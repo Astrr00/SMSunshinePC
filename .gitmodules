@@ -1,0 +1,3 @@
+[submodule "sunshine-pc/extern/aurora"]
+	path = sunshine-pc/extern/aurora
+	url = https://github.com/encounter/aurora.git

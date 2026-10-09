@@ -1,0 +1,29 @@
+# Decomp units the port does not build. One rule per line: <path prefix relative to sms/src> | <reason>.
+# A rule matches every unit whose path starts with the prefix. Read by tools/probe-units.py.
+PowerPC_EABI_Support/Msl/ | MSL C/C++ library; the port uses the MSVC CRT/STL
+PowerPC_EABI_Support/Runtime/ | CodeWarrior runtime (memcpy, exception tables, global ctor chain); host runtime replaces it
+TRK_MINNOW_DOLPHIN/ | MetroTRK on-target debugger; no equivalent on PC
+OdemuExi2/ | Odemu EXI debug hardware stubs
+dolphin/ai/ | Aurora provides the AI API
+dolphin/amcstubs/ | debug stubs
+dolphin/ar/ | Aurora provides AR (ARAM is host memory)
+dolphin/base/ | PPC cache/arch helpers; no PowerPC on PC
+dolphin/card/ | Aurora provides CARD (.gci / .raw)
+dolphin/db/ | debug interface
+dolphin/dsp/ | Aurora DSP side of the SDK; JAudio DSP is a separate open item below
+dolphin/dvd/ | Aurora provides DVD (reads the user's disc image)
+dolphin/exi/ | no EXI hardware on PC
+dolphin/gd/ | Aurora provides GD
+dolphin/gx/ | Aurora provides GX (WebGPU)
+dolphin/mtx/ | Aurora provides MTX
+dolphin/odenotstub/ | debug stub
+dolphin/os/ | Aurora provides OS; includes __start/__init_* startup code
+dolphin/pad/ | Aurora provides PAD
+dolphin/si/ | Aurora provides SI
+dolphin/thp/ | Aurora provides the THP decoder
+dolphin/vi/ | Aurora provides VI
+main.cpp | replaced by sunshine-pc/src/main.cpp
+JSystem/dspproc.c | OPEN: JAudio DSP glue; needs a host DSP implementation (Dusklight: DuskDsp), not yet written
+JSystem/dsptask.c | OPEN: JAudio DSP task glue, same item
+JSystem/osdsp.c | OPEN: JAudio DSP OS glue, same item
+JSystem/osdsp_task.c | OPEN: JAudio DSP OS glue, same item

@@ -1,0 +1,6 @@
+# Units that are meant to be built but cannot be yet. One rule per line: <path prefix relative to sms/src> | <reason>.
+# They are left out of files.cmake, so their symbols show up as unresolved at link time (visible, not stubbed).
+# Remove a line as soon as the unit builds.
+Enemy/Koopa.cpp | work in progress in the decomp working tree (uncommitted, not part of the port): TUtil<f32>::mod missing; fails the MWCC build too
+Enemy/bossManta.cpp | work in progress in the decomp working tree: jump past initialization in a switch case
+Enemy/hanasambo.cpp | work in progress in the decomp working tree: non-const reference bound to a temporary
