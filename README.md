@@ -9,7 +9,7 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
-| Decomp logic correctness (non-matching functions) | open | 0 | 1285 functions with behaviour-changing diffs (`sunshine-pc/tools/decomp_triage.py`); fixing by subsystem |
+| Decomp logic correctness (non-matching functions) | partial | 15 | risky functions 1285 → 1172; 129 asm-equivalence reviews recorded (`sunshine-pc/docs/decomp-verified.tsv`); dozens of asm-proven logic fixes incl. 18 wrong virtual calls; triage: `sunshine-pc/tools/decomp_triage.py` |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
 | Units compiled (clang-cl) | done | 100 | 583/583 built units, 150 excluded with reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
