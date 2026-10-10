@@ -98,6 +98,7 @@ void PlayBlock(u32 addr, u32 bytes, double hz)
 		}
 		return;
 	}
+	av::DumpWrite(src, bytes / 4, hz);
 	av::AudioWrite(src, bytes / 4, hz); // 16-bit stereo, 4 bytes per frame
 }
 
@@ -148,6 +149,7 @@ void AiPump()
 std::atomic<u32> g_retraceCount { 0 }; // changed only by the retrace thread, under the interrupt lock
 OSThreadQueue g_retraceQueue;          // threads in VIWaitForRetrace
 VIRetraceCallback g_postRetraceCb = nullptr; // interrupt lock
+long long g_lastRetraceNs = 0; // steady-clock ns of the last retrace; interrupt lock
 
 // Recorded for the presentation phase. Aurora has no XFB (its GXCopyDisp is empty); the frame reaches the window through
 // aurora_end_frame(), which the port drives elsewhere, so nothing shows these on screen.
@@ -175,6 +177,7 @@ void RetraceInterrupt()
 {
 	InterruptLock lock;
 	const u32 count = g_retraceCount.fetch_add(1) + 1;
+	g_lastRetraceNs = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now().time_since_epoch()).count();
 	if (g_postRetraceCb)
 		g_postRetraceCb(count);
 	OSWakeupThread(&g_retraceQueue);
@@ -337,6 +340,18 @@ u32 VIGetRetraceCount(void)
 {
 	EnsureRetraceThread();
 	return g_retraceCount;
+}
+
+// Steady-clock time (ns) of retrace number *count, read under the interrupt lock so count and time match.
+// Used by the presentation pacer (src/framerate/); retraces come every 16'683'333 ns (see WaitForNextRetrace).
+int64_t VIGetLastRetraceNs(u32* count)
+{
+	EnsureRetraceThread();
+	BOOL enabled = OSDisableInterrupts();
+	*count       = g_retraceCount;
+	const int64_t t = g_lastRetraceNs;
+	OSRestoreInterrupts(enabled);
+	return t;
 }
 
 // Interlaced video alternates between the two fields on every retrace; this is the field the next retrace will show.

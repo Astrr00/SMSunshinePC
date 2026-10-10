@@ -1,0 +1,87 @@
+<rml>
+<head>
+	<title>Super Mario Sunshine</title>
+	<link type="text/rcss" href="launcher.rcss"/>
+</head>
+<body>
+<div id="page-main" class="page">
+	<h1>Super Mario Sunshine</h1>
+	<p class="hint">Choose your disc image: Japanese version, GMSJ01 (NTSC-J). Supported formats: ISO, RVZ, WIA, GCZ, CISO, WBFS.</p>
+	<p id="image-path" class="path">No image selected</p>
+	<p id="image-status" class="status"></p>
+	<div class="row">
+		<button id="browse">Choose image...</button>
+	</div>
+	<div class="row">
+		<button id="start" class="primary">Start</button>
+		<button id="open-settings">Settings</button>
+		<button id="quit">Quit</button>
+	</div>
+</div>
+
+<div id="page-settings" class="page" style="display: none;">
+	<h1>Settings</h1>
+	<div class="row">
+		<button id="tab-video" class="tab">Video</button>
+		<button id="tab-audio" class="tab">Audio</button>
+		<button id="tab-controls" class="tab">Controls</button>
+		<button id="tab-interface" class="tab">Interface</button>
+		<button id="tab-cheats" class="tab">Cheats</button>
+	</div>
+
+	<div id="pane-video" class="pane">
+		<div class="row"><button id="window-mode">Window mode</button></div>
+		<div class="row"><button id="window-size">Window size</button></div>
+		<div class="row"><button id="vsync">VSync</button></div>
+		<div class="row"><button id="scale">Resolution scale</button></div>
+		<div class="row"><button id="fps">FPS limit</button></div>
+		<div class="row"><button id="widescreen">Widescreen</button></div>
+	</div>
+
+	<div id="pane-audio" class="pane" style="display: none;">
+		<div class="row"><button id="volume">Master volume</button></div>
+	</div>
+
+	<div id="pane-controls" class="pane" style="display: none;">
+		<div class="row">
+			<button id="stick-deadzone">Stick dead zone</button>
+			<button id="substick-deadzone">C-stick dead zone</button>
+		</div>
+		<div class="keys">
+			<button id="bind-A">A</button>
+			<button id="bind-B">B</button>
+			<button id="bind-X">X</button>
+			<button id="bind-Y">Y</button>
+			<button id="bind-START">START</button>
+			<button id="bind-Z">Z</button>
+			<button id="bind-L">L</button>
+			<button id="bind-R">R</button>
+			<button id="bind-DPAD_UP">DPAD_UP</button>
+			<button id="bind-DPAD_DOWN">DPAD_DOWN</button>
+			<button id="bind-DPAD_LEFT">DPAD_LEFT</button>
+			<button id="bind-DPAD_RIGHT">DPAD_RIGHT</button>
+			<button id="bind-STICK_UP">STICK_UP</button>
+			<button id="bind-STICK_DOWN">STICK_DOWN</button>
+			<button id="bind-STICK_LEFT">STICK_LEFT</button>
+			<button id="bind-STICK_RIGHT">STICK_RIGHT</button>
+			<button id="bind-CSTICK_UP">CSTICK_UP</button>
+			<button id="bind-CSTICK_DOWN">CSTICK_DOWN</button>
+			<button id="bind-CSTICK_LEFT">CSTICK_LEFT</button>
+			<button id="bind-CSTICK_RIGHT">CSTICK_RIGHT</button>
+		</div>
+		<div class="row"><button id="reset-keys">Restore default keys</button></div>
+	</div>
+
+	<div id="pane-interface" class="pane" style="display: none;">
+		<div class="row"><button id="glyph-style">Button glyphs</button></div>
+	</div>
+
+	<div id="pane-cheats" class="pane" style="display: none;">
+		<p class="hint">Cheats are not wired into the launcher yet.</p>
+	</div>
+
+	<p id="settings-status" class="status"></p>
+	<div class="row"><button id="back">Back</button></div>
+</div>
+</body>
+</rml>

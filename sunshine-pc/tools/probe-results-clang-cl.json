@@ -1,0 +1,5670 @@
+[
+ {
+  "unit": "main.cpp",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "'main' must return 'int'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\main.cpp(6,1)"
+   ]
+  ],
+  "excluded": "replaced by sunshine-pc/src/main.cpp"
+ },
+ {
+  "unit": "JSystem/JSupport/JSUOutputStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JSupport/JSUInputStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JSupport/JSUList.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JSupport/JSUMemoryStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JSupport/JSUFileStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JGadget/std-list.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JGadget/std-vector.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JGadget/linklist.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JGadget/singlelinklist.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRArchivePri.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRAramArchive.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRAramHeap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRAram.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRArchivePub.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRCompArchive.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRDisposer.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRDvdArchive.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRDvdFile.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRExpHeap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRFileCache.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRFileFinder.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRFileLoader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRHeap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRMemArchive.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRSolidHeap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRStdHeap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRThread.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRDvdRipper.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRDvdAramRipper.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRDecomp.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRAramBlock.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRAramPiece.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JKernel/JKRAramStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTException.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTDirectPrint.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTDbPrint.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTFont.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTGamePad.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTNameTab.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTPalette.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTRect.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTResource.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTTexture.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTAssert.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTVideo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTResFont.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTRomFont.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTConsole.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JUtility/JUTDirectFile.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRActor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRCamera.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRCharacter.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRDirector.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRDisplay.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRDrawBufObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRDStage.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRDStageGroup.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDREfbCtrl.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDREfbSetting.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRFrmGXSet.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRGraphics.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRLighting.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRNameRef.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRNameRefGen.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRPlacement.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRRenderMode.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRResolution.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRScreen.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRSmJ3DAct.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRSmJ3DScn.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRVideo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRViewConnecter.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRViewObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JDrama/JDRViewport.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JADebug/JADHioNode.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JALibrary/JALCalc.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JALibrary/JALModSe.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIAsnData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIAnimation.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIBasic.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIConst.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIDebug.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIEntry.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIEntrySe.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIEntrySequence.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIEntryStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIGFrameSe.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIGFrameSequence.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIGFrameStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAIGlobalParameter.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAISound.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JAInterface/JAISystemInterface.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASBank.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASBankMgr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASBasicBank.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASBasicInst.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASBasicWaveBank.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASBNKParser.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASDrumSet.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASInstEffect.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASInstRand.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASInstSense.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASSimpleWaveBank.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASWaveArcLoader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASWaveBank.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASWaveBankMgr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASWSParser.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASAudioThread.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASChAllocQueue.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASChannel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASDriverTables.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASChannelMgr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASChGlobal.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASDriverIF.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASDSPBuf.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASDSPChannel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASDSPInterface.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASOscillator.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASAiCtrl.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASCalc.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASCallback.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASCmdStack.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASDvdThread.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASHardStream.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASHeapCtrl.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASRate.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASKernelDebug.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASProbe.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASSystemHeap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASVload.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASNoteMgr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASOuterParam.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASPlayer_impl.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASRegisterParam.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASSeqCtrl.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASTrack.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASTrackInterrupt.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASTrackMgr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASTrackPort.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JAudio/JASystem/JASSeqParser.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DPane.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DPicture.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DPrint.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DScreen.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DTextBox.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DWindow.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DGrafContext.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J2D/J2DOrthoGraph.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DTransform.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DMaterial.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DShape.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DSys.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DVertex.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DPacket.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DTevs.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphBase/J3DDrawBuffer.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphAnimator/J3DCluster.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphAnimator/J3DJoint.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphAnimator/J3DModel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphAnimator/J3DNode.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphAnimator/J3DAnimation.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphAnimator/J3DMaterialAnm.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphAnimator/J3DMaterialAttach.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphLoader/J3DClusterLoader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphLoader/J3DJointFactory.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphLoader/J3DMaterialFactory.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphLoader/J3DModelLoader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphLoader/J3DShapeFactory.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphLoader/J3DAnmLoader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/J3D/J3DGraphLoader/J3DMaterialFactory_v21.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAEmitter.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAEmitterManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAField.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAMath.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAParticle.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPADrawSetupTev.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPADraw.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPADrawVisitor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAExTexShape.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPADataBlock.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAEmitterLoader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPABaseShape.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAExtraShape.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPAResourceManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPASweepShape.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JParticle/JPATexture.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JStage/JSGAmbientLight.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JStage/JSGCamera.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JStage/JSGActor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JStage/JSGLight.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JStage/JSGObject.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JStage/JSGSystem.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JMath.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/JRenderer.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/random.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "JSystem/dspproc.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/dspproc.c(17,28)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'DsetupTable'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/dspproc.c(24,6)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'DsyncFrame'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/dspproc.c(43,6)"
+   ]
+  ],
+  "excluded": "poked __DSPRegs; replaced by the host DSP in src/sdk/dsp_glue.cpp + dsp_mixer.cpp"
+ },
+ {
+  "unit": "JSystem/dsptask.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "must use 'struct' tag to refer to type 'STRUCT_DSP_TASK'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\JSystem/osdsp.h(6,22)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/dsptask.c(658,46)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/dsptask.c(659,46)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/dsptask.c(688,18)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/dsptask.c(712,42)"
+   ]
+  ],
+  "excluded": "same: DSP boot/command glue (and the jdsp microcode image) replaced by src/sdk/dsp_glue.cpp"
+ },
+ {
+  "unit": "JSystem/osdsp.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/osdsp.c(10,24)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/osdsp.c(12,10)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier 'nullptr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/osdsp.c(24,24)"
+   ]
+  ],
+  "excluded": "same: DSP task list; only the JAudio task exists on the host"
+ },
+ {
+  "unit": "JSystem/osdsp_task.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "expected identifier or '('",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/osdsp_task.c(15,8)"
+   ],
+   [
+    "clang",
+    "expected identifier or '('",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/osdsp_task.c(19,8)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'DsyncFrame2'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\JSystem/osdsp_task.c(125,6)"
+   ]
+  ],
+  "excluded": "same: DSP task scheduler and DsyncFrame2 (src/sdk/dsp_glue.cpp)"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Runtime/__mem.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(26,3)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(35,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(42,4)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(49,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(50,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(51,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(52,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(53,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(54,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(55,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(56,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(63,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(66,4)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__mem.c(74,9)"
+   ]
+  ],
+  "excluded": "CodeWarrior runtime (memcpy, exception tables, global ctor chain); host runtime replaces it"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Runtime/__va_arg.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(7,27)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(8,25)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(17,30)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(18,9)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(22,24)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(23,22)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(37,16)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(41,16)"
+   ],
+   [
+    "clang",
+    "member reference base type 'char' is not a structure or union",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__va_arg.c(43,9)"
+   ]
+  ],
+  "excluded": "CodeWarrior runtime (memcpy, exception tables, global ctor chain); host runtime replaces it"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Runtime/global_destructor_chain.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "CodeWarrior runtime (memcpy, exception tables, global ctor chain); host runtime replaces it"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Runtime/ptmf.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "ISO C requires a named parameter before '...'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/ptmf.c(15,19)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/ptmf.c(17,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/ptmf.c(36,1)"
+   ],
+   [
+    "clang",
+    "ISO C requires a named parameter before '...'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/ptmf.c(36,23)"
+   ]
+  ],
+  "excluded": "CodeWarrior runtime (memcpy, exception tables, global ctor chain); host runtime replaces it"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Runtime/runtime.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(9,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(10,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(11,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(12,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(13,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(14,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(15,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(16,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(17,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(25,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(56,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(131,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(234,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(307,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(394,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(410,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(426,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(444,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/runtime.c(500,1)"
+   ]
+  ],
+  "excluded": "CodeWarrior runtime (memcpy, exception tables, global ctor chain); host runtime replaces it"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Runtime/__init_cpp_exceptions.cpp",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "expected '(' after 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__init_cpp_exceptions.cpp(6,5)"
+   ],
+   [
+    "clang",
+    "expected ';' after top-level asm block",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Runtime/__init_cpp_exceptions.cpp(6,4)"
+   ]
+  ],
+  "excluded": "CodeWarrior runtime (memcpy, exception tables, global ctor chain); host runtime replaces it"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ansi_files.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/abort_exit.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/errno.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/ansi_fp.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/uart_console_io.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/buffer_io.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/PPC_EABI/critical_regions.ppc_eabi.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,2)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,8)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,14)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,20)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,26)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,32)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,38)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,44)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,50)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__motion_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,56)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__motion_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,62)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__motion_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,68)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__motion_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,74)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__motion_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,80)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,86)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(17,92)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(18,2)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(18,8)"
+   ],
+   [
+    "clang",
+    "use of undeclared identifier '__control_char'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/ctype.c(18,14)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/direct_io.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/mbstring.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/mem.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/mem_funcs.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/misc_io.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/printf.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/rand.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for 'srand'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/rand.c(13,6)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/scanf.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/string.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/string.c(57,5)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/string.c(60,8)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/string.c(61,31)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/string.c(71,5)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/string.c(161,13)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/string.c(162,13)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/strtoul.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/float.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/wchar_io.c",
+  "rc": 1,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Double_precision/e_asin.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Double_precision/e_atan2.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Double_precision/s_atan.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Double_precision/s_frexp.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Double_precision/w_atan2.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Single_precision/hyperbolicsf.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Single_precision/inverse_trig.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ],
+   [
+    "clang",
+    "redefinition of 'fabsf'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/math.h(45,14)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Single_precision/trigf.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ],
+   [
+    "clang",
+    "redefinition of 'fabsf'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/math.h(45,14)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Single_precision/common_float_tables.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/Single_precision/exponentialsf.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for '_matherr'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common_Embedded/Math/fdlibm.h(160,12)"
+   ],
+   [
+    "clang",
+    "redefinition of 'fabsf'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\PowerPC_EABI_Support/Msl/MSL_C/MSL_Common/math.h(45,14)"
+   ]
+  ],
+  "excluded": "MSL C/C++ library; the port uses the MSVC CRT/STL"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mainloop.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/nubevent.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/nubinit.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/msg.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/msgbuf.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/serpoll.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/usr_put.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/dispatch.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/msghndlr.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/support.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mutex_TRK.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/notify.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/flush_cache.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/flush_cache.c(3,1)"
+   ]
+  ],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(9,3)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(18,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(25,4)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(26,4)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(33,10)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(41,9)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(45,4)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/mem_TRK.c(52,8)"
+   ]
+  ],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(100,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(100,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(109,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(203,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(539,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(649,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(727,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c(784,1)"
+   ]
+  ],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk.c(32,1)"
+   ]
+  ],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/mpc_7xx_603e.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/mpc_7xx_603e.c(6,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/mpc_7xx_603e.c(127,1)"
+   ]
+  ],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/main_TRK.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk_glue.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk_glue.c(9,1)"
+   ]
+  ],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/targcont.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "MetroTRK on-target debugger; no equivalent on PC"
+ },
+ {
+  "unit": "dolphin/base/PPCArch.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(4,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(4,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(13,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(22,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(22,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(31,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(40,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(40,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(49,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(58,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(67,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(76,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(89,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(89,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(98,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(107,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/base/PPCArch.c(118,1)"
+   ]
+  ],
+  "excluded": "PPC cache/arch helpers; no PowerPC on PC"
+ },
+ {
+  "unit": "dolphin/db/db.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/db/db.c(28,1)"
+   ]
+  ],
+  "excluded": "debug interface"
+ },
+ {
+  "unit": "dolphin/os/OS.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OS.c(67,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OS.c(73,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OS.c(423,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OS.c(441,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OS.c(465,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OS.c(552,1)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSAlarm.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSAlarm.c(184,8)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSAlloc.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSArena.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSAudioSystem.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSCache.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(15,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(26,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(38,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(50,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(62,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(73,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(82,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(91,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(100,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(109,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(118,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(140,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(163,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(187,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(209,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSCache.c(232,1)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSContext.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(11,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(96,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(186,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(227,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(227,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(269,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(343,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(343,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(360,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(481,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSContext.c(533,1)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSError.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSFont.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSFont.c(311,3)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSInterrupt.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(8,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(36,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(36,9)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(50,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(50,9)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(63,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(63,9)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSInterrupt.c(414,8)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSLink.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSMessage.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSMemory.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSMemory.c(80,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSMemory.c(120,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSMemory.c(160,8)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSMutex.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSReboot.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSReboot.c(28,8)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSReset.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSReset.c(68,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSReset.c(95,8)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSResetSW.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSRtc.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSStopwatch.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSSync.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSSync.c(9,8)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSThread.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/OSTime.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSTime.c(14,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/OSTime.c(32,1)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/__start.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os\\__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/__start.c(49,46)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/__start.c(171,1)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/os/__ppc_eabi_init.cpp",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "expected '(' after 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/__ppc_eabi_init.cpp(11,5)"
+   ],
+   [
+    "clang",
+    "expected ';' after top-level asm block",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/__ppc_eabi_init.cpp(11,4)"
+   ],
+   [
+    "clang",
+    "expected '(' after 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/__ppc_eabi_init.cpp(27,5)"
+   ],
+   [
+    "clang",
+    "expected ';' after top-level asm block",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/os/__ppc_eabi_init.cpp(27,4)"
+   ]
+  ],
+  "excluded": "Aurora provides OS; includes __start/__init_* startup code"
+ },
+ {
+  "unit": "dolphin/mtx/mtx.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "redefinition of 'C_MTXIdentity'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtx.c(29,6)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtx.c(50,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtx.c(68,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtx.c(126,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtx.c(126,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtx.c(347,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtx.c(390,1)"
+   ]
+  ],
+  "excluded": "Aurora provides MTX"
+ },
+ {
+  "unit": "dolphin/mtx/mtxvec.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtxvec.c(6,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtxvec.c(34,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/mtxvec.c(79,1)"
+   ]
+  ],
+  "excluded": "Aurora provides MTX"
+ },
+ {
+  "unit": "dolphin/mtx/mtx44.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides MTX"
+ },
+ {
+  "unit": "dolphin/mtx/vec.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(6,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(20,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(34,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(80,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(100,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(100,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(113,1)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(134,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(134,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(149,1)"
+   ],
+   [
+    "clang",
+    "expected ';' after top level declarator",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/mtx/vec.c(149,8)"
+   ]
+  ],
+  "excluded": "Aurora provides MTX"
+ },
+ {
+  "unit": "dolphin/dvd/dvdlow.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/dvd\\../os/__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/dvd\\../os/__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides DVD (reads the user's disc image)"
+ },
+ {
+  "unit": "dolphin/dvd/dvdfs.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides DVD (reads the user's disc image)"
+ },
+ {
+  "unit": "dolphin/dvd/dvd.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides DVD (reads the user's disc image)"
+ },
+ {
+  "unit": "dolphin/dvd/dvdqueue.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides DVD (reads the user's disc image)"
+ },
+ {
+  "unit": "dolphin/dvd/dvderror.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/dvd\\../os/__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/dvd\\../os/__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides DVD (reads the user's disc image)"
+ },
+ {
+  "unit": "dolphin/dvd/fstload.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides DVD (reads the user's disc image)"
+ },
+ {
+  "unit": "dolphin/vi/vi.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/vi\\../os/__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/vi\\../os/__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides VI"
+ },
+ {
+  "unit": "dolphin/pad/Padclamp.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides PAD"
+ },
+ {
+  "unit": "dolphin/pad/Pad.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides PAD"
+ },
+ {
+  "unit": "dolphin/ai/ai.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/ai/ai.c(255,8)"
+   ]
+  ],
+  "excluded": "Aurora provides the AI API"
+ },
+ {
+  "unit": "dolphin/ar/ar.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "conflicting types for 'sqrt'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(19,21)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'fabs'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(35,21)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'floor'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(45,14)"
+   ],
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'ARStartDMA'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/ar/ar.c(38,6)"
+   ]
+  ],
+  "excluded": "Aurora provides AR (ARAM is host memory)"
+ },
+ {
+  "unit": "dolphin/ar/arq.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'ARQPostRequest'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/ar/arq.c(101,6)"
+   ]
+  ],
+  "excluded": "Aurora provides AR (ARAM is host memory)"
+ },
+ {
+  "unit": "dolphin/dsp/dsp.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora DSP side of the SDK; JAudio DSP is a separate open item below"
+ },
+ {
+  "unit": "dolphin/dsp/dsp_debug.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora DSP side of the SDK; JAudio DSP is a separate open item below"
+ },
+ {
+  "unit": "dolphin/dsp/dsp_task.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora DSP side of the SDK; JAudio DSP is a separate open item below"
+ },
+ {
+  "unit": "dolphin/card/CARDBios.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(104,29)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'CARDInit'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card/CARDBios.c(466,6)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDUnlock.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDRdwr.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card/CARDRdwr.c(21,4)"
+   ],
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card/CARDRdwr.c(67,4)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDBlock.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDDir.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDCheck.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDMount.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDFormat.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(103,29)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/card\\../os/__os.h(104,29)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDOpen.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDCreate.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDRead.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDWrite.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDStat.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/card/CARDNet.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides CARD (.gci / .raw)"
+ },
+ {
+  "unit": "dolphin/gx/GXInit.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXFifo.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXAttr.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXMisc.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXGeometry.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXFrameBuf.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXLight.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'sqrt'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(19,21)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'fabs'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(35,21)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'floor'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(45,14)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXTexture.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXBump.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXTev.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXPixel.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXDraw.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'sqrt'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(19,21)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'fabs'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(35,21)"
+   ],
+   [
+    "clang",
+    "conflicting types for 'floor'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\fake_tgmath.h(45,14)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXStubs.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXDisplayList.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXTransform.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/gx/GXTransform.c(84,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/gx/GXTransform.c(103,8)"
+   ],
+   [
+    "clang",
+    "unknown type name 'asm'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/gx/GXTransform.c(122,8)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "dolphin/gx/GXPerf.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gx/GXGeometry.h(20,69)"
+   ]
+  ],
+  "excluded": "Aurora provides GX (WebGPU)"
+ },
+ {
+  "unit": "OdemuExi2/DebuggerDriver.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Odemu EXI debug hardware stubs"
+ },
+ {
+  "unit": "dolphin/amcstubs/AmcExi2Stubs.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "debug stubs"
+ },
+ {
+  "unit": "dolphin/odenotstub/odenotstub.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "debug stub"
+ },
+ {
+  "unit": "dolphin/gd/GDBase.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides GD"
+ },
+ {
+  "unit": "dolphin/gd/GDGeometry.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "unknown type name 'bool'",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\include\\dolphin/gd/GDGeometry.h(178,72)"
+   ]
+  ],
+  "excluded": "Aurora provides GD"
+ },
+ {
+  "unit": "dolphin/gd/GDLight.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides GD"
+ },
+ {
+  "unit": "dolphin/gd/GDPixel.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides GD"
+ },
+ {
+  "unit": "dolphin/gd/GDTev.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides GD"
+ },
+ {
+  "unit": "dolphin/gd/GDTransform.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides GD"
+ },
+ {
+  "unit": "dolphin/si/SIBios.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides SI"
+ },
+ {
+  "unit": "dolphin/si/SISamplingRate.c",
+  "rc": 0,
+  "errors": [],
+  "excluded": "Aurora provides SI"
+ },
+ {
+  "unit": "dolphin/exi/EXIBios.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/exi/EXIBios.c(157,3)"
+   ]
+  ],
+  "excluded": "no EXI hardware on PC"
+ },
+ {
+  "unit": "dolphin/exi/EXIUart.c",
+  "rc": 1,
+  "errors": [
+   [
+    "clang",
+    "assignment to cast is illegal, lvalue casts are not supported",
+    "C:\\Users\\niemc\\Documents\\Projekte\\Sunshine Decomp\\sms\\src\\dolphin/exi/EXIUart.c(96,4)"
+   ]
+  ],
+  "excluded": "no EXI hardware on PC"
+ },
+ {
+  "unit": "dolphin/thp/THPDec.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "dolphin/thp/THPAudio.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "THPPlayer/THPAudioDecode.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "THPPlayer/THPDraw.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "THPPlayer/THPPlayer.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "THPPlayer/THPRead.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "THPPlayer/THPVideoDecode.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/DLUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/DrawUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/LightUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/MathUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/MtxUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/ScreenUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/ShadowUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/gd-reinit-gx.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/EffectUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/ModelUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/RumbleMgr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/RumbleData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/RumbleType.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/PacketUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/GDUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/TexUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/MapUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MarioUtil/ToolData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/M3UJoint.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/M3UModel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/MActor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/MActorAnm.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/MActorData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/SDLModel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/MActorUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/SampleCtrlNode.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/SampleCtrlModel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/MotionBlendCtrl.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "M3DUtil/LodAnm.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/BaseParam.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/EmitterViewObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/EventWatcher.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/FlagManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/GCLogoDir.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/J3DSysFlag.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirector.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorDirect.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorEvent.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorInitECT.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorPreEntry.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorSetup2.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/marerr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarNameRefGen.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MenuDir.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/Params.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/ParamInst.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/PerformList.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/RenderModeObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/SnapTimeObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/TalkCursor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/TexCache.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/ZBufferCatch.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/Application.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/ScenarioArchiveName.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarioGamePad.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/StageEventInfo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/StageUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/Resolution.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/PositionHolder.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/ProcessMeter.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/TimeRec.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/DrawSyncManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/THPRender.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarNameRefGen_BossEnemy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarNameRefGen_Enemy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarNameRefGen_Map.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarNameRefGen_MapObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarNameRefGen_NPC.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/CardManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorLoadResource.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MovieDirector.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorCreateObjects.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MarDirectorSetupObjects.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/MSoundMainSide.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "System/TargetArrow.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/liveactor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/liveinterp.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/livemanager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/ObjHitCheck.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/objmanager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/ObjModel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/spcinterp.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/Strategy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/question.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/smplcharacter.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/HitActor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/binder.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/SharedParts.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Strategic/MirrorActor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/Atom.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioAction.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioAutodemo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioBlend.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioCap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioCollision.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioDraw.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioJump.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioMain.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioMove.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioPhysics.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioRecord.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioRun.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioSpecial.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioUpper.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioParticle.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioWait.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/SplashManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/Tongue.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/WaterGun.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/Yoshi.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioEffect.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioSwim.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioAccess.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioInit.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/ModelWaterManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioPositionObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioCheckCol.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioReceiveMsg.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Player/MarioSound.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcAnm.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcBase.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcCallback.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcNerve.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcSave.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcEvent.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcInitData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcInitPrg.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcInbetween.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcParts.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcColor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcSound.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcChange.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcThrow.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcTrample.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcEffect.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcInitAnmData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcInitActionData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcCoin.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcBalloon.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcWalkTurn.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "NPC/NpcCollision.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MAnmSound.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSound.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSoundBGM.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSoundDebug.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSoundScene.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSoundSE.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSoundStruct.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSHandle.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MSound/MSModBgm.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/WoodBarrel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjBase.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjInit.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjGeneral.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjLib.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/Item.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/ItemManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjTown.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjBlock.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjBianco.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjSirena.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjRicco.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjMamma.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjPinna.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjSample.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjMare.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjFlag.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjWave.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjFloat.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjPlane.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjCloud.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjBall.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjAirport.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjDolpic.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjPollution.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjGrass.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjPole.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjWater.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/ModelGate.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjFence.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjOption.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjRailBlock.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjMonte.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjTree.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjTumblePole.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjEx.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/Pool.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjCorona.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjItem2.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjHide.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "MoveBG/MapObjTrap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/JointModel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/JointModelManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/JointObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/Map.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapArea.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapCheck.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapCollisionData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapCollisionEntry.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapCollisionManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapDraw.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapEvent.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapEventSink.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapMakeData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapMakeList.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapMirror.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapModel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapWarp.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapStaticObject.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapWire.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapWireManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapXlu.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/PollutionAction.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/PollutionCount.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/PollutionManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/PollutionObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/PollutionPos.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/Shimmer.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/Sky.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapEventSirena.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/PollutionLayer.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/PollutionEvent.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapCollisionPlane.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MarineSnow.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapEventDolpic.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/MapEventMare.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/BathWaterManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Map/StickyStainManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/ChangeValue.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/Coord2D.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/ExPane.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/Menu.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/ScrnFader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/GCConsole2.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/Talk2D2.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/BoundPane.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/PauseMenu2.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/MessageLoader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/HelpActor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/MessageUtil.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/CardSave.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/CardLoad.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/ConsoleStr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/SelectMenu.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/SelectDir.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/SelectShine2.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/BlendPane.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/Guide.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/SunGlass.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/ShineFader.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/ProgSelect.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/hx_wiper.c",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/MovieSubtitle.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/Option.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "GC2D/MovieRumble.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/conductor.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/effectObj.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/emario.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/enemy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/enemyAttachment.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/enemymanager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/enemyMario.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/feetinv.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/gesso.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/graph.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/hamukuri.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/hinokuri2.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/mameGesso.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/namekuri.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/pakkun.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/smallEnemy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/spider.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/spline.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/typicalenemy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/walker.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/walkerEnemy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bossgesso.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/elecNokonoko.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/telesa.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/fireWanwan.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/enemytable.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/generator.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bosspakkun.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/tobiPuku.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/tinkoopa.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/launcher.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bosswanwan.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/chuuhana.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/igaiga.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/poihana.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/tamaNoko.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bosstelesa.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/riccohook.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bombhei.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/cannon.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bosseel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/killer.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/beam.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/hanasambo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/popo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/SleepBossHanachan.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/DemoBossHanachanBase.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/fruitsboat.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanSub.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanMain.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanNerve.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanAnm.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanParts.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanSave.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/amiNoko.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/gatekeeper.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanEffect.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/egggen.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/seal.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bgpoldrop.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bgtentacle.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/effectEnemy.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/hauntLeg.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/areacylinder.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/wireTrap.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BossHanachanSound.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/rocket.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/Kazekun.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/bossManta.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/wireBinder.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/yunbo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/koopajr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/Kumokun.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/Koopa.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/Kukku.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/Amenbo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BathtubPeach.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BathtubKiller.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/coasterkiller.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/DebuTelesa.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/TabePuku.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/BathtubBinder.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/limitkoopa.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Enemy/limitkoopajr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraBGCheck.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraChange.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraCodeControl.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/cameragc.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraHeightPan.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraInbetween.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraKindParam.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/cameralib.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraMarioData.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraNotice.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraNormal.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/camerasave.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/camerashake.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraTalk.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/lensflare.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/lensglow.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/sunmgr.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/sunmodel.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CubeManagerBase.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraMapTool.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CubeMapTool.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraMultiPlayer.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraJetCoaster.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraBck.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraOption.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraDemo.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraWarp.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraMode.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CameraSecureView.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Camera/CamShakeDefine.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/boid.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/fishoid.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/AnimalBase.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/AnimalManager.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/AnimalSave.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/AnimalNerve.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/Bird.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/BeeHive.cpp",
+  "rc": 0,
+  "errors": []
+ },
+ {
+  "unit": "Animal/Butterfly.cpp",
+  "rc": 0,
+  "errors": []
+ }
+]

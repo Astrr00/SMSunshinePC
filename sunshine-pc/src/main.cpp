@@ -5,12 +5,21 @@
 #include <sunshine_config.h>
 #include <aurora/event.h>
 #include <aurora/main.h>
+#include "render/render_scale.h"
+#include "widescreen/widescreen.h"
+#include "launcher/launcher.hpp"
+#include "settings.h"
+#include "saves/saves.hpp"
 
 #include <System/Application.hpp>
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
+#include <string>
+#include "cheats/cheats.h"
+#include "mods/mods_loader.h"
 
 // ABI guard: the game's PADStatus (sms/include/dolphin/pad.h, TARGET_PC) must match Aurora's, which PADRead() fills.
 #include <dolphin/pad.h>
@@ -51,6 +60,7 @@ bool sunshineDevSkipMovies()
 // This is also the single seam where a later phase decouples rendering from the 30 Hz game logic.
 void sunshinePresentFrame()
 {
+	modsPresent(); // mods/mods_loader.cpp
 	aurora_end_frame();
 	for (;;) {
 		for (const AuroraEvent* e = aurora_update(); e != nullptr && e->type != AURORA_NONE; ++e) {
@@ -62,22 +72,62 @@ void sunshinePresentFrame()
 	}
 }
 
+// Called from sms MarDirectorDirect.cpp once per game logic step (30 Hz), right after movement().
+void sunshineLogicTick()
+{
+	cheatsTick();
+	modsLogicTick();
+}
+
 int main(int argc, char* argv[])
 {
 	installCrashHandler();
+	// Settings load before Aurora starts: window and VSync options are part of Aurora's startup config.
+	const std::filesystem::path settingsFile = sunshine::settingsPath(std::filesystem::path(argv[0]).parent_path());
+	sunshine::loadSettings(sunshine::settings(), settingsFile);
+	const sunshine::Settings& s = sunshine::settings();
+	// Dev hooks for tiling several test windows: SUNSHINE_WINDOW_POS=x,y and SUNSHINE_WINDOW_SIZE=w,h override the saved placement.
+	int posX = 0;
+	int posY = 0;
+	int width = static_cast<int>(s.windowWidth);
+	int height = static_cast<int>(s.windowHeight);
+	if (const char* pos = std::getenv("SUNSHINE_WINDOW_POS")) {
+		std::sscanf(pos, "%d,%d", &posX, &posY);
+	}
+	if (const char* size = std::getenv("SUNSHINE_WINDOW_SIZE")) {
+		std::sscanf(size, "%d,%d", &width, &height);
+	}
+	width = static_cast<int>(widescreenInit(s, static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
 	// GameCube main RAM backs the OS arena the JKR heaps are carved from; ARAM backs JKRAram.
-	const AuroraConfig config = { .appName = "Sunshine", .logCallback = &log_callback, .mem1Size = kSunshineMem1Size,
-		                          .mem2Size = kSunshineMem2Size };
+	const AuroraConfig config = { .appName = "Sunshine", .vsync = s.vsync, .startFullscreen = s.fullscreen,
+		                          .windowPosX = posX, .windowPosY = posY,
+		                          .windowWidth = static_cast<uint32_t>(width),
+		                          .windowHeight = static_cast<uint32_t>(height), .logCallback = &log_callback,
+		                          .mem1Size = kSunshineMem1Size, .mem2Size = kSunshineMem2Size };
 	aurora_initialize(argc, argv, &config);
+	sunshineApplyRenderSettings();
 
 	const char* disc = findDvdArg(argc, argv);
-	if (disc == nullptr || !aurora_dvd_open(disc)) {
+	if (disc == nullptr) {
+		// No --dvd: the launcher chooses and validates the disc. Quit or closing the window exits.
+		if (!launcher::run(settingsFile)) {
+			aurora_shutdown();
+			return 0;
+		}
+	} else if (!aurora_dvd_open(disc)) {
 		std::fprintf(stderr, "usage: sunshine --dvd <path to disc image (iso/rvz/wia/...)>\n");
 		aurora_shutdown();
 		return 1;
 	}
 
+	// Cheats and mods read files next to the exe and register disc overlays, so they need the disc open.
+	const std::string exeDir = std::filesystem::path(argv[0]).parent_path().string();
+	cheatsLoad(exeDir); // cheats/cheats_game.cpp
+	modsLoad(exeDir);   // mods/mods_loader.cpp
+
 	sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
+	launcher::applyRuntimeSettings(); // launcher/launcher.cpp: PAD bindings, dead zones, master volume, window
+	savesApplyDirectory(s, exeDir); // saves/save_directory.cpp: [saves] directory, before CARDInit in initialize()
 
 	// The console's startup code (excluded, __start) runs OSInit before main; it sets up the arena JKRHeap draws from.
 	OSInit();
@@ -87,6 +137,7 @@ int main(int argc, char* argv[])
 	gpApplication.initialize();
 	gpApplication.proc();
 	gpApplication.finalize();
+	modsShutdown(); // mods/mods_loader.cpp: calls sunshine_mod_shutdown and frees the DLLs
 
 	aurora_shutdown();
 	return 0;

@@ -145,7 +145,7 @@ void* operator new(size_t size)
 		}
 		std::new_handler handler = std::get_new_handler();
 		if (!handler)
-			throw std::bad_alloc();
+			std::abort(); // ponytail: exceptions are disabled in the port; OOM is fatal, as an uncaught bad_alloc would be
 		handler();
 	}
 }

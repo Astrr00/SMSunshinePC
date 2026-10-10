@@ -19,14 +19,22 @@ use_aurora = "--aurora" in sys.argv
 cfg = open(os.path.join(sms, "configure.py"), encoding="utf8").read()
 units = [p for _, p in re.findall(r'Object\((\w+),\s*"([^"]+)"', cfg)]
 units = [u for u in units if u.endswith((".cpp", ".c")) and os.path.exists(os.path.join(sms, "src", u))]
-rules = [ln.split("|", 1)[0].strip() for ln in open(os.path.join(root, "sunshine-pc", "excluded-units.txt"), encoding="utf8")
-         if ln.strip() and not ln.startswith("#")]
-excluded = [u for u in units if any(u.startswith(r) for r in rules)]
-units = [u for u in units if u not in excluded]
-print(f"excluded by rule: {len(excluded)}; probing: {len(units)}")
+rules = {}
+for ln in open(os.path.join(root, "sunshine-pc", "excluded-units.txt"), encoding="utf8"):
+    if ln.strip() and not ln.startswith("#"):
+        prefix, _, reason = ln.partition("|")
+        rules[prefix.strip()] = reason.strip()
+
+
+def why(u):
+    return next((r for p, r in rules.items() if u.startswith(p)), None)
+
+
+excluded = {u: why(u) for u in units if why(u) is not None}
+print(f"probing all {len(units)} units; {len(excluded)} of them are listed in excluded-units.txt")
 
 inc = [os.path.join(sms, "include"), os.path.join(sms, "include", "dolphin"),
-       os.path.join(sms, "include", "PowerPC_EABI_Support")]
+       os.path.join(root, "sunshine-pc", "src", "glyphs"), os.path.join(sms, "include", "PowerPC_EABI_Support")]
 # Lowest priority: decomp headers win; only files the decomp lacks (dolphin/ppc_math.h) come from Aurora.
 inc.append(aurora_inc)
 # CLANG_CL=<path to clang-cl.exe> switches to clang-cl (accepts C99 compound literals in C++, like Dusklight's clang-cl presets).
@@ -68,6 +76,7 @@ with cf.ThreadPoolExecutor(12) as ex:
     results = list(ex.map(run, units))
 
 print("parse clean:", sum(r[1] == 0 for r in results), "/", len(results))
+print("listed as not built, parse clean:", sum(rc == 0 for u, rc, _ in results if u in excluded), "/", len(excluded))
 codes = collections.Counter()
 sites = collections.Counter()
 for _, _, errs in results:
@@ -88,8 +97,9 @@ for u, rc, _ in results:
 for k in sorted(tot, key=lambda k: -tot[k])[:25]:
     print(f"{k:34}{by[k]:>4}/{tot[k]}")
 
-json.dump([{"unit": u, "rc": rc, "errors": errs} for u, rc, errs in results],
-          open(os.path.join(here, "probe-results.json"), "w"), indent=1)
+out = "probe-results-clang-cl.json" if cc else "probe-results.json"
+json.dump([{"unit": u, "rc": rc, "errors": errs, **({"excluded": excluded[u]} if u in excluded else {})}
+           for u, rc, errs in results], open(os.path.join(here, out), "w"), indent=1)
 
 if ptrtrunc:
     uniq = sorted(set(warnings))

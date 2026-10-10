@@ -1,0 +1,97 @@
+diff --git a/lib/dolphin/gx/GXVert.cpp b/lib/dolphin/gx/GXVert.cpp
+--- a/lib/dolphin/gx/GXVert.cpp
++++ b/lib/dolphin/gx/GXVert.cpp
+@@ -11,8 +11,30 @@
+ u32 sBeginSizeOffset = 0;
+ bool sBeginAuto = false;
+ 
++// Closes the open primitive (what GXEnd does). GXEnd is a no-op on the Dolphin SDK, and decomp draw
++// paths often omit it, so GXBegin closes a still-open primitive implicitly: on hardware a primitive
++// is complete once its vertices are written.
++void end_begin() {
++  if (!sInBegin) {
++    return;
++  }
++  u32 bytesWritten = aurora::gx::fifo::get_buffer_size() - sBeginFifoSize;
++  if (sBeginAuto) {
++    aurora::gx::fifo::patch_u32(sBeginSizeOffset, bytesWritten);
++    sBeginAuto = false;
++  } else if (sBeginNVerts > 0 && bytesWritten > 0) {
++    // We don't know the vertex size without processing the FIFO for vtxFmt changes
++    // so this is just a best-effort check to find obvious issues
++    if (bytesWritten % sBeginNVerts != 0) {
++      Log.warn("GXEnd: vertex data not evenly divisible: {} bytes for {} vertices", bytesWritten, sBeginNVerts);
++    }
++  }
++  sInBegin = false;
++  aurora::gx::fifo::finish_draw();
++}
++
+ void pre_begin() {
+-  CHECK(!sInBegin, "GXBegin: called without matching GXEnd");
++  end_begin();
+ 
+   // Flush dirty state before starting a draw
+   if (__gx->dirtyState != 0) {
+@@ -33,6 +55,10 @@
+ } // namespace
+ 
+ extern "C" {
++
++// Called by fifo::drain(): a flush or draw-done inside an open primitive would otherwise reset the FIFO buffer under
++// sBeginFifoSize/sBeginSizeOffset, wrapping the byte count and patching a stale offset.
++void __GXCloseOpenPrimitive() { end_begin(); }
+ 
+ void GXBegin(GXPrimitive primitive, GXVtxFmt vtxFmt, u16 nVerts) {
+   pre_begin();
+@@ -74,21 +100,7 @@
+ }
+ 
+ void GXEnd() {
+-  if (sInBegin) {
+-    u32 bytesWritten = aurora::gx::fifo::get_buffer_size() - sBeginFifoSize;
+-    if (sBeginAuto) {
+-      aurora::gx::fifo::patch_u32(sBeginSizeOffset, bytesWritten);
+-      sBeginAuto = false;
+-    } else if (sBeginNVerts > 0 && bytesWritten > 0) {
+-      // We don't know the vertex size without processing the FIFO for vtxFmt changes
+-      // so this is just a best-effort check to find obvious issues
+-      if (bytesWritten % sBeginNVerts != 0) {
+-        Log.warn("GXEnd: vertex data not evenly divisible: {} bytes for {} vertices", bytesWritten, sBeginNVerts);
+-      }
+-    }
+-    sInBegin = false;
+-    aurora::gx::fifo::finish_draw();
+-  }
++  end_begin();
+ }
+ 
+ void GXPosition3f32(f32 x, f32 y, f32 z) {
+diff --git a/lib/gx/fifo.cpp b/lib/gx/fifo.cpp
+--- a/lib/gx/fifo.cpp
++++ b/lib/gx/fifo.cpp
+@@ -10,6 +10,8 @@
+ #include <mutex>
+ 
+ #include <tracy/Tracy.hpp>
++
++extern "C" void __GXCloseOpenPrimitive(); // dolphin/gx/GXVert.cpp
+ 
+ namespace aurora::gx::fifo {
+ namespace detail {
+@@ -232,6 +234,7 @@
+ bool in_display_list() { return detail::sInDisplayList; }
+ 
+ void drain() {
++  __GXCloseOpenPrimitive();
+   if (detail::sBufferSize == 0) {
+     return;
+   }
+@@ -272,6 +275,7 @@
+ uint32_t get_buffer_size() { return detail::sBufferSize; }
+ 
+ void clear_buffer() {
++  __GXCloseOpenPrimitive();
+   const uint64_t processed = sProcessed.load(std::memory_order_acquire);
+   AURORA_ASSERT(sPublished.load(std::memory_order_acquire) == processed,
+                 "fifo::clear_buffer: published commands are still pending");

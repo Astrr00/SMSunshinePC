@@ -26,6 +26,9 @@ bool IsReadable(const void* p, size_t bytes);
 // next call retries the device after one second.
 void AudioWrite(const int16_t* stereo, uint32_t frames, double hz);
 
+// Opt-in PCM dump (SUNSHINE_AUDIO_DUMP=<file.wav>, av_dump.cpp): every block the AI pump hands to AudioWrite.
+void DumpWrite(const int16_t* stereo, uint32_t frames, double hz);
+
 // --- for the future host DSP (av.cpp) ------------------------------------------------------------------------------
 
 // Producer side of the DSP -> CPU mailbox behind DSPCheckMailFromDSP/DSPReadMailFromDSP. Pass the mail as the DSP

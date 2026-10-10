@@ -1,0 +1,9 @@
+{
+    "id": "hello",
+    "name": "Hello example",
+    "version": "1.0.0",
+    "author": "Sunshine PC port",
+    "description": "Logs lifecycle and stage loads, and turns on the infinite-lives cheat.",
+    "sunshine_api": "1.0",
+    "load_order": 0
+}

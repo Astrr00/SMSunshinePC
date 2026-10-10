@@ -1,0 +1,13 @@
+# Aurora patches the port depends on. Series: patches/aurora (base upstream 50e5be3; apply with tools/apply-aurora-patches.py).
+# Format: name | path (relative to extern/aurora) | regex[ && regex...]
+# verify.py fails when any regex has no match in its file. Edit the regex when the code moves, not the check.
+GXPeekARGB | lib/dolphin/gx/GXCpu2Efb.cpp | ^void GXPeekARGB\(
+GXReadPixMetric/GXClearPixMetric | lib/dolphin/gx/GXPerf.cpp | ^void GXReadPixMetric\( && ^void GXClearPixMetric\(
+GXSetDrawSync | include/dolphin/gx/GXManage.h | ^void GXSetDrawSync\(
+GXBegin implicit close | lib/dolphin/gx/GXVert.cpp | closes a still-open primitive implicitly
+card base path | lib/dolphin/card.cpp | ^std::array<std::filesystem::path, 2> cardBasePaths
+TEV alpha R8 compare | lib/gx/shader.cpp | case GX_TEV_COMP_R8_GT:
+FSR1 RCAS shader | lib/webgpu/gpu.cpp | ^fn fs_rcas\(
+FSR1 sharpness API | lib/aurora.cpp | ^void aurora_set_upscale_sharpness\(
+pass dump | lib/gfx/pass_dump.hpp | ^void write_frame\(
+screenshot | lib/gfx/screenshot.hpp | ^void finish\(

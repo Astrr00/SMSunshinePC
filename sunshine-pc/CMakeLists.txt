@@ -4,7 +4,7 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type" FORCE)
 endif ()
 
-project(sunshine LANGUAGES C CXX)
+project(sunshine VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
@@ -40,6 +40,16 @@ add_library(sms_game STATIC ${SMS_GAME_SOURCES} ${SDK_SOURCES})
 # Shift-JIS execution charset. tools/sjis_overlay.py writes copies with octal-escaped CP932 literals and a clang VFS
 # overlay that makes the compiler read them; it runs (incrementally, well under a second) before every build.
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+# Aurora's patch series (patches/aurora) must be applied to extern/aurora. Warn only, so configure never rewrites the
+# submodule; the apply step is idempotent: python tools/apply-aurora-patches.py
+execute_process(COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/apply-aurora-patches.py --check
+    RESULT_VARIABLE AURORA_PATCH_RESULT
+    OUTPUT_VARIABLE AURORA_PATCH_OUTPUT
+    ERROR_VARIABLE AURORA_PATCH_OUTPUT
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+if (NOT AURORA_PATCH_RESULT EQUAL 0)
+    message(WARNING "extern/aurora: ${AURORA_PATCH_OUTPUT}")
+endif ()
 set(SJIS_OVERLAY ${CMAKE_BINARY_DIR}/sjis/overlay.yaml)
 add_custom_target(sjis_overlay
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/sjis_overlay.py ${SMS_DIR} ${CMAKE_BINARY_DIR}/sjis
@@ -52,6 +62,7 @@ target_include_directories(sms_game PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${SMS_DIR}/include
     ${SMS_DIR}/include/dolphin
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/glyphs
     ${SMS_DIR}/include/PowerPC_EABI_Support
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora/include)
 target_compile_definitions(sms_game PUBLIC TARGET_PC=1 VERSION_GMSJ01=1 NDEBUG=1)
@@ -62,10 +73,20 @@ target_compile_options(sms_game PUBLIC
     /FI${CMAKE_CURRENT_SOURCE_DIR}/include/pc_compat.h)
 target_compile_options(sms_game PRIVATE /MP)
 
-add_executable(sunshine src/main.cpp src/crash.cpp)
+add_executable(sunshine src/main.cpp src/crash.cpp src/devstart/devstart.cpp src/render/render_scale.cpp
+    src/cheats/cheats_core.cpp src/cheats/cheats_game.cpp src/json/json_lite.cpp
+    src/mods/mod_manifest.cpp src/mods/mods_host.cpp src/mods/mods_loader.cpp src/util/read_file.cpp
+    src/settings.cpp src/launcher/launcher.cpp src/glyphs/glyphs.cpp src/framerate/framerate.cpp src/widescreen/widescreen.cpp
+    src/saves/save_directory.cpp src/saves/save_roundtrip.cpp)
+target_include_directories(sunshine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+# Round-trip test of the INI settings reader/writer (tools/settings_test.cpp); no game or Aurora dependency.
+add_executable(settings_test tools/settings_test.cpp src/settings.cpp)
+target_include_directories(settings_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_custom_command(TARGET sunshine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:sunshine>/assets)
 target_link_libraries(sunshine PRIVATE sms_game
     aurora::core aurora::gx aurora::gd aurora::si aurora::vi aurora::pad aurora::mtx aurora::os
-    aurora::dvd aurora::card aurora::main)
+    aurora::dvd aurora::card aurora::main ZLIB::ZLIB)
 include(extern/aurora/cmake/AuroraCopyRuntimeDLLs.cmake)
 aurora_copy_runtime_dlls(sunshine)
 # List every unresolved symbol instead of stopping after 100 (Goal-Port B.2 sorts them by cause).
@@ -87,7 +108,8 @@ if (SUNSHINE_ASAN)
     get_filename_component(_llvm_bin ${CMAKE_CXX_COMPILER} DIRECTORY)
     file(GLOB _asan_dir "${_llvm_bin}/../lib/clang/*/lib/windows")
     list(GET _asan_dir 0 _asan_dir)
-    target_compile_options(sms_game PUBLIC /fsanitize=address)
+    # Global redzones misreport merged string literals at static init (see platform-notes.md); heap is the target.
+    target_compile_options(sms_game PUBLIC /fsanitize=address -mllvm -asan-globals=0)
     # MSVC STL container annotations produce false positives when only some translation units are instrumented.
     target_compile_definitions(sms_game PUBLIC _DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION)
     target_link_libraries(sunshine PRIVATE
@@ -97,3 +119,30 @@ if (SUNSHINE_ASAN)
     add_custom_command(TARGET sunshine POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_asan_dir}/clang_rt.asan_dynamic-x86_64.dll" $<TARGET_FILE_DIR:sunshine>)
 endif ()
+
+# Example mods (mods-example/), OFF by default: each builds mods/<id>/mod.dll next to sunshine.exe, plus its mod.json.
+option(SUNSHINE_BUILD_EXAMPLE_MODS "Build the example mods into <exe dir>/mods" OFF)
+if (SUNSHINE_BUILD_EXAMPLE_MODS)
+    foreach (_mod hello faulty)
+        add_library(sunshine_mod_${_mod} SHARED mods-example/${_mod}/mod.cpp)
+        target_include_directories(sunshine_mod_${_mod} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+        set_target_properties(sunshine_mod_${_mod} PROPERTIES OUTPUT_NAME mod
+            RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:sunshine>/mods/${_mod}
+            LIBRARY_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:sunshine>/mods/${_mod}
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/mod_import/${_mod})
+        add_custom_command(TARGET sunshine_mod_${_mod} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mods-example/${_mod}/mod.json
+                $<TARGET_FILE_DIR:sunshine_mod_${_mod}>/mod.json)
+    endforeach ()
+endif ()
+
+# Installation-free Windows package. `cmake --install <build> --prefix <dir>` or `cpack` (ZIP). The release path is
+# tools/package.py, which also writes the licence texts and refuses to ship anything that looks like a game image.
+install(TARGETS sunshine RUNTIME DESTINATION .)
+aurora_install_runtime_dlls(sunshine .)
+install(DIRECTORY assets/ DESTINATION assets OPTIONAL)
+install(FILES THIRD_PARTY_LICENSES.md DESTINATION .)
+install(DIRECTORY licenses/ DESTINATION licenses)
+set(CPACK_PACKAGE_NAME "sunshine")
+set(CPACK_GENERATOR "ZIP")
+include(CPack)

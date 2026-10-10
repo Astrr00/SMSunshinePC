@@ -1,0 +1,16 @@
+diff --git a/lib/gx/shader.cpp b/lib/gx/shader.cpp
+--- a/lib/gx/shader.cpp
++++ b/lib/gx/shader.cpp
+@@ -412,6 +412,12 @@
+ 
+ std::string tev_alpha_op(GXTevOp op, std::string_view bias, std::string_view scale, bool clamp, std::string_view a,
+                          std::string_view b, std::string_view c, std::string_view d) {
++  // Alpha operands are scalar (no .r swizzle); R8 compares map to RGB8, which has the same scalar math.
++  if (op == GX_TEV_COMP_R8_GT) {
++    op = GX_TEV_COMP_RGB8_GT;
++  } else if (op == GX_TEV_COMP_R8_EQ) {
++    op = GX_TEV_COMP_RGB8_EQ;
++  }
+   std::string expr = tev_op(op, bias, scale, a, b, c, d, "0.0"sv);
+   return clamp ? fmt::format("clamp({}, 0.0, 1.0)", expr) : fmt::format("clamp({}, -4.0, 4.0)", expr);
+ }

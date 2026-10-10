@@ -119,4 +119,7 @@ private:
 	s32 bus_[kBusCount][kSubframeSamples];
 };
 
+// Launcher master volume, percent 0..100. Scales the game's master level in Mixer::render.
+void setOutputVolumePct(int pct);
+
 } // namespace hostdsp

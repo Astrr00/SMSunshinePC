@@ -5,3 +5,15 @@ tools/probe-results.json
 tools/unresolved.txt
 tools/ptr-trunc.txt
 tools/fmtcheck/out/
+dist/
+*.rvz
+*.iso
+*.dol
+*.szs
+*.gcm
+*.wbfs
+*.ciso
+*.nkit
+__pycache__/
+*.log
+*.arc

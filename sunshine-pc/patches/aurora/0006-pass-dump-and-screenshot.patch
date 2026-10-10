@@ -1,0 +1,797 @@
+diff --git a/cmake/aurora_gx.cmake b/cmake/aurora_gx.cmake
+--- a/cmake/aurora_gx.cmake
++++ b/cmake/aurora_gx.cmake
+@@ -3,11 +3,14 @@
+         lib/gfx/depth_peek.cpp
+         lib/gfx/encoding.cpp
+         lib/gfx/frame.cpp
++        lib/gfx/pass_dump.cpp
+         lib/gfx/pipeline_cache.cpp
+         lib/gfx/pixel_metric.cpp
+         lib/gfx/recording.cpp
+         lib/gfx/render_worker.cpp
+         lib/gfx/resource_cache.cpp
++        lib/gfx/screenshot.cpp
++        lib/gfx/screenshot.hpp
+         lib/gfx/dds_io.cpp
+         lib/gfx/tex_copy_conv.cpp
+         lib/gfx/tex_palette_conv.cpp
+diff --git a/lib/aurora.cpp b/lib/aurora.cpp
+--- a/lib/aurora.cpp
++++ b/lib/aurora.cpp
+@@ -14,6 +14,7 @@
+ #include "webgpu/gpu.hpp"
+ #include "webgpu/gpu_prof.hpp"
+ #include <webgpu/webgpu_cpp.h>
++#include "gfx/screenshot.hpp"
+ #endif
+ 
+ #ifdef AURORA_ENABLE_RMLUI
+@@ -285,7 +286,9 @@
+   }
+ #endif
+ 
++  const bool captureFrame = gfx::screenshot::selected(gfx::current_frame());
+   gfx::end_frame([rmlBindGroup = std::move(rmlBindGroup), rmlOverlay, viewport,
++                  imguiDrawData = std::move(imguiDrawData), captureFrame](
+                      wgpu::CommandEncoder& encoder, std::vector<gfx::AfterSubmitCallback> afterSubmitCallbacks) {
+     wgpu::Texture currentTexture;
+     wgpu::TextureView currentView;
+@@ -304,6 +307,7 @@
+       }
+     }
+ 
++    gfx::screenshot::CapturePtr capture;
+     const bool canPresent = currentTexture && currentView;
+     if (canPresent) {
+       wgpu::BindGroup presentBindGroup;
+@@ -362,6 +366,8 @@
+         imgui::render(pass, imguiDrawData);
+         pass.End();
+       }
++      if (captureFrame) {
++        capture = gfx::screenshot::record(encoder, presentBindGroup, rmlBindGroup, rmlOverlay, viewport,
+                                           imguiDrawData);
+       }
+     } else {
+@@ -374,6 +380,7 @@
+       ZoneScopedN("Queue Submit");
+       g_queue.Submit(1, &buffer);
+     }
++    gfx::screenshot::finish(capture);
+     webgpu::gpu_prof::after_submit();
+     if (canPresent && g_surface) {
+       ZoneScopedN("Present");
+diff --git a/lib/gfx/encoding.cpp b/lib/gfx/encoding.cpp
+--- a/lib/gfx/encoding.cpp
++++ b/lib/gfx/encoding.cpp
+@@ -349,6 +349,8 @@
+     };
+     cmd.CopyTextureToTexture(&src, &dst, &size);
+   }
++  if (frame.passDump) {
++    pass_dump::read_pass(cmd, *frame.passDump, passIndex, passInfo);
+   }
+ }
+ 
+@@ -431,6 +433,8 @@
+     if (op.textureCopy != nullptr) {
+       const webgpu::gpu_prof::Zone zone{cmd, "Texture copy"};
+       cmd.CopyTextureToTexture(&op.textureCopy->src, &op.textureCopy->dst, &op.textureCopy->size);
++      if (frame.passDump) {
++        pass_dump::read_copy(cmd, *frame.passDump, op.index, *op.textureCopy);
+       }
+     }
+     break;
+diff --git a/lib/gfx/frame.cpp b/lib/gfx/frame.cpp
+--- a/lib/gfx/frame.cpp
++++ b/lib/gfx/frame.cpp
+@@ -636,6 +636,7 @@
+   frame = {};
+   frame.frameId = g_nextFrameId++;
+   frame.frameIndex = g_frameIndex;
++  frame.passDump = pass_dump::begin_frame(frame.frameIndex);
+   frame.stagingBuffer = *stagingSlot;
+   size_t bufferOffset = 0;
+   const auto& stagingBuf = g_stagingBuffers[*stagingSlot];
+@@ -674,6 +675,7 @@
+     TracyPlot("aurora: cpuFrameTimeMs", cpuFrameTimeMs);
+   }
+   const auto recorded = end_recording();
++  pass_dump::end_frame();
+   auto& frame = *recorded.packet;
+   const size_t frameSlot = recorded.frameSlot;
+   const uint64_t frameId = frame.frameId;
+@@ -688,6 +690,7 @@
+     auto encoder = std::move(packet.encoder);
+     const auto stats = packet.stats;
+     auto afterSubmitCallbacks = std::move(packet.afterSubmitCallbacks);
++    auto passDump = std::move(packet.passDump);
+     pixel_metric::finish_frame(encoder, packet);
+     packet = {};
+     g_resources.stats.drawCallCount = stats.drawCallCount;
+@@ -700,6 +703,8 @@
+     if (callback) {
+       callback(encoder, std::move(afterSubmitCallbacks));
+     }
++    if (passDump) {
++      pass_dump::write_frame(*passDump);
+     }
+     g_frameSlots.release(frameSlot);
+     expire_cached_bind_groups();
+diff --git a/lib/gfx/frame_packet.hpp b/lib/gfx/frame_packet.hpp
+--- a/lib/gfx/frame_packet.hpp
++++ b/lib/gfx/frame_packet.hpp
+@@ -2,6 +2,7 @@
+ 
+ #include "pipeline_cache.hpp"
+ #include "types.hpp"
++#include "pass_dump.hpp"
+ #include "tex_palette_conv.hpp"
+ #include "texture.hpp"
+ 
+@@ -215,6 +216,7 @@
+   std::vector<AfterSubmitCallback> afterSubmitCallbacks;
+   uint64_t frameId = 0;
+   uint32_t frameIndex = 0;
++  std::shared_ptr<pass_dump::FrameDump> passDump; // AURORA_DUMP_PASSES: null unless this frame is dumped
+   size_t stagingBuffer = 0;
+   StagingHighWater copied;
+   AuroraStats stats{};
+diff --git a/lib/gfx/pass_dump.cpp b/lib/gfx/pass_dump.cpp
+new file mode 100644
+--- /dev/null
++++ b/lib/gfx/pass_dump.cpp
+@@ -0,0 +1,263 @@
++#include "pass_dump.hpp"
++
++#include "frame_packet.hpp"
++#include "../logging.hpp"
++#include "../webgpu/gpu.hpp"
++
++#include <png.h>
++
++#include <cstdio>
++#include <cstdlib>
++#include <filesystem>
++#include <vector>
++
++namespace aurora::gfx::pass_dump {
++using detail::RenderPass;
++using detail::TextureCopy;
++using detail::CommandType;
++namespace {
++constexpr Module Log{"aurora::gfx::pass_dump"};
++
++struct Range {
++  uint32_t first = 0;
++  uint32_t last = 0;
++  bool enabled = false;
++};
++
++const Range& selected_range() noexcept {
++  static const Range range = [] {
++    Range r;
++    const char* env = std::getenv("AURORA_DUMP_PASSES");
++    if (env == nullptr || *env == '\0') {
++      return r;
++    }
++    char* next = nullptr;
++    r.first = r.last = static_cast<uint32_t>(std::strtoul(env, &next, 10));
++    if (next == env) {
++      Log.warn("AURORA_DUMP_PASSES='{}' is not <first>-<last>; pass dump disabled", env);
++      return r;
++    }
++    if (*next == '-') {
++      r.last = static_cast<uint32_t>(std::strtoul(next + 1, nullptr, 10));
++    }
++    r.enabled = true;
++    Log.info("AURORA_DUMP_PASSES: dumping frames {}-{} to ./passdump/", r.first, r.last);
++    return r;
++  }();
++  return range;
++}
++
++struct Readback {
++  wgpu::Buffer buffer;
++  std::string name; // file stem, e.g. "pass3_efb"
++  uint32_t width = 0;
++  uint32_t height = 0;
++  uint32_t bytesPerRow = 0;
++  bool bgra = false;
++};
++
++// Main-thread state for the frame being recorded. Owned by the FramePacket until it is written out.
++FrameDump* g_active = nullptr;
++
++bool write_png(const std::string& path, const Readback& rb, const uint8_t* data) {
++  FILE* file = std::fopen(path.c_str(), "wb");
++  if (file == nullptr) {
++    return false;
++  }
++  png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
++  png_infop info = png != nullptr ? png_create_info_struct(png) : nullptr;
++  if (info == nullptr) {
++    png_destroy_write_struct(&png, nullptr);
++    std::fclose(file);
++    return false;
++  }
++  if (setjmp(png_jmpbuf(png))) {
++    png_destroy_write_struct(&png, &info);
++    std::fclose(file);
++    return false;
++  }
++  png_init_io(png, file);
++  png_set_IHDR(png, info, rb.width, rb.height, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
++               PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
++  png_write_info(png, info);
++  std::vector<uint8_t> row(static_cast<size_t>(rb.width) * 4);
++  for (uint32_t y = 0; y < rb.height; ++y) {
++    const uint8_t* src = data + static_cast<size_t>(y) * rb.bytesPerRow;
++    for (uint32_t x = 0; x < rb.width; ++x) {
++      const uint8_t* s = src + x * 4;
++      uint8_t* d = &row[x * 4];
++      d[0] = rb.bgra ? s[2] : s[0];
++      d[1] = s[1];
++      d[2] = rb.bgra ? s[0] : s[2];
++      d[3] = s[3];
++    }
++    png_write_row(png, row.data());
++  }
++  png_write_end(png, nullptr);
++  png_destroy_write_struct(&png, &info);
++  std::fclose(file);
++  return true;
++}
++
++void read_texture(wgpu::CommandEncoder& cmd, FrameDump& dump, std::string name, const wgpu::Texture& texture,
++                  wgpu::Origin3D origin, wgpu::Extent3D size);
++} // namespace
++
++struct FrameDump {
++  uint32_t frameIndex = 0;
++  std::string log;     // written after the frame is submitted
++  std::string pending; // draw lines recorded since the last sealed pass (main thread)
++  std::vector<Readback> readbacks;
++};
++
++FrameDumpPtr begin_frame(uint32_t frameIndex) {
++  const auto& range = selected_range();
++  if (!range.enabled || frameIndex < range.first || frameIndex > range.last) {
++    g_active = nullptr;
++    return nullptr;
++  }
++  auto dump = std::make_shared<FrameDump>();
++  dump->frameIndex = frameIndex;
++  dump->log = fmt::format("frame {}\n", frameIndex);
++  g_active = dump.get();
++  return dump;
++}
++
++void end_frame() noexcept {
++  if (g_active != nullptr && !g_active->pending.empty()) {
++    g_active->log += g_active->pending;
++  }
++  g_active = nullptr;
++}
++
++bool active() noexcept { return g_active != nullptr; }
++
++void note_draw(const std::string& line) {
++  if (g_active != nullptr) {
++    g_active->pending += fmt::format("    draw {}\n", line);
++  }
++}
++
++void seal_pass(uint32_t passIndex, const RenderPass& pass) {
++  if (g_active == nullptr) {
++    return;
++  }
++  auto& out = g_active->log;
++  out += fmt::format("PASS {} '{}' colorAttachments={} discardable={} hasDraws={}\n", passIndex, pass.label,
++                     pass.colorAttachmentCount, pass.discardable, pass.hasDraws);
++  for (uint32_t i = 0; i < pass.colorAttachmentCount; ++i) {
++    const auto& ca = pass.colorAttachments[i];
++    const auto& cv = ca.clearValue;
++    out += fmt::format("  color{} {}x{} clear={} loadOp={} clearValue=({}, {}, {}, {})\n", i, ca.size.width,
++                       ca.size.height, ca.clear, static_cast<uint32_t>(ca.loadOp), cv.x(), cv.y(), cv.z(), cv.w());
++  }
++  if (pass.resolveTarget) {
++    const auto& r = pass.resolveRect;
++    out += fmt::format("  resolve rect=({}, {}, {}, {}) -> copy {}x{} format={}\n", r.x, r.y, r.width, r.height,
++                       pass.resolveTarget->size.width, pass.resolveTarget->size.height,
++                       static_cast<uint32_t>(pass.resolveFormat));
++  }
++  uint32_t draws = 0;
++  for (const auto& cmd : pass.commands) {
++    if (cmd.type == CommandType::Draw || cmd.type == CommandType::CustomDraw) {
++      ++draws;
++    } else if (cmd.type == CommandType::SetViewport) {
++      const auto& v = cmd.data.setViewport;
++      out += fmt::format("  viewport ({}, {}, {}, {}) z=({}, {})\n", v.left, v.top, v.width, v.height, v.znear,
++                         v.zfar);
++    } else if (cmd.type == CommandType::SetScissor) {
++      const auto& s = cmd.data.setScissor;
++      out += fmt::format("  scissor ({}, {}, {}, {})\n", s.x, s.y, s.width, s.height);
++    }
++  }
++  out += g_active->pending;
++  g_active->pending.clear();
++  out += fmt::format("  draws={}\n", draws);
++}
++
++void note_copy(uint32_t copyIndex, const TextureCopy& copy) {
++  if (g_active == nullptr) {
++    return;
++  }
++  g_active->log += fmt::format("COPY {} src=({}, {}, {}) dst=({}, {}, {}) size={}x{}\n", copyIndex,
++                               copy.src.origin.x, copy.src.origin.y, copy.src.origin.z, copy.dst.origin.x,
++                               copy.dst.origin.y, copy.dst.origin.z, copy.size.width, copy.size.height);
++}
++
++void read_pass(wgpu::CommandEncoder& cmd, FrameDump& dump, uint32_t passIndex, const RenderPass& pass) {
++  if (pass.copySourceTexture) {
++    read_texture(cmd, dump, fmt::format("pass{}_efb", passIndex), pass.copySourceTexture, {}, {
++        pass.copySourceTexture.GetWidth(), pass.copySourceTexture.GetHeight(), 1});
++  }
++  if (pass.resolveTarget) {
++    read_texture(cmd, dump, fmt::format("pass{}_resolve", passIndex), pass.resolveTarget->texture, {},
++                 pass.resolveTarget->size);
++  }
++}
++
++void read_copy(wgpu::CommandEncoder& cmd, FrameDump& dump, uint32_t copyIndex, const TextureCopy& copy) {
++  read_texture(cmd, dump, fmt::format("copy{}", copyIndex), copy.dst.texture, copy.dst.origin, copy.size);
++}
++
++void write_frame(FrameDump& dump) {
++  std::error_code ec;
++  std::filesystem::create_directories("passdump", ec);
++  const std::string prefix = fmt::format("passdump/frame{}", dump.frameIndex);
++  for (auto& rb : dump.readbacks) {
++    const uint64_t bytes = static_cast<uint64_t>(rb.bytesPerRow) * rb.height;
++    wgpu::MapAsyncStatus status = wgpu::MapAsyncStatus::Error;
++    auto future = rb.buffer.MapAsync(wgpu::MapMode::Read, 0, bytes, wgpu::CallbackMode::WaitAnyOnly,
++                                     [&status](wgpu::MapAsyncStatus s, wgpu::StringView) { status = s; });
++    webgpu::g_instance.WaitAny(future, 5'000'000'000ull);
++    if (status != wgpu::MapAsyncStatus::Success) {
++      dump.log += fmt::format("  {} readback failed\n", rb.name);
++      continue;
++    }
++    const auto* data = static_cast<const uint8_t*>(rb.buffer.GetConstMappedRange(0, bytes));
++    const auto path = fmt::format("{}_{}.png", prefix, rb.name);
++    if (!write_png(path, rb, data)) {
++      dump.log += fmt::format("  {} PNG write failed\n", path);
++    }
++    rb.buffer.Unmap();
++  }
++  if (FILE* log = std::fopen((prefix + ".log").c_str(), "w"); log != nullptr) {
++    std::fwrite(dump.log.data(), 1, dump.log.size(), log);
++    std::fclose(log);
++  }
++  Log.info("pass dump: frame {} written ({} readbacks)", dump.frameIndex, dump.readbacks.size());
++}
++
++namespace {
++void read_texture(wgpu::CommandEncoder& cmd, FrameDump& dump, std::string name, const wgpu::Texture& texture,
++                  wgpu::Origin3D origin, wgpu::Extent3D size) {
++  const auto format = texture.GetFormat();
++  const bool bgra = format == wgpu::TextureFormat::BGRA8Unorm || format == wgpu::TextureFormat::BGRA8UnormSrgb;
++  const bool rgba = format == wgpu::TextureFormat::RGBA8Unorm || format == wgpu::TextureFormat::RGBA8UnormSrgb;
++  if (!bgra && !rgba) {
++    dump.log += fmt::format("  {} skipped: format {}\n", name, static_cast<uint32_t>(format));
++    return;
++  }
++  Readback rb{
++      .name = std::move(name),
++      .width = size.width,
++      .height = size.height,
++      .bytesPerRow = (size.width * 4 + 255) & ~255u,
++      .bgra = bgra,
++  };
++  const wgpu::BufferDescriptor desc{
++      .label = "Pass dump readback",
++      .usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst,
++      .size = static_cast<uint64_t>(rb.bytesPerRow) * rb.height,
++  };
++  rb.buffer = webgpu::g_device.CreateBuffer(&desc);
++  const wgpu::TexelCopyTextureInfo src{.texture = texture, .origin = origin};
++  const wgpu::TexelCopyBufferInfo dst{
++      .layout = {.offset = 0, .bytesPerRow = rb.bytesPerRow, .rowsPerImage = rb.height},
++      .buffer = rb.buffer,
++  };
++  const wgpu::Extent3D copySize{.width = size.width, .height = size.height, .depthOrArrayLayers = 1};
++  cmd.CopyTextureToBuffer(&src, &dst, &copySize);
++  dump.readbacks.push_back(std::move(rb));
++}
++} // namespace
++} // namespace aurora::gfx::pass_dump
+diff --git a/lib/gfx/pass_dump.hpp b/lib/gfx/pass_dump.hpp
+new file mode 100644
+--- /dev/null
++++ b/lib/gfx/pass_dump.hpp
+@@ -0,0 +1,49 @@
++#pragma once
++
++// Opt-in per-pass pixel dump (debug aid).
++//
++// AURORA_DUMP_PASSES=<first>-<last> (or a single <frame>) selects frames by gfx::current_frame(). For each selected
++// frame, files are written to ./passdump/ relative to the working directory:
++//   frame<N>.log                  pass boundaries: label, clears, resolve rect, copies, viewport/scissor, draw count
++//                                 and the textures every draw samples
++//   frame<N>_pass<K>_efb.png      EFB colour after render pass K
++//   frame<N>_pass<K>_resolve.png  copy texture written by pass K's resolve (when present)
++//   frame<N>_copy<K>.png          destination of texture copy K
++// When the variable is unset, begin_frame() costs one cached check and nothing is recorded or read back. Readbacks
++// block the render worker after submit, so this is for debugging only. Formats other than RGBA8/BGRA8 are logged as
++// skipped.
++
++#include "types.hpp"
++
++#include <cstdint>
++#include <memory>
++#include <string>
++
++namespace aurora::gfx::detail {
++struct RenderPass;
++struct TextureCopy;
++} // namespace aurora::gfx::detail
++
++namespace aurora::gfx::pass_dump {
++struct FrameDump;
++using FrameDumpPtr = std::shared_ptr<FrameDump>;
++
++// Main thread: called from begin_frame. Null unless frameIndex is selected.
++FrameDumpPtr begin_frame(uint32_t frameIndex);
++// Main thread: stops recording into the frame that began.
++void end_frame() noexcept;
++// Main thread: true while the frame being recorded is dumped.
++bool active() noexcept;
++// Main thread: appends a draw description to the open pass.
++void note_draw(const std::string& line);
++// Main thread: a render pass was sealed; writes its header and the draws recorded since the previous pass.
++void seal_pass(uint32_t passIndex, const detail::RenderPass& pass);
++// Main thread: a texture copy was queued.
++void note_copy(uint32_t copyIndex, const detail::TextureCopy& copy);
++// Render worker: records readbacks for the EFB and resolve target after a pass is encoded.
++void read_pass(wgpu::CommandEncoder& cmd, FrameDump& dump, uint32_t passIndex, const detail::RenderPass& pass);
++// Render worker: records a readback of a texture copy destination.
++void read_copy(wgpu::CommandEncoder& cmd, FrameDump& dump, uint32_t copyIndex, const detail::TextureCopy& copy);
++// Render worker, after the frame is submitted: maps readbacks, writes PNGs and the log.
++void write_frame(FrameDump& dump);
++} // namespace aurora::gfx::pass_dump
+diff --git a/lib/gfx/recording.cpp b/lib/gfx/recording.cpp
+--- a/lib/gfx/recording.cpp
++++ b/lib/gfx/recording.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include "encoding.hpp"
+ #include "frame.hpp"
++#include "pass_dump.hpp"
+ #include "resource_cache.hpp"
+ 
+ #include "clear.hpp"
+@@ -590,6 +591,8 @@
+ 
+ void enqueue_pass(FramePacket& frame, uint32_t passIndex) {
+   seal_pass(frame, passIndex);
++  if (pass_dump::active() && passIndex < frame.renderPasses.size()) {
++    pass_dump::seal_pass(passIndex, frame.renderPasses[passIndex]);
+   }
+   const auto opIndex = static_cast<uint32_t>(frame.ops.size());
+   frame.ops.emplace_back(capture_frame_op(frame, FrameOpType::RenderPass, passIndex));
+@@ -762,6 +765,8 @@
+       .dst = std::move(dst),
+       .size = size,
+   });
++  if (pass_dump::active()) {
++    pass_dump::note_copy(copyIndex, frame.textureCopies.back());
+   }
+   const auto opIndex = static_cast<uint32_t>(frame.ops.size());
+   frame.ops.emplace_back(capture_frame_op(frame, FrameOpType::TextureCopy, copyIndex));
+diff --git a/lib/gfx/screenshot.cpp b/lib/gfx/screenshot.cpp
+new file mode 100644
+--- /dev/null
++++ b/lib/gfx/screenshot.cpp
+@@ -0,0 +1,225 @@
++#include "screenshot.hpp"
++
++#include "../logging.hpp"
++
++#include <png.h>
++
++#include <algorithm>
++#include <array>
++#include <cmath>
++#include <cstdio>
++#include <cstdlib>
++#include <optional>
++#include <string>
++#include <vector>
++
++static aurora::Module Log("aurora::gfx::screenshot");
++
++namespace aurora::gfx::screenshot {
++namespace {
++struct Request {
++  uint32_t frame = 0;
++  std::string path;
++};
++
++// Parsed once. Empty when AURORA_SCREENSHOT is unset or malformed.
++const std::optional<Request>& request() noexcept {
++  static const std::optional<Request> parsed = [] {
++    std::optional<Request> out;
++    const char* env = std::getenv("AURORA_SCREENSHOT");
++    if (env == nullptr || *env == '\0') {
++      return out;
++    }
++    char* end = nullptr;
++    const unsigned long frame = std::strtoul(env, &end, 10);
++    if (end == env || *end != ':' || end[1] == '\0') {
++      Log.warn("AURORA_SCREENSHOT='{}' ignored; expected <frame>:<file.png>", env);
++      return out;
++    }
++    out = Request{static_cast<uint32_t>(frame), std::string(end + 1)};
++    Log.info("screenshot: frame {} -> {}", out->frame, out->path);
++    return out;
++  }();
++  return parsed;
++}
++
++} // namespace
++
++struct Capture {
++  wgpu::Buffer buffer;
++  std::string path;
++  uint32_t width = 0;
++  uint32_t height = 0;
++  uint32_t bytesPerRow = 0;
++  bool bgra = false;
++};
++
++namespace {
++
++// Same scissor rule as the present blit in aurora.cpp (set_present_viewport).
++uint32_t clamp_coord(double value, uint32_t maximum) noexcept {
++  return static_cast<uint32_t>(std::clamp(value, 0.0, static_cast<double>(maximum)));
++}
++
++bool write_png(const std::string& path, const Capture& capture, const uint8_t* data) {
++  FILE* file = std::fopen(path.c_str(), "wb");
++  if (file == nullptr) {
++    return false;
++  }
++  png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
++  png_infop info = png != nullptr ? png_create_info_struct(png) : nullptr;
++  if (info == nullptr) {
++    png_destroy_write_struct(&png, nullptr);
++    std::fclose(file);
++    return false;
++  }
++  if (setjmp(png_jmpbuf(png))) {
++    png_destroy_write_struct(&png, &info);
++    std::fclose(file);
++    return false;
++  }
++  png_init_io(png, file);
++  png_set_IHDR(png, info, capture.width, capture.height, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
++               PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
++  png_write_info(png, info);
++  std::vector<uint8_t> row(static_cast<size_t>(capture.width) * 4);
++  for (uint32_t y = 0; y < capture.height; ++y) {
++    const uint8_t* src = data + static_cast<size_t>(y) * capture.bytesPerRow;
++    for (uint32_t x = 0; x < capture.width; ++x) {
++      const uint8_t* s = src + x * 4;
++      uint8_t* d = &row[x * 4];
++      d[0] = capture.bgra ? s[2] : s[0];
++      d[1] = s[1];
++      d[2] = capture.bgra ? s[0] : s[2];
++      d[3] = s[3];
++    }
++    png_write_row(png, row.data());
++  }
++  png_write_end(png, nullptr);
++  png_destroy_write_struct(&png, &info);
++  std::fclose(file);
++  return true;
++}
++} // namespace
++
++bool selected(uint32_t frameIndex) noexcept {
++  const auto& req = request();
++  return req.has_value() && req->frame == frameIndex;
++}
++
++CapturePtr record(wgpu::CommandEncoder& encoder, const wgpu::BindGroup& presentBindGroup,
++                  const wgpu::BindGroup& rmlBindGroup, bool rmlOverlay, const webgpu::Viewport& viewport,
++                  const imgui::DrawData& imguiData) {
++  const auto& config = webgpu::g_graphicsConfig.surfaceConfiguration;
++  const auto format = config.format;
++  const bool bgra = format == wgpu::TextureFormat::BGRA8Unorm || format == wgpu::TextureFormat::BGRA8UnormSrgb;
++  const bool rgba = format == wgpu::TextureFormat::RGBA8Unorm || format == wgpu::TextureFormat::RGBA8UnormSrgb;
++  if (!bgra && !rgba) {
++    Log.warn("screenshot skipped: surface format {}", static_cast<uint32_t>(format));
++    return nullptr;
++  }
++
++  const wgpu::Extent3D size{config.width, config.height, 1};
++  const wgpu::TextureDescriptor textureDesc{
++      .label = "Screenshot target",
++      .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
++      .dimension = wgpu::TextureDimension::e2D,
++      .size = size,
++      .format = format,
++      .mipLevelCount = 1,
++  };
++  const wgpu::Texture target = webgpu::g_device.CreateTexture(&textureDesc);
++  const wgpu::TextureView targetView = target.CreateView();
++
++  {
++    const std::array attachments{
++        wgpu::RenderPassColorAttachment{
++            .view = targetView,
++            .loadOp = wgpu::LoadOp::Clear,
++            .storeOp = wgpu::StoreOp::Store,
++        },
++    };
++    const wgpu::RenderPassDescriptor renderPassDescriptor{
++        .label = "Screenshot blit pass",
++        .colorAttachmentCount = attachments.size(),
++        .colorAttachments = attachments.data(),
++    };
++    const auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
++    pass.SetPipeline(webgpu::g_CopyPipeline);
++    pass.SetBindGroup(0, presentBindGroup, 0, nullptr);
++    pass.SetViewport(viewport.left, viewport.top, viewport.width, viewport.height, viewport.znear, viewport.zfar);
++    const auto scissorX = clamp_coord(std::floor(viewport.left), config.width);
++    const auto scissorY = clamp_coord(std::floor(viewport.top), config.height);
++    const auto scissorRight = clamp_coord(std::ceil(viewport.left + viewport.width), config.width);
++    const auto scissorBottom = clamp_coord(std::ceil(viewport.top + viewport.height), config.height);
++    pass.SetScissorRect(scissorX, scissorY, scissorRight - scissorX, scissorBottom - scissorY);
++    pass.Draw(3);
++    if (rmlBindGroup && rmlOverlay) {
++      pass.SetPipeline(webgpu::g_CopyPremultipliedAlphaPipeline);
++      pass.SetBindGroup(0, rmlBindGroup, 0, nullptr);
++      pass.Draw(3);
++    }
++    pass.End();
++  }
++  {
++    const std::array attachments{
++        wgpu::RenderPassColorAttachment{
++            .view = targetView,
++            .loadOp = wgpu::LoadOp::Load,
++            .storeOp = wgpu::StoreOp::Store,
++        },
++    };
++    const wgpu::RenderPassDescriptor renderPassDescriptor{
++        .label = "Screenshot ImGui pass",
++        .colorAttachmentCount = attachments.size(),
++        .colorAttachments = attachments.data(),
++    };
++    const auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
++    pass.SetViewport(0.f, 0.f, static_cast<float>(config.width), static_cast<float>(config.height), 0.f, 1.f);
++    imgui::render(pass, imguiData);
++    pass.End();
++  }
++
++  auto capture = std::make_shared<Capture>();
++  capture->path = request()->path;
++  capture->width = config.width;
++  capture->height = config.height;
++  capture->bytesPerRow = (config.width * 4 + 255) & ~255u;
++  capture->bgra = bgra;
++  const wgpu::BufferDescriptor bufferDesc{
++      .label = "Screenshot readback",
++      .usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst,
++      .size = static_cast<uint64_t>(capture->bytesPerRow) * capture->height,
++  };
++  capture->buffer = webgpu::g_device.CreateBuffer(&bufferDesc);
++  const wgpu::TexelCopyTextureInfo src{.texture = target};
++  const wgpu::TexelCopyBufferInfo dst{
++      .layout = {.offset = 0, .bytesPerRow = capture->bytesPerRow, .rowsPerImage = capture->height},
++      .buffer = capture->buffer,
++  };
++  encoder.CopyTextureToBuffer(&src, &dst, &size);
++  return capture;
++}
++
++void finish(const CapturePtr& capture) {
++  if (!capture) {
++    return;
++  }
++  const uint64_t bytes = static_cast<uint64_t>(capture->bytesPerRow) * capture->height;
++  wgpu::MapAsyncStatus status = wgpu::MapAsyncStatus::Error;
++  auto future = capture->buffer.MapAsync(wgpu::MapMode::Read, 0, bytes, wgpu::CallbackMode::WaitAnyOnly,
++                                         [&status](wgpu::MapAsyncStatus s, wgpu::StringView) { status = s; });
++  webgpu::g_instance.WaitAny(future, 5'000'000'000ull);
++  if (status != wgpu::MapAsyncStatus::Success) {
++    Log.error("screenshot readback failed for {}", capture->path);
++    return;
++  }
++  const auto* data = static_cast<const uint8_t*>(capture->buffer.GetConstMappedRange(0, bytes));
++  if (write_png(capture->path, *capture, data)) {
++    Log.info("screenshot written: {} ({}x{})", capture->path, capture->width, capture->height);
++  } else {
++    Log.error("screenshot PNG write failed: {}", capture->path);
++  }
++  capture->buffer.Unmap();
++}
++} // namespace aurora::gfx::screenshot
+diff --git a/lib/gfx/screenshot.hpp b/lib/gfx/screenshot.hpp
+new file mode 100644
+--- /dev/null
++++ b/lib/gfx/screenshot.hpp
+@@ -0,0 +1,31 @@
++#pragma once
++
++// Opt-in capture of one presented frame as PNG (golden-image tests, before/after checks).
++//
++// AURORA_SCREENSHOT=<frame>:<file.png> writes the image that is presented for Aurora frame <frame>, numbered like
++// gfx::current_frame() and AURORA_DUMP_PASSES. The present passes are re-encoded into an offscreen texture of the
++// surface size and read back after submit, so the swapchain is never copied from. When the variable is unset,
++// selected() is one cached check and nothing else runs.
++
++#include "../imgui.hpp"
++#include "../webgpu/gpu.hpp"
++
++#include <webgpu/webgpu_cpp.h>
++
++#include <cstdint>
++#include <memory>
++
++namespace aurora::gfx::screenshot {
++struct Capture;
++using CapturePtr = std::shared_ptr<Capture>;
++
++// Main thread: true when frameIndex is the AURORA_SCREENSHOT frame.
++bool selected(uint32_t frameIndex) noexcept;
++// Render worker, before the encoder is finished: records the present passes into an offscreen target and a readback.
++// Returns null when the surface format is not RGBA8/BGRA8.
++CapturePtr record(wgpu::CommandEncoder& encoder, const wgpu::BindGroup& presentBindGroup,
++                  const wgpu::BindGroup& rmlBindGroup, bool rmlOverlay, const webgpu::Viewport& viewport,
++                  const imgui::DrawData& imguiData);
++// Render worker, after submit: maps the readback and writes the PNG. Null is a no-op.
++void finish(const CapturePtr& capture);
++} // namespace aurora::gfx::screenshot
+diff --git a/lib/gfx/texture.cpp b/lib/gfx/texture.cpp
+--- a/lib/gfx/texture.cpp
++++ b/lib/gfx/texture.cpp
+@@ -201,7 +201,8 @@
+   };
+   const wgpu::TextureDescriptor textureDescriptor{
+       .label = label,
+-      .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment,
++      .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc |
++               wgpu::TextureUsage::RenderAttachment,
+       .dimension = wgpu::TextureDimension::e2D,
+       .size = size,
+       .format = wgpuFormat,
+diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
+--- a/lib/gx/command_processor.cpp
++++ b/lib/gx/command_processor.cpp
+@@ -1,6 +1,7 @@
+ #include "command_processor.hpp"
+ 
+ #include "../gfx/depth_peek.hpp"
++#include "../gfx/pass_dump.hpp"
+ #include "../gfx/recording.hpp"
+ #include "../internal.hpp"
+ #include "dolphin/gd/GDGeometry.h"
+@@ -431,6 +432,7 @@
+       state.dirty |= DirtyUniform;
+     }
+   }
++  if (gfx::pass_dump::active()) {
+     std::string desc = fmt::format("prim={} indices={} blend={} src={} dst={} op={} tex:", static_cast<int>(prim),
+                                    numIndices, static_cast<int>(state.blendMode), static_cast<int>(state.blendFacSrc),
+                                    static_cast<int>(state.blendFacDst), static_cast<int>(state.blendOp));
+@@ -447,6 +449,7 @@
+                           ref->texture.GetWidth(), ref->texture.GetHeight(),
+                           static_cast<uint32_t>(ref->texture.GetFormat()), static_cast<uint32_t>(ref->gxFormat));
+     }
++    gfx::pass_dump::note_draw(desc);
+   }
+ 
+   const bool uniformValid = (state.dirty & DirtyUniform) == 0 && cache.uniformRange.size != 0;

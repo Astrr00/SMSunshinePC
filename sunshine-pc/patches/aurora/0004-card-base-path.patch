@@ -1,0 +1,44 @@
+diff --git a/lib/dolphin/card.cpp b/lib/dolphin/card.cpp
+--- a/lib/dolphin/card.cpp
++++ b/lib/dolphin/card.cpp
+@@ -17,6 +17,7 @@
+ aurora::Module Log("aurora::card");
+ std::array<std::unique_ptr<aurora::card::ICard>, 2> CardChannels = {{}};
+ std::array<std::filesystem::path, 2> cardPaths;
++std::array<std::filesystem::path, 2> cardBasePaths; // directory from CARDSetBasePath; resolved in CARDInit
+ 
+ constexpr uint16_t CARD_SECTOR_SIZE = 8192;
+ 
+@@ -278,14 +279,12 @@
+     Log.warn("Path supplied a filename, discarding. New Path: {}", aurora::io::fs_path_to_string(filePath));
+   }
+ 
++  // The game name is not known until CARDInit (g_gameName is not NUL-terminated), so keep the base directory here.
+   if (chan == 0 || chan == 1) {
+-    cardPaths[chan] = get_card_full_path(filePath, aurora::g_gameName, selected_card_type(),
+-                                         static_cast<aurora::card::ECardSlot>(chan));
++    cardBasePaths[chan] = filePath;
+   } else {
+-    cardPaths[0] =
+-        get_card_full_path(filePath, aurora::g_gameName, selected_card_type(), aurora::card::ECardSlot::SlotA);
+-    cardPaths[1] =
+-        get_card_full_path(filePath, aurora::g_gameName, selected_card_type(), aurora::card::ECardSlot::SlotB);
++    cardBasePaths[0] = filePath;
++    cardBasePaths[1] = filePath;
+   }
+ }
+ 
+@@ -319,10 +318,10 @@
+   bool loadedCard = false;
+ 
+   for (int i = 0; i < 2; ++i) {
+-    // use default working directory if no path was supplied for card
++    // use the path from CARDSetBasePath, else the default working directory, when no full card path was supplied
+     if (cardPaths[i].empty()) {
+-      cardPaths[i] =
+-          get_card_full_path(cardWorkingDir, game, selected_card_type(), static_cast<aurora::card::ECardSlot>(i));
++      cardPaths[i] = get_card_full_path(cardBasePaths[i].empty() ? cardWorkingDir : cardBasePaths[i], game,
++                                        selected_card_type(), static_cast<aurora::card::ECardSlot>(i));
+     }
+ 
+     const auto& curPath = cardPaths[i];

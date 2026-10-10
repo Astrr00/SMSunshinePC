@@ -3,52 +3,15 @@
 // Sources: original semantics from sms/src/dolphin/gx/*.c (the user's decompilation); texture/FIFO plumbing built on
 // Aurora (MIT) public entry points only (no Aurora-private headers).
 //
-// NOT defined on purpose (the link error is the honest signal, see report):
-//   GXPeekARGB, GXReadPixMetric, GXClearPixMetric
-// They need GPU readback / per-pixel counting that Aurora has no primitive for, and the game uses the results for
-// gameplay (Mario occlusion -> camera, goop cleaning degree), so a constant stub would silently break the game.
-
-#include <atomic>
+// Moved to Aurora (lib/dolphin/gx/GXPerf.cpp, GXCpu2Efb.cpp): GXSetDrawSync(Callback), GXClearPixMetric,
+// GXReadPixMetric, GXPeekARGB.
 
 #include <dolphin/gx.h>
 #include <dolphin/gx/GXAurora.h> // AuroraGXSync
 
 extern "C" {
 
-// ---------------------------------------------------------------------------------------------------------------
-// Draw sync tokens.
-//
-// Original: GXSetDrawSync(token) writes the token into the GP FIFO; when the GP reaches it, a PE interrupt calls the
-// callback registered with GXSetDrawSyncCallback. TDrawSyncManager additionally parks the GP on a FIFO break point
-// (GXEnableBreakPt) so the GP cannot run ahead of the token before the callback reads GP state (pixel metrics, EFB).
-//
-// Port: the token is delivered synchronously from GXSetDrawSync. AuroraGXSync() flushes pending GX state and blocks
-// until the FIFO worker has executed every command issued so far; since this thread is the only producer, nothing
-// after the token exists yet when the callback runs. That gives the same guarantee the break point existed for
-// (callback sees the effect of all earlier commands and none of the later ones), at the cost of one worker round-trip
-// per token.
-// ponytail: asynchronous delivery needs a token hook in Aurora's command processor; add it if the round-trip shows up
-// in profiles (TDrawSyncManager issues ~2 tokens per pollution layer/object per frame).
-// ---------------------------------------------------------------------------------------------------------------
-
-static std::atomic<GXDrawSyncCallback> sDrawSyncCallback{nullptr};
-
-GXDrawSyncCallback GXSetDrawSyncCallback(GXDrawSyncCallback cb)
-{
-	return sDrawSyncCallback.exchange(cb, std::memory_order_acq_rel);
-}
-
-void GXSetDrawSync(u16 token)
-{
-	// Without a callback the token is unobservable (GXReadDrawSync is not used by the game).
-	GXDrawSyncCallback cb = sDrawSyncCallback.load(std::memory_order_acquire);
-	if (cb == nullptr)
-		return;
-	AuroraGXSync();
-	cb(token);
-}
-
-// Break points only park the GP so a draw sync callback sees a stable GP; GXSetDrawSync above already guarantees it.
+// Break points only park the GP so a draw sync callback sees a stable GP; Aurora's GXSetDrawSync orders that.
 void GXEnableBreakPt(void* break_pt) { (void)break_pt; }
 
 void GXDisableBreakPt(void) { }
@@ -221,7 +184,7 @@ void GXSetMisc(GXMiscToken token, u32 val)
 }
 
 // PE alpha-read mode only changes what a CPU EFB peek/poke returns for the alpha channel of formats without alpha.
-// Aurora has no CPU EFB color access (see GXPeekARGB above), so there is no read path it could affect.
+// Aurora's GXPeekARGB (GXCpu2Efb.cpp) does not apply this mode, so there is nothing for it to change here.
 void GXPokeAlphaRead(GXAlphaReadMode mode) { (void)mode; }
 
 } // extern "C"

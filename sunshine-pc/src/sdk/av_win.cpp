@@ -12,6 +12,7 @@
 #include <atomic>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <thread>
 
 #pragma comment(lib, "ole32.lib")
@@ -71,6 +72,23 @@ struct Device {
 	bool warned = false;
 };
 Device g_dev;
+
+// Blocks that never reached the device, counted for the exit summary. Written by the pump thread only.
+struct Stats {
+	uint64_t notUp     = 0; // dropped while the device was closed, opening, or waiting for its retry
+	uint64_t underruns = 0; // device ran dry: 40 ms of silence queued before the block
+	uint64_t overflows = 0; // more than 100 ms queued: block dropped
+	uint64_t fails     = 0; // device lost or write failed (see Fail)
+} g_stats;
+
+void summaryAtExit()
+{
+	std::fprintf(stderr,
+	             "[av] audio: %llu blocks dropped while the device was not up, %llu underruns, %llu overflow drops, "
+	             "%llu device failures\n",
+	             static_cast<unsigned long long>(g_stats.notUp), static_cast<unsigned long long>(g_stats.underruns),
+	             static_cast<unsigned long long>(g_stats.overflows), static_cast<unsigned long long>(g_stats.fails));
+}
 
 template <class T> void Release(T*& p)
 {
@@ -139,6 +157,7 @@ bool Open(UINT32 hz)
 // Device missing or lost: close it and keep quiet for a second before the next attempt.
 void Fail(std::chrono::steady_clock::time_point now, const char* what)
 {
+	++g_stats.fails;
 	Close();
 	g_dev.retryAt = now + std::chrono::seconds(1);
 	if (!g_dev.warned) {
@@ -173,6 +192,8 @@ void OpenAsync(UINT32 hz)
 
 void AudioWrite(const int16_t* stereo, uint32_t frames, double hz)
 {
+	static const bool summaryRegistered = (std::atexit(summaryAtExit), true);
+	(void)summaryRegistered;
 	const UINT32 rate = static_cast<UINT32>(hz + 0.5);
 	const auto now    = std::chrono::steady_clock::now();
 
@@ -186,6 +207,7 @@ void AudioWrite(const int16_t* stereo, uint32_t frames, double hz)
 	}();
 	(void)comReady;
 	if (g_dev.hz != rate) { // first call, rate change, or the device was lost
+		++g_stats.notUp;
 		const int state = g_dev.open;
 		if (state == kOpening) // the open can block for seconds inside the audio service; never stall the pump on it
 			return;
@@ -206,6 +228,8 @@ void AudioWrite(const int16_t* stereo, uint32_t frames, double hz)
 		Fail(now, "GetCurrentPadding failed");
 		return;
 	}
+	if (padding == 0)
+		g_stats.underruns++;
 	// Device ran dry: restore the lead before queueing more.
 	if (padding == 0 && !Silence(rate / 25)) {
 		Fail(now, "write failed");
@@ -213,8 +237,10 @@ void AudioWrite(const int16_t* stereo, uint32_t frames, double hz)
 	}
 	// ponytail: the producer (wall clock) and the device clock drift apart by ~100 ppm. Over 100 ms queued we drop a
 	// block (and on underrun re-add lead above); both are a short click every few minutes. Upgrade: resample slightly.
-	if (padding + frames > rate / 10)
+	if (padding + frames > rate / 10) {
+		g_stats.overflows++;
 		return;
+	}
 
 	BYTE* dst;
 	if (FAILED(g_dev.render->GetBuffer(frames, &dst))) {

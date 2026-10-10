@@ -1,0 +1,9 @@
+{
+    "id": "faulty",
+    "name": "Faulty example",
+    "version": "1.0.0",
+    "author": "Sunshine PC port",
+    "description": "Crashes on its first logic tick on purpose. The host must log the fault, disable this mod, and keep the game running.",
+    "sunshine_api": "1.0",
+    "load_order": 100
+}

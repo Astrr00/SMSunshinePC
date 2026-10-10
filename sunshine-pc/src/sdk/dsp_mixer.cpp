@@ -16,6 +16,9 @@ namespace hostdsp {
 using JASystem::DSPInterface::DSPBuffer;
 using JASystem::DSPInterface::FXBuffer;
 
+// Launcher master volume, percent 0..100 (src/settings.h audio.master_volume).
+int gOutputVolumePct = 100;
+
 namespace {
 
 constexpr u16 kBusAddr[kBusCount] = { 0x0D00, 0x0D60, 0x0DC0, 0x0E20, 0x0E80, 0x0EE0,
@@ -446,10 +449,16 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 	// Output stage: master level (4.12), saturate. Only the two main buses reach the output; the surround buses 0x0F40/
 	// 0x0FA0 (bus 8/9) are where the effect lines write and where surround-mode voices send, and the Dolby encode the
 	// microcode would do with them is not implemented (see mixVoice).
+	const s64 level = (static_cast<s64>(masterLevel) * gOutputVolumePct) / 100;
 	for (int i = 0; i < kSubframeSamples; ++i) {
-		left[i]  = sat16((static_cast<s64>(bus_[0][i]) * masterLevel) >> 12);
-		right[i] = sat16((static_cast<s64>(bus_[1][i]) * masterLevel) >> 12);
+		left[i]  = sat16((static_cast<s64>(bus_[0][i]) * level) >> 12);
+		right[i] = sat16((static_cast<s64>(bus_[1][i]) * level) >> 12);
 	}
+}
+
+void setOutputVolumePct(int pct)
+{
+	gOutputVolumePct = std::clamp(pct, 0, 100);
 }
 
 } // namespace hostdsp

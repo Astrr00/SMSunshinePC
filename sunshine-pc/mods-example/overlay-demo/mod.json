@@ -1,0 +1,9 @@
+{
+    "id": "overlay-demo",
+    "name": "Overlay demo",
+    "version": "1.0.0",
+    "author": "Sunshine PC port",
+    "description": "Data-only mod: replaces one station name in data/message.szs. Build files/ with tools/mod_pack.py.",
+    "sunshine_api": "1.0",
+    "load_order": 10
+}

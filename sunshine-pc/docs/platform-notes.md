@@ -29,28 +29,45 @@ For the port the relevant measure is "exists as C/C++", not "matches". That numb
 - `sms/src/main.cpp`: `gpApplication.initialize(); proc(); finalize();`. This is the entry point `sunshine-pc/src/main.cpp` will call later.
 - `initialize()` uses `OSProtectRange` with fixed addresses (`0x80000000`, `0x83000000`). Those calls cannot work on PC and must go under `TARGET_PC`.
 
-## Feasibility: decomp sources under clang-cl / MSVC (`tools/probe-units.cmd`)
+## Feasibility: decomp sources under cl / clang-cl (`tools/probe-units.py`)
 
-Syntax-only check (`/Zs`, C++20; C11 for plain C units, `/TP` for `THPPlayer/` which the decomp builds with `-lang=c++`) over the 733 source files listed in `configure.py`. No MSL include paths (CRT instead of MSL), `include/pc_compat.h` force-included, `/DTARGET_PC /DNDEBUG`.
-`CLANG_CL=<path to clang-cl.exe>` switches the probe from `cl` to clang-cl. clang-cl is needed because the decomp uses C99 compound literals in C++ (`(Vec){...}`), which MSVC rejects and clang accepts; Dusklight also ships clang-cl presets.
+Syntax-only check (`/Zs`; C++20 for C++ units, C11 for C units, `/TP` for `THPPlayer/`) over the 733 units in `configure.py`. Flags: `/DTARGET_PC=1 /DNDEBUG /FI include/pc_compat.h`, CRT headers (no MSL include path). `CLANG_CL=<clang-cl.exe>` switches the probe to clang-cl and writes `probe-results-clang-cl.json`; `probe-results.json` is the cl run. Per-unit errors are in those files.
 
-Units listed in `excluded-units.txt` (151, each with a reason: MSL, CodeWarrior runtime, MetroTRK, SDK parts Aurora provides, `main.cpp`, JAudio DSP glue) are not probed. The denominator below is the 582 probed units.
+| Compiler | Clean | Failing | Failing among built units |
+| --- | ---: | ---: | ---: |
+| cl | 565 / 733 | 168 | 66 |
+| clang-cl | 624 / 733 | 109 | 0 |
 
-| Step | Compiler | Units without errors |
-| --- | --- | ---: |
-| Unmodified, 733 units | cl | 73 / 733 |
-| MSVC branch in `dolphin/types.h`, `nullptr` not a macro, `pc_compat.h` intrinsics | cl | 326 / 733 |
-| `EOF` un-macroized, MSL float constants | cl | 404 / 733 |
-| `printf.h` shim, exclusion list applied | cl | 432 / 582 |
-| nullptr-as-integer sites, `<cmath>` | cl | 464 / 582 |
-| clang-cl, 32-bit-only flag bits in `J3DMaterial`/`J3DPacket` | clang-cl | 542 / 582 |
-| return-type conflicts, remaining nullptr sites, include fixes, `NDEBUG` | clang-cl | 566 / 582 |
-| asm rewrites in `J3DTransform.cpp` and `MathUtil.cpp`, last site fixes | clang-cl | 579 / 582 |
+The probe marks 149 units as not built (`excluded` dict in `probe-units.py`, one reason each). They are still probed, not skipped. Built units (584): clang-cl 584/584 clean. Not-built units: clang-cl 40 clean, cl 47 clean.
 
-Only syntax is checked, not linking or behavior.
+cl progress: 181 clean at baseline, 505 after the `hostendian.h` byte-swap fix, 564 after the `MapCollisionEntry` and `JGQuat4` fixes, 565 after the `glyphs` include.
 
-Still failing (3), all in files that carry uncommitted edits that are not part of this port and were left untouched:
-`Enemy/Koopa.cpp` (`TUtil<f32>::mod` missing), `Enemy/bossManta.cpp` (jump past initialization in a `case`), `Enemy/hanasambo.cpp` (non-const reference to a temporary).
+### cl, built units (66 failing, not fixed)
+
+Classified, not patched: the fixes touch shared files that other agents are editing.
+
+- 46 units, C4576: C99 compound literal `(T){...}` in C++ (`.cpp` under `sms/src`, plus `THPDraw.c`). Candidate fix: `T{...}` under `TARGET_PC`, as in `MapCollisionEntry.hpp`.
+- 10 units, C2664/C2440: string literal passed as `char*` (`JAISystemInterface::checkFileExsistence`, `JASystem::Kernel::probeStart`, `JUTException::appendMapFile`, `DVDChangeDir`, `SMS_CreatePartsModel`). Candidate fix: `const char*` under `TARGET_PC`.
+- 7 units, GCC `__attribute__((aligned(N)))`: `JASAudioThread.cpp`, `JASDriverTables.cpp`, `J3DSys.cpp`, `THPPlayer.c`, `THPDec.c`, `DLUtil.cpp`, `gd-reinit-gx.cpp`. Candidate fix: existing `ATTRIBUTE_ALIGN` in `types.h` (not checked).
+- 2 units, `remove`/`append` unresolved (dependent name, `JSUList.hpp:182`): `JKRHeap.cpp`, `J2DPane.cpp`.
+- 1 unit, C2360: jump past initialization of `ukuleleFlag` in a `case` label (`MSound/MSound.cpp`).
+
+### cl, not-built units (102 failing)
+
+- 59: C `bool` undefined, no `stdbool.h` (`dolphin/gx/GXGeometry.h`, `exi.h`, `__ppc_eabi_init.h`, `GDGeometry.h`).
+- 13: MWCC `__declspec(section)` or SDK asm (`dolphin/os`, TRK, `Runtime`).
+- 10: MSL C units (`PowerPC_EABI_Support/Msl/...`), empty error text: `ansi_files.h` is not on the probe's include path.
+- 6: MWCC inline `asm` (`runtime.c`, MetroTRK, `db.c`).
+- 3: `fabsf` redefinition (MSL `math.h`).
+- 2: `nullptr` in C (`dspproc.c`, `osdsp.c`).
+- 9: single-unit MWCC/SDK-only syntax or header clashes (e.g. `osdsp_task.c`, `__va_arg.c`, `ctype.c`, `ptmf.c`, `dvd.c`, `AmcExi2Stubs.c`, `dolphin/dvd/__dvd.h`).
+
+### clang-cl, not-built units (109 failing)
+
+- 99: MSL/MWCC/SDK syntax, same classes as above.
+- 10: MSL units with empty error text (`ansi_files.h`).
+
+Stale three-unit note removed: `Enemy/Koopa.cpp` and `Enemy/hanasambo.cpp` are clean under both compilers. `Enemy/bossManta.cpp` fails under cl (C4576) and is clean under clang-cl.
 
 ### Open items (each fails visibly instead of being faked)
 
@@ -373,3 +390,188 @@ Six formerly empty units (new headers `KoopaJr.hpp`, `DirectionCalc.hpp`, `Limit
 - **Header changes.** New: `KoopaJr.hpp` (`TKoopaJr` 0x170, `TKoopaJrSubmarine` 0x1AC, managers, params, nerves), `DirectionCalc.hpp` (`TDirectionCalc`, one `f32` at 0x0, defined in `koopajr.cpp`; used by `limitkoopa`/`limitkoopajr` through `bl`), `LimitKoopa.hpp` (`TLimitKoopa` 0x1C8, `TLimitKoopaParts/Body/Head/Hand/Flame`, manager 0x54), `LimitKoopaJr.hpp` (`TLimitKoopaJr` 0x17C), `TinKoopa.hpp`, `Seal.hpp` (`TSeal` 0x154, `TSealManager` 0x54). `Rocket.hpp` keeps `TRocket(const char* = "ロケット")`, `isAttack()` and the inline destructor and adds `TRocketManager`, the params and the nerves. Shared, additive: `System/Particles.hpp` (`PARTICLE_MS_PETBTL_BOMB_A/B` 0xC1/0xC2, `PARTICLE_MS_PETBTL_SMOKE` 0x179), `JUtility/JUTNameTab.hpp` (`getNameNum()`, used instead of raw `+0x8` access that would be wrong with 64-bit pointers), `JGeometry/JGUtil.hpp` (`TUtil<f32>::mod`), `MSL_C/math.h` (`std::fmodf` body). Constructors take `const char* name` with the retail Japanese names as defaults where the registry (`MarNameRefGen_*.cpp`) constructs them without arguments (`new TSeal`, `new TRocketManager`, ...).
 - **Host-specific code**: none. `TTinKoopa::emitTinKoopaEffects` passes `this + 1` (retail: `this + 0x1FC`, the end of the object) as the opaque owner key of particle emitters; it is only compared for identity, so the pointer-arithmetic form is portable. The joint-name loop in `TLimitKoopa::init` uses `JUTNameTab::getNameNum()`. No pointer-to-integer casts, no paired-single code.
 - Uncertain: member names are `unkNN` or role guesses (offsets/types come from the asm); `TLimitKoopa` keeps `unk174` and `unk1BC[0xC]` as untyped padding (not touched in the unit); `TLimitKoopaJr::unk160` is typed as a quaternion but only reset here; `TTinKoopaLaunchOrderAry` (0xC bytes at `TTinKoopa+0x1F4`) and its helper names are fabricated (the asm only shows them inlined); `TRocketManager::unk64` (zeroed in the constructor) has no known purpose; `TSealManager` has no `createEnemyInstance` override (per vtable). Nothing here was run: the Koopa/Koopa Jr. fights, Tin Koopa, the seal and the rocket enemies are untested at runtime.
+
+## Manta and Sambo units written from the asm: bossManta, hanasambo (`sms/src/Enemy/`)
+
+| Unit | Text functions | Avg fuzzy % | Size-weighted % | Lowest |
+| --- | ---: | ---: | ---: | --- |
+| `bossManta` (TBossManta, manager, additional collision, params, nerves) | 49 | 99.1 | 98.2 | `TBossManta::updateAttractor` 86.4, `TBossMantaManager::updateMantaEscape` 90.0, `moveObject` 95.3 |
+| `hanasambo` (THanaSambo, TSamboHead, TSamboFlower, managers, leaves, coin units, nerves) | 95 | 99.1 | 97.6 | `SamboHeadRollCallback` 76.3, `TSamboFlowerCoinUnit::checkGenCoin` 83.0, `TSamboHead::genEventCoin` 90.1, `TSamboFlower::moveObject` 91.8, `TSamboFlowerManager::dropLeaf` 92.8 |
+
+- No function is at 0 %. Both units compile under MWCC and clang-cl (`syntax.cmd` clean). `bossManta.o` and `hanasambo.o` built with clang-cl define every constructor and member of these units (`llvm-nm`).
+- **Port fixes (clang-cl only, codegen unchanged).** `TBossManta::getPolluteRadius` puts the `case 3` body in braces (a jump past an initializer in a switch is an error in clang). `hanasambo.cpp` binds the `generate()` argument to a named local instead of a temporary (non-const reference). `hanasambo.cpp` includes `J3DJoint.hpp` and `J3DSys.hpp` (same as `Koopa.cpp`) for `J3DJoint` and `j3dSys`.
+- **Header change.** `Enemy/HanaSambo.hpp`: `TSamboFlower(const char* name = "サンボフラワー")` and `TSamboFlowerManager(const char* name = "サンボフラワーマネージャー")` are inline with the mem-initializers from `MarNameRefGen_Enemy.s` (`0x150..0x168` set, `0x16C` and `mMatTable` left unset as in the asm). The name factory emits them weak, so the header copy is what links. No layout change.
+- **Unmatched rodata (not a function).** `bossManta` has two `.ctors`-labelled 12-byte `.rodata` blocks (a zero `Vec3` and three `1.0f`) that no bossManta function references; objdiff shows them as residue. Left as is.
+- **Link state.** `sunshine-pc/blocked-units.txt` still lists `Enemy/bossManta.cpp` and `Enemy/hanasambo.cpp` as blocked (reason: the old MWCC/clang errors). While they are listed, `gen-files.py` leaves them out of `sms_game`, so the strict link keeps the eight `(const char*)` constructors and the `TSamboFlower`/`TSamboFlowerManager` virtuals undefined. Removing those two lines and re-running `gen-files.py` is the remaining step.
+
+## Bowser unit written from the asm: Koopa (`sms/src/Enemy/Koopa.cpp`, `sms/include/Enemy/Koopa.hpp`)
+
+| Unit | Text functions | Avg fuzzy % | Size-weighted % | Lowest |
+| --- | ---: | ---: | ---: | --- |
+| `Koopa` (TKoopa, parts, flame, manager, nerves) | 37 | 77.3 | 71.6 | `TNerveKoopaTurnR/TurnL::execute` 0.0 (inline artefact, see below), `TKoopaFlame::attack_` 1.4, `TKoopa::perform` 39.5, `TKoopa::setUpHitActors` 43.1, `TKoopaFlame::control` 43.2 |
+
+- Compiles under MWCC (only the pre-existing `std-list.hpp` warning) and clang-cl (`syntax.cmd` clean). A standalone clang-cl `Koopa.obj` defines `TKoopa(const char*)`, `TKoopaManager(const char*)`, `allowsLaunch`, `effectsTumble`, `isFlaming`, `getFlameDirDegree`, `fall`, `getDown`, `stagger`, and has no undefined `TKoopa` symbols.
+- **Inline artefact.** TurnR/TurnL (0.0 %) and `attack_` (1.4 %): MWCC inlines `changeAnm` and `std::fmodf` into them, retail calls both out of line. Not chased further.
+- **Remaining gap** in `perform`/`setUpHitActors`/flame code is register allocation and stack frame (ours 0x210, retail 0x1F0). The tumble gate in `perform` now reads the frame once before the nerve compare, as retail does (the old `canTumble()` re-read it per check).
+- **Changes kept.** `changeAnm` ternary written as `table == nullptr ? nullptr : table[bck]` (branch layout matches retail). The `#pragma dont_inline` around `changeAnm` was removed (measured net gain). Dead helpers removed: `stopFlame`, `isProvoking`, `isTumbling`, `getAnmEnd`, `checkMarioWhichSide`, `canTumble` (nothing calls them; the retail asm has no reference).
+- **Header changes (Koopa.hpp, owned by this unit).** Nerve `theNerve()` is an in-class static (retail emits weak in-class `nerve` symbols). Fall, Stagger, GetShowered, GetDown and Provoke changed from `DECLARE_NERVE` to explicit classes. `TKoopaSaveLoadParams(const char*)` is defined in-class. No layout change.
+- **Branch rule (PowerPC).** `bne` branches when the CR condition is false, `beq` when true. Reading cror-based gating with the opposite sense flipped the flame and tumble conditions once.
+- **Link state.** `sunshine-pc/blocked-units.txt` still lists `Enemy/Koopa.cpp`; remove that line and re-run `gen-files.py`, then do the strict link. The private `build-alt koopa` tree stops in `src/sdk/jkr_new_delete.cpp` (`throw` with exceptions disabled), which is not part of this unit.
+
+## Title screen washed out (RenderTitle2): findings, root cause NOT yet fixed
+
+Symptom: on the title, the sun-emblem background shows only inside a black box at the top-left (about 40% x 57% of the window). Everything else is flat white. Logo and text are full size.
+
+Established by probes (all removed afterwards):
+- Copy 1 (`GXCopyTex`, clear=1, src 512x549 physical, logical dst 256x256) clears to black. Its rect is exactly the black box, so the box is the copy-1 clear reaching the EFB.
+- Copy 2 (clear=0, src 1280x960, logical dst 320x224 -> 640x480) is the full-screen background copy. On its first frame it resolves through the static fallback, then through the copy texture.
+- `scale_copy_dst()` scales copy dst by target/logical size non-uniformly (256 -> 512 wide, 256 -> 549 high). Not yet proven wrong.
+- Ruled out: fader (`TSMSFader::draw` is a no-op at FULLY_FADED_IN); missing texture handles; I8 640x448 static decode (bytes not white); IA8 decode; copy-texture shader for RGB565; boot-time viewport/scissor (`0 0 640 448`, probes gated to boot only, title frames not logged); FIFO `drain()` as the washout cause. The `GXEnd: vertex data not evenly divisible` warning is real evidence, not a checker false positive: decomp draws often skip `GXEnd`, so `GXDrawDone` drains while `sInBegin` is still set, and the next `GXEnd` computes `0 - sBeginFifoSize` (unsigned wrap). The warning shows the drain happened mid-primitive; it does not prove vertices were dropped.
+
+Found, not yet proven as the white source:
+- Aurora `GXCopyDisp` (`dolphin/gx/GXFrameBuffer.cpp`) is an empty stub. Retail `TEfbCtrlDisp::perform` (CUE_DRAW) calls `IssueGXCopyDisp` with `doClear`, so retail clears the EFB after each display copy. Aurora ignores it. The frame's first pass still clears to `g_gxState.clearColor` (`gfx/recording.cpp` `begin_recording`, `clear` defaults true), and the game's `TGraphics` clear colour defaults to (0,0,0,0), so the stub alone does not explain white.
+- `S3TCBlend` (`gfx/texture_convert.cpp`) uses (3a+5b)/8 where GX uses 1/3 and 2/3. Minor colour error, not the flat white.
+- **Call chain (confirmed in sms source).** The display copy is `TEfbCtrlDisp::perform` (CUE_DRAW, `JDREfbCtrl.cpp:45-51`) and `TDisplay::endRendering` (`JDRDisplay.cpp:41-45`), both calling `IssueGXCopyDisp` → `GXCopyDisp(xfb, clear)`. Aurora's `GXCopyDisp` is an empty stub, so no XFB exists. Copy 1 and copy 2 are `TEfbCtrlTex::perform` (`JDREfbCtrl.cpp:95-108`) → `GXCopyTex`, which are texture copies, not display copies.
+- **Working hypothesis (not proven).** Aurora presents the live EFB (`present_source()` = `g_frameBuffer`). Retail presents the XFB, which copy 1 never touches. So the clear that copy 1 applies to the EFB after its snapshot is what Aurora presents, which matches the black box footprint. Fix direction: `GXCopyDisp` must snapshot the EFB into a display source before any clear, and presentation must use that source. Not implemented; presentation is shared with other agents' uncommitted `gpu.cpp` edits.
+
+Next: gate draw/viewport/scissor/texture-bind logs on a title-frame counter (copy 2 count), not on boot-time static counters that are exhausted. Check whether the background quad is drawn inside the title viewport and whether a `drain()` between `GXBegin` and `GXEnd` drops its vertices. Check copy-2 src rect (1280x960 full window) against the title's logical 640x448 with aspect-fit offset (0,32).
+
+## ReleaseDlss: DLSS verdict, FSR1 upscaler, glyphs, packaging
+
+- DLSS: NOT implemented. Blockers: GX path has no motion vectors or jitter; Dawn D3D12 backend is import-only (no Dawn colour target export as `ID3D12Resource`); no DLSS SDK headers in the repo. Full analysis in `docs/dlss-feasibility.md`.
+- Upscaler: `SUNSHINE_UPSCALER=fsr1` selects Aurora `SAMPLER_FSR1` (EASU + RCAS, written from scratch, sharpness via `SUNSHINE_UPSCALE_SHARPNESS`, default 0.2). Render scale via `SUNSHINE_RENDER_SCALE` (0.25–1.0) → `VISetFrameBufferScale`. Code: `src/render/render_scale.cpp`, `extern/aurora/lib/webgpu/gpu.cpp`. Limit: when an RmlUI overlay is active, Aurora bypasses the resample pass, so FSR1 is not applied to that frame. Simplification: no RCAS min/max halo limiter.
+- Evidence: tree build links (`build/ReleaseDlss`); packaged exe runs 20 s from a clean dir with `--dvd` and stays alive. The log is empty, so WGSL compile and glyph swap are NOT confirmed. Visual FSR1 comparison NOT done: the captured frame was black (title render issue, RenderTitle2) and the screenshot slot was shared.
+- Glyphs: `tools/gen_glyphs.py` → 72 PNGs in `assets/glyphs/{xbox,playstation,switch,gamecube}/`. `src/glyphs/glyphs.{h,cpp}` serve them. In-game hook (`sms/src/JSystem/JUtility/JUTResource.cpp`, `#ifdef TARGET_PC`) swaps only the 4 disc icons (A, B, X, Start). Y, Z, L, R, D-pad, C-stick and stick glyphs ship as assets but are not hooked. guide_tx_b visual check still pending.
+- Packaging: `tools/package.py --build-dir build/ReleaseDlss --version 0.1.0 --llvm-bin <llvm bin>` → `dist/sunshine-0.1.0/` + `.zip` + `.sha256` (20.3 MiB). Bundles SDL3, webgpu_dawn, nod, libpng16, zlib1, dxcompiler, dxil and the MSVC runtime DLLs. Hard-fails on game-image extensions. Open: VC redistributable EULA not checked; Dawn/nod/SQLite/DXC licence texts fetched from default branches, not pinned commits; port code licence undecided; `release-checklist.md` still names `build/windows-clang-release`.
+- Shared-desktop note: four game windows land on the same spot. Use the `build/_screen.lock` protocol before any windowed capture.
+
+
+
+## Launcher and persistent settings (`src/launcher/`, `src/settings.*`)
+
+- Started without `--dvd`: launcher page (Choose image, Start, Settings, Quit). `--dvd <file>` skips it and keeps the old path. Disc check: `aurora_dvd_open`, then disc ID must be `GMSJ01`.
+- Settings file: `%APPDATA%\Sunshine\settings.ini` (fallback: exe dir). Loaded before `aurora_initialize`: window mode and size and VSync go into `AuroraConfig` (VSync applies at next start). Resolution scale, dead zones, key bindings and master volume apply via `launcher::applyRuntimeSettings()` after `sunshineInstallKeyboardDefaults()`. FPS cap is `settings().fpsLimit` (0 = unlimited).
+- Persisted and applied: button-glyph style (`launcher::applyRuntimeSettings()` calls `glyphsSetStyle()`, read by the `JUTResource` hook). Persisted only: widescreen (not implemented). Cheats tab is a placeholder.
+- Font pitfall: Aurora registers the Lato faces as `LatoLatin`. `font-family: Lato` in `launcher.rcss` renders no text at all.
+- While the launcher is open its input layer captures all sources and forwards to `aurora::rmlui::process_input`. No gamepad navigation in the launcher yet.
+- Dev hooks: `SUNSHINE_DEV_LAUNCHER_PAGE=settings[/video|audio|controls|interface|cheats]` opens a settings page at start. `SUNSHINE_WINDOW_POS=x,y` and `SUNSHINE_WINDOW_SIZE=w,h` override the window placement and size (the Video page still shows the saved size).
+- Verified: `tools/settings_test.cpp` round trip ok; launcher pages video, audio, controls, interface and cheats rendered (screenshots). Not verified: Browse, Start, invalid-image rejection and any click. Background input does not reach the RmlUI window and Windows refuses a foreground raise, so interactive paths need a live session.
+
+## Cheats, mod loader and logic-tick hook (`src/cheats/`, `src/mods/`, `include/sunshine_mod_api.h`)
+
+- Cheats: `assets/cheats.json` (`infinite_health`, `infinite_water`, `infinite_lives`, `unlock_nozzles` one-shot). Optional `cheats.user.json` beside the exe. Effects are a fixed C++ table picked by name; JSON only toggles them. Parser: `src/json/json_lite.*`. Logs `[cheats] ...`.
+- Logic hook (one per logic frame): `sms/src/System/MarDirectorDirect.cpp` calls `sunshineLogicTick()` after `movement()`, inside the existing `!(unk4C & 0x4000)` branch. `main.cpp` runs `cheatsTick()` then `modsLogicTick()`. Health guard: `TMario::decHP` (`sms/src/Player/MarioCollision.cpp`) returns early via `cheatsHealthLossBlocked()`. Both behind `#ifdef TARGET_PC`.
+- Present hook: `modsPresent()` first in `sunshinePresentFrame()`.
+- Mod loader: scans `<exe>/mods/*/mod.json`, loads `mod.dll` (LoadLibraryW), checks ABI 1.0 (`include/sunshine_mod_api.h`), orders by `load_order` then `id`. Each export runs under SEH: a faulting mod is disabled, its DLL stays loaded until shutdown. C++ exceptions are not caught. Overlays go through `aurora_dvd_overlay_callbacks` and `aurora_dvd_overlay_files`. Log: `<exe>/sunshine_mods.log`.
+- Example mods (opt-in, `-DSUNSHINE_BUILD_EXAMPLE_MODS=ON`): `mods-example/hello` (logs, sets `infinite_lives`), `mods-example/faulty` (null write in the tick, to exercise SEH).
+- Verified: `tools/port_tests.cmd` 38 checks, 0 failed (JSON, manifest, load order, ABI check, overlay merge, cheat registry). Example mods build in `build/CheatsMods`. Own `sunshine.exe` builds with no errors in the new files.
+- Startup hang fixed: the `std::ifstream`/`rdbuf` reads in the cheat and mod loaders hung boot. Both now use `util/read_file.*` (`readWholeFile`: Win32 `ReadFile`, bounded loop, 256 MiB cap).
+- Verified (`build/CheatsMods`, 30 s run to title): `[cheats] 4 cheats loaded`, both example mods load, game logic at 30/s, `[mod hello] entered stage 15`, `[cheats] infinite_lives = on`, `[mod faulty] faulted ... disabled` while the game keeps running (SEH isolation works).
+- Not verified in-game: effects on health, water, and lives values; nozzle read-back; `cheats.user.json`; overlays. `SUNSHINE_DEV_START=bianco/0` crashes in stage load at `TNpcParts::TNpcParts` (`sms/src/NPC/NpcParts.cpp:56`), before the tick hook runs.
+- Known limits: instant-death paths (`loserExec`, `MarioMove.cpp` ~1948 and ~2247, `MarioRun.cpp` ~978) bypass the `decHP` guard. `gpMarioOriginal` is never cleared on stage unload, so it may dangle; the tick only runs from the director's logic step after setup (`unk260 == 0` returns early).
+
+## Frame-rate pacing window (`src/framerate/`, `TVideo::waitForRetrace`) — partial, designed + partly verified
+
+- Logic stays at 30 Hz: one logic tick = one `TMarDirector::direct()` = 2 retraces. Verified in logs: `[framerate] logic 30/s, extra presents 0/s, fpsLimit 0` on nearly every second over a 60 s title run (56 samples), no crashes from the new code.
+- Window design: `sunshinePaceWindow` runs at the start of `TVideo::waitForRetrace`. With `fpsLimit > 30` it re-draws the last entry/draw lists (`sunshineReplayFrame`) and presents extra frames until the caller's retrace deadline, using `VIGetLastRetraceNs`. It is gated by `sunshineCanReplay()`: `APP_STATE_GAMEPLAY`, `mState == STATE_UNK4`, all perform lists non-null, `unk260 == 1`. `fpsLimit <= 30` keeps the single present.
+- Verified: a `delfino/0` run at fps 144 reached gameplay (stack dump at 40 s shows the main thread inside `sunshineReplayFrame` → `TPerformList::perform` → `JDrama::IssueGXCopyDisp`, called from `sunshinePaceWindow`). Earlier run: gate open with all lists present.
+- Not verified: window present rate at fpsLimit 144 and 60 (no per-second window count was logged in the gameplay runs); logic 30 ± 0.1 Hz in gameplay; mid-window screenshots. A 90 s `delfino/0` run's log stopped after the devstart shadow line, so the log flush in that run is unexplained.
+- Known limits: skeletal animation is not interpolated (the entry replay masks `CUE_MOVE | CUE_CALC_ANIM | CUE_DRAW`). Menus, pause, movies and title keep one present per tick. Ceiling: fixed slot grid with about 1 ms sleep margin, not vblank-aligned. Upgrade: align slots to vblank.
+- Not done: step 2 (camera/actor interpolation with discontinuity snap) and part B (widescreen, Hor+, 4:3 UI anchoring). Designed only; no code written.
+- Stage loads: `bianco/0`, `ricco/0`, `mamma/0`, `sirena/0` crash in `TNpcParts::TNpcParts` (`NpcParts.cpp:56`, BootStage); `dolpic/0` crashes at a read of `000002AC5FFC0008` (not yet attributed).
+- Not mine, flagged: `sms/src/System/Application.cpp` `TApplication::proc()` has a `[TEMP-DEBUG] proc state` printf that must be removed by its owner.
+
+## StageDolpic (`dolpic/0` Delfino; smoke: airport, mare, ricco, pinnaBeach)
+
+Fix list:
+- `sms/include/MarioUtil/ToolData.hpp` ~3-13, 38, 82, 86, 99, 105-118: `BCSV_U32`/`BCSV_U16` byte-swap macros under `TARGET_PC`, applied on read, not in place (cached `fileEntry->mData` would double-swap). Evidence: movie-rumble `ToolData::GetValue` read ~19 MB past its buffer; gone after the fix.
+- `sms/src/System/Application.cpp` ~423-436 and ~507: `gDevStartSkipPreStageMovie` under `TARGET_PC`. Devstart skips the first-visit pre-stage movie once. Evidence: card crash `TExPane::TExPane` (ExPane.cpp:7) <- `TCardSave::initData` (CardSave.cpp:146) <- `TMovieDirector::rsetup` (MovieDirector.cpp:128). The card needs the `game_6` volume, which only the title/select flow mounts. Devstart-only shortcut, not a null check; decomp unchanged.
+- Removed my TEMP-DEBUG prints from `sms/src/System/MovieDirector.cpp` and `sms/src/GC2D/CardSave.cpp`.
+- Shader fix `extern/aurora/lib/gx/shader.cpp` `tev_alpha_op`: `GX_TEV_COMP_R8_GT/EQ` map to `RGB8_GT/EQ`. Owned by GxCopy. Removes the WGSL `cannot index into expression of type 'f32'` error.
+
+Results:
+- `mare`, `ricco`, `pinnaBeach`, `airport` (30 s smoke, build 5): no WGSL errors, no fatal lines, reach setup entry. Aurora `GXEnd: vertex data not evenly divisible` warnings (Aurora GX, not mine). Exit codes not captured.
+- `dolpic/0`: crashes after the two fixes above. `0xc0000409` silently at 12-19 s. With `SUNSHINE_CHECK_HEAP=1`: `0xc0000374` at about 11 s. Stack: free of a quarantined operator-new block in `FramePacket::~FramePacket` (`extern/aurora/lib/gfx/frame_packet.hpp:201`) during `aurora::gfx::begin_frame` (`frame.cpp:637`), from `sunshinePresentFrame` (`src/main.cpp:68`) <- `JDrama::TVideo::waitForRetrace` (JDRVideo.cpp:82) <- `TApplication::gameLoop` (Application.cpp:731). Last game-side entry: `TShimmer::perform` (Shimmer.cpp:85) -> `J3DModel` entry. `viewCalc` debug prints hit their cap of 400.
+- Heap-writer probes, all negative: footer check on free (no report), live-footer sweep every 256 allocations (no report), page heap `=2` (no fault on operator-new blocks). Ruled out: `LOG_FATAL` (no fatal line), `OSPanic` (no stderr), operator-new OOM abort (not hit).
+- Not reached: dolpic gameplay. Pollution goop counters, sun `GXPeekZ`, and EventWatcher scripts are not verified in-game.
+
+Open items:
+- Heap writer not identified. Likely a stale write after free, or a non-operator write (C `malloc` or the JKRHeap arena). Next probe: under `SUNSHINE_CHECK_HEAP=1`, never release freed operator-new blocks, so a stale write hits the poison check. Needs no debugger, but is unbuilt.
+- Not a debugger: no `cdb.exe` is installed.
+- StageBianco owns the J3D TEMP-DEBUG prints (`J3DModel.cpp`, `J3DPacket.cpp`, `J3DShape.cpp`) and the `NpcParts` ctor. Not edited here.
+
+## Verification toolchain (`tools/verify.cmd`, `tools/compare_png.py`, `AURORA_SCREENSHOT`)
+
+Details in `docs/verification.md`. Status as of this section:
+- `tools\verify.cmd` runs: TEMP-DEBUG grep, Aurora patch presence (`tools/aurora-patches.txt`), matching SHA of `mario.dol`, headless tests, boot smoke. Opt-in: `--build` (strict link, LNK2019 count), `--matching` (lead only, `ninja -k 0` in `sms/`), `--full` (probe-units). Exit 1 on any FAIL.
+- Ran it twice (no rebuild): matching SHA PASS (`9f5a8caf…`), headless tests PASS (38 checks, 0 failed). TEMP-DEBUG FAIL: the markers are peer debug prints in `aurora.cpp`, `src/sdk/gx_extra.cpp`, `frame.cpp`; counts change as peers edit. Boot smoke FAIL: the process dies at 8-26 s with `0xc0000409` after `WebGPU error 2: Error while parsing WGSL: :399:67 ... cannot index into expression of type 'f32'` (`tev_overflow_f32(tevreg1.a).r` in the generated GX fragment shader, `lib/gx/shader.cpp`, uncommitted peer edits).
+- `AURORA_SCREENSHOT=<frame>:<file.png>` (Aurora `lib/gfx/screenshot.{hpp,cpp}`, hook in `lib/aurora.cpp`): syntax-checked with clang-cl only. NOT run: `build/strict/sunshine.exe` predates it (string absent), and the WGSL error above stops the process before frame 60. Runtime test pending a build after the shader fix.
+- `tools/compare_png.py`: tested on synthetic PNGs (identical PASS, one 10x10 bump PASS, inverted FAIL with exit 1, size mismatch exit 2).
+- Aurora patch manifest: `GXPeekARGB`, `GXReadPixMetric`/`GXClearPixMetric`, and the `GXBegin` implicit close from commit `94431fd`. This is an assumption about what "the three Aurora patches" means; the lead should confirm or replace the list.
+
+## Mod data overlays (ModOverlay)
+
+Design and rules in `docs/mods.md`. Overlays reuse Aurora's existing DVD overlay API (`aurora_dvd_overlay_files`, `fst.cpp`, `dvd.cpp`) and need no Aurora edit. Port glue: `src/mods/mods_loader.cpp` (`applyOverlays`, `modIsLive`, unload re-merge in `disableMod`) and `mod_manifest.cpp` (`mergeOverlays`, last wins, case-insensitive).
+- Verified: own tree (`build/ModOverlay`, `build-alt`) links `sunshine.exe`; `mod_pack.py` output round-trips via `discfmt`, only `/station.bmg` differs; with `mods/overlay-demo` the log shows `[mods] 1 overlay file(s) active`, `[mods] 0 DLL mod(s) active`; without a `mods/` folder `0 mods loaded`.
+- NOT verified in-game: `[mods] overlay in use` (game opens `message.szs`) and the visible station name. The process dies in `TApplication::initialize` before that. Fault: `SMSSetupTitleRenderMode` (`RenderModeObj.cpp:54`) calls `SMSGetTitleRenderWidth` → `sunshineRenderWidth` (`src/widescreen/widescreen.cpp`); execute fault at `0x7FF6E66C0000`, reproduces with and without the mod. Not diagnosed; not in the overlay path.
+- Strict own-tree link (`SUNSHINE_ALLOW_UNRESOLVED=OFF`) stops at `src/saves/save_roundtrip.cpp(85)`: `aurora_shutdown` undeclared (peer file).
+- Not exercised: unload of a faulted DLL mod.
+- Ceiling: overlay name and source deques only grow (open handles point into them). Each disable rebuilds the full FST.
+
+## EventWatcher SPCB handles (`sms/src/System/EventWatcher.cpp`, `tools/spc_bind_test.*`)
+
+- Handle table: `bindSystemDataToSymbol` in `sms/src/Strategic/spcinterp.cpp` stores the full pointer in `sNativeCalls[512]` and returns a 1-based handle in `mNativeCall`; `getNativeCall(u32)` resolves it. Already in place, unchanged. Overflow leaves the symbol unbound. The table is global and holds 88 EventWatcher entries plus any others.
+- Bind sites: the 88 `bindSystemDataToSymbol(name, (u32)&evFn)` calls are now `PTR_U32(&evFn)` (`uintptr_t` on PC, `(u32)` on console; the console expansion is the same cast, so MWCC output is unchanged).
+- Pointer round trips (script int <-> host pointer): `evGetNameRefHandle` pushes via `SPC_PUSH_PTR`; `evGetNameRefName`, `getNameRefPtr`, `evWarpFrontToMario`, `evIsWaterMelonIsReached` read via `SPC_GET_PTR`; `evGetTalkNPC` pushes via `SPC_PUSH_PTR`. Each `#else` branch keeps the original `int`/`getDataInt()` code.
+- 64-bit review of the rest of `EventWatcher.cpp`: nothing further. Remaining `int` uses are script values. `TSpcSymbol`/`TSpcHeader` overlays hold offsets and indices, not pointers. `TFlagManager` packed data is in another file and is only called here.
+- Build: `build-alt.cmd EventWatcher sms_game` EXIT 0. `syntax.cmd` (TARGET_PC): no errors or warnings. MWCC `ninja -t commands build/GMSJ01/src/System/EventWatcher.o` last command: exit 0.
+- Test: `tools/spc_bind_test.cmd <build>` (native, links the build's `sms_game.lib` and Aurora libs, `/FORCE:UNRESOLVED`), driven by `python tools/spc_bind_test.py <build> [scene.szs ...]` (parses the 88 bind lines and each `verifyArgNum`). Runs every script in each archive, then calls each bound callback with zero args under SEH.
+- Result, all 107 extracted `data/scene/*.szs`: all 88 names resolve to handles in 1..512, every address inside the test image, none unbound. Nine archives reference no names (bosses, `option.szs`).
+- Callbacks: 2550 calls completed. 71 names fault with `0xc0000005` in at least one scene. Each fault RIP is in game code and touches a small offset (0x8 to 0x480) from 0, the signature of a null game-global base (`SMSGetMarDirector()` and similar) in a headless process. The handle dispatch did not fault. 17 names never fault. The "callbacks do not crash with a fake context" check is NOT met for those 71; it needs an in-game run, or a fake game state that is not built here.
+- Ceiling: 512 handles are shared by all binaries. A future bind count past that needs the table size raised.
+
+## Audio verification (`SUNSHINE_AUDIO_DUMP`, `src/sdk/av_dump.cpp`, AV counters)
+- Dump: `SUNSHINE_AUDIO_DUMP=<file.wav>` writes the 32 kHz stereo s16 block that `av::PlayBlock` hands to WASAPI (`av::DumpWrite` before `av::AudioWrite`). It captures everything the AI pump mixes: JAudio/DSP output and THP movie audio. THP does NOT use the AI stream on PC: `THPPlayer.c` registers a mix callback that `JASAiCtrl` interleaves into the same DAC buffer. The header rate is `(uint32_t)(hz+0.5)` = 32029; the true rate is 32028.5 Hz (`gDacRate`). Each block is flushed; RIFF/data sizes are patched every 3 s and at exit. `run-log.py` ends the game with `terminate()`, so the final patch never runs there: derive the frame count from file size. Blocks at a different rate are skipped with a one-time warning. Ceiling: no rotation, single file.
+- Counters: `src/sdk/av_win.cpp` prints one `[av] audio: …` line at exit (blocks dropped while the device was not up, underruns, overflow drops, device failures). Not printed under `run-log.py` (no `atexit`). Counter values are NOT measured yet.
+- THP exactness (`tools\thp_test.cmd ..\sms\orig\GMSJ01\extracted\files\data\openingA.thp 120 0`): 128254 audio samples; decoder vs integer model (`thp_ref.audio_decode`) max error 0. Round-half-up would change 5719 of 256508 samples (max 16). ffmpeg `adpcm_thp` differs: max error 3027 as interleaved, 90 with L/R swapped, so the decomp's channel order (`out[1::2]=first`) fits ffmpeg only swapped. Whether this matters on PC is open (not checked against the game dump).
+- Game-run dump (150 s run, movies not skipped, `SUNSHINE_DSP_TRACE=1`): 4.74 M frames, 147.97 s, header rate 32029. Analysis (1 s RMS windows): 0–1 s intro movie (−4.5 dBFS, pure tones 1316/3948/6579 Hz); 2–4 s silence; 5–100 s continuous music, −9 to −35 dBFS, clipping at 0.19% of samples (18079 of 9478560 at full scale); DC −15.4 (L/R); L/R balance +0.13 dB; L/R correlation 0.90; no sample jumps (0 above max(4·p99.9, 2000)). Music spectrum has stable pitches (123–124 Hz, 329–330 Hz, 1567 Hz, 2092 Hz, …).
+- Silence after the music: the dump goes to all-zero at about 101 s (run 1: 103 s) and stays zero to the end of the run, while the game stays alive and the pump keeps writing. Repeats across two runs, so it is deterministic. Cause NOT determined. Hypotheses, unchecked: the title BGM stream ends, or JAudio stops playing the title track.
+- Note-on evidence: `TTrack::noteOn` (`sms/src/JSystem/JAudio/JASystem/JASTrack.cpp`) and `TTrack::gateOn` gave only 6 and 20 calls over 150 s. The title music is therefore not driven by the sequencer's note path (tie-mode notes take `gateOn`, the rest take `noteOn`). The DSP voice map (`[dsp] command 2`) is nonzero only 1405 times (voices 62/63, 5 zero→nonzero transitions). Neither explains the music. Mechanism is OPEN: the likely candidate is streamed BGM (`JAIStream`/`JAStream` in `sms/src/JSystem/JAudio/JAInterface/`), not verified.
+- Startup crash (`0xc0000005` in `SMSSetupTitleRenderMode` → image-base call) was a C++ mangling mismatch: `Resolution.cpp` declared `u32 sunshineRenderWidth()` (`YAKXZ`, unsigned long) while `widescreen.cpp` defines `uint32_t` (`YAIXZ`). Fixed by changing `Resolution.cpp` to `unsigned int`.
+- Files: `src/sdk/av_dump.cpp` (new), `src/sdk/av.hpp`, `src/sdk/av.cpp`, `src/sdk/av_win.cpp` (edited). Temporary note-on/gate-on traces in `sms/src/JSystem/JAudio/JASystem/JASTrack.cpp` were removed.
+- Checks for Main: `tools\build-alt.cmd AudioVerify`; then `SUNSHINE_AUDIO_DUMP=<path>.wav SUNSHINE_WINDOW_POS=2800,520 SUNSHINE_WINDOW_SIZE=640,480 python tools\run-log.py AudioVerify 150`, and inspect the WAV.
+
+## Widescreen (`src/widescreen/widescreen.*`, Port.md section 5)
+
+- Design: EFB width `W` = 640 when off or 4:3 (bit-exact path), else `max(640, round(448*A))` rounded to even: 16:9→796, 16:10→718, 21:9→1046, 32:9→1594. The 2D UI stays a 640-wide 4:3 column at `bx = ((W-640)/2) & ~1` (`SMSGetUIOffsetX`), letterboxed by the clear colour. Hor+ camera `mAspect *= W/640` (fovy kept). Movies stay 4:3 and centred.
+- Window: `widescreenInit` returns the logical window width. At 4:3 it returns the requested width. Otherwise `windowHeight * W / 448`, so Aurora FIT does not letterbox the widened EFB. Default 480 height gives a 852x480 window at 16:9.
+- Settings: `[video] widescreen=`, `aspect=` (`4:3`, `16:9`, `16:10`, `21:9`, `32:9`, `auto`); env `SUNSHINE_ASPECT=<a:b>` enables widescreen. Launcher only toggles on/off; aspect is INI/env only.
+- sms (all under `TARGET_PC`, original in `#else`): `System/Resolution.cpp`, `include/System/Resolution.hpp`, `JSystem/J2D/J2DOrthoGraph.cpp`, `J2DGrafContext.cpp`, `J2DScreen.cpp`, `JSystem/JDrama/JDREfbCtrl.cpp`, `GC2D/ScrnFader.cpp`, `System/MarDirectorSetupObjects.cpp`, `System/MenuDir.cpp`, `GC2D/SelectDir.cpp`, `System/GCLogoDir.cpp`. Type is `unsigned int` on the sms side to match `uint32_t` (mangling, see the AudioVerify note).
+- Verified: own tree `build-alt Widescreen` EXIT 0 (after the type fix and after the window change). Boot 16:9: log `widescreen: on aspect=16:9 render width 796`, `Using framebuffer size 852x480`. 4:3 control (`SUNSHINE_WINDOW_SIZE=640,480`, widescreen off): `widescreen: off ... render width 640`, `framebuffer size 640x480`.
+- Visual (`AURORA_SCREENSHOT`, frames numbered as in `docs/verification.md`): presentation works; `window presents 0/s` is only the framerate counter. 4:3 control, frame 150: logo centred and clean. 16:9, frame 150: "Super Mario Sunshine / Nintendo Presents" logo is left of centre and about 0.8x the 4:3 width (EFB x ~129–386 vs ~160–480 at 4:3). Cause NOT found: the logo is not offset by `bx` and changes size. Open. 16:9, frame 300 (intro movie): 4:3 movie centred, not stretched, full height. Title, menu and GCLogo centring still unchecked.
+- Not run: `tools/settings_test.cpp` (aspect round-trip, invalid `5:4` fallback).
+- Ceilings: `auto` reads the window ratio once at init. Full-width screens still overlay the 4:3 area (`MarDirectorInitECT.cpp`). `SelectDir` camera literal `1.3333334f` is not scaled. `JUTConsole.cpp:99` stays left-anchored. Wipe `Hx_ResetWipe(640,480)` stretch across W is open. The window height drives the width; a larger height gives a wider window.
+
+## Heap corruption hunt (`dolpic/0`, `FramePacket::~FramePacket` 0xc0000374 / 0xc0000409): ASan findings
+
+- Setup: `ASAN=1 tools\build-alt.cmd asan` (`SUNSHINE_ASAN=ON`, `-asan-globals=0`, see `CMakeLists.txt:101`). Run: `ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:symbolize=1:detect_odr_violation=0`. `build-alt.cmd` passes no linker flags: the tree's `CMAKE_*_LINKER_FLAGS_RELWITHDEBINFO` must carry `/debug`, or the exe and PDB mismatch and stacks are wrong. Fixed in `build/asan` by hand; `build/heaphunt` is correct.
+- ASan only sees operator-new blocks (plain mode of `src/sdk/jkr_new_delete.cpp` uses `std::malloc`). JKR/MEM1 is one big allocation, so overruns inside JKR blocks and inside Aurora's own buffers stay invisible.
+- Finding #1, fixed (not asm-proven): `stack-use-after-scope` READ in `TModelDataNode::isSameName` (`sms/src/Strategic/ObjModel.cpp:14`). Chain: `TModelDataKeeper::getIndex` (`ObjModel.cpp:73`) ← `TMActorKeeper::createMActor` (`ObjModel.cpp:154`) ← `TMapObjBase::initMActor` (`MapObjInit.cpp:11051`) ← `makeMActors` (`MapObjInit.cpp:11098`) ← `TCoin::initMapObj` (`Item.cpp:321`) ← `newAndRegisterObjByEventID` (`MapObjManager.cpp:402`, `char buffer[64]` at 408) ← `TNpcCoin::TNpcCoin` (`NpcCoin.cpp:19`) ← `TStrategy::load` ← `TMarDirector::setupObjects`. Cause: `registerDataAndJoinNewNode` stored `mName = name` by pointer, and the caller passed a stack buffer. Fix `ObjModel.cpp:24-31` (`TARGET_PC`: `new char[]` + `strcpy`; `#else` unchanged).
+- Finding #2, fixed and asm-proven: `access-violation` READ at `0x0000008322e8` in `JASystem::Calc::imixcopy` (`JASCalc.cpp:40`) ← `Kernel::vframeWork` (`JASAiCtrl.cpp:80`) ← `updateDac` (`JASAiCtrl.cpp:124`) ← `AudioThread::audioproc` (`JASAudioThread.cpp:91`). Cause: `DSPBuf::mixDSP` (`sms/src/JSystem/JAudio/JASystem/JASDSPBuf.cpp:36`) had no `return` in a non-void function (UB). Asm `0x8005EA8C` (`JASDSPBuf.s`): `li r3,2; bl process; blr`, so r3 passes through. Fix `JASDSPBuf.cpp:36-37`, unguarded with `// asm 0x8005EA8C`.
+- Result of fix #2: `build/asan` 90 s run, RC=0, no ASan report. Only the `GXEnd` warning remains.
+- A/B on the normal tree: with fix #2 reverted, `build/heaphunt` ran 60 s with no heap error. With the fix, 90 s run passes (RC=0, wall 111 s, 0 heap/fatal lines). So mixDSP is NOT shown to be the `0xc0000374` writer. The writer is still unidentified and the crash did not reproduce in these runs.
+- `window presents 0/s` in the framerate line is the replay counter only (`src/framerate/framerate.cpp:36`). It does not mean presentation is stalled.
+- Rejected: Aurora ASan instrumentation (foreach over `aurora_gx` objects in `CMakeLists.txt`). Under ASan the `.CRT$XCU` initializers of `aurora::gx` (e.g. `s_tlutObjectCaches`) were not linked in the init table, so `clear_copy_texture_cache` (`lib/gx/texture.cpp:795`) crashed at startup. Reverted. Writes inside Aurora GFX/GX stay invisible to ASan.
+- Triage, not memory corruption: `odr-violation` on `L"."` (`src/mods/mods_loader.cpp`) vs `"."` (`src/mods/mod_manifest.cpp`), and `global-buffer-overflow` at `""` in `mod_manifest.cpp`. These are merged-literal redzone artifacts on Windows. Handled by `-asan-globals=0` and `detect_odr_violation=0`.
+- Open: the writer of the 0xc0000374 heap error in `FramePacket::~FramePacket` is not identified. Kukku AV `0x145148` is unverified with a matching PDB. GXEnd floods (134,493 warnings in 90 s, `lib/gx`): GxCopy's divisibility issue, not a heap error.
+
+## Non-void functions without `return` (`-Wreturn-type` sweep)
+
+- Scan: clang-cl `/clang:-Werror=return-type` over the 589 units in `files.cmake`. Baseline 224 units failed, 41 unique sites. After the fixes: 588/589 units clean, 0 hits. Remaining: `JSystem/JUtility/JUTResource.cpp` (`glyphs.h` missing; the include is under `TARGET_PC` and is not in the scan's include set; not a return-type hit; unverified whether the real build compiles it).
+- Fix rule: where the retail function has a body, the port returns the value the PPC asm produces (`li r3,…` or the callee's r3). Unused stubs (MAP `UNUSED 000004`, or no caller) get `false`/`0`/`nullptr`. All edits sit under `TARGET_PC`, original under `#else`.
+- Asm-proven, unguarded: `JASDSPBuf.cpp` `mixDSP` (`// asm 0x8005EA8C`, `li r3,2; bl process; blr`, r3 passes through).
+- Caveats: `Graph` finders return `-1` (no callers found; unobservable). `JKRDvdFile::close` returns `true` where retail returns the leftover `this` (not-open case). `JUTGamePad::read` returns `0` where retail r3 is undefined.
+- Check: `tools\build-alt.cmd ReturnSweep` EXIT 0; sweep script `build/ReturnSweep-scan/run.cmd` (untracked scratch).
+
+
+

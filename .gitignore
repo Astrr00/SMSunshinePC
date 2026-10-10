@@ -1,0 +1,9 @@
+# Harness-local state (not project source)
+.claude/
+.cursor/
+.stateroot/
+
+# Logs and crash output written next to the game
+crash.log
+*.log
+__pycache__/

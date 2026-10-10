@@ -1,0 +1,1309 @@
+diff --git a/cmake/aurora_gx.cmake b/cmake/aurora_gx.cmake
+--- a/cmake/aurora_gx.cmake
++++ b/cmake/aurora_gx.cmake
+@@ -4,6 +4,7 @@
+         lib/gfx/encoding.cpp
+         lib/gfx/frame.cpp
+         lib/gfx/pipeline_cache.cpp
++        lib/gfx/pixel_metric.cpp
+         lib/gfx/recording.cpp
+         lib/gfx/render_worker.cpp
+         lib/gfx/resource_cache.cpp
+diff --git a/include/dolphin/gx/GXAurora.h b/include/dolphin/gx/GXAurora.h
+--- a/include/dolphin/gx/GXAurora.h
++++ b/include/dolphin/gx/GXAurora.h
+@@ -96,6 +96,23 @@
+  */
+ #define GX_AURORA_DRAW_INDEXED 0x0041
+ 
++/**
++ * Request a color snapshot of the EFB. Read the latest result with GXPeekARGB; it lags by a frame or two.
++ */
++#define GX_AURORA_REQUEST_COLOR_SNAPSHOT 0x0042
++
++/**
++ * Begin a pixel metric segment. Draws after this are counted with occlusion queries until the next
++ * GX_AURORA_DRAW_SYNC. Used by GXClearPixMetric.
++ */
++#define GX_AURORA_CLEAR_PIX_METRIC 0x0043
++
++/**
++ * End the pixel metric segment and emit a draw-sync token (u16). The registered draw-sync callback fires
++ * on the render thread once the segment's occlusion queries have resolved. Used by GXSetDrawSync.
++ */
++#define GX_AURORA_DRAW_SYNC 0x0044
++
+ #define GX2_SET_POLYGON_OFFSET 0x1000
+ 
+ 
+diff --git a/include/dolphin/gx/GXManage.h b/include/dolphin/gx/GXManage.h
+--- a/include/dolphin/gx/GXManage.h
++++ b/include/dolphin/gx/GXManage.h
+@@ -12,6 +12,7 @@
+ 
+ GXFifoObj* GXInit(void* base, u32 size);
+ GXDrawSyncCallback GXSetDrawSyncCallback(GXDrawSyncCallback cb);
++void GXSetDrawSync(u16 token);
+ GXDrawDoneCallback GXSetDrawDoneCallback(GXDrawDoneCallback cb);
+ void GXDrawDone(void);
+ void GXSetDrawDone(void);
+diff --git a/include/dolphin/gx/GXPerf.h b/include/dolphin/gx/GXPerf.h
+--- a/include/dolphin/gx/GXPerf.h
++++ b/include/dolphin/gx/GXPerf.h
+@@ -1,16 +1,17 @@
+-#ifndef DOLPHIN_GXPERF_H
+-#define DOLPHIN_GXPERF_H
++#ifndef _DOLPHIN_GX_GXPERF_H_
++#define _DOLPHIN_GX_GXPERF_H_
+ 
+-#include <dolphin/types.h>
++#include "GXEnum.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
+-void GXReadXfRasMetric(u32* xf_wait_in, u32* xf_wait_out, u32* ras_busy, u32* clocks);
++void GXReadPixMetric(u32* topIn, u32* topOut, u32* botIn, u32* botOut, u32* clrIn, u32* clocks);
++void GXClearPixMetric(void);
+ 
+ #ifdef __cplusplus
+ }
+ #endif
+ 
+-#endif
++#endif // _DOLPHIN_GX_GXPERF_H_
+diff --git a/lib/dolphin/gx/GXCpu2Efb.cpp b/lib/dolphin/gx/GXCpu2Efb.cpp
+--- a/lib/dolphin/gx/GXCpu2Efb.cpp
++++ b/lib/dolphin/gx/GXCpu2Efb.cpp
+@@ -18,3 +18,16 @@
+ 
+   GX_WRITE_AURORA(GX_AURORA_REQUEST_DEPTH_SNAPSHOT);
+ }
++
++void GXPeekARGB(u16 x, u16 y, u32* color) {
++  if (color != nullptr) {
++    u32 value = 0;
++    if (aurora::gfx::depth_peek::read_latest_color(x, y, value)) {
++      *color = value;
++    } else {
++      *color = 0;
++    }
++  }
++
++  GX_WRITE_AURORA(GX_AURORA_REQUEST_COLOR_SNAPSHOT);
++}
+diff --git a/lib/dolphin/gx/GXPerf.cpp b/lib/dolphin/gx/GXPerf.cpp
+--- a/lib/dolphin/gx/GXPerf.cpp
++++ b/lib/dolphin/gx/GXPerf.cpp
+@@ -1,4 +1,16 @@
+ #include "gx.hpp"
++#include "__gx.h"
++
++#include "../../gfx/pixel_metric.hpp"
++
++#include <dolphin/gx/GXAurora.h>
++#include <dolphin/gx/GXManage.h>
++#include <dolphin/gx/GXPerf.h>
++
++namespace {
++// Game-thread state: a pixel metric segment is open between GXClearPixMetric and the next GXSetDrawSync.
++bool sPixMetricOpen = false;
++} // namespace
+ 
+ extern "C" {
+ 
+@@ -9,12 +21,60 @@
+ // TODO GXReadGP1Metric
+ // TODO GXReadMemMetric
+ // TODO GXClearMemMetric
+-// TODO GXReadPixMetric
+-// TODO GXClearPixMetric
+ // TODO GXSetVCacheMetric
+ // TODO GXReadVCacheMetric
+ // TODO GXClearVCacheMetric
+ // TODO GXReadXfRasMetric
+ // TODO GXInitXfRasMetric
+ // TODO GXReadClksPerVtx
+-}
+\ No newline at end of file
++
++GXDrawSyncCallback GXSetDrawSyncCallback(GXDrawSyncCallback cb) {
++  return aurora::gfx::pixel_metric::set_draw_sync_callback(cb);
++}
++
++// A token that closes a pixel metric segment is delivered asynchronously: the callback runs on the render
++// thread after the segment's occlusion queries resolve (see pixel_metric.hpp). Other tokens keep the
++// synchronous behavior: the callback runs before GXSetDrawSync returns.
++void GXSetDrawSync(u16 token) {
++  if (sPixMetricOpen) {
++    sPixMetricOpen = false;
++    GX_WRITE_AURORA(GX_AURORA_DRAW_SYNC);
++    GX_WRITE_U16(token);
++    return;
++  }
++  const auto callback = aurora::gfx::pixel_metric::draw_sync_callback();
++  if (callback == nullptr) {
++    return;
++  }
++  AuroraGXSync();
++  callback(token);
++}
++
++void GXClearPixMetric(void) {
++  sPixMetricOpen = true;
++  GX_WRITE_AURORA(GX_AURORA_CLEAR_PIX_METRIC);
++}
++
++// ponytail: only clrIn (the occlusion sample count) is implemented; top/bottom counters and clocks read as zero.
++void GXReadPixMetric(u32* topIn, u32* topOut, u32* botIn, u32* botOut, u32* clrIn, u32* clocks) {
++  if (topIn != nullptr) {
++    *topIn = 0;
++  }
++  if (topOut != nullptr) {
++    *topOut = 0;
++  }
++  if (botIn != nullptr) {
++    *botIn = 0;
++  }
++  if (botOut != nullptr) {
++    *botOut = 0;
++  }
++  if (clrIn != nullptr) {
++    *clrIn = aurora::gfx::pixel_metric::read_count();
++  }
++  if (clocks != nullptr) {
++    *clocks = 0;
++  }
++}
++
++} // extern "C"
+diff --git a/lib/gfx/depth_peek.cpp b/lib/gfx/depth_peek.cpp
+--- a/lib/gfx/depth_peek.cpp
++++ b/lib/gfx/depth_peek.cpp
+@@ -25,11 +25,19 @@
+ 
+ using Clock = std::chrono::steady_clock;
+ 
+-constexpr size_t SlotCount = 3;
++// Depth and color peeks share one slot pool, so SlotCount covers one of each per frame in flight.
++constexpr size_t SlotCount = 6;
+ constexpr uint32_t WorkgroupSizeX = 8;
+ constexpr uint32_t WorkgroupSizeY = 8;
+ constexpr uint32_t DepthPeekSnapshotHz = 30;
+ constexpr auto SnapshotInterval = std::chrono::nanoseconds{1'000'000'000 / DepthPeekSnapshotHz};
++
++enum class Kind : uint8_t {
++  Depth,
++  Color,
++};
++constexpr size_t KindCount = 2;
++constexpr size_t index(Kind kind) noexcept { return static_cast<size_t>(kind); }
+ 
+ struct Params {
+   uint32_t dstWidth = 0;
+@@ -40,8 +48,10 @@
+   float offsetY = 0.f;
+   float scaleX = 1.f;
+   float scaleY = 1.f;
+-};
+-static_assert(sizeof(Params) == 32);
++  uint32_t opaqueAlpha = 0;
++  uint32_t pad = 0;
++};
++static_assert(sizeof(Params) == 40);
+ 
+ struct LatestSnapshot {
+   uint32_t width = 0;
+@@ -62,6 +72,7 @@
+   uint32_t width = 0;
+   uint32_t height = 0;
+   uint64_t byteSize = 0;
++  Kind kind = Kind::Depth;
+   SlotState state = SlotState::Available;
+ };
+ 
+@@ -74,11 +85,11 @@
+ bool g_enabled = false;
+ std::array<Slot, SlotCount> g_slots;
+ size_t g_nextSlot = 0;
+-wgpu::BindGroupLayout g_bindGroupLayout;
+-wgpu::ComputePipeline g_pipeline;
+-bool g_snapshotRequested = false;
+-Clock::time_point g_nextSnapshotTime;
+-LatestSnapshot g_latest;
++std::array<wgpu::BindGroupLayout, KindCount> g_bindGroupLayouts;
++std::array<wgpu::ComputePipeline, KindCount> g_pipelines;
++std::array<bool, KindCount> g_snapshotRequested{};
++std::array<Clock::time_point, KindCount> g_nextSnapshotTime{};
++std::array<LatestSnapshot, KindCount> g_latest;
+ std::mutex g_mutex;
+ 
+ constexpr std::string_view ShaderPreamble = R"(
+@@ -87,6 +98,8 @@
+     srcSize: vec2u,
+     offset: vec2f,
+     scale: vec2f,
++    opaqueAlpha: u32,
++    pad: u32,
+ };
+ 
+ @group(0) @binding(1) var<storage, read_write> out_z: array<u32>;
+@@ -105,7 +118,7 @@
+ }
+ )"sv;
+ 
+-constexpr std::string_view ShaderMain = R"(
++constexpr std::string_view DepthShaderMain = R"(
+ @group(0) @binding(0) var src: texture_depth_2d;
+ 
+ fn load_depth(coord: vec2i) -> f32 {
+@@ -126,17 +139,42 @@
+ }
+ )"sv;
+ 
+-std::string build_shader_source() {
++// Packs logical RGBA into GX ARGB (alpha in the top byte). WebGPU textureLoad returns logical
++// channels, so BGRA-stored surfaces need no swizzle.
++constexpr std::string_view ColorShaderMain = R"(
++@group(0) @binding(0) var src: texture_2d<f32>;
++
++@compute @workgroup_size(8, 8, 1)
++fn cs_main(@builtin(global_invocation_id) id: vec3u) {
++    if (id.x >= params.dstSize.x || id.y >= params.dstSize.y) {
++        return;
++    }
++
++    let dstCenter = vec2f(vec2u(id.xy)) + vec2f(0.5, 0.5);
++    let srcPixel = clamp(vec2i(floor(params.offset + dstCenter * params.scale)), vec2i(0, 0),
++                         vec2i(params.srcSize) - vec2i(1, 1));
++    var c = textureLoad(src, srcPixel, 0);
++    if (params.opaqueAlpha != 0u) {
++        c.a = 1.0;
++    }
++    out_z[id.y * params.dstSize.x + id.x] = pack4x8unorm(vec4f(c.b, c.g, c.r, c.a));
++}
++)"sv;
++
++std::string build_shader_source(Kind kind) {
+   std::string source;
+-  source.reserve(ShaderPreamble.size() + ReversedZBody.size() + ShaderMain.size());
+   source += ShaderPreamble;
+-  source += gx::UseReversedZ ? ReversedZBody : ForwardZBody;
+-  source += ShaderMain;
++  if (kind == Kind::Depth) {
++    source += gx::UseReversedZ ? ReversedZBody : ForwardZBody;
++    source += DepthShaderMain;
++  } else {
++    source += ColorShaderMain;
++  }
+   return source;
+ }
+ 
+-wgpu::ComputePipeline create_pipeline(const wgpu::BindGroupLayout& bindGroupLayout, const char* label) {
+-  const auto shaderSource = build_shader_source();
++wgpu::ComputePipeline create_pipeline(Kind kind, const wgpu::BindGroupLayout& bindGroupLayout, const char* label) {
++  const auto shaderSource = build_shader_source(kind);
+   const wgpu::ShaderSourceWGSL wgslSource{wgpu::ShaderSourceWGSL::Init{
+       .code = shaderSource.c_str(),
+   }};
+@@ -163,14 +201,16 @@
+   return g_device.CreateComputePipeline(&pipelineDescriptor);
+ }
+ 
+-wgpu::BindGroupLayout create_bind_group_layout(const char* label) {
+-  constexpr std::array entries{
++wgpu::BindGroupLayout create_bind_group_layout(Kind kind, const char* label) {
++  const wgpu::TextureSampleType sampleType =
++      kind == Kind::Depth ? wgpu::TextureSampleType::Depth : wgpu::TextureSampleType::Float;
++  const std::array entries{
+       wgpu::BindGroupLayoutEntry{
+           .binding = 0,
+           .visibility = wgpu::ShaderStage::Compute,
+           .texture =
+               wgpu::TextureBindingLayout{
+-                  .sampleType = wgpu::TextureSampleType::Depth,
++                  .sampleType = sampleType,
+                   .viewDimension = wgpu::TextureViewDimension::e2D,
+               },
+       },
+@@ -293,9 +333,10 @@
+     const auto* mapped =
+         static_cast<const uint32_t*>(slot.readbackBuffer.GetConstMappedRange(0, valueCount * sizeof(uint32_t)));
+     if (mapped != nullptr) {
+-      g_latest.width = slot.width;
+-      g_latest.height = slot.height;
+-      g_latest.data.assign(mapped, mapped + valueCount);
++      auto& latest = g_latest[index(slot.kind)];
++      latest.width = slot.width;
++      latest.height = slot.height;
++      latest.data.assign(mapped, mapped + valueCount);
+     }
+     slot.readbackBuffer.Unmap();
+   } else if (status != wgpu::MapAsyncStatus::CallbackCancelled && status != wgpu::MapAsyncStatus::Aborted) {
+@@ -303,69 +344,53 @@
+   }
+   slot.state = SlotState::Available;
+ }
+-} // namespace
+-
+-void initialize() {
+-  if (!webgpu::g_hasCoreFeatures) {
+-    return;
+-  }
+-  g_bindGroupLayout = create_bind_group_layout("Depth Peek Bind Group Layout");
+-  g_pipeline = create_pipeline(g_bindGroupLayout, "Depth Peek Pipeline");
+-  g_enabled = true;
+-}
+-
+-void shutdown() {
+-  testing::reset();
+-  g_pipeline = {};
+-  g_bindGroupLayout = {};
+-  for (auto& slot : g_slots) {
+-    slot = {};
+-  }
+-}
+-
+-void request_snapshot() noexcept {
++
++void request_kind(Kind kind) noexcept {
+   if (!g_enabled) {
+     return;
+   }
+   std::lock_guard lock{g_mutex};
+-  g_snapshotRequested = true;
+-}
+-
+-bool read_latest(uint16_t x, uint16_t y, uint32_t& z) noexcept {
+-  std::lock_guard lock{g_mutex};
+-  if (x >= g_latest.width || y >= g_latest.height || g_latest.data.empty()) {
++  g_snapshotRequested[index(kind)] = true;
++}
++
++bool read_latest_kind(Kind kind, uint16_t x, uint16_t y, uint32_t& value) noexcept {
++  std::lock_guard lock{g_mutex};
++  const auto& latest = g_latest[index(kind)];
++  if (x >= latest.width || y >= latest.height || latest.data.empty()) {
+     return false;
+   }
+-  z = g_latest.data[static_cast<size_t>(y) * g_latest.width + x] & 0x00ffffffu;
++  value = latest.data[static_cast<size_t>(y) * latest.width + x];
+   return true;
+ }
+ 
+-void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureView& depthView,
+-                           wgpu::Extent3D sourceSize, uint32_t msaaSamples) noexcept {
+-  if (!g_enabled) {
+-    return;
+-  }
+-
+-  ZoneScoped;
++void encode_snapshot(Kind kind, const wgpu::CommandEncoder& cmd, const wgpu::TextureView& view,
++                     wgpu::Extent3D sourceSize, uint32_t msaaSamples) noexcept {
++  const auto idx = index(kind);
+   const auto now = Clock::now();
+   {
+     std::lock_guard lock{g_mutex};
+-    if (!g_snapshotRequested || now < g_nextSnapshotTime) {
++    if (!g_snapshotRequested[idx] || now < g_nextSnapshotTime[idx]) {
+       return;
+     }
+-    g_snapshotRequested = false;
+-    g_nextSnapshotTime = now + SnapshotInterval;
++    g_snapshotRequested[idx] = false;
++    g_nextSnapshotTime[idx] = now + SnapshotInterval;
+   }
+ 
+   const auto dstSize = vi::configured_fb_size();
+-  if (!depthView || dstSize.x == 0 || dstSize.y == 0 || sourceSize.width == 0 || sourceSize.height == 0) {
++  if (!view || dstSize.x == 0 || dstSize.y == 0 || sourceSize.width == 0 || sourceSize.height == 0) {
+     return;
+   }
+   if (msaaSamples > 1) {
+-    Log.fatal("Depth Peek from multisampled EFB targets is not supported");
+-  }
+-
+-  const Params params = make_params(sourceSize, dstSize);
++    // ponytail: color peek skips multisampled EFBs (request consumed, no result). Upgrade: resolve before peek.
++    if (kind == Kind::Depth) {
++      Log.fatal("Depth Peek from multisampled EFB targets is not supported");
++    }
++    return;
++  }
++
++  Params params = make_params(sourceSize, dstSize);
++  // ponytail: format read at encode time (render worker), not at record time. Upgrade: carry the format in RenderPass.
++  params.opaqueAlpha = kind == Kind::Color && !gx::efb_has_alpha(gx::g_gxState.pixelFmt) ? 1u : 0u;
+   wgpu::Buffer storageBuffer;
+   wgpu::Buffer readbackBuffer;
+   wgpu::Buffer paramsBuffer;
+@@ -377,6 +402,7 @@
+       return;
+     }
+     slot->state = SlotState::CopySubmitted;
++    slot->kind = kind;
+     storageBuffer = slot->storageBuffer;
+     readbackBuffer = slot->readbackBuffer;
+     paramsBuffer = slot->paramsBuffer;
+@@ -389,7 +415,7 @@
+   const std::array bindGroupEntries{
+       wgpu::BindGroupEntry{
+           .binding = 0,
+-          .textureView = depthView,
++          .textureView = view,
+       },
+       wgpu::BindGroupEntry{
+           .binding = 1,
+@@ -404,7 +430,7 @@
+   };
+   const wgpu::BindGroupDescriptor bindGroupDescriptor{
+       .label = "Depth Peek Bind Group",
+-      .layout = g_bindGroupLayout,
++      .layout = g_bindGroupLayouts[idx],
+       .entryCount = bindGroupEntries.size(),
+       .entries = bindGroupEntries.data(),
+   };
+@@ -415,13 +441,63 @@
+       .timestampWrites = webgpu::gpu_prof::pass_writes("Depth peek"),
+   };
+   const auto pass = cmd.BeginComputePass(&passDescriptor);
+-  pass.SetPipeline(g_pipeline);
++  pass.SetPipeline(g_pipelines[idx]);
+   pass.SetBindGroup(0, bindGroup);
+   pass.DispatchWorkgroups((dstSize.x + WorkgroupSizeX - 1) / WorkgroupSizeX,
+                           (dstSize.y + WorkgroupSizeY - 1) / WorkgroupSizeY);
+   pass.End();
+ 
+   cmd.CopyBufferToBuffer(storageBuffer, 0, readbackBuffer, 0, byteSize);
++}
++} // namespace
++
++void initialize() {
++  if (!webgpu::g_hasCoreFeatures) {
++    return;
++  }
++  for (const auto kind : {Kind::Depth, Kind::Color}) {
++    const char* label = kind == Kind::Depth ? "Depth Peek" : "Color Peek";
++    g_bindGroupLayouts[index(kind)] = create_bind_group_layout(kind, label);
++    g_pipelines[index(kind)] = create_pipeline(kind, g_bindGroupLayouts[index(kind)], label);
++  }
++  g_enabled = true;
++}
++
++void shutdown() {
++  testing::reset();
++  g_pipelines = {};
++  g_bindGroupLayouts = {};
++  for (auto& slot : g_slots) {
++    slot = {};
++  }
++}
++
++void request_snapshot() noexcept { request_kind(Kind::Depth); }
++
++void request_color_snapshot() noexcept { request_kind(Kind::Color); }
++
++bool read_latest(uint16_t x, uint16_t y, uint32_t& z) noexcept {
++  if (!read_latest_kind(Kind::Depth, x, y, z)) {
++    return false;
++  }
++  z &= 0x00ffffffu;
++  return true;
++}
++
++bool read_latest_color(uint16_t x, uint16_t y, uint32_t& argb) noexcept {
++  return read_latest_kind(Kind::Color, x, y, argb);
++}
++
++void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureView& depthView,
++                           const wgpu::TextureView& colorView, wgpu::Extent3D sourceSize,
++                           uint32_t msaaSamples) noexcept {
++  if (!g_enabled) {
++    return;
++  }
++
++  ZoneScoped;
++  encode_snapshot(Kind::Depth, cmd, depthView, sourceSize, msaaSamples);
++  encode_snapshot(Kind::Color, cmd, colorView, sourceSize, msaaSamples);
+ }
+ 
+ void after_submit() noexcept {
+@@ -458,7 +534,7 @@
+ namespace testing {
+ void reset() noexcept {
+   std::lock_guard lock{g_mutex};
+-  g_snapshotRequested = false;
++  g_snapshotRequested = {};
+   g_nextSlot = 0;
+   g_nextSnapshotTime = {};
+   g_latest = {};
+@@ -469,14 +545,23 @@
+ 
+ bool snapshot_requested() noexcept {
+   std::lock_guard lock{g_mutex};
+-  return g_snapshotRequested;
++  return g_snapshotRequested[index(Kind::Depth)];
+ }
+ 
+ void set_latest(uint32_t width, uint32_t height, const std::vector<uint32_t>& data) {
+   std::lock_guard lock{g_mutex};
+-  g_latest.width = width;
+-  g_latest.height = height;
+-  g_latest.data = data;
++  auto& latest = g_latest[index(Kind::Depth)];
++  latest.width = width;
++  latest.height = height;
++  latest.data = data;
++}
++
++void set_latest_color(uint32_t width, uint32_t height, const std::vector<uint32_t>& data) {
++  std::lock_guard lock{g_mutex};
++  auto& latest = g_latest[index(Kind::Color)];
++  latest.width = width;
++  latest.height = height;
++  latest.data = data;
+ }
+ } // namespace testing
+ 
+diff --git a/lib/gfx/depth_peek.hpp b/lib/gfx/depth_peek.hpp
+--- a/lib/gfx/depth_peek.hpp
++++ b/lib/gfx/depth_peek.hpp
+@@ -10,16 +10,20 @@
+ void shutdown();
+ 
+ void request_snapshot() noexcept;
++void request_color_snapshot() noexcept;
+ bool read_latest(uint16_t x, uint16_t y, uint32_t& z) noexcept;
++bool read_latest_color(uint16_t x, uint16_t y, uint32_t& argb) noexcept;
+ 
+ void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureView& depthView,
+-                           wgpu::Extent3D sourceSize, uint32_t msaaSamples) noexcept;
++                           const wgpu::TextureView& colorView, wgpu::Extent3D sourceSize,
++                           uint32_t msaaSamples) noexcept;
+ void after_submit() noexcept;
+ 
+ namespace testing {
+ void reset() noexcept;
+ bool snapshot_requested() noexcept;
+ void set_latest(uint32_t width, uint32_t height, const std::vector<uint32_t>& data);
++void set_latest_color(uint32_t width, uint32_t height, const std::vector<uint32_t>& data);
+ } // namespace testing
+ 
+ } // namespace aurora::gfx::depth_peek
+diff --git a/lib/gfx/encoding.cpp b/lib/gfx/encoding.cpp
+--- a/lib/gfx/encoding.cpp
++++ b/lib/gfx/encoding.cpp
+@@ -175,6 +175,12 @@
+       pass.InsertDebugMarker(wgpu::StringView(frame.debugMarkers[cmd.data.debugMarkerIndex]));
+ #endif
+     } break;
++    case CommandType::BeginOcclusionQuery: {
++      pass.BeginOcclusionQuery(cmd.data.occlusionQuery);
++    } break;
++    case CommandType::EndOcclusionQuery: {
++      pass.EndOcclusionQuery();
++    } break;
+     }
+   }
+ 
+@@ -237,11 +243,21 @@
+   }
+   const auto label = passInfo.label.empty() ? fmt::format("Render pass {}", passIndex)
+                                             : fmt::format("{} {}", passInfo.label, passIndex);
++  if (passInfo.hasOcclusionQueries && !frame.occlusionQuerySet) {
++    // ponytail: one query set per frame packet; pool it if pixel metrics get hot.
++    constexpr wgpu::QuerySetDescriptor querySetDescriptor{
++        .label = "Pixel metric occlusion",
++        .type = wgpu::QueryType::Occlusion,
++        .count = MaxOcclusionQueries,
++    };
++    frame.occlusionQuerySet = g_device.CreateQuerySet(&querySetDescriptor);
++  }
+   const wgpu::RenderPassDescriptor renderPassDescriptor{
+       .label = label.c_str(),
+       .colorAttachmentCount = passInfo.colorAttachmentCount,
+       .colorAttachments = attachments.data(),
+       .depthStencilAttachment = depthStencilAttachmentPtr,
++      .occlusionQuerySet = frame.occlusionQuerySet,
+       .timestampWrites = webgpu::gpu_prof::pass_writes(label),
+   };
+ 
+@@ -250,7 +266,7 @@
+   pass.End();
+ 
+   if (passInfo.captureDepthSnapshot) {
+-    depth_peek::encode_frame_snapshot(cmd, passInfo.copySourceDepthView,
++    depth_peek::encode_frame_snapshot(cmd, passInfo.copySourceDepthView, passInfo.copySourceView,
+                                       passInfo.colorAttachments[SceneColorAttachmentIndex].size, passInfo.msaaSamples);
+   }
+ 
+@@ -333,6 +349,7 @@
+     };
+     cmd.CopyTextureToTexture(&src, &dst, &size);
+   }
++  }
+ }
+ 
+ constexpr uint64_t VertexStagingOffset = 0;
+@@ -414,6 +431,7 @@
+     if (op.textureCopy != nullptr) {
+       const webgpu::gpu_prof::Zone zone{cmd, "Texture copy"};
+       cmd.CopyTextureToTexture(&op.textureCopy->src, &op.textureCopy->dst, &op.textureCopy->size);
++      }
+     }
+     break;
+   case FrameOpType::EncoderTask:
+diff --git a/lib/gfx/frame.cpp b/lib/gfx/frame.cpp
+--- a/lib/gfx/frame.cpp
++++ b/lib/gfx/frame.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include "depth_peek.hpp"
+ #include "pipeline_cache.hpp"
++#include "pixel_metric.hpp"
+ #include "recording.hpp"
+ #include "render_worker.hpp"
+ #include "resource_cache.hpp"
+@@ -540,6 +541,7 @@
+   }
+   shutdown_pipeline_cache();
+   depth_peek::shutdown();
++  pixel_metric::shutdown();
+   tex_copy_conv::shutdown();
+   tex_palette_conv::shutdown();
+   texture_replacement::shutdown();
+@@ -686,6 +688,7 @@
+     auto encoder = std::move(packet.encoder);
+     const auto stats = packet.stats;
+     auto afterSubmitCallbacks = std::move(packet.afterSubmitCallbacks);
++    pixel_metric::finish_frame(encoder, packet);
+     packet = {};
+     g_resources.stats.drawCallCount = stats.drawCallCount;
+     g_resources.stats.mergedDrawCallCount = stats.mergedDrawCallCount;
+@@ -697,16 +700,21 @@
+     if (callback) {
+       callback(encoder, std::move(afterSubmitCallbacks));
+     }
++    }
+     g_frameSlots.release(frameSlot);
+     expire_cached_bind_groups();
+     map_staging_buffer(stagingSlot, true);
+     process_events();
++    pixel_metric::poll();
+   });
+ }
+ 
+ uint32_t current_frame() noexcept { return g_frameIndex; }
+ 
+-void after_submit() noexcept { depth_peek::after_submit(); }
++void after_submit() noexcept {
++  depth_peek::after_submit();
++  pixel_metric::after_submit();
++}
+ 
+ void gpu_synchronize() { render_worker::synchronize(); }
+ 
+diff --git a/lib/gfx/frame_packet.hpp b/lib/gfx/frame_packet.hpp
+--- a/lib/gfx/frame_packet.hpp
++++ b/lib/gfx/frame_packet.hpp
+@@ -37,12 +37,22 @@
+   alignas(std::max_align_t) std::array<std::byte, InlineDrawPayloadSize> payload{};
+ };
+ 
++struct SyncToken {
++  uint16_t token = 0;
++  std::vector<uint32_t> queries;
++};
++
++// ponytail: fixed cap per frame; pool query sets if more are needed.
++constexpr uint32_t MaxOcclusionQueries = 256;
++
+ enum class CommandType {
+   SetViewport,
+   SetScissor,
+   Draw,
+   CustomDraw,
+   DebugMarker,
++  BeginOcclusionQuery,
++  EndOcclusionQuery,
+ };
+ 
+ struct Command {
+@@ -56,6 +66,7 @@
+     DrawCommand draw;
+     CustomDrawCommand customDraw;
+     size_t debugMarkerIndex;
++    uint32_t occlusionQuery;
+   } data;
+ };
+ 
+@@ -107,6 +118,8 @@
+   bool discardable = false;
+   bool captureDepthSnapshot = false;
+   bool sealed = false;
++  bool occlusionOpen = false;
++  bool hasOcclusionQueries = false;
+   std::vector<tex_palette_conv::ConvRequest> paletteConvs;
+ 
+   RenderTargetLayout target_layout() const noexcept;
+@@ -205,6 +218,9 @@
+   size_t stagingBuffer = 0;
+   StagingHighWater copied;
+   AuroraStats stats{};
++  wgpu::QuerySet occlusionQuerySet;
++  uint32_t occlusionCount = 0;
++  std::vector<SyncToken> syncTokens;
+ };
+ 
+ } // namespace aurora::gfx::detail
+diff --git a/lib/gfx/pixel_metric.cpp b/lib/gfx/pixel_metric.cpp
+new file mode 100644
+--- /dev/null
++++ b/lib/gfx/pixel_metric.cpp
+@@ -0,0 +1,153 @@
++#include "pixel_metric.hpp"
++
++#include "frame_packet.hpp"
++#include "../webgpu/gpu.hpp"
++
++#include <algorithm>
++#include <atomic>
++#include <cstdint>
++#include <deque>
++#include <limits>
++#include <memory>
++#include <vector>
++
++#include <magic_enum.hpp>
++
++namespace aurora::gfx::pixel_metric {
++namespace {
++Module Log("aurora::gfx::pixel_metric");
++
++using webgpu::g_device;
++
++enum class BatchStatus : uint8_t { Pending, Ok, Failed };
++
++// One batch per frame that issued draw-sync tokens. Shared with the MapAsync callback, which may run on another thread.
++struct Batch {
++  std::vector<detail::SyncToken> tokens;
++  wgpu::Buffer readback;
++  uint64_t byteSize = 0;
++  bool mapRequested = false;
++  std::atomic<BatchStatus> status{BatchStatus::Pending};
++};
++
++// Render thread only, except g_callback and g_last which are read from the game thread.
++std::deque<std::shared_ptr<Batch>> g_batches;
++std::atomic<DrawSyncCallback> g_callback{nullptr};
++std::atomic<uint32_t> g_last{0};
++
++thread_local bool tDispatching = false;
++thread_local uint32_t tCount = 0;
++
++// Sums the resolved query values of one token. Each query value is a sample count; clamp to u32.
++uint32_t token_count(const detail::SyncToken& token, const uint64_t* values) {
++  uint64_t sum = 0;
++  for (const auto index : token.queries) {
++    sum += values[index];
++  }
++  return static_cast<uint32_t>(std::min<uint64_t>(sum, std::numeric_limits<uint32_t>::max()));
++}
++
++void dispatch(uint16_t token, uint32_t count) {
++  g_last.store(count, std::memory_order_relaxed);
++  const auto callback = g_callback.load(std::memory_order_acquire);
++  if (callback == nullptr) {
++    return;
++  }
++  tDispatching = true;
++  tCount = count;
++  callback(token);
++  tDispatching = false;
++}
++} // namespace
++
++DrawSyncCallback set_draw_sync_callback(DrawSyncCallback callback) noexcept {
++  return g_callback.exchange(callback, std::memory_order_acq_rel);
++}
++
++DrawSyncCallback draw_sync_callback() noexcept { return g_callback.load(std::memory_order_acquire); }
++
++void finish_frame(const wgpu::CommandEncoder& encoder, detail::FramePacket& packet) noexcept {
++  if (packet.syncTokens.empty()) {
++    return;
++  }
++  auto batch = std::make_shared<Batch>();
++  batch->tokens = std::move(packet.syncTokens);
++  packet.syncTokens.clear();
++
++  const uint32_t queryCount = packet.occlusionCount;
++  if (queryCount == 0 || !packet.occlusionQuerySet) {
++    // Nothing was counted this frame, so every token in the batch reports zero.
++    batch->status.store(BatchStatus::Ok, std::memory_order_release);
++  } else {
++    // ponytail: per-frame buffers; pool them if per-frame allocation shows up in profiles.
++    batch->byteSize = static_cast<uint64_t>(queryCount) * sizeof(uint64_t);
++    const wgpu::BufferDescriptor resolveDescriptor{
++        .label = "Pixel Metric Resolve Buffer",
++        .usage = wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopySrc,
++        .size = batch->byteSize,
++    };
++    const auto resolve = g_device.CreateBuffer(&resolveDescriptor);
++    const wgpu::BufferDescriptor readbackDescriptor{
++        .label = "Pixel Metric Readback Buffer",
++        .usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst,
++        .size = batch->byteSize,
++    };
++    batch->readback = g_device.CreateBuffer(&readbackDescriptor);
++    encoder.ResolveQuerySet(packet.occlusionQuerySet, 0, queryCount, resolve, 0);
++    encoder.CopyBufferToBuffer(resolve, 0, batch->readback, 0, batch->byteSize);
++  }
++  g_batches.push_back(std::move(batch));
++}
++
++void after_submit() noexcept {
++  for (auto& batch : g_batches) {
++    if (batch->mapRequested || !batch->readback) {
++      continue;
++    }
++    batch->mapRequested = true;
++    batch->readback.MapAsync(
++        wgpu::MapMode::Read, 0, batch->byteSize, wgpu::CallbackMode::AllowSpontaneous,
++        [batch](wgpu::MapAsyncStatus status, wgpu::StringView message) {
++          if (status == wgpu::MapAsyncStatus::Success) {
++            batch->status.store(BatchStatus::Ok, std::memory_order_release);
++          } else {
++            if (status != wgpu::MapAsyncStatus::CallbackCancelled && status != wgpu::MapAsyncStatus::Aborted) {
++              Log.warn("Pixel metric readback mapping failed {}: {}", magic_enum::enum_name(status), message);
++            }
++            batch->status.store(BatchStatus::Failed, std::memory_order_release);
++          }
++        });
++  }
++}
++
++void poll() noexcept {
++  while (!g_batches.empty()) {
++    auto& batch = *g_batches.front();
++    const auto status = batch.status.load(std::memory_order_acquire);
++    if (status == BatchStatus::Pending) {
++      break;
++    }
++
++    const uint64_t* values = nullptr;
++    if (status == BatchStatus::Ok && batch.readback) {
++      values = static_cast<const uint64_t*>(batch.readback.GetConstMappedRange(0, batch.byteSize));
++    }
++    for (const auto& token : batch.tokens) {
++      // Failed or unmapped batches report zero rather than stalling the game's draw-sync callbacks.
++      dispatch(token.token, values != nullptr ? token_count(token, values) : 0);
++    }
++    if (values != nullptr) {
++      batch.readback.Unmap();
++    }
++    g_batches.pop_front();
++  }
++}
++
++uint32_t read_count() noexcept { return tDispatching ? tCount : g_last.load(std::memory_order_relaxed); }
++
++void shutdown() noexcept {
++  g_batches.clear();
++  g_last.store(0, std::memory_order_relaxed);
++}
++
++} // namespace aurora::gfx::pixel_metric
+diff --git a/lib/gfx/pixel_metric.hpp b/lib/gfx/pixel_metric.hpp
+new file mode 100644
+--- /dev/null
++++ b/lib/gfx/pixel_metric.hpp
+@@ -0,0 +1,31 @@
++#pragma once
++
++#include "types.hpp"
++
++#include <cstdint>
++
++namespace aurora::gfx::detail {
++struct FramePacket;
++} // namespace aurora::gfx::detail
++
++namespace aurora::gfx::pixel_metric {
++
++// Draw-sync callbacks run on the render thread once the GPU has resolved the token's occlusion queries.
++using DrawSyncCallback = void (*)(uint16_t token);
++
++DrawSyncCallback set_draw_sync_callback(DrawSyncCallback callback) noexcept;
++DrawSyncCallback draw_sync_callback() noexcept;
++
++// Render thread: called from the end-frame task before the frame encoder is finished.
++void finish_frame(const wgpu::CommandEncoder& encoder, detail::FramePacket& packet) noexcept;
++// Render thread: called after the frame is submitted; starts async readback mapping.
++void after_submit() noexcept;
++// Render thread: dispatches callbacks for batches whose readback has completed, in order.
++void poll() noexcept;
++
++// Count of the most recently dispatched token. Inside a draw-sync callback it is that token's count.
++uint32_t read_count() noexcept;
++
++void shutdown() noexcept;
++
++} // namespace aurora::gfx::pixel_metric
+diff --git a/lib/gfx/recording.cpp b/lib/gfx/recording.cpp
+--- a/lib/gfx/recording.cpp
++++ b/lib/gfx/recording.cpp
+@@ -54,6 +54,8 @@
+   ClipRect cachedScissor;
+   bool suppressRenderWorker = false;
+   bool normalRequested = false;
++  bool metricOpen = false;
++  std::vector<uint32_t> metricQueries;
+ #ifdef AURORA_GFX_DEBUG_GROUPS
+   std::vector<std::string> debugGroupStack;
+ #endif
+@@ -261,6 +263,14 @@
+   return op;
+ }
+ 
++void end_occlusion_query(RenderPass& pass) {
++  if (!pass.occlusionOpen) {
++    return;
++  }
++  pass.commands.push_back({.type = CommandType::EndOcclusionQuery});
++  pass.occlusionOpen = false;
++}
++
+ void seal_pass(FramePacket& frame, uint32_t passIndex) {
+   if (passIndex >= frame.renderPasses.size()) {
+     return;
+@@ -270,6 +280,7 @@
+     return;
+   }
+   pass.sealed = true;
++  end_occlusion_query(pass);
+ }
+ 
+ Range push(ByteBuffer& target, const uint8_t* data, size_t length, size_t alignment) {
+@@ -364,7 +375,33 @@
+   return command;
+ }
+ 
++// Pixel metric: one occlusion query per render pass covers the draws recorded while the metric is open.
++void begin_pixel_metric_query() {
++  auto& pass = current_render_passes()[g_recorder.currentRenderPass];
++  if (pass.occlusionOpen) {
++    return;
++  }
++  auto& frame = g_recorder.frame();
++  if (frame.occlusionCount >= MaxOcclusionQueries) {
++    static bool warned = false;
++    if (!warned) {
++      Log.warn("Pixel metric: more than {} occlusion queries in one frame; further draws are not counted",
++               MaxOcclusionQueries);
++      warned = true;
++    }
++    return;
++  }
++  const auto index = frame.occlusionCount++;
++  push_command(CommandType::BeginOcclusionQuery, Command::Data{.occlusionQuery = index});
++  pass.occlusionOpen = true;
++  pass.hasOcclusionQueries = true;
++  g_recorder.metricQueries.push_back(index);
++}
++
+ void push_draw_command(DrawCommand data) {
++  if (g_recorder.metricOpen && g_recorder.currentRenderPass != UINT32_MAX) {
++    begin_pixel_metric_query();
++  }
+   push_command(CommandType::Draw, Command::Data{.draw = data});
+   ++g_recorder.drawCallCount;
+ }
+@@ -553,6 +590,7 @@
+ 
+ void enqueue_pass(FramePacket& frame, uint32_t passIndex) {
+   seal_pass(frame, passIndex);
++  }
+   const auto opIndex = static_cast<uint32_t>(frame.ops.size());
+   frame.ops.emplace_back(capture_frame_op(frame, FrameOpType::RenderPass, passIndex));
+   enqueue_op(frame, opIndex);
+@@ -592,6 +630,12 @@
+   AURORA_ASSERT(g_recorder.currentRenderPass == UINT32_MAX,
+                 "end_frame called before finish finalized the current render pass");
+   auto& frame = g_recorder.frame();
++  if (g_recorder.metricOpen) {
++    // ponytail: a pixel-metric segment that crosses a frame boundary is dropped; its token reports 0.
++    Log.warn("Pixel metric segment crossed a frame boundary; its count is lost");
++    g_recorder.metricOpen = false;
++    g_recorder.metricQueries.clear();
++  }
+   frame.stats.drawCallCount = g_recorder.drawCallCount;
+   frame.stats.mergedDrawCallCount = g_recorder.mergedDrawCallCount;
+   frame.stats.lastVertSize = frame.verts.size();
+@@ -718,6 +762,7 @@
+       .dst = std::move(dst),
+       .size = size,
+   });
++  }
+   const auto opIndex = static_cast<uint32_t>(frame.ops.size());
+   frame.ops.emplace_back(capture_frame_op(frame, FrameOpType::TextureCopy, copyIndex));
+   enqueue_op(frame, opIndex);
+@@ -998,6 +1043,27 @@
+   restore_efb();
+ }
+ 
++void begin_pixel_metric() {
++  if (!check_recording("begin_pixel_metric")) {
++    return;
++  }
++  g_recorder.metricOpen = true;
++  g_recorder.metricQueries.clear();
++}
++
++void pixel_metric_sync(uint16_t token) {
++  if (!check_recording("pixel_metric_sync")) {
++    return;
++  }
++  auto& frame = g_recorder.frame();
++  if (g_recorder.currentRenderPass != UINT32_MAX) {
++    end_occlusion_query(current_render_passes()[g_recorder.currentRenderPass]);
++  }
++  frame.syncTokens.push_back({.token = token, .queries = std::move(g_recorder.metricQueries)});
++  g_recorder.metricQueries.clear();
++  g_recorder.metricOpen = false;
++}
++
+ bool create_pass(uint32_t width, uint32_t height) {
+   if (width == 0 || height == 0) {
+     Log.warn("create_pass: invalid size {}x{}", width, height);
+diff --git a/lib/gfx/recording.hpp b/lib/gfx/recording.hpp
+--- a/lib/gfx/recording.hpp
++++ b/lib/gfx/recording.hpp
+@@ -56,6 +56,8 @@
+ void queue_texture_copy(wgpu::TexelCopyTextureInfo src, wgpu::TexelCopyTextureInfo dst, wgpu::Extent3D size);
+ void begin_offscreen(uint32_t width, uint32_t height);
+ void end_offscreen();
++void begin_pixel_metric();
++void pixel_metric_sync(uint16_t token);
+ bool has_normal_attachment() noexcept;
+ RenderTargetLayout get_render_target_layout() noexcept;
+ void clear_caches() noexcept;
+diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
+--- a/lib/gx/command_processor.cpp
++++ b/lib/gx/command_processor.cpp
+@@ -429,6 +429,23 @@
+     // For texture_size_bias uniform
+     if (cache.bindGroups.textureBindGroup != prevBindGroup) {
+       state.dirty |= DirtyUniform;
++    }
++  }
++    std::string desc = fmt::format("prim={} indices={} blend={} src={} dst={} op={} tex:", static_cast<int>(prim),
++                                   numIndices, static_cast<int>(state.blendMode), static_cast<int>(state.blendFacSrc),
++                                   static_cast<int>(state.blendFacDst), static_cast<int>(state.blendOp));
++    for (u32 i = 0; i < MaxTextures; ++i) {
++      if (!cache.shaderInfo.sampledTextures.test(i)) {
++        continue;
++      }
++      const auto& ref = state.textures[i].ref;
++      if (!ref) {
++        desc += fmt::format(" [{}:none]", i);
++        continue;
++      }
++      desc += fmt::format(" [{}:{:p} {}x{} fmt={} gx={}]", i, static_cast<const void*>(ref.get()),
++                          ref->texture.GetWidth(), ref->texture.GetHeight(),
++                          static_cast<uint32_t>(ref->texture.GetFormat()), static_cast<uint32_t>(ref->gxFormat));
+     }
+   }
+ 
+@@ -693,6 +710,12 @@
+     g_gxState.texCopyDest = reinterpret_cast<const void*>(reader.read<u64>());
+   } else if (subCmd == GX_AURORA_REQUEST_DEPTH_SNAPSHOT) {
+     gfx::depth_peek::request_snapshot();
++  } else if (subCmd == GX_AURORA_REQUEST_COLOR_SNAPSHOT) {
++    gfx::depth_peek::request_color_snapshot();
++  } else if (subCmd == GX_AURORA_CLEAR_PIX_METRIC) {
++    gfx::begin_pixel_metric();
++  } else if (subCmd == GX_AURORA_DRAW_SYNC) {
++    gfx::pixel_metric_sync(reader.read<u16>());
+   } else if (subCmd == GX_AURORA_BEGIN_OFFSCREEN) {
+     const u32 width = reader.read<u32>();
+     const u32 height = reader.read<u32>();
+diff --git a/tests/gx_fifo_test.cpp b/tests/gx_fifo_test.cpp
+--- a/tests/gx_fifo_test.cpp
++++ b/tests/gx_fifo_test.cpp
+@@ -6,6 +6,8 @@
+ 
+ #include "gx_test_common.hpp"
+ #include "__gx.h"
++#include <dolphin/gx/GXManage.h>
++#include <dolphin/gx/GXPerf.h>
+ 
+ #include <algorithm>
+ #include <atomic>
+@@ -27,6 +29,12 @@
+ extern std::atomic<uint32_t> offscreenHeight;
+ } // namespace testing
+ } // namespace aurora::gfx
++
++namespace aurora::gfx::pixel_metric::testing {
++extern uint32_t readCount;
++extern uint32_t beginCount;
++extern int lastSyncToken;
++} // namespace aurora::gfx::pixel_metric::testing
+ 
+ namespace {
+ bool wait_for(const std::atomic<uint32_t>& value, uint32_t expected) {
+@@ -3660,6 +3668,57 @@
+   EXPECT_TRUE(aurora::gfx::depth_peek::testing::snapshot_requested());
+ }
+ 
++TEST_F(GXFifoTest, PeekARGB_ReturnsLatestCompletedSnapshot) {
++  aurora::gfx::depth_peek::testing::set_latest_color(2, 2, {0xff000001, 0xff000002, 0xff000003, 0xff123456});
++
++  u32 color = 0;
++  GXPeekARGB(1, 1, &color);
++
++  EXPECT_EQ(color, 0xff123456u);
++
++  auto bytes = capture_fifo();
++  EXPECT_TRUE(has_aurora_cmd(bytes, GX_AURORA_REQUEST_COLOR_SNAPSHOT));
++  decode_fifo(bytes);
++}
++
++TEST_F(GXFifoTest, PeekARGB_OutOfRangeFallsBackToZero) {
++  aurora::gfx::depth_peek::testing::set_latest_color(1, 1, {0xff000001});
++
++  u32 color = 0xabcdef;
++  GXPeekARGB(1, 0, &color);
++
++  EXPECT_EQ(color, 0u);
++}
++
++TEST_F(GXFifoTest, PixMetric_ClearAndSyncEmitTokenCommands) {
++  aurora::gfx::pixel_metric::testing::beginCount = 0;
++  aurora::gfx::pixel_metric::testing::lastSyncToken = -1;
++
++  GXClearPixMetric();
++  auto bytes = capture_fifo();
++  EXPECT_TRUE(has_aurora_cmd(bytes, GX_AURORA_CLEAR_PIX_METRIC));
++  decode_fifo(bytes);
++  EXPECT_EQ(aurora::gfx::pixel_metric::testing::beginCount, 1u);
++
++  // Inside an open segment the token is queued as DRAW_SYNC instead of running the callback here.
++  GXSetDrawSync(0x92);
++  bytes = capture_fifo();
++  EXPECT_TRUE(has_aurora_cmd(bytes, GX_AURORA_DRAW_SYNC));
++  decode_fifo(bytes);
++  EXPECT_EQ(aurora::gfx::pixel_metric::testing::lastSyncToken, 0x92);
++}
++
++TEST_F(GXFifoTest, ReadPixMetric_ReturnsCountAndZeroesOtherCounters) {
++  aurora::gfx::pixel_metric::testing::readCount = 42;
++
++  u32 topIn = 1, topOut = 1, botIn = 1, botOut = 1, clr = 0, clocks = 1;
++  GXReadPixMetric(&topIn, &topOut, &botIn, &botOut, &clr, &clocks);
++
++  EXPECT_EQ(clr, 42u);
++  EXPECT_EQ(topIn, 0u);
++  EXPECT_EQ(clocks, 0u);
++}
++
+ // ============================================================================
+ // Composite tests (multiple state changes in a single FIFO stream)
+ // ============================================================================
+diff --git a/tests/gx_test_stubs.cpp b/tests/gx_test_stubs.cpp
+--- a/tests/gx_test_stubs.cpp
++++ b/tests/gx_test_stubs.cpp
+@@ -7,6 +7,7 @@
+ #include "gfx/frame_packet.hpp"
+ #include "gfx/resources.hpp"
+ #include "gfx/depth_peek.hpp"
++#include "gfx/pixel_metric.hpp"
+ #include "gfx/recording.hpp"
+ #include "gfx/tex_copy_conv.hpp"
+ #include "gfx/tex_palette_conv.hpp"
+@@ -234,14 +235,19 @@
+ uint32_t s_width = 0;
+ uint32_t s_height = 0;
+ std::vector<uint32_t> s_data;
++uint32_t s_colorWidth = 0;
++uint32_t s_colorHeight = 0;
++std::vector<uint32_t> s_colorData;
+ } // namespace
+ 
+ void initialize() {}
+ void shutdown() {}
+ void request_snapshot() noexcept { s_snapshotRequested = true; }
++void request_color_snapshot() noexcept {}
+ void poll() noexcept {}
+ void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureView& depthView,
+-                           wgpu::Extent3D sourceSize, uint32_t msaaSamples) noexcept {}
++                           const wgpu::TextureView& colorView, wgpu::Extent3D sourceSize,
++                           uint32_t msaaSamples) noexcept {}
+ void after_submit() noexcept {}
+ 
+ bool read_latest(uint16_t x, uint16_t y, uint32_t& z) noexcept {
+@@ -249,6 +255,14 @@
+     return false;
+   }
+   z = s_data[static_cast<size_t>(y) * s_width + x] & 0x00ffffffu;
++  return true;
++}
++
++bool read_latest_color(uint16_t x, uint16_t y, uint32_t& argb) noexcept {
++  if (x >= s_colorWidth || y >= s_colorHeight || s_colorData.empty()) {
++    return false;
++  }
++  argb = s_colorData[static_cast<size_t>(y) * s_colorWidth + x];
+   return true;
+ }
+ 
+@@ -258,6 +272,9 @@
+   s_width = 0;
+   s_height = 0;
+   s_data.clear();
++  s_colorWidth = 0;
++  s_colorHeight = 0;
++  s_colorData.clear();
+ }
+ 
+ bool snapshot_requested() noexcept { return s_snapshotRequested; }
+@@ -267,8 +284,37 @@
+   s_height = height;
+   s_data = data;
+ }
++
++void set_latest_color(uint32_t width, uint32_t height, const std::vector<uint32_t>& data) {
++  s_colorWidth = width;
++  s_colorHeight = height;
++  s_colorData = data;
++}
+ } // namespace testing
+ } // namespace aurora::gfx::depth_peek
++
++namespace aurora::gfx::pixel_metric {
++namespace testing {
++uint32_t readCount = 0;
++uint32_t beginCount = 0;
++int lastSyncToken = -1;
++} // namespace testing
++namespace {
++DrawSyncCallback s_callback = nullptr;
++} // namespace
++DrawSyncCallback set_draw_sync_callback(DrawSyncCallback callback) noexcept {
++  const auto previous = s_callback;
++  s_callback = callback;
++  return previous;
++}
++DrawSyncCallback draw_sync_callback() noexcept { return s_callback; }
++uint32_t read_count() noexcept { return testing::readCount; }
++} // namespace aurora::gfx::pixel_metric
++
++namespace aurora::gfx {
++void begin_pixel_metric() { pixel_metric::testing::beginCount++; }
++void pixel_metric_sync(uint16_t token) { pixel_metric::testing::lastSyncToken = token; }
++} // namespace aurora::gfx
+ 
+ namespace aurora::gfx::tex_copy_conv {
+ bool needs_conversion(GXTexFmt fmt) { return false; }
