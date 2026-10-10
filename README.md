@@ -4,22 +4,31 @@ A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The gam
 
 ## Status
 
-Not playable end to end yet. Reported by the lead on the development build (not re-verified in this README):
+Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. Updated with every milestone.
 
-- Bianco Hills renders with textures when started with `SUNSHINE_DEV_START=bianco/0`. Mario walks and jumps, and the camera follows him.
-- The matching-build SHA-1 check passes, and the strict link has 0 unresolved symbols.
+| Area | State | Evidence / gap |
+| --- | --- | --- |
+| Matching decomp build (SHA-1 `9f5a8caf…`) | done | `ninja` in `sms/` |
+| Strict link, 0 unresolved symbols | done | `tools/_strict.cmd` |
+| Units compiled (clang-cl) | done | 584/584 built units; 624/733 incl. excluded (`docs/platform-notes.md`) |
+| Boot: logo, intro movies | done | normal `--dvd` boot |
+| Title screen | partial | logo, Shine Sprite, seagulls render, logic 30/s; area behind the logo black (retail background unverified) |
+| Title → file select → new game → Delfino | open | in progress |
+| Bianco Hills Ep.1 (dev start) | partial | textured, HUD, Mario walks/jumps, camera follows; flat untextured polygon at the screen edge |
+| First Shine + save + reload | open | in progress |
+| Goop / pixel metric | open | GPU occlusion gives 0/1 only; needs real fragment counts |
+| Audio | partial | movies and title music play; gameplay output turns into noise after ~20 s |
+| Particles | partial | JPA loads; some particle view objects not in the draw lists |
+| Unlocked framerate | partial | replay works on the title but halves logic speed; default is retail 30 fps; interpolation not started |
+| Widescreen | partial | implemented, visuals not verified |
+| Launcher, settings | partial | pages render; clicks/runtime effects unverified |
+| Cheats, mods | partial | 38 headless checks pass; in-game effects unverified |
+| Controller glyphs | partial | assets + hook, unverified in game |
+| FSR1 upscaling | partial | implemented, unverified |
+| DLSS | blocked | needs motion vectors and a D3D12 handoff Dawn does not expose (`docs/dlss-feasibility.md`) |
+| Release package | partial | packaging script exists, not run on the current tree |
 
-Open, not working or not verified:
-
-- Title screen rendering (`GXCopyDisp` is still a stub).
-- Title screen, file select, and new game flow.
-- First Shine collection and saving.
-- Goop and the pixel metric path.
-- Audio: BGM is noise after about 20 seconds.
-- DLSS: feasibility notes only, not started.
-- Widescreen and interpolation: not visually verified.
-
-See [`sunshine-pc/docs/status.md`](sunshine-pc/docs/status.md) for the requirement table and blockers (`status.md` is partly out of date; the list above is the newer one).
+Plan and order of work: [`ROADMAP.md`](ROADMAP.md).
 
 ## Legal
 
