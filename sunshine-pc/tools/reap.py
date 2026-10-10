@@ -39,9 +39,6 @@ def kill(pid, why, path):
 
 
 def one_pass(limit_min, enforce):
-    lock = os.path.join(ROOT, "build", "_build.lock")
-    if os.path.isdir(lock) and time.time() - os.path.getmtime(lock) > 1800:
-        os.rmdir(lock)
     out = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", PS], capture_output=True, text=True, creationflags=NO_WINDOW).stdout
     now = time.time()
     mute_mtime = os.path.getmtime(MUTE_SRC) if os.path.exists(MUTE_SRC) else 0
