@@ -1233,7 +1233,7 @@ void sunshineReplayFrame()
 	// render mode that the draw lists read.
 	JDrama::TGraphics local;
 	JDrama::SunshineApplyDisplay(d->unkC0, &local);
-	local.unk2 = 0;
+	local.unk0 = 0; // the flag halfword direct() writes (asm 0x800ED050: sth to TGraphics+0x0)
 	d->unk34->perform(CUE_ALL & ~(CUE_MOVE | CUE_CALC_ANIM), &local);
 	d->unk40->perform(CUE_ALL, &local);
 	d->unk38->perform(CUE_ALL, &local);

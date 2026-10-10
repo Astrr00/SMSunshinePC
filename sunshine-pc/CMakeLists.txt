@@ -26,7 +26,7 @@ set(AURORA_ENABLE_THP OFF CACHE BOOL "" FORCE)
 set(AURORA_ENABLE_RMLUI ON CACHE BOOL "" FORCE)
 # Developers can point this at a private copy of Aurora to work on multi-file changes without breaking other trees.
 set(SUNSHINE_AURORA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora" CACHE PATH "Aurora source directory")
-add_subdirectory(${SUNSHINE_AURORA_DIR} aurora EXCLUDE_FROM_ALL)
+add_subdirectory(${SUNSHINE_AURORA_DIR} extern/aurora EXCLUDE_FROM_ALL)
 
 # Decomp game code, listed by tools/gen-files.py from sms/configure.py.
 set(SMS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../sms)
