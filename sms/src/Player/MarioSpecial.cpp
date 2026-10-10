@@ -677,6 +677,7 @@ void TMario::getOnWirePosAngle(JGeometry::TVec3<f32>* outPos, s16* outAngle)
 	*outAngle = matan(dirCopy.z, dirCopy.x);
 }
 
+#pragma dont_inline on
 BOOL TMario::wireMove(f32 param_1)
 {
 	JGeometry::TVec3<f32> start = mWireStartPos;
@@ -698,6 +699,7 @@ BOOL TMario::wireMove(f32 param_1)
 		mWirePosRatio += delta;
 	return clean;
 }
+#pragma dont_inline off
 
 BOOL TMario::wireWait()
 {
@@ -995,13 +997,6 @@ BOOL TMario::wireHanging()
 
 	setAnimation(ANIM_ROPE_HGWAT, 1.0f);
 	return 0;
-}
-
-s16 TMario::getNozzleEmitVX()
-{
-#ifdef TARGET_PC
-	return 0;
-#endif
 }
 
 BOOL TMario::wireRolling()

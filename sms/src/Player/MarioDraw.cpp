@@ -763,10 +763,6 @@ static int MarioFootDirLCtrl(J3DNode* param_1, int param_2)
 	return 1;
 }
 
-void TMario::getJumpIntoWaterModelData() { }
-
-void TMario::getHeadRot() { }
-
 Mtx* TMario::getRootAnmMtx() { return (Mtx*)mModel->getModel()->getAnmMtx(0); }
 
 MtxPtr TMario::getCenterAnmMtx()

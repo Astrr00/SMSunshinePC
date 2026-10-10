@@ -689,8 +689,6 @@ public:
 	void rumbleStart(int, int);
 
 	// Draw stuff
-	void getJumpIntoWaterModelData();
-	void getHeadRot();
 	Mtx* getRootAnmMtx();
 	MtxPtr getCenterAnmMtx();
 	f32 getPumpFrame() const;
@@ -1034,7 +1032,6 @@ public:
 	BOOL wireSWaitToHang();
 	BOOL wireReturn();
 	BOOL wireHanging();
-	s16 getNozzleEmitVX();
 	BOOL wireRolling();
 	BOOL wireSWaitToWaitL();
 	BOOL wireSWaitToWaitR();

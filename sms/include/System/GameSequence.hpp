@@ -6,7 +6,10 @@
 
 class TGameSequence {
 public:
-	TGameSequence() { set(0, 0, 0); }
+	TGameSequence(u8 stage = 0, u8 scenario = 0, JDrama::TFlagT<u16> flag = 0)
+	{
+		set(stage, scenario, flag);
+	}
 
 	TGameSequence& operator=(const TGameSequence& other)
 	{

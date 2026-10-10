@@ -620,6 +620,18 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 }
 
 // fabricated
+static inline int getHiddenOffsetY(TExPane* pane)
+{
+	return -(pane->mInitialBounds.y2 + 1);
+}
+
+// fabricated
+static inline int getBelowScreenOffsetY(TExPane* pane)
+{
+	return 465 - pane->getInitialBounds().y1;
+}
+
+// fabricated
 static inline void detachBoundPaneFromParent(TBoundPane* pane)
 {
 	detachPaneFromParent(pane->getPane());
@@ -2367,17 +2379,17 @@ void TGCConsole2::startDownLeftBot()
 	unk5A = 1;
 
 	if (unk44C->getPane()->isVisible() && unk44C->isInterpolatorAtZero()) {
-		unk44C->updatePaneOffset(20, 0, 525 - unk44C->getInitialBounds().y1);
+		unk44C->updatePaneOffset(20, 0, getBelowScreenOffsetY(unk44C) + 60);
 		unk51C = 1;
 	}
 
 	if (unk428->getPane()->isVisible()) {
-		unk428->updatePaneOffset(20, 0, 525 - unk428->getInitialBounds().y1);
+		unk428->updatePaneOffset(20, 0, getBelowScreenOffsetY(unk428) + 60);
 		unk448 = 1;
 	}
 
 	if (unk3FC->getPane()->isVisible()) {
-		unk3FC->updatePaneOffset(20, 0, 525 - unk3FC->getInitialBounds().y1);
+		unk3FC->updatePaneOffset(20, 0, getBelowScreenOffsetY(unk3FC) + 60);
 		unk426 = 1;
 	}
 }
@@ -2436,7 +2448,7 @@ void TGCConsole2::startDisappearTelop()
 
 void TGCConsole2::startDisappearTimer()
 {
-	unk44C->updatePaneOffset(40, 0, 525 - unk44C->getInitialBounds().y1);
+	unk44C->updatePaneOffset(40, 0, getBelowScreenOffsetY(unk44C) + 60);
 	unk3F = 1;
 	unk5A = 1;
 }
@@ -2488,7 +2500,7 @@ void TGCConsole2::startInsertTimer()
 	unk59 = 1;
 
 	unk44C->getPane()->show();
-	unk44C->setPaneOffset(40, 0, 0, 0, 465 - unk44C->getInitialBounds().y1);
+	unk44C->setPaneOffset(40, 0, 0, 0, getBelowScreenOffsetY(unk44C));
 
 	unk450->getPane()->show();
 	unk450->setPanePosition(50, cUpTopPoint, cUpMidPoint, cUpMidPoint);
@@ -2686,9 +2698,8 @@ bool TGCConsole2::startAppearBalloon(u32 messageID, bool autoClose)
 
 void TGCConsole2::startDisappearStar()
 {
-	int offset = -(unk140->mInitialBounds.y2 + 1);
-	unk140->updatePaneOffset(40, 0, offset + unk26A);
-	unk160->updatePaneOffset(40, 0, -(unk160->mInitialBounds.y2 + 1));
+	unk140->updatePaneOffset(40, 0, getHiddenOffsetY(unk140) + unk26A);
+	unk160->updatePaneOffset(40, 0, getHiddenOffsetY(unk160));
 	unk108->updatePaneOffset(40, 0, unk26A);
 
 	unk144->setStatus(JPABaseEmitter::STATUS_STOP_EMIT);
@@ -2713,7 +2724,7 @@ void TGCConsole2::startAppearStar()
 		unk35 = 0;
 	}
 
-	unk140->setPaneOffset(40, 0, 0, 0, -(unk140->mInitialBounds.y2 + 1));
+	unk140->setPaneOffset(40, 0, 0, 0, getHiddenOffsetY(unk140));
 	unk140->getPane()->show();
 	unk128->setPanePosition(50, cDownTopPoint, cDownMidPoint, cDownMidPoint);
 
@@ -2722,7 +2733,7 @@ void TGCConsole2::startAppearStar()
 	for (int i = 0; i < 3; ++i)
 		unk134[i]->getPane()->hide();
 
-	unk160->setPaneOffset(40, 0, 0, 0, -(unk160->mInitialBounds.y2 + 1));
+	unk160->setPaneOffset(40, 0, 0, 0, getHiddenOffsetY(unk160));
 	unk160->getPane()->show();
 	unk148->setPanePosition(50, cDownTopPoint, cDownMidPoint, cDownMidPoint);
 

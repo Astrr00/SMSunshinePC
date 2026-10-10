@@ -300,15 +300,16 @@ void TApplication::initialize_bootAfter()
 	this_01->mountFixed(arcBufNLogo, MBF_0);
 
 	this_01->becomeCurrent("/font");
-	u32 uVar1
-	    = this_01->getResSize(this_01->getResource("standard_fontEx.bfn"));
+	void* fontRes = this_01->getResource("standard_fontEx.bfn");
+	u32 uVar1     = this_01->getResSize(fontRes);
 	ResFONT* font = (ResFONT*)new (0x20) u8[uVar1];
 	this_01->readResource(font, uVar1, "standard_fontEx.bfn");
 	gpSystemFont = new JUTResFont(font, nullptr);
 
 	this_01->becomeCurrent("/audi");
-	u32 uVar3 = this_01->getResSize(this_01->getResource("mSound.aaf"));
-	u8* buf   = new u8[uVar3];
+	void* aafRes = this_01->getResource("mSound.aaf");
+	u32 uVar3    = this_01->getResSize(aafRes);
+	u8* buf      = new u8[uVar3];
 	this_01->readResource(buf, uVar3, "mSound.aaf");
 	JKRHeap* prevHeap = JKRGetCurrentHeap();
 	gpMSound = new MSound(prevHeap, nullptr, 0xF40000, buf, nullptr, 0xb00000);

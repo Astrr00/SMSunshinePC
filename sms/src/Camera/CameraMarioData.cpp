@@ -106,27 +106,6 @@ bool TCameraMarioData::isMarioLeanMirror() const
 	return result;
 }
 
-bool TCameraMarioData::isMarioBathtub() const
-{
-#ifdef TARGET_PC
-	return false;
-#endif
-}
-
-bool TCameraMarioData::isMarioDoorDemoStart() const
-{
-#ifdef TARGET_PC
-	return false;
-#endif
-}
-
-bool TCameraMarioData::isMarioDoorDemoEnd() const
-{
-#ifdef TARGET_PC
-	return false;
-#endif
-}
-
 bool TCameraMarioData::isMarioClimb(u32 status) const
 {
 	bool result = false;

@@ -272,8 +272,7 @@ void TSandBombBase::explode()
 
 	JPABaseEmitter* emitter
 	    = gpMarioParticleManager->emit(0x55, &mPosition, 0, nullptr);
-	emitter->mGlobalDynamicsScale.setAll(mExplodeScale);
-	emitter->mGlobalParticleScale.setAll(mExplodeScale);
+	emitter->setGlobalScale(JGeometry::TVec3<f32>(mExplodeScale));
 
 	if (!SMSGetMarDirector()->isDemoModeNow())
 		gpCameraShake->startShake((EnumCamShakeMode)0xD, 1.0f);
@@ -439,7 +438,23 @@ void TSandCastle::expanded()
 
 void TSandCastle::explode()
 {
-	TSandBombBase::explode();
+	startControlAnim(1);
+	mScaling.y = 1.0f;
+	mMapCollisionManager->changeCollision(1);
+	mMapCollisionManager->unk8->setUp();
+	if (mMapCollisionManager->unk8)
+		mMapCollisionManager->unk8->moveSRT(mPosition, mRotation, mScaling);
+
+	JPABaseEmitter* emitter
+	    = gpMarioParticleManager->emit(0x55, &mPosition, 0, nullptr);
+	emitter->setGlobalScale(JGeometry::TVec3<f32>(mExplodeScale));
+
+	if (!SMSGetMarDirector()->isDemoModeNow())
+		gpCameraShake->startShake((EnumCamShakeMode)0xD, 1.0f);
+
+	SMSGetMSound()->startSoundActor(0x28A4, &mPosition, 0, nullptr, 0, 4);
+	SMSRumbleMgr->start(0x15, mExlodingRumbleTime, &mPosition);
+	mState = STATE_EXPLODING;
 	awake();
 	mStageSwitch->appear();
 	startControlAnim(3);
@@ -644,8 +659,9 @@ void TLeanMirror::release()
 static s32 startCameraShakeSE(TMarDirector::DemoCallbackArg position, u32 state)
 {
 	if (state == 0) {
-		SMSGetMSound()->startSoundActor(
-		    0x3008, reinterpret_cast<const Vec*>(position), 0, nullptr, 0, 4);
+		const Vec* pos = reinterpret_cast<const Vec*>(position);
+		SMSGetMSound()->startSoundActor(MSD_SE_OBJ_QUAKE, pos, 0, nullptr, 0,
+		                                4);
 	}
 	return 0;
 }

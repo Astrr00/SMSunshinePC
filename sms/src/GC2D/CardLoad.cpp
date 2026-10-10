@@ -868,7 +868,8 @@ bool TCardLoad::titleDraw()
 	} break;
 
 	case 4: {
-		for (int i = 0; i < 13; ++i) {
+		// asm 0x8022D16C
+		for (int i = 0; i < 11; ++i) {
 			switch (unk222[i]) {
 			case 0:
 				if (unkF8[i]->update()) {
@@ -1898,7 +1899,8 @@ s8 TCardLoad::selectFunction()
 
 	case 1: {
 		bool done = true;
-		for (int i = 0; i < 4; ++i)
+		// asm 0x80226050
+		for (int i = 0; i < 3; ++i)
 			done &= unk2A4[i]->update();
 		done &= unk33C[unkB0]->update();
 		if (done) {
@@ -2060,7 +2062,8 @@ s8 TCardLoad::selectFunction()
 	case 4: {
 		bool done = true;
 		done &= unk33C[unkB0]->update();
-		for (int i = 0; i < 4; ++i)
+		// asm 0x802273B0
+		for (int i = 0; i < 3; ++i)
 			done &= unk2A4[i]->update();
 		if (done) {
 			unk33C[unkB0]->getPane()->hide();

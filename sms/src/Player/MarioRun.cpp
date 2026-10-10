@@ -512,7 +512,7 @@ void TMario::doRunning()
 		rotSp = (s16)((f32)rotSp * mYoshiParams.mRotYoshiMult.get());
 
 	if (checkFlag(MARIO_FLAG_FLUDD_EMITTING))
-		rotSp = mDeParams.mRunningRotSpMin.get();
+		rotSp = mRunParams.mDashRotSp.get();
 
 	if (isRunningInWater()) {
 		mForwardVel *= -(
@@ -656,7 +656,7 @@ BOOL TMario::running()
 			return changePlayerStatus(0xC400209, 0, false);
 		}
 		if (mStatusTimer > 0xF0 && mForwardVel >= 16.0f
-		    && mGroundPlane->mNormal.y <= 0.17364818f) {
+		    && mGroundPlane->mNormal.y >= 0.17364818f) {
 			return changePlayerStatus(MARIO_STATUS_BRAKE, 0, false);
 		}
 		return changePlayerStatus(MARIO_STATUS_WALK_END, 0, false);
@@ -681,7 +681,7 @@ BOOL TMario::running()
 			return changePlayerStatus(0xC400209, 0, false);
 		}
 		if (mStatusTimer > 0xF0 && mForwardVel >= 16.0f
-		    && mGroundPlane->mNormal.y <= 0.17364818f) {
+		    && mGroundPlane->mNormal.y >= 0.17364818f) {
 			return changePlayerStatus(MARIO_STATUS_BRAKE, 0, false);
 		}
 		return changePlayerStatus(MARIO_STATUS_WALK_END, 0, false);
@@ -798,7 +798,7 @@ BOOL TMario::rotating()
 	if (mStatus == MARIO_STATUS_ROTATE_L)
 		mModelFaceAngle = mStatusTimer * 4096;
 	else
-		mModelFaceAngle = -(mStatusTimer * 4096);
+		mModelFaceAngle = mStatusTimer * -4096;
 
 	return 0;
 }
@@ -1332,7 +1332,7 @@ BOOL TMario::oilSlip()
 	}
 
 	f32 tmp = mDirtyParams.mPolSizeSlip.get();
-	gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, tmp);
+	gpPollution->pollute(mPosition.x, mPosition.y, mPosition.z, tmp);
 	SMSGetMSound()->startSoundActor(MSD_SE_MA_SLIP_POLLUT_CP, &mPosition, 0,
 	                                nullptr, 0, 4);
 

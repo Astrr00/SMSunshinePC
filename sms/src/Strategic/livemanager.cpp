@@ -85,15 +85,14 @@ void TLiveManager::setFlagOutOfCube()
 
 void TLiveManager::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	char trash[16];
 
 	if (cue & CUE_CALC_ANIM) {
 		if (unk30 & 1)
-			TTimeRec::startTimer();
+			TTimeRec::snapCPUTime(JUtility::TColor(0xff, 0xff, 0xff, 0xff));
 		clipActors(graphics);
 		setFlagOutOfCube();
 		if (unk30 & 1)
-			TTimeRec::endTimer();
+			TTimeRec::snapCPUTime(0);
 	}
 
 	TObjManager::perform(cue, graphics);

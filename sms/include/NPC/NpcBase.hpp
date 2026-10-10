@@ -87,7 +87,6 @@ public:
 	bool isNerveCanGoToWet() const;
 	bool isNerveCanGoToSink() const;
 	bool isNerveCanGoToTaken() const;
-	bool isNerveCanGoToThrow() const;
 	bool isNerveCanGoToMad() const;
 	bool isNerveCanGoToBlown() const;
 

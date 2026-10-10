@@ -107,7 +107,8 @@ TDrawSyncManager::TDrawSyncManager(u32 param_1, u32 param_2, s32 param_3)
 #ifdef TARGET_PC
 	OSInitMessageQueue(&mMessageQueue, new OSMessage[0x14], 0x14); // OSMessage is pointer-sized on the host
 #else
-	OSInitMessageQueue(&mMessageQueue, new u8[0x50], 0x14);
+	OSMessage* msgs = new OSMessage[0x14];
+	OSInitMessageQueue(&mMessageQueue, msgs, 0x14);
 #endif
 	mFifo = new TFifo(param_2);
 	OSResumeThread(&mProcessingThread);

@@ -329,7 +329,7 @@ public:
 	/* 0x214 */ f32 unk214;
 	/* 0x218 */ f32 unk218;
 	/* 0x21C */ f32 unk21C;
-	/* 0x220 */ Vec unk220;
+	/* 0x220 */ JGeometry::TVec3<f32> unk220;
 	/* 0x22C */ THaneHamuKuriSaveLoadParams* unk22C;
 	/* 0x230 */ f32 unk230;
 	/* 0x234 */ f32 unk234;

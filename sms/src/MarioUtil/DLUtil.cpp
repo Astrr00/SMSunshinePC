@@ -114,21 +114,6 @@ void TDLTexQuad::draw()
 	}
 }
 
-void TDLTexQuadMulti::setChangeNum(u16) { }
-
-void TDLTexQuadMulti::createDLBuffer(u16) { }
-
-bool TDLTexQuadMulti::request(const JGeometry::TVec3<f32>*)
-{
-#ifdef TARGET_PC
-	return false;
-#endif
-}
-
-void TDLTexQuadMulti::setEnd() { }
-
-void TDLTexQuadMulti::draw(int) { }
-
 void TDLColorTexQuad::createColorArrayBuffer(u16 param_1)
 {
 	unk20[0] = new (0x20) GXColor[param_1];

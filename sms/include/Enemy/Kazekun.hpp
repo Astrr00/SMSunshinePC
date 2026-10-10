@@ -49,6 +49,8 @@ public:
 
 	void doAttackPose(bool);
 	void flyAroundMario();
+	bool isDamage() const;
+	bool isHitWater() const;
 
 	// fabricated
 	TKazekunParams* getSaveParam2() const

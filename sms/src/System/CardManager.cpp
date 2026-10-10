@@ -95,38 +95,26 @@ void TCardManager::TCriteria::setEmpty()
 	}
 }
 
-// TODO: incorrect
 #pragma dont_inline on
 s32 TCardManager::decideUseSector(TCardManager::TCriteria* criteria)
 {
-	if (criteria[0].getState() == TCriteria::STATE_EMPTY)
-		return CARD_RESULT_WRONGDEVICE;
-
-	if (criteria[0].getState() == TCriteria::STATE_CHECKSUM_BAD) {
+	s32 result;
+	if (criteria[0].getState() == TCriteria::STATE_EMPTY) {
+		result = CARD_RESULT_WRONGDEVICE;
+	} else if (criteria[0].getState() == TCriteria::STATE_CHECKSUM_BAD) {
 		if (criteria[1].getState() == TCriteria::STATE_CHECKSUM_BAD)
-			return CARD_RESULT_BUSY;
-		return 1;
+			result = CARD_RESULT_BUSY;
+		else
+			result = 1;
+	} else if (criteria[1].getState() == TCriteria::STATE_CHECKSUM_BAD) {
+		result = 0;
+	} else {
+		result = criteria[0].getWriteCount() >= criteria[1].getWriteCount() ? 0
+		                                                                    : 1;
 	}
-
-	if (criteria[1].getState() == TCriteria::STATE_CHECKSUM_BAD)
-		return 0;
-
-	s32 idx;
-	if (criteria[0].getWriteCount() >= criteria[1].getWriteCount())
-		idx = 0;
-	else
-		idx = 1;
-	return idx;
+	return result;
 }
 #pragma dont_inline off
-
-// TODO: what is this?
-s32 TCardManager::getLoadIndex(TCardManager::TCriteria* criteria)
-{
-#ifdef TARGET_PC
-	return 0;
-#endif
-}
 
 s32 TCardManager::getWriteCount(TCardManager::TCriteria* criteria)
 {
@@ -455,14 +443,11 @@ s32 TCardManager::filledInitData_(CARDFileInfo* file)
 	sector->setCheckSum(0);
 
 	for (int i = 1; i < ARRAY_COUNT(mSectorCriteria); ++i) {
-		TCriteria* crit = &mSectorCriteria[i];
-		if (crit->getState() != TCriteria::STATE_EMPTY)
-			continue;
-
-		s32 errc = writeCardSector_(file, i, sector, crit);
-
-		if (errc != 0)
-			return errc;
+		if (mSectorCriteria[i].getState() == TCriteria::STATE_EMPTY) {
+			s32 errc = writeCardSector_(file, i, sector, &mSectorCriteria[i]);
+			if (errc != 0)
+				return errc;
+		}
 	}
 
 	return setCardStat_(file);
@@ -481,12 +466,13 @@ s32 TCardManager::setCardStat_(CARDFileInfo* file)
 		CARDSetBannerFormat(&stat, CARD_STAT_BANNER_C8);
 		CARDSetIconAnim(&stat, CARD_STAT_ANIM_LOOP);
 
-		CARDSetIconFormat(&stat, 0, CARD_STAT_ICON_C8);
-		CARDSetIconSpeed(&stat, 0, CARD_STAT_SPEED_SLOW);
-		CARDSetIconFormat(&stat, 1, CARD_STAT_ICON_C8);
-		CARDSetIconSpeed(&stat, 1, CARD_STAT_SPEED_SLOW);
+		int i;
+		for (i = 0; i < 2; ++i) {
+			CARDSetIconFormat(&stat, i, CARD_STAT_ICON_C8);
+			CARDSetIconSpeed(&stat, i, CARD_STAT_SPEED_SLOW);
+		}
 
-		for (u16 i = 2; i < CARD_ICON_MAX; ++i) {
+		for (; i < CARD_ICON_MAX; ++i) {
 			CARDSetIconFormat(&stat, i, CARD_STAT_ICON_NONE);
 			CARDSetIconSpeed(&stat, i, CARD_STAT_SPEED_END);
 		}

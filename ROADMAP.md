@@ -9,10 +9,22 @@ Last updated from observed state (see `sunshine-pc/docs/status.md` section 0 for
 
 1. **Gates before any push**: matching DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged; strict link with 0 unresolved symbols; `TEMP-DEBUG` grep empty; fresh-clone build passes.
 2. **Short tasks**: every agent task is one concrete deliverable time-boxed to ~30 min (edit→build→run→evidence at least every 15 min, one line per cycle in `sunshine-pc/build/progress.log`); it then reports and the next step becomes a new task.
-3. **Concurrency**: at most 3 agents at once. Each builds only its own tree. Multi-file Aurora work happens in a private copy (`-DSUNSHINE_AURORA_DIR=<copy>`) and lands in one step. Timing measurements (fps, logic rate, latency) are taken only while no other agent runs.
+3. **Concurrency**: at most 3 agents that build the port or run the game. Decomp-only agents (single-unit mwcc + objdiff, ~1 s per compile) may run up to 6 at once, ~45 min per task, one progress.log line per finished function. Each builds only its own tree. Multi-file Aurora work happens in a private copy (`-DSUNSHINE_AURORA_DIR=<copy>`) and lands in one step. Timing measurements (fps, logic rate, latency) are taken only while no other agent runs.
 4. **Evidence**: a feature counts as done only with a log excerpt or screenshot. Dev hooks are named as such.
 5. **Decomp changes**: `#ifdef TARGET_PC` for port behaviour; asm-proven decomp bugs are fixed unguarded only in NonMatching units, with an `// asm 0x<addr>` comment.
 6. **Saves**: tests use a temp save directory, never the user's `%APPDATA%\Sunshine\saves`.
+
+## Phase 0: Decomp correctness (current priority, port work paused)
+
+Runtime bugs keep coming from NonMatching functions (wrong masks, swapped branches, empty bodies with `TARGET_PC` stubs). `sunshine-pc/tools/decomp_triage.py` ranks every non-100 % function by behaviour-changing diffs (op/insert/delete/immediate/reloc; register allocation ignored).
+
+| Item | State | Next |
+| --- | --- | --- |
+| Risky functions (triage score > 0) | OPEN (1285 functions, 1.18 MB; 921 more score 0 but still unverified: register, stack or local-static reloc diffs) | subsystem waves: System/Camera/MarioUtil, Player/Map/NPC, GC2D/MoveBG, then Enemy/Animal, JSystem/MSound |
+| Empty decomp bodies with `TARGET_PC` stubs | OPEN (40 found) | reconstruct from asm or inlined call sites, drop the stub |
+| Fully matching units flipped to `Matching` in `configure.py` | OPEN | lead, after SHA-1 gate |
+
+Exit criterion: every function the port builds is an exact match or has a recorded asm-equivalence review (triage score only ranks the work), no `TARGET_PC` stub over an empty body.
 
 ## Phase 1: Boot to gameplay (core)
 

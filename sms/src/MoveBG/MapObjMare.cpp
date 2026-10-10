@@ -1010,13 +1010,12 @@ void TCogwheelScale::control()
 	TMapObjBase::control();
 	if (unk140 > 0.0f) {
 		unk140 -= mWaterLeakSpeed;
-		f32 speed = abs(unk140);
-		gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_MR_TSUBO_WATER, &mPosition,
-		                                  nullptr, speed, 0, 0, nullptr, 0, 4);
+		SMSGetMSound()->startSoundActorWithInfo(
+		    MSD_SE_OBJ_MR_TSUBO_WATER, &mPosition, nullptr, abs(unk140), 0, 0,
+		    nullptr, 0, 4);
 		if (unk140 < 0.0f)
 			unk140 = 0.0f;
 	}
-	char trash[8];
 }
 
 void TCogwheelScale::touchPlayer(THitActor*)

@@ -487,14 +487,15 @@ BOOL TNerveBombHeiThrown::execute(TSpineBase<TLiveActor>* spine) const
 	if (spine->getTime() == 0) {
 		TBombHeiSaveLoadParams* params = self->getBombHeiParams();
 
-		f32 rateXZ = params->mSLThrownRateXZ.get();
-
-		s16 angle = *gpMarioAngleY & 0xffff;
-		JGeometry::TVec3<f32> vel(
-		    rateXZ * (*gpMarioThrowPower * JMASSin(angle)),
-		    params->mSLThrownVY.get(),
-		    rateXZ * (*gpMarioThrowPower * JMASCos(angle)));
-		self->setVelocity(vel);
+		f32 power = SMS_GetMarioThrowPower();
+		f32 rate  = params->mSLThrownRateXZ.get();
+		JGeometry::TVec3<f32> velocity;
+		f32 c = JMASCos(SMS_GetMarioAngleY());
+		f32 s = JMASSin(SMS_GetMarioAngleY());
+		velocity.x = rate * (power * s);
+		velocity.y = params->mSLThrownVY.get();
+		velocity.z = rate * (power * c);
+		self->setVelocity(velocity);
 
 		self->mPosition.y += 2.0f;
 		self->onLiveFlag(LIVE_FLAG_AIRBORNE);

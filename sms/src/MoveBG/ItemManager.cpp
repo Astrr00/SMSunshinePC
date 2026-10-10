@@ -51,14 +51,6 @@ TShine* TItemManager::makeShineAppearWithTime(const char* shine_name,
 	return shine;
 }
 
-TShine* TItemManager::makeShineAppearWithTimeOffset(const char*, int, f32, f32,
-                                                    f32, int, int, int)
-{
-#ifdef TARGET_PC
-	return nullptr;
-#endif
-}
-
 TShine* TItemManager::makeShineAppearWithDemo(const char* shine_name,
                                               const char* demo_name, f32 x,
                                               f32 y, f32 z)

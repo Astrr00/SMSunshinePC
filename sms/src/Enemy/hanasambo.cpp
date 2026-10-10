@@ -99,56 +99,38 @@ void TSamboFlowerCoinUnit::checkGenCoin()
 	if (mCoin == nullptr)
 		return;
 
-	bool allFwait = true;
-	for (int i = 0; i < mNumFlowers; ++i) {
-		bool isFwait;
-		if (mFlowers[i]->mMActor->checkCurAnm("flower_fwait", 0))
-			isFwait = true;
-		else
-			isFwait = false;
-		if (!isFwait)
-			allFwait = false;
+	bool bloomed = true;
+	for (int i = 0; i < mNumFlowers; i++) {
+		if (!mFlowers[i]->mMActor->checkCurAnm("flower_fwait", 0))
+			bloomed = false;
 	}
 
-	if (!allFwait)
+	if (!bloomed)
 		return;
 
-	int numCoins = 0;
-	for (int i = 0; i < mNumFlowers; ++i) {
-		if (mFlowers[i]->unk168 != nullptr)
-			++numCoins;
-		mFlowers[i]->unk160 = 0;
+	int total = 0;
+	for (int i = 0; i < mNumFlowers; i++) {
+		TSamboFlower* flower = mFlowers[i];
+		if (flower->unk168 != nullptr)
+			total++;
+
+		flower->unk160 = 0;
 	}
 
-	if (numCoins > 0) {
-		int coinIdx = 0;
-		for (int i = 0; i < mNumFlowers; ++i) {
+	if (total > 0) {
+		Mtx mtx;
+		int spawned = 0;
+		for (int i = 0; i < mNumFlowers; i++) {
 			TSamboFlower* flower = mFlowers[i];
 			if (flower->unk168 == nullptr)
 				continue;
 
-			f32 ratio = (f32)coinIdx / (f32)numCoins;
-			Mtx mtx;
-			JGeometry::TVec3<f32> dir(0.0f, 0.0f,
-			                          flower->unk16C->mSLCoinCircleR.get());
-			s16 angle = DEG2SHORTANGLE(360.0f * ratio);
+			f32 rate = (f32)spawned / (f32)total;
 
-			f32 sin = JMASSin(angle);
-			f32 cos = JMASCos(angle);
-			mtx[0][0] = cos;
-			mtx[0][1] = 0.0f;
-			mtx[0][2] = sin;
-			mtx[0][3] = 0.0f;
-			mtx[1][0] = 0.0f;
-			mtx[1][1] = 1.0f;
-			mtx[1][2] = 0.0f;
-			mtx[1][3] = 0.0f;
-			mtx[2][0] = -sin;
-			mtx[2][1] = 0.0f;
-			mtx[2][2] = cos;
-			mtx[2][3] = 0.0f;
-
-			MTXMultVec(mtx, &dir, &dir);
+			JGeometry::TVec3<f32> offset(0.0f, 0.0f,
+			                             flower->unk16C->mSLCoinCircleR.get());
+			MsMtxSetRotY(mtx, 360.0f * rate);
+			MTXMultVec(mtx, &offset, &offset);
 
 			TCoin* coin = flower->unk168;
 			if (coin->isActorType(0x2000000E))
@@ -158,24 +140,22 @@ void TSamboFlowerCoinUnit::checkGenCoin()
 				coin->appear();
 
 				JGeometry::TVec3<f32> pos = mCoinPos;
-				pos += dir;
+				pos += offset;
 				coin->mPosition = pos;
 
-				MsVECNormalize(&dir, &dir);
+				MsVECNormalize(&offset, &offset);
 
-				f32 coinVelXZ = flower->unk16C->mSLCoinVelocityXZ.get();
-				coin->mVelocity.x = dir.x * coinVelXZ;
-				coin->mVelocity.y
-				    = flower->unk16C->mSLCoinVelocityY.get() + 8.0f * ratio;
-				coin->mVelocity.z = dir.z * coinVelXZ;
-				coin->offLiveFlag(LIVE_FLAG_UNK8 | LIVE_FLAG_UNK10);
+				TSamboFlowerSaveLoadParams* prm = flower->unk16C;
+				coin->mVelocity.set(offset.x * prm->mSLCoinVelocityXZ.get(),
+				                    8.0f * rate + prm->mSLCoinVelocityY.get(),
+				                    offset.z * prm->mSLCoinVelocityXZ.get());
+				coin->offLiveFlag(LIVE_FLAG_UNK10);
+				spawned++;
 			}
-
-			++coinIdx;
 		}
 
 		if (gpMSound->gateCheck(0x4813))
-			MSoundSESystem::MSoundSE::startSoundSystemSE(0x4813, coinIdx,
+			MSoundSESystem::MSoundSE::startSoundSystemSE(0x4813, spawned,
 			                                             nullptr, 0);
 	}
 
@@ -259,7 +239,7 @@ void TSamboLeaf::perform(u32 cue, JDrama::TGraphics* graphics)
 void TSamboLeaf::generate(JGeometry::TVec3<f32>& param_1)
 {
 	mRotation.x = 0.0f;
-	mRotation.y = param_1.y - 90.0f;
+	mRotation.y = param_1.y;
 	mRotation.z = 0.0f;
 }
 
@@ -391,29 +371,30 @@ void TSamboFlowerManager::dropLeaf(JGeometry::TVec3<f32>& param_1,
 	for (int i = 0; generated < 3 && i < 18; ++i) {
 		TSamboLeaf* leaf = mLeaves[i];
 		if (!leaf->unk44) {
+			leaf->mPosition = param_1;
+			leaf->mPosition.y += 10.0f;
+			leaf->unk44 = 1;
 
-		leaf->mPosition = param_1;
-		leaf->mPosition.y += 10.0f;
-		leaf->unk44 = 1;
+			TSamboFlowerSaveLoadParams* params
+			    = (TSamboFlowerSaveLoadParams*)unk38;
+			f32 leafVelXZ = params->mSLLeafVelocityXZ.get();
+			f32 leafVelY  = params->mSLLeafVelocityY.get();
+			TMsRange<f32> rangeXZ(leafVelXZ, leafVelXZ * 1.2f);
+			TMsRange<f32> rangeY(leafVelY, leafVelY * 1.2f);
+			f32 velZ = rangeXZ.rand();
+			f32 velY = rangeY.rand();
+			JGeometry::TVec3<f32> vel(0.0f, velY, velZ);
 
-		TSamboFlowerSaveLoadParams* params
-		    = (TSamboFlowerSaveLoadParams*)unk38;
-		f32 leafVelXZ = params->mSLLeafVelocityXZ.get();
-		f32 leafVelY  = params->mSLLeafVelocityY.get();
-		TMsRange<f32> rangeXZ(leafVelXZ, leafVelXZ * 1.2f);
-		TMsRange<f32> rangeY(leafVelY, leafVelY * 1.2f);
-		JGeometry::TVec3<f32> vel(0.0f, rangeY.rand(), rangeXZ.rand());
+			Mtx mtx;
+			MsMtxSetRotRPH(mtx, 0.0f, angleTable[i], 0.0f);
+			MTXMultVec(mtx, &vel, &vel);
 
-		Mtx mtx;
-		MsMtxSetRotRPH(mtx, 0.0f, angleTable[i], 0.0f);
-		MTXMultVec(mtx, &vel, &vel);
+			JGeometry::TVec3<f32> leafRot(0.0f, angleTable[i] - 90.0f, 0.0f);
+			mLeaves[i]->generate(leafRot);
+			mLeaves[i]->mVelocity = vel;
+			mLeaves[i]->mScaling  = param_2;
 
-		JGeometry::TVec3<f32> leafRot(0.0f, angleTable[i] - 90.0f, 0.0f);
-		mLeaves[i]->generate(leafRot);
-		mLeaves[i]->mVelocity = vel;
-		mLeaves[i]->mScaling  = param_2;
-
-		++generated;
+			++generated;
 		}
 	}
 }
@@ -551,7 +532,6 @@ void TSamboFlower::bloom()
 	}
 }
 
-
 bool TSamboFlower::isBloomEnd()
 {
 	return unk154 > unk16C->mSLBloomTimer.get();
@@ -617,19 +597,13 @@ void THanaSamboManager::createModelData()
 
 BOOL THanaSamboHead::receiveMessage(THitActor* sender, u32 message)
 {
-	if (message <= HIT_MESSAGE_HIP_DROP) {
+	if (message == HIT_MESSAGE_TRAMPLE || message == HIT_MESSAGE_HIP_DROP) {
 		mOwner->kill();
 		return true;
 	}
 
 	if (message == HIT_MESSAGE_SPRAYED_BY_WATER) {
-		THanaSambo* owner = mOwner;
-		owner->unk165 = 1;
-		if (!owner->changeByJuice()) {
-			if (owner->mSpine->getCurrentNerve()
-			    == &TNerveHanaSamboWait::theNerve())
-				owner->mSpine->pushNerve(&TNerveHanaSamboFreeze::theNerve());
-		}
+		mOwner->waterDamage();
 		return true;
 	}
 
@@ -774,14 +748,14 @@ void THanaSambo::setWaitAnm()
 
 void THanaSambo::setDeadAnm()
 {
-	mMActor = mMActorKeeper->getMActor("samboD.bmd");
+	mMActor = getActorKeeper()->getMActor("samboD.bmd");
 
 	if (unk1B0)
 		setBckAnm(0xA);
 	else
 		setBckAnm(0);
 
-	unk194->onHitFlag(HIT_FLAG_NO_COLLISION);
+	unk194->kill();
 	unk1B0 = 0;
 	onLiveFlag(LIVE_FLAG_UNK8);
 }
@@ -793,12 +767,17 @@ void THanaSambo::setAttackAnm()
 	unk1B0 = 1;
 }
 
-// fabricated: never called in emitted code
 void THanaSambo::waterDamage()
 {
-	unk165 = 1;
-	if (mSpine->getCurrentNerve() == &TNerveHanaSamboWait::theNerve())
-		mSpine->pushNerve(&TNerveHanaSamboFreeze::theNerve());
+	unk165 = true;
+
+	if (changeByJuice())
+		return;
+
+	if (mSpine->getCurrentNerve() != &TNerveHanaSamboWait::theNerve())
+		return;
+
+	mSpine->pushNerve(&TNerveHanaSamboFreeze::theNerve());
 }
 
 const char** THanaSambo::getBasNameTable() const { return sambo_bastable; }
@@ -1057,62 +1036,46 @@ DEFINE_NERVE(TNerveHanaSamboFreeze, TLiveActor)
 
 static int SamboHeadRollCallback(J3DNode* node, int param_2)
 {
-	if (param_2 != 0)
-		return 1;
-	if (gpCurSamboHead == nullptr)
-		return 1;
-	if (!gpCurSamboHead->isUseCallBack())
-		return 1;
+	if (param_2 == 0) {
+		if (gpCurSamboHead == nullptr || !gpCurSamboHead->isUseCallBack())
+			return true;
 
-	J3DJoint* joint = (J3DJoint*)node;
-	MtxPtr jointMtx
-	    = gpCurSamboHead->getModel()->getAnmMtx(joint->getJntNo());
+		J3DJoint* joint = (J3DJoint*)node;
+		MtxPtr anmMtx
+		    = gpCurSamboHead->getModel()->getAnmMtx(joint->getJntNo());
 
-	JGeometry::TVec3<f32> vel = gpCurSamboHead->mVelocity;
-	if (vel.x == 0.0f && vel.z == 0.0f)
-		vel.x = 0.001f;
+		JGeometry::TVec3<f32> velocity = gpCurSamboHead->mVelocity;
+		if (0.0f == velocity.x && 0.0f == velocity.z)
+			velocity.x = 0.001f;
 
-	JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
-	JGeometry::TVec3<f32> axis;
-	PSVECCrossProduct(&up, &vel, &axis);
+		JGeometry::TVec3<f32> side;
+		JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
+		PSVECCrossProduct(&up, &velocity, &side);
 
-	f32 rollAngle = gpCurSamboHead->unk1AC;
+		JGeometry::TVec3<f32> zAxis(anmMtx[0][2], anmMtx[1][2], anmMtx[2][2]);
+		JGeometry::TVec3<f32> yAxis(anmMtx[0][1], anmMtx[1][1], anmMtx[2][1]);
+		JGeometry::TVec3<f32> xAxis(anmMtx[0][0], anmMtx[1][0], anmMtx[2][0]);
 
-	JGeometry::TVec3<f32> localAxis;
+		f32 rateZ = 0.0f;
+		if (0.0f != zAxis.squared())
+			rateZ = side.dot(zAxis) / zAxis.squared();
 
-	localAxis.z = 0.0f;
-	f32 lenSqZ  = jointMtx[1][2] * jointMtx[1][2]
-	         + jointMtx[0][2] * jointMtx[0][2]
-	         + jointMtx[2][2] * jointMtx[2][2];
-	if (lenSqZ != 0.0f)
-		localAxis.z = (axis.y * jointMtx[1][2] + axis.x * jointMtx[0][2]
-		               + axis.z * jointMtx[2][2])
-		              / lenSqZ;
+		f32 rateY = 0.0f;
+		if (0.0f != yAxis.squared())
+			rateY = side.dot(yAxis) / yAxis.squared();
 
-	localAxis.y = 0.0f;
-	f32 lenSqY  = jointMtx[1][1] * jointMtx[1][1]
-	         + jointMtx[0][1] * jointMtx[0][1]
-	         + jointMtx[2][1] * jointMtx[2][1];
-	if (lenSqY != 0.0f)
-		localAxis.y = (axis.y * jointMtx[1][1] + axis.x * jointMtx[0][1]
-		               + axis.z * jointMtx[2][1])
-		              / lenSqY;
+		f32 rateX = 0.0f;
+		if (0.0f != xAxis.squared())
+			rateX = side.dot(xAxis) / xAxis.squared();
 
-	localAxis.x = 0.0f;
-	f32 lenSqX  = jointMtx[1][0] * jointMtx[1][0]
-	         + jointMtx[0][0] * jointMtx[0][0]
-	         + jointMtx[2][0] * jointMtx[2][0];
-	if (lenSqX != 0.0f)
-		localAxis.x = (axis.y * jointMtx[1][0] + axis.x * jointMtx[0][0]
-		               + axis.z * jointMtx[2][0])
-		              / lenSqX;
+		JGeometry::TVec3<f32> axis(rateX, rateY, rateZ);
 
-	Mtx rot;
-	PSMTXRotAxisRad(rot, &localAxis, rollAngle * 0.017453292f);
-	MTXConcat(jointMtx, rot, jointMtx);
-	MTXConcat(j3dSys.mCurrentMtx, rot, j3dSys.mCurrentMtx);
-
-	return 1;
+		Mtx rotMtx;
+		PSMTXRotAxisRad(rotMtx, &axis, 0.017453292f * gpCurSamboHead->unk1AC);
+		PSMTXConcat(anmMtx, rotMtx, anmMtx);
+		PSMTXConcat(j3dSys.mCurrentMtx, rotMtx, j3dSys.mCurrentMtx);
+	}
+	return true;
 }
 
 // ============= params =============
@@ -1345,60 +1308,41 @@ void TSamboHead::calcRootMatrix()
 void TSamboHead::genEventCoin()
 {
 	if (isBckAnm(1)) {
-	for (int i = 0; i < 3; ++i) {
-		s16 angle = DEG2SHORTANGLE(mRotation.y - 60.0f + 60.0f * i);
-
 		Mtx mtx;
-		f32 sin   = JMASSin(angle);
-		f32 cos   = JMASCos(angle);
-		mtx[0][0] = cos;
-		mtx[0][1] = 0.0f;
-		mtx[0][2] = sin;
-		mtx[0][3] = 0.0f;
-		mtx[1][0] = 0.0f;
-		mtx[1][1] = 1.0f;
-		mtx[1][2] = 0.0f;
-		mtx[1][3] = 0.0f;
-		mtx[2][0] = -sin;
-		mtx[2][1] = 0.0f;
-		mtx[2][2] = cos;
-		mtx[2][3] = 0.0f;
+		MtxPtr matrix = mtx;
+		for (int i = 0; i < 3; ++i) {
+			MsMtxSetRotY(matrix, mRotation.y - 60.0f + 60.0f * i);
+			JGeometry::TVec3<f32> offset(0.0f, 0.0f, 100.0f);
+			MTXMultVec(matrix, &offset, &offset);
 
-		JGeometry::TVec3<f32> dir(0.0f, 0.0f, 100.0f);
-		MTXMultVec(mtx, &dir, &dir);
+			TMapObjBase* coin;
+			if (i == 1 && mCoin) {
+				coin = mCoin;
+				if (coin->isActorType(0x2000000E))
+					coin = gpItemManager->makeObjAppear(0x2000000E);
 
-		TMapObjBase* coin = nullptr;
-		if (i == 1 && mCoin != nullptr) {
-			coin = mCoin;
-			if (coin->isActorType(0x2000000E))
-				coin = gpItemManager->makeObjAppear(0x2000000E);
-
-			if (coin != nullptr) {
-				coin->appear();
-				coin->mPosition = mPosition;
+				if (coin) {
+					coin->appear();
+					coin->mPosition = mPosition;
+				}
+			} else {
+				coin = gpItemManager->makeObjAppear(
+				    mPosition.x + offset.x, mPosition.y, mPosition.z + offset.z,
+				    0x2000000E, true);
 			}
-		} else {
-			coin = gpItemManager->makeObjAppear(mPosition.x + dir.x,
-			                                    mPosition.y,
-			                                    mPosition.z + dir.z, 0x2000000E,
-			                                    true);
-		}
 
-		if (coin != nullptr) {
-			coin->mPosition.y = mPosition.y;
-
-			MsVECNormalize(&dir, &dir);
-			coin->mVelocity.x = dir.x * 4.0f;
-			coin->mVelocity.y = TMsRange<f32>(8.0f, 16.0f).rand();
-			coin->mVelocity.z = dir.z * 4.0f;
-			coin->offLiveFlag(LIVE_FLAG_UNK8 | LIVE_FLAG_UNK10);
+			if (coin) {
+				coin->mPosition.y = mPosition.y;
+				MsVECNormalize(&offset, &offset);
+				coin->mVelocity.set(offset.x * 4.0f,
+				                    TMsRange<f32>(8.0f, 16.0f).rand(),
+				                    offset.z * 4.0f);
+				coin->offLiveFlag(LIVE_FLAG_UNK10);
+			}
 		}
-	}
 	} else {
 		TSmallEnemy::genEventCoin();
 	}
-
-	char trash[8];
 }
 
 bool TSamboHead::isUseCallBack()
@@ -1515,8 +1459,7 @@ DEFINE_NERVE(TNerveSamboHeadAttack, TLiveActor)
 	if (self->mPosition.y > self->mGroundHeight + 30.0f) {
 		f32 jumpAngY                = self->unk194->mSLJumpAngY.get();
 		JGeometry::TVec3<f32> vel   = self->mVelocity;
-		JGeometry::TVec3<f32> rot   = MsGetRotFromZaxis(vel);
-		self->unk1AC = MsClamp(rot.x, -jumpAngY, jumpAngY);
+		self->unk1AC = MsClamp(MsGetRotFromZaxis(vel).x, -jumpAngY, jumpAngY);
 	} else {
 		self->unk1AC *= 0.8f;
 	}
@@ -1526,7 +1469,7 @@ DEFINE_NERVE(TNerveSamboHeadAttack, TLiveActor)
 		turnSpeed = 5.0f;
 
 	self->walkToCurPathNode(0.0f, turnSpeed, 0.0f);
-	char trash[84];
+	char trash[92];
 	return false;
 }
 

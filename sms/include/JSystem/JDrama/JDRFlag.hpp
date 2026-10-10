@@ -7,15 +7,13 @@ template <class T> class TFlagT {
 public:
 	TFlagT(T v = T()) { mValue = v; }
 
-#pragma dont_inline on
 	TFlagT(const TFlagT<T>& other)
 	    : mValue(other.mValue)
 	{
 	}
-#pragma dont_inline off
 
 	// fabricated
-	TFlagT& operator=(const TFlagT<T>& other)
+	TFlagT& operator=(TFlagT<T> other)
 	{
 		set(other.mValue);
 		return *this;

@@ -221,13 +221,11 @@ void CPolarSubCamera::loadAfter()
 	mCurrentTarget.unk18.set(mPosition);
 	mCurrentTarget.mTarget.set(mTarget);
 
-	TCameraOption* option = gpCameraOption;
 	if (SMS_isOptionMap()) {
-		mCurrentTarget.mPosition = mPosition;
-		mCurrentTarget.mTarget   = mTarget;
-		option = new TCameraOption(mPosition, &mCurrentTarget.mTarget);
+		mCurrentTarget.mPosition.set(mPosition);
+		mCurrentTarget.mTarget.set(mTarget);
+		gpCameraOption = new TCameraOption(mPosition, &mCurrentTarget.mTarget);
 	}
-	gpCameraOption = option;
 
 	unk256 = mCurrentTarget.mPitch;
 	unk258 = mCurrentTarget.mYaw;
@@ -258,7 +256,7 @@ void CPolarSubCamera::loadAfter()
 
 	MTXCopy(unk1EC, unk21C);
 
-	fabricatedInline2();
+	calcExternalData_();
 
 	if ((unk64 & CAMERA_FLAG_JET_COASTER_SCENE) && gpMarDirector->unk7D == 1) {
 		gpMarDirector->fireStartDemoCamera(
@@ -283,8 +281,6 @@ MtxPtr CPolarSubCamera::getToroccoMtx_() const
 {
 	return gpMarioOriginal->mTorocco->mModel->getAnmMtx(2);
 }
-
-void CPolarSubCamera::setMarioLookat_() { }
 
 JGeometry::TVec3<f32> CPolarSubCamera::getUsualLookat() const
 {
@@ -486,8 +482,8 @@ void CPolarSubCamera::calcPosAndAt_()
 	s16 yawDelta  = 0;
 	f32 distDelta = 0.0f;
 	s16 yawSpeed  = CLBLinearInbetween<s16>(
-        mCurrentParams->mYAngleManualSpeedXMin,
-        mCurrentParams->mYAngleManualSpeedXMax, mCurrentTarget.unk28);
+        mCurrentParams->mHoldOffsetAngleXMin,
+        mCurrentParams->mHoldOffsetAngleXMax, mCurrentTarget.unk28);
 	f32 distSpeed = CLBLinearInbetween<f32>(mCurrentParams->mHoldAddDistXZMin,
 	                                        mCurrentParams->mHoldAddDistXZMax,
 	                                        mCurrentTarget.unk28);
@@ -501,7 +497,7 @@ void CPolarSubCamera::calcPosAndAt_()
 	}
 
 	CLBChaseAngleDecrease(&unk2AC->unk0, yawDelta,
-	                      mSaveEx->mSLAimAngleYChaseMin.get());
+	                      mSaveEx->mSLHoldAngleXChase.get());
 	CLBChaseDecrease(&unk2AC->unk4, distDelta, mSaveEx->mSLHoldDistChase.get(),
 	                 0.0f);
 
@@ -710,7 +706,7 @@ void CPolarSubCamera::calcPosAndAt_()
 							f32 d  = MsSqrtf(dx * dx + dz * dz);
 							f32 minD = mSaveEx->mSLMinCushionXZ.get();
 							f32 mD2
-							    = minD < dist * cushion ? dist * cushion : minD;
+							    = minD < dist * cushion ? minD : dist * cushion;
 							if (d < mD2) {
 								f32 add = mD2 - d;
 								mCurrentTarget.mPosition.x += sY * add;
@@ -857,8 +853,6 @@ void CPolarSubCamera::calcFinalPosAndAt_()
 	}
 }
 
-void CPolarSubCamera::calcExternalData_() { }
-
 // TODO: this should be weak/inline
 void CPolarSubCamera::ctrlGameCamera_()
 {
@@ -970,7 +964,7 @@ void CPolarSubCamera::perform(u32 cue, JDrama::TGraphics* graphics)
 				ctrlGameCamera_();
 			calcFinalPosAndAt_();
 
-			fabricatedInline2();
+			calcExternalData_();
 		}
 
 		if (mMode != CAMERA_MODE_REPRODUCE_DEMO) {

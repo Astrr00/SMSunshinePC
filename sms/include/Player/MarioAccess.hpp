@@ -94,6 +94,7 @@ inline s16 SMS_GetMarioAngleZ() { return *gpMarioAngleZ; }
 inline f32 SMS_GetMarioSpeedX() { return *gpMarioSpeedX; }
 inline f32 SMS_GetMarioSpeedY() { return *gpMarioSpeedY; }
 inline f32 SMS_GetMarioSpeedZ() { return *gpMarioSpeedZ; }
+inline f32 SMS_GetMarioThrowPower() { return *gpMarioThrowPower; }
 
 inline JGeometry::TVec3<f32>
 SMS_DistanceFromMarioVec(const JGeometry::TVec3<f32>& pos)

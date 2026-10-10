@@ -185,6 +185,7 @@ enum E_SMS_EFFECT_ONETIME_NORMAL /* 0 */ {
 
 enum E_SMS_EFFECT_LOOP_NORMAL /* 1 */ {
 	PARTICLE_MS_HIKAGE1_A                 = 0x100,
+	PARTICLE_MS_HIKAGE1_B                 = 0x101,
 	PARTICLE_MS_MARIWALLSL1               = 0x102,
 	PARTICLE_MS_M_SLIPSMOKE               = 0x103,
 	PARTICLE_MS_M_BLUR3                   = 0x104,

@@ -60,7 +60,7 @@ TLiveActor* CPolarSubCamera::getNoticeActor_()
 
 			// TODO: inline
 			f32 clipMax  = mSaveNotice->mOffClipRatio.get();
-			f32 clipMin  = mSaveNotice->mOffClipRatio.get();
+			f32 clipMin  = -mSaveNotice->mOffClipRatio.get();
 			bool inClipX = false;
 			bool inClipY = false;
 			if (clipMin <= clipPos.x && clipPos.x <= clipMax)
@@ -95,7 +95,7 @@ TLiveActor* CPolarSubCamera::getNoticeActor_()
 
 		// TODO: inline
 		f32 clipMax  = mSaveNotice->mOnClipRatio.get();
-		f32 clipMin  = mSaveNotice->mOnClipRatio.get();
+		f32 clipMin  = -mSaveNotice->mOnClipRatio.get();
 		bool inClipX = false;
 		bool inClipY = false;
 		if (clipMin <= clipPos.x && clipPos.x <= clipMax) {
@@ -154,7 +154,7 @@ void CPolarSubCamera::calcNoticeTargetYrot_(const Vec& target)
 	f32 farClip2 = CLBSquared<f32>(mSaveNotice->mRotateMinDistXZ.get());
 	f32 near2    = CLBSquared<f32>(mSaveNotice->mRotateFastMinDistXZ.get());
 
-	if (dist2 > near2) {
+	if (dist2 > farClip2) {
 		JGeometry::TVec3<f32> diff(mPos.x - target.x, mPos.y - target.y,
 		                           mPos.z - target.z);
 		MsVECNormalize(&diff, &diff);
@@ -163,23 +163,22 @@ void CPolarSubCamera::calcNoticeTargetYrot_(const Vec& target)
 		f32 dz       = diff.z * 500.0f + mPos.z;
 		s16 ang      = matan(dz - mCurrentTarget.mTarget.z,
 		                     dx - mCurrentTarget.mTarget.x);
-		int absAngle = ang - mCurrentTarget.mYaw >= 0
-		                   ? ang - mCurrentTarget.mYaw
-		                   : -(ang - mCurrentTarget.mYaw);
+		s16 yawDiff  = mCurrentTarget.mYaw - ang;
+		int absAngle = yawDiff >= 0 ? yawDiff : -yawDiff;
 		f32 ratio    = DEG2SHORTANGLE(1.0f) * (f32)absAngle;
 
 		f32 chase;
-		if (dist2 > farClip2) {
+		if (dist2 > near2) {
 			chase = 1.0f;
 		} else {
-			chase = CLBCalcRatio<f32>(near2, farClip2, dist2);
+			chase = CLBCalcRatio<f32>(farClip2, near2, dist2);
 		}
 		f32 base = CLBLinearInbetween<f32>(
 		    1.0f, mSaveNotice->mRotateMagnifXmax.get(), mCurrentTarget.unk28);
 		f32 speed
 		    = unk288
-		      * (chase
-		         * (ratio * ((f32)mSaveNotice->mRotateYSpeed.get() * base)));
+		      * (base
+		         * (chase * (ratio * (f32)mSaveNotice->mRotateYSpeed.get())));
 		if (speed > 32766.998f)
 			speed = 32766.998f;
 		s16 delta = CLBRoundf<s16>(speed);

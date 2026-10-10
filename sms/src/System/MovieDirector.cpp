@@ -1,4 +1,5 @@
 #include <System/MovieDirector.hpp>
+#include <stdint.h>
 #include <THPPlayer/THPPlayer.h>
 #include <JSystem/JKernel/JKRMemArchive.hpp>
 #include <JSystem/JDrama/JDRDStage.hpp>
@@ -54,11 +55,7 @@ TMovieDirector::TMovieDirector()
 
 void* TMovieDirector::setupThreadFunc(void* self)
 {
-#ifdef TARGET_PC
-	return (void*)(intptr_t)((TMovieDirector*)self)->rsetup(); // retail returns the callee's r3
-#else
-	((TMovieDirector*)self)->rsetup();
-#endif
+	return (void*)(intptr_t)((TMovieDirector*)self)->rsetup(); // asm 0x8010BF38
 }
 
 extern OSThread gSetupThread;

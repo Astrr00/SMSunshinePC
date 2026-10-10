@@ -110,11 +110,9 @@ TSmallEnemy* TPopoManager::createEnemyInstance() { return new TPopo; }
 
 void TPopoManager::initSetEnemies()
 {
-	// The retail code only probes the graph of the first Popo and does nothing
-	// with the result.
-	TGraphWeb* graph = ((TPopo*)unk18[0])->getTracer()->unk0;
-	if (graph == nullptr || graph->isDummy()) {
-	}
+	TGraphWeb* graph = getObj(0)->getTracer()->getGraph();
+	if (graph && graph->isDummy())
+		return;
 }
 
 void TPopoManager::createModelData()
@@ -141,10 +139,9 @@ void TPopoManager::perform(u32 cue, JDrama::TGraphics* graphics)
 
 BOOL TPopoCollision::receiveMessage(THitActor* sender, u32 message)
 {
-	TPopo* owner = mOwner;
-	if (owner->mSpine->getCurrentNerve() != &TNervePopoFly::theNerve())
+	if (mOwner->isRollJump())
 		return mOwner->receiveMessage(sender, message);
-	return false;
+	return FALSE;
 }
 
 static BOOL PopoRollCallback(J3DNode* node, int param_2)
@@ -377,6 +374,13 @@ void TPopo::reset()
 
 	mCollision->onHitFlag(HIT_FLAG_NO_COLLISION);
 	unk18C = 0;
+}
+
+bool TPopo::isRollJump()
+{
+	if (mSpine->getCurrentNerve() == &TNervePopoFly::theNerve())
+		return false;
+	return true;
 }
 
 bool TPopo::checkTrigger()

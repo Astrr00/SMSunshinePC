@@ -89,6 +89,7 @@ public:
 	void explosion();
 	void flyBehavior();
 	bool checkTrigger();
+	bool isRollJump();
 
 	static bool mRollSw;
 	static bool mTriggerSw;

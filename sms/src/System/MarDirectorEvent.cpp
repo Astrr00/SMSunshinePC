@@ -172,14 +172,47 @@ void TMarDirector::fireDemoMovie(u32, TLiveActor*) { }
 
 void TMarDirector::movement()
 {
-	if ((int)mState == STATE_UNK4)
+	switch (mState) {
+	case STATE_UNK4:
 		movement_game();
+		break;
+	}
 }
 
 #pragma dont_inline on
 void TMarDirector::setNextStage(u16 param_1, JDrama::TActor* param_2)
 {
-	// TODO: wtf is happening in this function it's cursed
+	// asm 0x800ED8A0
+	if (unk4C & 0x2)
+		return;
+
+	TGameSequence local;
+	if (param_1 >= 0x100) {
+		local.unk0 = (param_1 >> 8) - 1;
+		local.unk1 = param_1 & 0xff;
+	} else {
+		local.unk0 = param_1;
+		local.unk1 = 0xff;
+	}
+	gpApplication.setNextArea(local);
+
+	const TGameSequence& curArea = gpApplication.mCurrArea;
+	if (param_2) {
+		unk4C |= 0x4;
+		unk250 = param_2;
+	} else {
+		if ((curArea.getStage() == 1 && local.getStage() == 5)
+		    || (curArea.getStage() == 1 && local.getStage() == 6)
+		    || (curArea.getStage() == 1 && local.getStage() == 8))
+			unk4C |= 0x8;
+		else
+			unk4C |= 0x2;
+	}
+
+	if ((int)local.getStage() == 0x37) {
+		unk4C |= 0x100;
+		gpApplication.setMovie(6);
+	}
 }
 #pragma dont_inline off
 
@@ -219,8 +252,8 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 {
 	switch (param_1) {
 	case 0:
-		if (!(unk4C & 0x100)) {
-			unk4C |= 0x100;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
 			setNextStage(0x1, nullptr);
 			TFlagManager::smInstance->setBool(true, 0x10389);
 			TFlagManager::smInstance->setBool(true, 0x30004);
@@ -229,48 +262,49 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 		break;
 
 	case 10:
-		if (!(unk4C & 0x100)) {
-			unk4C |= 0x100;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
 			setNextStage(0x3B, nullptr);
 			gpApplication.mMovie = param_1;
 		}
 		break;
 
 	case 7:
-		if (!(unk4C & 0x100)) {
-			unk4C |= 0x100;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
 			setNextStage(0xE06, nullptr);
 			gpApplication.mMovie = param_1;
 		}
 		break;
 
 	case 8:
-		if (!(unk4C & 0x100)) {
-			unk4C |= 0x100;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
 			setNextStage(0xE07, nullptr);
 			gpApplication.mMovie = param_1;
 		}
 		break;
 
 	case 11:
-		if (!(unk4C & 0x100)) {
-			unk4C |= 0x100;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
 			setNextStage(0x3C, nullptr);
 			gpApplication.mMovie = param_1;
 		}
 		break;
 
 	case 2:
-		if (!(unk4C & 0x100)) {
-			unk4C |= 0x100;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
 			setNextStage(0x101, nullptr);
 			gpApplication.mMovie = param_1;
 		}
 		break;
 
+	case 12:
 	default:
-		if (!(unk4C & 0x100)) {
-			unk4C |= 0x100;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
 			setNextStage(0xF, nullptr);
 			gpApplication.mMovie = (u8)param_1;
 		}

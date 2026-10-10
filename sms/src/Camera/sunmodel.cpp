@@ -222,7 +222,7 @@ void TSunModel::perform(u32 cue, JDrama::TGraphics*)
 			unkB0 = 0.0f;
 		} else {
 			f32 distSq = unkF8[0].squared();
-			if (unkF8[0].squared() > 2.0f) {
+			if (distSq > 2.0f) {
 				unkB0 = 0.0f;
 			} else {
 				unkB0 = CLBLinearInbetween<f32>(

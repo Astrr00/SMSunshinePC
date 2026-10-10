@@ -604,8 +604,10 @@ void TChangeStageMerrygoround::touchPlayer(THitActor* actor)
 void TChangeStageMerrygoround::calc()
 {
 	if (unk13C) {
-		gpMarioParticleManager->emitAndBindToPosPtr(0x100, gpMarioPos, 1, this);
-		gpMarioParticleManager->emitAndBindToPosPtr(0x101, gpMarioPos, 1, this);
+		gpMarioParticleManager->emitAndBindToPosPtr(
+		    PARTICLE_MS_HIKAGE1_A, &SMS_GetMarioPos(), 1, this);
+		gpMarioParticleManager->emitAndBindToPosPtr(
+		    PARTICLE_MS_HIKAGE1_B, &SMS_GetMarioPos(), 1, this);
 	}
 }
 
@@ -637,8 +639,9 @@ void TBalloonKoopaJr::load(JSUMemoryInputStream& stream)
 void TPinnaEntrance::loadAfter()
 {
 	TMapObjBase::loadAfter();
+	JGeometry::TVec3<f32> rot(90.0f, 0.0f, 0.0f);
 	TMapObjBaseManager::newAndRegisterObj(
-	    "GateManta", mPosition, JGeometry::TVec3<f32>(90.0f, 0.0f, 0.0f));
+	    "GateManta", mPosition, rot, JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f));
 }
 
 void TWaterRecoverObj::touchPlayer(THitActor* other)
@@ -662,7 +665,8 @@ void TAmiKing::initMapObj()
 	mMActor->setBck("amiking_sleep1");
 	setAnmSound("/scene/mapObj/amiking_sleep1.bas");
 	offLiveFlag(LIVE_FLAG_UNK10);
-	for (u8 i = 0; i < mMActor->getModel()->getModelData()->getJointNum(); ++i) {
+	for (u8 i = 0; i < getMActor()->getModel()->getModelData()->getJointNum();
+	     ++i) {
 	}
 }
 

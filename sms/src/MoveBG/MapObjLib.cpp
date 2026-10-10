@@ -48,19 +48,9 @@ bool TMapObjBase::isHideObj(THitActor* param_1)
 
 bool TMapObjBase::isDemo()
 {
-	bool b1 = true;
-	if (gpMarDirector->unk124 != 1 && gpMarDirector->unk124 != 2)
-		b1 = false;
-
-	if (!b1) {
-		// TODO: should be OR, but need fancy inlines for that...
-		bool b2 = true;
-		if (gpMarDirector->unk124 != 3 && gpMarDirector->unk124 != 4)
-			b2 = false;
-		if (b2) {
-			return true;
-		}
-	}
+	if (SMSGetMarDirector()->isTalkModeNow()
+	    || SMSGetMarDirector()->isDemoModeNow())
+		return true;
 	return false;
 }
 
@@ -224,14 +214,6 @@ TMapObjBase::newAndInitBuildingCollisionMove(int param_1, TLiveActor* param_2)
 	snprintf(buffer, 64, "/scene/map/map/building%02d.col", param_1);
 	move->init(buffer, 0, param_2);
 	return move;
-}
-
-TMapCollisionStatic* TMapObjBase::newAndInitBuildingCollisionStatic(int,
-                                                                    TLiveActor*)
-{
-#ifdef TARGET_PC
-	return nullptr;
-#endif
 }
 
 J3DJoint* TMapObjBase::getBuildingJoint(int i)
@@ -550,41 +532,39 @@ void TMapObjBase::makeObjMtxRotByAxis(const JGeometry::TVec3<f32>& param_1,
 void TMapObjBase::calcReflectingVelocity(const TBGCheckData* wall, f32 param_2,
                                          JGeometry::TVec3<f32>* velocity) const
 {
-	const JGeometry::TVec3<f32>& normal = wall->getNormal();
-	f32 onePlus                         = 1.0f + param_2;
-	f32 dot                             = velocity->dot(normal);
-	velocity->x -= onePlus * dot * normal.x;
-	velocity->y -= onePlus * dot * normal.y;
-	velocity->z -= onePlus * dot * normal.z;
-}
-
-// TODO: fabricated hack
-static inline void rotateVecByAxisY2(JGeometry::TVec3<f32>* vec, f32 angle)
-{
-	TMapObjBase::rotateVecByAxisY(vec, angle);
+	f32 dot    = velocity->dot(wall->getNormal());
+	f32 factor = 1.0f + param_2;
+	velocity->x -= dot * wall->getNormal().x * factor;
+	velocity->y -= dot * wall->getNormal().y * factor;
+	velocity->z -= dot * wall->getNormal().z * factor;
 }
 
 void TMapObjBase::getVerticalVecToTargetXZ(f32 x, f32 z,
                                            JGeometry::TVec3<f32>* vec) const
 {
-	vec->set(x - mPosition.x, 0.0f, z - mPosition.z);
-	MsVECNormalize(vec, vec);
-
-	rotateVecByAxisY2(vec, 1.5707963f);
+	getVerticalVecFromOffsetXZ(x - mPosition.x, z - mPosition.z, vec);
 }
 
-void TMapObjBase::getVerticalVecFromOffsetXZ(f32, f32, JGeometry::TVec3<f32>*)
+void TMapObjBase::getVerticalVecFromOffsetXZ(f32 x, f32 z,
+                                             JGeometry::TVec3<f32>* vec)
 {
+	getNormalVecFromOffsetXZ(x, z, vec);
+	rotateVecByAxisY(vec, 1.5707963f);
 }
 
 void TMapObjBase::rotateVecByAxisY(JGeometry::TVec3<f32>* vec, f32 angle)
 {
 	JGeometry::TRotation3<TMtx33f> rot;
 	rot.setEular(0.0f, angle, 0.0f);
-	rot.mult33(*vec, *vec);
+	rot.mult33(*vec);
 }
 
-void TMapObjBase::getNormalVecFromOffsetXZ(f32, f32, JGeometry::TVec3<f32>*) { }
+void TMapObjBase::getNormalVecFromOffsetXZ(f32 x, f32 z,
+                                           JGeometry::TVec3<f32>* vec)
+{
+	vec->set(x, 0.0f, z);
+	MsVECNormalize(vec, vec);
+}
 
 void TMapObjBase::getNormalVecFromTargetXZ(f32 param_1, f32 param_2,
                                            JGeometry::TVec3<f32>* param_3) const
@@ -845,14 +825,6 @@ TMapObjBase::emitAndScale(s32 param_1, u8 param_2,
 	}
 
 	return emitter;
-}
-
-JPABaseEmitter* TMapObjBase::emitAndRotate(s32, u8,
-                                           const JGeometry::TVec3<f32>*) const
-{
-#ifdef TARGET_PC
-	return nullptr;
-#endif
 }
 
 void TMapObjVibration::startSlowly(f32) { }

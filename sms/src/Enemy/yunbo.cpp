@@ -162,27 +162,55 @@ BOOL TYumbo::receiveMessage(THitActor* sender, u32 message)
 
 void TYumbo::moveObject()
 {
-	if (mSpine->getLatestNerve() == &TNerveYumboFreeze::theNerve()) {
-		if (JPABaseEmitter* emitter
-		    = gpMarioParticleManager->emitAndBindToPosPtr(
-		        PARTICLE_MS_POI_KIZETSU, &mPosition, 1, this))
+	updateEffect();
+	updateCollision();
+	updateSquareToMario();
+	TSmallEnemy::moveObject();
+}
+
+void TYumbo::updateCollision()
+{
+	if (isFreeze() || isDead())
+		onHitFlag(HIT_FLAG_CANNOT_ATTACK);
+	else
+		offHitFlag(HIT_FLAG_CANNOT_ATTACK);
+}
+
+void TYumbo::updateEffect()
+{
+	if (isFreeze()) {
+		JPABaseEmitter* emitter = gpMarioParticleManager->emitAndBindToPosPtr(
+		    PARTICLE_MS_POI_KIZETSU, &mPosition, 1, this);
+		if (emitter)
 			emitter->setGlobalScale(mScaling);
 	}
 
 	if (mMActor->checkCurAnm("sambohead_dance", 0)) {
-		gpMarioParticleManager->emitAndBindToMtxPtr(
-		    PARTICLE_MS_YNB_ONPU, getModel()->getAnmMtx(mCenterJointIdx), 1,
-		    this);
+		MtxPtr mtx = getModel()->getAnmMtx(mCenterJointIdx);
+		gpMarioParticleManager->emitAndBindToMtxPtr(PARTICLE_MS_YNB_ONPU, mtx,
+		                                            1, this);
 	}
+}
 
-	if (mSpine->getLatestNerve() == &TNerveYumboFreeze::theNerve()
-	    || mSpine->getLatestNerve() == &TNerveSmallEnemyDie::theNerve())
-		onHitFlag(HIT_FLAG_CANNOT_ATTACK);
-	else
-		offHitFlag(HIT_FLAG_CANNOT_ATTACK);
+bool TYumbo::isWaterproof() const
+{
+	const TNerveBase<TLiveActor>* nerve = mSpine->getLatestNerve();
+	return nerve == &TNerveYumboFreeze::theNerve()
+	       || nerve == &TNerveSmallEnemyDie::theNerve()
+	       || nerve == &TNerveYumboHiding::theNerve()
+	       || nerve == &TNerveYumboAttack::theNerve();
+}
 
-	updateSquareToMario();
-	TSmallEnemy::moveObject();
+bool TYumbo::isFreeze() const
+{
+	const TNerveBase<TLiveActor>* nerve = mSpine->getLatestNerve();
+	return nerve == &TNerveYumboFreeze::theNerve();
+}
+
+bool TYumbo::isDead() const
+{
+	const TNerveBase<TLiveActor>* nerve = mSpine->getLatestNerve();
+	return nerve == &TNerveSmallEnemyDie::theNerve();
 }
 
 void TYumbo::perform(u32 cue, JDrama::TGraphics* graphics)
@@ -194,20 +222,9 @@ void TYumbo::perform(u32 cue, JDrama::TGraphics* graphics)
 		(*it)->perform(cue, graphics);
 }
 
-// fabricated: the original inlined this predicate (a helper is needed for the
-// theNerve() inlining to come out the same)
-static inline bool isUnaffectedByWater(const TNerveBase<TLiveActor>* nerve)
-{
-	return nerve == &TNerveYumboFreeze::theNerve()
-	       || nerve == &TNerveSmallEnemyDie::theNerve()
-	       || nerve == &TNerveYumboHiding::theNerve()
-	       || nerve == &TNerveYumboAttack::theNerve();
-}
-
 void TYumbo::behaveToWater(THitActor* sender)
 {
-	const TNerveBase<TLiveActor>* nerve = mSpine->getLatestNerve();
-	if (!isUnaffectedByWater(nerve)) {
+	if (!isWaterproof()) {
 		mSpine->reset();
 		mSpine->setNext(&TNerveYumboFreeze::theNerve());
 	}

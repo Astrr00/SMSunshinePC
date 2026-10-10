@@ -73,11 +73,7 @@ void TSelectDir::setup(JDrama::TDisplay* display, TMarioGamePad* gamePad,
 
 void* TSelectDir::setupThreadFunc(void* param_1)
 {
-#ifdef TARGET_PC
 	return (void*)(intptr_t)((TSelectDir*)param_1)->rsetup(); // retail returns the callee's r3
-#else
-	((TSelectDir*)param_1)->rsetup();
-#endif
 }
 
 int TSelectDir::rsetup()

@@ -89,7 +89,7 @@ public:
 	bool getNextGrip(const JGeometry::TVec3<f32>&, const JGeometry::TVec3<f32>&,
 	                 f32, f32*) const;
 	void updatePosture_();
-	u8 getNumKillerLaunchable() const;
+	int getNumKillerLaunchable() const;
 	bool isKillerAttackable() const;
 	u8 getNumKillerBurstable() const;
 	bool isKillerLaunchable() const;
@@ -149,6 +149,7 @@ public:
 	virtual void calcRootMatrix();
 	virtual void control();
 	virtual void kill();
+	void removeCollisions_();
 	virtual void perform(u32 cue, JDrama::TGraphics* graphics);
 
 public:

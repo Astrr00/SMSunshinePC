@@ -142,13 +142,6 @@ bool TBaseNPC::isNerveCanGoToTaken() const
 	return result;
 }
 
-bool TBaseNPC::isNerveCanGoToThrow() const
-{
-#ifdef TARGET_PC
-	return false;
-#endif
-}
-
 bool TBaseNPC::isNerveCanGoToMad() const
 {
 	bool result                         = false;

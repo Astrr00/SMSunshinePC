@@ -9,13 +9,14 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
+| Decomp logic correctness (non-matching functions) | open | 0 | 1285 functions with behaviour-changing diffs (`sunshine-pc/tools/decomp_triage.py`); fixing by subsystem |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
-| Units compiled (clang-cl) | done | 100 | 584/584 built units; 624/733 incl. excluded (`docs/platform-notes.md`) |
+| Units compiled (clang-cl) | done | 100 | 583/583 built units, 150 excluded with reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
 | Title screen | partial | 70 | logo, Shine Sprite, seagulls render, logic 30/s; area behind the logo black (retail background unverified) |
-| Title → file select → new game → Delfino | partial | 35 | file select reached (`sunshine-pc/build/FlowFileSelect/a2.png`); CardLoad title crash fixed (loop 13→11, asm 0x8022D16C); new game/Delfino pending |
+| Title → file select → new game → Delfino | partial | 35 | select and slot panel run clean (`sunshine-pc/build/FlowFileSelect/s3.png`; flow6 to tick 3146, no fatal); CardLoad crashes fixed (titleDraw loop 13→11, asm 0x8022D16C; selectFunction unk2A4 loop 4→3, asm 0x80226050/0x802273B0); play of slot A hides card UI (`s6.png`) but stage stays 15; slot A still reads NEW after File created; new game/Delfino pending |
 | Bianco Hills Ep.1 (dev start) | partial | 60 | textured, HUD, Mario walks/jumps, camera follows; flat untextured polygon at the screen edge |
-| First Shine + save + reload | open | 10 | in progress |
+| First Shine + save + reload | open | 10 | tpshine finds the Shine via the shine manager (eventId 42, `build/ShineSave2-2/watch.log:73`); Mario falls to the ground, no collect, no `.gci` yet |
 | Goop / pixel metric | open | 15 | GPU occlusion gives 0/1 only; needs real fragment counts |
 | Audio | partial | 50 | movies and title music play; gameplay output turns into noise after ~20 s |
 | Particles | partial | 50 | JPA loads; some particle view objects not in the draw lists |

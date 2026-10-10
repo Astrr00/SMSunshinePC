@@ -463,7 +463,7 @@ void TSpineEnemy::walkToCurPathNode(f32 march_speed, f32 turn_speed,
 		fVar3 = 0.0f;
 	} else {
 		f32 s = MsSin(turn_speed);
-		if (fVar3 == 0.0f) {
+		if (s == 0.0f) {
 			fVar3 = 100000.0f;
 		} else {
 			fVar3 = march_speed * MsSin(90.0f - turn_speed * 0.5f) / s;
@@ -474,7 +474,7 @@ void TSpineEnemy::walkToCurPathNode(f32 march_speed, f32 turn_speed,
 	f32 fVar5 = fVar2;
 	if (fVar7 > fVar3 * 2.0f) {
 		if (fVar2 > 0.0f) {
-			fVar5 = fVar2 > turn_speed ? fVar2 : turn_speed;
+			fVar5 = fVar2 < turn_speed ? fVar2 : turn_speed;
 		} else {
 			fVar5 = fVar2 > -turn_speed ? fVar2 : -turn_speed;
 		}
@@ -532,17 +532,17 @@ void TSpineEnemy::zigzagToCurPathNode(f32 march_speed, f32 turn_speed,
 		fVar3 = 0.0f;
 	} else {
 		f32 s = MsSin(turn_speed);
-		if (fVar3 == 0.0f) {
+		if (s == 0.0f) {
 			fVar3 = 100000.0f;
 		} else {
 			fVar3 = march_speed * MsSin(90.0f - turn_speed * 0.5f) / s;
 		}
 	}
 
-	f32 fVar2;
+	f32 fVar2 = fVar1;
 	if (dVar9 > fVar3 * 2.0f) {
 		if (fVar1 > 0.0f) {
-			fVar2 = fVar1 > turn_speed ? fVar1 : turn_speed;
+			fVar2 = fVar1 < turn_speed ? fVar1 : turn_speed;
 		} else {
 			fVar2 = fVar1 > -turn_speed ? fVar1 : -turn_speed;
 		}
@@ -573,7 +573,7 @@ void TSpineEnemy::doShortCut()
 		return;
 	}
 
-	TPathNode node = unk114.pop();
+	TPathNode node = unk114.top();
 
 	JGeometry::TVec3<f32> local_28 = node.getPoint() - mPosition;
 	if (local_28.x == 0.0f && local_28.y == 0.0f && local_28.z == 0.0f)

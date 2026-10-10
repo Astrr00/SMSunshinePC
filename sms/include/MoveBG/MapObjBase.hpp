@@ -216,7 +216,6 @@ public:
 	void initUnique();
 	void setMatTableTex(J3DMaterialTable*);
 	void setMatTable(J3DMaterialTable*);
-	JPABaseEmitter* emitAndRotate(s32, u8, const JGeometry::TVec3<f32>*) const;
 	JPABaseEmitter* emitAndScale(s32, u8, const JGeometry::TVec3<f32>*,
 	                             const JGeometry::TVec3<f32>&) const;
 	JPABaseEmitter* emitAndBindScale(s32, u8, const JGeometry::TVec3<f32>*,
@@ -248,9 +247,9 @@ public:
 	void getNormalVecFromTarget(f32, f32, f32, JGeometry::TVec3<f32>*) const;
 	void getNormalVecFromOffset(f32, f32, f32, JGeometry::TVec3<f32>*);
 	void getNormalVecFromTargetXZ(f32, f32, JGeometry::TVec3<f32>*) const;
-	void getNormalVecFromOffsetXZ(f32, f32, JGeometry::TVec3<f32>*);
+	static void getNormalVecFromOffsetXZ(f32, f32, JGeometry::TVec3<f32>*);
 	static void rotateVecByAxisY(JGeometry::TVec3<f32>*, f32);
-	void getVerticalVecFromOffsetXZ(f32, f32, JGeometry::TVec3<f32>*);
+	static void getVerticalVecFromOffsetXZ(f32, f32, JGeometry::TVec3<f32>*);
 	void getVerticalVecToTargetXZ(f32, f32, JGeometry::TVec3<f32>*) const;
 	void calcReflectingVelocity(const TBGCheckData* wall, f32,
 	                            JGeometry::TVec3<f32>* velocity) const;
@@ -300,8 +299,6 @@ public:
 	static TJointObj* getBuildingJointObj(int);
 	static J3DJoint* getBuildingJoint(int);
 
-	static TMapCollisionStatic* newAndInitBuildingCollisionStatic(int,
-	                                                              TLiveActor*);
 	static TMapCollisionMove* newAndInitBuildingCollisionMove(int, TLiveActor*);
 	static TMapCollisionWarp* newAndInitBuildingCollisionWarp(int, TLiveActor*);
 

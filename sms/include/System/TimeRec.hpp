@@ -26,6 +26,7 @@ public:
 	// fabricated
 	int size() const { return mSize; }
 	Entry& operator[](int i) { return mEntries[i]; }
+	void clear() { mSize = 0; }
 
 public:
 	/* 0x0 */ Entry mEntries[MAX_SIZE];
@@ -42,7 +43,7 @@ public:
 	TTimeRec(u16);
 	void flip();
 	void snapGXTime(u32);
-	void suppleGXTime();
+	static void suppleGXTime();
 	virtual void drawSyncCallback(u16);
 
 	static TTimeRec* _instance;
@@ -67,6 +68,21 @@ public:
 
 	// fabricated
 	static void snapGxTimeEnd() { snapGxTimeStatic(0); }
+
+	static void snapCPUTime(u32 color)
+	{
+		TTimeRec* rec = _instance;
+		if (rec) {
+			OSTick tick = OSGetTick();
+			rec->crTimeAry()[0].append(tick, color);
+		}
+	}
+
+	static void snapGXTimeSt(u32 color)
+	{
+		if (_instance)
+			_instance->snapGXTime(color);
+	}
 
 	static void snapGxTimeStatic(u32 param_1)
 	{

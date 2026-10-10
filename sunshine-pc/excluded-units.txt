@@ -26,3 +26,4 @@ JSystem/dspproc.c | poked __DSPRegs; replaced by the host DSP in src/sdk/dsp_glu
 JSystem/dsptask.c | same: DSP boot/command glue (and the jdsp microcode image) replaced by src/sdk/dsp_glue.cpp
 JSystem/osdsp.c | same: DSP task list; only the JAudio task exists on the host
 JSystem/osdsp_task.c | same: DSP task scheduler and DsyncFrame2 (src/sdk/dsp_glue.cpp)
+GC2D/hx_wiper.c | the port links src/sdk/hx_wiper.cpp (asm translation with PC fixes: BTI byte order, bounded wipe tables); the decomp file (upstream import, matching) is C over C++-only headers

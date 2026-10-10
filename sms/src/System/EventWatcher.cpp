@@ -208,7 +208,7 @@ static void evIsNearSameActors(TSpcTypedInterp<TEventWatcher>* interp,
 /// stack until the end, because the count of them is only known at run time.
 static void evIsNearActors(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	int count = 0; // asm 0x800E4D94: init 0; `which` is not counted (only the loop increments, 0x800E5038)
+	int count = 0;
 
 	if (arg_num >= 3) {
 		THitActor* which = (THitActor*)getNameRefPtr(
@@ -216,6 +216,7 @@ static void evIsNearActors(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 		if (which) {
 			f32 dist
 			    = interp->mProcessStack.getFromTop(arg_num - 2).getDataFloat();
+			count = 1;
 
 			for (u32 i = 2; i < arg_num; ++i) {
 				THitActor* other = (THitActor*)getNameRefPtr(
@@ -848,16 +849,16 @@ static void evCheckWoodBox(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 	int p1 = interp->pop().getDataInt();
 	int p2 = interp->pop().getDataInt();
 
-	int count = p2 - p1 + 1;
+	int count = p1 - p2 + 1;
 
 	char buffer[] = "ゲーム木箱00";
 	for (int i = p2; i <= p1; ++i) {
 		if (i < 10) {
-			buffer[10] = '0' + i;
-			buffer[11] = 0;
+			buffer[sizeof(buffer) - 3] = '0' + i;
+			buffer[sizeof(buffer) - 2] = 0;
 		} else {
-			buffer[10] = '0' + i / 10;
-			buffer[11] = '0' + i % 10;
+			buffer[sizeof(buffer) - 3] = '0' + i / 10;
+			buffer[sizeof(buffer) - 2] = '0' + i % 10;
 		}
 		TMapObjBase* obj
 		    = static_cast<TMapObjBase*>(JDrama::TNameRefGen::search(buffer));
@@ -1015,9 +1016,10 @@ static void evSetTransScale(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 	TMapObjBase* obj = (TMapObjBase*)getNameRefPtr(interp->pop());
 
 	obj->makeObjAppeared();
-	obj->changeObjSRT(JGeometry::TVec3<f32>(sx, sy, sz),
-	                  JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f),
-	                  JGeometry::TVec3<f32>(tx, ty, tz));
+	JGeometry::TVec3<f32> scale(sx, sy, sz);
+	JGeometry::TVec3<f32> rot(0.0f, 0.0f, 0.0f);
+	JGeometry::TVec3<f32> trans(tx, ty, tz);
+	obj->changeObjSRT(scale, rot, trans);
 
 	interp->push();
 }
@@ -1225,7 +1227,6 @@ static void evAppear8RedCoinsAndTimer(TSpcTypedInterp<TEventWatcher>* interp,
 	interp->push();
 }
 
-// fabricated and wrong
 JGeometry::TVec3<f32> rotateY(JGeometry::TVec3<f32> vec, s16 angleY)
 {
 	f32 x = vec.x * JMASCos(angleY) + vec.z * JMASSin(angleY);
@@ -1243,7 +1244,6 @@ static void evWarpFrontToMario(TSpcTypedInterp<TEventWatcher>* interp,
 
 	s16 angleY = SMS_GetMarioAngleY();
 
-	// TODO: codegen very wrong
 	actor->mPosition = SMS_GetMarioPos()
 	                   + rotateY(JGeometry::TVec3<f32>(0.0f, 0.0f, 400.0f),
 	                             SMS_GetMarioAngleY());

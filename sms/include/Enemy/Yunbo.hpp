@@ -88,6 +88,11 @@ public:
 	virtual bool doKeepDistance();
 
 	void shotSeeds();
+	void updateEffect();
+	void updateCollision();
+	bool isWaterproof() const;
+	bool isFreeze() const;
+	bool isDead() const;
 
 	// fabricated
 	TYumboParams* getSaveParam2() const

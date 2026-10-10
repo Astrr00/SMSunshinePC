@@ -42,9 +42,9 @@ static void CheckNerve4Npc_(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num,
 	                                             ? npc->mSpine->getLatestNerve()
 	                                             : npc->mSpine->getCurrentNerve();
 
-	TSpcSlice result;
+	int result = 0;
 	if (actual == expected)
-		result.setDataInt(1);
+		result = 1;
 	interp->push(result);
 }
 
@@ -280,9 +280,9 @@ static void evFireStartDemoCamera(TSpcTypedInterp<TEventWatcher>* interp,
 {
 	interp->verifyArgNum(1, &arg_num);
 	const char* cameraName = interp->pop().getDataString();
-	gpMarDirector->fireStartDemoCamera(cameraName, nullptr, -1, 0.0f, true,
-	                                   nullptr, 0, nullptr,
-	                                   JDrama::TFlagT<u16>());
+	SMSGetMarDirector()->fireStartDemoCamera(cameraName, nullptr, -1, 0.0f,
+	                                         true, nullptr, 0, nullptr,
+	                                         JDrama::TFlagT<u16>());
 	interp->push();
 }
 
@@ -378,15 +378,16 @@ void TNpcEvent::reviveOneSunflower()
 		TBaseNPC* npc
 		    = static_cast<TBaseNPC*>(JDrama::TNameRefGen::search(acStack_50));
 		--mDownSunflowerNum;
+		JGeometry::TVec3<f32>* position = &npc->unk1B8;
 
 		static const char* sCameraNames[] = {
 			"ひまわりカメラ0", "ひまわりカメラ1", "ひまわりカメラ2",
 			"ひまわりカメラ3", "ひまわりカメラ4",
 		};
 
-		gpMarDirector->fireStartDemoCamera(sCameraNames[idx], &npc->unk1B8, -1,
-		                                   0.0f, true, &ReviveSunflowerCallBack,
-		                                   PTR_U32(npc), nullptr, 0);
+		SMSGetMarDirector()->fireStartDemoCamera(
+		    sCameraNames[idx], position, -1, 0.0f, true,
+		    &ReviveSunflowerCallBack, PTR_U32(npc), nullptr, 0);
 
 		if (mDownSunflowerNum == 0) {
 			gpItemManager->makeShineAppearWithDemo(

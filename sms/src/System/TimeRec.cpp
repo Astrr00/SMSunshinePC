@@ -39,24 +39,10 @@ TTimeRec::TTimeRec(u16 param_1)
 
 void TTimeRec::flip()
 {
-	TTimeArray& array = _instance->crTimeAry()[1];
-	int size          = array.mSize;
-	if (size >= 3) {
-		int i    = size - 1;
-		u32 curr = array.mEntries[i].time;
-		while (i > 0) {
-			--i;
-			if (array.mEntries[i].time == 0) {
-				array.mEntries[i].time = curr;
-			} else {
-				curr = array.mEntries[i].time;
-			}
-		}
-	}
-
+	suppleGXTime();
 	unk814 ^= 1;
-	crTimeAry()[0].mSize = 0;
-	crTimeAry()[1].mSize = 0;
+	crTimeAry()[0].clear();
+	crTimeAry()[1].clear();
 }
 
 void TTimeRec::snapGXTime(u32 param_1)
@@ -71,7 +57,21 @@ void TTimeRec::snapGXTime(u32 param_1)
 	}
 }
 
-void TTimeRec::suppleGXTime() { }
+void TTimeRec::suppleGXTime()
+{
+	TTimeArray& array = _instance->crTimeAry()[1];
+	if (array.size() < 3)
+		return;
+	u32 curr = array[array.size() - 1].time;
+	int i    = array.size() - 1;
+	while (i > 0) {
+		--i;
+		if (array[i].time == 0)
+			array[i].time = curr;
+		else
+			curr = array[i].time;
+	}
+}
 
 void TTimeRec::drawSyncCallback(u16 param_1)
 {

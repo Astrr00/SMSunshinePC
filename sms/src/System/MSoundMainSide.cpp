@@ -964,13 +964,16 @@ f32 MSStageCubeFade::calcParamRatioInCube(s32 id) { return 0.0f; }
 f32 MSStageCubeFade::calcParamRatioInCube(s32 id) { }
 #endif
 
+inline Vec getCubeCheckPos(const Vec& pos)
+{
+	Vec result = pos;
+	result.y += 75.0f;
+	return result;
+}
+
 void MSStageCubeSwitch::proc()
 {
-	Vec tmp = SMS_GetMarioPos();
-	tmp.y += 75.0f;
-	Vec local_18 = tmp;
-
-	unk4 = gpCubeSoundChange->getInCubeNo(local_18);
+	unk4 = gpCubeSoundChange->getInCubeNo(getCubeCheckPos(SMS_GetMarioPos()));
 
 	switch (unk4) {
 	case -1:

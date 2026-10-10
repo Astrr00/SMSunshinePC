@@ -161,8 +161,8 @@ public:
 	}
 
 private:
-	// fabricated
-	void fabricatedInline2()
+	// In-class so mwcc inlines it at both call sites (retail has no symbol).
+	void calcExternalData_()
 	{
 		CLBCrossToPolar(mTarget, mPosition, &unk256, &unk258);
 
@@ -178,7 +178,6 @@ private:
 	void execSecureView_(s16, Vec*);
 
 	MtxPtr getToroccoMtx_() const;
-	void setMarioLookat_();
 
 	bool startReproduceDemoCamera_(const char*, const JGeometry::TVec3<f32>*);
 	void restartReproduceDemoCamera_();
@@ -202,7 +201,6 @@ private:
 	void calcSlopeAngleX_(s16*);
 	void calcPosAndAt_();
 	void calcFinalPosAndAt_();
-	void calcExternalData_();
 	void ctrlGameCamera_();
 
 	void drawJetCoasterBalloonMessage_();

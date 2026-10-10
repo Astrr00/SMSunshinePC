@@ -44,14 +44,15 @@ void TMarDirector::setup2()
 	unkBC = static_cast<TNameRefAryT<TStageEventInfo>*>(
 	    JDrama::TNameRefGen::search("イベントテーブル"));
 	if (unkBC) {
-		for (TStageEventInfo* it = unkBC->begin(); it != unkBC->end(); ++it) {
+		u16 index = 0;
+		for (TStageEventInfo* it = unkBC->begin(); it != unkBC->end(); ++it, ++index) {
 			JDrama::TNameRef* ref = JDrama::TNameRefGen::search(it->unk14);
 			if (ref) {
 				// TODO: what is ref?
 				// asm 0x800EFCA4-0x800EFCA8: stw (u16)index, 0x134(ref) before unk28 store. The target field is not
 				// identified; 0x134 is a retail 32-bit offset and would hit an unrelated member in the 64-bit layout.
 #ifndef TARGET_PC
-				*(u32*)((u8*)ref + 0x134) = (u16)(it - unkBC->begin());
+				*(u32*)((u8*)ref + 0x134) = index;
 #endif
 				it->unk28                 = ref;
 			}
@@ -117,7 +118,6 @@ void TMarDirector::setup2()
 
 	JDrama::TGraphics graphics;
 	graphics.unk0 = 0; // asm 0x800F00D4: sth r0,0x2f4(r1)
-	graphics.unkFC.set(0); // asm 0x800F00CC: sth r0,0x3f0(r1) (+0xFC, not +0xFE)
 	unk40->perform(CUE_ALL, &graphics);
 	unk38->perform(CUE_ALL, &graphics);
 	GXSetDrawDone();

@@ -60,7 +60,6 @@ public:
 	};
 
 	static s32 decideUseSector(TCriteria*);
-	static s32 getLoadIndex(TCriteria*);
 	static s32 getWriteCount(TCriteria*);
 	static void copyTo(TCriteria*, TCardBookmarkInfo*);
 

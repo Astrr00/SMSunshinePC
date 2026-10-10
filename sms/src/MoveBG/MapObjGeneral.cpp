@@ -566,24 +566,23 @@ void TMapObjGeneral::calcRootMatrix()
 		if (mMapObjData->mHold) {
 			TMapObjHoldData* hold = mMapObjData->mHold;
 
-			MtxPtr src = getTakingMtx();
+			MtxPtr src = mHolder->getTakingMtx();
 			MTXCopy(src, hold->unkC->getBaseTRMtx());
 			hold->unkC->calc();
 
-			MtxPtr src2 = hold->unk10;
-			MTXCopy(src2, model->getBaseTRMtx());
-			mPosition.set(src2[3][0], src2[3][1], src2[3][2]);
+			MtxPtr takingMtx = hold->unk10;
+			MTXCopy(takingMtx, model->getBaseTRMtx());
+			mPosition.set(takingMtx[0][3], takingMtx[1][3], takingMtx[2][3]);
 		} else {
-			MtxPtr src = getTakingMtx();
-			MTXCopy(src, checkMapObjFlag(MAP_OBJ_FLAG_UNK100)
-			                 ? model->getAnmMtx(0)
-			                 : model->getBaseTRMtx());
-			mPosition.set(src[3][0], src[3][1], src[3][2]);
+			MtxPtr takingMtx = mHolder->getTakingMtx();
+			MTXCopy(takingMtx, checkMapObjFlag(MAP_OBJ_FLAG_UNK100)
+			                       ? model->getAnmMtx(0)
+			                       : model->getBaseTRMtx());
+			mPosition.set(takingMtx[0][3], takingMtx[1][3], takingMtx[2][3]);
 		}
 	} else {
-		JGeometry::TVec3<f32> pos(mPosition.x, mPosition.y - mYOffset,
-		                          mPosition.z);
-		MsMtxSetXYZRPH(model->getBaseTRMtx(), pos.x, pos.y, pos.z, mRotation.x,
+		MsMtxSetXYZRPH(model->getBaseTRMtx(), mPosition.x,
+		               mPosition.y - mYOffset, mPosition.z, mRotation.x,
 		               mRotation.y, mRotation.z);
 	}
 	model->setBaseScale(mScaling);

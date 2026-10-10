@@ -9,6 +9,11 @@
 // it behaves sinside of a TVector. See InsertRaw for it in MarNameRefGen.
 class TCameraMapTool : public JDrama::TNameRef {
 public:
+	struct TPitchYaw {
+		f32 pitch;
+		f32 yaw;
+	};
+
 	TCameraMapTool(const char* name = "<TCameraMapTool>")
 	    : JDrama::TNameRef(name)
 	{
@@ -18,13 +23,13 @@ public:
 	void load(JSUMemoryInputStream&);
 
 	// Fabricated
-	f32 getYaw() const { return mPitchYaw.y; }
+	f32 getYaw() const { return mPitchYaw.yaw; }
 	int getCameraMode() const { return mCameraMode; }
 	int getDemoLengthFrames() const { return mDemoLengthFrames; }
 
 public:
 	/* 0xC */ JGeometry::TVec3<f32> mPosition;
-	/* 0x18 */ JGeometry::TVec2<f32> mPitchYaw;
+	/* 0x18 */ TPitchYaw mPitchYaw;
 	/* 0x20 */ u32 unk20;
 	/* 0x24 */ s32 mCameraMode;
 	/* 0x28 */ s32 unk28;

@@ -18,7 +18,6 @@
 #include <MarioUtil/MathUtil.hpp>
 #include <MarioUtil/RumbleMgr.hpp>
 #include <MSound/MSound.hpp>
-#include <MSound/MSoundSE.hpp>
 #include <Player/Mario.hpp>
 #include <Player/MarioAccess.hpp>
 #include <Player/NozzleTrigger.hpp>
@@ -31,6 +30,37 @@
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
 #include <M3DUtil/InfectiousStrings.hpp>
+TBathtubParams::TBathtubParams()
+    : TParams("/MapObj/bathtub.prm")
+    , PARAM_INIT(resetGrip, 0)
+    , PARAM_INIT(trampleRelease, 10)
+    , PARAM_INIT(trampleRecover, 10)
+    , PARAM_INIT(quakeRelease, 500)
+    , PARAM_INIT(quakeRecover, 500)
+    , PARAM_INIT(hipdropRelease, 35)
+    , PARAM_INIT(hipdropRecover, 35)
+    , PARAM_INIT(breakCount0, 750)
+    , PARAM_INIT(breakCount1, 710)
+    , PARAM_INIT(breakCount2, 685)
+    , PARAM_INIT(breakCount3, 655)
+    , PARAM_INIT(launchStopCount, 1000)
+    , PARAM_INIT(animSpeed0, 0.15f)
+    , PARAM_INIT(animSpeed1, 0.15f)
+    , PARAM_INIT(animSpeed2, 0.15f)
+    , PARAM_INIT(animSpeed3, 0.15f)
+    , PARAM_INIT(animSpeed4, 0.22f)
+    , PARAM_INIT(shake, 0.0f)
+    , PARAM_INIT(watermark, 0.3f)
+    , PARAM_INIT(maxAngle, 35.0f)
+    , PARAM_INIT(angleVelDamp, 0.93f)
+    , PARAM_INIT(rebound, 0.0005f)
+    , PARAM_INIT(shakeDamp, 0.93f)
+    , PARAM_INIT(marioWeight, 0.01f)
+    , PARAM_INIT(marioDropWeight, 5.0f)
+    , PARAM_INIT(outerHeight, 20.0f)
+{
+	TParams::load(mPrmPath);
+}
 
 static inline TBathtubRot& bathRot(TBathtubData& data)
 {
@@ -74,12 +104,17 @@ bool TBathtub::isKillerLaunchable() const
 	return isKillerAttackable();
 }
 
-u8 TBathtub::getNumKillerLaunchable() const
+int TBathtub::getNumKillerLaunchable() const
 {
 	if (!isKillerLaunchable())
 		return 0;
-	int n = getNumGripsDead();
-	return JGeometry::TUtil<int>::clamp(n + 1, 2, 4);
+
+	int num = getNumGripsDead() + 1;
+	if (num < 2)
+		num = 2;
+	if (num > 4)
+		num = 4;
+	return num;
 }
 
 TBathtub::TBathtub(const char* name)
@@ -187,37 +222,45 @@ void TBathtub::load(JSUMemoryInputStream& stream)
 	unk298 = 1;
 }
 
+static inline void liftMario(JGeometry::TVec3<f32>& angVel, const JGeometry::TVec3<f32>& marioPos,
+                             const JGeometry::TVec3<f32>& pos, f32 weight)
+{
+	static JGeometry::TVec3<f32> yDown(0.0f, -1.0f, 0.0f);
+	JGeometry::TVec3<f32> lever;
+	lever.sub(marioPos, pos);
+	JGeometry::TVec3<f32> torque;
+	torque.cross(lever, yDown);
+	torque.scale(0.00000001f * weight);
+	angVel.add(torque);
+}
+
 void TBathtub::updatePosture_()
 {
 	static JGeometry::TVec3<f32> y(0.0f, 1.0f, 0.0f);
 
 	if (unk250 == 0) {
-		f32 t;
+		f32 rate;
 		if (unk258 == 0) {
-			t = 1.0f;
+			rate = 1.0f;
 		} else {
-			unk258 -= 1;
-			t = 1.0f - (f32)unk258 / (f32)unk25C;
+			unk258--;
+			rate = 1.0f - (f32)unk258 / (f32)unk25C;
 		}
-
 		JGeometry::TVec3<f32> up;
 		mQuat.getYDir(up);
 		JGeometry::TVec3<f32> axis;
 		axis.cross(y, up);
 		axis.normalize();
-		f32 mag = unk16C->rebound.get() * (t * -acosf(y.dot(up)));
-		axis.scale(mag);
-		f32 damp = unk16C->angleVelDamp.get();
-		mAngularVelocity.x = mAngularVelocity.x * damp + axis.x;
-		mAngularVelocity.y = mAngularVelocity.y * damp + axis.y;
-		mAngularVelocity.z = mAngularVelocity.z * damp + axis.z;
+		axis.scale(unk16C->rebound.get() * (rate * -acosf(y.dot(up))));
+		mAngularVelocity.scaleAdd(unk16C->angleVelDamp.get(), axis,
+		                          mAngularVelocity);
 	} else {
-		unk250 -= 1;
+		unk250--;
 	}
 
-	JGeometry::TQuat4<f32> dq(mAngularVelocity.x * 0.5f,
-	                          mAngularVelocity.y * 0.5f,
-	                          mAngularVelocity.z * 0.5f, 0.0f);
+	JGeometry::TQuat4<f32> dq;
+	dq.xyz().scale(0.5f, mAngularVelocity);
+	dq.w = 0.0f;
 	dq.mul(dq, mQuat);
 	mQuat.x += dq.x;
 	mQuat.y += dq.y;
@@ -227,14 +270,13 @@ void TBathtub::updatePosture_()
 
 	JGeometry::TVec3<f32> up;
 	mQuat.getYDir(up);
-	f32 angle  = acosf(y.dot(up));
-	f32 excess = angle - unk16C->maxAngle.get() * 0.017453292f;
+	f32 angle    = acosf(y.dot(up));
+	f32 maxAngle = DEG_TO_RAD(unk16C->maxAngle.get());
+	f32 excess   = angle - maxAngle;
 	if (excess > 0.0f) {
-		JGeometry::TQuat4<f32> corr;
-		corr.setRotate(up, y, excess / angle);
-		JGeometry::TQuat4<f32> result;
-		result.mul(corr, mQuat);
-		mQuat.set(result);
+		JGeometry::TQuat4<f32> limit;
+		limit.setRotate(up, y, excess / angle);
+		mQuat.mul(limit, mQuat);
 	}
 	mQuat.normalize();
 }
@@ -615,13 +657,7 @@ void TBathtub::control()
 			if (unk250 > 0)
 				weight += unk16C->marioDropWeight.get();
 			if (!(weight <= 0.0000000001f)) {
-				static JGeometry::TVec3<f32> yDown(0.0f, -1.0f, 0.0f);
-				JGeometry::TVec3<f32> d;
-				d.sub(*gpMarioPos, mPosition);
-				JGeometry::TVec3<f32> torque;
-				torque.cross(d, yDown);
-				torque.scale(0.00000001f * weight);
-				mAngularVelocity.add(torque);
+				liftMario(mAngularVelocity, *gpMarioPos, mPosition, weight);
 			}
 		}
 
@@ -777,12 +813,16 @@ MtxPtr TBathtub::getKoopaMtxInDemo()
 
 void TBathtub::tumble(f32 angle, f32 weight)
 {
-	if (unk29A)
+	if (unk29A != 0)
 		return;
 
-	f32 scale = weight * 0.0001f;
-	s16 a     = (s16)(angle * 182.04445f);
-	JGeometry::TVec3<f32> push(scale * JMASCos(a), 0.0f, scale * -JMASSin(a));
+	s16 a = DEG2SHORTANGLE(angle);
+	weight *= 0.0001f;
+
+	JGeometry::TVec3<f32> push;
+	push.x = weight * JMASCos(a);
+	push.y = 0.0f;
+	push.z = weight * -JMASSin(a);
 	mAngularVelocity.add(push);
 }
 
@@ -1088,7 +1128,12 @@ TBathtubGrip::TBathtubGrip(TBathtub* owner, f32 angle, MActorAnmData* anmData,
 void TBathtubGrip::kill()
 {
 	unk24A = 1;
-	TMapObjBase::kill();
+	makeObjDead();
+	removeCollisions_();
+}
+
+void TBathtubGrip::removeCollisions_()
+{
 	for (int i = 0; i < 17; ++i)
 		mColsB[i]->remove();
 	for (int i = 0; i < 5; ++i)
@@ -1112,34 +1157,3 @@ Mtx* TBathtubGripParts::getRootJointMtx() const
 	return (Mtx*)mGrip->getModel()->getAnmMtx(mGrip->mJointIdx[mIndex]);
 }
 
-TBathtubParams::TBathtubParams()
-    : TParams("/MapObj/bathtub.prm")
-    , PARAM_INIT(resetGrip, 0)
-    , PARAM_INIT(trampleRelease, 10)
-    , PARAM_INIT(trampleRecover, 10)
-    , PARAM_INIT(quakeRelease, 500)
-    , PARAM_INIT(quakeRecover, 500)
-    , PARAM_INIT(hipdropRelease, 35)
-    , PARAM_INIT(hipdropRecover, 35)
-    , PARAM_INIT(breakCount0, 750)
-    , PARAM_INIT(breakCount1, 710)
-    , PARAM_INIT(breakCount2, 685)
-    , PARAM_INIT(breakCount3, 655)
-    , PARAM_INIT(launchStopCount, 1000)
-    , PARAM_INIT(animSpeed0, 0.15f)
-    , PARAM_INIT(animSpeed1, 0.15f)
-    , PARAM_INIT(animSpeed2, 0.15f)
-    , PARAM_INIT(animSpeed3, 0.15f)
-    , PARAM_INIT(animSpeed4, 0.22f)
-    , PARAM_INIT(shake, 0.0f)
-    , PARAM_INIT(watermark, 0.3f)
-    , PARAM_INIT(maxAngle, 35.0f)
-    , PARAM_INIT(angleVelDamp, 0.93f)
-    , PARAM_INIT(rebound, 0.0005f)
-    , PARAM_INIT(shakeDamp, 0.93f)
-    , PARAM_INIT(marioWeight, 0.01f)
-    , PARAM_INIT(marioDropWeight, 5.0f)
-    , PARAM_INIT(outerHeight, 20.0f)
-{
-	TParams::load(mPrmPath);
-}

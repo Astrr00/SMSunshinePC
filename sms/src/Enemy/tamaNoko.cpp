@@ -547,27 +547,27 @@ void TTamaNoko::landEffect()
 	if (mGroundPlane->isSand()) {
 		if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
 		        PARTICLE_MS_HIPDROP_C, &mPosition, 0, nullptr)) {
-			emitter->setGlobalScale(mScaling);
+			emitter->setGlobalScale(mScaling * 0.8f);
 		}
 		if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
 		        PARTICLE_MS_POI_SAND, &mPosition, 0, nullptr)) {
-			emitter->setGlobalScale(mScaling);
+			emitter->setGlobalScale(mScaling * 0.8f);
 		}
-	}
-
-	const TBGCheckData* local_10;
-	gpMap->checkGround(mPosition.x, mPosition.y + 500.0f, mPosition.z,
-	                   &local_10);
-	if (local_10 && local_10->isWaterSurface()) {
-		generateEffectColumWater();
 	} else {
-		if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
-		        PARTICLE_MS_HIPDROP_C, &mPosition, 0, nullptr)) {
-			emitter->setGlobalScale(mScaling);
-		}
-		if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
-		        PARTICLE_MS_HIPDROP_B, &mPosition, 0, nullptr)) {
-			emitter->setGlobalScale(mScaling);
+		const TBGCheckData* local_10;
+		gpMap->checkGround(mPosition.x, mPosition.y + 500.0f, mPosition.z,
+		                   &local_10);
+		if (local_10 && local_10->isWaterSurface()) {
+			generateEffectColumWater();
+		} else {
+			if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
+			        PARTICLE_MS_HIPDROP_C, &mPosition, 0, nullptr)) {
+				emitter->setGlobalScale(mScaling * 0.8f);
+			}
+			if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
+			        PARTICLE_MS_HIPDROP_B, &mPosition, 0, nullptr)) {
+				emitter->setGlobalScale(mScaling * 0.8f);
+			}
 		}
 	}
 
@@ -852,15 +852,15 @@ DEFINE_NERVE(TNerveTamaNokoThrown, TLiveActor)
 	if (spine->getTime() == 0) {
 		TTamaNokoSaveLoadParams* params = self->getSaveParams2();
 
-		int angle = *gpMarioAngleY;
-		f32 fVar2 = *gpMarioThrowPower;
-		f32 s     = JMASSin(angle);
-		f32 c     = JMASCos(angle);
-		f32 fVar3 = params->mSLThrownRateXZ.get();
-		f32 fVar4 = params->mSLThrownVY.get();
-
-		self->setVelocity(
-		    JGeometry::TVec3<f32>(fVar3 * fVar2 * c, fVar4, fVar3 * fVar2 * s));
+		f32 power = *gpMarioThrowPower;
+		f32 rate  = params->mSLThrownRateXZ.get();
+		JGeometry::TVec3<f32> velocity;
+		f32 c      = JMASCos(SMS_GetMarioAngleY());
+		f32 s      = JMASSin(SMS_GetMarioAngleY());
+		velocity.x = rate * (power * s);
+		velocity.y = params->mSLThrownVY.get();
+		velocity.z = rate * (power * c);
+		self->setVelocity(velocity);
 
 		self->mPosition.y += 2.0f;
 

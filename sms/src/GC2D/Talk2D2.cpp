@@ -520,8 +520,8 @@ bool TTalk2D2::openBoardWindow()
 
 	case 1:
 		if (mBoardBound->update()) {
-			unk1C->mAlpha = 0;
-			result        = true;
+			unk1C->setAlpha(0);
+			result = true;
 			unk1C->show();
 			++mBoardState;
 		}
@@ -673,89 +673,85 @@ void TTalk2D2::checkBoardControler()
 
 void TTalk2D2::moveTalkWindow()
 {
-	for (int i = 0; i < 3; ++i) {
-		u8 count = unk224[i];
-		int base = count + i * 30;
-		if (count != 0 && count <= unk228[i]) {
-			J2DTextBox*& box = unk9C[base];
-			if (box->isVisible()) {
-				s16 alpha = box->mAlpha + unk340;
-				s16 clamped = alpha;
-				if (clamped > 0xff)
-					clamped = 0xff;
-				box->mAlpha = clamped;
-				if (alpha >= 0xff)
-					++unk224[i];
+	for (int line = 0; line < 3; line++) {
+		int idx = unk224[line] + line * 30;
+		if (unk224[line] != 0 && unk224[line] <= unk228[line]) {
+			if (unk9C[idx]->isVisible()) {
+				s16 alpha = unk9C[idx]->getAlpha();
+				alpha += unk340;
+				unk9C[idx]->setAlpha(alpha > 255 ? 255 : alpha);
+				if (alpha >= 255)
+					unk224[line]++;
 			} else if (unk2DC <= 0) {
-				unk2DC = unk281[base];
-				box->show();
-				box->mAlpha = 0;
+				unk2DC = unk281[idx];
+				unk9C[idx]->show();
+				unk9C[idx]->setAlpha(0);
 			} else {
-				unk2DC = unk2DC - 1;
+				unk2DC--;
 			}
 		}
 	}
 
-	u8 count = unk224[unk274];
-	if (count >= 30 || count > unk228[unk274]) {
-		J2DPane* current;
-		J2DPane* arrow;
-		if (mSelection == -1) {
-			current = unk6C[unk274];
-			if (unk26A) {
-				arrow = unk84[unk274];
-				unk78[unk274]->hide();
-				unk84[unk274]->show();
-			} else {
-				arrow = unk78[unk274];
-				unk78[unk274]->show();
-				unk84[unk274]->hide();
-			}
+	if (unk224[unk274] < 30 && unk224[unk274] <= unk228[unk274])
+		return;
+
+	J2DPane* pane;
+	J2DPane* fade;
+	if (mSelection == -1) {
+		pane = unk6C[unk274];
+		if (unk26A != 0) {
+			fade = unk84[unk274];
+			unk78[unk274]->hide();
+			unk84[unk274]->show();
 		} else {
-			current = unk204;
-			arrow   = unk20C[mSelection];
+			fade = unk78[unk274];
+			unk78[unk274]->show();
+			unk84[unk274]->hide();
+		}
+	} else {
+		pane = unk204;
+		fade = unk20C[mSelection];
+	}
+
+	if (pane->isVisible()) {
+		s16 alpha = pane->getAlpha();
+		if (alpha < 255) {
+			alpha += 0x10;
+			if (alpha >= 255)
+				alpha = 255;
+			pane->setAlpha(alpha);
 		}
 
-		if (current->isVisible()) {
-			s16 alpha = current->mAlpha;
-			if (alpha < 0xff) {
-				alpha += 16;
-				if (alpha >= 0xff)
-					alpha = 0xff;
-				current->mAlpha = alpha;
-			}
-
-			s16 blink = arrow->mAlpha;
-			if (unk26B) {
-				blink += 2;
-				if (blink > 0xff) {
-					unk26B = 0;
-					blink  = 0xff;
-				}
-			} else {
-				blink -= 4;
-				if (blink < 0x3c) {
-					unk26B = 1;
-					blink  = 0x3c;
-				}
-			}
-			arrow->mAlpha = blink;
-			u8 arrowAlpha = blink;
-
-			if (mSelection == 1) {
-				snprintf(unk208->getStringPtr(), 0x5e,
-				         "\033CC[ffffff60]\033GC[ffffff60]%s\033CC[ffffff%02x]\033GC[ffffff%02x]\n%s",
-				         unk218[0], arrowAlpha, arrowAlpha, unk218[1]);
-			} else if (mSelection == 0) {
-				snprintf(unk208->getStringPtr(), 0x5e,
-				         "\033CC[ffffff%02x]\033GC[ffffff%02x]%s\n\033CC[ffffff60]\033GC[ffffff60]%s",
-				         arrowAlpha, arrowAlpha, unk218[0], unk218[1]);
+		s16 fadeAlpha = fade->getAlpha();
+		if (unk26B != 0) {
+			fadeAlpha += 2;
+			if (fadeAlpha > 255) {
+				unk26B    = 0;
+				fadeAlpha = 255;
 			}
 		} else {
-			current->show();
-			current->mAlpha = 0;
-			arrow->mAlpha   = 0xff;
+			fadeAlpha -= 4;
+			if (fadeAlpha < 60) {
+				unk26B    = 1;
+				fadeAlpha = 60;
+			}
 		}
+		fade->setAlpha(fadeAlpha);
+
+		u8 color = fadeAlpha;
+		if (mSelection == 1) {
+			snprintf(unk208->getStringPtr(), 0x5E,
+			         "\033CC[ffffff60]\033GC[ffffff60]%s\033CC[ffffff%02x]\033GC[ffffff%02x]\n%s",
+			         unk218[0], color, color, unk218[1]);
+		} else if (mSelection == 0) {
+			snprintf(unk208->getStringPtr(), 0x5E,
+			         "\033CC[ffffff%02x]\033GC[ffffff%02x]%s\n\033CC[ffffff60]\033GC[ffffff60]%s",
+			         color, color, unk218[0], unk218[1]);
+		}
+	} else {
+		pane->show();
+		pane->setAlpha(0);
+		fade->setAlpha(255);
 	}
 }
 
@@ -823,91 +819,79 @@ void TTalk2D2::checkControler()
 
 bool TTalk2D2::closeNormalWindow()
 {
+	s16 alpha = mWindowPane->getAlpha();
+	alpha -= 0x10;
 	bool result = false;
-	s16 alpha   = mWindowPane->mAlpha - 16;
 	if (alpha < 0) {
-		unk234[0] = 1.0f;
-		unk3C[0]->hide();
-		unk224[0] = 0;
-		unk6C[0]->hide();
-		unk234[1] = 2.0f;
-		unk3C[1]->hide();
-		unk224[1] = 0;
-		unk6C[1]->hide();
-		unk234[2] = 3.0f;
-		unk3C[2]->hide();
-		unk224[2] = 0;
-		unk6C[2]->hide();
+		alpha = 0;
+		for (int i = 0; i < 3; ++i) {
+			unk234[i] = i + 1.0f;
+			unk3C[i]->hide();
+			unk224[i] = 0;
+			unk6C[i]->hide();
+		}
 		for (int i = 0; i < 90; ++i) {
-			if (unk9C[i])
+			if (unk9C[i] != nullptr)
 				unk9C[i]->hide();
 		}
-
 		if (unk204->isVisible())
 			unk204->hide();
 		result = true;
 	}
-	mWindowPane->mAlpha = alpha;
+	mWindowPane->setAlpha(alpha);
 	if (unk204->isVisible())
-		unk204->mAlpha = alpha;
+		unk204->setAlpha(alpha);
 	return result;
 }
 
 bool TTalk2D2::eraseNormalWindow()
 {
+	s16 alpha = mWindowPane->getAlpha();
+	alpha -= 0x10;
 	bool result = false;
-	s16 alpha   = mWindowPane->mAlpha - 16;
 	if (alpha < 0) {
-		unk234[0] = 1.0f;
-		unk3C[0]->hide();
-		unk224[0] = 0;
-		unk6C[0]->hide();
-		unk234[1] = 2.0f;
-		unk3C[1]->hide();
-		unk224[1] = 0;
-		unk6C[1]->hide();
-		unk234[2] = 3.0f;
-		unk3C[2]->hide();
-		unk224[2] = 0;
-		unk6C[2]->hide();
-		alpha = 0xff;
+		alpha = 0xFF;
+		for (int i = 0; i < 3; ++i) {
+			unk234[i] = i + 1.0f;
+			unk3C[i]->hide();
+			unk224[i] = 0;
+			unk6C[i]->hide();
+		}
 		for (int i = 0; i < 90; ++i) {
-			if (unk9C[i])
+			if (unk9C[i] != nullptr)
 				unk9C[i]->hide();
 		}
-
-		void* data          = unk260->unk4;
-		JMSMesgEntry* entry = unk260->getMessageEntry((u16)unk264);
-		setupTextBox(data, entry);
+		setupTextBox(unk260->getMessageData(),
+		             unk260->getMessageEntry(unk264 & 0xFFFF));
 		unk26C = 0;
 		if (TFlagManager::smInstance->getFlag(0xa0001) == 0x100)
 			unk340 = 0x20;
 		else
 			unk340 = 0x40;
 		unk27C.set(0xFFFFFFFF);
-		result = true;
 		unk2DE = 0;
 		unk2DC = 0;
+		result = true;
 	}
-	mWindowPane->mAlpha = alpha;
+	mWindowPane->setAlpha(alpha);
 	return result;
 }
 
 bool TTalk2D2::eraseBoardWindow()
 {
+	s16 alpha = mBoardText->getAlpha();
+	alpha -= 4;
 	bool result = false;
-	s16 alpha   = mBoardText->mAlpha - 4;
 	if (alpha < 0) {
 		alpha = 0;
-		void* data          = unk260->unk4;
-		JMSMesgEntry* entry = unk260->getMessageEntry((u16)unk264);
-		setupTextBox(data, entry);
+		setupTextBox(unk260->getMessageData(),
+		             unk260->getMessageEntry(unk264 & 0xFFFF));
 		unk27C.set(0xFFFFFFFF);
-		result = true;
 		unk2DE = 0;
 		unk2DC = 0;
+		result = true;
 	}
-	mBoardText->mAlpha = alpha;
+	mBoardText->setAlpha(alpha);
 	return result;
 }
 
@@ -1100,7 +1084,7 @@ void TTalk2D2::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TTalk2D2::setupBoardTextBox(const void* data, JMSMesgEntry* entry)
 {
-	JSUMemoryInputStream in((const u8*)data + (entry->unk0 + unk278), 0x400);
+	JSUMemoryInputStream in((const u8*)data + entry->unk0 + unk278, 0x400);
 	JSUMemoryOutputStream out(mBoardText->getStringPtr(), 0x200);
 	unk254 = entry;
 
@@ -1147,7 +1131,7 @@ void TTalk2D2::setupBoardTextBox(const void* data, JMSMesgEntry* entry)
 		}
 	}
 
-	unk278 += in.mPosition;
+	unk278 += in.getPosition();
 }
 
 void TTalk2D2::setupTextBox(const void* data, JMSMesgEntry* entry)
@@ -1449,22 +1433,23 @@ void TTalk2D2::setTagParam(JSUMemoryInputStream& stream, J2DTextBox& textBox,
 
 void TTalk2D2::openWindow(s8 idx, f32 offset)
 {
-	Mtx mtx;
-	Mtx rot;
+	Mtx mtxA;
+	Mtx mtxB;
+	f32 x = mWindowPane->getGlobalBounds().x1 + 5;
+	f32 y = mWindowPane->getGlobalBounds().y1 + 5;
 
-	f32 x = mWindowPane->mGlobalBounds.x1 + 5;
-	f32 y = mWindowPane->mGlobalBounds.y1 + 5;
-	MTXTrans(mtx, -x, -y, 0.0f);
-	MTXRotRad(rot, 'Z', 0.017453292f * -mWindowPane->mRotation);
-	MTXConcat(rot, mtx, mtx);
-	MTXTrans(rot, x, y, 0.0f);
-	MTXConcat(rot, mtx, mtx);
-	GXLoadPosMtxImm(mtx, GX_PNMTX0);
+	MTXTrans(mtxA, -x, -y, 0.0f);
+	MTXRotRad(mtxB, 'Z', DEG_TO_RAD(-mWindowPane->getRotation()));
+	MTXConcat(mtxB, mtxA, mtxA);
+	MTXTrans(mtxB, x, y, 0.0f);
+	MTXConcat(mtxB, mtxA, mtxA);
+	GXLoadPosMtxImm(mtxA, GX_PNMTX0);
+
 	GXSetCullMode(GX_CULL_BACK);
 	GXSetNumTexGens(2);
 	GXSetNumTevStages(2);
 	GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
-	GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 0);
+	GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_S8, 0);
 	GXClearVtxDesc();
 	GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
 	GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
@@ -1475,12 +1460,8 @@ void TTalk2D2::openWindow(s8 idx, f32 offset)
 	              GX_DF_NONE, GX_AF_NONE);
 	GXSetChanAmbColor(GX_COLOR0A0, (GXColor) { 0xff, 0xff, 0xff, 0xff });
 
-	JUTTexture* windowTexture;
-	if (unk3C[idx]->mTextureNum > 0)
-		windowTexture = unk3C[idx]->mTextures[0];
-	else
-		windowTexture = nullptr;
-	windowTexture->load(GX_TEXMAP1);
+	JUTTexture* tex = unk3C[idx]->getTexture(0);
+	tex->load(GX_TEXMAP1);
 	unk244->load(GX_TEXMAP0);
 
 	GXSetTevColor(GX_TEVREG0, JUtility::TColor(0x0000ff00));
@@ -1491,8 +1472,8 @@ void TTalk2D2::openWindow(s8 idx, f32 offset)
 	                GX_TRUE, GX_TEVPREV);
 	GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1,
 	                GX_TRUE, GX_TEVPREV);
-	MTXTrans(mtx, offset, 0.0f, 0.0f);
-	GXLoadTexMtxImm(mtx, GX_TEXMTX0, GX_MTX2x4);
+	MTXTrans(mtxA, offset, 0.0f, 0.0f);
+	GXLoadTexMtxImm(mtxA, GX_TEXMTX0, GX_MTX2x4);
 	GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0,
 	                  GX_FALSE, GX_PTIDENTITY);
 	GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
@@ -1505,20 +1486,22 @@ void TTalk2D2::openWindow(s8 idx, f32 offset)
 	                GX_TRUE, GX_TEVPREV);
 	GXSetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1,
 	                GX_TRUE, GX_TEVPREV);
-	MTXIdentity(mtx);
-	GXLoadTexMtxImm(mtx, GX_TEXMTX1, GX_MTX2x4);
+	MTXIdentity(mtxA);
+	GXLoadTexMtxImm(mtxA, GX_TEXMTX1, GX_MTX2x4);
 	GXSetTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX1,
 	                  GX_FALSE, GX_PTIDENTITY);
 	GXSetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR_NULL);
 
-	JUTRect rect(unk3C[idx]->mGlobalBounds);
+	JUTRect rect(unk3C[idx]->getGlobalBounds());
+
 	GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-	GXPosition2f32((f32)rect.x1, (f32)rect.y1);
-	GXTexCoord2u8(0, 0);
-	GXPosition2f32((f32)rect.x2, (f32)rect.y1);
-	GXTexCoord2u8(1, 0);
-	GXPosition2f32((f32)rect.x2, (f32)rect.y2);
-	GXTexCoord2u8(1, 1);
-	GXPosition2f32((f32)rect.x1, (f32)rect.y2);
-	GXTexCoord2u8(0, 1);
+	GXPosition2f32(rect.x1, rect.y1);
+	GXTexCoord2s8(0, 0);
+	GXPosition2f32(rect.x2, rect.y1);
+	GXTexCoord2s8(1, 0);
+	GXPosition2f32(rect.x2, rect.y2);
+	GXTexCoord2s8(1, 1);
+	GXPosition2f32(rect.x1, rect.y2);
+	GXTexCoord2s8(0, 1);
+	GXEnd();
 }

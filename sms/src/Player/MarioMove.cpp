@@ -2436,7 +2436,7 @@ void TMario::playerControl(JDrama::TGraphics* param_1)
 {
 	unk9C         = mFaceAngle.y;
 	mPrevPosition = mPosition;
-	offUnk114(UNK114_FLAG_PROFILE);
+	offUnk114(UNK114_FLAG_UNK8);
 
 	if (gpMarDirector->unk124 == 1 && mStatus != MARIO_STATUS_READ_BILLBOARD)
 		changePlayerStatus(MARIO_STATUS_READ_BILLBOARD, 0, false);

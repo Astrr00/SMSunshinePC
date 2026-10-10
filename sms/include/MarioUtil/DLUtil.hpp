@@ -40,16 +40,6 @@ public:
 	/* 0x1C */ u32 unk1C;
 };
 
-class TDLTexQuadMulti : public TDLTexQuad {
-public:
-	void reset() { }
-	void setChangeNum(u16);
-	void createDLBuffer(u16);
-	bool request(const JGeometry::TVec3<f32>*);
-	void setEnd();
-	void draw(int);
-};
-
 class TDLColorTexQuad : public TDLTexQuad {
 public:
 	void createColorArrayBuffer(u16);
