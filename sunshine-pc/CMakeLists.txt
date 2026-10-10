@@ -16,11 +16,13 @@ if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message(FATAL_ERROR "Configure with the windows-clang-* preset (clang-cl); got ${CMAKE_CXX_COMPILER_ID}")
 endif ()
 
-# Same switches as Dusklight: DVD (nod) for reading the user's disc image, CARD for .gci saves,
-# THP for the FMV decoder, RmlUi for the launcher UI.
+# Same switches as Dusklight: DVD (nod) for reading the user's disc image, CARD for .gci saves, RmlUi for the launcher UI.
+# THP is OFF: the port builds the decomp's own decoder (sms/src/dolphin/thp, host versions under TARGET_PC), which is the
+# console's output bit for bit; Aurora's decoder deliberately differs (it fixes the SDK's quarter-IDCT column swap and
+# rounds audio ties up).
 set(AURORA_ENABLE_DVD ON CACHE BOOL "" FORCE)
 set(AURORA_ENABLE_CARD ON CACHE BOOL "" FORCE)
-set(AURORA_ENABLE_THP ON CACHE BOOL "" FORCE)
+set(AURORA_ENABLE_THP OFF CACHE BOOL "" FORCE)
 set(AURORA_ENABLE_RMLUI ON CACHE BOOL "" FORCE)
 add_subdirectory(extern/aurora EXCLUDE_FROM_ALL)
 
@@ -33,6 +35,18 @@ set_source_files_properties(${SMS_CXX_C_SOURCES} PROPERTIES LANGUAGE CXX) # THPP
 # Port-side SDK layer (OS threads, AI/VI/DSP glue, GX leftovers): compiled with the game flags so it sees the decomp's headers.
 file(GLOB SDK_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/*.cpp)
 add_library(sms_game STATIC ${SMS_GAME_SOURCES} ${SDK_SOURCES})
+
+# Shift-JIS string literals: the decomp sources are UTF-8, the disc data is Shift-JIS, and clang-cl cannot emit a
+# Shift-JIS execution charset. tools/sjis_overlay.py writes copies with octal-escaped CP932 literals and a clang VFS
+# overlay that makes the compiler read them; it runs (incrementally, well under a second) before every build.
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(SJIS_OVERLAY ${CMAKE_BINARY_DIR}/sjis/overlay.yaml)
+add_custom_target(sjis_overlay
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/sjis_overlay.py ${SMS_DIR} ${CMAKE_BINARY_DIR}/sjis
+    BYPRODUCTS ${SJIS_OVERLAY}
+    COMMENT "Shift-JIS string literal overlay")
+add_dependencies(sms_game sjis_overlay)
+target_compile_options(sms_game PUBLIC "SHELL:-Xclang -ivfsoverlay -Xclang \"${SJIS_OVERLAY}\"")
 # Order matters: port shims first, then the decomp's headers, Aurora's last (it only supplies what the decomp lacks).
 target_include_directories(sms_game PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -51,15 +65,35 @@ target_compile_options(sms_game PRIVATE /MP)
 add_executable(sunshine src/main.cpp src/crash.cpp)
 target_link_libraries(sunshine PRIVATE sms_game
     aurora::core aurora::gx aurora::gd aurora::si aurora::vi aurora::pad aurora::mtx aurora::os
-    aurora::dvd aurora::thp aurora::card aurora::main)
+    aurora::dvd aurora::card aurora::main)
 include(extern/aurora/cmake/AuroraCopyRuntimeDLLs.cmake)
 aurora_copy_runtime_dlls(sunshine)
 # List every unresolved symbol instead of stopping after 100 (Goal-Port B.2 sorts them by cause).
 target_link_options(sunshine PRIVATE /errorlimit:0)
+# The decomp keeps large buffers on the stack (and ASan adds red zones); the default 1 MiB main stack is too small.
+target_link_options(sunshine PRIVATE /STACK:67108864)
 
 # Developer diagnostic, OFF by default: turn unresolved symbols into runtime faults so the boot path can run before
 # every decomp source exists. Never use it for a deliverable build: a missing function then crashes when called.
 option(SUNSHINE_ALLOW_UNRESOLVED "Link with /FORCE:UNRESOLVED (diagnostics only)" OFF)
 if (SUNSHINE_ALLOW_UNRESOLVED)
     target_link_options(sunshine PRIVATE /FORCE:UNRESOLVED)
+endif ()
+
+# Developer diagnostic, OFF by default: AddressSanitizer on the game code and the port (not on Aurora/Dawn). Finds heap
+# corruption and bad frees in the decompiled game. Needs clang-cl's ASan runtime, which is copied next to the exe.
+option(SUNSHINE_ASAN "Build game code and port with AddressSanitizer (diagnostics only)" OFF)
+if (SUNSHINE_ASAN)
+    get_filename_component(_llvm_bin ${CMAKE_CXX_COMPILER} DIRECTORY)
+    file(GLOB _asan_dir "${_llvm_bin}/../lib/clang/*/lib/windows")
+    list(GET _asan_dir 0 _asan_dir)
+    target_compile_options(sms_game PUBLIC /fsanitize=address)
+    # MSVC STL container annotations produce false positives when only some translation units are instrumented.
+    target_compile_definitions(sms_game PUBLIC _DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION)
+    target_link_libraries(sunshine PRIVATE
+        "${_asan_dir}/clang_rt.asan_dynamic-x86_64.lib"
+        "-wholearchive:${_asan_dir}/clang_rt.asan_dynamic_runtime_thunk-x86_64.lib")
+    target_link_options(sunshine PRIVATE /INCREMENTAL:NO)
+    add_custom_command(TARGET sunshine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_asan_dir}/clang_rt.asan_dynamic-x86_64.dll" $<TARGET_FILE_DIR:sunshine>)
 endif ()

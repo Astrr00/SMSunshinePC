@@ -13,5 +13,8 @@ set "SRC=%~dp0.."
 set "BLD=%~dp0..\build\%~1"
 set "TARGET=%~2"
 if "%TARGET%"=="" set "TARGET=sunshine"
-cmake -S "%SRC%" -B "%BLD%" -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DSUNSHINE_ALLOW_UNRESOLVED=ON >nul || exit /b 1
+rem Set ASAN=1 to build with AddressSanitizer (see SUNSHINE_ASAN in CMakeLists.txt).
+set "XCMAKE="
+if defined ASAN set "XCMAKE=-DSUNSHINE_ASAN=ON"
+cmake -S "%SRC%" -B "%BLD%" -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DSUNSHINE_ALLOW_UNRESOLVED=ON %XCMAKE% >nul || exit /b 1
 cmake --build "%BLD%" --target %TARGET%

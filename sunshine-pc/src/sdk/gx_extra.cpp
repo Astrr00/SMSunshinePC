@@ -71,7 +71,8 @@ void GXSetDispCopyFrame2Field(GXCopyMode mode) { (void)mode; }
 static u32 GetNumXfbLines(u32 height, u32 scale)
 {
 	u32 numLines     = (height - 1) * 0x100;
-	u32 actualHeight = (numLines / scale) + 1;
+	// PowerPC divwu by zero yields 0 (scale is 0 when 256/yScale is a multiple of 512); x86 would trap.
+	u32 actualHeight = (scale ? numLines / scale : 0) + 1;
 
 	u32 newScale = scale;
 	if (newScale > 0x80 && newScale < 0x100) {

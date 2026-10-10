@@ -2,6 +2,7 @@
 // window, GX and the disc image, then the decompiled game runs its own initialize/proc/finalize.
 #include <aurora/aurora.h>
 #include <aurora/dvd.h>
+#include <sunshine_config.h>
 #include <aurora/event.h>
 #include <aurora/main.h>
 
@@ -10,6 +11,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
+// ABI guard: the game's PADStatus (sms/include/dolphin/pad.h, TARGET_PC) must match Aurora's, which PADRead() fills.
+#include <dolphin/pad.h>
+static_assert(sizeof(PADStatus) == 16, "PADStatus layout differs from Aurora's");
 
 // BSS object defined by the decomp's main.cpp.
 TApplication gpApplication;
@@ -31,9 +36,18 @@ static const char* findDvdArg(int argc, char** argv)
 }
 
 void installCrashHandler(); // crash.cpp
+void sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
 
-// Called by VISetNextFrameBuffer (sdk/av.cpp), i.e. once per game frame at the point where the console hands the
-// finished XFB to the video hardware: present what the game drew, pump window events, open the next frame.
+// Developer switch: SUNSHINE_DEV_SKIP_MOVIES=1 ends every THP movie as soon as it starts playing (the retail game only
+// allows skipping movies that were already seen), to reach the scenes behind them quickly during boot testing.
+bool sunshineDevSkipMovies()
+{
+	static const bool skip = std::getenv("SUNSHINE_DEV_SKIP_MOVIES") != nullptr;
+	return skip;
+}
+
+// Called by TVideo::waitForRetrace (JDRVideo.cpp) once per game frame, right before VIFlush: present what the game
+// drew, pump window events, open the next frame. Aurora has no XFB, so the game's XFB handoff cannot mark frames.
 // This is also the single seam where a later phase decouples rendering from the 30 Hz game logic.
 void sunshinePresentFrame()
 {
@@ -51,9 +65,9 @@ void sunshinePresentFrame()
 int main(int argc, char* argv[])
 {
 	installCrashHandler();
-	// GameCube main RAM (24 MiB) backs the OS arena the JKR heaps are carved from; ARAM (16 MiB) backs JKRAram.
-	const AuroraConfig config = { .appName = "Sunshine", .logCallback = &log_callback, .mem1Size = 24u * 1024 * 1024,
-		                          .mem2Size = 16u * 1024 * 1024 };
+	// GameCube main RAM backs the OS arena the JKR heaps are carved from; ARAM backs JKRAram.
+	const AuroraConfig config = { .appName = "Sunshine", .logCallback = &log_callback, .mem1Size = kSunshineMem1Size,
+		                          .mem2Size = kSunshineMem2Size };
 	aurora_initialize(argc, argv, &config);
 
 	const char* disc = findDvdArg(argc, argv);
@@ -62,6 +76,8 @@ int main(int argc, char* argv[])
 		aurora_shutdown();
 		return 1;
 	}
+
+	sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
 
 	// The console's startup code (excluded, __start) runs OSInit before main; it sets up the arena JKRHeap draws from.
 	OSInit();

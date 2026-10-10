@@ -356,14 +356,12 @@ VIRetraceCallback VISetPostRetraceCallback(VIRetraceCallback cb)
 	return old;
 }
 
-void sunshinePresentFrame(); // main.cpp: aurora_end_frame, pump events, aurora_begin_frame
-
-// The game calls this once per frame with the finished XFB. Aurora has no XFB (frames are drawn straight to the window
-// target), so the handoff is the point where the frame is presented.
+// The game hands over an XFB pointer only when it flips buffers (never with a single XFB), and Aurora has no XFB.
+// Frames are therefore presented once per game frame by TVideo::waitForRetrace (JDRVideo.cpp) through
+// sunshinePresentFrame() in main.cpp, not here.
 void VISetNextFrameBuffer(void* fb)
 {
 	g_nextFrameBuffer = fb;
-	sunshinePresentFrame();
 }
 
 void VISetBlack(BOOL black) { g_black = black; }

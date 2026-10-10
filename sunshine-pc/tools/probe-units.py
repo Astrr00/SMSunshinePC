@@ -36,11 +36,14 @@ base = [cc or "cl", "/nologo", "/c", "/Zs", "/Zc:__cplusplus", "/utf-8", "/W0", 
         "/I" + os.path.join(root, "sunshine-pc", "include")] + [f"/I{i}" for i in inc]
 if cc:
     base += ["-Wno-everything", "-Wno-multichar", "-Wno-trigraphs"]
-# --ptrtrunc: report every pointer cast to a 32-bit integer (needs clang-cl); result goes to tools/ptr-trunc.txt.
-ptrtrunc = "--ptrtrunc" in sys.argv
-if ptrtrunc and cc:
-    base = [a for a in base if a != "/W0"] + ["-Wpointer-to-int-cast", "-Wno-error"]  # /W0 would mute every warning
-warn_re = re.compile(r"^(.*?\(\d+,\d+\)): warning: (cast to smaller integer type.*)$", re.M)
+# --wflag=<name>: report every -W<name> warning (needs clang-cl); result goes to tools/warn-<name>.txt.
+# --ptrtrunc is shorthand for --wflag=pointer-to-int-cast and writes tools/ptr-trunc.txt.
+wflag = next((a[8:] for a in sys.argv if a.startswith("--wflag=")), None) or (
+    "pointer-to-int-cast" if "--ptrtrunc" in sys.argv else None)
+ptrtrunc = wflag is not None
+if wflag and cc:
+    base = [a for a in base if a != "/W0"] + [f"-W{wflag}", "-Wno-error"]  # /W0 would mute every warning
+warn_re = re.compile(r"^(.*?\(\d+,\d+\)): warning: (.*)$", re.M)  # only the requested flag is enabled
 err_re = re.compile(r"^(.*?): error (C\d+): (.*)$|^(.*?\(\d+,\d+\)): error: (.*)$", re.M)
 
 
@@ -90,7 +93,7 @@ json.dump([{"unit": u, "rc": rc, "errors": errs} for u, rc, errs in results],
 
 if ptrtrunc:
     uniq = sorted(set(warnings))
-    with open(os.path.join(here, "ptr-trunc.txt"), "w", encoding="utf8") as f:
+    with open(os.path.join(here, "ptr-trunc.txt" if wflag == "pointer-to-int-cast" else f"warn-{wflag}.txt"), "w", encoding="utf8") as f:
         for loc, msg in uniq:
             f.write(f"{os.path.relpath(loc.split('(')[0], root)}({loc.split('(', 1)[-1]}: {msg}\n")
     per = collections.Counter(os.path.relpath(loc.split("(")[0], root).split(os.sep)[2] if len(os.path.relpath(loc.split("(")[0], root).split(os.sep)) > 2 else "?" for loc, _ in uniq)

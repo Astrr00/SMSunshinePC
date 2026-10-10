@@ -45,9 +45,7 @@
 #define PSVECDistance C_VECDistance
 #define PSVECSquareDistance C_VECSquareDistance
 
-// __fres: reciprocal estimate (Gekko fres). OPEN: declared on purpose without a definition so every user fails at
-// link time until a bit-exact implementation exists. Aurora has none and Dolphin's table is GPL-2.0, so it is not
-// copied; see sunshine-pc/docs/platform-notes.md.
+// __fres: Gekko `fres` reciprocal estimate, bit-exact (src/sdk/ppc_fres.cpp; checked by tools/fres_test.cmd).
 #ifdef __cplusplus
 extern "C"
 #endif

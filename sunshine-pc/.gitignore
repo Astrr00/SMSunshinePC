@@ -4,3 +4,4 @@ tools/_*
 tools/probe-results.json
 tools/unresolved.txt
 tools/ptr-trunc.txt
+tools/fmtcheck/out/

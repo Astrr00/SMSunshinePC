@@ -9,6 +9,7 @@
 #include <mmdeviceapi.h>
 #include <audioclient.h>
 
+#include <atomic>
 #include <cstdio>
 #include <cstring>
 #include <thread>
@@ -59,13 +60,15 @@ namespace {
 
 constexpr REFERENCE_TIME kDeviceBuffer = 2'000'000; // 200 ms, in 100 ns units: capacity only, the fill is limited below
 
+enum OpenState { kIdle = 0, kOpening, kDone, kFailed };
+
 struct Device {
 	IAudioClient* client       = nullptr;
 	IAudioRenderClient* render = nullptr;
-	UINT32 hz                  = 0; // 0 = closed
+	std::atomic<UINT32> hz { 0 };   // 0 = closed; the opening thread sets it last
+	std::atomic<int> open { kIdle }; // state of the helper thread that opens the stream
 	std::chrono::steady_clock::time_point retryAt {};
-	bool comReady = false;
-	bool warned   = false;
+	bool warned = false;
 };
 Device g_dev;
 
@@ -97,11 +100,8 @@ bool Silence(UINT32 frames)
 // Shared-mode stream at `hz`, 16-bit stereo. AUTOCONVERTPCM lets Windows resample to whatever the endpoint mixes at.
 bool Open(UINT32 hz)
 {
-	if (!g_dev.comReady) {
-		// S_FALSE and RPC_E_CHANGED_MODE both leave COM usable on this thread.
-		CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-		g_dev.comReady = true;
-	}
+	// S_FALSE and RPC_E_CHANGED_MODE both leave COM usable on this thread.
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	WAVEFORMATEX fmt    = {};
 	fmt.wFormatTag      = WAVE_FORMAT_PCM;
@@ -148,6 +148,27 @@ void Fail(std::chrono::steady_clock::time_point now, const char* what)
 	}
 }
 
+// Opens the stream on a helper thread. Inside the game process the first open has been seen to sit in the audio
+// service's RPC for many seconds (standalone it takes ~20 ms); the AI pump must keep its DMA cadence regardless, so it
+// drops audio until the open returns. Logs once when the first open completes.
+void OpenAsync(UINT32 hz)
+{
+	g_dev.open = kOpening;
+	std::thread([hz] {
+		const auto t0 = std::chrono::steady_clock::now();
+		const bool ok = Open(hz);
+		static bool reported;
+		if (!reported) {
+			reported = true;
+			std::fprintf(stderr, "[av] audio device open %s after %lld ms\n", ok ? "completed" : "failed",
+			             static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(
+			                                        std::chrono::steady_clock::now() - t0)
+			                                        .count()));
+		}
+		g_dev.open = ok ? kDone : kFailed;
+	}).detach();
+}
+
 } // namespace
 
 void AudioWrite(const int16_t* stereo, uint32_t frames, double hz)
@@ -155,15 +176,29 @@ void AudioWrite(const int16_t* stereo, uint32_t frames, double hz)
 	const UINT32 rate = static_cast<UINT32>(hz + 0.5);
 	const auto now    = std::chrono::steady_clock::now();
 
+	if (g_dev.open == kDone) { // the helper thread finished: hz is set when it succeeded
+		g_dev.open   = kIdle;
+		g_dev.warned = false;
+	}
+	static thread_local const bool comReady = [] { // the pump uses the MTA objects the helper created
+		CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+		return true;
+	}();
+	(void)comReady;
 	if (g_dev.hz != rate) { // first call, rate change, or the device was lost
-		Close();
-		if (now < g_dev.retryAt)
+		const int state = g_dev.open;
+		if (state == kOpening) // the open can block for seconds inside the audio service; never stall the pump on it
 			return;
-		if (!Open(rate)) {
+		if (state == kFailed) {
+			g_dev.open = kIdle;
 			Fail(now, "open failed");
 			return;
 		}
-		g_dev.warned = false;
+		Close();
+		if (now < g_dev.retryAt)
+			return;
+		OpenAsync(rate);
+		return; // audio is dropped until the device is up
 	}
 
 	UINT32 padding;
