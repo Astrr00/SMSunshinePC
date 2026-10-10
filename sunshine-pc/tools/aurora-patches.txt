@@ -11,3 +11,5 @@ FSR1 RCAS shader | lib/webgpu/gpu.cpp | ^fn fs_rcas\(
 FSR1 sharpness API | lib/aurora.cpp | ^void aurora_set_upscale_sharpness\(
 pass dump | lib/gfx/pass_dump.hpp | ^void write_frame\(
 screenshot | lib/gfx/screenshot.hpp | ^void finish\(
+texture side channel opcodes | include/dolphin/gx/GXAurora.h | ^#define GX_AURORA_SET_TEX_DATA 0x0045 && ^#define GX_AURORA_SET_TLUT_DATA 0x0046 && ^#define GX_AURORA_SET_TEX_TLUT 0x0047
+texture side channel emit | lib/dolphin/gd/GDTexture.cpp | GDWriteAuroraCmd\(GX_AURORA_SET_TEX_DATA\)

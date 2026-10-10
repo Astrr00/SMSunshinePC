@@ -45,16 +45,18 @@ diff --git a/lib/aurora.cpp b/lib/aurora.cpp
      const bool canPresent = currentTexture && currentView;
      if (canPresent) {
        wgpu::BindGroup presentBindGroup;
-@@ -362,6 +366,8 @@
+@@ -362,6 +366,10 @@
          imgui::render(pass, imguiDrawData);
          pass.End();
        }
 +      if (captureFrame) {
 +        capture = gfx::screenshot::record(encoder, presentBindGroup, rmlBindGroup, rmlOverlay, viewport,
-                                           imguiDrawData);
-       }
++                                          imguiDrawData);
++      }
      } else {
-@@ -374,6 +380,7 @@
+       Log.info("Skipping present; window not presentable");
+     }
+@@ -372,6 +380,7 @@
        ZoneScopedN("Queue Submit");
        g_queue.Submit(1, &buffer);
      }
@@ -768,6 +770,15 @@ diff --git a/lib/gfx/texture.cpp b/lib/gfx/texture.cpp
        .dimension = wgpu::TextureDimension::e2D,
        .size = size,
        .format = wgpuFormat,
+@@ -234,7 +235,7 @@
+   };
+   const wgpu::TextureDescriptor textureDescriptor{
+       .label = label,
+-      .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
++      .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment,
+       .dimension = wgpu::TextureDimension::e2D,
+       .size = size,
+       .format = wgpuFormat,
 diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
 --- a/lib/gx/command_processor.cpp
 +++ b/lib/gx/command_processor.cpp
@@ -779,18 +790,28 @@ diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
  #include "../gfx/recording.hpp"
  #include "../internal.hpp"
  #include "dolphin/gd/GDGeometry.h"
-@@ -431,6 +432,7 @@
+@@ -430,6 +431,25 @@
+     if (cache.bindGroups.textureBindGroup != prevBindGroup) {
        state.dirty |= DirtyUniform;
      }
-   }
++  }
 +  if (gfx::pass_dump::active()) {
-     std::string desc = fmt::format("prim={} indices={} blend={} src={} dst={} op={} tex:", static_cast<int>(prim),
-                                    numIndices, static_cast<int>(state.blendMode), static_cast<int>(state.blendFacSrc),
-                                    static_cast<int>(state.blendFacDst), static_cast<int>(state.blendOp));
-@@ -447,6 +449,7 @@
-                           ref->texture.GetWidth(), ref->texture.GetHeight(),
-                           static_cast<uint32_t>(ref->texture.GetFormat()), static_cast<uint32_t>(ref->gxFormat));
-     }
++    std::string desc = fmt::format("prim={} indices={} blend={} src={} dst={} op={} tex:", static_cast<int>(prim),
++                                   numIndices, static_cast<int>(state.blendMode), static_cast<int>(state.blendFacSrc),
++                                   static_cast<int>(state.blendFacDst), static_cast<int>(state.blendOp));
++    for (u32 i = 0; i < MaxTextures; ++i) {
++      if (!cache.shaderInfo.sampledTextures.test(i)) {
++        continue;
++      }
++      const auto& ref = state.textures[i].ref;
++      if (!ref) {
++        desc += fmt::format(" [{}:none]", i);
++        continue;
++      }
++      desc += fmt::format(" [{}:{:p} {}x{} fmt={} gx={}]", i, static_cast<const void*>(ref.get()),
++                          ref->texture.GetWidth(), ref->texture.GetHeight(),
++                          static_cast<uint32_t>(ref->texture.GetFormat()), static_cast<uint32_t>(ref->gxFormat));
++    }
 +    gfx::pass_dump::note_draw(desc);
    }
  

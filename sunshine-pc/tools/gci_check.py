@@ -3,11 +3,11 @@
 
 Usage: gci_check.py <file.gci> [--dump N]
 
-DEntry (0x40 bytes, big-endian multi-byte fields, layout per Aurora
-card/File.hpp): game 0x00[4], maker 0x04[2], filename 0x06[32], modifiedTime
-0x26, iconAddr 0x2A, iconFmt 0x2E, animSpeed 0x30, permissions 0x32,
-copyCounter 0x33, firstBlock 0x34, blockCount 0x36, reserved 0x38,
-commentAddr 0x3C.
+DEntry (0x40 bytes, big-endian multi-byte fields, layout per the decomp's
+CARDDir in sms/include/dolphin/card.h): game 0x00[4], maker 0x04[2],
+bannerFormat 0x07, filename 0x08[32], time 0x28, iconAddr 0x2C, iconFormat 0x30,
+iconSpeed 0x32, permission 0x34, copyTimes 0x35, startBlock 0x36, length 0x38
+(blocks), commentAddr 0x3C.
 
 Data offsets (commentAddr, iconAddr) are relative to the data start at file
 0x40. Each 0x2000 block follows the decomp TCardSector layout: write count at
@@ -68,15 +68,15 @@ def main(argv):
 
     game = data[0x00:0x04]
     maker = data[0x04:0x06]
-    fname = cstr(data[0x06:0x26])
-    mtime = be32(data, 0x26)
-    icon_addr = be32(data, 0x2A)
-    icon_fmt = be16(data, 0x2E)
-    anim = be16(data, 0x30)
-    perm = data[0x32]
-    copy_ctr = data[0x33]
-    first_block = be16(data, 0x34)
-    block_count = be16(data, 0x36)
+    fname = cstr(data[0x08:0x28])
+    mtime = be32(data, 0x28)
+    icon_addr = be32(data, 0x2C)
+    icon_fmt = be16(data, 0x30)
+    anim = be16(data, 0x32)
+    perm = data[0x34]
+    copy_ctr = data[0x35]
+    first_block = be16(data, 0x36)
+    block_count = be16(data, 0x38)
     comment_addr = be32(data, 0x3C)
     print(f"DEntry: game={game!r} maker={maker!r} file={fname!r}")
     print(f"        mtime=0x{mtime:08X} iconAddr=0x{icon_addr:X} iconFmt={icon_fmt} "

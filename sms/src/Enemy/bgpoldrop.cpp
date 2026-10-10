@@ -1,0 +1,131 @@
+#include <Enemy/BossGessoPolDrop.hpp>
+#include <Map/MapData.hpp>
+#include <Map/Map.hpp>
+#include <Map/PollutionManager.hpp>
+#include <System/EmitterViewObj.hpp>
+#include <System/Particles.hpp>
+#include <M3DUtil/MActor.hpp>
+#include <MarioUtil/MathUtil.hpp>
+#include <MSound/MSound.hpp>
+#include <MSound/MSoundSE.hpp>
+#include <JSystem/JMath.hpp>
+
+// rogue includes needed for matching sinit & bss
+#include <MSound/MSSetSound.hpp>
+#include <MSound/MSoundBGM.hpp>
+
+TBGPolDrop::TBGPolDrop(const char* name)
+    : JDrama::TActor(name)
+    , unk50(nullptr)
+    , unk54(nullptr)
+    , unk58(0)
+{
+	unk44.zero();
+}
+
+void TBGPolDrop::move()
+{
+	if (!unk58)
+		return;
+
+	JGeometry::TVec3<f32> local_14 = mPosition;
+	local_14 += unk44;
+
+	if (unk58 == 1) {
+		unk44.y -= 0.2f;
+		const TBGCheckData* checkData;
+		char trash[12];
+		f32 dVar3 = gpMap->checkGround(local_14.x, mPosition.y, local_14.z,
+		                               &checkData);
+		dVar3 += 1.0f;
+
+		if (checkData->checkFlag(BG_CHECK_FLAG_ILLEGAL)) {
+			unk58 = 0;
+			return;
+		}
+
+		if (local_14.y < dVar3) {
+			unk58      = 2;
+			local_14.y = dVar3;
+			unk44.zero();
+			if (!unk50->checkCurBckFromIndex(12)) {
+				unk50->setBckFromIndex(12);
+				unk54->setBckFromIndex(13);
+			}
+
+			gpMarioParticleManager->emit(BGESO_JPA_MS_BOGE_ODANHIT_A, &local_14,
+			                             0, nullptr);
+			gpMarioParticleManager->emit(BGESO_JPA_MS_BOGE_ODANHIT_B, &local_14,
+			                             0, nullptr);
+			SMSGetMSound()->startSoundActor(MSD_SE_BS_GESO_GERO_LAND,
+			                                &mPosition, 0, nullptr, 0, 4);
+		} else if (!unk50->checkCurBckFromIndex(11)
+		           || unk50->curAnmEndsNext()) {
+			unk50->setBckFromIndex(11);
+		}
+
+		if (gpMap->isTouchedOneWallAndMoveXZ(&local_14.x, local_14.y,
+		                                     &local_14.z, 80.0f))
+			unk58 = 0;
+
+	} else if (unk58 == 2 && unk50->curAnmEndsNext()) {
+		unk58 = 0;
+	}
+
+	mPosition = local_14;
+}
+
+void TBGPolDrop::launch(const JGeometry::TVec3<f32>& param_1,
+                        const JGeometry::TVec3<f32>& param_2)
+{
+	unk44     = param_2;
+	mPosition = param_1;
+	mScaling.set(1.0f, 1.0f, 1.0f);
+	mRotation.zero();
+	unk58 = 1;
+}
+
+void TBGPolDrop::perform(u32 cue, JDrama::TGraphics* graphics)
+{
+	if (!unk58)
+		return;
+
+	if (cue & CUE_MOVE)
+		move();
+
+	if (cue & CUE_CALC_ANIM) {
+		MtxPtr m = unk50->getModel()->getBaseTRMtx();
+		if (unk58 == 1) {
+			Mtx local_60;
+			MsMtxSetRotX(local_60, -90.0f);
+
+			mRotation = MsGetRotFromZaxis(unk44);
+
+			MsMtxSetXYZRPH(m, mPosition.x, mPosition.y, mPosition.z,
+			               mRotation.x, mRotation.y, mRotation.z);
+
+			MTXConcat(m, local_60, m);
+			gpMarioParticleManager->emitAndBindToPosPtr(0x13A, &mPosition, 1,
+			                                            this);
+		} else {
+			MTXIdentity(m);
+			m[0][3] = mPosition.x;
+			m[1][3] = mPosition.y;
+			m[2][3] = mPosition.z;
+		}
+
+		unk50->getModel()->setBaseScale(mScaling);
+		if (unk58 == 2) {
+			unk54->getModel()->setBaseScale(mScaling);
+			unk54->getModel()->setBaseTRMtx(m);
+		}
+	}
+
+	unk50->perform(cue, graphics);
+	if (unk58 == 2) {
+		if (cue & CUE_CALC_ANIM)
+			unk54->calcAnm();
+		if (cue & CUE_ENTRY)
+			gpPollution->stampModel(unk54->getModel());
+	}
+}

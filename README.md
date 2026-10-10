@@ -2,7 +2,24 @@
 
 A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The game code is the decompilation in `sms/`, compiled with clang-cl against [Aurora](https://github.com/encounter/aurora), which replaces the Dolphin SDK layer (GX, VI, PAD, OS, DVD, CARD). No emulator, no PowerPC code.
 
-**Not playable yet.** See [`sunshine-pc/docs/status.md`](sunshine-pc/docs/status.md) for the requirement table and open blockers (for example the title screen rendering and the stage-load crash).
+## Status
+
+Not playable end to end yet. Reported by the lead on the development build (not re-verified in this README):
+
+- Bianco Hills renders with textures when started with `SUNSHINE_DEV_START=bianco/0`. Mario walks and jumps, and the camera follows him.
+- The matching-build SHA-1 check passes, and the strict link has 0 unresolved symbols.
+
+Open, not working or not verified:
+
+- Title screen rendering (`GXCopyDisp` is still a stub).
+- Title screen, file select, and new game flow.
+- First Shine collection and saving.
+- Goop and the pixel metric path.
+- Audio: BGM is noise after about 20 seconds.
+- DLSS: feasibility notes only, not started.
+- Widescreen and interpolation: not visually verified.
+
+See [`sunshine-pc/docs/status.md`](sunshine-pc/docs/status.md) for the requirement table and blockers (`status.md` is partly out of date; the list above is the newer one).
 
 ## Legal
 

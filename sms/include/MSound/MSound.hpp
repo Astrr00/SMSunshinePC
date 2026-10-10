@@ -1,0 +1,212 @@
+#ifndef MSOUND_HPP
+#define MSOUND_HPP
+
+#include <dolphin/types.h>
+#include <dolphin/mtx.h>
+
+#include <JSystem/JKernel/JKRHeap.hpp>
+#include <JSystem/JAudio/JASystem/JASTrackMgr.hpp>
+#include <JSystem/JAudio/JASystem/JASWaveArcLoader.hpp>
+#include <JSystem/JAudio/JAInterface/JAISound.hpp>
+#include <JSystem/JAudio/JAInterface/JAIBasic.hpp>
+#include <MSound/MSSceneWave.hpp>
+#include <MSound/MSoundSE.hpp>
+#include <MSound/SoundEffects.hpp>
+
+class JAIActor;
+class JAICamera;
+struct JAIAnimeFrameSoundData;
+class MSModBgm;
+class MSBgmXFade;
+
+enum MSSeSwBit {
+	MSSeSwBit_AnimeSpeed                 = 0x00100000,
+	MSSeSwBit_AnimeSpeedShift            = 20,
+	MSSeSwBit_ModDistanceVolume          = 0x00200000,
+	MSSeSwBit_RandomVolumePSlopeMask     = 0x00C00000,
+	MSSeSwBit_RandomVolumePSlopeShift    = 22,
+	MSSeSwBit_RandomVolumeCSlopeMask     = 0x03000000,
+	MSSeSwBit_RandomVolumeCSlopeShift    = 24,
+	MSSeSwBit_RandomVolumeAmplitudeMask  = 0x0C000000,
+	MSSeSwBit_RandomVolumeAmplitudeShift = 26,
+	MSSeSwBit_RandomIDWeightMask         = 0x70000000,
+	MSSeSwBit_RandomIDWeightShift        = 28,
+	MSSeSwBit_RandomID                   = 0x80000000,
+};
+
+enum MSBgmSwBit {
+	MSBgmSwBit_YoshiPercussion = 0x10000000,
+};
+
+class MSSeCallBack {
+public:
+	static u16 setParameterSeqSync(JASystem::TTrack*, u16);
+	static void setWaterFilter(u16);
+	static void setWaterCameraFir(bool);
+	static u16 smTrackCategory[];
+	static u8 smPolifonic[];
+	static u16 smWaterFilter;
+};
+
+namespace MSLoadWave {
+bool loadWaveBackword(int, int);
+}
+
+namespace MSMarioPosVolume {
+f32 getDistFromMario(const Vec&);
+}
+
+class MSound : public JAIBasic {
+public:
+	MSound(JKRHeap*, JKRHeap*, u32, u8*, u8*, u32);
+	~MSound() { }
+
+	virtual JAISound* makeSound(u32);
+	virtual u32 getMapInfoGround(u32) { return 0; }
+	virtual void setSeExtParameter(JAISound*);
+	virtual void setRegisterTrackCallback();
+	virtual void loadGroupWave(s32, s32);
+
+	static MSound* getMSound();
+
+	void initSound();
+	void mainLoop();
+	void exitStage();
+	void enterStage(MS_SCENE_WAVE, u8, u8);
+	void loadWave(MS_SCENE_WAVE);
+	void cleanUpAramWave(u8);
+	bool checkWaveOnAram(MS_SCENE_WAVE);
+	bool checkSeqOnMemory(u32);
+
+	void stopAllSound();
+	void fadeOutAllSound(u32 fadeout);
+	void stopAllSeInCategory(u8, u32);
+	void setCategoryAllVolume(u8, f32, u32, u8);
+	void setCategoryVOLs(u16, f32);
+	void setCategoryVOLsDefault(u16);
+
+	void pauseOn(bool);
+	void pauseOff(u8);
+	void talkModeIn(bool);
+	void talkModeOut();
+	void demoModeIn(u16, bool);
+	void demoModeOut(bool);
+
+	void setPlayerInfo(Vec*, Vec*, MtxPtr, bool);
+	void setCameraInfo(Vec*, Vec*, MtxPtr, u32);
+	f32 getDistFromCamera(Vec*);
+	bool cameraLooksAtMario();
+
+	void startSoundSet(u32, const Vec*, u32, f32, u32, u32, u8);
+	void startSoundSetGrp(u32, const Vec*, u32, f32, u32, u32, u8);
+	void startSoundActorSpecial(u32 id, const Vec* position, f32, f32,
+	                            u32 ground_no, JAISoundHandle* out_handle, u32,
+	                            u8);
+	void startBeeSe(Vec*, u32);
+
+	u32 startMarioVoice(u32, s16, u8);
+	void stopMarioVoice(u32, u8);
+	u32 getMarioVoiceID(u8);
+	void* checkMarioVoicePlaying(u8);
+
+	void playTimer(u32);
+	void requestShineAppearFanfare();
+
+	u32 getWallSound(u32, f32);
+	u32 getBstPitch(u32);
+	static u32 getBstSwitch(u32 sound_id);
+	static u32 getSwitch(u32 sound_id, u32 mask, u32 offset);
+	bool gateCheck(u32);
+
+	bool resetAudioAll(u16);
+
+	// real
+	void startSoundSystemSE(u32 id, u32 param_2, JAISoundHandle* out_handle,
+	                        u32 fade)
+	{
+		if (gateCheck(id))
+			MSoundSESystem::MSoundSE::startSoundSystemSE(id, param_2,
+			                                             out_handle, fade);
+	}
+
+	// Fabricated, very likely due to real startSoundSystemSE
+	void startSoundActor(u32 id, const Vec* position, u32 ground_no,
+	                     JAISoundHandle* out_handle, u32 fade, u8 camera_idx)
+	{
+		if (gateCheck(id))
+			MSoundSESystem::MSoundSE::startSoundActor(
+			    id, position, ground_no, out_handle, fade, camera_idx);
+	}
+
+	void startSoundActorWithInfo(u32 id, const Vec* position, Vec* param_3,
+	                             f32 param_4, u32 param_5, u32 ground_no,
+	                             JAISoundHandle* out_handle, u32 fade,
+	                             u8 camera_idx)
+	{
+		if (gateCheck(id))
+			MSoundSESystem::MSoundSE::startSoundActorWithInfo(
+			    id, position, param_3, param_4, param_5, ground_no, out_handle,
+			    fade, camera_idx);
+	}
+
+	void startSeRandPlay(u32 id, u32 param_2)
+	{
+		if (gateCheck(id))
+			MSoundSESystem::MSRandPlay::startSeRandPlay(id, param_2);
+	}
+
+	void startForceJumpSound(Vec* position, u32 param_2, f32 param_3,
+	                         u32 param_4)
+	{
+		u32 id;
+		switch (param_2 & 0xff) {
+		case 0x15:
+		case 0x17:
+		case 0x1D:
+			id = MSD_SE_MA_STALL_JUMP;
+			break;
+
+		case 0x1E:
+		default:
+			if (param_4 < 0x1770)
+				id = MSD_SE_MA_ROPE_JUMP_A;
+			else if (param_4 < 0x2EE0)
+				id = MSD_SE_MA_ROPE_JUMP_B;
+			else
+				id = MSD_SE_MA_ROPE_JUMP_C;
+			break;
+		}
+
+		if (gateCheck(id))
+			startSoundActor(id, position, 0, nullptr, 0, 4);
+	}
+
+	bool checkUnkA8(u32 flag) { return !(unkA8 & flag) ? false : true; }
+
+public:
+	/* 0x98 */ MSModBgm* unk98;
+	/* 0x9C */ MSBgmXFade* unk9C;
+	/* 0xA0 */ u32 unkA0;
+	/* 0xA4 */ u32 unkA4;
+	/* 0xA8 */ u8 unkA8;
+	/* 0xAC */ JAICamera unkAC[2];
+	/* 0xC4 */ JAISound* unkC4;
+	/* 0xC8 */ u8 unkC8[5];
+	/* 0xCD */ u8 unkCD;
+	/* 0xCE */ u8 unkCE;
+	/* 0xCF */ u8 unkCF;
+	/* 0xD0 */ u8 unkD0;
+	/* 0xD1 */ u8 unkD1;
+	/* 0xD2 */ char unkD2[0x304 - 0xD2];
+	/* 0x304 */ JASystem::TTrack::TOuterParam* unk304;
+	/* 0x308 */ char unk308[0x4];
+};
+
+extern MSound* MSGMSound;
+extern JAIBasic* MSGBasic;
+extern MSound* gpMSound;
+
+// real
+inline MSound* SMSGetMSound() { return gpMSound; }
+
+#endif // MSOUND_HPP

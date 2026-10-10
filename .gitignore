@@ -7,3 +7,4 @@
 crash.log
 *.log
 __pycache__/
+sms/.git.hold/

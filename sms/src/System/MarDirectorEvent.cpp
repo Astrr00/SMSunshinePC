@@ -1,0 +1,279 @@
+#include <System/MarDirector.hpp>
+#include <System/TalkCursor.hpp>
+#include <System/MarioGamePad.hpp>
+#include <System/FlagManager.hpp>
+#include <System/Application.hpp>
+#include <MSound/MSound.hpp>
+#include <MSound/MSoundSE.hpp>
+#include <MoveBG/Item.hpp>
+#include <NPC/NpcBase.hpp>
+#include <Player/MarioAccess.hpp>
+#include <Player/Mario.hpp>
+
+// rogue includes needed for matching sinit & bss
+#include <MSound/MSSetSound.hpp>
+#include <MSound/MSoundBGM.hpp>
+#include <M3DUtil/InfectiousStrings.hpp>
+
+const char* cCameraBckNameShineGetInside
+    = "/common/camera/camera_demo_shine_get_inside";
+const char* cCameraBckNameShineGetOutside
+    = "/common/camera/camera_demo_shine_get_outside";
+const char* cCameraBckNameGate = "/common/camera/camera_demo_gate_in";
+
+void TMarDirector::entryNPC(TBaseNPC* npc) { unk88.push_back(npc); }
+
+void isNearMapObj(const JDrama::TActor&, const char*, f32) { }
+
+void is3BarrelNear(const TBaseNPC&) { }
+
+void TMarDirector::getTalkMsgID(TBaseNPC*) { }
+
+void TMarDirector::updateFlag(TBaseNPC*, u32, u32) { }
+
+TBaseNPC* TMarDirector::findNearestTalkNPC()
+{
+	TBaseNPC* result = nullptr;
+	if (gpMarioOriginal->mStatus == MARIO_STATUS_WAIT) {
+		f32 bestDist                   = 5000000.0f;
+		JGeometry::TVec3<f32> marioPos = *gpMarioPos;
+		JGadget::TVector_pointer<TBaseNPC>::iterator it;
+
+		for (it = unk88.begin(); it != unk88.end(); ++it) {
+			TBaseNPC* npc = *it;
+			if (npc->checkLiveFlag(LIVE_FLAG_UNK100000)
+			    || !npc->checkLiveFlag(LIVE_FLAG_UNK20000))
+				continue;
+
+			f32 dist = (npc->mPosition.x - marioPos.x)
+			               * (npc->mPosition.x - marioPos.x)
+			           + (npc->mPosition.y - marioPos.y)
+			                 * (npc->mPosition.y - marioPos.y)
+			           + (npc->mPosition.z - marioPos.z)
+			                 * (npc->mPosition.z - marioPos.z);
+			if (dist < bestDist) {
+				bestDist = dist;
+				result   = npc;
+			}
+		}
+	}
+	return result;
+}
+
+TBaseNPC* TMarDirector::findNearestTakeNPC()
+{
+	TBaseNPC* result = nullptr;
+	JGadget::TVector_pointer<TBaseNPC>::iterator it;
+
+	for (it = unk88.begin(); it != unk88.end(); ++it) {
+		TBaseNPC* npc = *it;
+
+		if (npc->isNowCanTaken() && gpMarioOriginal->isTakeSituation(npc))
+			result = npc;
+	}
+	return result;
+}
+
+void TMarDirector::movement_game()
+{
+	unk84->associateNPC(nullptr);
+	if ((int)unk124 == 0)
+		return;
+
+	unk18[0]->offFlag(TMarioGamePad::PAD_FLAG_TALK_NPC);
+	if (!gpMarioOriginal->isHolding() && gpCamera->isLButtonCamera())
+		return;
+
+	if (!gpCamera->isDemoCamera()) {
+		TBaseNPC* takeNpc = findNearestTakeNPC();
+		if (takeNpc != nullptr) {
+			unk84->associateNPC(takeNpc);
+		} else {
+			TBaseNPC* talkNpc = findNearestTalkNPC();
+			if (talkNpc != nullptr) {
+				unkA0 = talkNpc;
+				unk84->associateNPC(talkNpc);
+				unk18[0]->onFlag(TMarioGamePad::PAD_FLAG_TALK_NPC);
+				unk128 |= 0x1;
+				if ((unk128 & 2)
+				    && (unk18[0]->checkFrameMeaning(
+				        TMarioGamePad::MEANING_TALK_B)))
+					unk126 = 1;
+			}
+		}
+	}
+}
+
+void TMarDirector::fireGetBlueCoin(TCoin* coin)
+{
+	char trash[8];
+	if (!coin)
+		return;
+
+	TFlagManager::smInstance->setBlueCoinFlag(gpApplication.mCurrArea.unk0,
+	                                          coin->getEventId());
+	unk4C |= 0x200;
+	unk261 = 1;
+	SMSGetMSound()->startSoundActor(MSD_SE_SY_BLUE_COIN_GET, &coin->mPosition,
+	                                0, nullptr, 0, 4);
+}
+
+void TMarDirector::fireGetNozzle(TItemNozzle* nozzle)
+{
+	char trash[8];
+	if (!nozzle)
+		return;
+
+	u8 areaId = gpApplication.mCurrArea.unk0;
+	if (nozzle->isActorType(0x20000022)
+	    && !TFlagManager::smInstance->getNozzleRight(areaId, 0)) {
+		TFlagManager::smInstance->setNozzleRight(areaId, 0);
+		unk4C |= 0x200;
+		unk261 = 3;
+	} else if (nozzle->isActorType(0x2000002A)
+	           && !TFlagManager::smInstance->getNozzleRight(areaId, 1)) {
+		TFlagManager::smInstance->setNozzleRight(areaId, 1);
+		unk4C |= 0x200;
+		unk261 = 4;
+	}
+}
+
+void TMarDirector::fireGetStar(TShine* shine)
+{
+	unk25C = shine;
+	unk4C |= 1;
+	JGeometry::TVec3<f32>& v = shine->mInitialRotation;
+	fireStartDemoCamera(!shine->unk190 ? cCameraBckNameShineGetOutside
+	                                   : cCameraBckNameShineGetInside,
+	                    &gpMarioOriginal->mPosition, -1, v.y, false, nullptr, 0,
+	                    nullptr, JDrama::TFlagT<u16>());
+}
+
+void TMarDirector::fireRideYoshi(TYoshi* param_1)
+{
+	char trash[16];
+	if (param_1 == nullptr)
+		return;
+
+	if (gpApplication.mCurrArea.unk0 != 1)
+		return;
+
+	if (TFlagManager::smInstance->getBool(0x1038F))
+		return;
+
+	TFlagManager::smInstance->setBool(true, 0x1038F);
+	unk4C |= 0x200;
+	unk261 = 5;
+}
+
+void TMarDirector::fireDefeatEnemy(TSpineEnemy*) { }
+
+void TMarDirector::fireDemoMovie(u32, TLiveActor*) { }
+
+void TMarDirector::movement()
+{
+	if ((int)mState == STATE_UNK4)
+		movement_game();
+}
+
+#pragma dont_inline on
+void TMarDirector::setNextStage(u16 param_1, JDrama::TActor* param_2)
+{
+	// TODO: wtf is happening in this function it's cursed
+}
+#pragma dont_inline off
+
+void TMarDirector::fireStageEvent(TMapObjBase*) { }
+
+#pragma dont_inline on
+void TMarDirector::fireStartDemoCamera(const char* param_1,
+                                       const JGeometry::TVec3<f32>* param_2,
+                                       s32 param_3, f32 param_4, bool param_5,
+                                       s32 (*param_6)(DemoCallbackArg, u32),
+                                       DemoCallbackArg param_7,
+                                       JDrama::TActor* param_8,
+                                       JDrama::TFlagT<u16> param_9)
+{
+	if (((unk24C - unk24D) & 7) >= 7)
+		return;
+
+	unk4C |= 0x40;
+	unk12C[unk24C].unk0  = param_1;
+	unk12C[unk24C].unk4  = param_2;
+	unk12C[unk24C].unk8  = param_3;
+	unk12C[unk24C].unkC  = param_4;
+	unk12C[unk24C].unk10 = param_5;
+	unk12C[unk24C].unk14 = param_6;
+	unk12C[unk24C].unk18 = param_7;
+	unk12C[unk24C].unk1C = param_8;
+	unk12C[unk24C].unk20 = param_9;
+
+	unk24C += 1;
+	unk24C &= 7;
+}
+#pragma dont_inline off
+
+void TMarDirector::fireEndDemoCamera() { unk4C |= 0x80; }
+
+void TMarDirector::fireStreamingMovie(u8 param_1)
+{
+	switch (param_1) {
+	case 0:
+		if (!(unk4C & 0x100)) {
+			unk4C |= 0x100;
+			setNextStage(0x1, nullptr);
+			TFlagManager::smInstance->setBool(true, 0x10389);
+			TFlagManager::smInstance->setBool(true, 0x30004);
+			gpApplication.mMovie = param_1;
+		}
+		break;
+
+	case 10:
+		if (!(unk4C & 0x100)) {
+			unk4C |= 0x100;
+			setNextStage(0x3B, nullptr);
+			gpApplication.mMovie = param_1;
+		}
+		break;
+
+	case 7:
+		if (!(unk4C & 0x100)) {
+			unk4C |= 0x100;
+			setNextStage(0xE06, nullptr);
+			gpApplication.mMovie = param_1;
+		}
+		break;
+
+	case 8:
+		if (!(unk4C & 0x100)) {
+			unk4C |= 0x100;
+			setNextStage(0xE07, nullptr);
+			gpApplication.mMovie = param_1;
+		}
+		break;
+
+	case 11:
+		if (!(unk4C & 0x100)) {
+			unk4C |= 0x100;
+			setNextStage(0x3C, nullptr);
+			gpApplication.mMovie = param_1;
+		}
+		break;
+
+	case 2:
+		if (!(unk4C & 0x100)) {
+			unk4C |= 0x100;
+			setNextStage(0x101, nullptr);
+			gpApplication.mMovie = param_1;
+		}
+		break;
+
+	default:
+		if (!(unk4C & 0x100)) {
+			unk4C |= 0x100;
+			setNextStage(0xF, nullptr);
+			gpApplication.mMovie = (u8)param_1;
+		}
+		break;
+	}
+}

@@ -1,0 +1,59 @@
+
+#include <M3DUtil/M3UModelMario.hpp>
+#include <M3DUtil/M3UJoint.hpp>
+#include <JSystem/J3D/J3DGraphAnimator/J3DModel.hpp>
+#include <JSystem/J3D/J3DGraphAnimator/J3DJoint.hpp>
+
+void M3UModelMario::changeMtxCalcSIAnmBQAnmTransform(int param_1, int param_2,
+                                                     u16 param_3)
+{
+	SomeModelMarioStruct& tmp = unk24[param_1];
+	if (tmp.unk4[param_2] != param_3) {
+		tmp.unk4[param_2]  = param_3;
+		J3DFrameCtrl& ctrl = unkC[tmp.unk8];
+		ctrl.init(unk4->unk4[param_3]->getFrameMax());
+	}
+}
+
+void M3UModelMario::updateInMotion()
+{
+	char trash[0x20];
+	// volatile u32 unused[12];
+	for (int i = 0; i < unk10; ++i) {
+		SomeModelMarioStruct& info = unk24[i];
+		getFrameCtrl(info.unk8).update();
+		J3DJoint* jnt = unk8->getModelData()->getJointNodePointer(info.unk0);
+
+		if (info.unk3 == 0xff) {
+			jnt->setMtxCalc(nullptr);
+			continue;
+		}
+
+		J3DAnmTransform* newAnm = unk4->unk4[info.unk4[0]];
+		J3DAnmTransform* oldAnm = unk4->unk4[info.unk4[1]];
+
+		if (newAnm != nullptr)
+			newAnm->setFrame(getFrameCtrl(info.unk8).getFrame());
+		if (oldAnm != nullptr)
+			oldAnm->setFrame(getFrameCtrl(info.unk8).getFrame());
+
+		unk20->unk18[info.unk3].mNewAnm = newAnm;
+		unk20->unk18[info.unk3].mOldAnm = oldAnm;
+		jnt->setMtxCalc(&unk20->unk18[info.unk3]);
+	}
+}
+
+void M3UModelMario::updateIn()
+{
+	updateInMotion();
+	updateInTexPatternAnm();
+}
+
+void M3UModelMario::updateOut()
+{
+	for (int i = 0; i < unk10; i++) {
+		unk8->getModelData()
+		    ->getJointNodePointer(unk24[i].unk0)
+		    ->setMtxCalc(nullptr);
+	}
+}

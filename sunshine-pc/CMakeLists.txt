@@ -77,7 +77,7 @@ add_executable(sunshine src/main.cpp src/crash.cpp src/devstart/devstart.cpp src
     src/cheats/cheats_core.cpp src/cheats/cheats_game.cpp src/json/json_lite.cpp
     src/mods/mod_manifest.cpp src/mods/mods_host.cpp src/mods/mods_loader.cpp src/util/read_file.cpp
     src/settings.cpp src/launcher/launcher.cpp src/glyphs/glyphs.cpp src/framerate/framerate.cpp src/widescreen/widescreen.cpp
-    src/saves/save_directory.cpp src/saves/save_roundtrip.cpp)
+    src/saves/save_directory.cpp src/saves/save_roundtrip.cpp src/devscript/devscript.cpp)
 target_include_directories(sunshine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # Round-trip test of the INI settings reader/writer (tools/settings_test.cpp); no game or Aurora dependency.
 add_executable(settings_test tools/settings_test.cpp src/settings.cpp)

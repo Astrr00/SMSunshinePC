@@ -1,0 +1,131 @@
+#include <Enemy/Spider.hpp>
+#include <Enemy/Enemy.hpp>
+#include <Map/MapData.hpp>
+#include <Map/MapCollisionData.hpp>
+#include <Map/Map.hpp>
+
+TSpider::TSpider()
+    : unk4(0)
+    , unk8(0)
+    , unkC(0)
+    , unk10(0.0f)
+{
+}
+
+TSpider::~TSpider() { }
+
+void TSpider::bind(TLiveActor* param_1)
+{
+	JGeometry::TVec3<f32> local_114 = param_1->mLinearVelocity;
+	JGeometry::TVec3<f32> local_50  = param_1->mPosition;
+	local_50 += local_114;
+
+	if (param_1->isAirborne()) {
+		JGeometry::TVec3<f32> local_5C = param_1->mVelocity;
+		local_50 += local_5C;
+		f32 dVar7 = param_1->getGravityY();
+		local_5C.y -= dVar7;
+		if (local_5C.y < TLiveActor::mVelocityMinY)
+			local_5C.y = TLiveActor::mVelocityMinY;
+
+		param_1->mVelocity = local_5C;
+	}
+
+	const TBGCheckData* local_60;
+	f32 fVar3 = gpMap->checkGround(
+	    local_50.x, local_50.y + ((TSpineEnemy*)param_1)->getHeadHeight(),
+	    local_50.z, &local_60);
+	fVar3 += 1.0f;
+
+	if (param_1->mPosition.y - local_50.y > 0.0f) {
+		const TBGCheckData* local_64;
+		f32 dVar7 = gpMap->checkGround(
+		    local_50.x, local_50.y + ((TSpineEnemy*)param_1)->getHeadHeight(),
+		    local_50.z, &local_64);
+		dVar7 += 1.0f;
+		if (dVar7 > fVar3) {
+			local_60 = local_64;
+			fVar3    = dVar7;
+		}
+	}
+
+	if (local_60->checkFlag(BG_CHECK_FLAG_ILLEGAL)) {
+		if (unk4 <= 0) {
+			param_1->kill();
+		} else {
+			fVar3      = param_1->mPosition.y;
+			local_50.y = fVar3;
+			unk4 -= 1;
+		}
+	} else {
+		unk4 = 0x1E;
+	}
+
+	if (local_50.y <= fVar3) {
+		param_1->mVelocity = JGeometry::TVec3<f32>(0, 0, 0);
+
+		param_1->offLiveFlag(LIVE_FLAG_AIRBORNE);
+		param_1->offLiveFlag(LIVE_FLAG_UNK8000);
+		local_50.y = fVar3;
+	} else {
+		param_1->onLiveFlag(LIVE_FLAG_AIRBORNE);
+	}
+
+	param_1->mGroundHeight = fVar3;
+	param_1->mGroundPlane  = local_60;
+
+	TBGWallCheckRecord local_90(
+	    local_50.x, local_50.y, local_50.z,
+	    ((TSpineEnemy*)param_1)->mBodyScale * param_1->mHeadHeight, 1, 0);
+
+	JGeometry::TVec3<f32> local_bc;
+	f32 unaff_f29;
+
+	bool b   = gpMap->isTouchedWallsAndMoveXZ(&local_90);
+	local_bc = local_90.mCenter;
+	if (!b) {
+		if (unk8 > 0) {
+			unk8 -= 1;
+			unaff_f29 = ((TSpineEnemy*)param_1)->mMarchSpeed;
+			param_1->offLiveFlag(LIVE_FLAG_AIRBORNE);
+			param_1->offLiveFlag(LIVE_FLAG_UNK8000);
+			param_1->mVelocity = JGeometry::TVec3<f32>(0, 0, 0);
+		} else {
+			unkC = 0;
+
+			((TSpineEnemy*)param_1)->unk138 = nullptr;
+
+			unaff_f29 = 0.0f;
+		}
+		unk10 -= 0.016666667f;
+		if (unk10 < 0.0f)
+			unk10 = 0.0f;
+	} else {
+		JGeometry::TVec3<f32> normal = local_90.mResultWalls[0]->getNormal();
+		if (normal.dot(local_114) < 0.0f) {
+			unaff_f29 = ((TSpineEnemy*)param_1)->mMarchSpeed;
+			param_1->offLiveFlag(LIVE_FLAG_AIRBORNE);
+			param_1->offLiveFlag(LIVE_FLAG_UNK8000);
+			param_1->mVelocity = JGeometry::TVec3<f32>(0, 0, 0);
+
+			unkC = local_90.mResultWalls[0];
+
+			((TSpineEnemy*)param_1)->unk138 = unkC;
+
+			unk8 = 0x3C;
+
+			JGeometry::TVec3<f32> tmp;
+			tmp.scale(((TSpineEnemy*)param_1)->getWallRadius() * unk10, normal);
+			local_bc.sub(tmp, local_90.mCenter);
+
+			unk10 += 1.0f / 60.0f;
+			if (unk10 > 1.0f)
+				unk10 = 1.0f;
+		}
+	}
+
+	JGeometry::TVec3<f32> local_118 = local_bc;
+	local_118.y += unaff_f29 - ((TSpineEnemy*)param_1)->getHeadHeight();
+
+	param_1->mLinearVelocity = local_118 - param_1->mPosition;
+}

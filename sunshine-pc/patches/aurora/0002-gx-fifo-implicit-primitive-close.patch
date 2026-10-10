@@ -1,14 +1,14 @@
 diff --git a/lib/dolphin/gx/GXVert.cpp b/lib/dolphin/gx/GXVert.cpp
 --- a/lib/dolphin/gx/GXVert.cpp
 +++ b/lib/dolphin/gx/GXVert.cpp
-@@ -11,8 +11,30 @@
+@@ -11,8 +11,31 @@
  u32 sBeginSizeOffset = 0;
  bool sBeginAuto = false;
  
 +// Closes the open primitive (what GXEnd does). GXEnd is a no-op on the Dolphin SDK, and decomp draw
 +// paths often omit it, so GXBegin closes a still-open primitive implicitly: on hardware a primitive
 +// is complete once its vertices are written.
-+void end_begin() {
++void end_begin(bool explicitEnd = false) {
 +  if (!sInBegin) {
 +    return;
 +  }
@@ -16,9 +16,10 @@ diff --git a/lib/dolphin/gx/GXVert.cpp b/lib/dolphin/gx/GXVert.cpp
 +  if (sBeginAuto) {
 +    aurora::gx::fifo::patch_u32(sBeginSizeOffset, bytesWritten);
 +    sBeginAuto = false;
-+  } else if (sBeginNVerts > 0 && bytesWritten > 0) {
++  } else if (explicitEnd && sBeginNVerts > 0 && bytesWritten > 0) {
 +    // We don't know the vertex size without processing the FIFO for vtxFmt changes
-+    // so this is just a best-effort check to find obvious issues
++    // so this is just a best-effort check to find obvious issues. Only on a real GXEnd: a primitive closed implicitly
++    // by the next GXBegin also counts the state commands written in between (decomp code often omits GXEnd).
 +    if (bytesWritten % sBeginNVerts != 0) {
 +      Log.warn("GXEnd: vertex data not evenly divisible: {} bytes for {} vertices", bytesWritten, sBeginNVerts);
 +    }
@@ -33,7 +34,7 @@ diff --git a/lib/dolphin/gx/GXVert.cpp b/lib/dolphin/gx/GXVert.cpp
  
    // Flush dirty state before starting a draw
    if (__gx->dirtyState != 0) {
-@@ -33,6 +55,10 @@
+@@ -33,6 +56,10 @@
  } // namespace
  
  extern "C" {
@@ -44,7 +45,7 @@ diff --git a/lib/dolphin/gx/GXVert.cpp b/lib/dolphin/gx/GXVert.cpp
  
  void GXBegin(GXPrimitive primitive, GXVtxFmt vtxFmt, u16 nVerts) {
    pre_begin();
-@@ -74,21 +100,7 @@
+@@ -74,21 +101,7 @@
  }
  
  void GXEnd() {
@@ -63,7 +64,7 @@ diff --git a/lib/dolphin/gx/GXVert.cpp b/lib/dolphin/gx/GXVert.cpp
 -    sInBegin = false;
 -    aurora::gx::fifo::finish_draw();
 -  }
-+  end_begin();
++  end_begin(true);
  }
  
  void GXPosition3f32(f32 x, f32 y, f32 z) {

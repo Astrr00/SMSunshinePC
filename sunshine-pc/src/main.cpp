@@ -30,6 +30,10 @@ TApplication gpApplication;
 
 static void log_callback(AuroraLogLevel level, const char* module, const char* message, unsigned int)
 {
+	// Aurora logs every unhandled XF/BP register write at debug level (thousands per frame); SUNSHINE_LOG_DEBUG=1 restores them.
+	static const bool debugLogs = std::getenv("SUNSHINE_LOG_DEBUG") != nullptr;
+	if (level == LOG_DEBUG && !debugLogs)
+		return;
 	std::fprintf(level >= LOG_ERROR ? stderr : stdout, "[%d %s] %s\n", (int)level, module, message);
 	if (level == LOG_FATAL)
 		std::abort();
@@ -46,6 +50,7 @@ static const char* findDvdArg(int argc, char** argv)
 
 void installCrashHandler(); // crash.cpp
 void sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
+void sunshineDevScriptTick(); // devscript/devscript.cpp
 
 // Developer switch: SUNSHINE_DEV_SKIP_MOVIES=1 ends every THP movie as soon as it starts playing (the retail game only
 // allows skipping movies that were already seen), to reach the scenes behind them quickly during boot testing.
@@ -77,6 +82,7 @@ void sunshineLogicTick()
 {
 	cheatsTick();
 	modsLogicTick();
+	sunshineDevScriptTick();
 }
 
 int main(int argc, char* argv[])

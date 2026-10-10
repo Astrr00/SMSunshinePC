@@ -29,16 +29,7 @@ diff --git a/lib/aurora.cpp b/lib/aurora.cpp
                       wgpu::CommandEncoder& encoder, std::vector<gfx::AfterSubmitCallback> afterSubmitCallbacks) {
      wgpu::Texture currentTexture;
      wgpu::TextureView currentView;
-@@ -363,6 +362,8 @@
-         imgui::render(pass, imguiDrawData);
-         pass.End();
-       }
-+                                          imguiDrawData);
-+      }
-     } else {
-       Log.info("Skipping present; window not presentable");
-     }
-@@ -478,5 +479,12 @@
+@@ -478,5 +477,12 @@
    (void)sampler;
  #endif
  }

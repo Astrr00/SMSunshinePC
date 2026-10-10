@@ -1,0 +1,117 @@
+#include <System/Resolution.hpp>
+#include <dolphin/vi.h>
+
+#ifdef TARGET_PC
+// sunshine-pc/src/widescreen/widescreen.cpp: EFB width (640 at 4:3) and the centred 4:3 UI column offset.
+unsigned int sunshineRenderWidth();
+unsigned int sunshineUIOffsetX();
+#endif
+
+u16 SMSGetGameVideoWidth() { return 660; }
+
+#ifdef VERSION_GMSP01
+u16 SMSGetGameVideoHeight(u32 format)
+{
+	u16 ret = 448;
+	switch (format) {
+	case VI_MPAL:
+	case VI_NTSC:
+	case VI_EURGB60:
+		ret = 448;
+		break;
+	case VI_PAL:
+		ret = 530;
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+#else
+u16 SMSGetGameVideoHeight()
+{
+	u16 ret = 448;
+	switch (VIGetTvFormat()) {
+	case VI_MPAL:
+	case VI_NTSC:
+	case VI_EURGB60:
+		ret = 448;
+		break;
+	case VI_PAL:
+		ret = 530;
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+#endif
+
+// UNUSED
+s32 SMSGetDisplayWidthMax() { return 720; }
+
+// UNUSED
+s32 SMSGetDisplayHeightMax() { return 574; }
+
+u16 SMSGetTitleVideoWidth() { return 660; }
+
+#ifdef VERSION_GMSP01
+// PAL duplicates the switch here instead of forwarding to
+// SMSGetGameVideoHeight().
+u16 SMSGetTitleVideoHeight(u32 format)
+{
+	u16 ret = 448;
+	switch (format) {
+	case VI_MPAL:
+	case VI_NTSC:
+	case VI_EURGB60:
+		ret = 448;
+		break;
+	case VI_PAL:
+		ret = 530;
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+#else
+u16 SMSGetTitleVideoHeight() { return SMSGetGameVideoHeight(); }
+#endif
+
+#ifdef TARGET_PC
+u16 SMSGetGameRenderWidth() { return (u16)sunshineRenderWidth(); }
+#else
+u16 SMSGetGameRenderWidth() { return 640; }
+#endif
+
+u16 SMSGetGameRenderHeight() { return 448; }
+
+#ifdef TARGET_PC
+u16 SMSGetTitleRenderWidth() { return (u16)sunshineRenderWidth(); }
+#else
+u16 SMSGetTitleRenderWidth() { return 640; }
+#endif
+
+u16 SMSGetTitleRenderHeight() { return 448; }
+
+#ifdef TARGET_PC
+u16 SMSGetGCLogoRenderWidth() { return (u16)sunshineRenderWidth(); }
+#else
+u16 SMSGetGCLogoRenderWidth() { return 640; }
+#endif
+
+u16 SMSGetGCLogoRenderHeight() { return 448; }
+
+#ifdef TARGET_PC
+u16 SMSGetUIOffsetX() { return (u16)sunshineUIOffsetX(); }
+#endif
+
+u16 SMSGetGCLogoVideoWidth() { return 640; }
+
+#ifdef VERSION_GMSP01
+// PAL forwards to SMSGetGameVideoHeight() rather than SMSGetTitleVideoHeight().
+u16 SMSGetGCLogoVideoHeight(u32 format) { return SMSGetGameVideoHeight(format); }
+#else
+u16 SMSGetGCLogoVideoHeight() { return SMSGetTitleVideoHeight(); }
+#endif

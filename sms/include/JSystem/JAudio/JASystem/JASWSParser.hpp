@@ -1,0 +1,85 @@
+#ifndef JASWSPARSER_HPP
+#define JASWSPARSER_HPP
+
+#include <JSystem/JSupport.hpp>
+#include <JSystem/JAudio/JASystem/JASHostFmt.hpp>
+#include <dolphin/types.h>
+
+namespace JASystem {
+
+class TWaveBank;
+
+namespace WSParser {
+
+	template <typename T> struct TOffset {
+		T* ptr(const void* base) const
+		{
+			return JSUConvertOffsetToPtr<T>(base, mOffset);
+		}
+
+		/* 0x00 */ DiscU32 mOffset;
+	};
+
+	struct TCtrlWave {
+		/* 0x00 */ DiscU32 unk0;
+	};
+
+	// same as JASystem::Driver::Wave_
+	struct TWave {
+		/* 0x00 */ u8 unk0;
+		/* 0x01 */ u8 unk1;
+		/* 0x02 */ u8 unk2;
+		/* 0x04 */ DiscF32 unk4;
+		/* 0x08 */ DiscU32 mOffset;
+		/* 0x0C */ DiscU32 unkC;
+		/* 0x10 */ DiscU32 unk10;
+		/* 0x14 */ DiscU32 unk14;
+		/* 0x18 */ DiscU32 unk18;
+		/* 0x1C */ DiscU32 unk1c;
+		/* 0x20 */ DiscS16 unk20;
+		/* 0x22 */ DiscS16 unk22;
+		/* 0x24 */ u8 unk24[0x28 - 0x24];
+		/* 0x28 */ DiscS32 unk28;
+	};
+	struct TWaveArchive {
+		/* 0x00 */ char mFileName[0x74];
+		/* 0x74 */ TOffset<TWave> mWaveOffsets[1];
+	};
+	struct TWaveArchiveBank {
+		/* 0x00 */ DiscU32 mMagic;
+		/* 0x04 */ u8 unk4[0x08 - 0x04];
+		/* 0x08 */ TOffset<TWaveArchive> mArchiveOffsets[1];
+	};
+	struct TCtrl {
+		/* 0x00 */ DiscU32 mMagic;
+		/* 0x04 */ DiscU32 mWaveCount;
+		/* 0x08 */ TOffset<TCtrlWave> mCtrlWaveOffsets[1];
+	};
+	struct TCtrlScene {
+		/* 0x00 */ DiscU32 mMagic;
+		/* 0x04 */ u8 unk4[0x0C - 0x04];
+		/* 0x0C */ TOffset<TCtrl> mCtrlOffset;
+	};
+	struct TCtrlGroup {
+		/* 0x00 */ DiscU32 mMagic;
+		/* 0x04 */ u8 unk4[0x08 - 0x04];
+		/* 0x08 */ DiscU32 mCtrlGroupCount;
+		/* 0x0C */ TOffset<TCtrlScene> mCtrlSceneOffsets[1];
+	};
+	struct THeader {
+		/* 0x00 */ u8 unk0[0x10];
+		/* 0x10 */ TOffset<TWaveArchiveBank> mArchiveBankOffset;
+		/* 0x14 */ TOffset<TCtrlGroup> mCtrlGroupOffset;
+	};
+
+	u32 getGroupCount(void* data);
+	TWaveBank* createBasicWaveBank(void* data);
+	TWaveBank* createSimpleWaveBank(void* data);
+	u32 getUsedHeapSize();
+
+	extern u32 sUsedHeapSize;
+}; // namespace WSParser
+
+} // namespace JASystem
+
+#endif // JASWSPARSER_HPP
