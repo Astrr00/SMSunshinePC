@@ -13,7 +13,7 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 | Units compiled (clang-cl) | done | 100 | 584/584 built units; 624/733 incl. excluded (`docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
 | Title screen | partial | 70 | logo, Shine Sprite, seagulls render, logic 30/s; area behind the logo black (retail background unverified) |
-| Title → file select → new game → Delfino | partial | 10 | file select reached (`sunshine-pc/build/FlowFileSelect/a2.png`); CardLoad title crash fixed (loop 13→11, asm 0x8022D16C); new game/Delfino pending |
+| Title → file select → new game → Delfino | partial | 35 | file select reached (`sunshine-pc/build/FlowFileSelect/a2.png`); CardLoad title crash fixed (loop 13→11, asm 0x8022D16C); new game/Delfino pending |
 | Bianco Hills Ep.1 (dev start) | partial | 60 | textured, HUD, Mario walks/jumps, camera follows; flat untextured polygon at the screen edge |
 | First Shine + save + reload | open | 10 | in progress |
 | Goop / pixel metric | open | 15 | GPU occlusion gives 0/1 only; needs real fragment counts |
@@ -28,7 +28,7 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 | DLSS | blocked | 0 | needs motion vectors and a D3D12 handoff Dawn does not expose (`docs/dlss-feasibility.md`) |
 | Release package | partial | 40 | packaging script exists, not run on the current tree |
 
-Overall (mean of the rows): **54 %**.
+Overall (mean of the rows): **55 %**.
 
 Plan and order of work: [`ROADMAP.md`](ROADMAP.md).
 
