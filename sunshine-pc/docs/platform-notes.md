@@ -675,21 +675,34 @@ Build: `build-alt.cmd AudioTile` failed once at `extern/aurora/lib/gfx/pixel_met
 
 
 
-## Title flow / title washout (TitleRender): status and next steps (paused, no verdict)
+## Title flow / title washout (TitleRender): findings, no fix yet
 
-Status: no fix landed. My tree `build/TitleRender` builds (`build-alt.cmd TitleRender`, exit 0 after GoopCount's pixel-counter edits settled). No source edits by me. Screenshots of title, file select, new game and Bianco from a normal run are NOT done. No 120 s log exists.
+Status: acceptance NOT met. No title, file-select, new-game or Bianco screenshot from a normal run yet; no 120 s log. Stopped at Main's request; live debugging continues in the lead's window.
 
-Observed:
-- Normal run (no `SUNSHINE_DEV_START`, `SUNSHINE_DEV_SKIP_MOVIES=1`, `SUNSHINE_DEV_STATUS=1`, own `APPDATA`): the process runs (window "Sunshine", responding) but prints no devscript/status line and writes no `shot` PNG in 3+ minutes. The logic tick never reaches `sunshineDevScriptTick` (`src/devscript/devscript.cpp:321`), so the game is stuck before logic starts, or the logic step is not being driven in this boot path. Not yet diagnosed.
-- Launcher: `build/TitleRender/run.py <tag> [KEY=VAL...]` (own APPDATA, stdout to `run-<tag>.log`; stdout is buffered until a devscript fflush).
+Corrections (observed):
+- Earlier runs were NOT normal runs. `build/TitleRender/run.py` always set `SUNSHINE_DEV_SKIP_MOVIES=1` (`src/main.cpp:59` tests presence, not value), so every movie was skipped. Fixed: `run.py` only sets variables passed on the command line.
+- Logic tick is gated: `sunshineLogicTick()` runs only from `MarDirectorDirect` (gameplay). Without the frame clock the devscript never ticks in logo/movie/title, so "no status line" there is expected; the game is not hung.
+- No `--dvd`: the launcher page runs (`src/main.cpp:117-123`) and waits for Start. Normal boot = `--dvd <GMSJ01 rvz>`.
+- Dev-only frame clock: `SUNSHINE_DEV_FRAME_TICK=1` ticks the devscript on presented frames (`sunshinePresentFrame`) instead of logic steps.
 
-Next steps (in order):
-1. Relaunch with `SUNSHINE_HANG_DUMP=25` (`src/crash.cpp:277`) and read the thread stacks to see where boot is stuck. Check `run-<tag>.log` and `crash.log`.
-2. If the normal boot path is genuinely stuck before logic ticks, bisect: `SUNSHINE_DEV_START=dolpic/0` vs no start, and check whether logos/movies wait on a memory-card or DVD read.
-3. Once ticks run: pad script `build/TitleRender/title_probe.txt` takes `shot` at ticks 300, 900, 1800. Compare the title frame with the `AURORA_DUMP_PASSES` pass dumps (copy 1 `clear=1` 256x256 logical box at top-left; copy 2 full-screen 320x224 → 640x480).
-4. Washout hypothesis (unproven): Aurora presents the live EFB (`webgpu/gpu.cpp` `present_source`), while `GXCopyDisp` is an empty stub (`regs.cpp:272-279` bit 14 only warns). Verify with the pass dumps before implementing a display snapshot.
-5. 16:9 title-logo offset (Widescreen, EFB x ~129–386 vs ~160–480 at 4:3, frame 150): cause not found; check after the title renders.
-6. Then the flow: logo → movies → title → Start → file select (first-run memory card, expect `Failed to open file: super_mario_sunshine`) → new game → Delfino → Bianco, plus a 120 s log with no fatal exceptions.
+Observed (normal boot with movies, `build/TitleRender/title_movies.txt`, `title_movies2.txt`):
+- `shots/mv_900.png`: map cinematic plays. `shots/mv_2100.png`: Peach cutscene with subtitle. Movies render correctly.
+- `shots/mv_3300.png`, `mv2_3500`, `mv2_4100`, `mv2_4700`, `mv2_5300`: near-black frame with a faint sun-like shape and a small white sprite at left. Same picture for 2000 frames: no visible progress.
+- Status stays `stage=15 scen=0 mario=(950,100,-1000) cam=(1095,328,-13) dir.state=4` for the whole run (to t=190 s). Mario and camera do not move.
+- Earlier `--dvd` runs without movies (`shots/o2_*`, `obs_*`): sky, sun and clouds at ~5 s, then solid black from ~7 s.
+- Pass dump, frame 700 (`AURORA_DUMP_PASSES=700-700`, `build/TitleRender/passdump/`): 131 draws. Final EFB is almost entirely alpha 0.
+- Projection (`proj=` in the dump): `[2.042 0 0 0 | 0 2.747 0 0 | 0 0 -0.001 -10.010 | 0 0 -1 0]` for camera fovy 40, aspect 1.346, near 10, far 10000. This equals Dolphin `C_MTXPerspective` (`sms/src/dolphin/mtx/mtx44.c:37-63`) exactly, so the matrix is correct for GX clip z in [-1,0].
+- Depth remap (`extern/aurora/lib/gx/shader_info.cpp:393-396`, `UseReversedZ = true` in `gx.hpp:51`): `m2 = -m2` gives depth 1 at near and 0 at far. Clear value and compare (`gx.cpp:95`) are consistent. The projection/depth path is therefore NOT the cause. Earlier note "projection depth row wrong" is withdrawn.
+- Fader: `TSMSFader` (`sms/src/GC2D/ScrnFader.cpp`) wipes are frame-driven. `MarDirectorDirect.cpp:1148-1155` sets the title area's fader colour; `startWipe` at 447/492/732/768/791-796 is the transition path.
+
+Inferred (unverified):
+- The black frame with a faint sun is a fade/wipe whose alpha does not advance (fader stuck part-way), not missing geometry. Mario and camera being frozen is consistent with the title waiting for input.
+
+Next:
+1. Log `mFader` state (`mFadeStatus`, wipe `unk0/unk4/unk8`, colour alpha) per status line; confirm whether it advances.
+2. If it is stuck, find which update/draw path stops `TSMSFader::update`/`drawWipe` from running in state 4.
+3. Then the pad script for Start, file select, new game, Delfino, Bianco, and a 120 s log.
+
 
 ## ShineSave: real Shine collect (STOPPED mid-build, not verified)
 
@@ -704,3 +717,26 @@ Next steps:
 2. Run `build/ShineSave/shine_tp.txt` (wait 240, log, tpshine, log, wait/log) with `SUNSHINE_DEV_START=delfino/1`, `SUNSHINE_DEV_SCRIPT`, `SUNSHINE_DEV_STATUS=1`, private `APPDATA`, `SUNSHINE_WINDOW_POS=700,0`, `SUNSHINE_WINDOW_SIZE=640,480`. Read the `tpshine:` line.
 3. Extend the script with A presses through the card-save dialog after the touch. Chain: `updateGameMode` `unk4C&1` then `0x200` then `STATE_CARD_SAVE` then `CardSave::init`. Watch flag 0x40000 (shine count) go 0→1.
 4. Check the `.gci` in the private save dir with `tools/gci_check.py`. Relaunch with the same APPDATA and confirm the count reloads.
+
+## Watchdog, live monitor and the title-screen hang (lead)
+
+- **Watchdog** (`src/crash.cpp`, always on after the launcher): `sunshinePaceWindow` (once per logic tick) and the
+  minimized/paused event loop call `sunshineHeartbeat()`. No heartbeat for `SUNSHINE_WATCHDOG_SECONDS` (default 120,
+  0 = off) writes every thread's stack to `crash.log`/stderr and terminates with exit code `0xDEAD0001`.
+  `SUNSHINE_DEV_MAX_SECONDS=<n>` ends a dev run after n seconds (`0xDEAD0002`); `tools/_shot.py` and
+  `tools/_watch.py` set 900 s by default. `tools/reap.py [minutes]` kills this checkout's `sunshine.exe` processes
+  older than the limit. Together these keep hung runs from lingering.
+- **Live monitor**: `AURORA_SCREENSHOT_EVERY=<n>:<file.png>` rewrites `<file.png>` (via a temp file + rename) every n
+  presented frames from Aurora's offscreen copy of the present, so the current frame can be inspected regardless of
+  window stacking or occlusion. `tools/_watch.py <tree> [KEY=VAL...]` launches the game low-priority with
+  `build/live.png` refreshed every 30 frames.
+- **Title hang (fixed)**: the title is a `TMarDirector` stage (map 15) that enters `STATE_UNK4` immediately, so the
+  frame-rate replay gate opened. `sunshinePaceWindow` computed its deadline from `(int64_t)(nextRetraceIndex - count)`,
+  an unsigned subtraction that wraps once the retrace thread is ahead (late frame), giving a deadline decades away:
+  the replay loop never returned, logic never advanced, the screen showed one frame then black. The distance is now
+  signed and clamped to 0..2 retraces, plus a wall-clock cap of two retraces. Default `fpsLimit` is now 30 (retail
+  timing, no replay frames); with replay on (`fps_limit` 0 or > 30) logic still dropped to 11-14/s on the title, so
+  replay needs a cost budget before it can be the default.
+- Observed after the fix (normal `--dvd` boot, `SUNSHINE_DEV_SKIP_MOVIES=1`): title logo, Shine Sprite, palm, rainbow
+  band, "(C)2002 NINTENDO" and seagulls render; logic 30/s. The area behind the logo is black: not yet compared with
+  retail, unknown whether a background scene is missing.

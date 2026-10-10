@@ -14,6 +14,8 @@
 #include <vector>
 
 #include "Camera/Camera.hpp"
+#include "Camera/CameraOption.hpp"
+#include "System/StageUtil.hpp"
 #include "JSystem/JDrama/JDRNameRefGen.hpp"
 #include "MoveBG/Item.hpp"
 #include "MoveBG/ItemManager.hpp"
@@ -210,6 +212,16 @@ void logStatus(const char* tag)
 	    m->mFloorPosition.y, m->mFloorPosition.z);
 	std::printf("[%s-pad] flags=0x%04X en=0x%08X dis=0x%08X disFrames=%d\n", tag, pad ? pad->mFlags : 0,
 	    pad ? pad->mEnabledFrameMeaning : 0u, pad ? pad->mDisabledFrameMeaning : 0u, pad ? pad->mDisabledFrames : -1);
+	std::printf("[%s-cam] target=(%.1f,%.1f,%.1f) up=(%.2f,%.2f,%.2f) fovy=%.1f aspect=%.3f near=%.1f far=%.1f\n", tag,
+	    gpCamera->mTarget.x, gpCamera->mTarget.y, gpCamera->mTarget.z, gpCamera->mUp.x, gpCamera->mUp.y,
+	    gpCamera->mUp.z, gpCamera->getFovy(), gpCamera->getAspect(), gpCamera->getNear(), gpCamera->getFar());
+	const TCameraOption* co = gpCameraOption;
+	std::printf("[%s-cam2] optionMap=%d mode=%d pos=(%.1f,%.1f,%.1f) cur.pos=(%.1f,%.1f,%.1f) cur.tgt=(%.1f,%.1f,%.1f) "
+	            "opt=%d/%d/%d/%d/%d/%d\n", tag, SMS_isOptionMap() ? 1 : 0, gpCamera->mMode, gpCamera->mPosition.x,
+	            gpCamera->mPosition.y, gpCamera->mPosition.z, gpCamera->mCurrentTarget.mPosition.x,
+	            gpCamera->mCurrentTarget.mPosition.y, gpCamera->mCurrentTarget.mPosition.z,
+	            gpCamera->mCurrentTarget.mTarget.x, gpCamera->mCurrentTarget.mTarget.y, gpCamera->mCurrentTarget.mTarget.z,
+	            co ? co->unk0 : -1, co ? co->unkA : -1, co ? co->unkE : -1, co ? co->unk12 : -1, co ? co->unk16 : -1, co ? co->unk8 : -1);
 }
 TShine* findShine(int& seen)
 {
@@ -317,9 +329,12 @@ namespace {
 } // namespace
 
 
-// Called once per logic step from sunshineLogicTick().
-void sunshineDevScriptTick()
+// Called once per logic step from sunshineLogicTick(), or once per presented frame from sunshinePresentFrame() when
+// SUNSHINE_DEV_FRAME_TICK=1: logic steps only run in gameplay, so menus, movies and the title need the frame clock.
+void sunshineDevScriptTick(bool presentFrame)
 {
+	static const bool frameClock = std::getenv("SUNSHINE_DEV_FRAME_TICK") != nullptr;
+	if (presentFrame != frameClock) return;
 	++gTick;
 	static const char* const scriptPath = std::getenv("SUNSHINE_DEV_SCRIPT");
 	if (scriptPath && !gLoaded) {

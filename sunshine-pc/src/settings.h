@@ -18,7 +18,7 @@ struct Settings {
 	int windowHeight = 960;
 	bool vsync = true;          // applied at the next start: Aurora only takes vsync at initialization
 	int resolutionScalePct = 0; // 0 = Auto (swapchain size), else percent of the native EFB size
-	int fpsLimit = 0;           // 0 = unlimited. FrameRate owns the cap implementation.
+	int fpsLimit = 30;          // 30 = retail timing (no replay frames); 0 = unlimited; >30 = cap. See framerate.cpp.
 	bool widescreen = false;    // widescreen render width, see src/widescreen/widescreen.h
 	std::string aspect = "16:9"; // 4:3, 16:9, 16:10, 21:9, 32:9 or auto (window aspect at startup)
 	// [audio]

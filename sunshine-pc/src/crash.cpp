@@ -97,9 +97,8 @@ void printStack(HANDLE thread, CONTEXT ctx)
 // Diagnostic: SUNSHINE_HANG_DUMP=<seconds> prints the stack of every thread once after that delay, to see where a
 // hung boot is waiting. Pass 1 unwinds with Rtl* only (no allocation: a suspended thread may hold the heap lock),
 // pass 2 symbolizes after every thread is running again.
-DWORD WINAPI hangDumpThread(LPVOID p)
+void dumpAllThreads()
 {
-	Sleep((DWORD)(uintptr_t)p * 1000);
 	constexpr int kMaxThreads = 64, kDepth = 40;
 	static DWORD ids[kMaxThreads];
 	static DWORD64 pcs[kMaxThreads][kDepth];
@@ -108,7 +107,7 @@ DWORD WINAPI hangDumpThread(LPVOID p)
 
 	HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
 	if (snap == INVALID_HANDLE_VALUE)
-		return 1;
+		return;
 	THREADENTRY32 te = { sizeof(te) };
 	HANDLE held[kMaxThreads];
 	for (BOOL ok = Thread32First(snap, &te); ok && count < kMaxThreads; ok = Thread32Next(snap, &te)) {
@@ -154,7 +153,62 @@ DWORD WINAPI hangDumpThread(LPVOID p)
 		for (int i = 0; i < depth[k]; i++)
 			printPc(GetCurrentProcess(), i, pcs[k][i]);
 	}
+}
+
+DWORD WINAPI hangDumpThread(LPVOID p)
+{
+	Sleep((DWORD)(uintptr_t)p * 1000);
+	dumpAllThreads();
 	return 0;
+}
+
+// Watchdog (always on once sunshineWatchdogStart() ran): the main loop calls sunshineHeartbeat() every presented frame.
+// If no heartbeat arrives for the limit (SUNSHINE_WATCHDOG_SECONDS, default 120, 0 = off) every thread's stack is written
+// to crash.log and the process is terminated, so a deadlocked worker or a stalled boot can never leave a silent zombie
+// process burning CPU. SUNSHINE_DEV_MAX_SECONDS=<n> additionally ends dev runs after n seconds of wall time.
+volatile LONG64 g_heartbeat = 0;
+
+DWORD WINAPI watchdogThread(LPVOID)
+{
+	const char* wd   = std::getenv("SUNSHINE_WATCHDOG_SECONDS");
+	const int limit  = wd ? std::atoi(wd) : 120;
+	const char* mx   = std::getenv("SUNSHINE_DEV_MAX_SECONDS");
+	const int maxSec = mx ? std::atoi(mx) : 0;
+	const ULONGLONG start = GetTickCount64();
+	LONG64 last           = -1;
+	ULONGLONG lastChange  = start;
+	for (;;) {
+		Sleep(1000);
+		const ULONGLONG now = GetTickCount64();
+		if (maxSec > 0 && now - start >= (ULONGLONG)maxSec * 1000) {
+			emit("\n*** SUNSHINE_DEV_MAX_SECONDS reached: ending the process\n");
+			TerminateProcess(GetCurrentProcess(), 0xDEAD0002);
+		}
+		const LONG64 hb = g_heartbeat;
+		if (hb != last) {
+			last       = hb;
+			lastChange = now;
+			continue;
+		}
+		if (limit > 0 && now - lastChange >= (ULONGLONG)limit * 1000) {
+			emit("\n*** WATCHDOG: no frame presented for too long; thread stacks follow, then the process ends\n");
+			dumpAllThreads();
+			emit("\n*** WATCHDOG: terminating\n");
+			TerminateProcess(GetCurrentProcess(), 0xDEAD0001);
+		}
+	}
+}
+
+void heartbeatImpl()
+{
+	InterlockedIncrement64(&g_heartbeat);
+}
+
+void watchdogStartImpl()
+{
+	static LONG started = 0;
+	if (InterlockedExchange(&started, 1) == 0)
+		CloseHandle(CreateThread(nullptr, 1 << 20, watchdogThread, nullptr, 0, nullptr));
 }
 
 void report(EXCEPTION_POINTERS* info)
@@ -264,6 +318,9 @@ DWORD WINAPI armThreads(LPVOID)
 }
 
 } // namespace
+
+void sunshineHeartbeat() { heartbeatImpl(); }
+void sunshineWatchdogStart() { watchdogStartImpl(); }
 
 void installCrashHandler()
 {

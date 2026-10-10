@@ -49,8 +49,10 @@ static const char* findDvdArg(int argc, char** argv)
 }
 
 void installCrashHandler(); // crash.cpp
+void sunshineHeartbeat();   // crash.cpp: watchdog heartbeat, once per presented frame
+void sunshineWatchdogStart(); // crash.cpp
 void sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
-void sunshineDevScriptTick(); // devscript/devscript.cpp
+void sunshineDevScriptTick(bool presentFrame); // devscript/devscript.cpp
 
 // Developer switch: SUNSHINE_DEV_SKIP_MOVIES=1 ends every THP movie as soon as it starts playing (the retail game only
 // allows skipping movies that were already seen), to reach the scenes behind them quickly during boot testing.
@@ -65,6 +67,7 @@ bool sunshineDevSkipMovies()
 // This is also the single seam where a later phase decouples rendering from the 30 Hz game logic.
 void sunshinePresentFrame()
 {
+	sunshineDevScriptTick(true); // SUNSHINE_DEV_FRAME_TICK=1 only: pad scripts clock on presented frames
 	modsPresent(); // mods/mods_loader.cpp
 	aurora_end_frame();
 	for (;;) {
@@ -72,6 +75,7 @@ void sunshinePresentFrame()
 			if (e->type == AURORA_EXIT)
 				std::exit(0);
 		}
+		sunshineHeartbeat(); // minimized or paused windows keep pumping events: not a hang
 		if (aurora_begin_frame()) // false while minimized or paused: keep pumping events
 			break;
 	}
@@ -82,7 +86,7 @@ void sunshineLogicTick()
 {
 	cheatsTick();
 	modsLogicTick();
-	sunshineDevScriptTick();
+	sunshineDevScriptTick(false);
 }
 
 int main(int argc, char* argv[])
@@ -136,6 +140,7 @@ int main(int argc, char* argv[])
 	savesApplyDirectory(s, exeDir); // saves/save_directory.cpp: [saves] directory, before CARDInit in initialize()
 
 	// The console's startup code (excluded, __start) runs OSInit before main; it sets up the arena JKRHeap draws from.
+	sunshineWatchdogStart(); // after the launcher: its own loop is interactive and may idle for any time
 	OSInit();
 	while (!aurora_begin_frame()) { // GX commands issued during TApplication::initialize need an open frame
 		aurora_update();
