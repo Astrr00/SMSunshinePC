@@ -3,3 +3,4 @@ build/
 tools/_*
 tools/probe-results.json
 tools/unresolved.txt
+tools/ptr-trunc.txt

@@ -41,12 +41,14 @@ target_include_directories(sms_game PUBLIC
     ${SMS_DIR}/include/PowerPC_EABI_Support
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora/include)
 target_compile_definitions(sms_game PUBLIC TARGET_PC=1 VERSION_GMSJ01=1 NDEBUG=1)
+# -fno-strict-return: many decomp functions fall off the end of a non-void function (MWCC just returns whatever is in
+# the return register). Clang treats that as unreachable and executes padding (int3), e.g. JUTGamePad::read.
 target_compile_options(sms_game PUBLIC
-    /utf-8 /Zc:__cplusplus /W0 -Wno-everything -Wno-multichar -Wno-trigraphs
+    /utf-8 /Zc:__cplusplus /W0 -Wno-everything -Wno-multichar -Wno-trigraphs /clang:-fno-strict-return
     /FI${CMAKE_CURRENT_SOURCE_DIR}/include/pc_compat.h)
 target_compile_options(sms_game PRIVATE /MP)
 
-add_executable(sunshine src/main.cpp)
+add_executable(sunshine src/main.cpp src/crash.cpp)
 target_link_libraries(sunshine PRIVATE sms_game
     aurora::core aurora::gx aurora::gd aurora::si aurora::vi aurora::pad aurora::mtx aurora::os
     aurora::dvd aurora::thp aurora::card aurora::main)
@@ -54,3 +56,10 @@ include(extern/aurora/cmake/AuroraCopyRuntimeDLLs.cmake)
 aurora_copy_runtime_dlls(sunshine)
 # List every unresolved symbol instead of stopping after 100 (Goal-Port B.2 sorts them by cause).
 target_link_options(sunshine PRIVATE /errorlimit:0)
+
+# Developer diagnostic, OFF by default: turn unresolved symbols into runtime faults so the boot path can run before
+# every decomp source exists. Never use it for a deliverable build: a missing function then crashes when called.
+option(SUNSHINE_ALLOW_UNRESOLVED "Link with /FORCE:UNRESOLVED (diagnostics only)" OFF)
+if (SUNSHINE_ALLOW_UNRESOLVED)
+    target_link_options(sunshine PRIVATE /FORCE:UNRESOLVED)
+endif ()

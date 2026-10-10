@@ -36,6 +36,11 @@ base = [cc or "cl", "/nologo", "/c", "/Zs", "/Zc:__cplusplus", "/utf-8", "/W0", 
         "/I" + os.path.join(root, "sunshine-pc", "include")] + [f"/I{i}" for i in inc]
 if cc:
     base += ["-Wno-everything", "-Wno-multichar", "-Wno-trigraphs"]
+# --ptrtrunc: report every pointer cast to a 32-bit integer (needs clang-cl); result goes to tools/ptr-trunc.txt.
+ptrtrunc = "--ptrtrunc" in sys.argv
+if ptrtrunc and cc:
+    base = [a for a in base if a != "/W0"] + ["-Wpointer-to-int-cast", "-Wno-error"]  # /W0 would mute every warning
+warn_re = re.compile(r"^(.*?\(\d+,\d+\)): warning: (cast to smaller integer type.*)$", re.M)
 err_re = re.compile(r"^(.*?): error (C\d+): (.*)$|^(.*?\(\d+,\d+\)): error: (.*)$", re.M)
 
 
@@ -44,12 +49,15 @@ def parse(out):
     for a, c, m, b, m2 in err_re.findall(out):
         res.append((c, m, a) if c else ("clang", m2, b))
     return res
+warnings = []
 
 
 def run(u):
     cxx = u.endswith(".cpp") or u.startswith("THPPlayer/")  # THPPlayer is built -lang=c++
     std = ["/TP", "/std:c++20"] if cxx else ["/std:c11"]
     r = subprocess.run(base + std + [os.path.join(sms, "src", u)], capture_output=True, text=True, cwd=sms)
+    if ptrtrunc:
+        warnings.extend(warn_re.findall(r.stdout + r.stderr))
     return u, r.returncode, parse(r.stdout + r.stderr)
 
 
@@ -79,3 +87,13 @@ for k in sorted(tot, key=lambda k: -tot[k])[:25]:
 
 json.dump([{"unit": u, "rc": rc, "errors": errs} for u, rc, errs in results],
           open(os.path.join(here, "probe-results.json"), "w"), indent=1)
+
+if ptrtrunc:
+    uniq = sorted(set(warnings))
+    with open(os.path.join(here, "ptr-trunc.txt"), "w", encoding="utf8") as f:
+        for loc, msg in uniq:
+            f.write(f"{os.path.relpath(loc.split('(')[0], root)}({loc.split('(', 1)[-1]}: {msg}\n")
+    per = collections.Counter(os.path.relpath(loc.split("(")[0], root).split(os.sep)[2] if len(os.path.relpath(loc.split("(")[0], root).split(os.sep)) > 2 else "?" for loc, _ in uniq)
+    print(f"pointer-to-32-bit casts: {len(uniq)} distinct sites in {len({l.split('(')[0] for l, _ in uniq})} files")
+    for k, n in per.most_common(12):
+        print(f"  {n:4} {k}")
