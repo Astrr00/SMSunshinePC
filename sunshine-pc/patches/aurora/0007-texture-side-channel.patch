@@ -71,7 +71,7 @@ diff --git a/lib/dolphin/gd/GDTexture.cpp b/lib/dolphin/gd/GDTexture.cpp
 diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
 --- a/lib/gx/command_processor.cpp
 +++ b/lib/gx/command_processor.cpp
-@@ -680,6 +680,42 @@
+@@ -687,6 +687,42 @@
        slot.tlutObjId = newTlutObjId;
        slot.tlutDataVersion = newTlutDataVersion;
        slot.flags = newFlags;

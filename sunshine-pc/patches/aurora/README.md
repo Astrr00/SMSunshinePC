@@ -21,7 +21,7 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 42 file entries over 33 distinct files, +1552 / -136.
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 42 file entries over 33 distinct files, +1638 / -136.
 
 | file | topic | files | +/- |
 |---|---|---|---|
@@ -30,7 +30,7 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0003-gx-tev-alpha-r8-compare.patch` | TEV alpha `R8_GT`/`R8_EQ` mapped to RGB8 variants | 1 | +6 / -0 |
 | `0004-card-base-path.patch` | `CARDSetBasePath` directory used by `CARDInit` | 1 | +8 / -9 |
 | `0005-fsr1-render-scale.patch` | FSR1 upscale (EASU + RCAS) and sharpness API | 4 | +137 / -22 |
-| `0006-pass-dump-and-screenshot.patch` | `AURORA_DUMP_PASSES` pass dump and frame screenshot; `CopySrc` usage flags on render/conv textures (topic by inference, see below) | 12 | +619 / -2 |
+| `0006-pass-dump-and-screenshot.patch` | `AURORA_DUMP_PASSES` pass dump with per-draw descriptions (`TitleRender` fields in `command_processor.cpp`); frame screenshot with `AURORA_SCREENSHOT_EVERY=<n>:<file.png>` live monitor mode and `aurora_screenshot_next(path)`; `CopySrc` usage flags on render/conv textures (topic by inference, see below) | 12 | +705 / -2 |
 | `0007-texture-side-channel.patch` | `GX_AURORA_SET_TEX_DATA` / `SET_TLUT_DATA` / `SET_TEX_TLUT`: texture host pointers and TLUT state passed from `GDTexture.cpp` to the GX command stream | 4 | +76 / -3 |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.

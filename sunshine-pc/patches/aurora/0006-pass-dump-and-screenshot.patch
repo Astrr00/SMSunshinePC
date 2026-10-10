@@ -495,7 +495,7 @@ diff --git a/lib/gfx/screenshot.cpp b/lib/gfx/screenshot.cpp
 new file mode 100644
 --- /dev/null
 +++ b/lib/gfx/screenshot.cpp
-@@ -0,0 +1,225 @@
+@@ -0,0 +1,304 @@
 +#include "screenshot.hpp"
 +
 +#include "../logging.hpp"
@@ -504,10 +504,13 @@ new file mode 100644
 +
 +#include <algorithm>
 +#include <array>
++#include <atomic>
 +#include <cmath>
 +#include <cstdio>
 +#include <cstdlib>
++#include <filesystem>
 +#include <optional>
++#include <mutex>
 +#include <string>
 +#include <vector>
 +
@@ -540,6 +543,39 @@ new file mode 100644
 +  }();
 +  return parsed;
 +}
++
++// Monitor mode: AURORA_SCREENSHOT_EVERY=<n>:<file.png> overwrites <file.png> every n presented frames (atomically, via a
++// temp file), so a developer can look at the real frame at any time regardless of window stacking or occlusion.
++struct Monitor {
++  uint32_t every = 0;
++  std::string path;
++};
++const Monitor& monitor() noexcept {
++  static const Monitor parsed = [] {
++    Monitor out;
++    const char* env = std::getenv("AURORA_SCREENSHOT_EVERY");
++    if (env == nullptr || *env == '\0') {
++      return out;
++    }
++    char* end = nullptr;
++    const unsigned long every = std::strtoul(env, &end, 10);
++    if (end == env || *end != ':' || end[1] == '\0' || every == 0) {
++      Log.warn("AURORA_SCREENSHOT_EVERY='{}' ignored; expected <n>:<file.png>", env);
++      return out;
++    }
++    out.every = static_cast<uint32_t>(every);
++    out.path = std::string(end + 1);
++    Log.info("screenshot monitor: every {} frames -> {}", out.every, out.path);
++    return out;
++  }();
++  return parsed;
++}
++
++// One-shot request from devscript (requestNext): the next selected frame is written to gPendingPath.
++std::atomic<bool> gPendingFlag{false};
++std::mutex gRequestMutex;
++std::string gPendingPath;
++std::string gClaimedPath;
 +
 +} // namespace
 +
@@ -601,6 +637,19 @@ new file mode 100644
 +} // namespace
 +
 +bool selected(uint32_t frameIndex) noexcept {
++  if (gPendingFlag.load(std::memory_order_acquire)) {
++    std::lock_guard<std::mutex> lock(gRequestMutex);
++    gClaimedPath = gPendingPath;
++    gPendingPath.clear();
++    gPendingFlag.store(false, std::memory_order_release);
++    return true;
++  }
++  const auto& mon = monitor();
++  if (mon.every != 0 && frameIndex % mon.every == 0) {
++    std::lock_guard<std::mutex> lock(gRequestMutex);
++    gClaimedPath = mon.path;
++    return true;
++  }
 +  const auto& req = request();
 +  return req.has_value() && req->frame == frameIndex;
 +}
@@ -679,7 +728,11 @@ new file mode 100644
 +  }
 +
 +  auto capture = std::make_shared<Capture>();
-+  capture->path = request()->path;
++  {
++    std::lock_guard<std::mutex> lock(gRequestMutex);
++    capture->path = !gClaimedPath.empty() ? gClaimedPath : (request().has_value() ? request()->path : monitor().path);
++    gClaimedPath.clear();
++  }
 +  capture->width = config.width;
 +  capture->height = config.height;
 +  capture->bytesPerRow = (config.width * 4 + 255) & ~255u;
@@ -713,14 +766,40 @@ new file mode 100644
 +    return;
 +  }
 +  const auto* data = static_cast<const uint8_t*>(capture->buffer.GetConstMappedRange(0, bytes));
-+  if (write_png(capture->path, *capture, data)) {
++  const bool isMonitor = monitor().every != 0 && capture->path == monitor().path;
++  const std::string target = isMonitor ? capture->path + ".tmp" : capture->path;
++  bool ok = write_png(target, *capture, data);
++  if (ok && isMonitor) {
++    std::error_code ec;
++    std::filesystem::rename(target, capture->path, ec);
++    ok = !ec;
++  }
++  if (ok) {
++    if (isMonitor) {
++      capture->buffer.Unmap();
++      return;
++    }
 +    Log.info("screenshot written: {} ({}x{})", capture->path, capture->width, capture->height);
 +  } else {
 +    Log.error("screenshot PNG write failed: {}", capture->path);
 +  }
 +  capture->buffer.Unmap();
 +}
++
++void requestNext(const char* path) {
++  if (path == nullptr || *path == '\0') {
++    return;
++  }
++  std::lock_guard<std::mutex> lock(gRequestMutex);
++  gPendingPath = path;
++  gPendingFlag.store(true, std::memory_order_release);
++}
 +} // namespace aurora::gfx::screenshot
++
++// C entry point for src/devscript (`shot <path>`).
++extern "C" void aurora_screenshot_next(const char* path) {
++  aurora::gfx::screenshot::requestNext(path);
++}
 diff --git a/lib/gfx/screenshot.hpp b/lib/gfx/screenshot.hpp
 new file mode 100644
 --- /dev/null
@@ -790,15 +869,22 @@ diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
  #include "../gfx/recording.hpp"
  #include "../internal.hpp"
  #include "dolphin/gd/GDGeometry.h"
-@@ -430,6 +431,25 @@
+@@ -430,6 +431,32 @@
      if (cache.bindGroups.textureBindGroup != prevBindGroup) {
        state.dirty |= DirtyUniform;
      }
 +  }
 +  if (gfx::pass_dump::active()) {
-+    std::string desc = fmt::format("prim={} indices={} blend={} src={} dst={} op={} tex:", static_cast<int>(prim),
-+                                   numIndices, static_cast<int>(state.blendMode), static_cast<int>(state.blendFacSrc),
-+                                   static_cast<int>(state.blendFacDst), static_cast<int>(state.blendOp));
++    std::string desc = fmt::format("prim={} indices={} blend={} src={} dst={} op={} cull={} zc={} zf={} zu={} cu={} au={} ac=({},{},{},{},{}) proj=[{:.3f} {:.3f} {:.3f} {:.3f} | {:.3f} {:.3f} {:.3f} {:.3f} | {:.3f} {:.3f} {:.3f} {:.3f} | {:.3f} {:.3f} {:.3f} {:.3f}] tex:",
++        static_cast<int>(prim), numIndices, static_cast<int>(state.blendMode), static_cast<int>(state.blendFacSrc),
++        static_cast<int>(state.blendFacDst), static_cast<int>(state.blendOp), static_cast<int>(state.cullMode),
++        static_cast<int>(state.depthCompare), static_cast<int>(state.depthFunc), static_cast<int>(state.depthUpdate),
++        static_cast<int>(state.colorUpdate), static_cast<int>(state.alphaUpdate), static_cast<int>(state.alphaCompare.comp0),
++        state.alphaCompare.ref0, static_cast<int>(state.alphaCompare.op), static_cast<int>(state.alphaCompare.comp1),
++        state.alphaCompare.ref1, state.proj.m0.x(), state.proj.m0.y(), state.proj.m0.z(), state.proj.m0.w(),
++        state.proj.m1.x(), state.proj.m1.y(), state.proj.m1.z(), state.proj.m1.w(), state.proj.m2.x(),
++        state.proj.m2.y(), state.proj.m2.z(), state.proj.m2.w(), state.proj.m3.x(), state.proj.m3.y(),
++        state.proj.m3.z(), state.proj.m3.w());
 +    for (u32 i = 0; i < MaxTextures; ++i) {
 +      if (!cache.shaderInfo.sampledTextures.test(i)) {
 +        continue;
