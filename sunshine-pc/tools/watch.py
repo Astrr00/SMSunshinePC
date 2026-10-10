@@ -1,5 +1,5 @@
 # Launch the game (low priority, detached) with a live monitor image: build/live.png is rewritten every N presented
-# frames from Aurora's offscreen present, independent of window stacking. Usage: _watch.py <tree> [KEY=VAL ...]
+# frames from Aurora's offscreen present, independent of window stacking. Usage: watch.py <tree> [KEY=VAL ...]
 import subprocess,os,sys
 tree=sys.argv[1]
 extra=dict(a.split('=',1) for a in sys.argv[2:])

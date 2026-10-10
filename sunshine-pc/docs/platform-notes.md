@@ -723,12 +723,12 @@ Next steps:
 - **Watchdog** (`src/crash.cpp`, always on after the launcher): `sunshinePaceWindow` (once per logic tick) and the
   minimized/paused event loop call `sunshineHeartbeat()`. No heartbeat for `SUNSHINE_WATCHDOG_SECONDS` (default 120,
   0 = off) writes every thread's stack to `crash.log`/stderr and terminates with exit code `0xDEAD0001`.
-  `SUNSHINE_DEV_MAX_SECONDS=<n>` ends a dev run after n seconds (`0xDEAD0002`); `tools/_shot.py` and
-  `tools/_watch.py` set 900 s by default. `tools/reap.py [minutes]` kills this checkout's `sunshine.exe` processes
+  `SUNSHINE_DEV_MAX_SECONDS=<n>` ends a dev run after n seconds (`0xDEAD0002`); `tools/shot.py` and
+  `tools/watch.py` set 900 s by default. `tools/reap.py [minutes]` kills this checkout's `sunshine.exe` processes
   older than the limit. Together these keep hung runs from lingering.
 - **Live monitor**: `AURORA_SCREENSHOT_EVERY=<n>:<file.png>` rewrites `<file.png>` (via a temp file + rename) every n
   presented frames from Aurora's offscreen copy of the present, so the current frame can be inspected regardless of
-  window stacking or occlusion. `tools/_watch.py <tree> [KEY=VAL...]` launches the game low-priority with
+  window stacking or occlusion. `tools/watch.py <tree> [KEY=VAL...]` launches the game low-priority with
   `build/live.png` refreshed every 30 frames.
 - **Title hang (fixed)**: the title is a `TMarDirector` stage (map 15) that enters `STATE_UNK4` immediately, so the
   frame-rate replay gate opened. `sunshinePaceWindow` computed its deadline from `(int64_t)(nextRetraceIndex - count)`,
