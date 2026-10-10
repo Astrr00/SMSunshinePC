@@ -1,5 +1,8 @@
 # Publishing runbook
 
+**Status (published):** everything lives in one repository, `https://github.com/Astrr00/SMSunshinePC` (branch `main`). `https://github.com/Astrr00/sms` does not exist (`git ls-remote` reports "Repository not found"), so the decomp is NOT a submodule: `sms/` is tracked as ordinary files in this repo. The decomp's original local git history is kept on the author's machine in `sms/.git.hold/` (git-ignored); to commit decomp work there, use `git --git-dir=sms/.git.hold --work-tree=sms`. Aurora stays a submodule at upstream `encounter/aurora` 50e5be3, with the port's changes as `sunshine-pc/patches/aurora/*.patch` (`python sunshine-pc/tools/apply-aurora-patches.py`). The sections below are the original plan and are kept for reference only.
+
+
 For the lead. Nothing here is run automatically. Every step that writes to a remote needs explicit approval.
 
 Targets:
