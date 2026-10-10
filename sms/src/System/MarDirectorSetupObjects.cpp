@@ -491,7 +491,7 @@ bool TMarDirector::setupObjects()
 	mPerformListGXPost->push_back(drawInit, CUE_DRAW_STAGE_END);
 	preEntry(unk34);
 	setup2();
-	JKRHeap::getCurrentHeap()->freeTail();
+	JKRHeap::getCurrentHeap()->getTotalFreeSize();
 
 	return 0;
 }

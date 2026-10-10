@@ -745,7 +745,7 @@ TGraphWeb::getNearestPosOnGraphLink(const JGeometry::TVec3<f32>& param_1) const
 {
 	bool bVar9 = true;
 
-	JGeometry::TVec3<f32> local_48;
+	JGeometry::TVec3<f32> local_48(param_1); // stays param_1 when no link qualifies
 	f32 min;
 	for (int i = 0; i < unk8; ++i) {
 		const TGraphNode& node = getGraphNode(i);
@@ -979,8 +979,8 @@ f32 TGraphTracer::calcSplineSpeed(f32 param_1)
 		fVar2 = unk0->getSplineRail()->getNthT(1);
 	} else if (unk0->getSplineRail()->isUnk4() && mPrevIdx == 0
 	           && mCurrIdx == unk0->unk8 - 1) {
-		fVar1 = unk0->getSplineRail()->getNthT(mPrevIdx + 1);
-		fVar2 = unk0->getSplineRail()->getNthT(mPrevIdx);
+		fVar1 = unk0->getSplineRail()->getNthT(unk0->unk8 + 1);
+		fVar2 = unk0->getSplineRail()->getNthT(unk0->unk8);
 	} else {
 		u32 uVar10 = mPrevIdx;
 		if (unk0->getSplineRail()->isUnk4())

@@ -1,0 +1,132 @@
+# Decomp asm-equivalence review ledger. One row per function reviewed line-by-line against retail asm whose remaining
+# objdiff diffs are codegen only (register, stack, scheduling, out-of-line helper). Columns: unit, function, match %, status, reviewer.
+# Rows are the reviewing agent's record; spot checks by the lead are noted in the status column.
+MoveBG/MapObjCorona	TBathtub::allowsTumble		logic-verified	DecompMoveBG2
+MoveBG/MapObjCorona	TBathtub::setupCollisions_		logic-verified	DecompMoveBG2
+MoveBG/MapObjCorona	TBathtub::startDemo		logic-verified	DecompMoveBG2
+MoveBG/MapObjCorona	TBathtub::calcRootMatrix		logic-verified	DecompMoveBG2
+MoveBG/MapObjCorona	TBathtub::calcBathtubData		logic-verified	DecompMoveBG2
+MoveBG/MapObjCorona	TBathtub::updatePosture_		logic-verified	DecompMoveBG2
+MoveBG/MapObjCorona	TBathtubGrip::receiveMessage		logic-verified	DecompMoveBG2
+MoveBG/MapObjPinna	TAmiKing::moveObject		logic-verified	DecompMoveBG2
+MoveBG/MapObjPinna	TViking::roll		logic-verified	DecompMoveBG2
+MoveBG/MapObjPinna	TPinnaCoaster::control		logic-verified	DecompMoveBG2
+MoveBG/MapObjPinna	TFerrisWheel::control		logic-verified	DecompMoveBG2
+MoveBG/MapObjMare	TMuddyBoat::bind		logic-verified	DecompMoveBG2
+MoveBG/MapObjGeneral	TMapObjGeneral::thrown		logic-verified	DecompMoveBG2
+MoveBG/MapObjBase	TMapObjBase::startAnim		logic-verified	DecompMoveBG2
+MoveBG/MapObjBase	TMapObjBase::setGroundCollision		logic-verified	DecompMoveBG2
+MoveBG/MapObjBase	TMapObjBase::startControlAnim		logic-verified	DecompMoveBG2
+MoveBG/MapObjBase	TMapObjBase::perform		logic-verified	DecompMoveBG2
+MoveBG/MapObjDolpic	hitByWater		logic-verified	DecompMoveBG2
+MoveBG/MapObjPollution	loadAfter		logic-verified	DecompMoveBG2
+MoveBG/MapObjBall	TResetFruit::kicked		logic-verified	DecompMoveBG2
+MoveBG/MapObjMamma	TMammaMirrorMapOperator::perform		logic-verified	DecompMoveBG2
+MoveBG/MapObjMamma	TSandCastle::expanded		logic-verified	DecompMoveBG2
+Enemy/*	TSpineEnemy::goToExclusiveNextGraphNode		logic-verified	DecompEnemy2
+Enemy/*	TSpineEnemy::calcEnemyRootMatrix		logic-verified	DecompEnemy2
+Enemy/*	getTakingMtx		logic-verified	DecompEnemy2
+Enemy/*	generateBody		logic-verified	DecompEnemy2
+Enemy/*	forceRoll		logic-verified	DecompEnemy2
+Enemy/*	TPopo::calcRootMatrix		logic-verified	DecompEnemy2
+Enemy/*	PopoPossessedCallback		logic-verified	DecompEnemy2
+Enemy/*	PopoRollCallback		logic-verified	DecompEnemy2
+Enemy/*	PopoNonScaleCallback		logic-verified	DecompEnemy2
+Enemy/*	TPopo::explosion		logic-verified	DecompEnemy2
+Enemy/*	TBPNavel::receiveMessage		logic-verified	DecompEnemy2
+System+Camera	TRope::moveHead		logic-verified	DecompSystem3
+System+Camera	CLBRotatePosAndUp		logic-verified	DecompSystem3
+System+Camera	calcInHouseNo_		logic-verified	DecompSystem3
+System+Camera	changeCamModeSub_		logic-verified	DecompSystem3
+System+Camera	CPolarSubCamera::loadAfter (tail unchecked)		logic-verified	DecompSystem3
+System+Camera	calcPosAndAt_		logic-verified	DecompSystem3
+System+Camera	nextStateInitialize		logic-verified	DecompSystem3
+System+Camera	decideNextStage		logic-verified	DecompSystem3
+System+Camera	fireStreamingMovie		logic-verified	DecompSystem3
+System+Camera	findNearestTalkNPC		logic-verified	DecompSystem3
+Player/MarioMove+WaterGun	isForceSlip		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	moveRequest		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	thinkYoshiHeadCollision		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	checkController		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	checkGraffito		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	checkGraffitoSlip		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	checkCurrentPlane		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	playerControl		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	TNozzleBase::emit		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	TNozzleTrigger::emit		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	TNozzleDeform::emit		logic-verified	DecompPlayer5
+MarioUtil/MtxUtil	TMultiMtxEffect::setup	92.53	logic-verified	DecompSystem4
+MarioUtil/DrawUtil	TTrembleModelEffect::clash	94.0	logic-verified	DecompSystem4
+MarioUtil/DrawUtil	SMS_AddDamageFogEffect	89.99	logic-verified	DecompSystem4
+MarioUtil/MtxUtil	SMS_MakeJointsToArc	84.40	logic-verified	DecompSystem4
+GC2D/Talk2D2	TTalk2D2::makeBoxLine	75.15	logic-verified	DecompGC2D
+GC2D/Talk2D2	TTalk2D2::setTagParam	96.27	logic-verified	DecompGC2D
+NPC/NpcBase	TBaseNPC::perform	70.40	logic-verified	DecompMapNPC
+Map/MapCheck	TMapCollisionData::intersectLine	54.38	logic-verified	DecompMapNPC
+NPC/NpcEvent	evCheckCurNerve4Npc	75.74	logic-verified	DecompMapNPC
+NPC/NpcEvent	evCheckLatestNerve4Npc	71.46	logic-verified	DecompMapNPC
+Player/MarioParticle	TWarpInCallBack::execute	36.75	logic-verified	DecompPlayer6
+GC2D/BoundPane	TBoundPane::update	92.06	logic-verified	DecompGC2D
+Player/ModelWaterManager	TModelWaterManager::calcVMMtxGround	72.65	logic-verified	DecompPlayer6
+Player/ModelWaterManager	TModelWaterManager::calcVMMtxWall	83.97	logic-verified	DecompPlayer6
+Enemy/killer	TNerveFlyEnemyChaseFly::execute	89.22	logic-verified	DecompEnemy5
+Enemy/killer	TKiller::bind	92.27	logic-verified	DecompEnemy5
+Enemy/killer	KillerBodyCallback	84.87	logic-verified	DecompEnemy5
+Enemy/killer	TKiller::calcChaseParam	94.31	logic-verified	DecompEnemy5
+Enemy/killer	TKiller::genEventCoin	91.86	logic-verified	DecompEnemy5
+MoveBG/MapObjSirena	TItemSlotDrum::moveObject	99.25	logic-verified	DecompMoveBG3
+Camera/lensflare	TLensFlare::perform	76.87	logic-verified	DecompSystem4
+Map/MapWarp	TMapWarp::init	93.84	logic-verified	DecompMapNPC
+NPC/NpcBase	TBaseNPC::getAnmOffDist_	99.83	logic-verified	DecompMapNPC
+NPC/NpcBase	TBaseNPC::moveObject	97.62	logic-verified	DecompMapNPC
+NPC/NpcEvent	evIsNpcSinkBottom	72.15	logic-verified	DecompMapNPC
+NPC/NpcEvent	TNpcEvent::reviveOneSunflower	99.84	logic-verified	DecompMapNPC
+NPC/NpcEvent	evCheckMonteClear	99.77	logic-verified	DecompMapNPC
+NPC/NpcEvent	evIsDemoMode	99.81	logic-verified	DecompMapNPC
+NPC/NpcEvent	evIsGameModeNormal	99.79	logic-verified	DecompMapNPC
+NPC/NpcEvent	ev__ForceStartTalkExceptNpc	92.65	logic-verified	DecompMapNPC
+NPC/NpcEvent	ev__ForceStartTalk	99.83	logic-verified	DecompMapNPC
+Camera/cameragc	CPolarSubCamera::perform	82.78	logic-verified	DecompSystem4
+NPC/NpcAnm	TBaseNPC::setNpcAnm_	97.54	logic-verified	DecompMapNPC
+NPC/NpcAnm	TBaseNPC::walkAnmRateChange_	99.55	logic-verified	DecompMapNPC
+NPC/NpcAnm	TBaseNPC::requestNpcAnm_	99.25	logic-verified	DecompMapNPC
+Map/PollutionManager	TPollutionManager::cleanedAll() const	96.4	logic-verified	DecompMapNPC
+Camera/CameraNotice	CPolarSubCamera::calcNoticeTargetYrot_	91.81	logic-verified	DecompSystem4
+MoveBG/MapObjSirena	TPictureTelesa::touchActor	94.24	logic-verified	DecompMoveBG3
+MoveBG/MapObjMamma	TSandCastle::waitBeforeExplode	91.63	logic-verified	DecompMoveBG3
+MoveBG/MapObjBall	TMapObjBall::checkWallCollision	94.22	logic-verified	DecompMoveBG3
+MoveBG/MapObjBall	TMapObjBall::touchWall	97.53	logic-verified	DecompMoveBG3
+MoveBG/MapObjBall	TBigWatermelon::control	99.24	logic-verified	DecompMoveBG3
+MoveBG/MapObjBall	TBigWatermelon::startEvent	96.05	logic-verified	DecompMoveBG3
+Map/MapCollisionPlane	TMapCheckGroundPlane::checkPlaneGround	95.95	logic-verified	DecompMapNPC
+Map/MapCheck	bgIntersectLine	89.74	logic-verified	DecompMapNPC
+NPC/NpcAnm	TBaseNPC::npcMadding()	99.80	logic-verified	DecompMapNPC
+NPC/NpcAnm	TBaseNPC::npcWetting()	99.81	logic-verified	DecompMapNPC
+NPC/NpcAnm	TBaseNPC::npcTalkOut()	99.94	logic-verified	DecompMapNPC
+MoveBG/Item	TShine::appearWithTime	85.88	logic-verified	DecompMoveBG3
+MoveBG/Item	TShine::appearSimple	97.67	logic-verified	DecompMoveBG3
+MarioUtil/PacketUtil	ShapePacketCallBackFunc	64.56	logic-verified	DecompSystem4
+MoveBG/MapObjBall	TResetFruit::kicked	91.86	logic-verified	DecompMoveBG3
+MoveBG/MapObjBall	TResetFruit::control	99.67	logic-verified	DecompMoveBG3
+MoveBG/MapObjBall	TMapObjBall::calcCurrentMtx	96.26	logic-verified	DecompMoveBG3
+Player/MarioPhysics	TMario::keepDistance(const JGeometry::TVec3<float>&, float, float)	95.15	logic-verified	DecompPlayer7
+Player/MarioSwim	TMario::doSwimming	98.05	logic-verified	DecompPlayer7
+MarioUtil/ShadowUtil	TMBindShadowManager::calcVtx	96.64	logic-verified	DecompSystem4
+GC2D/SelectMenu	TSelectMenu::initData	92.28	logic-verified	DecompGC2D
+MarioUtil/ShadowUtil	TMBindShadowManager::drawShadowGD	98.58	logic-verified	DecompSystem4
+GC2D/SelectShine2	TSelectShineManager::perform	86.01	logic-verified	DecompGC2D2
+MarioUtil/MtxUtil	TRope::moveHead	93.60	logic-verified	DecompSystem4
+Player/WaterGun	TWaterGun::movement	99.70	logic-verified	DecompPlayer7
+GC2D/ConsoleStr	TConsoleStr::processGo	74.85	logic-verified	DecompGC2D2
+GC2D/ConsoleStr	TConsoleStr::startCloseWipe	74.29	logic-verified	DecompGC2D2
+MarioUtil/LightUtil	TLightCommon::loadAfter	97.47	logic-verified	DecompSystem4
+MoveBG/MapObjInit	TMapObjBase::initMActor	86.88	logic-verified	DecompMoveBG3
+Player/MarioCheckCol	TMario::checkCollision	99.682	logic-verified	DecompPlayer7
+GC2D/Guide	TGuide::perform	79.25	logic-verified	DecompGC2D2
+GC2D/Talk2D2	TTalk2D2::loadAfter	93.12	logic-verified	DecompGC2D2
+GC2D/Talk2D2	TTalk2D2::setMessageID	97.31	logic-verified	DecompGC2D2
+Strategic/ObjModel	TMActorKeeper::createMActorFromDefaultBmd	99.93	logic-verified	DecompSystem4
+GC2D/Talk2D2	TTalk2D2::openNormalWindow	97.56	logic-verified	DecompGC2D2
+GC2D/Talk2D2	TTalk2D2::load	97.95	logic-verified	DecompGC2D2
+System/MarDirectorEvent	TMarDirector::fireStreamingMovie	72.77	logic-verified	DecompSystem4
+Player/MarioWait	TMario::waitingCommonEvents	99.96	logic-verified	DecompPlayer7

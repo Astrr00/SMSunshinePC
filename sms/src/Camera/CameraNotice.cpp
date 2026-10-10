@@ -165,7 +165,7 @@ void CPolarSubCamera::calcNoticeTargetYrot_(const Vec& target)
 		                     dx - mCurrentTarget.mTarget.x);
 		s16 yawDiff  = mCurrentTarget.mYaw - ang;
 		int absAngle = yawDiff >= 0 ? yawDiff : -yawDiff;
-		f32 ratio    = DEG2SHORTANGLE(1.0f) * (f32)absAngle;
+		f32 ratio    = (f32)absAngle * (1.0f / 32768.0f);
 
 		f32 chase;
 		if (dist2 > near2) {

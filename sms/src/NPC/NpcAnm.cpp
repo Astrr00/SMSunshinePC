@@ -780,7 +780,7 @@ bool TBaseNPC::npcThrowing()
 	int uVar1   = mSpine->getTime();
 	if ((uVar1 == 0 && uVar4 < 20) || uVar1 == uVar4 - 20) {
 		onHitFlag(HIT_FLAG_NO_COLLISION);
-		unk1DC = CLBPalFrame(30);
+		unk1DC = CLBPalFrame<s32>(30);
 	} else if (uVar1 == uVar4) {
 		mThrowCtrl->throwMario(this);
 	} else if (mMActor->isCurAnmAlreadyEnd(ANM_TYPE_BCK)) {

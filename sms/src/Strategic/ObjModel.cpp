@@ -143,11 +143,16 @@ MActor* TMActorKeeper::getMActor(const char* name) const
 
 MActor* TMActorKeeper::createMActorFromDefaultBmd(const char* folder, u32 flags)
 {
-	SDLModelData* data = mModelDataKeeper->loadModelData(
-	    "default.bmd", mModelLoaderFlags, folder);
+	// Retail inlines loadModelData here; copied so the helper stays out of line for createMActor.
+	u32 loaderFlags = mModelLoaderFlags;
+	char fullPath[256];
+	sprintf(fullPath, "%s/%s", folder, "default.bmd");
+	void* res             = JKRGetResource(fullPath);
+	J3DModelData* data    = J3DModelLoaderDataBase::load(res, loaderFlags);
+	SDLModelData* sdlData = new SDLModelData(data);
 	mActorAnmData = new MActorAnmData;
 	mActorAnmData->init(folder, nullptr);
-	return createAndRegister(data, flags);
+	return createAndRegister(sdlData, flags);
 }
 
 MActor* TMActorKeeper::createMActorFromNthData(int n, u32 flags)

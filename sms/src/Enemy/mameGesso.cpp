@@ -394,9 +394,8 @@ DEFINE_NERVE(TNerveMameGessoGraphJumpWander, TLiveActor)
 	}
 
 	if (self->unk1EC != 0) {
-		// TODO: one more condition that is kind of like
-		// mGroundPlane->isWaterSurface() but not really
-		if (!self->isReachedToGoal() || self->isAirborne()) {
+		// retail reads the ground BG type after reaching the goal, but no path acts on it
+		if (!self->isReachedToGoal()) {
 			if (!self->isAirborne())
 				self->walkBehavior(2, 1.0f);
 			else

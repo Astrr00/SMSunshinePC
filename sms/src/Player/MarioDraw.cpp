@@ -1124,8 +1124,8 @@ void TMario::initModel()
 	    JKRFileLoader::getGlbResource("/mario/bmd/ma_mdl1.bmd"),
 	    J3DMLF_MaterialPEFull | (16 << J3DMLF_TevStageNumShift));
 	mJointIdCenter   = mBodyModelData->getJointName()->getIndex("center");
-	mJointIdChnChest = mBodyModelData->getJointName()->getIndex("chn_chest");
-	mJointIdChest    = mBodyModelData->getJointName()->getIndex("jnt_chest");
+	mJointIdChest    = mBodyModelData->getJointName()->getIndex("chn_chest");
+	mJointIdChnChest = mBodyModelData->getJointName()->getIndex("jnt_chest");
 	mJointIdArmR1    = mBodyModelData->getJointName()->getIndex("jnt_arm_R1");
 	mJointIdArmL1    = mBodyModelData->getJointName()->getIndex("jnt_arm_L1");
 	mJointIdHandR    = mBodyModelData->getJointName()->getIndex("jnt_hand_R");
@@ -1690,10 +1690,10 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 		if (mGroundPlane->isWaterSurface()) {
 			// Use water-side surf params
 			s16 rMax = mSurfingParamsWaterRed.mPitchMax.get();
-			s16 pMax = mSurfingParamsWaterRed.mPitchMax.get();
+			s16 pMax = mSurfingParamsWaterRed.mRollMax.get();
 
 			f32 rollScale  = mSurfingParamsWaterRed.mPitch.get();
-			f32 pitchScale = mSurfingParamsWaterRed.mWaistRoll.get();
+			f32 pitchScale = mSurfingParamsWaterRed.mRoll.get();
 
 			s16 limitR = (s16)(mForwardVel * rollScale);
 			s16 delta  = mFaceAngle.y - unk9C;
@@ -1716,10 +1716,10 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 			           + unk414.x;
 		} else {
 			// Use ground-side surf params
-			s16 rMax       = mSurfingParamsGroundRed.mRollMax.get();
-			s16 pMax       = mSurfingParamsGroundRed.mPitchMax.get();
-			f32 rollScale  = mSurfingParamsGroundRed.mWaistRoll.get();
-			f32 pitchScale = mSurfingParamsGroundRed.mPitch.get();
+			s16 rMax       = mSurfingParamsGroundRed.mPitchMax.get();
+			s16 pMax       = mSurfingParamsGroundRed.mRollMax.get();
+			f32 rollScale  = mSurfingParamsGroundRed.mPitch.get();
+			f32 pitchScale = mSurfingParamsGroundRed.mRoll.get();
 
 			s16 limitR = (s16)(mForwardVel * rollScale);
 			s16 delta  = mFaceAngle.y - unk9C;

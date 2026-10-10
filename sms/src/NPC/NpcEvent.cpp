@@ -391,8 +391,8 @@ void TNpcEvent::reviveOneSunflower()
 
 		if (mDownSunflowerNum == 0) {
 			gpItemManager->makeShineAppearWithDemo(
-			    "ひまわり用シャイン", "ひまわりシャインカメラ", npc->unk1B8.x,
-			    npc->unk1B8.y + 500.0f, npc->unk1B8.z);
+			    "ひまわり用シャイン", "ひまわりシャインカメラ", position->x,
+			    position->y + 500.0f, position->z);
 			TFlagManager::getInstance()->setBool(false, 0x50003);
 		}
 	}

@@ -450,8 +450,7 @@ const TBGCheckData* TMapCollisionData::intersectLine(
 
 	for (int gridZ = minGridZ; gridZ <= maxGridZ; ++gridZ) {
 		for (int gridX = minGridX; gridX <= maxGridX; ++gridX) {
-			if (gridX == minGridX && gridZ == minGridZ) {
-			} else {
+			if (gridX != minGridX || gridZ != minGridZ) {
 				f32 x0i = gridX * 1024.0f;
 				f32 z0i = gridZ * 1024.0f;
 				f32 x1i = (gridX + 1) * 1024.0f;
@@ -471,8 +470,8 @@ const TBGCheckData* TMapCollisionData::intersectLine(
 
 				if (!LineInLineXZ(lineA, lineB, p10, p00)
 				    && !LineInLineXZ(lineA, lineB, p01, p00)
-				    && !LineInLineXZ(lineA, lineB, p11, p01)
-				    && !LineInLineXZ(lineA, lineB, p10, p11))
+				    && !LineInLineXZ(lineA, lineB, p11, p10)
+				    && !LineInLineXZ(lineA, lineB, p11, p01))
 					continue;
 			}
 

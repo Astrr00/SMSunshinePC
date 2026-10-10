@@ -385,11 +385,10 @@ void SMS_MakeJointsToArc(J3DModel* model, const JGeometry::TVec3<f32>& start,
 
 		MtxPtr jm = model->getAnmMtx(i);
 
-		f32 dist = (f32)i * (mag / (f32)(jointNum - 1));
-
 		JGeometry::TVec3<f32> zAxis(jm[0][2], jm[1][2], jm[2][2]);
 		JGeometry::TVec3<f32> side;
 		side.cross(zAxis, c);
+		f32 dist = (f32)i * (mag / (f32)(jointNum - 1));
 		JGeometry::TVec3<f32> fwd;
 		fwd.cross(c, side);
 		side.normalize();

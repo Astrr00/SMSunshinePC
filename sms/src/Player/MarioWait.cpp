@@ -97,7 +97,7 @@ BOOL TMario::waitingCommonEvents()
 	if (mInput & 0x1) {
 		s16 diff      = mIntendedYaw - mFaceAngle.y;
 		s16 rotSp     = mDeParams.mWaitingRotSp.get();
-		s16 converged = IConverge(diff, 0, rotSp, rotSp);
+		s32 converged = IConverge(diff, 0, rotSp, rotSp);
 		mFaceAngle.y  = mIntendedYaw - converged;
 		if (mIntendedMag > mControllerParams.mStartToWalkLevel.get()) {
 			emitSmoke(mFaceAngle.y);
@@ -105,7 +105,7 @@ BOOL TMario::waitingCommonEvents()
 		}
 	}
 
-	if (checkFlag(MARIO_FLAG_IS_PERFORMING))
+	if (checkFlag(MARIO_FLAG_FLUDD_EMITTING))
 		return changePlayerStatus(MARIO_STATUS_RUN, 0, false);
 
 	if (canSquat()) {
@@ -113,7 +113,7 @@ BOOL TMario::waitingCommonEvents()
 		return changePlayerStatus(MARIO_STATUS_SQUAT, 0, false);
 	}
 
-	if (mInput & 0x10000)
+	if (mInput & 0x8000)
 		return changePlayerStatus(MARIO_STATUS_TAKE_POSE, 0, false);
 
 	if (rocketCheck()) {
@@ -565,7 +565,7 @@ BOOL TMario::waitMain()
 	int result = 0;
 
 	checkEnforceJump();
-	checkCollision();
+	checkReturn();
 	setNormalAttackArea();
 
 	if (mHeldObject != nullptr && (mInput & 0x2000 ? true : false)) {

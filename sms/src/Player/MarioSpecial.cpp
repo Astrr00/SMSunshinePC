@@ -1248,7 +1248,7 @@ BOOL TMario::pulling()
 	pos.z += cosF * rateH * JMASCos(backAngle)
 	         + sinF * rateV * JMASSin(backAngle);
 
-	if (((THitActor*)mHeldObject)->receiveMessage(this, 0xa) == 1) {
+	if (mHeldObject->moveRequest(pos) == 1) {
 		mPosition = pos;
 	}
 

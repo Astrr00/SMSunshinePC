@@ -293,7 +293,7 @@ void TSelectMenu::initData(u8 stage, JKRArchive* pArch,
 		return;
 	}
 
-	mMenuScreen      = new J2DSetScreen("scenario_select_1.blo", nullptr);
+	mMenuScreen      = new J2DSetScreen("scenario_select_1.blo", pArch);
 	mLetterBoxTop    = new TExPane(mMenuScreen, 'msk1');
 	mLetterBoxBottom = new TExPane(mMenuScreen, 'msk2');
 	mStageName       = (J2DTextBox*)mMenuScreen->search('map');
@@ -311,7 +311,7 @@ void TSelectMenu::initData(u8 stage, JKRArchive* pArch,
 
 	for (s32 i = 0; i < 8; i++) {
 		char buf[254];
-		snprintf(buf, sizeof(buf), "/select/timg/sc_number_%d.bti", i);
+		snprintf(buf, sizeof(buf), "/select/timg/sc_number_%d.bti", i + 1);
 		mScenarioTex[i] = new JUTTexture((const ResTIMG*)JKRGetResource(buf));
 	}
 
@@ -345,8 +345,14 @@ void TSelectMenu::initData(u8 stage, JKRArchive* pArch,
 	volatile s32 const unkArr[]
 	    = { 0x0, 0x0, 0x2, 0x3, 0x4, 0x5, 0x6, 0x0, 0x7, 0x8, 0x0 };
 
-	u8* const stages[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-		                   nullptr, nullptr, nullptr, nullptr, nullptr };
+	const u8* const stages[] = {
+		nullptr,               nullptr,
+		scShineTableBiancoEtc, scShineTableRiccoEtc,
+		scShineTableMammaEtc,  scShineTablePinnaEtc,
+		scShineTableSirenaEtc, nullptr,
+		scShineTableMonteEtc,  scShineTableMareEtc,
+		nullptr,
+	};
 
 	s32 numCoins = TFlagManager::getInstance()->getFlag(SMS_getShineStage(stage)
 	                                                    + 0x20005);
@@ -830,7 +836,7 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					s16 shineID2 = SMS_getShineID(SMS_getShineStage(mStage),
 					                              mSelectedShine, false);
 					const char* scenarioName2 = SMSGetMessageData(
-					    mScenarioBmg2, SMS_getNormalStage(shineID));
+					    mScenarioBmg2, SMS_getNormalStage(shineID2));
 					strncpy(mScenarioText2->getStringPtr(), scenarioName2, 127);
 
 					mShineMarks[mSelectedShine]->mWhite = mSelectedMarkCol;
@@ -903,7 +909,7 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					s16 shineID2 = SMS_getShineID(SMS_getShineStage(mStage),
 					                              mSelectedShine, false);
 					const char* scenarioName2 = SMSGetMessageData(
-					    mScenarioBmg2, SMS_getNormalStage(shineID));
+					    mScenarioBmg2, SMS_getNormalStage(shineID2));
 					strncpy(mScenarioText2->getStringPtr(), scenarioName2, 127);
 
 					mSelectShineMgr->mShines[mSelectedShine]->mSelected

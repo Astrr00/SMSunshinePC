@@ -297,9 +297,10 @@ void TYoshiTongue::movement()
 		if (target != nullptr && mHeldObject == nullptr) {
 			JGeometry::TVec3<f32> tpos = target->mPosition;
 			tpos.y += 0.5f * target->mDamageHeight;
+			JGeometry::TVec3<f32> prevTip = mTipPos;
 			JGeometry::TVec3<f32> step = (tpos - mTipPos) * mExtendAmount;
 			mTipPos += step;
-			mInitialVelocity = step;
+			mInitialVelocity = mTipPos - prevTip;
 
 			JGeometry::TVec3<f32> rem = tpos - mTipPos;
 			if (rem.length() < 200.0f
@@ -351,7 +352,7 @@ void TYoshiTongue::movement()
 	}
 	}
 
-	ensureTakeSituation();
+	checkTaking();
 	mPosition   = mTipPos;
 	mPosition.y = -((0.5f * mAttackHeight) - mPosition.y);
 }

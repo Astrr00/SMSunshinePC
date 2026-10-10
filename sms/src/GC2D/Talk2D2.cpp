@@ -1155,8 +1155,8 @@ void TTalk2D2::setupTextBox(const void* data, JMSMesgEntry* entry)
 		switch (c) {
 		case '\n':
 			unk228[line] = col == 0 ? 0 : col - 1;
-			makeBoxLine(line, nullptr);
 			col = 0;
+			makeBoxLine(line, nullptr);
 			++line;
 			break;
 
@@ -1361,10 +1361,9 @@ void TTalk2D2::setTagParam(JSUMemoryInputStream& stream, J2DTextBox& textBox,
 				         total / 10);
 				*col += 1;
 			} else {
-				int hundreds = total / 100;
 				snprintf(unk9C[*col + *line * 30]->getStringPtr(), 2, "%d",
-				         hundreds);
-				total -= hundreds * 100;
+				         total / 100);
+				total -= total / 100 * 100;
 				snprintf(unk9C[*col + *line * 30 + 1]->getStringPtr(), 2, "%d",
 				         total / 10);
 				*col += 2;

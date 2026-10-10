@@ -827,7 +827,7 @@ void TResetFruit::kicked()
 		return;
 
 	JGeometry::TVec3<f32> vel = mVelocity;
-	if (JGeometry::TVec3<f32>(vel).y > 0.0f)
+	if (!(JGeometry::TVec3<f32>(vel).y <= 0.0f))
 		return;
 
 	f32 dot = JGeometry::TVec3<f32>(vel).dot(JGeometry::TVec3<f32>(
@@ -928,7 +928,7 @@ void TResetFruit::control()
 			    && (actor->isActorType(0x400000CD)
 			        || actor->isActorType(0x400000CD))) {
 				f32 prevRatio  = mSandRiseRatio;
-				mSandRiseRatio = SMS_GetSandRiseUpRatio(this);
+				mSandRiseRatio = SMS_GetSandRiseUpRatio(actor);
 				if (mSandRiseRatio > 0.05f && mSandRiseRatio > prevRatio)
 					mVelocity.y += 20.0f;
 			}
@@ -1328,7 +1328,7 @@ void TBigWatermelon::control()
 		    && (actor->isActorType(0x400000CD)
 		        || actor->isActorType(0x400000CD))) {
 			f32 prevRatio  = mSandRiseRatio;
-			mSandRiseRatio = SMS_GetSandRiseUpRatio(this);
+			mSandRiseRatio = SMS_GetSandRiseUpRatio(actor);
 			if (mSandRiseRatio > 0.05f && mSandRiseRatio > prevRatio)
 				mVelocity.y += 20.0f;
 		}

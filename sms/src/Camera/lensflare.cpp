@@ -85,8 +85,6 @@ void TLensFlare::perform(u32 cue, JDrama::TGraphics*)
 	if (cue & CUE_CALC_ANIM) {
 		JGeometry::TVec3<f32> sunWorldPos = gpSunModel->unk198;
 
-		// TODO: a mystery is happening here with the args, but it's definitely
-		// this inline (maybe one more inlining layer?)
 		JGeometry::TVec3<f32> near9grid[9];
 		S16Vec euler;
 		CLBCalcNearNinePos(near9grid, &euler, gpCamera->unk124,
@@ -111,7 +109,6 @@ void TLensFlare::perform(u32 cue, JDrama::TGraphics*)
 
 		JGeometry::TVec3<f32> rot = MsGetRotFromZaxis(dir);
 		Mtx mtx;
-		// Wrong! Need a different inline wrapper!
 		MsMtxSetTRS(mtx, sunWorldPos.x, sunWorldPos.y, sunWorldPos.z,
 		            CLBDegToShortAngle(rot.x), CLBDegToShortAngle(rot.y), 0,
 		            unk18.x, unk18.y, unk18.z);

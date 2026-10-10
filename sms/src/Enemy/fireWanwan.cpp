@@ -408,8 +408,49 @@ void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
 	if (cue & CUE_CALC_ANIM) {
 		TPosition3f mtx;
 
-		SMS_CalcToDirMatrix(mtx, param_4,
-		                    JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f));
+		// Basis built inline as retail does: X = norm(up x dir), Y = norm(dir x X),
+		// both zeroed when lenSq <= 2^-18; Z column is dir as given.
+		const f32 dx = param_4.x;
+		const f32 dy = param_4.y;
+		const f32 dz = param_4.z;
+		const f32 kEps = 1.0f / 262144.0f;
+
+		f32 xx = dz;
+		f32 xz = -dx;
+		f32 lsq = xx * xx + xz * xz;
+		if (lsq <= kEps) {
+			xx = 0.0f;
+			xz = 0.0f;
+		} else {
+			f32 k = JGeometry::TUtil<f32>::inv_sqrt(lsq);
+			xx *= k;
+			xz *= k;
+		}
+
+		f32 yx = dy * xz;
+		f32 yy = dz * xx - dx * xz;
+		f32 yz = -dy * xx;
+		lsq = yx * yx + yy * yy + yz * yz;
+		if (lsq <= kEps) {
+			yx = 0.0f;
+			yy = 0.0f;
+			yz = 0.0f;
+		} else {
+			f32 k = JGeometry::TUtil<f32>::inv_sqrt(lsq);
+			yx *= k;
+			yy *= k;
+			yz *= k;
+		}
+
+		mtx.ref(0, 0) = xx;
+		mtx.ref(1, 0) = 0.0f;
+		mtx.ref(2, 0) = xz;
+		mtx.ref(0, 1) = yx;
+		mtx.ref(1, 1) = yy;
+		mtx.ref(2, 1) = yz;
+		mtx.ref(0, 2) = dx;
+		mtx.ref(1, 2) = dy;
+		mtx.ref(2, 2) = dz;
 
 		mtx.setTrans(param_3);
 
