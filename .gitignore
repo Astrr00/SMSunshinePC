@@ -8,3 +8,11 @@ crash.log
 *.log
 __pycache__/
 sms/.git.hold/
+
+# Agent scratch
+sms/_*.py
+sms/_*.bat
+sms/tmp_*.cpp
+sms/EventWatcher.d
+sunshine-pc/tf_run.py
+sunshine-pc/tools/_*

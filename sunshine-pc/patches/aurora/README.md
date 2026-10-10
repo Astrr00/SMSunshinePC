@@ -21,12 +21,12 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 42 file entries over 33 distinct files, +1553 / -136.
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 42 file entries over 33 distinct files, +1552 / -136.
 
 | file | topic | files | +/- |
 |---|---|---|---|
 | `0001-gx-color-peek-and-pixel-metric.patch` | `GXPeekARGB`, pixel metric (`GXReadPixMetric`/`GXClearPixMetric`, `GXSetDrawSync`), occlusion queries, tests | 18 | +674 / -84 |
-| `0002-gx-fifo-implicit-primitive-close.patch` | `GXBegin` closes a still-open primitive | 2 | +33 / -16 |
+| `0002-gx-fifo-implicit-primitive-close.patch` | implicit close of a still-open primitive (`GXVert.cpp`); `fifo::drain()` calls `__GXCloseOpenPrimitive` | 2 | +32 / -16 |
 | `0003-gx-tev-alpha-r8-compare.patch` | TEV alpha `R8_GT`/`R8_EQ` mapped to RGB8 variants | 1 | +6 / -0 |
 | `0004-card-base-path.patch` | `CARDSetBasePath` directory used by `CARDInit` | 1 | +8 / -9 |
 | `0005-fsr1-render-scale.patch` | FSR1 upscale (EASU + RCAS) and sharpness API | 4 | +137 / -22 |

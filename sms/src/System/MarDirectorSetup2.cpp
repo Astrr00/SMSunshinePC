@@ -48,8 +48,11 @@ void TMarDirector::setup2()
 			JDrama::TNameRef* ref = JDrama::TNameRefGen::search(it->unk14);
 			if (ref) {
 				// TODO: what is ref?
-				// asm 0x800EFCA4-0x800EFCA8: stw (u16)index, 0x134(ref) before unk28 store
+				// asm 0x800EFCA4-0x800EFCA8: stw (u16)index, 0x134(ref) before unk28 store. The target field is not
+				// identified; 0x134 is a retail 32-bit offset and would hit an unrelated member in the 64-bit layout.
+#ifndef TARGET_PC
 				*(u32*)((u8*)ref + 0x134) = (u16)(it - unkBC->begin());
+#endif
 				it->unk28                 = ref;
 			}
 		}

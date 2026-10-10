@@ -88,11 +88,3 @@ diff --git a/lib/gx/fifo.cpp b/lib/gx/fifo.cpp
    if (detail::sBufferSize == 0) {
      return;
    }
-@@ -272,6 +275,7 @@
- uint32_t get_buffer_size() { return detail::sBufferSize; }
- 
- void clear_buffer() {
-+  __GXCloseOpenPrimitive();
-   const uint64_t processed = sProcessed.load(std::memory_order_acquire);
-   AURORA_ASSERT(sPublished.load(std::memory_order_acquire) == processed,
-                 "fifo::clear_buffer: published commands are still pending");
