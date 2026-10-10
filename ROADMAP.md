@@ -8,10 +8,11 @@ Last updated from observed state (see `sunshine-pc/docs/status.md` section 0 for
 ## Working rules (apply to every phase)
 
 1. **Gates before any push**: matching DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged; strict link with 0 unresolved symbols; `TEMP-DEBUG` grep empty; fresh-clone build passes.
-2. **Concurrency**: at most 3 agents at once. Each builds only its own tree. Multi-file Aurora work happens in a private copy (`-DSUNSHINE_AURORA_DIR=<copy>`) and lands in one step. Timing measurements (fps, logic rate, latency) are taken only while no other agent runs.
-3. **Evidence**: a feature counts as done only with a log excerpt or screenshot. Dev hooks are named as such.
-4. **Decomp changes**: `#ifdef TARGET_PC` for port behaviour; asm-proven decomp bugs are fixed unguarded only in NonMatching units, with an `// asm 0x<addr>` comment.
-5. **Saves**: tests use a temp save directory, never the user's `%APPDATA%\Sunshine\saves`.
+2. **Short tasks**: every agent task is one concrete deliverable time-boxed to ~30 min (edit→build→run→evidence at least every 15 min, one line per cycle in `sunshine-pc/build/progress.log`); it then reports and the next step becomes a new task.
+3. **Concurrency**: at most 3 agents at once. Each builds only its own tree. Multi-file Aurora work happens in a private copy (`-DSUNSHINE_AURORA_DIR=<copy>`) and lands in one step. Timing measurements (fps, logic rate, latency) are taken only while no other agent runs.
+4. **Evidence**: a feature counts as done only with a log excerpt or screenshot. Dev hooks are named as such.
+5. **Decomp changes**: `#ifdef TARGET_PC` for port behaviour; asm-proven decomp bugs are fixed unguarded only in NonMatching units, with an `// asm 0x<addr>` comment.
+6. **Saves**: tests use a temp save directory, never the user's `%APPDATA%\Sunshine\saves`.
 
 ## Phase 1: Boot to gameplay (core)
 
