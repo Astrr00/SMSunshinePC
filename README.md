@@ -4,29 +4,31 @@ A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The gam
 
 ## Status
 
-Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. Updated with every milestone.
+Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. % is the lead's estimate of how much of the item works, not a measurement. Updated with every milestone.
 
-| Area | State | Evidence / gap |
-| --- | --- | --- |
-| Matching decomp build (SHA-1 `9f5a8caf…`) | done | `ninja` in `sms/` |
-| Strict link, 0 unresolved symbols | done | `tools/_strict.cmd` |
-| Units compiled (clang-cl) | done | 584/584 built units; 624/733 incl. excluded (`docs/platform-notes.md`) |
-| Boot: logo, intro movies | done | normal `--dvd` boot |
-| Title screen | partial | logo, Shine Sprite, seagulls render, logic 30/s; area behind the logo black (retail background unverified) |
-| Title → file select → new game → Delfino | open | in progress |
-| Bianco Hills Ep.1 (dev start) | partial | textured, HUD, Mario walks/jumps, camera follows; flat untextured polygon at the screen edge |
-| First Shine + save + reload | open | in progress |
-| Goop / pixel metric | open | GPU occlusion gives 0/1 only; needs real fragment counts |
-| Audio | partial | movies and title music play; gameplay output turns into noise after ~20 s |
-| Particles | partial | JPA loads; some particle view objects not in the draw lists |
-| Unlocked framerate | partial | replay works on the title but halves logic speed; default is retail 30 fps; interpolation not started |
-| Widescreen | partial | implemented, visuals not verified |
-| Launcher, settings | partial | pages render; clicks/runtime effects unverified |
-| Cheats, mods | partial | 38 headless checks pass; in-game effects unverified |
-| Controller glyphs | partial | assets + hook, unverified in game |
-| FSR1 upscaling | partial | implemented, unverified |
-| DLSS | blocked | needs motion vectors and a D3D12 handoff Dawn does not expose (`docs/dlss-feasibility.md`) |
-| Release package | partial | packaging script exists, not run on the current tree |
+| Area | State | % | Evidence / gap |
+| --- | --- | ---: | --- |
+| Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
+| Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
+| Units compiled (clang-cl) | done | 100 | 584/584 built units; 624/733 incl. excluded (`docs/platform-notes.md`) |
+| Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
+| Title screen | partial | 70 | logo, Shine Sprite, seagulls render, logic 30/s; area behind the logo black (retail background unverified) |
+| Title → file select → new game → Delfino | partial | 10 | file select reached (`sunshine-pc/build/FlowFileSelect/a2.png`); CardLoad title crash fixed (loop 13→11, asm 0x8022D16C); new game/Delfino pending |
+| Bianco Hills Ep.1 (dev start) | partial | 60 | textured, HUD, Mario walks/jumps, camera follows; flat untextured polygon at the screen edge |
+| First Shine + save + reload | open | 10 | in progress |
+| Goop / pixel metric | open | 15 | GPU occlusion gives 0/1 only; needs real fragment counts |
+| Audio | partial | 50 | movies and title music play; gameplay output turns into noise after ~20 s |
+| Particles | partial | 50 | JPA loads; some particle view objects not in the draw lists |
+| Unlocked framerate | partial | 30 | replay works on the title but halves logic speed; default is retail 30 fps; interpolation not started |
+| Widescreen | partial | 60 | implemented, visuals not verified |
+| Launcher, settings | partial | 60 | pages render; clicks/runtime effects unverified |
+| Cheats, mods | partial | 60 | 38 headless checks pass; in-game effects unverified |
+| Controller glyphs | partial | 60 | assets + hook, unverified in game |
+| FSR1 upscaling | partial | 50 | implemented, unverified |
+| DLSS | blocked | 0 | needs motion vectors and a D3D12 handoff Dawn does not expose (`docs/dlss-feasibility.md`) |
+| Release package | partial | 40 | packaging script exists, not run on the current tree |
+
+Overall (mean of the rows): **54 %**.
 
 Plan and order of work: [`ROADMAP.md`](ROADMAP.md).
 
