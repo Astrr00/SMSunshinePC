@@ -411,6 +411,13 @@ void TShellCup::control()
 		unk138[i].control();
 }
 
+#pragma dont_inline on
+static void setShellRotX(MtxPtr mtx, f32 angle)
+{
+	MsMtxSetRotX(mtx, angle);
+}
+#pragma dont_inline off
+
 void TShellCup::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	TMapObjBase::perform(cue, graphics);
@@ -418,7 +425,7 @@ void TShellCup::perform(u32 cue, JDrama::TGraphics* graphics)
 		if (!gpMarDirector->isTalkModeNow() || gpMarDirector->isDemoModeNow()) {
 			for (int i = 0; i < 6; ++i) {
 				Mtx rotMtx;
-				MsMtxSetRotX(rotMtx, unk138[i].unk6C);
+				setShellRotX(rotMtx, unk138[i].unk6C);
 				concatOnlyRotFromRight(unk138[i].unk74, rotMtx,
 				                       unk138[i].unk74);
 			}

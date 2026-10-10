@@ -603,6 +603,7 @@ void TMarDirector::setMario()
 		gpMarioOriginal->toroccoStart();
 		break;
 
+	case 0:
 	default: { // asm 0x800EBFC4: unkD1 0, 3 and >4 all take the waiting path
 		const JGeometry::TVec3<f32>* pos = nullptr;
 		if (uVar10)
@@ -611,30 +612,32 @@ void TMarDirector::setMario()
 	} break;
 	}
 
-	switch (gpApplication.mCurrArea.getStage()) {
-	case 0x3C:
-		gpMarioOriginal->mWaterGun->changeNozzle(TWaterGun::Rocket, true);
-		break;
-	// asm 0x800EC094: these stages keep the current nozzle
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-	case 5:
-	case 6:
-	case 8:
-	case 9:
-	case 0x10:
-	case 0x2C:
-	case 0x34:
-	case 0x39:
-		break;
-	default: // asm 0x800EC094: flag nozzle, then Spray
-		gpMarioOriginal->mWaterGun->changeNozzle(
-		    (TWaterGun::TNozzleType)TFlagManager::getInstance()->getFlag(0x40004),
-		    true);
-		gpMarioOriginal->mWaterGun->changeNozzle(TWaterGun::Spray, true);
-		break;
+	if (gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD)) {
+		switch (gpApplication.mCurrArea.getStage()) {
+		case 0x3C:
+			gpMarioOriginal->mWaterGun->changeNozzle(TWaterGun::Rocket, true);
+			break;
+		// asm 0x800EC094: these stages keep the current nozzle
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 8:
+		case 9:
+		case 0x10:
+		case 0x2C:
+		case 0x34:
+		case 0x39:
+			break;
+		default: // asm 0x800EC094: flag nozzle, then Spray
+			gpMarioOriginal->mWaterGun->changeNozzle(
+			    (TWaterGun::TNozzleType)TFlagManager::getInstance()->getFlag(0x40004),
+			    true);
+			gpMarioOriginal->mWaterGun->changeNozzle(TWaterGun::Spray, true);
+			break;
+		}
 	}
 
 	u32 uVar6 = SMS_getShineIDofExStage(gpApplication.mCurrArea.getStage());
@@ -896,7 +899,7 @@ u8 TMarDirector::updateGameMode()
 				unk4C |= 0x2;
 				unk126 = 3;
 				fireStartDemoCamera(nullptr, nullptr, -1, 0.0f, false, nullptr,
-				                    0, unk250, 0);
+				                    0, unk250, 1);
 				break;
 			}
 
@@ -917,6 +920,7 @@ u8 TMarDirector::updateGameMode()
 		}
 		break;
 
+	case 3:
 	case 4: {
 		bool bVar5  = false;
 		bool uVar15 = 0;

@@ -965,7 +965,7 @@ DEFINE_NERVE(TNervePakkunAppear, TLiveActor)
 		self->offHitFlag(HIT_FLAG_NO_COLLISION);
 	}
 
-	if (self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->checkPass(100.0f)) { }
+	self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->checkPass(100.0f);
 	if (self->checkCurAnmEnd(ANM_TYPE_BCK)) {
 		spine->pushAfterCurrent(&TNervePakkunStay::theNerve());
 		return true;

@@ -200,20 +200,18 @@ void TConsoleStr::perform(u32 cue, JDrama::TGraphics* graphics)
 		}
 
 		if (!unk2A9 && gpMarDirector->mState != 4) {
-			if (unk2AC[0])
-				;
-
-			// TODO: uknown stuff
-
+			for (int i = 0; i < 3; ++i) {
+				if (unk2AC[i])
+					unk2AC[i]->stopCreateParticle();
+			}
 			unk2A9 = true;
 		}
 
-		if (unk2A9 && gpMarDirector->mState != 4) {
-			if (unk2AC[0])
-				;
-
-			// TODO: uknown stuff
-
+		if (unk2A9 && gpMarDirector->mState == 4) {
+			for (int i = 0; i < 3; ++i) {
+				if (unk2AC[i])
+					unk2AC[i]->playCreateParticle();
+			}
 			unk2A9 = false;
 		}
 	}
@@ -232,17 +230,21 @@ void TConsoleStr::perform(u32 cue, JDrama::TGraphics* graphics)
 
 				u32 uVar13       = pane->getPane()->getAlpha();
 				JUTRect local_a0 = pane->getPane()->getBounds();
+				u8 trailAlpha = uVar13;
 
 				for (int j = 0; j < 3; ++j) {
 					int iVar9 = local_b0[j];
-					// TODO: unk34 is wrong
-					if (unk34[3 * i + j].x != 0) {
-						unk28[i]->getPane()->setAlpha(uVar13 * 0.7f);
+					if (unk34[22 * i + iVar9].x != 0) {
+						trailAlpha = (u8)(0.7f * trailAlpha);
+						unk28[i]->getPane()->setAlpha(trailAlpha);
+						unk28[i]->getPane()->resize(
+						    local_a0.getWidth() - iVar9 * 3,
+						    local_a0.getHeight() - iVar9 * 3);
 
-						JUTRect local_90 = unk28[i]->unk14;
+						JUTRect local_90 = unk28[i]->getPane()->getBounds();
 						((J2DPicture*)unk28[i]->getPane())
-						    ->draw(unk34[iVar9 + 12 * i].x,
-						           unk34[iVar9 + 12 * i].y, local_90.getWidth(),
+						    ->draw(unk34[22 * i + iVar9].x,
+						           unk34[22 * i + iVar9].y, local_90.getWidth(),
 						           local_90.getHeight(), false, false, false);
 					}
 				}
@@ -562,6 +564,7 @@ bool TConsoleStr::processMiss(int param_1)
 		}
 
 		if (param_1 == i * 10 + 60) {
+			unk268[i]->getPane()->mRotation = 0.0f;
 			unk268[i]->setPanePosition(0x28, JUTPoint(0, 30), JUTPoint(0, -80),
 			                           JUTPoint(0, -80));
 		}
@@ -576,7 +579,7 @@ bool TConsoleStr::processMiss(int param_1)
 			                           JUTPoint(0, 150));
 		}
 
-		if (param_1 < i * 10) {
+		if (param_1 < i * 10 + 60) {
 			u16 alpha = unk268[i]->getPane()->getAlpha();
 			alpha += 12;
 			if (alpha > 0xff)
@@ -592,8 +595,8 @@ bool TConsoleStr::processMiss(int param_1)
 				result = false;
 			}
 		} else {
-			if (param_1 < i * 10) {
-				unk268[i]->getPane()->mRotation = (i - param_1) * 6;
+			if (param_1 < i * 10 + 60) {
+				unk268[i]->getPane()->mRotation = (i * 10 - param_1) * 6;
 			}
 
 			result = false;

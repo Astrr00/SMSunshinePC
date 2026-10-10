@@ -428,7 +428,7 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 	u32 nextStatus = status;
 
 	unk2BC = mPosition.y;
-	if (mSlopeAngle > mDeParams.mRocketRotSp.get() / 2)
+	if (mFootPrintTimer > mDeParams.mFootPrintTimerMax.get() / 2)
 		gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z,
 		                   mDirtyParams.mPolSizeJump.get());
 
@@ -594,15 +594,15 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 		switch (mAnimationId) {
 		case ANIM_STEP2:
 			startVoice(MSD_SE_MV22_JUMP_MID_01);
-			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep1.get());
+			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep2.get());
 			break;
 		case ANIM_STEP3:
 			startVoice(MSD_SE_MV23_JUMP_LARGE_01);
-			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep2.get());
+			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep3.get());
 			break;
 		default:
 			startVoice(MSD_SE_MV21_JUMP_SMALL_01);
-			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep3.get());
+			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep1.get());
 			break;
 		}
 		mForwardVel *= 0.8f;
@@ -1493,7 +1493,7 @@ void TMario::checkController(JDrama::TGraphics*)
 		mIntendedYaw = mFaceAngle.y;
 	}
 
-	// Rocket-nozzle pump rotation latch
+	// Turbo-nozzle pump rotation latch
 	if (mWaterGun != nullptr) {
 		if ((s32)mWaterGun->mCurrentNozzle == TWaterGun::Turbo
 		    && isUpperState(UPPER_STATE_PUMPING)
@@ -1544,9 +1544,9 @@ void TMario::checkController(JDrama::TGraphics*)
 			offFlag(MARIO_FLAG_FLUDD_EMITTING);
 		}
 
-		// asm 0x801314B8: retail stores propRot at nozzle+0x714, which is past
-		// the end of TWaterGun. Not replicated; unk388 is trigger pressure
-		// (WaterGun.cpp), so writing it here was a real bug.
+		// asm 0x801314B8: retail stores mIntendedMag/32 to getCurrentNozzle()+0x714.
+		// Turbo nozzle is TWaterGun+0x18D8, so this is TWaterGun+0x1FEC: past the
+		// nozzle and TWaterGunParams. Stray out-of-object write; not replicated.
 	}
 
 	// mInput bit synthesis
@@ -2401,7 +2401,7 @@ void TMario::gunExec()
 			mWaterGun->emit();
 			mWaterGun->resetWaterToFull();
 		}
-	} else if (unk390 == 0) {
+	} else if (mUpperState == UPPER_STATE_PUMPING) {
 		mWaterGun->emit();
 	}
 

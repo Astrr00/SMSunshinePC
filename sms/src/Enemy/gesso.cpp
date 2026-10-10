@@ -465,7 +465,7 @@ void TGesso::polluteBehavior()
 	if (mSpine->getCurrentNerve() == &TNerveGessoPollute::theNerve())
 		return;
 
-	if (mPollutionTimer < unk1E8->mSLPollutionInterval.get())
+	if (mPollutionTimer <= unk1E8->mSLPollutionInterval.get())
 		return;
 
 	if (!MsIsInSight(mPosition, getSightDirection(), SMS_GetMarioPos(),
@@ -493,9 +493,9 @@ void TGesso::setPolluteGoal()
 		                     SMS_GetMarioPos().y,
 		                     SMS_GetMarioPos().z + range.rand());
 
-		JGeometry::TVec3<f32> local;
-		calcVelocityToJumpToY(local, polluteObjSpeed, polluteObjGravity);
-		mPolluteVelocity = local;
+		mPolluteVelocity
+		    = calcVelocityToJumpToY(mPolluteVelocity, polluteObjSpeed,
+		                            polluteObjGravity);
 	} else {
 		mPolluteVelocity = SMS_GetMarioPos();
 		mPolluteVelocity.x -= mPosition.x;

@@ -529,7 +529,7 @@ void TItemSlotDrum::generateItem()
 		    mPosition, "テレサマネージャー", 1);
 		if (item != nullptr) {
 			Mtx m;
-			MsMtxSetRotY(m, mRotation.x);
+			MsMtxSetRotY(m, mRotation.y);
 			JGeometry::TVec3<f32> off(0.0f, -350.0f, 300.0f);
 			MTXMultVec(m, &off, &off);
 			item->mPosition += off;
@@ -546,7 +546,7 @@ void TItemSlotDrum::generateItem()
 		}
 		for (int i = 0; i < count; ++i) {
 			Mtx m;
-			MsMtxSetRotY(m, spread * ((f32)i - 1.0f) + (mRotation.x - spread));
+			MsMtxSetRotY(m, spread * (f32)i + (mRotation.y - spread));
 			JGeometry::TVec3<f32> off(0.0f, -350.0f, 200.0f);
 			MTXMultVec(m, &off, &off);
 			TMapObjBase* item = gpItemManager->makeObjAppear(

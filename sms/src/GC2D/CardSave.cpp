@@ -455,8 +455,7 @@ s8 TCardSave::waitForChoice(TEProgress param_1, TEProgress param_2, s8 param_3)
 			}
 
 			unkFC->updateCenteredSize(1, unk104.getWidth(), unk104.getHeight());
-			unk100->updateCenteredSize(1, unk114.getWidth(),
-			                           unk114.getHeight());
+			unk100->updateCenteredSize(1, unk114.getWidth(), unk114.getHeight());
 			unkFC->update();
 			unk100->update();
 
@@ -560,8 +559,7 @@ s8 TCardSave::waitForChoice(TEProgress param_1, TEProgress param_2, s8 param_3)
 			gpMSound->startSoundSystemSE(0x481EU, 0, nullptr, 0);
 
 			unkFC->updateCenteredSize(1, unk104.getWidth(), unk104.getHeight());
-			unk100->updateCenteredSize(1, unk114.getWidth(),
-			                           unk114.getHeight());
+			unk100->updateCenteredSize(1, unk114.getWidth(), unk114.getHeight());
 			unkFC->update();
 			unk100->update();
 
@@ -677,8 +675,7 @@ s8 TCardSave::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
 			unkFC->getPane()->show();
 			unk100->getPane()->show();
 			unkFC->updateCenteredSize(1, unk104.getWidth(), unk104.getHeight());
-			unk100->updateCenteredSize(1, unk114.getWidth(),
-			                           unk114.getHeight());
+			unk100->updateCenteredSize(1, unk114.getWidth(), unk114.getHeight());
 			unkFC->update();
 			unk100->update();
 			unk2E9 = param_3;
@@ -784,8 +781,7 @@ s8 TCardSave::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
 			gpMSound->startSoundSystemSE(0x481EU, 0, nullptr, 0);
 
 			unkFC->updateCenteredSize(1, unk104.getWidth(), unk104.getHeight());
-			unk100->updateCenteredSize(1, unk114.getWidth(),
-			                           unk114.getHeight());
+			unk100->updateCenteredSize(1, unk114.getWidth(), unk114.getHeight());
 			unkFC->update();
 			unk100->update();
 			if (unk2E9 == 0) {
@@ -1298,7 +1294,7 @@ s8 TCardSave::waitForSelect3(TEProgress param_1, TEProgress param_2,
 		break;
 
 	case 2: {
-		u8 oldSelect = unk2E9;
+		s8 oldSelect = unk2E9;
 		u32 input    = unk270->mEnabledFrameMeaning;
 
 		if (input & TMarioGamePad::MEANING_MENU_A) {

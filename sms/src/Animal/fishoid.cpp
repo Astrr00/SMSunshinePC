@@ -195,7 +195,21 @@ TFishoid::TFishoid(int type, const char* name)
 
 void TFishoid::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	TRealoid::perform(cue, graphics);
+	// retail inlines TRealoid::perform here
+	unk150->perform(cue, graphics);
+
+	if (cue & CUE_CALC_ANIM) {
+		clipBoids(graphics);
+		for (int i = 0; i < unk150->getBoidNum(); ++i) {
+			TBoid* boid = unk150->getBoid(i);
+			unk154[i]->calcRootMatrix(boid);
+		}
+	}
+
+	for (int i = 0; i < unk150->getBoidNum(); ++i) {
+		TRealoidActor* actor = getRealoid(i);
+		actor->perform(cue, graphics);
+	}
 
 	for (int i = 0; i < unk150->getBoidNum(); ++i) {
 		TBoid* boid = unk150->getBoid(i);

@@ -325,7 +325,7 @@ void TNozzleBase::emit(int param_1)
 			refEmitFlag = (refEmitFlag | 0x80);
 		}
 
-		s32 emittedWater = gpModelWaterManager->emitRequest(*emitInfo);
+		u8 emittedWater = gpModelWaterManager->emitRequest(*emitInfo);
 
 		mFludd->updateUnk1C88(emittedWater);
 		if (emittedWater != 0) {
@@ -674,9 +674,8 @@ void TNozzleTrigger::emit(int param_1)
 			f32 sinAngle       = JMASSin(faceAngleY);
 			f32 directionScale = (-dirX * sinAngle - cosAngle * dirZ);
 
-			f32 velocity = reaction;
+			f32 velocity = reaction * refEmitPow;
 			velocity *= directionScale;
-			velocity *= refEmitPow;
 
 			mFludd->mMario->addVelocity(velocity);
 
@@ -943,8 +942,8 @@ void TNozzleDeform::emit(int param_1)
 			emitSizeLerp = 0.0f;
 		} else {
 			if (localUnk378 < sizeMaxPressure) {
-				emitSizeLerp = (sizeMinPressure - localUnk378)
-				               / (sizeMaxPressure - localUnk378);
+				emitSizeLerp = (localUnk378 - sizeMinPressure)
+				               / (sizeMaxPressure - sizeMinPressure);
 			} else {
 				emitSizeLerp = 1.0f;
 			}
@@ -976,9 +975,8 @@ void TNozzleDeform::emit(int param_1)
 			f32 sinAngle       = JMASSin(faceAngleY);
 			f32 directionScale = (-dirX * sinAngle - cosAngle * dirZ);
 
-			f32 velocity = reaction;
+			f32 velocity = reaction * refEmitPow;
 			velocity *= directionScale;
-			velocity *= refEmitPow;
 
 			mFludd->mMario->addVelocity(velocity);
 

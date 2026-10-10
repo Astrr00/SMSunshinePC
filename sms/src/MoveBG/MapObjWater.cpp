@@ -53,12 +53,7 @@ void TMapObjWaterFilter::perform(u32 cue, JDrama::TGraphics* graphics)
 	if (!unk44 || gpMarDirector->unk124 != 0)
 		return;
 
-	bool bVar1 = true;
-	if (!gpCamera->isSimpleDemoCamera() && !gpCamera->isBckDemoCamera()) {
-		bVar1 = false;
-	}
-
-	if (bVar1 ? true : false)
+	if (gpCamera->isDemoCamera())
 		return;
 
 	if (gpCamera->unk124.y > 0.0f

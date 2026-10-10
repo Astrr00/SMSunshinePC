@@ -186,8 +186,10 @@ TNameIndParCallback::TNameIndParCallback(TNameKuri* owner)
 void TNameIndParCallback::execute(JPABaseEmitter* param_1,
                                   JPABaseParticle* param_2)
 {
-	if (mOwner->checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
-		MtxPtr mA = mOwner->getMActor()->getModel()->getAnmMtx(1);
+	if (!mOwner->checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
+		J3DModel* model = mOwner->getMActor()->getModel();
+		MtxPtr mBase    = model->getAnmMtx(0);
+		MtxPtr mA       = model->getAnmMtx(4);
 
 		Mtx local_4c;
 		MsMtxSetRotX(local_4c, mOwner->unk1AC);
@@ -205,7 +207,7 @@ void TNameIndParCallback::execute(JPABaseEmitter* param_1,
 		JGeometry::TVec3<f32> tmp3(mA[0][2], mA[1][2], mA[2][2]);
 		local_7c.x = tmp3.length();
 
-		param_1->setGlobalRTMatrix(mA);
+		param_1->setGlobalRTMatrix(mBase);
 
 		if (mOwner->unk1A8) {
 			param_1->setGlobalScale(mOwner->mScaling);
@@ -374,7 +376,7 @@ void TNameKuri::calcRootMatrix()
 		JGeometry::TVec3<f32> local_88(MsSin(mRotation.y), 0.0f,
 		                               MsCos(mRotation.y));
 
-		JGeometry::TVec3<f32> normal = unk138->getNormal();
+		JGeometry::TVec3<f32> normal = mGroundPlane->getNormal();
 
 		JGeometry::TVec3<f32> local_a0;
 		local_a0.cross(normal, local_88);
@@ -620,6 +622,7 @@ bool TNameKuri::canJumpAttack() const
 #ifdef TARGET_PC
 	return false;
 #endif
+	return false;
 }
 
 bool TNameKuri::isHitValid(u32 param_1)
@@ -665,8 +668,11 @@ DEFINE_NERVE(TNerveNameKuriLand, TLiveActor)
 {
 	TNameKuri* self = (TNameKuri*)spine->getBody();
 
-	if (self->isBckAnm(4) && self->checkCurAnmEnd(0))
-		return true;
+	if (self->isBckAnm(4)) {
+		if (self->checkCurAnmEnd(0))
+			return true;
+		return false;
+	}
 
 	if (!self->isAirborne())
 		self->setBckAnm(4);

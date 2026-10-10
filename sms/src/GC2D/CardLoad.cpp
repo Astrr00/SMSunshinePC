@@ -153,7 +153,7 @@ void TCardLoad::load(JSUMemoryInputStream& stream)
 
 		unk1D4[i] = new TExPane(unk34, key);
 
-		((J2DPicture*)unk1D4[i]->getPane())->mBlack = 0x01006667;
+		((J2DPicture*)unk1D4[i]->getPane())->mBlack = 0x00FFFF00;
 
 		unk1D4[i]->setPaneAlpha(20, 0xff, 0);
 	}
@@ -585,9 +585,9 @@ void TCardLoad::perform(u32 cue, JDrama::TGraphics* graphics)
 
 			bool done = true;
 
-			int alpha1 = root1->getAlpha() + 4;
-			if (alpha1 > 255)
-				alpha1 = 255;
+			int alpha1 = root1->getAlpha() - 4;
+			if (alpha1 < 0)
+				alpha1 = 0;
 			else
 				done = false;
 			root1->setAlpha(alpha1);
@@ -596,9 +596,9 @@ void TCardLoad::perform(u32 cue, JDrama::TGraphics* graphics)
 			unk744->setAlpha(alpha1);
 			unk740->setAlpha(alpha1);
 
-			int alpha2 = root2->getAlpha() - 4;
-			if (alpha2 < 0)
-				alpha2 = 0;
+			int alpha2 = root2->getAlpha() + 4;
+			if (alpha2 > 255)
+				alpha2 = 255;
 			else
 				done = false;
 			root2->setAlpha(alpha2);
@@ -733,7 +733,7 @@ void TCardLoad::perform(u32 cue, JDrama::TGraphics* graphics)
 		case 10:
 			MSBgm::startBGM(MSD_BGM_CHUBOSS2);
 			unk38->onFlag(TMarioGamePad::PAD_FLAG_MENU_INPUT);
-			gpMarioOriginal->offFlag(MARIO_FLAG_GAME_OVER);
+			gpMarioOriginal->offFlag(MARIO_FLAG_HAS_FLUDD);
 			unk14 = 9;
 			unk18 = 1;
 			unkF0->getPane()->setAlpha(0);
@@ -2403,7 +2403,7 @@ void TCardLoad::changeScene()
 			if (rc == CARD_RESULT_READY) {
 				if (unk10 == 2)
 					unk10 = 3;
-				drawMessage(PROGRESS_UNK20);
+				drawMessageBM(PROGRESS_UNK20);
 				gpCardManager->probe();
 				if (unk10 == 5)
 					SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_DECIDE, 0,
@@ -2411,7 +2411,7 @@ void TCardLoad::changeScene()
 			} else {
 				if (unk10 == 2)
 					unk10 = 3;
-				drawMessage(PROGRESS_UNK21);
+				drawMessageBM(PROGRESS_UNK21);
 			}
 		} else {
 			drawMessageBM(PROGRESS_UNK0);

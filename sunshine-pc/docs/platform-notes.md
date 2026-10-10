@@ -704,19 +704,19 @@ Next:
 3. Then the pad script for Start, file select, new game, Delfino, Bianco, and a 120 s log.
 
 
-## ShineSave: real Shine collect (STOPPED mid-build, not verified)
+## ShineSave: Shine collect and card save (ShineSave2-2, collect not verified)
 
-Changed: `src/devscript/devscript.cpp`: new `tpshine [dx dy dz]` op (moves Mario to the runtime `TShine` plus offset, then the game's own overlap test runs `touchPlayer`). `doShine` now shares a `findShine` helper. NOT compiled yet: the build was killed at 1180/1283 with no devscript diagnostics seen.
+Changed: `src/devscript/devscript.cpp`. `findShine` scans the Shine manager (name-tree entry from MapObjInit.cpp:1259, looked up with `TNameRefGen::search`), then the item and map-object managers. `tpshine [dx dy dz]` moves Mario onto the runtime `TShine`. On failure it dumps every managed object (diagnostic, kept on purpose).
 
-Stage: `SUNSHINE_DEV_START=delfino/1` maps to `delfino1.arc` (`stageArc.bin` group `delfino`, entry index 1; `Application.cpp` `devStartArea`). Placed Shine in `delfino1.szs`: event 42, scene pos (-2163.0, 2115.0, -376.5), `normal` (live). Runtime instantiation not checked yet; the `tpshine:` log line prints the runtime shine position and eventId, which proves it.
+Latest run (`build/ShineSave2-2/watch.log`, build stamp 21:25:45, `SUNSHINE_DEV_START=delfino/1`, temp `APPDATA=build/ShineSave2-2/appdata`, 240 s cap):
+- Observed: the APPDATA override works (log:47 `Loaded GC Card Image` in the temp dir). The cap ends the run (log:425).
+- Observed: `tpshine` finds the placed Shine: `eventId=42 shine=(-2163.0,2115.0,-376.5)`, `shines_before=0` (log:73). The earlier build found no TShine among 171 objects.
+- Observed: Mario is placed at the Shine (log:73), then stands on the ground at y=1865 by tick 211 (log:78). No collect: `shines=0` and `dir.state=4` on every status line to tick 1381 (log:247). No card save.
+- Observed: `hold A` does not move Mario (`con.move=0`, `pad.stick=(0,0)` throughout), and collect.txt has no stick input.
+- Observed: no `.gci` in `build/ShineSave2-2/appdata/Sunshine/saves/JAP/Card A/`. The real save `%APPDATA%\Sunshine\saves\JAP\Card A\01-GMSJ-super_mario_sunshine.gci` (last write 15:01) is untouched.
+- PNGs: `build/ShineSave2-2/s1_before.png` (tick 181), `s2_demo.png` (tick 331), `s8.png` (tick 1381), `live.png`.
 
-Save dir: `APPDATA` env controls it (`settings.cpp:142`, `<APPDATA>\Sunshine\saves`). Use a private temp APPDATA.
-
-Next steps:
-1. Build: `tools\build-alt.cmd ShineSave` with the `LLVM_BIN` export. Fix any devscript compile error. If `extern/aurora` breaks, retry later (GoopCount's mid-edit).
-2. Run `build/ShineSave/shine_tp.txt` (wait 240, log, tpshine, log, wait/log) with `SUNSHINE_DEV_START=delfino/1`, `SUNSHINE_DEV_SCRIPT`, `SUNSHINE_DEV_STATUS=1`, private `APPDATA`, `SUNSHINE_WINDOW_POS=700,0`, `SUNSHINE_WINDOW_SIZE=640,480`. Read the `tpshine:` line.
-3. Extend the script with A presses through the card-save dialog after the touch. Chain: `updateGameMode` `unk4C&1` then `0x200` then `STATE_CARD_SAVE` then `CardSave::init`. Watch flag 0x40000 (shine count) go 0→1.
-4. Check the `.gci` in the private save dir with `tools/gci_check.py`. Relaunch with the same APPDATA and confirm the count reloads.
+Next step: make `tpshine` collect directly: call the Shine touch path (`TShine::touchPlayer`, Item.cpp:670, then `TMarDirector::fireGetStar`, MarDirectorEvent.cpp:141) instead of relying on overlap. Then check `dir.state` 4 -> 11 and `shines=1`, run the card save, and check the `.gci` with `tools/gci_check.py`.
 
 ## Watchdog, live monitor and the title-screen hang (lead)
 
@@ -740,3 +740,29 @@ Next steps:
 - Observed after the fix (normal `--dvd` boot, `SUNSHINE_DEV_SKIP_MOVIES=1`): title logo, Shine Sprite, palm, rainbow
   band, "(C)2002 NINTENDO" and seagulls render; logic 30/s. The area behind the logo is black: not yet compared with
   retail, unknown whether a background scene is missing.
+
+## Sibling project SunshineRecomp (surveyed, lead)
+
+`C:/Users/niemc/Documents/Projekte/SunshineRecomp` is a static recompilation of the **USA** DOL (GMSE01) on ModernGekko (Dolphin fork). What transfers to this GMSJ01 source port:
+- Nothing binary: its `main.dol`, Gecko codes and patch addresses are GMSE01-only; its `ref/sms` is an older upstream doldecomp than `upstream/main` (fetched into `sms/.git.hold`, worktree `../sms-upstream`).
+- Widescreen reference values (GMSE01.ini `$Widescreen`, verified against a RAM dump there): aspect 16:9 written as 0x3FE38E39, extra float 0x3F9A7643 (~1.2067), clip/FOV floats 800.0 and 700.0, HUD x offsets (746, -106, 572). Use as cross-check for our Hor+ numbers, not as code.
+- Its `$60FPS` code writes 0.02 (1/50 s), semantics unconfirmed; not a basis for our replay/interpolation.
+- Runtime reference: ModernGekko has a file-command automation channel (`read_memory`, max 16 MiB, `ref/ModernGekko/tools/automation_protocol.cpp`), usable as a USA-only state reference; no GMSJ01 Dolphin reference exists on this machine yet.
+
+## Reference Dolphin for GMSJ01 (blocked, DolphinRef)
+
+- Binary: `SunshineRecomp/ref/ModernGekko/build/DolphinNoGUI.exe` (reads the JP RVZ directly). `moderngekko-run.exe` not used: it patches `sys/main.dol` and targets the USA build.
+- Tool: `tools/dolphin_ref.py --image <rvz|dol> [--seconds N | --frames N] [--symbol NAME]... [--mario] [--dump FILE]`; `--selftest` checks parsing. Launch: `-p headless -v Null`, temp `-u` with `Config/Dolphin.ini` (`UsePanicHandlers = False`, `OnScreenDisplayMessages = False`), `-C Logger.*`, `CREATE_NO_WINDOW | BELOW_NORMAL_PRIORITY`. The temp dir is deleted only on success.
+- Memory: Dolphin's GDB stub (`Main.General.GDBPort`, port chosen per run). Reads are capped at 4096 B per packet (`GDBStub.cpp:821-837`; longer reads answer `E01` and fall through), so a 24 MiB dump is about 6144 packets. The task's 16 MiB chunks are not possible on this route. The CPU starts halted; `c` resumes. The stub only exists after `BootUp` returns (`Core/Core.cpp:606`; `CpuThread` at 641, GDB init at its line 340).
+- Symbols: `retraceCount = 0x80409F00` is provisional (sbss local). `gpMarioOriginal = 0x8040A378` (pointer). Mario `mPosition` at `+0x10` is [INFERENCE] (`JDRPlacement.hpp:29`), not checked at runtime.
+- Comparison (once a run works): `python tools/dolphin_ref.py --image <dol|rvz> --seconds 20 --symbol retraceCount --symbol gpMarDirector --mario` prints the values for a frame; compare with the port at the same frame.
+- Result: **no RAM value read.** The GDB stub never came up.
+  - RVZ (`Booting from disc`): the emu thread never reaches `CpuThread` in 6 log-enabled attempts. The log ends after the apploader DVD reads (last at offset `0x40a900`, `Boot_BS2Emu.cpp:210`). A live probe showed the process busy (CPU time rising, no GDB listener).
+  - DOL (`sys/main.dol` from `DolphinTool extract -g`, standalone dir): game code runs. Invalid reads at PC `0x8009617c` (inside `DVDConvertPathToEntrynum`, `0x80095ECC`) and `0x800964d4` (inside `DVDGetCurrentDir`, `0x80096480`) are null pointers into the DVD FST, which a bare DOL does not have.
+- Popups: a `Warning: Invalid read` MessageBox appeared on the desktop in the DOL run (no Dolphin.ini yet; the exact `-C` argument list of that run is not recorded). Source: `PanicAlertFmtT` warnings (`Core/PowerPC/MMU.cpp:495`, `MsgType::Warning`) return before the handler unless `s_alert_enabled` (`Common/MsgHandler.cpp:136-137`), which `Main.Interface.UsePanicHandlers` sets (`UICommon.cpp:124`). `-C` outranks Base (`Common/Config/Enums.h:39-46`) and is parsed before `UICommon::Init` (`DolphinNoGUI/MainNoGUI.cpp:227,277`). So the current script config (`-C` key plus Dolphin.ini) should suppress these. [INFERENCE] The earlier popup means the key was not applied, or the built binary differs from the vendor source. Not verified by a run: **no further run until a log shows no popup.**
+- MMU: left off (`Main.Core.MMU`, default false, `MainSettings.cpp:204`). With MMU off, invalid accesses take the warning path (`MMU.cpp:487-498`) instead of faulting like hardware; enable only if a run needs crash-accurate faults.
+- Next, if resumed: a GCM image with an FST (not a bare DOL), or find out why the RVZ apploader stops. Alternative: ModernGekko's `read_memory` (`tools/automation_protocol.cpp`) with `MODERNGEKKO_STATICRECOMP=0` on an extracted JP root (not tried).
+
+## Decomp: out-of-line header helpers (InlineMechanism, blocked)
+
+Retail calls some header-inline helpers out of line (`bl sqrt__Q29JGeometry8TUtil<f>Ff`, TVec3 dot/set/normalize, TMario::checkStatusType, JUTRect ctor) where our mwcc build inlines them. Ruled out with evidence: `#pragma dont_inline` pairs (inert), scoped `inline_depth(1..3)` (inert; only a global depth changes it and out-lines everything else too), `inline_max_size`/`inline_max_total_size` (inert for `inline`-keyword callees), `-inline noauto/off/smart/all`, mwcc 1.2.5n/1.2.5 (both inline), cflags (identical to upstream), body differences (sqrt body equals retail's weak copy). Upstream has the same declarations and does not match these callers either. Open: the exact retail caller source shape and header include order. Affected callers stay pending until a per-function asm-equivalence review is recorded (failed inlining experiments do not prove caller correctness): evIsNearActors 87 %, evIsNearSameActors 93 %, CLBCalcNearNinePos 41 %, isMarioCrabWalk_/isMarioAimWithGun_ 53.5 %, MapMirror perform 46 %.

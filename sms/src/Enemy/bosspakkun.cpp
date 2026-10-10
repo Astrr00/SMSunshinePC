@@ -665,16 +665,16 @@ void TBossPakkunMtxCalc::calcHeadDir(u16 jointIndex)
 	f32 limit = mOwner->getBossPakkunParams()->mSLHeadHomingLimit.get();
 
 	f32 limitedDelta;
-	if (0.0f < delta)
-		limitedDelta = limit > delta ? delta : limit;
+	if (delta > 0.0f)
+		limitedDelta = delta > limit ? limit : delta;
 	else
-		limitedDelta = -limit > delta ? -limit : delta;
+		limitedDelta = delta > -limit ? delta : -limit;
 
 	f32 turn = MsAngleDiff(limitedDelta, headRotation);
-	if (0.0f < turn)
-		turn = 1.0f > turn ? turn : 1.0f;
+	if (turn > 0.0f)
+		turn = turn > 1.0f ? 1.0f : turn;
 	else
-		turn = -1.0f > turn ? -1.0f : turn;
+		turn = turn > -1.0f ? turn : -1.0f;
 
 	headRotation += turn;
 	mOwner->unk184 = headRotation;
@@ -887,6 +887,7 @@ void TBossPakkun::rumblePad(int type, const JGeometry::TVec3<f32>& position)
 	SMSRumbleMgr->start(8, &unk1C8);
 }
 
+#pragma dont_inline on
 void TBossPakkun::showMessage(u32 message)
 {
 	u32 index = message - 0xe0000;
@@ -902,6 +903,7 @@ void TBossPakkun::showMessage(u32 message)
 	}
 	unk1C0 |= mask;
 }
+#pragma dont_inline off
 
 bool TBossPakkun::is2ndFightNow() const
 {

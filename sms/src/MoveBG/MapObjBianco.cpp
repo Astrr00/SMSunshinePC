@@ -879,12 +879,12 @@ void TMapObjRootPakkun::initMapObj()
 void TMapObjRootPakkun::drawObject(JDrama::TGraphics* graphics)
 {
 	TLiveActor::drawObject(graphics);
-	if (fabsf(gpMarioPos->z - mPosition.z) < 10000.0f) {
+	if (fabsf(SMS_GetMarioZ() - mPosition.z) < 10000.0f) {
 		unk138->movement();
 		if (!isStateTimerEngaged()) {
 			unk138->tremble(mTremblePower, mTrembleAccel, mTrembleBrake,
 			                mTrembleTime);
-			mStateTimer = mTrembleTime;
+			startStateTimer(mTrembleTime);
 		}
 	}
 }

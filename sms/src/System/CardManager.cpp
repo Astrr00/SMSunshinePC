@@ -396,9 +396,9 @@ s32 TCardManager::format_()
 		result = CARDFormat(mChannel);
 		if (result == CARD_RESULT_READY)
 			mFsCheckedOk = true;
-		if (result == CARD_RESULT_IOERROR)
-			unmount_();
 	}
+	if (result == CARD_RESULT_IOERROR)
+		unmount_();
 	return result;
 }
 

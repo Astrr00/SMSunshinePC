@@ -25,6 +25,7 @@ Runtime bugs keep coming from NonMatching functions (wrong masks, swapped branch
 | Fully matching units flipped to `Matching` in `configure.py` | OPEN | lead, after SHA-1 gate |
 
 Exit criterion: every function the port builds is an exact match or has a recorded asm-equivalence review (triage score only ranks the work), no `TARGET_PC` stub over an empty body.
+Scope limit (`sms/AGENTS.md`): agents do no autonomous decomp work on MSL, MetroTRK, THPPlayer, the dolphin SDK or JSystem; only game code. Port fixes in those libraries stay under `TARGET_PC`.
 
 ## Phase 1: Boot to gameplay (core)
 

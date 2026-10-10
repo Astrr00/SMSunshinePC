@@ -261,8 +261,9 @@ void THamuKuriManager::setSearchHamuKuri()
 			TMapObjBase* pTVar18 = nullptr;
 			f32 fVar1            = canSearchDist * canSearchDist;
 
-			for (int i = 0; i < unk68; ++i) {
-				TMapObjBase* uVar16 = unk64[i];
+			int nObjs = unk68;
+			for (int j = 0; j < nObjs; ++j) {
+				TMapObjBase* uVar16 = unk64[j];
 				if (uVar16->checkLiveFlag(LIVE_FLAG_DEAD
 				                          | LIVE_FLAG_CLIPPED_OUT))
 					continue;
@@ -943,54 +944,53 @@ void THamuKuri::makeCapFly(TMapObjBase* param_1)
 	local_3c.x += -mVelocity.x * 20.0f;
 	local_3c.z += -mVelocity.z * 20.0f;
 
-	// TODO: control flow all over the place, definitely inlines needed
-
-	TSmallEnemy* holder = getManager()->getHolder(mInstanceIndex);
-	if (holder == nullptr && mGroundPlane->checkFlag(BG_CHECK_FLAG_ILLEGAL)
-	    && mGroundPlane->isPool() && mGroundPlane->isWaterSurface()) {
-		mPosition = SMS_GetMarioPos();
-		mVelocity.set(0.0f, 10.0f, 0.0f);
-		offLiveFlag(LIVE_FLAG_UNK10);
-	} else {
-		mPosition = local_3c;
-		mPosition.y += 100.0f;
-		param_1->mPosition.y = mPosition.y;
-
-		if (param_1->receiveMessage(this, HIT_MESSAGE_TAKE)) {
-			onLiveFlag(LIVE_FLAG_DEAD);
+	THamuKuri* holder = (THamuKuri*)getManager()->getHolder(mInstanceIndex);
+	if (holder == nullptr) {
+		if (!mGroundPlane->checkFlag(BG_CHECK_FLAG_ILLEGAL) && !mGroundPlane->isPool()
+		    && !mGroundPlane->isWaterSurface()) {
+			holder = this;
 		} else {
-			reset();
-			onHaveCap();
-			mHeldObject = param_1;
-			onLiveFlag(LIVE_FLAG_HIDDEN);
-			offLiveFlag(LIVE_FLAG_DEAD);
-			offLiveFlag(LIVE_FLAG_CLIPPED_OUT);
-			onHitFlag(HIT_FLAG_NO_COLLISION);
-			getManager()->unk70 = this;
-
-			// TODO: this is an inline
-			int uVar11 = unk124->getCurGraphIndex();
-
-			int count  = MsRandF(2, 3);
-			int uVar10 = -1;
-			for (int i = 0; i < count; ++i) {
-				int next = unk124->unk0->getRandomNextIndex(uVar11, uVar10,
-				                                            0xffffffff);
-				uVar10   = uVar11;
-				uVar11   = next;
-			}
-
-			if (uVar11 < 0)
-				uVar11 = 0;
-
-			JGeometry::TVec3<f32> VStack_60;
-			unk124->getGraph()->getGraphNode(uVar11).getPoint(&VStack_60);
-
-			JGeometry::TVec3<f32> local_6c
-			    = calcVelocityToJumpToY(VStack_60, mCapSpeed, getGravityY());
-			onLiveFlag(LIVE_FLAG_AIRBORNE);
-			mVelocity = local_6c;
+			param_1->mPosition = SMS_GetMarioPos();
+			param_1->mVelocity.set(0.0f, 10.0f, 0.0f);
+			param_1->offLiveFlag(LIVE_FLAG_UNK10);
+			return;
 		}
+	}
+
+	holder->mPosition = local_3c;
+	holder->mPosition.y += 100.0f;
+	param_1->mPosition.y = holder->mPosition.y;
+
+	if (param_1->receiveMessage(holder, HIT_MESSAGE_TAKE)) {
+		holder->reset();
+		holder->onHaveCap();
+		holder->mHeldObject = param_1;
+		holder->onLiveFlag(LIVE_FLAG_HIDDEN);
+		holder->offLiveFlag(LIVE_FLAG_DEAD);
+		holder->offLiveFlag(LIVE_FLAG_CLIPPED_OUT);
+		holder->onHitFlag(HIT_FLAG_NO_COLLISION);
+		getManager()->unk70 = holder;
+
+		int cur   = unk124->getCurGraphIndex();
+		int prev  = -1;
+		int count = TMsRange<s32>(2, 3).rand();
+		for (int i = 0; i < count; ++i) {
+			int next = unk124->unk0->getRandomNextIndex(cur, prev, 0xffffffff);
+			prev     = cur;
+			cur      = next;
+		}
+
+		if (cur < 0)
+			cur = 0;
+
+		JGeometry::TVec3<f32> goal;
+		unk124->getGraph()->getGraphNode(cur).getPoint(&goal);
+		JGeometry::TVec3<f32> velocity
+		    = calcVelocityToJumpToY(goal, mCapSpeed, holder->getGravityY());
+		holder->onLiveFlag(LIVE_FLAG_AIRBORNE);
+		holder->mVelocity = velocity;
+	} else {
+		holder->onLiveFlag(LIVE_FLAG_DEAD);
 	}
 }
 
@@ -1219,27 +1219,24 @@ bool THamuKuri::isCollidMove(THitActor* param_1)
 	    || param_1->isActorType(0x10000013)
 	    || param_1->isActorType(0x10000011)) {
 		THamuKuri* hamu = (THamuKuri*)param_1;
-		if (hamu->mSpine->getCurrentNerve()
-		        != &TNerveHamuKuriBoundFreeze::theNerve()
-		    && hamu->mSpine->getCurrentNerve()
-		           != &TNerveHamuKuriBoundFreeze::theNerve()
-		    && hamu->mSpine->getCurrentNerve()
-		           != &TNerveHamuKuriWallDie::theNerve()) {
-			if (!isHitWallInBound()) {
-				unk1A3 = 1;
-				forceRoll(mPosition, false);
-				return false;
-			}
+		if (hamu->mSpine->getCurrentNerve() == &TNerveHamuKuriBoundFreeze::theNerve()
+		    && mSpine->getCurrentNerve() != &TNerveSmallEnemyDie::theNerve()
+		    && mSpine->getCurrentNerve() != &TNerveHamuKuriBoundFreeze::theNerve()
+		    && mSpine->getCurrentNerve() != &TNerveHamuKuriWallDie::theNerve()
+		    && !isHitWallInBound()) {
+			unk1A3 = 1;
+			forceRoll(hamu->mPosition, false);
+			return false;
 		}
 	}
 
-	// TODO: need more checks & HitActor inlines
-	if ((param_1->getActorType() & 0xFFFF0000) == 0x40000000) {
+	u32 type = param_1->getActorType();
+	if ((type & 0xFFFF0000) == 0x40000000 && type >= 0x40000390 && type <= 0x40000394) {
 		TLiveActor* enemy         = (TLiveActor*)param_1;
 		JGeometry::TVec3<f32> vel = enemy->mVelocity;
-		if (abs(vel.x) > 2.0f && abs(vel.y) > 2.0f && abs(vel.z) > 2.0f) {
+		if (abs(vel.y) > 2.0f && (abs(vel.x) > 2.0f || abs(vel.z) > 2.0f)) {
 			if (mSpine->getCurrentNerve() != &TNerveHamuKuriJitabata::theNerve()
-			    && isAirborne()) {
+			    && !isAirborne()) {
 				mSpine->pushNerve(&TNerveHamuKuriJitabata::theNerve());
 			}
 		}

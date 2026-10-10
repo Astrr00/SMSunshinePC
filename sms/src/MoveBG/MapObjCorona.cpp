@@ -18,6 +18,7 @@
 #include <MarioUtil/MathUtil.hpp>
 #include <MarioUtil/RumbleMgr.hpp>
 #include <MSound/MSound.hpp>
+#include <MSound/MSoundSE.hpp>
 #include <Player/Mario.hpp>
 #include <Player/MarioAccess.hpp>
 #include <Player/NozzleTrigger.hpp>
@@ -281,111 +282,104 @@ void TBathtub::updatePosture_()
 	mQuat.normalize();
 }
 
-bool TBathtub::getNextGrip(const JGeometry::TVec3<f32>& target,
-                           const JGeometry::TVec3<f32>& velocity, f32 range,
+static f32 getDir(MtxPtr mtx, const JGeometry::TVec3<f32>& pos)
+{
+	JGeometry::TVec3<f32> xDir(mtx[0][0], mtx[1][0], mtx[2][0]);
+	JGeometry::TVec3<f32> zDir(mtx[0][2], mtx[1][2], mtx[2][2]);
+	JGeometry::TVec3<f32> trans(mtx[0][3], mtx[1][3], mtx[2][3]);
+	JGeometry::TVec3<f32> delta;
+	delta.sub(pos, trans);
+	f32 localZ = zDir.dot(delta);
+	f32 localX = xDir.dot(delta);
+	return (360.0f / 65536.0f) * matan(localZ, localX);
+}
+
+static f32 getDir(MtxPtr mtx, const JGeometry::TVec3<f32>& pos,
+                  const JGeometry::TVec3<f32>& direction)
+{
+	JGeometry::TVec3<f32> xDir(mtx[0][0], mtx[1][0], mtx[2][0]);
+	JGeometry::TVec3<f32> zDir(mtx[0][2], mtx[1][2], mtx[2][2]);
+	JGeometry::TVec3<f32> trans(mtx[0][3], mtx[1][3], mtx[2][3]);
+	JGeometry::TVec3<f32> delta;
+	delta.sub(pos, trans);
+	JGeometry::TVec3<f32> normal;
+	normal.normalize(delta);
+	JGeometry::TVec3<f32> tangent;
+	tangent.scaleAdd(-normal.dot(direction), direction, normal);
+	delta += tangent;
+	f32 localZ = zDir.dot(delta);
+	f32 localX = xDir.dot(delta);
+	return (360.0f / 65536.0f) * matan(localZ, localX);
+}
+
+// Retail calls fmodf out of line; keep the MSL inline version out of the grip
+// loops so mwcc emits the same bl.
+#pragma dont_inline on
+static f32 fmodDeg(f32 x, f32 y) { return std::fmodf(x, y); }
+#pragma dont_inline off
+
+#pragma dont_inline on
+bool TBathtub::getNearGrip(const JGeometry::TVec3<f32>& pos, f32 maxDiff,
                            f32* out) const
 {
-	const TPosition3f& m
-	    = *(const TPosition3f*)getRootJointMtx();
-	JGeometry::TVec3<f32> xDir;
-	m.getXDir(xDir);
-	JGeometry::TVec3<f32> zDir;
-	m.getZDir(zDir);
-	JGeometry::TVec3<f32> trans;
-	m.getTrans(trans);
+	f32 angle = getDir(*getRootJointMtx(), pos);
 
-	JGeometry::TVec3<f32> diff;
-	diff.sub(target, trans);
-	JGeometry::TVec3<f32> dir;
-	dir.setLength(diff, 1.0f);
-	JGeometry::TVec3<f32> proj;
-	proj.scaleAdd(-dir.dot(velocity), dir, velocity);
-	diff.add(proj);
-	f32 angle = (360.0f / 65536.0f) * matan(zDir.dot(diff), xDir.dot(diff));
-
-	f32 best = 360.0f;
-	int idx  = 0;
+	f32 best  = 360.0f;
+	int index = 0;
 	for (int i = 0; i < 5; ++i) {
-		f32 delta = -180.0f
-		            + std::fmodf(
-		                360.0f + (unk150[i] - angle - (-180.0f)), 360.0f);
-		if (fabsf(delta) < best) {
-			idx  = i;
-			best = fabsf(delta);
+		f32 diff = fabsf(
+		    -180.0f
+		    + fmodDeg(360.0f + (unk150[i] - angle - -180.0f), 360.0f));
+		if (diff < best) {
+			index = i;
+			best  = diff;
 		}
 	}
 
-	if (best < range) {
-		*out = unk150[idx];
+	if (best < maxDiff) {
+		*out = unk150[index];
 		return true;
 	}
 	return false;
 }
+#pragma dont_inline off
 
-f32 TBathtub::getNextJuncture(const JGeometry::TVec3<f32>& target,
-                              const JGeometry::TVec3<f32>& velocity) const
+f32 TBathtub::getNextJuncture(const JGeometry::TVec3<f32>& pos,
+                              const JGeometry::TVec3<f32>& direction) const
 {
-	const TPosition3f& m
-	    = *(const TPosition3f*)getRootJointMtx();
-	JGeometry::TVec3<f32> xDir;
-	m.getXDir(xDir);
-	JGeometry::TVec3<f32> zDir;
-	m.getZDir(zDir);
-	JGeometry::TVec3<f32> trans;
-	m.getTrans(trans);
-
-	JGeometry::TVec3<f32> diff;
-	diff.sub(target, trans);
-	JGeometry::TVec3<f32> dir;
-	dir.setLength(diff, 1.0f);
-	JGeometry::TVec3<f32> proj;
-	proj.scaleAdd(-dir.dot(velocity), dir, velocity);
-	diff.add(proj);
-	f32 angle = (360.0f / 65536.0f) * matan(zDir.dot(diff), xDir.dot(diff));
-
-	f32 best = 360.0f;
-	int idx  = 0;
+	f32 angle = getDir(*getRootJointMtx(), pos, direction);
+	f32 best  = 360.0f;
+	int index = 0;
 	for (int i = 0; i < 5; ++i) {
-		f32 delta = -180.0f
-		            + std::fmodf(
-		                360.0f + (unk13C[i] - angle - (-180.0f)), 360.0f);
-		if (fabsf(delta) < best) {
-			idx  = i;
-			best = fabsf(delta);
+		f32 diff = fabsf(
+		    -180.0f
+		    + fmodDeg(360.0f + (unk13C[i] - angle - -180.0f), 360.0f));
+		if (diff < best) {
+			index = i;
+			best  = diff;
 		}
 	}
-	return unk13C[idx];
+	return unk13C[index];
 }
 
-bool TBathtub::getNearGrip(const JGeometry::TVec3<f32>& pos, f32 range,
+bool TBathtub::getNextGrip(const JGeometry::TVec3<f32>& pos,
+                           const JGeometry::TVec3<f32>& direction, f32 maxDiff,
                            f32* out) const
 {
-	const TPosition3f& m = *(const TPosition3f*)getRootJointMtx();
-	JGeometry::TVec3<f32> xDir;
-	m.getXDir(xDir);
-	JGeometry::TVec3<f32> zDir;
-	m.getZDir(zDir);
-	JGeometry::TVec3<f32> trans;
-	m.getTrans(trans);
-
-	JGeometry::TVec3<f32> diff;
-	diff.sub(pos, trans);
-	f32 angle = (360.0f / 65536.0f) * matan(zDir.dot(diff), xDir.dot(diff));
-
-	f32 best = 360.0f;
-	int idx  = 0;
+	f32 angle = getDir(*getRootJointMtx(), pos, direction);
+	f32 best  = 360.0f;
+	int index = 0;
 	for (int i = 0; i < 5; ++i) {
-		f32 delta = -180.0f
-		            + std::fmodf(
-		                360.0f + (unk150[i] - angle - (-180.0f)), 360.0f);
-		if (fabsf(delta) < best) {
-			idx  = i;
-			best = fabsf(delta);
+		f32 diff = fabsf(
+		    -180.0f
+		    + fmodDeg(360.0f + (unk150[i] - angle - -180.0f), 360.0f));
+		if (diff < best) {
+			index = i;
+			best  = diff;
 		}
 	}
-
-	if (best < range) {
-		*out = unk150[idx];
+	if (best < maxDiff) {
+		*out = unk150[index];
 		return true;
 	}
 	return false;
@@ -590,7 +584,7 @@ void TBathtub::calcBathtubData()
 		if (!axis.isZero()) {
 			JGeometry::TQuat4<f32> q;
 			q.setRotate(axis, unk16C->maxAngle.get() * 6.2831855f / 360.0f);
-			q.rotate(mBathtubData.unk0C);
+			q.rotate(mBathtubData.unk0C, mBathtubData.unk0C);
 			mBathtubData.unk58.set(0.0f, unk16C->shake.get(), 0.0f);
 		}
 	} else {
