@@ -444,6 +444,9 @@ Next: gate draw/viewport/scissor/texture-bind logs on a title-frame counter (cop
 - Glyphs: `tools/gen_glyphs.py` → 72 PNGs in `assets/glyphs/{xbox,playstation,switch,gamecube}/`. `src/glyphs/glyphs.{h,cpp}` serve them. In-game hook (`sms/src/JSystem/JUtility/JUTResource.cpp`, `#ifdef TARGET_PC`) swaps only the 4 disc icons (A, B, X, Start). Y, Z, L, R, D-pad, C-stick and stick glyphs ship as assets but are not hooked. guide_tx_b visual check still pending.
 - Packaging: `tools/package.py --build-dir build/ReleaseDlss --version 0.1.0 --llvm-bin <llvm bin>` → `dist/sunshine-0.1.0/` + `.zip` + `.sha256` (20.3 MiB). Bundles SDL3, webgpu_dawn, nod, libpng16, zlib1, dxcompiler, dxil and the MSVC runtime DLLs. Hard-fails on game-image extensions. Open: VC redistributable EULA not checked; Dawn/nod/SQLite/DXC licence texts fetched from default branches, not pinned commits; port code licence undecided; `release-checklist.md` still names `build/windows-clang-release`.
 - Shared-desktop note: four game windows land on the same spot. Use the `build/_screen.lock` protocol before any windowed capture.
+- DLSS verdict revised: Dawn's D3D12 backend is import-only, but the Vulkan backend exports images (`ExportVulkanImage`, `VulkanBackend.h` l.175). Still infeasible: no motion vectors/jitter in GX, no SDK, NVIDIA-only. Launcher shows a static `dlss` row ("unavailable in this build"), `assets/launcher/launcher.rml` l.37. Not a toggle.
+- Clean Release configure `build/ReleaseDlssPkg` works (`build/_pkg-build.cmd`, run as `cmd /c "build\_pkg-build.cmd"`). The build is NOT green: `extern/aurora/lib/gfx/pixel_metric.cpp(66)` uses undeclared `MaxPixelCounters` (GoopCount's occlusion-to-pixel-counter cutover, mid-flight). The clean build has not produced `sunshine.exe`, so no install, CPack or package has been run from it.
+- Next steps (in order): (1) After GoopCount's cutover compiles, rerun `cmd /c "build\_pkg-build.cmd"` and confirm `build/ReleaseDlssPkg/sunshine.exe` exists. (Earlier `BUILD_EXIT 0` was a false pass: the script's last `echo` hid ninja's exit 1; the script now ends with `exit /b %ERRORLEVEL%`.) (2) Confirm whether Tracy is in the `sunshine.exe` link line. The configure has `TRACY_ENABLE=OFF` and `RMLUI_TRACY_PROFILING=OFF`, so drop the `tracy-LICENSE` row from `package.py` and `THIRD_PARTY_LICENSES.md` if it is not linked. (3) Check that every `package.py` LICENSES source exists under `build/ReleaseDlssPkg/_deps/` (present: googletest, tracy, rmlui, zstd, imgui, freetype, png, zlib, fmt, xxhash, abseil). `SDL3-LICENSE.txt` and `dawn`/`dxc` sources need a check against the prebuilt dirs. (4) `cmake --install build/ReleaseDlssPkg --prefix <scratch>` (it failed only because the exe was missing), then `cpack` (ZIP). (5) `python tools/package.py --build-dir build/ReleaseDlssPkg --version 0.1.0 --llvm-bin "C:/llvm-dl/t/clang+llvm-23.1.3-x86_64-pc-windows-msvc/bin"`, then check the zip has `licenses/Lato-OFL-LICENSE.txt` and no game data. (6) Smoke test the unpacked package in a scratch dir (`SUNSHINE_WINDOW_POS=0,520 SUNSHINE_WINDOW_SIZE=640,480`, `--dvd` with the GMSJ01 rvz, 20 s, kill by PID). (7) Update `docs/release-checklist.md` to `build/ReleaseDlssPkg`. (8) Delete scratch: `build/_pkg-build.cmd`, `build/ReleaseDlssPkg-build.log`, `%TEMP%\sunshine-install-check`, `%TEMP%\sunshine-clean-0.1.0`.
 
 
 
@@ -455,7 +458,11 @@ Next: gate draw/viewport/scissor/texture-bind logs on a title-frame counter (cop
 - Font pitfall: Aurora registers the Lato faces as `LatoLatin`. `font-family: Lato` in `launcher.rcss` renders no text at all.
 - While the launcher is open its input layer captures all sources and forwards to `aurora::rmlui::process_input`. No gamepad navigation in the launcher yet.
 - Dev hooks: `SUNSHINE_DEV_LAUNCHER_PAGE=settings[/video|audio|controls|interface|cheats]` opens a settings page at start. `SUNSHINE_WINDOW_POS=x,y` and `SUNSHINE_WINDOW_SIZE=w,h` override the window placement and size (the Video page still shows the saved size).
-- Verified: `tools/settings_test.cpp` round trip ok; launcher pages video, audio, controls, interface and cheats rendered (screenshots). Not verified: Browse, Start, invalid-image rejection and any click. Background input does not reach the RmlUI window and Windows refuses a foreground raise, so interactive paths need a live session.
+- Verified: `tools/settings_test.cpp` round trip ok (incl. Switch and GameCube glyph names); `tools/port_tests.cmd` 38 checks, 0 failed; launcher pages video, audio, controls, interface and cheats rendered (screenshots). Glyph styles now: Generic, Xbox, PlayStation, Switch, GameCube (`glyph_style=` in `[interface]`).
+- Launcher run in Bianco-free mode aborted (0xC0000409) on a WGSL error in the GX TEV alpha compare (`extern/aurora/lib/gx/shader.cpp`, R8 compares with `.r` on f32). GxCopy reports it fixed (alpha R8 compares now map to RGB8). Not re-run by me.
+- Blocked at handoff: `sunshine` target does not build while Aurora gfx occlusion-query code is mid-edit (`extern/aurora/lib/gfx/{pixel_metric,encoding,recording}.cpp`, GoopCount).
+- Not verified: Browse, Start, invalid-image rejection, keybind capture, any click, glyph swap in game, runtime VSync/fullscreen/FPS cap/render scale/FSR1 check. Background input does not reach the RmlUI window and Windows refuses a foreground raise, so interactive paths need a live session or a dev hook.
+- Next steps (in order): (1) rebuild `tools\build-alt.cmd LauncherSettings sunshine -- -k 0` once Aurora compiles; (2) relaunch with `SUNSHINE_WINDOW_POS=2800,0 SUNSHINE_WINDOW_SIZE=640,480` and confirm no WGSL error and the launcher stays open; (3) click-test Browse (file dialog), Start with an invalid image (error text) and Start with `sms/orig/GMSJ01/Super Mario Sunshine (Japan).rvz`; (4) rebind a key, check `[keys]` persisted and the in-game effect via `SUNSHINE_DEV_SCRIPT`/`SUNSHINE_DEV_STATUS`; (5) set glyph style and check the disc icon hook (`sms/src/JSystem/JUtility/JUTResource.cpp`, `kGlyphTexFormatRGBA8Pc` static_assert already in place, not yet compiled in a run); (6) FSR1 `SUNSHINE_UPSCALER=fsr1` and render scale 0.67/0.5 in Bianco, compare with `tools/compare_png.py`.
 
 ## Cheats, mod loader and logic-tick hook (`src/cheats/`, `src/mods/`, `include/sunshine_mod_api.h`)
 
@@ -559,6 +566,10 @@ Design and rules in `docs/mods.md`. Overlays reuse Aurora's existing DVD overlay
 - `tools/settings_test`: built with `cmake --build build/Widescreen --target settings_test`; run prints `settings_test: ok` (aspect round-trip, invalid `5:4` fallback).
 - Determinism: Bianco frames 600 and 1000 are NOT stable goldens. Two 4:3 runs at frame 1000 differ (compare_png MAD 98.8, SSIM -0.08). The 4:3 and 16:9 frame-600 shots show different camera states, so HUD/J2D cannot be compared frame-for-frame there. Bit-exact 4:3 vs the pre-change path is NOT yet established: needs a repeatable frame or a camera-independent screen.
 - Ceilings: `auto` reads the window ratio once at init. Full-width screens still overlay the 4:3 area (`MarDirectorInitECT.cpp`). `SelectDir` camera literal `1.3333334f` is not scaled. `JUTConsole.cpp:99` stays left-anchored. Wipe `Hx_ResetWipe(640,480)` stretch across W is open. The window height drives the width; a larger height gives a wider window.
+- Logic-tick capture (new): devscript `shot <abs.png>` op (`src/devscript/devscript.cpp`) calls `aurora_screenshot_next(path)` (`extern/aurora/lib/gfx/screenshot.cpp`, uncommitted). It arms a one-shot capture of the next presented frame, so the capture follows logic ticks and not the frame index. The env path `AURORA_SCREENSHOT` is unchanged. Own tree build EXIT 0 with this change. Runner: `build/Widescreen/shoot.py <tag> <off|aspect> <tick>` (script `wait frames=<tick>`, `shot`, `wait frames=30`, `end`).
+- Determinism at tick 1301 (Bianco, 4:3): run A vs run B: MAD 1.69 (PASS), SSIM 0.9776 (FAIL, min 0.98). The logged Mario, camera and status values match except `dir.261` (2 vs 4). Run B has an extra white vertical bar at x≈630 that run A lacks. Cause NOT found. A third run (`off_c`) logged no devscript progress past `wait start` and wrote no PNG within 300 s. A rerun (`off_d`) wrote no PNG because the owner killed its process (PID 14584) on Main's request: NO result, not a determinism check.
+- 16:9 at tick 1300 (`shots/ar169_t1300.png`) captured, NOT yet compared with the 4:3 frames or read for HUD edges.
+- Next steps: (1) find the source of the `dir.261` and white-bar difference, or show it is a presentation race (rerun two 4:3 captures with nothing else running, then compare); (2) read 16:9 vs 4:3 at tick 1300 for coin/shine/lives/FLUDD edge anchoring, pause, fader and J2D centring; (3) bit-exact 4:3 check against the pre-change path (compile switch that disables the widescreen hooks, then compare PNGs); (4) remove `shots/*.log` and `shoot.py` scratch, keep the PNGs. The frame-150 logo finding was sent to TitleRender, which acknowledged it.
 
 ## Heap corruption hunt (`dolpic/0`, `FramePacket::~FramePacket` 0xc0000374 / 0xc0000409): ASan findings
 
@@ -607,6 +618,19 @@ Ceilings and options:
 - Visibility-only is the current ceiling. Fixing it needs fragment counting in Aurora (an atomic storage-buffer counter written by the fragment shader, read back per query). Not built. Decision for the lead: implement counting, or accept that pollution, goop and graffiti magnitudes are wrong on PC.
 - Test tokens 0xEE00-0xEE02 were scratch and are removed. Every token the callback receives advances the `DrawSyncManager` FIFO read index, so a test must never send tokens the game also consumes.
 
+Next steps (GoopCount, WIP, NOT landed in shared `extern/aurora`):
+1. State: shared tree restored (my hunks reverted via `build/GoopCount/goop-wip.patch`, other agents' hunks kept). Forward patch is the pixel-count design (fragment `atomic<u32>` counters, `ShaderConfig.countPixels`, 256 segments per frame).
+2. Base compile check of the restored tree in the private copy (`build/GoopCount/aurora-priv`, `goop-build.cmd aurora_gx`) was NOT finished (killed at Main's stop). Re-run it first when CPU is free.
+3. Apply the patch to the private copy (`git apply --recount ../goop-wip.patch`, run inside `aurora-priv`), build `aurora_gx`, then `sunshine` with `/FORCE:UNRESOLVED`, and check the link log for unresolved symbols.
+4. Known compile fixes: qualify `detail::MaxPixelCounters` (`pixel_metric.cpp` L66) and `detail::NoPixelCounter` (`command_processor.cpp` ~L486). Update `lib/dolphin/gx/GXPerf.cpp` comments (L36, L58) that mention occlusion. Grep `lib/gfx`, `lib/gx` for `occlusion|Occlusion|QuerySet` (ignore `webgpu/gpu_prof.cpp`).
+5. Check the device limit: `webgpu/gpu.cpp` L990-1004 sets `maxStorageBuffersInFragmentStage = 2`. Bindings 1 (`abuf`) and 2 (`pixel_counters`) fill it exactly. Re-check after another agent's +145 change in `gpu.cpp`.
+6. Self-test behind `SUNSHINE_DEV_PIXTEST=1` in `src/devscript/devscript.cpp`: 100x50 quad (expect 5000), overlapping quads (expect union), alpha-test half-transparent quad (exact count), z-on informational only. Use a token range that the game FIFO never sends.
+7. Game run: `SUNSHINE_DEV_START=bianco/0`, own save dir, 640x480, `SUNSHINE_DEV_STATUS=1`. Check that the pollution counters change after cleaning. Record fps before and after.
+8. DrawSync pointer test (`DrawSyncManager.cpp` L75): add a probe that prints `msg` values.
+9. Land once, as a single step, after the self-test passes: re-check the shared tree against the pre-patch base, apply the forward patch to `extern/aurora`, then `agent://all`.
+10. Optional: bump `GXPipelineConfigVersion` (13 to 14) for the new `ShaderConfig` layout.
+
+
 
 
 ## Bianco Hills start (`dev bianco/0`): WARP_OUT death and control (MarioStart)
@@ -627,3 +651,56 @@ Dev switches for this path:
 - `SUNSHINE_DEV_STATUS=1` prints `[status]`, `[status-mario*]` and `[status-pad] flags/en/dis/disFrames`.
 - Run in a temp `APPDATA` so the real `%APPDATA%\Sunshine\saves` is untouched.
 
+omp is byte-exact.
+- `sunshine-pc/src/sdk/av.cpp` lines 101-102 feed `av::AudioWrite` as 16-bit stereo; the slot-to-channel mapping there is not yet traced in detail.
+
+Title BGM (open):
+- Title music is started by the scene script via `startBGM(MSD_BGM_MAIN_TITLE)` (0x8001000F, `MS_WAVE_CLEAR` 0x209 in `MSoundBGM.cpp`). `MarioMove.cpp:1951` plays `MSD_BGM_TITLEBACK` (0x8001001B, `MS_WAVE_UNK210`) and stops it at 1955 on visibility change.
+- The length differs between movie and skip runs (about 101 s vs about 20 s). The sequence data is the same, so the skip path is a candidate for a missing transition or a changed start point. Not yet decided whether the sequence ends by design.
+- Next: compare root tick rates (root1 2.5x) against the retail sequence data, and check the sequence end (`cmdFinish` vs loop) and whether any retail trigger (movie end, event) starts or extends it.
+
+Gameplay noise (open, in progress):
+- Temporary diagnostic in `src/sdk/dsp_mixer.cpp`: `SUNSHINE_DSP_VOICE_LOG=1` prints `[dsp-voice] t=<s> v=<voice> type=<kind> base=<addr> pos end ratio rms zc` once per second. Marked "DIAG (temporary)". Remove it or keep it documented before closing.
+- Not yet run. Next: run `SUNSHINE_DEV_START=bianco/0` for 200 s with `SUNSHINE_DSP_VOICE_LOG=1` and `SUNSHINE_AUDIO_DUMP`, read the voice that turns to noise at about 20 s, and trace its source (ARAM Afc4/Pcm16 wave, DirectPcm stream, or Osc). Decomp setup to check: `DSPBuffer::setWaveInfo` (`JASDSPInterface.cpp` 161-191), `setOscInfo` (192-197), `Play_DirectPCM` (`JAIGFrameStream.cpp` 282-310).
+- Mixer: `Mixer::render` sums buses as unbounded s32 and saturates only at output `sat16`, so clipping can come from bus overflow or the master level. Buses are not saturated.
+
+Build: `build-alt.cmd AudioTile` failed once at `extern/aurora/lib/gfx/pixel_metric.cpp:66` (`MaxPixelCounters` unqualified; it is `detail::MaxPixelCounters` in `frame_packet.hpp:48`). This is another agent's in-progress Aurora edit, not touched. A retry (job `bg_3129`) was started and its result is NOT verified.
+
+## Mario/object callback and particle draw (ParticlesNull, paused)
+
+- Done: `sms/src/MarioUtil/PacketUtil.cpp` gets a `TARGET_PC` `ShapePacketCallBackFunc` (asm 0x800D1164 jump table "@2227", types 0-3 and 5-10; type 4 CallDL has no writer) plus `SetPacketFog`. It applies TEV/K colours and fog through Aurora GX setters, not GXWGFifo or the J3DGD wrappers. Matching build stays on the `#else` stub. Not yet compiled or run.
+- Not done: no screenshot or run evidence yet. The `EmitterViewObj` null perform-list question is open; retail data has no "EmitterViewObj" name, so the null is probably matching retail (inferred).
+- Next, in order: (1) build `build-alt.cmd ParticlesNull` once Aurora `pixel_metric.cpp`/`frame.cpp`/`recording.cpp` compile (they reference undefined `NoPixelCounter`/`MaxPixelCounters`/`pixelCounters` as of 18:49); (2) 120 s Bianco run with `SUNSHINE_DEV_START=bianco/0`, `SUNSHINE_DEV_SCRIPT=build/MarioStart/bianco_mario.txt`, own save dir, and `AURORA_SCREENSHOT` for FLUDD spray, dust, Mario; (3) if particles are missing, check `gpMarioParticleManager` creation and the perform entry, not the lookup first.
+
+
+
+
+## Title flow / title washout (TitleRender): status and next steps (paused, no verdict)
+
+Status: no fix landed. My tree `build/TitleRender` builds (`build-alt.cmd TitleRender`, exit 0 after GoopCount's pixel-counter edits settled). No source edits by me. Screenshots of title, file select, new game and Bianco from a normal run are NOT done. No 120 s log exists.
+
+Observed:
+- Normal run (no `SUNSHINE_DEV_START`, `SUNSHINE_DEV_SKIP_MOVIES=1`, `SUNSHINE_DEV_STATUS=1`, own `APPDATA`): the process runs (window "Sunshine", responding) but prints no devscript/status line and writes no `shot` PNG in 3+ minutes. The logic tick never reaches `sunshineDevScriptTick` (`src/devscript/devscript.cpp:321`), so the game is stuck before logic starts, or the logic step is not being driven in this boot path. Not yet diagnosed.
+- Launcher: `build/TitleRender/run.py <tag> [KEY=VAL...]` (own APPDATA, stdout to `run-<tag>.log`; stdout is buffered until a devscript fflush).
+
+Next steps (in order):
+1. Relaunch with `SUNSHINE_HANG_DUMP=25` (`src/crash.cpp:277`) and read the thread stacks to see where boot is stuck. Check `run-<tag>.log` and `crash.log`.
+2. If the normal boot path is genuinely stuck before logic ticks, bisect: `SUNSHINE_DEV_START=dolpic/0` vs no start, and check whether logos/movies wait on a memory-card or DVD read.
+3. Once ticks run: pad script `build/TitleRender/title_probe.txt` takes `shot` at ticks 300, 900, 1800. Compare the title frame with the `AURORA_DUMP_PASSES` pass dumps (copy 1 `clear=1` 256x256 logical box at top-left; copy 2 full-screen 320x224 → 640x480).
+4. Washout hypothesis (unproven): Aurora presents the live EFB (`webgpu/gpu.cpp` `present_source`), while `GXCopyDisp` is an empty stub (`regs.cpp:272-279` bit 14 only warns). Verify with the pass dumps before implementing a display snapshot.
+5. 16:9 title-logo offset (Widescreen, EFB x ~129–386 vs ~160–480 at 4:3, frame 150): cause not found; check after the title renders.
+6. Then the flow: logo → movies → title → Start → file select (first-run memory card, expect `Failed to open file: super_mario_sunshine`) → new game → Delfino → Bianco, plus a 120 s log with no fatal exceptions.
+
+## ShineSave: real Shine collect (STOPPED mid-build, not verified)
+
+Changed: `src/devscript/devscript.cpp`: new `tpshine [dx dy dz]` op (moves Mario to the runtime `TShine` plus offset, then the game's own overlap test runs `touchPlayer`). `doShine` now shares a `findShine` helper. NOT compiled yet: the build was killed at 1180/1283 with no devscript diagnostics seen.
+
+Stage: `SUNSHINE_DEV_START=delfino/1` maps to `delfino1.arc` (`stageArc.bin` group `delfino`, entry index 1; `Application.cpp` `devStartArea`). Placed Shine in `delfino1.szs`: event 42, scene pos (-2163.0, 2115.0, -376.5), `normal` (live). Runtime instantiation not checked yet; the `tpshine:` log line prints the runtime shine position and eventId, which proves it.
+
+Save dir: `APPDATA` env controls it (`settings.cpp:142`, `<APPDATA>\Sunshine\saves`). Use a private temp APPDATA.
+
+Next steps:
+1. Build: `tools\build-alt.cmd ShineSave` with the `LLVM_BIN` export. Fix any devscript compile error. If `extern/aurora` breaks, retry later (GoopCount's mid-edit).
+2. Run `build/ShineSave/shine_tp.txt` (wait 240, log, tpshine, log, wait/log) with `SUNSHINE_DEV_START=delfino/1`, `SUNSHINE_DEV_SCRIPT`, `SUNSHINE_DEV_STATUS=1`, private `APPDATA`, `SUNSHINE_WINDOW_POS=700,0`, `SUNSHINE_WINDOW_SIZE=640,480`. Read the `tpshine:` line.
+3. Extend the script with A presses through the card-save dialog after the touch. Chain: `updateGameMode` `unk4C&1` then `0x200` then `STATE_CARD_SAVE` then `CardSave::init`. Watch flag 0x40000 (shine count) go 0→1.
+4. Check the `.gci` in the private save dir with `tools/gci_check.py`. Relaunch with the same APPDATA and confirm the count reloads.

@@ -89,7 +89,11 @@ static void FifoSetFog(GXFogType type, float startz, float endz, float nearz,
 
 static void SetFogBase(const J3DFogInfo*) { }
 
+#ifdef TARGET_PC
+static void ShapePacketCallBackFunc(J3DCallBackPacket*, int);
+#else
 static void ShapePacketCallBackFunc(J3DCallBackPacket*, int) { }
+#endif
 
 static J3DShapePacket* InitPacket_Sub(J3DModel* model, u16 mat_idx)
 {
@@ -375,6 +379,94 @@ void SMS_InitPacket_TwoTevColorAndOneTevKColor(J3DModel* param_1, u16 param_2,
 	packet->setUserArea(PTR_U32(userData));
 	packet->setCallback(&ShapePacketCallBackFunc);
 }
+
+#ifdef TARGET_PC
+// Retail writes these states to GXWGFifo, which PC lacks. Aurora's GX setters emit the same state.
+static void SetPacketFog(const J3DFogInfo* fog)
+{
+	GXSetFog(GXFogType(fog->mType), fog->mStartZ, fog->mEndZ, fog->mNearZ,
+	         fog->mFarZ, fog->mColor);
+	GXSetFogRangeAdj(fog->mAdjEnable, fog->mCenter,
+	                 (GXFogAdjTable*)fog->mFogAdjTable);
+}
+
+static void ShapePacketCallBackFunc(J3DCallBackPacket* packet, int param)
+{
+	void* area = (void*)packet->getUserArea();
+	u32 type   = *(u32*)area;
+
+	if (param != 0) {
+		// asm 0x800D1894: fog packets switch fog off after the shape draws.
+		if (param == 1 && (type == 5 || type == 8)) {
+			GXColor off = { 0, 0, 0, 0 };
+			GXSetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, off);
+		}
+		return;
+	}
+
+	// asm 0x800D1164 jump table "@2227". Type 4 (CallDL) has no writer in this port.
+	switch (type) {
+	case 0: {
+		PacketUserData_MatColor* d = (PacketUserData_MatColor*)area;
+		GXSetChanMatColor(d->unk4, *d->unk8);
+		break;
+	}
+	case 1: {
+		PacketUserData_OneTevColor* d = (PacketUserData_OneTevColor*)area;
+		GXSetTevColorS10(d->unk4, *d->unk8);
+		break;
+	}
+	case 2: {
+		PacketUserData_TwoTevColor* d = (PacketUserData_TwoTevColor*)area;
+		GXSetTevColorS10(d->unk4, *d->unkC);
+		GXSetTevColorS10(d->unk8, *d->unk10);
+		break;
+	}
+	case 3: {
+		PacketUserData_ThreeTevColor* d = (PacketUserData_ThreeTevColor*)area;
+		GXSetTevColorS10(d->unk4, *d->unk10);
+		GXSetTevColorS10(d->unk8, *d->unk14);
+		GXSetTevColorS10(d->unkC, *d->unk18);
+		break;
+	}
+	case 5: {
+		PacketUserData_Fog* d = (PacketUserData_Fog*)area;
+		SetPacketFog(d->unk4);
+		break;
+	}
+	case 6: {
+		PacketUserData_OneTevKColor* d = (PacketUserData_OneTevKColor*)area;
+		GXSetTevKColor(d->unk4, *d->unk8);
+		break;
+	}
+	case 7: {
+		PacketUserData_TwoTevKColor* d = (PacketUserData_TwoTevKColor*)area;
+		GXSetTevKColor(d->unk4, *d->unkC);
+		GXSetTevKColor(d->unk8, *d->unk10);
+		break;
+	}
+	case 8: {
+		PacketUserData_OneTevKColorAndFog* d = (PacketUserData_OneTevKColorAndFog*)area;
+		GXSetTevKColor(d->unk8, *d->unkC);
+		SetPacketFog(d->unk14);
+		break;
+	}
+	case 9: {
+		PacketUserData_OneTevColorAndOneTevKColor* d = (PacketUserData_OneTevColorAndOneTevKColor*)area;
+		GXSetTevColorS10(d->unk4, *d->unk8);
+		GXSetTevKColor(GX_KCOLOR0, *d->unkC); // asm hardwires K0 (0xE080)
+		break;
+	}
+	case 10: {
+		PacketUserData_TwoTevColorAndOneTevKColor* d = (PacketUserData_TwoTevColorAndOneTevKColor*)area;
+		GXSetTevColorS10(d->unk4, *d->unkC);
+		GXSetTevColorS10(d->unk8, *d->unk10);
+		GXSetTevKColor(GX_KCOLOR0, *d->unk14); // asm hardwires K0 (0xE080)
+		break;
+	}
+	}
+}
+#endif
 
 void SMS_HideAllShapePacket(J3DModel* model)
 {

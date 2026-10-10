@@ -31,3 +31,11 @@ except Exception:
     p.kill()
     out, _ = p.communicate()
 print(out[-4000:])
+
+# Defaults: with no cheats.user.json beside the exe, every shipped cheat must start disabled.
+if not os.path.exists(os.path.join(bld, "cheats.user.json")):
+    loads = [l for l in out.splitlines() if l.startswith("[cheats] ") and " cheats loaded, " in l]
+    ok = bool(loads) and loads[-1].endswith(" 0 active")
+    print(f"CHECK cheat defaults: {loads[-1] if loads else 'no [cheats] load line'} -> {'PASS' if ok else 'FAIL'}")
+else:
+    print("CHECK cheat defaults: skipped (cheats.user.json present)")

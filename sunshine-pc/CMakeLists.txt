@@ -24,7 +24,9 @@ set(AURORA_ENABLE_DVD ON CACHE BOOL "" FORCE)
 set(AURORA_ENABLE_CARD ON CACHE BOOL "" FORCE)
 set(AURORA_ENABLE_THP OFF CACHE BOOL "" FORCE)
 set(AURORA_ENABLE_RMLUI ON CACHE BOOL "" FORCE)
-add_subdirectory(extern/aurora EXCLUDE_FROM_ALL)
+# Developers can point this at a private copy of Aurora to work on multi-file changes without breaking other trees.
+set(SUNSHINE_AURORA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora" CACHE PATH "Aurora source directory")
+add_subdirectory(${SUNSHINE_AURORA_DIR} aurora EXCLUDE_FROM_ALL)
 
 # Decomp game code, listed by tools/gen-files.py from sms/configure.py.
 set(SMS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../sms)
@@ -64,7 +66,7 @@ target_include_directories(sms_game PUBLIC
     ${SMS_DIR}/include/dolphin
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glyphs
     ${SMS_DIR}/include/PowerPC_EABI_Support
-    ${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora/include)
+    ${SUNSHINE_AURORA_DIR}/include)
 target_compile_definitions(sms_game PUBLIC TARGET_PC=1 VERSION_GMSJ01=1 NDEBUG=1)
 # -fno-strict-return: many decomp functions fall off the end of a non-void function (MWCC just returns whatever is in
 # the return register). Clang treats that as unreachable and executes padding (int3), e.g. JUTGamePad::read.
@@ -87,7 +89,7 @@ add_custom_command(TARGET sunshine POST_BUILD
 target_link_libraries(sunshine PRIVATE sms_game
     aurora::core aurora::gx aurora::gd aurora::si aurora::vi aurora::pad aurora::mtx aurora::os
     aurora::dvd aurora::card aurora::main ZLIB::ZLIB)
-include(extern/aurora/cmake/AuroraCopyRuntimeDLLs.cmake)
+include(${SUNSHINE_AURORA_DIR}/cmake/AuroraCopyRuntimeDLLs.cmake)
 aurora_copy_runtime_dlls(sunshine)
 # List every unresolved symbol instead of stopping after 100 (Goal-Port B.2 sorts them by cause).
 target_link_options(sunshine PRIVATE /errorlimit:0)
@@ -120,15 +122,16 @@ if (SUNSHINE_ASAN)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_asan_dir}/clang_rt.asan_dynamic-x86_64.dll" $<TARGET_FILE_DIR:sunshine>)
 endif ()
 
-# Example mods (mods-example/), OFF by default: each builds mods/<id>/mod.dll next to sunshine.exe, plus its mod.json.
-option(SUNSHINE_BUILD_EXAMPLE_MODS "Build the example mods into <exe dir>/mods" OFF)
+# Example mods (mods-example/), OFF by default. Each builds <exe dir>/mod-examples/<id>/ (mod.dll + mod.json). That
+# folder is NOT on the mods/ discovery path: copy it into <exe dir>/mods/ to enable it.
+option(SUNSHINE_BUILD_EXAMPLE_MODS "Build the example mods into <exe dir>/mod-examples" OFF)
 if (SUNSHINE_BUILD_EXAMPLE_MODS)
     foreach (_mod hello faulty)
         add_library(sunshine_mod_${_mod} SHARED mods-example/${_mod}/mod.cpp)
         target_include_directories(sunshine_mod_${_mod} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
         set_target_properties(sunshine_mod_${_mod} PROPERTIES OUTPUT_NAME mod
-            RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:sunshine>/mods/${_mod}
-            LIBRARY_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:sunshine>/mods/${_mod}
+            RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:sunshine>/mod-examples/${_mod}
+            LIBRARY_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:sunshine>/mod-examples/${_mod}
             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/mod_import/${_mod})
         add_custom_command(TARGET sunshine_mod_${_mod} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mods-example/${_mod}/mod.json

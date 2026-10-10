@@ -18,7 +18,7 @@ constexpr EffectName kEffects[] = {
     {"unlock_all_nozzles", Effect::UnlockAllNozzles, true},
 };
 
-// Stages 1..9 are the shine-stage indices of the nozzle flags (sms FlagManager setNozzleRight clamps stage 1..9).
+// Shine stages 1..9, two nozzles each; raw flag index is kNozzleFlagBase + (stage-1)*2 + nozzle (cheats_core.h).
 constexpr uint8_t kFirstStage = 1;
 constexpr uint8_t kLastStage = 9;
 constexpr uint8_t kNozzleCount = 2;
@@ -237,7 +237,10 @@ void Registry::tick(World& world) {
             case Effect::UnlockAllNozzles:
                 for (uint8_t stage = kFirstStage; stage <= kLastStage; stage++) {
                     for (uint8_t nozzle = 0; nozzle < kNozzleCount; nozzle++) {
-                        world.setNozzleRight(stage, nozzle);
+                        const uint32_t flag = kNozzleFlagBase + (uint32_t(stage) - kFirstStage) * kNozzleCount + nozzle;
+                        if (world.getFlag(flag) == 0) {
+                            world.setFlag(flag, 1);
+                        }
                     }
                 }
                 break;

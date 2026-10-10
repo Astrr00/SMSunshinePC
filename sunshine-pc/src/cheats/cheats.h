@@ -28,8 +28,9 @@ bool cheatEnabled(const char* id);
 // Returns false when the id is unknown.
 bool cheatSet(const char* id, bool enabled);
 
-// True while an enabled cheat keeps Mario's health full. TMario::decHP returns early in that case (sms hook).
-bool cheatsHealthLossBlocked();
+// True while an enabled cheat keeps Mario's health full. TMario::decHP returns early in that case (sms hook),
+// and each blocked hit is logged. Called by the sms hook only.
+bool cheatsHealthLossBlocked(int damage);
 
 // Runs the enabled cheats once. Called from sunshineLogicTick() once per logic frame (30 Hz).
 void cheatsTick();

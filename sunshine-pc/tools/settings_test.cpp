@@ -39,6 +39,11 @@ int main()
 	assert(back.keys.at("A") == 26 && back.glyphStyle == GlyphStyle::PlayStation);
 	assert(back.lastImagePath == s.lastImagePath);
 	assert(serializeSettings(back) == text);
+	for (GlyphStyle g : {GlyphStyle::Switch, GlyphStyle::GameCube, GlyphStyle::Generic}) {
+		Settings gs;
+		gs.glyphStyle = g;
+		assert(parseSettings(serializeSettings(gs)).glyphStyle == g);
+	}
 
 	// Out-of-range values are clamped; garbage and unknown keys fall back or are ignored.
 	const Settings odd = parseSettings("[video]\nwidth=99999\nheight=abc\nfps_limit=-4\nmystery=1\n"

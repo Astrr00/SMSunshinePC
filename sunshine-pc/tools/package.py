@@ -42,6 +42,7 @@ LICENSES = [
     ("nod-LICENSE-MIT.txt", "root", "licenses/nod-LICENSE-MIT.txt"),
     ("sqlite3-PUBLIC-DOMAIN.txt", "root", "licenses/sqlite3-PUBLIC-DOMAIN.txt"),
     ("dxc-LICENSE.txt", "root", "licenses/dxc-LICENSE.txt"),
+    ("Lato-OFL-LICENSE.txt", "root", "assets/launcher/LICENSE-Lato.txt"),
 ]
 
 README = """Sunshine {version} - Super Mario Sunshine (GMSJ01) port for Windows

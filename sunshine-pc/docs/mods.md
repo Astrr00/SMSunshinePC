@@ -82,6 +82,10 @@ is Yaz0 literal-only: valid, but larger than the input.
 To try it, copy the folder to `<exe dir>/mods/overlay-demo/`. Remove the folder to return to the stock file.
 CMake does not copy data-only mods; the copy is manual.
 
+Example DLL mods: `hello` logs the logic tick count every 30 ticks; `faulty` faults on purpose to test isolation.
+With `-DSUNSHINE_BUILD_EXAMPLE_MODS=ON` they build to `<exe dir>/mod-examples/<id>/`, which is not on the discovery
+path. Copy a folder into `<exe dir>/mods/` to enable it.
+
 ## Verified
 
 - Loader: with `mods/overlay-demo` installed, the log shows `[mods] 1 overlay file(s) active` and `[mods] 0 DLL mod(s) active`.

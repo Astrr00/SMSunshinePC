@@ -76,7 +76,7 @@ constexpr const char* kKeyNames[] = {
 	"STICK_UP", "STICK_DOWN", "STICK_LEFT", "STICK_RIGHT", "CSTICK_UP", "CSTICK_DOWN", "CSTICK_LEFT", "CSTICK_RIGHT",
 };
 constexpr const char* kPanes[] = { "video", "audio", "controls", "interface", "cheats" };
-constexpr const char* kGlyphNames[] = { "Generic", "Xbox", "PlayStation", "Nintendo" };
+constexpr const char* kGlyphNames[] = { "Generic", "Xbox", "PlayStation", "Switch", "GameCube" };
 
 struct WindowSize {
 	int width;
@@ -454,7 +454,7 @@ private:
 		} else if (id == "substick-deadzone") {
 			s.substickDeadZonePct = nextPreset(kDeadZonePresets, s.substickDeadZonePct);
 		} else if (id == "glyph-style") {
-			s.glyphStyle = static_cast<sunshine::GlyphStyle>((static_cast<int>(s.glyphStyle) + 1) % 4);
+			s.glyphStyle = static_cast<sunshine::GlyphStyle>((static_cast<int>(s.glyphStyle) + 1) % 5);
 		} else if (id == "reset-keys") {
 			s.keys = sunshine::defaultSettings().keys;
 			capture_.clear();
@@ -525,8 +525,11 @@ void applyRuntimeSettings() {
 	case sunshine::GlyphStyle::PlayStation:
 		glyphsSetStyle(::GlyphStyle::PlayStation);
 		break;
-	case sunshine::GlyphStyle::Nintendo:
+	case sunshine::GlyphStyle::Switch:
 		glyphsSetStyle(::GlyphStyle::Switch);
+		break;
+	case sunshine::GlyphStyle::GameCube:
+		glyphsSetStyle(::GlyphStyle::GameCube);
 		break;
 	default:
 		glyphsSetStyle(::GlyphStyle::Xbox);

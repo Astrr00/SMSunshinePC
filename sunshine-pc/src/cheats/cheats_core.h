@@ -18,7 +18,6 @@ public:
     virtual void refillWater() = 0;
     virtual int32_t getFlag(uint32_t flag) = 0;
     virtual void setFlag(uint32_t flag, int32_t value) = 0;
-    virtual void setNozzleRight(uint8_t stage, uint8_t nozzle) = 0;
 };
 
 enum class Effect {
@@ -30,6 +29,9 @@ enum class Effect {
 
 constexpr uint32_t kLivesFlag = 0x20001;  // card int bank: lives (see sms incMario cap of 99)
 constexpr int32_t kMaxLives = 99;
+// Nozzle-unlocked flags: one per (shine stage 1..9, nozzle 0..1), index = base + (stage-1)*2 + nozzle.
+// Same indices as sms TFlagManager::getNozzleRight/setNozzleRight (sms/src/System/FlagManager.cpp).
+constexpr uint32_t kNozzleFlagBase = 0x10366;
 
 struct Cheat {
     std::string id;

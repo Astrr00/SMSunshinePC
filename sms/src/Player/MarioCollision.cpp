@@ -16,7 +16,7 @@
 #include <MSound/MSoundBGM.hpp>
 
 #ifdef TARGET_PC
-bool cheatsHealthLossBlocked();
+bool cheatsHealthLossBlocked(int damage);
 #endif
 
 void TMario::rumbleStart(int channelDataIdx, int repeatCount)
@@ -68,7 +68,7 @@ void TMario::decHP(int hp)
 	}
 
 #ifdef TARGET_PC
-	if (cheatsHealthLossBlocked()) {
+	if (cheatsHealthLossBlocked(hp)) {
 		return;
 	}
 #endif

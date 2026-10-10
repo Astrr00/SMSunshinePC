@@ -40,6 +40,10 @@ const GlyphSlot kGlyphSlots[] = {
 };
 const size_t kGlyphSlotCount = sizeof(kGlyphSlots) / sizeof(kGlyphSlots[0]);
 
+// GX_TF_RGBA8 (0x6) with Aurora's _GX_TF_PC bit (0x40); the game's dolphin/gx.h hides both, so they are spelled out here.
+constexpr u32 kGlyphTexFormatRGBA8Pc = 0x6 | 0x40;
+static_assert(kGlyphTexFormatRGBA8Pc == 0x46, "GX_TF_RGBA8 | _GX_TF_PC changed");
+
 // One replacement header per slot and style. Allocated once, never freed (same as JUTTexture images).
 ResTIMG* sGlyphTimg[kGlyphSlotCount][(size_t)GlyphStyle::Count];
 
@@ -49,7 +53,7 @@ ResTIMG* buildGlyphTimg(const GlyphImage& g, u32 w, u32 h)
 	u8* block = new (0x20) u8[sizeof(ResTIMG) + w * h * 4];
 	ResTIMG* t = (ResTIMG*)block;
 	memset(t, 0, sizeof(ResTIMG));
-	t->format          = 0x6 | 0x40; // GX_TF_RGBA8_PC (Aurora: 0x6 | _GX_TF_PC); the game's dolphin/gx.h hides it
+	t->format          = kGlyphTexFormatRGBA8Pc; // GX_TF_RGBA8_PC (Aurora: 0x6 | _GX_TF_PC)
 	t->alphaEnabled    = 1;
 	t->width           = w;
 	t->height          = h;

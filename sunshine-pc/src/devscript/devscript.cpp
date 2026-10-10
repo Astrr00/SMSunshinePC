@@ -30,16 +30,19 @@
 // include path), which lacks these two; same signatures as extern/aurora/include/dolphin/pad.h.
 extern "C" void PADSetVirtualStatus(u32 port, const PADStatus* status);
 extern "C" void PADClearVirtualStatus(u32 port);
+extern "C" void aurora_screenshot_next(const char* path);
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, End };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine };
 
 struct Command {
 	Op op;
 	int frames = 0;
 	int line = 0;
+	std::string path;
 	PADStatus pad{};
+	float pos[3]{};
 };
 
 struct ButtonName {
@@ -130,7 +133,26 @@ Command parseLine(const std::string& text, int line)
 		if (c.op == Op::Hold && c.frames <= 0) fail(line, "hold needs frames=N", text);
 		return c;
 	}
+	if (verb == "hurt") {
+		// Test-only: applies damage through TMario::decHP, so the cheat health guard can be checked. frames = damage.
+		c.op = Op::Hurt;
+		if (!(in >> c.frames) || c.frames <= 0) fail(line, "hurt needs a positive damage amount", text);
+		return c;
+	}
 	if (verb == "shine") { c.op = Op::Shine; return c; }
+	if (verb == "tpshine") {
+		// Dev-assisted: moves Mario onto the runtime TShine (+ optional x y z offset); the game's own overlap test then runs.
+		c.op = Op::TpShine;
+		for (float& v : c.pos) in >> v;
+		return c;
+	}
+	if (verb == "shot") {
+		c.op = Op::Shot;
+		std::getline(in >> std::ws, c.path);
+		while (!c.path.empty() && (c.path.back() == '\r' || c.path.back() == ' ')) c.path.pop_back();
+		if (c.path.empty()) fail(line, "shot needs a path", text);
+		return c;
+	}
 	if (verb == "log") { c.op = Op::Log; return c; }
 	if (verb == "end") { c.op = Op::End; return c; }
 	fail(line, "unknown command", verb);
@@ -189,27 +211,59 @@ void logStatus(const char* tag)
 	std::printf("[%s-pad] flags=0x%04X en=0x%08X dis=0x%08X disFrames=%d\n", tag, pad ? pad->mFlags : 0,
 	    pad ? pad->mEnabledFrameMeaning : 0u, pad ? pad->mDisabledFrameMeaning : 0u, pad ? pad->mDisabledFrames : -1);
 }
+TShine* findShine(int& seen)
+{
+	TObjManager* mgrs[] = {gpItemManager, gpMapObjManager};
+	TShine* shine = nullptr;
+	seen = 0;
+	for (TObjManager* mgr : mgrs) {
+		if (!mgr) continue;
+		seen += mgr->getObjNum();
+		for (int i = 0; !shine && i < mgr->getObjNum(); ++i) shine = dynamic_cast<TShine*>(mgr->getObj(i));
+	}
+	return shine;
+}
+
 // Dev trigger: runs the game's own collect path (TShine::touchPlayer -> TMario::receiveMessage
 // -> WIN_DEMO -> fireGetStar -> setShineFlag). Only the overlap test is skipped.
 // Shines are found by type in the item and map-object managers (scene shine names vary).
 void doShine()
 {
-	TObjManager* mgrs[] = {gpItemManager, gpMapObjManager};
-	TShine* shine = nullptr;
 	int seen = 0;
-	for (TObjManager* mgr : mgrs) {
-		if (!mgr) continue;
-		seen += mgr->getObjNum();
-		for (int i = 0; !shine && i < mgr->getObjNum(); ++i) {
-			shine = dynamic_cast<TShine*>(mgr->getObj(i));
-		}
-	}
+	TShine* shine = findShine(seen);
 	if (!shine || !gpMarioOriginal) {
 		std::printf("[devscript] shine: no TShine among %d managed objects (tick=%d)\n", seen, gTick);
 		return;
 	}
 	std::printf("[devscript] shine: eventId=%u shines_before=%d tick=%d\n", shine->getEventId(), shineCount(), gTick);
 	shine->touchPlayer(gpMarioOriginal);
+}
+
+void doTpShine(const float* off)
+{
+	int seen = 0;
+	TShine* shine = findShine(seen);
+	if (!shine || !gpMarioOriginal) {
+		std::printf("[devscript] tpshine: no TShine among %d managed objects (tick=%d)\n", seen, gTick);
+		return;
+	}
+	TMario* m = gpMarioOriginal;
+	m->mPosition.x = shine->mPosition.x + off[0];
+	m->mPosition.y = shine->mPosition.y + off[1];
+	m->mPosition.z = shine->mPosition.z + off[2];
+	std::printf("[devscript] tpshine: eventId=%u shine=(%.1f,%.1f,%.1f) mario=(%.1f,%.1f,%.1f) shines_before=%d tick=%d\n",
+	    shine->getEventId(), shine->mPosition.x, shine->mPosition.y, shine->mPosition.z, m->mPosition.x, m->mPosition.y,
+	    m->mPosition.z, shineCount(), gTick);
+}
+
+void doHurt(int damage) {
+	if (!gpMarioOriginal) {
+		std::printf("[devscript] hurt: no mario yet (tick=%d)\n", gTick);
+		return;
+	}
+	const int before = gpMarioOriginal->mHealth;
+	gpMarioOriginal->decHP(damage);
+	std::printf("[devscript] hurt %d: health %d -> %d tick=%d\n", damage, before, (int)gpMarioOriginal->mHealth, gTick);
 }
 
 void finish()
@@ -240,6 +294,12 @@ void step()
 			return;
 		}
 		if (c.op == Op::Shine) doShine();
+		if (c.op == Op::TpShine) doTpShine(c.pos);
+		if (c.op == Op::Hurt) doHurt(c.frames);
+		if (c.op == Op::Shot) {
+			logStatus("shot");
+			aurora_screenshot_next(c.path.c_str());
+		}
 		if (c.op == Op::Log) logStatus("devscript");
 		if (c.op == Op::End) {
 			gCursor = gScript.size();

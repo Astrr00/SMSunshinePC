@@ -92,7 +92,8 @@ const char* glyphName(GlyphStyle style)
 	switch (style) {
 	case GlyphStyle::Xbox:        return "xbox";
 	case GlyphStyle::PlayStation: return "playstation";
-	case GlyphStyle::Nintendo:    return "nintendo";
+	case GlyphStyle::Switch:      return "switch";
+	case GlyphStyle::GameCube:    return "gamecube";
 	case GlyphStyle::Generic:     break;
 	}
 	return "generic";
@@ -104,8 +105,10 @@ GlyphStyle parseGlyph(const std::string& s)
 		return GlyphStyle::Xbox;
 	if (s == "playstation")
 		return GlyphStyle::PlayStation;
-	if (s == "nintendo")
-		return GlyphStyle::Nintendo;
+	if (s == "switch")
+		return GlyphStyle::Switch;
+	if (s == "gamecube")
+		return GlyphStyle::GameCube;
 	return GlyphStyle::Generic;
 }
 

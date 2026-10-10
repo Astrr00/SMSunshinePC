@@ -17,4 +17,5 @@ rem Set ASAN=1 to build with AddressSanitizer (see SUNSHINE_ASAN in CMakeLists.t
 set "XCMAKE="
 if defined ASAN set "XCMAKE=-DSUNSHINE_ASAN=ON"
 cmake -S "%SRC%" -B "%BLD%" -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DSUNSHINE_ALLOW_UNRESOLVED=ON %XCMAKE% >nul || exit /b 1
-cmake --build "%BLD%" --target %TARGET%
+rem CPU-friendly: low priority and at most 6 of the 16 hardware threads.
+start "" /b /wait /low cmd /c cmake --build "%BLD%" --target %TARGET% -j 6

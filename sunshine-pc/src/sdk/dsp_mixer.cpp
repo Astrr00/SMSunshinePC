@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 namespace hostdsp {
@@ -18,6 +19,18 @@ using JASystem::DSPInterface::FXBuffer;
 
 // Launcher master volume, percent 0..100 (src/settings.h audio.master_volume).
 int gOutputVolumePct = 100;
+
+// DIAG (temporary; remove when the audio investigation closes): SUNSHINE_DSP_VOICE_LOG=1 prints the RMS and zero
+// crossings of every voice once per second of output (400 subframes).
+struct VoiceDiag {
+	double sq = 0;
+	long n    = 0;
+	long zc   = 0;
+	s32 last  = 0;
+};
+VoiceDiag gDiag[kVoiceCount];
+long gDiagSubframes = 0;
+const bool gDiagOn  = std::getenv("SUNSHINE_DSP_VOICE_LOG") != nullptr;
 
 namespace {
 
@@ -378,6 +391,15 @@ void Mixer::renderVoice(int index, DSPBuffer& v)
 
 	filterVoice(v, mono);
 	mixVoice(v, mono);
+	if (gDiagOn)
+		for (int i = 0; i < kSubframeSamples; ++i) {
+			VoiceDiag& d = gDiag[index];
+			d.sq += static_cast<double>(mono[i]) * mono[i];
+			d.n++;
+			if ((mono[i] < 0) != (d.last < 0))
+				d.zc++;
+			d.last = mono[i];
+		}
 
 	// The voice is over when the end of its source has left the resampler window, or when the CPU asked for the end
 	// (DSPBuffer::forceStop path: the volumes above ramped to 0). The CPU then answers `done` (replyFinishRequest).
@@ -453,6 +475,21 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 	for (int i = 0; i < kSubframeSamples; ++i) {
 		left[i]  = sat16((static_cast<s64>(bus_[0][i]) * level) >> 12);
 		right[i] = sat16((static_cast<s64>(bus_[1][i]) * level) >> 12);
+	}
+	if (gDiagOn && ++gDiagSubframes % 400 == 0) {
+		for (int i = 0; i < kVoiceCount; ++i) {
+			VoiceDiag& d = gDiag[i];
+			if (d.n == 0)
+				continue;
+			const DSPBuffer& v = cfg_.voices[i];
+			std::fprintf(stderr,
+			             "[dsp-voice] t=%lds v=%d type=0x%x base=0x%llx pos=%d end=%u ratio=%u rms=%.0f zc=%ld\n",
+			             gDiagSubframes / 400, i, static_cast<unsigned>(v.samplesSourceType),
+			             static_cast<unsigned long long>(addrOf(v.baseAddress)), v.currentPosition,
+			             static_cast<unsigned>(v.endPosition), static_cast<unsigned>(v.resamplingRatio),
+			             std::sqrt(d.sq / static_cast<double>(d.n)), d.zc);
+			d = VoiceDiag{};
+		}
 	}
 }
 

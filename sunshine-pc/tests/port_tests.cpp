@@ -27,7 +27,6 @@ public:
     bool present = true;
     int healthRefills = 0;
     int waterRefills = 0;
-    int nozzleCalls = 0;
     int flagSets = 0;
     std::vector<uint32_t> flags;
 
@@ -39,7 +38,6 @@ public:
         ++flagSets;
         flags.push_back(flag);
     }
-    void setNozzleRight(uint8_t, uint8_t) override { ++nozzleCalls; }
 };
 
 const char* kBaseJson = R"({
@@ -107,12 +105,13 @@ void testTick() {
 
     reg.set("n", true);
     reg.tick(world);
-    check(world.nozzleCalls > 0, "tick: unlock_all_nozzles calls setNozzleRight");
-    check(world.flagSets == 0, "tick: unlock_all_nozzles does not touch unrelated flags");
+    check(world.flagSets == 18, "tick: unlock_all_nozzles sets 18 nozzle flags");
+    check(world.flags.size() == 18 && world.flags.front() == 0x10366 && world.flags.back() == 0x10377,
+          "tick: nozzle flags are the sms indices 0x10366..0x10377");
     check(reg.find("n") && !reg.find("n")->enabled, "tick: one-shot cheat switches itself off");
-    const int callsAfterOneShot = world.nozzleCalls;
+    const int setsAfterOneShot = world.flagSets;
     reg.tick(world);
-    check(world.nozzleCalls == callsAfterOneShot, "tick: one-shot cheat does not run again");
+    check(world.flagSets == setsAfterOneShot, "tick: one-shot cheat does not run again");
 }
 
 void testManifest() {
