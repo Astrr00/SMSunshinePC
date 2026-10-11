@@ -31,6 +31,8 @@ struct VoiceDiag {
 VoiceDiag gDiag[kVoiceCount];
 long gDiagSubframes = 0;
 const bool gDiagOn  = std::getenv("SUNSHINE_DSP_VOICE_LOG") != nullptr;
+long gDiagClip = 0; // DIAG: output samples saturated by sat16, per second
+s64 gDiagPeak  = 0; // DIAG: largest |bus| sample, per second
 
 namespace {
 
@@ -473,8 +475,14 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 	// microcode would do with them is not implemented (see mixVoice).
 	const s64 level = (static_cast<s64>(masterLevel) * gOutputVolumePct) / 100;
 	for (int i = 0; i < kSubframeSamples; ++i) {
-		left[i]  = sat16((static_cast<s64>(bus_[0][i]) * level) >> 12);
-		right[i] = sat16((static_cast<s64>(bus_[1][i]) * level) >> 12);
+		const s64 l = (static_cast<s64>(bus_[0][i]) * level) >> 12;
+		const s64 r = (static_cast<s64>(bus_[1][i]) * level) >> 12;
+		left[i]     = sat16(l);
+		right[i]    = sat16(r);
+		if (gDiagOn) { // DIAG
+			gDiagClip += (l != left[i]) + (r != right[i]);
+			gDiagPeak = std::max({gDiagPeak, std::abs(static_cast<s64>(bus_[0][i])), std::abs(static_cast<s64>(bus_[1][i]))});
+		}
 	}
 	if (gDiagOn && ++gDiagSubframes % 400 == 0) {
 		for (int i = 0; i < kVoiceCount; ++i) {
@@ -482,14 +490,33 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 			if (d.n == 0)
 				continue;
 			const DSPBuffer& v = cfg_.voices[i];
+			const double rms   = std::sqrt(d.sq / static_cast<double>(d.n));
+			double gain        = 0;
+			unsigned bus       = 0;
+			for (const auto& c : v.mixChannels)
+				if (c.id) {
+					gain += static_cast<s16>(c.targetVolume) / 32768.0;
+					bus = bus ? bus : c.id;
+				}
+			if (v.useDolbyVolume)
+				gain = static_cast<s16>(v.dolbyVolumeTarget) / 32768.0;
 			std::fprintf(stderr,
-			             "[dsp-voice] t=%lds v=%d type=0x%x base=0x%llx pos=%d end=%u ratio=%u rms=%.0f zc=%ld\n",
+			             "[dsp-voice] t=%lds v=%d type=0x%x base=0x%llx pos=%d end=%u loop=%d la=%llu ended=%d req=%d "
+			             "ratio=%u flt=0x%x iir=%d,%d,%d,%d lp=%d bus=0x%x gain=%.3f rms=%.0f post=%.0f zc=%ld\n",
 			             gDiagSubframes / 400, i, static_cast<unsigned>(v.samplesSourceType),
 			             static_cast<unsigned long long>(addrOf(v.baseAddress)), v.currentPosition,
-			             static_cast<unsigned>(v.endPosition), static_cast<unsigned>(v.resamplingRatio),
-			             std::sqrt(d.sq / static_cast<double>(d.n)), d.zc);
+			             static_cast<unsigned>(v.endPosition), v.isLooping ? 1 : 0,
+			             static_cast<unsigned long long>(addrOf(v.loopAddress)), state_[i].ended ? 1 : 0,
+			             v.endRequested ? 1 : 0, static_cast<unsigned>(v.resamplingRatio),
+			             static_cast<unsigned>(static_cast<u16>(v.filterMode)), v.biquadFilterCoeffs[0],
+			             v.biquadFilterCoeffs[1], v.biquadFilterCoeffs[2], v.biquadFilterCoeffs[3], v.lowPassCoeff,
+			             bus, gain, rms, rms * gain, d.zc);
 			d = VoiceDiag{};
 		}
+		std::fprintf(stderr, "[dsp-out] t=%lds level=%lld clip=%ld peak=%lld\n", gDiagSubframes / 400,
+		             static_cast<long long>(level), gDiagClip, static_cast<long long>(gDiagPeak));
+		gDiagClip = 0;
+		gDiagPeak = 0;
 	}
 }
 

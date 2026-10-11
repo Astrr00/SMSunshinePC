@@ -1,5 +1,6 @@
 // Example mod: logs its lifecycle, reads the game state through the host table and toggles a cheat.
-// Build with the SUNSHINE_BUILD_EXAMPLE_MODS option, the DLL is copied to mods/hello/mod.dll.
+// Build with the SUNSHINE_BUILD_EXAMPLE_MODS option. The DLL goes to <exe>/mod-examples/hello (not discovered);
+// copy the folder into <exe>/mods/ to load it.
 #include <cstdio>
 
 #include "sunshine_mod_api.h"
@@ -33,6 +34,17 @@ SUNSHINE_MOD_EXPORT void sunshine_mod_on_stage_load(SunshineModCtx* ctx, uint32_
     // Turn on the infinite-lives cheat from the data file, if it exists.
     if (gHost->cheat_set(ctx, "infinite_lives", 1) != 0) {
         gHost->log(ctx, SUNSHINE_LOG_WARN, "cheat infinite_lives not found");
+    }
+}
+
+SUNSHINE_MOD_EXPORT void sunshine_mod_on_logic_tick(SunshineModCtx* ctx) {
+    // One log line per second (30 logic ticks), so the tick rate can be read from the log.
+    static uint32_t ticks = 0;
+    ticks++;
+    if (ticks % 30 == 0) {
+        char msg[64];
+        std::snprintf(msg, sizeof msg, "logic tick %u (%u s)", ticks, ticks / 30);
+        gHost->log(ctx, SUNSHINE_LOG_INFO, msg);
     }
 }
 

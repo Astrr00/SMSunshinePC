@@ -161,9 +161,9 @@ void cheatsTick() {
         }
     }
     const int water = gpMarioOriginal->mWaterGun != nullptr ? gpMarioOriginal->mWaterGun->getCurrentWater() : -1;
-    std::printf("[cheats-state] t=%us health=%d water=%d lives=%d nozzles=0x%05X active=%d\n", ticks / 30,
-                (int)gpMarioOriginal->mHealth, water, (int)world.getFlag(cheats::kLivesFlag), nozzleMask,
-                activeCount());
+    std::printf("[cheats-state] t=%us health=%d water=%d lives=%d coins=%d nozzles=0x%05X active=%d\n", ticks / 30,
+                (int)gpMarioOriginal->mHealth, water, (int)world.getFlag(cheats::kLivesFlag),
+                (int)world.getFlag(cheats::kCoinFlag), nozzleMask, activeCount());
 }
 
 bool cheatExists(const char* id) {

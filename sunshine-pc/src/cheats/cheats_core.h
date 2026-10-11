@@ -24,11 +24,14 @@ enum class Effect {
     KeepHealthFull,    // hold: refill Mario's health each logic frame; blocks health loss (see healthLossBlocked)
     KeepWaterFull,     // hold: refill FLUDD water each logic frame
     KeepLivesMax,      // hold: keep the lives counter at kMaxLives
+    KeepCoinsMax,      // hold: keep the gold-coin counter at kMaxCoins (a pickup passes 100 for one tick and grants the 1-up)
     UnlockAllNozzles,  // one-shot: set the nozzle-unlocked flag for every stage, then the cheat switches itself off
 };
 
 constexpr uint32_t kLivesFlag = 0x20001;  // card int bank: lives (see sms incMario cap of 99)
 constexpr int32_t kMaxLives = 99;
+constexpr uint32_t kCoinFlag = 0x40002;  // gold coins in the current stage: read by TMario::getCoin and the HUD (sms GCConsole2)
+constexpr int32_t kMaxCoins = 99;
 // Nozzle-unlocked flags: one per (shine stage 1..9, nozzle 0..1), index = base + (stage-1)*2 + nozzle.
 // Same indices as sms TFlagManager::getNozzleRight/setNozzleRight (sms/src/System/FlagManager.cpp).
 constexpr uint32_t kNozzleFlagBase = 0x10366;

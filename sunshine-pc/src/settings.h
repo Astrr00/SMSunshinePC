@@ -20,6 +20,7 @@ struct Settings {
 	int resolutionScalePct = 0; // 0 = Auto (swapchain size), else percent of the native EFB size
 	int fpsLimit = 30;          // 30 = retail timing (no replay frames); 0 = unlimited; >30 = cap. See framerate.cpp.
 	bool widescreen = false;    // widescreen render width, see src/widescreen/widescreen.h
+	bool fsr1 = false;          // FSR 1 upscale (EASU + RCAS) of the internal frame when resolutionScalePct < 100; off = bilinear. SUNSHINE_UPSCALER overrides.
 	std::string aspect = "16:9"; // 4:3, 16:9, 16:10, 21:9, 32:9 or auto (window aspect at startup)
 	// [audio]
 	int masterVolumePct = 100;  // 0..100

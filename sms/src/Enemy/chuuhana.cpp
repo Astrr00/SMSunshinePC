@@ -961,8 +961,8 @@ BOOL TNerveChuuHanaRoll::execute(TSpineBase<TLiveActor>* spine) const
 	volatile f32 stepZ = 0.2f * (vel.z - self->unk204.z);
 	self->unk204.z += stepZ;
 
-	f32 speed = JGeometry::TUtil<f32>::sqrt(self->unk204.x * self->unk204.x
-	                                        + self->unk204.z * self->unk204.z);
+	f32 speed = JGeometry::TUtil<f32>::sqrt(self->unk204.z * self->unk204.z // asm 0x802BF000-0x802BF008: z*z fmuls, then x*x fmadds
+	                                        + self->unk204.x * self->unk204.x);
 	self->unk1B8 = 2.0f * (speed / self->mBodyRadius);
 	self->unk210 += self->unk1B8;
 	if (self->unk210 > 360.0f)

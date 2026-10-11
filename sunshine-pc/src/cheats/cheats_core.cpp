@@ -15,6 +15,7 @@ constexpr EffectName kEffects[] = {
     {"keep_health_full", Effect::KeepHealthFull, false},
     {"keep_water_full", Effect::KeepWaterFull, false},
     {"keep_lives_max", Effect::KeepLivesMax, false},
+    {"keep_coins_max", Effect::KeepCoinsMax, false},
     {"unlock_all_nozzles", Effect::UnlockAllNozzles, true},
 };
 
@@ -232,6 +233,11 @@ void Registry::tick(World& world) {
             case Effect::KeepLivesMax:
                 if (world.getFlag(kLivesFlag) != kMaxLives) {
                     world.setFlag(kLivesFlag, kMaxLives);
+                }
+                break;
+            case Effect::KeepCoinsMax:
+                if (world.getFlag(kCoinFlag) != kMaxCoins) {
+                    world.setFlag(kCoinFlag, kMaxCoins);
                 }
                 break;
             case Effect::UnlockAllNozzles:

@@ -150,6 +150,7 @@ bool loadEntry(GlyphStyle style, PadButton button, Entry& e) {
         return false;
     }
     e.image = GlyphImage{w, h, e.pixels.data()};
+    std::printf("[glyph] %s/%s %ux%u\n", kStyleDir[(size_t)style], kButtonFile[(size_t)button], w, h);
     return true;
 }
 

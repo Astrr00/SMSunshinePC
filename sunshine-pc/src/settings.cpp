@@ -156,6 +156,7 @@ Settings parseSettings(std::string_view text)
 	s.resolutionScalePct = readInt(ini, "video.resolution_scale", def.resolutionScalePct, 0, 400);
 	s.fpsLimit = readInt(ini, "video.fps_limit", def.fpsLimit, 0, 1000);
 	s.widescreen = readBool(ini, "video.widescreen", def.widescreen);
+	s.fsr1 = readBool(ini, "video.fsr1", def.fsr1);
 	s.aspect = readString(ini, "video.aspect", def.aspect);
 	if (!isValidAspect(s.aspect))
 		s.aspect = def.aspect;
@@ -183,6 +184,7 @@ std::string serializeSettings(const Settings& in)
 	out << "resolution_scale=" << in.resolutionScalePct << '\n';
 	out << "fps_limit=" << in.fpsLimit << '\n';
 	out << "widescreen=" << (in.widescreen ? 1 : 0) << '\n';
+	out << "fsr1=" << (in.fsr1 ? 1 : 0) << '\n';
 	out << "aspect=" << in.aspect << '\n';
 	out << "[audio]\n";
 	out << "master_volume=" << in.masterVolumePct << '\n';

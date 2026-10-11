@@ -25,6 +25,14 @@
             "default": false
         },
         {
+            "id": "infinite_coins",
+            "name": "Max coins",
+            "description": "The coin counter is kept at 99. Each pickup passes 100 for one tick, which also grants the 1-up.",
+            "category": "Game",
+            "effect": "keep_coins_max",
+            "default": false
+        },
+        {
             "id": "unlock_nozzles",
             "name": "Unlock all nozzles",
             "description": "Sets the nozzle-unlocked flag for every stage. Runs once, then switches itself off.",

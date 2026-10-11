@@ -42,11 +42,16 @@ uint32_t widescreenInit(const sunshine::Settings& s, uint32_t windowWidth, uint3
 	}
 	std::printf("widescreen: %s aspect=%s render width %u\n", on ? "on" : "off", aspect.c_str(), g_renderWidth);
 	// The logical window keeps the EFB aspect (W/448), so Aurora's FIT does not letterbox the widened image.
-	if (g_renderWidth == kGameWidth)
-		return windowWidth;
-	return ((windowHeight * g_renderWidth) / kGameHeight + 1) & ~1u;
+	return widescreenWindowWidth(windowWidth, windowHeight);
 }
 
 uint32_t sunshineRenderWidth() { return g_renderWidth; }
 
 uint32_t sunshineUIOffsetX() { return ((g_renderWidth - kGameWidth) / 2) & ~1u; }
+
+uint32_t widescreenWindowWidth(uint32_t windowWidth, uint32_t windowHeight)
+{
+	if (g_renderWidth == kGameWidth)
+		return windowWidth;
+	return ((windowHeight * g_renderWidth) / kGameHeight + 1) & ~1u;
+}

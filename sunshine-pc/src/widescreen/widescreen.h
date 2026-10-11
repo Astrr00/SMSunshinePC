@@ -19,5 +19,9 @@ uint32_t sunshineRenderWidth();
 // Left edge of the centred 640-wide 4:3 UI column inside sunshineRenderWidth() (even; 0 at 4:3).
 uint32_t sunshineUIOffsetX();
 
+// Logical window width for windowHeight at the active EFB aspect; windowWidth unchanged at 4:3. Used by widescreenInit and
+// by launcher::applyRuntimeSettings, which would otherwise reset the window to the saved 4:3 size.
+uint32_t widescreenWindowWidth(uint32_t windowWidth, uint32_t windowHeight);
+
 // Pure policy, exposed for tests: EFB width for a target aspect ratio (width / height).
 uint32_t widescreenRenderWidthForAspect(double aspect);

@@ -223,9 +223,16 @@ void logStatus(const char* tag)
 	            gpCamera->mCurrentTarget.mTarget.x, gpCamera->mCurrentTarget.mTarget.y, gpCamera->mCurrentTarget.mTarget.z,
 	            co ? co->unk0 : -1, co ? co->unkA : -1, co ? co->unkE : -1, co ? co->unk12 : -1, co ? co->unk16 : -1, co ? co->unk8 : -1);
 }
+// Shine manager: MapObjInit shine_data name, as SJIS escapes (source is UTF-8).
+TObjManager* shineManager()
+{
+	return dynamic_cast<TObjManager*>(JDrama::TNameRefGen::search(
+	    "\x83\x56\x83\x83\x83\x43\x83\x93\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"));
+}
+
 TShine* findShine(int& seen)
 {
-	TObjManager* mgrs[] = {gpItemManager, gpMapObjManager};
+	TObjManager* mgrs[] = {shineManager(), gpItemManager, gpMapObjManager};
 	TShine* shine = nullptr;
 	seen = 0;
 	for (TObjManager* mgr : mgrs) {
@@ -238,7 +245,6 @@ TShine* findShine(int& seen)
 
 // Dev trigger: runs the game's own collect path (TShine::touchPlayer -> TMario::receiveMessage
 // -> WIN_DEMO -> fireGetStar -> setShineFlag). Only the overlap test is skipped.
-// Shines are found by type in the item and map-object managers (scene shine names vary).
 void doShine()
 {
 	int seen = 0;
@@ -257,6 +263,16 @@ void doTpShine(const float* off)
 	TShine* shine = findShine(seen);
 	if (!shine || !gpMarioOriginal) {
 		std::printf("[devscript] tpshine: no TShine among %d managed objects (tick=%d)\n", seen, gTick);
+		TObjManager* mgrs[] = {shineManager(), gpItemManager, gpMapObjManager};
+		for (int m = 0; m < 3; ++m) {
+			TObjManager* mgr = mgrs[m];
+			if (!mgr) {
+				std::printf("[devscript]   mgr=%d missing\n", m);
+				continue;
+			}
+			for (int i = 0; i < mgr->getObjNum() && i < 400; ++i)
+				std::printf("[devscript]   mgr=%d obj=%s\n", m, mgr->getObj(i)->getName());
+		}
 		return;
 	}
 	TMario* m = gpMarioOriginal;

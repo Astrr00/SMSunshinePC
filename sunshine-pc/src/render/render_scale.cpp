@@ -51,3 +51,11 @@ void sunshineApplyRenderSettings()
 			VISetFrameBufferScale(scale);
 	}
 }
+
+void sunshineApplyUpscaler(bool fsr1)
+{
+	if (std::getenv("SUNSHINE_UPSCALER") != nullptr)
+		return;
+	aurora_set_resampler(fsr1 ? SAMPLER_FSR1 : SAMPLER_BILINEAR);
+	std::printf("[render] upscaler=%s\n", fsr1 ? "fsr1" : "bilinear");
+}

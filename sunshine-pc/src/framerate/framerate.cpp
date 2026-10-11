@@ -20,8 +20,27 @@ int64_t VIGetLastRetraceNs(u32* count); // src/sdk/av.cpp
 
 namespace {
 constexpr int kLogicRate = 30; // logic ticks per second (two retraces each)
+constexpr float kLogicPeriod = 1.0f / kLogicRate;
 using Clock              = std::chrono::steady_clock;
+
+// Interpolation state (J3DModel::interpBlend): g_alpha runs 0..1 over the window's replays after a logic tick.
+bool g_interp = false;
+float g_alpha = 0.0f;
+u32 g_step    = 0;
+u32 g_blends  = 0;
+Clock::time_point g_tickStart;
 }
+
+// J3DModel draws blend the draw matrices of the last two logic ticks with sunshineInterpAlpha(); -1 = no blend.
+// The blend position runs 0..1 over the replays after a tick, so the picture lags the logic by one tick (33 ms).
+bool sunshineInterpEnabled()
+{
+	const int cap = sunshine::settings().fpsLimit;
+	return cap == 0 || cap > kLogicRate;
+}
+float sunshineInterpAlpha() { return g_interp ? g_alpha : -1.0f; }
+u32 sunshineInterpStep() { return g_step; }
+void sunshineInterpNoteBlend() { ++g_blends; }
 
 // Called once per logic tick from TVideo::waitForRetrace(), before its own pre-wait (sms/src/JSystem/JDrama/JDRVideo.cpp).
 // Presents the frame drawn by TMarDirector::direct(), then replays on the cap's slot grid until the caller's retrace
@@ -35,17 +54,22 @@ void sunshinePaceWindow(u32 nextRetraceIndex)
 	sunshineHeartbeat();
 	const auto now = Clock::now();
 	++ticks;
+	++g_step;
 	if (now - logStart >= std::chrono::seconds(1)) {
-		std::printf("[framerate] logic %d/s, window presents %d/s, fpsLimit %d\n", ticks, presents,
-		            sunshine::settings().fpsLimit);
+		std::printf("[framerate] logic %d/s, window presents %d/s, blended draws %u/s, fpsLimit %d\n", ticks, presents,
+		            g_blends, sunshine::settings().fpsLimit);
 		std::fflush(stdout);
 		ticks = 0;
+		g_blends = 0;
 		presents = 0;
 		logStart = now;
 	}
 
 	const int cap = sunshine::settings().fpsLimit; // 0 = unlimited (no slot sleep)
-	if ((cap > 0 && cap <= kLogicRate) || !sunshineCanReplay())
+	g_tickStart   = now;
+	g_alpha       = 0.0f;
+	g_interp      = (cap == 0 || cap > kLogicRate) && sunshineCanReplay();
+	if (!g_interp)
 		return;
 
 	// Retraces are periodic: the caller's retrace is due at lastRetrace + (nextRetraceIndex - count) periods.
@@ -66,9 +90,12 @@ void sunshinePaceWindow(u32 nextRetraceIndex)
 		av::SleepUntil(t);
 		sunshinePresentFrame();
 		++presents;
+		g_alpha = std::clamp(std::chrono::duration<float>(Clock::now() - g_tickStart).count() / kLogicPeriod,
+		                     0.0f, 1.0f);
 		sunshineReplayFrame();
 		t += slot;
 		if (t < Clock::now()) // fell behind (slow replay): resync, do not burst to catch up
 			t = Clock::now();
 	}
+	g_alpha = 0.0f; // direct draws of the next tick show the previous logic state
 }

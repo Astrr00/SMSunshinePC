@@ -159,6 +159,8 @@ std::atomic<u32> g_retraceCount { 0 }; // changed only by the retrace thread, un
 OSThreadQueue g_retraceQueue;          // threads in VIWaitForRetrace
 VIRetraceCallback g_postRetraceCb = nullptr; // interrupt lock
 long long g_lastRetraceNs = 0; // steady-clock ns of the last retrace; interrupt lock
+// SUNSHINE_DEV_STEP_RETRACE=1 (dev harness): the retrace fires only once a game thread waits for it (WaitForNextRetrace).
+std::atomic<u32> g_waitFor { 0xFFFFFFFFu }; // retrace count the last VIWaitForRetrace caller waits on; interrupt lock
 
 // Recorded for the presentation phase. Aurora has no XFB (its GXCopyDisp is empty); the frame reaches the window through
 // aurora_end_frame(), which the port drives elsewhere, so nothing shows these on screen.
@@ -172,6 +174,12 @@ std::atomic<BOOL> g_black { TRUE }; // the video output starts blanked
 // renderer's present / the display's vsync instead.
 void WaitForNextRetrace()
 {
+	static const bool stepped = std::getenv("SUNSHINE_DEV_STEP_RETRACE") != nullptr;
+	if (stepped) { // dev harness: fire a retrace only once a game thread waits for it, so none is skipped
+		while (g_waitFor.load() != g_retraceCount.load() && !g_stopping)
+			std::this_thread::sleep_for(std::chrono::microseconds(50));
+		return;
+	}
 	using namespace std::chrono;
 	constexpr nanoseconds kPeriod(16'683'333); // 1001 / 60000 s
 	static auto next = Clock::now();
@@ -339,6 +347,7 @@ void VIWaitForRetrace(void)
 	// Game threads must wait through the OS layer (not a host wait) so lower-priority game threads keep running.
 	BOOL enabled    = OSDisableInterrupts();
 	const u32 count = g_retraceCount;
+	g_waitFor       = count;
 	do {
 		OSSleepThread(&g_retraceQueue);
 	} while (count == g_retraceCount);
@@ -393,3 +402,10 @@ void VISetBlack(BOOL black) { g_black = black; }
 // Bit 0 of the DTV status register is the component-cable (progressive scan capable) sense line. A PC has no console
 // video cable, so it is reported as absent: the game then never offers its progressive-scan prompt (GCLogoDir).
 u32 VIGetDTVStatus(void) { return 0; }
+
+// SUNSHINE_DEV_SEED=<n> (dev harness): fixed srand() seed so runs reproduce; unset keeps the boot-tick seed.
+u32 sunshineRandSeed(u32 fallback)
+{
+	const char* seed = std::getenv("SUNSHINE_DEV_SEED");
+	return seed != nullptr ? (u32)std::strtoul(seed, nullptr, 0) : fallback;
+}

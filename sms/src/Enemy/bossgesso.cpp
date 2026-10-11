@@ -683,6 +683,8 @@ void TBossGesso::definiteRumble() { }
 
 void TBossGesso::continuousRumble() { }
 
+// asm 0x80289368: retail calls lenFromToeToMario out of line (bl from perform)
+#pragma dont_inline on
 f32 TBossGesso::lenFromToeToMario()
 {
 	char trash[8];
@@ -702,6 +704,7 @@ f32 TBossGesso::lenFromToeToMario()
 
 	return min;
 }
+#pragma dont_inline off
 
 // asm 0x8028BDDC: retail calls showMessage out of line (bl from perform 0x80288C58)
 #pragma dont_inline on
@@ -775,10 +778,16 @@ void TBossGesso::changeAttackMode(int new_mode)
 	case ASTATE_DOUBLE:
 	case ASTATE_SKIP_ROPE:
 		break;
-	case ASTATE_GUARD:
-		// TODO: wrong, this should only use 2 tentacles, not all
-		changeAllTentacleState(10);
+	case ASTATE_GUARD: {
+		// asm 0x8028B6DC: retail only drives tentacles 1 and 3 (idx$3335), no state-5 check
+		static const int sGuardTentacles[2] = { 1, 3 };
+		for (int i = 0; i < 2; ++i) {
+			TBGTentacle* tentacle = mTentacles[sGuardTentacles[i]];
+			if (!tentacle->isThing())
+				tentacle->changeStateAndFixNodes(10);
+		}
 		break;
+	}
 
 	case ASTATE_UNISON:
 		changeAllTentacleState(0);

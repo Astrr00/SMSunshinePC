@@ -88,8 +88,7 @@ path. Copy a folder into `<exe dir>/mods/` to enable it.
 
 ## Verified
 
-- Loader: with `mods/overlay-demo` installed, the log shows `[mods] 1 overlay file(s) active` and `[mods] 0 DLL mod(s) active`.
-  Without a `mods/` folder: `[mods] no mods folder ..., 0 mods loaded`.
-- `mod_pack.py` output round-trips through `tools/discfmt.py`. Only `/station.bmg` differs from the stock archive; `/system.bmg` is identical.
-- Not yet exercised in-game: the game's open of `message.szs` (`[mods] overlay in use`) and the visible station name. Boot faults earlier in `TApplication::initialize` (see `platform-notes.md`).
+- Loader, measured: with `mods/overlay-demo` present the log shows `[mods] 1 overlay file(s) active` and `[mods] 0 DLL mod(s) active` (10 mod-on runs in `build/PortLauncherRun/*.log`). Without a `mods/` folder: `[mods] no mods folder (...), 0 mods loaded` (3 runs, e.g. `bilinear67_nomod.log`).
+- Overlay effect in-game: NOT verified. No `[mods] overlay in use` and no `[mods] overlay replaced` line appears in any mod-on run (`src/mods/mods_loader.cpp:170,248`). The bianco stage (`SUNSHINE_DEV_START=bianco/0`) shows `ビアンコヒルズ`, not the replaced station name. Delfino was not run in this session.
+- Carried over from an earlier session, not re-run: `mod_pack.py` output round-trips through `tools/discfmt.py` (only `/station.bmg` differs).
 - Not exercised: unload of a faulted DLL mod.

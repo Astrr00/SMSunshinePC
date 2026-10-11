@@ -23,6 +23,8 @@
 
 #include "../settings.h"
 #include "../glyphs/glyphs.h"
+#include "../render/render_scale.h"
+#include "../widescreen/widescreen.h"
 // Aurora headers by path: the game's include directories shadow <dolphin/...> (see sdk/pad_keys.cpp).
 #include "../../extern/aurora/include/dolphin/dvd.h"
 #include "../../extern/aurora/include/dolphin/pad.h"
@@ -83,7 +85,7 @@ struct WindowSize {
 	int height;
 };
 constexpr WindowSize kWindowSizes[] = { { 640, 480 }, { 960, 720 }, { 1280, 960 }, { 1600, 1200 } };
-constexpr int kScalePresets[] = { 0, 100, 150, 200, 300 }; // 0 = Auto
+constexpr int kScalePresets[] = { 0, 50, 67, 77, 100, 150, 200, 300 }; // 0 = Auto. Below 100 renders a smaller internal frame; FSR 1 (video.fsr1) upscales it.
 // ponytail: preset cycling instead of sliders. Values outside a preset (hand-edited INI) cycle back to the first.
 constexpr int kFpsPresets[] = { 0, 30, 60, 120, 144 };
 constexpr int kVolumePresets[] = { 100, 75, 50, 25, 0 };
@@ -238,6 +240,20 @@ public:
 			imagePath_ = last;
 			validate();
 		}
+		// Dev hook for tests: SUNSHINE_DEV_LAUNCHER_ACTIONS=id,id,... runs those actions in order (e.g. fsr1,scale,start).
+		if (const char* actions = std::getenv("SUNSHINE_DEV_LAUNCHER_ACTIONS")) {
+			std::string list = actions;
+			size_t begin = 0;
+			while (begin < list.size()) {
+				size_t end = list.find(',', begin);
+				if (end == std::string::npos)
+					end = list.size();
+				const std::string id = list.substr(begin, end - begin);
+				std::printf("[launcher] action %s\n", id.c_str());
+				onAction(id);
+				begin = end + 1;
+			}
+		}
 		refresh();
 		return true;
 	}
@@ -352,6 +368,7 @@ private:
 		                     (s.resolutionScalePct == 0 ? "Auto" : std::to_string(s.resolutionScalePct) + "%"));
 		setText("fps", std::string("FPS limit: ") + (s.fpsLimit == 0 ? "Unlimited" : std::to_string(s.fpsLimit)));
 		setText("widescreen", std::string("Widescreen: ") + (s.widescreen ? "On" : "Off") + " (" + s.aspect + ")");
+		setText("fsr1", std::string("FSR 1 upscale: ") + (s.fsr1 ? "On" : "Off"));
 		setText("volume", "Master volume: " + std::to_string(s.masterVolumePct) + "%");
 		setText("stick-deadzone", "Stick dead zone: " + std::to_string(s.stickDeadZonePct) + "%");
 		setText("substick-deadzone", "C-stick dead zone: " + std::to_string(s.substickDeadZonePct) + "%");
@@ -447,6 +464,8 @@ private:
 			s.fpsLimit = nextPreset(kFpsPresets, s.fpsLimit);
 		} else if (id == "widescreen") {
 			s.widescreen = !s.widescreen;
+		} else if (id == "fsr1") {
+			s.fsr1 = !s.fsr1;
 		} else if (id == "volume") {
 			s.masterVolumePct = nextPreset(kVolumePresets, s.masterVolumePct);
 		} else if (id == "stick-deadzone") {
@@ -537,11 +556,13 @@ void applyRuntimeSettings() {
 	}
 	hostdsp::setOutputVolumePct(s.masterVolumePct);
 	VISetWindowFullscreen(s.fullscreen);
-	VISetWindowSize(static_cast<uint32_t>(s.windowWidth), static_cast<uint32_t>(s.windowHeight));
+	const auto windowHeight = static_cast<uint32_t>(s.windowHeight);
+	VISetWindowSize(widescreenWindowWidth(static_cast<uint32_t>(s.windowWidth), windowHeight), windowHeight);
 	// SUNSHINE_RENDER_SCALE (render/render_scale.cpp) overrides the saved scale.
 	if (std::getenv("SUNSHINE_RENDER_SCALE") == nullptr) {
 		VISetFrameBufferScale(static_cast<float>(s.resolutionScalePct) / 100.f);
 	}
+	sunshineApplyUpscaler(s.fsr1); // render/render_scale.cpp: FSR 1 or bilinear, unless SUNSHINE_UPSCALER is set
 }
 
 } // namespace launcher

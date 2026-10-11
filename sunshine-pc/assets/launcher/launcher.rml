@@ -34,7 +34,8 @@
 		<div class="row"><button id="window-size">Window size</button></div>
 		<div class="row"><button id="vsync">VSync</button></div>
 		<div class="row"><button id="scale">Resolution scale</button></div>
-		<div class="row"><span id="dlss">DLSS: unavailable in this build (no motion vectors or jitter, Dawn cannot export D3D12 targets; see docs/dlss-feasibility.md)</span></div>
+		<div class="row"><button id="fsr1">FSR 1 upscale</button></div>
+		<div class="row"><span id="dlss">DLSS: unavailable (docs/dlss-feasibility.md)</span></div>
 		<div class="row"><button id="fps">FPS limit</button></div>
 		<div class="row"><button id="widescreen">Widescreen</button></div>
 	</div>
