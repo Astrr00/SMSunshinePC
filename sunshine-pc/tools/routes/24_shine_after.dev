@@ -1,0 +1,16 @@
+# Diagnosis only (airport/1 + Null backend, dev verbs): kill the boss, collect the Shine, then answer the save prompt with A
+# and see where the game goes (expected: the arrest film / Delfino, stage 1).
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=90
+killboss
+wait frames=300
+tpshine
+wait frames=120
+log
+mash A period=30 until stage=1 timeout=3000
+log
+wait frames=300
+log
+end

@@ -1,0 +1,178 @@
+# Diagnosis only (airport/1 + Null backend, dev cheats and teleports): which nozzle pitch reaches the GateKeeper head?
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=30
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,30 frames=45
+log
+log
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,50 frames=45
+log
+log
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,70 frames=45
+log
+log
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,90 frames=45
+log
+log
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+tp x=-1200 y=320 z=1180 yaw=-43
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=45
+log
+log
+log
+wait frames=30
+end

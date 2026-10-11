@@ -1,0 +1,28 @@
+# Diagnosis only (airport/1 + Null backend, dev verbs): kill the airport GateKeeper, then see what the airport does.
+# Question: does TAirportEventSink raise the building and make a Shine appear, and what happens after collecting it?
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=90
+log
+killboss
+wait frames=150
+log
+wait frames=150
+log
+wait frames=150
+log
+wait frames=150
+log
+wait frames=300
+log
+tpshine
+wait frames=150
+log
+wait frames=300
+log
+wait frames=300
+log
+wait frames=300
+log
+end

@@ -19,6 +19,7 @@
 #include "Camera/CameraOption.hpp"
 #include "System/StageUtil.hpp"
 #include "JSystem/JDrama/JDRNameRefGen.hpp"
+#include "cheats/cheats.h"
 #include "MoveBG/Item.hpp"
 #include "MoveBG/ItemManager.hpp"
 #include "MoveBG/MapObjManager.hpp"
@@ -47,7 +48,7 @@ u32 sunshineInterpStep();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss };
 
 struct Command {
 	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed };
@@ -246,6 +247,33 @@ Command parseLine(const std::string& text, int line)
 		// Test-only: applies damage through TMario::decHP, so the cheat health guard can be checked. frames = damage.
 		c.op = Op::Hurt;
 		if (!(in >> c.frames) || c.frames <= 0) fail(line, "hurt needs a positive damage amount", text);
+		return c;
+	}
+	if (verb == "killboss") { c.op = Op::KillBoss; return c; } // dev-only: marks the airport GateKeeper dead (diagnosis, never acceptance)
+	if (verb == "tp") {
+		// Dev-only teleport for diagnosis: tp x=<x> y=<y> z=<z> puts Mario there (velocity cleared). Never in an acceptance route.
+		c.op = Op::Tp;
+		std::string tok;
+		while (in >> tok) {
+			const size_t eq = tok.find('=');
+			if (eq == std::string::npos) fail(line, "unexpected token in tp", tok);
+			const std::string key = tok.substr(0, eq);
+			const float v         = static_cast<float>(std::atof(tok.c_str() + eq + 1));
+			if (key == "x") c.pos[0] = v;
+			else if (key == "y") c.pos[1] = v;
+			else if (key == "z") c.pos[2] = v;
+			else if (key == "yaw") { c.tol = v; c.spray = true; } // degrees, game yaw convention (forward = (sin, cos))
+			else fail(line, "unexpected token in tp", tok);
+		}
+		return c;
+	}
+	if (verb == "cheat") {
+		// Dev-only: cheat <id> [off] switches one of the shipped cheats (assets/cheats.json), e.g. infinite_health, infinite_water.
+		c.op = Op::Cheat;
+		std::string tok;
+		if (!(in >> c.path)) fail(line, "cheat needs an id", text);
+		c.frames = 1;
+		if (in >> tok) c.frames = tok == "off" ? 0 : 1;
 		return c;
 	}
 	if (verb == "shine") { c.op = Op::Shine; return c; }
@@ -721,6 +749,23 @@ void step()
 		if (c.op == Op::Shine) doShine();
 		if (c.op == Op::TpShine) doTpShine(c.pos);
 		if (c.op == Op::Hurt) doHurt(c.frames);
+		if (c.op == Op::Tp && gpMarioOriginal) {
+			gpMarioOriginal->mPosition.set(c.pos[0], c.pos[1], c.pos[2]);
+			gpMarioOriginal->mVel.set(0.f, 0.f, 0.f);
+			if (c.spray) gpMarioOriginal->mFaceAngle.y = static_cast<s16>(c.tol * (65536.0f / 360.0f));
+			std::printf("[devscript] tp: mario=(%.0f,%.0f,%.0f) tick=%d\n", c.pos[0], c.pos[1], c.pos[2], gTick);
+		}
+		if (c.op == Op::Cheat)
+			std::printf("[devscript] cheat %s %s: %s tick=%d\n", c.path.c_str(), c.frames ? "on" : "off",
+			    cheatSet(c.path.c_str(), c.frames != 0) ? "ok" : "unknown id", gTick);
+		if (c.op == Op::KillBoss) {
+			if (TBiancoGateKeeper* b = findBoss()) {
+				b->kill();
+				std::printf("[devscript] killboss: boss killed tick=%d\n", gTick);
+			} else {
+				std::printf("[devscript] killboss: no boss tick=%d\n", gTick);
+			}
+		}
 		if (c.op == Op::Shot) {
 			logStatus("shot");
 			aurora_screenshot_next(c.path.c_str());
