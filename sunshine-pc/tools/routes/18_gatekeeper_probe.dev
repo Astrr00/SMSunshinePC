@@ -9,60 +9,60 @@ walkto x=-4005 z=652 radius=100 timeout=500
 walkto x=-3069 z=491 radius=100 timeout=500
 walkto x=-2134 z=329 radius=100 timeout=500
 log
-walkto x=-1500 z=900 radius=120 timeout=500
+walkto x=-1500 z=900 radius=150 timeout=500
 log
-walkto x=-1500 z=1500 radius=450 timeout=300
+walkto x=-1500 z=1500 radius=330 spray=1 timeout=900
 log
 shot gk0.png
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
-hold trig=0,255 frames=60
+hold trig=0,255 stick=0,30 frames=60
 log
 shot gk1.png
 wait frames=60

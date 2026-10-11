@@ -60,6 +60,7 @@ struct Command {
 	std::vector<std::pair<Cond, int>> conds; // waitfor/mash: ALL must hold to end the op
 	int maxTicks = 0;       // waitfor/mash/walkto: fail loudly after this many logic ticks
 	float radius = 80.f;    // walkto: arrival distance in the XZ plane
+	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
 	int period = 30;        // mash: press for 2 ticks every `period` ticks
 };
 
@@ -221,6 +222,7 @@ Command parseLine(const std::string& text, int line)
 			if (key == "x") { c.pos[0] = v; gotX = true; }
 			else if (key == "z") { c.pos[2] = v; gotZ = true; }
 			else if (key == "radius") c.radius = v;
+			else if (key == "spray") c.spray = v != 0.f;
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
 			else fail(line, "unexpected token in walkto", tok);
 		}
@@ -324,6 +326,16 @@ void logBoss(const char* tag)
 			if (b->getMActor()->checkCurBckFromIndex(i)) { bck = i; break; }
 	std::printf("[%s-boss] hp=%d vulnerable=%d unk154=%d dead=%d bck=0x%X pos=(%.0f,%.0f,%.0f) tick=%d\n", tag, (int)g->getHitPoints(),
 	    (int)g->mVulnerable, g->unk154, g->checkLiveFlag(LIVE_FLAG_DEAD) ? 1 : 0, bck, g->mPosition.x, g->mPosition.y, g->mPosition.z, gTick);
+	if (TBiancoGateKeeper* b = dynamic_cast<TBiancoGateKeeper*>(g)) {
+		if (b->mHead && gpMarioOriginal) {
+			const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
+			const float dz = b->mHead->mPosition.z - gpMarioOriginal->mPosition.z;
+			// bearing in the game's yaw convention (forward = (sin, cos)); face = Mario's yaw in degrees
+			std::printf("[%s-boss]   head vulnerable=%d pos=(%.0f,%.0f,%.0f) dist=%.0f bearing=%.0f marioFace=%.0f\n", tag,
+			    (int)b->mHead->mVulnerable, b->mHead->mPosition.x, b->mHead->mPosition.y, b->mHead->mPosition.z,
+			    std::sqrt(dx * dx + dz * dz), std::atan2(dx, dz) * 57.29578f, gpMarioOriginal->mFaceAngle.y * (360.0f / 65536.0f));
+		}
+	}
 }
 
 void logStatus(const char* tag)
@@ -550,6 +562,7 @@ void step()
 			float dist = 0.f;
 			if (gpMarioOriginal && gpCamera) {
 				walkStick(c, pad.stickX, pad.stickY, dist);
+				if (c.spray) pad.triggerRight = 255;
 				if (dist <= c.radius) {
 					std::printf("[devscript] walkto met line=%d after=%d dist=%.0f tick=%d\n", c.line, gRemaining, dist, gTick);
 					const PADStatus neutral{};
