@@ -127,6 +127,7 @@ void TPopoManager::createModelData()
 
 void TPopoManager::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[8];
 	if (cue & 1) {
 		for (int i = 0; i < getActiveObjNum(); ++i) {
 			TPopo* popo = (TPopo*)unk18[i];

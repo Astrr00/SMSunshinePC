@@ -247,7 +247,7 @@ void TAnimalBird::moveObject()
 	}
 
 	bool isCoin
-	    = mSpine->getLatestNerve() == &TNerveAnimalBirdChangeToCoin::theNerve();
+	    = &TNerveAnimalBirdChangeToCoin::theNerve() == mSpine->getLatestNerve();
 	if (!isCoin && mHitPoints == 0) {
 		mSpine->reset();
 		mSpine->setNext(&TNerveAnimalBirdChangeToCoin::theNerve());

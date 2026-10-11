@@ -258,13 +258,13 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 	char trash[40];
 	switch (param_1) {
 	case 0:
-		if (checkUnk4CFlag(0x100))
-			break;
-		onUnk4CFlag(0x100);
-		setNextStage(0x1, nullptr);
-		TFlagManager::smInstance->setBool(true, 0x10389);
-		TFlagManager::smInstance->setBool(true, 0x30004);
-		gpApplication.mMovie = param_1;
+		if (!checkUnk4CFlag(0x100)) {
+			onUnk4CFlag(0x100);
+			setNextStage(0x1, nullptr);
+			TFlagManager::smInstance->setBool(true, 0x10389);
+			TFlagManager::smInstance->setBool(true, 0x30004);
+			gpApplication.mMovie = param_1;
+		}
 		break;
 
 	case 10:

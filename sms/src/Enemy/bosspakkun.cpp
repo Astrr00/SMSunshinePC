@@ -611,7 +611,7 @@ void TBossPakkunMtxCalc::calcBellyScale(u16 jointIndex)
 		progress = static_cast<f32>(mOwner->unk1B8) / 50.0f;
 	} else {
 		s32 limit = mOwner->getBossPakkunParams()->mSLWaterMarkLimit.get();
-		s32 mark  = mOwner->unk178;
+		s32 mark = mOwner->unk178;
 		if (mark > limit)
 			mark = limit;
 		progress = static_cast<f32>(mark) / static_cast<f32>(limit);

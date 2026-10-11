@@ -503,7 +503,7 @@ void TFireWanwanTailHit::behaveTaken(THitActor* param_1)
 
 	mCurTailLength  = unkA4->getLength();
 	mPrevTailLength = mCurTailLength;
-	moveRequest(mPosition);
+	moveRequest(param_1->mPosition);
 }
 
 void TFireWanwanTailHit::behaveApart()
@@ -2154,9 +2154,8 @@ DEFINE_NERVE(TNerveFireWanwanFly, TLiveActor)
 
 DEFINE_NERVE(TNerveFireWanwanFreeze, TLiveActor)
 {
-	char trash[8];
 	TFireWanwan* self = (TFireWanwan*)spine->getBody();
-
+	char trash[8];
 
 	if (spine->getTime() == 0) {
 		self->setBckAnm(0);

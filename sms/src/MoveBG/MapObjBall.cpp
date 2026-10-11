@@ -836,8 +836,9 @@ void TResetFruit::kicked()
 	if (!(JGeometry::TVec3<f32>(vel).y <= 0.0f))
 		return;
 
-	f32 dot = JGeometry::TVec3<f32>(vel).dot(JGeometry::TVec3<f32>(
-	    gpMarioPos->x - mPosition.x, 0.0f, gpMarioPos->z - mPosition.z));
+	f32 dx  = gpMarioPos->x - mPosition.x;
+	f32 dz  = gpMarioPos->z - mPosition.z;
+	f32 dot = JGeometry::TVec3<f32>(vel).dot(JGeometry::TVec3<f32>(dx, 0.0f, dz));
 	if (isAirborne() && dot > 0.0f)
 		return;
 

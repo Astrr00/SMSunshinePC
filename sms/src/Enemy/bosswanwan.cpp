@@ -764,6 +764,7 @@ void TBossWanwanMtxCalc::calc(u16 jointIndex)
 			MTXCopy(jointMtx, J3DSys::mCurrentMtx);
 		}
 	}
+	char trash[0x10];
 }
 
 TBossWanwan::TBossWanwan(const char* name)
@@ -893,6 +894,7 @@ void TBossWanwan::shakeCamera(int mode)
 
 BOOL TBossWanwan::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x20];
 	if (sender->getActorType() == 0x80000001)
 		return false;
 
@@ -966,6 +968,7 @@ void TBossWanwan::slideToCurPathNode(f32 slideSpeed, f32 turnSpeed)
 		toNode.scale(slideSpeed / dist);
 	vel += toNode;
 	mLinearVelocity = vel;
+	char trash[0x10];
 }
 
 void TBossWanwan::control()
@@ -997,10 +1000,12 @@ void TBossWanwan::control()
 
 	unk15C.zero();
 	updateSquareToMario();
+	char trash[0x40];
 }
 
 void TBossWanwan::emitEffects()
 {
+	char trash[0x68];
 	BOOL hit = FALSE;
 	if (mMActor->checkCurBckFromIndex(4) || mMActor->checkCurBckFromIndex(5)) {
 		if (mMActor->checkBckPass(8.0f))
@@ -1086,6 +1091,7 @@ void TBossWanwan::emitEffects()
 
 void TBossWanwan::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x98];
 	if (unk18C) {
 		mHit[0]->perform(cue, graphics);
 		TSpineEnemy::perform(cue, graphics);
@@ -1370,6 +1376,7 @@ DEFINE_NERVE(TNerveBWGraphWander, TLiveActor)
 
 DEFINE_NERVE(TNerveBWRoll, TLiveActor)
 {
+	char trash[0xd0];
 	TBossWanwan* boss = static_cast<TBossWanwan*>(spine->getBody());
 
 	if (spine->getTime() == 0) {

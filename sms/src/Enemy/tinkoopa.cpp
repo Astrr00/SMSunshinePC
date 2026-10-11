@@ -287,17 +287,17 @@ void TTinKoopa::init(TLiveManager* manager)
 
 void TTinKoopa::makeLaunchSchedule()
 {
-	mLaunchOrders->getOrder(0)->set(0, 600, -1, 0);
-	mLaunchOrders->getOrder(1)->set(0, 1230, -1, 1);
-	mLaunchOrders->getOrder(2)->set(0, 2450, -1, 1);
-	mLaunchOrders->getOrder(3)->set(1, 240, -1, 0);
-	mLaunchOrders->getOrder(4)->set(1, 280, -1, 1);
-	mLaunchOrders->getOrder(5)->set(1, 630, -1, 0);
-	mLaunchOrders->getOrder(6)->set(1, 900, -1, 0);
-	mLaunchOrders->getOrder(7)->set(1, 1200, -1, 1);
-	mLaunchOrders->getOrder(8)->set(2, 565, -1, 0);
-	mLaunchOrders->getOrder(9)->set(2, 700, -1, 0);
-	mLaunchOrders->getOrder(10)->set(2, 2220, -1, 1);
+	mLaunchOrders->mOrders[0]->set(0, 600, -1, 0);
+	mLaunchOrders->mOrders[1]->set(0, 1230, -1, 1);
+	mLaunchOrders->mOrders[2]->set(0, 2450, -1, 1);
+	mLaunchOrders->mOrders[3]->set(1, 240, -1, 0);
+	mLaunchOrders->mOrders[4]->set(1, 280, -1, 1);
+	mLaunchOrders->mOrders[5]->set(1, 630, -1, 0);
+	mLaunchOrders->mOrders[6]->set(1, 900, -1, 0);
+	mLaunchOrders->mOrders[7]->set(1, 1200, -1, 1);
+	mLaunchOrders->mOrders[8]->set(2, 565, -1, 0);
+	mLaunchOrders->mOrders[9]->set(2, 700, -1, 0);
+	mLaunchOrders->mOrders[10]->set(2, 2220, -1, 1);
 }
 
 BOOL TTinKoopaFlame::receiveMessage(THitActor* sender, u32 message)

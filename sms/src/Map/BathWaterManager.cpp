@@ -1711,10 +1711,26 @@ f32 TBathWaterManager::getWaterHeight(f32 x, f32 z) const
 }
 
 namespace {
-void CalcJumpVelocityY(const JGeometry::TVec3<f32>&,
-                       const JGeometry::TVec3<f32>&, f32, f32, f32,
-                       JGeometry::TVec3<f32>*)
+void CalcJumpVelocityY(const JGeometry::TVec3<f32>& desired_pos,
+                       const JGeometry::TVec3<f32>& initial_pos,
+                       f32 jump_y_velocity, f32 gravity_accel, f32 min_y,
+                       JGeometry::TVec3<f32>* result)
 {
+	f32 y     = initial_pos.y;
+	f32 vy    = jump_y_velocity;
+	int count = 1;
+	while (true) {
+		y += vy;
+		if (vy < 0.0f && y <= desired_pos.y)
+			break;
+		vy -= gravity_accel;
+		if (vy < min_y)
+			vy = min_y;
+		count++;
+	}
+
+	result->set((desired_pos.x - initial_pos.x) / (f32)count, jump_y_velocity,
+	            (desired_pos.z - initial_pos.z) / (f32)count);
 }
 } // namespace
 
@@ -1725,8 +1741,14 @@ void TBathWaterManager::throwMario(f32 param_1)
 	JGeometry::TVec3<f32> diff;
 	diff.sub(SMS_GetMarioPos(), data.mPos);
 
+	JGeometry::TVec3<f32> xDir;
+	JGeometry::TVec3<f32> yDir;
+	JGeometry::TVec3<f32> zDir;
+	data.unk18.getXDir(xDir);
+	data.unk18.getYDir(yDir);
+	data.unk18.getZDir(zDir);
 	JGeometry::TVec3<f32> local;
-	data.unk18.mult33(diff, local);
+	local.set(diff.dot(xDir), diff.dot(yDir), diff.dot(zDir));
 
 	JGeometry::TVec3<f32> horiz;
 	horiz   = local;
@@ -1737,29 +1759,12 @@ void TBathWaterManager::throwMario(f32 param_1)
 		horiz.setLength(4150.0f);
 
 		JGeometry::TVec3<f32> w;
-		// w = mPos + transpose(unk18) * horiz; horiz.y is 0, so that column drops out.
-		w.x = data.mPos.x + data.unk18.mMtx[0][0] * horiz.x + data.unk18.mMtx[2][0] * horiz.z;
-		w.y = data.mPos.y + data.unk18.mMtx[0][1] * horiz.x + data.unk18.mMtx[2][1] * horiz.z;
-		w.z = data.mPos.z + data.unk18.mMtx[0][2] * horiz.x + data.unk18.mMtx[2][2] * horiz.z;
+		data.unk18.mult33(horiz, w);
+		w += data.mPos;
 		w.y += 120.0f;
 
-		f32 gravity = SMS_GetMarioGravity();
-		int count   = 1;
-		f32 vy      = 100.0f;
-		f32 y       = gpMarioPos->y;
-		while (true) {
-			y += vy;
-			if (vy < 0.0f && y <= w.y)
-				break;
-			vy -= gravity;
-			if (vy < -75.0f)
-				vy = -75.0f;
-			count++;
-		}
-
-		vel.x = (w.x - gpMarioPos->x) / (f32)count;
-		vel.y = 100.0f;
-		vel.z = (w.z - gpMarioPos->z) / (f32)count;
+		CalcJumpVelocityY(w, SMS_GetMarioPos(), 100.0f, SMS_GetMarioGravity(),
+		                  -75.0f, &vel);
 	} else {
 		vel.x = 0.0f;
 		vel.y = param_1;

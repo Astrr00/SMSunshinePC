@@ -171,8 +171,9 @@ void TMario::hangPole(THitActor* actor)
 		}
 
 		if (inHangStatus == 1) {
-			f32 dz   = actor->mPosition.z - mPosition.z;
-			f32 dx   = actor->mPosition.x - mPosition.x;
+			f32 dx, dz;
+			dz = actor->mPosition.z - mPosition.z;
+			dx = actor->mPosition.x - mPosition.x;
 			f32 dist = std::sqrtf(dx * dx + dz * dz);
 			if (dist == 0.0f)
 				dist = 1.0f;
