@@ -159,6 +159,12 @@ TBathtubPeach::TBathtubPeach(const char* name)
 	offLiveFlag(LIVE_FLAG_UNK10);
 }
 
+// Retail calls fmodf out of line; keep the MSL inline version out of the turn
+// logic so mwcc emits a call.
+#pragma dont_inline on
+static f32 fmodDeg(f32 x, f32 y) { return std::fmodf(x, y); }
+#pragma dont_inline off
+
 BOOL TNervePeachEscape::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TBathtubPeach* peach = static_cast<TBathtubPeach*>(spine->getBody());
@@ -188,21 +194,19 @@ BOOL TNervePeachEscape::execute(TSpineBase<TLiveActor>* spine) const
 	f32 peachAngle = SHORTANGLE2DEG(matan(peachDZ, peachDX));
 
 	// Keep the target angle on the side of Mario the peach is already on.
-	// The original's std::fmodf is the same truncating float mod as
-	// JGeometry::TUtil<f32>::mod.
 	f32 target = -180.0f
-	             + JGeometry::TUtil<f32>::mod(
+	             + fmodDeg(
 	                 360.0f + ((peachAngle - marioAngle) - -180.0f), 360.0f);
 	if (target < 0.0f) {
 		target = -180.0f
-		         + JGeometry::TUtil<f32>::mod(
+		         + fmodDeg(
 		             360.0f
 		                 + ((marioAngle - getPeachParams(peach)->angle.get())
 		                    - -180.0f),
 		             360.0f);
 	} else {
 		target = -180.0f
-		         + JGeometry::TUtil<f32>::mod(
+		         + fmodDeg(
 		             360.0f
 		                 + ((marioAngle + getPeachParams(peach)->angle.get())
 		                    - -180.0f),
@@ -237,18 +241,18 @@ BOOL TNervePeachEscape::execute(TSpineBase<TLiveActor>* spine) const
 	f32 faceAngle = SHORTANGLE2DEG(matan(dz, dx));
 	f32 face      = faceAngle - 90.0f;
 	f32 diff = -180.0f
-	           + JGeometry::TUtil<f32>::mod(
+	           + fmodDeg(
 	               360.0f + ((face - peach->mRotation.y) - -180.0f), 360.0f);
 	if (diff < -turnSpeed) {
 		peach->mRotation.y
 		    = -180.0f
-		      + JGeometry::TUtil<f32>::mod(
+		      + fmodDeg(
 		          360.0f + ((peach->mRotation.y - turnSpeed) - -180.0f),
 		          360.0f);
 	} else if (diff > turnSpeed) {
 		peach->mRotation.y
 		    = -180.0f
-		      + JGeometry::TUtil<f32>::mod(
+		      + fmodDeg(
 		          360.0f + ((peach->mRotation.y + turnSpeed) - -180.0f),
 		          360.0f);
 	} else {

@@ -105,6 +105,7 @@ TYumbo::TYumbo(const char* name)
 
 void TYumbo::init(TLiveManager* manager)
 {
+	char trash[0x20];
 	mManager = manager;
 	mManager->manageActor(this);
 	mMActorKeeper = new TMActorKeeper(mManager, 18);
@@ -354,7 +355,6 @@ DEFINE_NERVE(TNerveYumboDancing, TLiveActor)
 	JGeometry::TVec3<f32> dir = SMS_GetMarioPos();
 	dir -= self->mPosition;
 	self->mRotation.y = MsGetRotFromZaxisY(dir);
-	char trash[8];
 
 	if (isMarioInSight(self)) {
 		spine->pushAfterCurrent(&TNerveYumboHiding::theNerve());

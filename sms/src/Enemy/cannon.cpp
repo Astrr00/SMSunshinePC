@@ -442,8 +442,8 @@ BOOL TNerveCannonSearch::execute(TSpineBase<TLiveActor>* spine) const
 	}
 
 	if (gpApplication.mCurrArea.unk0 == 5 && gpMarDirector->mState == 1) {
-		JGeometry::TVec3<f32> rot = MsGetRotFromZaxis(*gpMarioPos - self->mPosition);
-		self->mRotation.y         = rot.y;
+		JGeometry::TVec3<f32> diff = *gpMarioPos - self->mPosition;
+		self->mRotation.y = MsGetRotFromZaxis(diff).y;
 	} else {
 		self->walkToCurPathNode(0.0f, self->mTurnSpeed, 0.0f);
 	}

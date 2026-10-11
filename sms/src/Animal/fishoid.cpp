@@ -149,6 +149,7 @@ void TRealoid::loadDefault(JSUMemoryInputStream& stream, const char* name,
 	}
 }
 
+#pragma dont_inline on
 void TRealoid::clipBoids(JDrama::TGraphics* graphics)
 {
 	f32 nearPlane = graphics->getNearPlane();
@@ -165,6 +166,7 @@ void TRealoid::clipBoids(JDrama::TGraphics* graphics)
 			unk154[i]->onFlag(TRealoidActor::FLAG_CLIPPED_OUT);
 	}
 }
+#pragma dont_inline off
 
 void TRealoid::perform(u32 cue, JDrama::TGraphics* graphics)
 {

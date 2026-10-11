@@ -84,10 +84,22 @@ TDirectionCalc::TDirectionCalc(JGeometry::TVec3<f32> vec) { makeDirection(vec); 
 
 #pragma auto_inline off
 
+// Retail calls mod/fmodf out of line; mwcc inlines the header versions otherwise.
+#pragma dont_inline on
+static f32 modOutOfLine(f32 value, f32 modulus)
+{
+	return JGeometry::TUtil<f32>::mod(value, modulus);
+}
+static f32 fmodfOutOfLine(f32 value, f32 modulus)
+{
+	return std::fmodf(value, modulus);
+}
+#pragma dont_inline off
+
 f32 TDirectionCalc::calcNearerDirection(f32 target)
 {
 	mDirection = 0.0f
-	             + std::fmodf(6.2831855f + (mDirection - 0.0f), 6.2831855f);
+	             + fmodfOutOfLine(6.2831855f + (mDirection - 0.0f), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -105,7 +117,7 @@ f32 TDirectionCalc::calcNearerDirection(f32 target)
 f32 TDirectionCalc::sub(f32 target)
 {
 	mDirection = 0.0f
-	             + JGeometry::TUtil<f32>::mod(
+	             + modOutOfLine(
 	                 6.2831855f + (mDirection - 0.0f), 6.2831855f);
 
 	if (target >= mDirection) {
@@ -124,9 +136,9 @@ f32 TDirectionCalc::sub(f32 target)
 f32 TDirectionCalc::calcTurnDirection(f32 target, f32 step)
 {
 	mDirection = 0.0f
-	             + std::fmodf(6.2831855f + (mDirection - 0.0f), 6.2831855f);
+	             + fmodfOutOfLine(6.2831855f + (mDirection - 0.0f), 6.2831855f);
 	mDirection = 0.0f
-	             + JGeometry::TUtil<f32>::mod(
+	             + modOutOfLine(
 	                 6.2831855f + (mDirection - 0.0f), 6.2831855f);
 
 	if (target >= mDirection) {
@@ -169,7 +181,7 @@ JGeometry::TVec3<f32> TDirectionCalc::calcDirectionVector()
 f32 TDirectionCalc::absDirection(f32 target)
 {
 	mDirection = 0.0f
-	             + JGeometry::TUtil<f32>::mod(
+	             + modOutOfLine(
 	                 6.2831855f + (mDirection - 0.0f), 6.2831855f);
 
 	if (target >= mDirection) {
@@ -793,7 +805,7 @@ void TKoopaJrSubmarine::moveSwing()
 
 	mSwingPhase
 	    = 0.0f
-	      + std::fmodf(
+	      + fmodfOutOfLine(
 	          6.2831855f
 	              + (mSwingPhase
 	                 + ((TKoopaJrSubmarineParams*)getSaveParam())
@@ -833,7 +845,7 @@ void TKoopaJrSubmarine::moveSwing()
 
 	mWavePhase
 	    = 0.0f
-	      + std::fmodf(
+	      + fmodfOutOfLine(
 	          6.2831855f
 	              + (mWavePhase
 	                 + ((TKoopaJrSubmarineParams*)getSaveParam())

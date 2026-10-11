@@ -133,7 +133,7 @@ void TCoasterEnemy::moveCoaster()
 		mQuat.mul(steer);
 	}
 
-	static_cast<JGeometry::TVec4<f32>&>(mQuat).normalize();
+	mQuat.normalize();
 }
 
 void TCoasterEnemy::calcRootMatrix()

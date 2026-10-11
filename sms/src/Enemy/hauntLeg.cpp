@@ -173,6 +173,11 @@ void THauntLeg::reset()
 	TWalkerEnemy::reset();
 }
 
+static inline void checkHit(THauntedObject* obj)
+{
+	for (int i = obj->getColNum(); i > 0; --i) { }
+}
+
 void THauntLeg::calcRootMatrix()
 {
 	gpCurHauntLeg = this;
@@ -257,8 +262,7 @@ void THauntLeg::calcRootMatrix()
 		mHauntedObject->mPosition.z = jointMtx[2][3];
 	}
 
-	for (int i = 0; i < mHauntedObject->getColNum(); ++i) {
-	}
+	checkHit(mHauntedObject);
 }
 
 void THauntLeg::setGenerateAnm() { setBckAnm(0); }

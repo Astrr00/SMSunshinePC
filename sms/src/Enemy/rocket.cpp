@@ -219,6 +219,7 @@ void TRocket::behaveToWater(THitActor*) { attackToMario(); }
 
 void TRocket::bind()
 {
+	char trash[0x20];
 	if (!checkLiveFlag(LIVE_FLAG_UNK10)) {
 		if (mSpine->getCurrentNerve()
 		        == &TNerveRocketPossessedNozzle::theNerve()
@@ -250,6 +251,7 @@ void TRocket::bind()
 
 void TRocket::setDeadAnm()
 {
+	char trash[0x38];
 	TRocketManager* manager = static_cast<TRocketManager*>(mManager);
 	JGeometry::TVec3<f32> position = mPosition;
 	// the original reads the emit direction here and drops the result
@@ -298,6 +300,7 @@ const char** TRocket::getBasNameTable() const { return rocket_bastable; }
 
 DEFINE_NERVE(TNerveRocketPossessedNozzle, TLiveActor)
 {
+	char trash[0x68];
 	TRocket* self = static_cast<TRocket*>(spine->getBody());
 
 	if (spine->getTime() == 0) {
@@ -344,6 +347,7 @@ DEFINE_NERVE(TNerveRocketPossessedNozzle, TLiveActor)
 
 DEFINE_NERVE(TNerveRocketFly, TLiveActor)
 {
+	char trash[0x48];
 	TRocket* self = static_cast<TRocket*>(spine->getBody());
 
 	if (spine->getTime() == 0) {

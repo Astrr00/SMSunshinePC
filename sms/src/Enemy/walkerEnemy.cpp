@@ -54,6 +54,7 @@ static inline JGeometry::TVec3<f32> polarXZ(f32 theta, f32 radius)
 
 void TWalkerEnemy::moveObject()
 {
+	char trash[40]; // matching: stack padding
 	if (!mGroundPlane->checkFlag(BG_CHECK_FLAG_ILLEGAL)
 	    && (mInstanceIndex & 0xF) == (gpMarDirector->mMoveTickCount & 0xF)) {
 		doShortCut();
@@ -274,6 +275,7 @@ DEFINE_NERVE(TNerveWalkerPostAttack, TLiveActor)
 
 DEFINE_NERVE(TNerveWalkerEscape, TLiveActor)
 {
+	char trash[40]; // matching: stack padding
 	TWalkerEnemy* self = (TWalkerEnemy*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->goToRandomEscapeGraphNode();

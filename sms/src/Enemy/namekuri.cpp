@@ -379,6 +379,7 @@ void TNameKuri::calcRootMatrix()
 		JGeometry::TVec3<f32> normal = mGroundPlane->getNormal();
 
 		JGeometry::TVec3<f32> local_a0;
+		char trash[0x34];
 		local_a0.cross(normal, local_88);
 		MsVECNormalize(&local_a0, &local_a0);
 
@@ -559,6 +560,7 @@ void TNameKuri::setMActorAndKeeper()
 
 void TNameKuri::reset()
 {
+	char trash[8];
 	gpCurNameKuri = this;
 	TWalkerEnemy::reset();
 	unk1B0 = 1.0f;
@@ -671,11 +673,9 @@ DEFINE_NERVE(TNerveNameKuriLand, TLiveActor)
 	if (self->isBckAnm(4)) {
 		if (self->checkCurAnmEnd(0))
 			return true;
-		return false;
-	}
-
-	if (!self->isAirborne())
+	} else if (!self->isAirborne()) {
 		self->setBckAnm(4);
+	}
 
 	return false;
 }
@@ -802,6 +802,7 @@ DEFINE_NERVE(TNerveNameKuriDrawPollute, TLiveActor) { return true; }
 
 DEFINE_NERVE(TNerveNKFollowMario, TLiveActor)
 {
+	char trash[0x10];
 	TNameKuri* self = (TNameKuri*)spine->getBody();
 
 	if (spine->getTime() == 0)

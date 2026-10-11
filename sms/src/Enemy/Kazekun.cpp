@@ -32,7 +32,7 @@ void SMS_CalcToDirMatrix(TPosition3f& mtx, const JGeometry::TVec3<f32>& dir,
 		z.y = 0.0f;
 		z.z = 1.0f;
 	} else {
-		z.normalize();
+		z.setLength(1.0f);
 	}
 
 	JGeometry::TVec3<f32> x;
@@ -42,12 +42,12 @@ void SMS_CalcToDirMatrix(TPosition3f& mtx, const JGeometry::TVec3<f32>& dir,
 		x.y = 0.0f;
 		x.z = 0.0f;
 	} else {
-		x.normalize();
+		x.setLength(1.0f);
 	}
 
 	JGeometry::TVec3<f32> y;
 	y.cross(z, x);
-	y.normalize();
+	y.setLength(1.0f);
 
 	mtx.setXDir(x);
 	mtx.setYDir(y);

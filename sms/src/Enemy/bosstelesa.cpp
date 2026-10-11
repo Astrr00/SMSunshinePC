@@ -810,6 +810,7 @@ TBossTelesa::TBossTelesa(const char* name)
 
 void TBossTelesa::init(TLiveManager* manager)
 {
+	char trash[0x28];
 	mManager = manager;
 	manager->manageActor(this);
 	mMActorKeeper = new TMActorKeeper(mManager, 1);
@@ -915,6 +916,7 @@ void TBossTelesa::init(TLiveManager* manager)
 
 void TBossTelesa::loadAfter()
 {
+	char trash[0x10];
 	u32 count = gpMapObjManager->getObjNumWithActorType(0x4000019A);
 	if (count != 0) {
 		int n = 0;
@@ -1090,8 +1092,9 @@ void TBossTelesa::moveObject()
 	}
 
 	if (mSpine->getCurrentNerve() == &TNerveBossTelesaDie::theNerve()) {
+		u8 maxHp       = getMaxHitPoints();
 		u8 targetAlpha = clampBossTelesa<u8>(
-		    mNormalAlpha + (getMaxHitPoints() - mHitPoints) * 30, 0, 254);
+		    mNormalAlpha + (maxHp - mHitPoints) * 30, 0, 254);
 		if ((mMActor->checkCurBckFromIndex(7)
 		     && mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() > 50.0f)
 		    || mMActor->checkCurBckFromIndex(6)) {
@@ -1206,6 +1209,7 @@ MtxPtr TBossTelesa::getTakingMtx()
 
 void TBossTelesa::calcRootMatrix()
 {
+	char trash[0x50];
 	mMActor->getModel()->setBaseScale(mScaling);
 
 	f32 x = mPosition.x;
@@ -1414,6 +1418,7 @@ void TBossTelesa::setSpicy(TLiveActor* actor)
 #pragma dont_inline off
 void TBossTelesa::damageRecover()
 {
+	char trash[0x38];
 	for (int i = 0; i < 20; ++i) {
 		TMapObjBase* item = mFruits[i];
 		if (!item->checkLiveFlag(LIVE_FLAG_DEAD)) {
@@ -1640,6 +1645,7 @@ void TBossTelesa::rouletteStart()
 
 void TBossTelesa::generateSlotItem()
 {
+	char trash[0x28];
 	static const f32 xzTable[8]
 	    = { 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f };
 	static const char* manNameTable[] = {
@@ -1840,6 +1846,7 @@ void TBossTelesa::generateSlotItem()
 #pragma dont_inline on
 void TBossTelesa::forceAllItemKill()
 {
+	char trash[0x10];
 	for (int i = 0; i < mItemNum; ++i) {
 		if (mItems[i]->mHolder != nullptr) {
 			SMS_SendMessageToMario(mItems[i], HIT_MESSAGE_UNK8);
@@ -1862,6 +1869,7 @@ void TBossTelesa::forceAllItemKill()
 #pragma dont_inline on
 void TBossTelesa::forceHide()
 {
+	char trash[0x8];
 	if (mSpine->getCurrentNerve() != &TNerveBossTelesaDie::theNerve()) {
 		if (!mMActor->checkCurBckFromIndex(4)
 		    && !mMActor->checkCurBckFromIndex(0)) {
@@ -1885,6 +1893,7 @@ void TBossTelesa::forceHide()
 
 DEFINE_NERVE(TNerveBossTelesaDie, TLiveActor)
 {
+	char trash[0x78];
 	TBossTelesa* self = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (spine->getTime() == 0) {
@@ -1989,6 +1998,7 @@ DEFINE_NERVE(TNerveBossTelesaDie, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaSpit, TLiveActor)
 {
+	char trash[0x10];
 	TBossTelesa* boss = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (spine->getTime() == 0 || !boss->mMActor->checkCurBckFromIndex(14)) {
@@ -2053,6 +2063,7 @@ DEFINE_NERVE(TNerveBossTelesaHideWait, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaAppear, TLiveActor)
 {
+	char trash[0x28];
 	TBossTelesa* self = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (spine->getTime() == 0 && !self->mMActor->checkCurBckFromIndex(0)) {
@@ -2096,6 +2107,7 @@ DEFINE_NERVE(TNerveBossTelesaAppear, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaSlotStart, TLiveActor)
 {
+	char trash[0x20];
 	TBossTelesa* boss = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (spine->getTime() == 0)
@@ -2123,6 +2135,7 @@ DEFINE_NERVE(TNerveBossTelesaSlotStart, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaSpitSlotItem, TLiveActor)
 {
+	char trash[0x20];
 	TBossTelesa* boss = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (!boss->mMActor->checkCurBckFromIndex(14)
@@ -2151,6 +2164,7 @@ DEFINE_NERVE(TNerveBossTelesaSpitSlotItem, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaPrepareSlot, TLiveActor)
 {
+	char trash[0x58];
 	TBossTelesa* self = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (spine->getTime() == 0) {
@@ -2221,6 +2235,7 @@ DEFINE_NERVE(TNerveBossTelesaPrepareSlot, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaFreeze, TLiveActor)
 {
+	char trash[0x10];
 	TBossTelesa* boss = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (boss->mMActor->checkCurBckFromIndex(16)) {

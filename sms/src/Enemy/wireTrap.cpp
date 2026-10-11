@@ -137,6 +137,7 @@ BOOL TWireTrap::receiveMessage(THitActor* sender, u32 message)
 		kill();
 		return true;
 	}
+	char trash[8];
 	return TSpineEnemy::receiveMessage(sender, message);
 }
 

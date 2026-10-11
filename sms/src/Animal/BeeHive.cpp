@@ -238,12 +238,9 @@ BOOL TBeeHive::receiveMessage(THitActor* sender, u32 message)
 			flat.y                     = 0.0f;
 			flat.normalize();
 
-			f32 sign;
-			if (fabsf(mAngularVel) < 0.0001f) {
-				sign = 1.0f;
-			} else {
-				int s = mAngularVel > 0.0f ? 1 : (mAngularVel < 0.0f ? -1 : 0);
-				sign  = (f32)s;
+			f32 sign = 1.0f;
+			if (fabsf(mAngularVel) >= 0.0001f) {
+				sign = mAngularVel > 0.0f ? 1.0f : -1.0f;
 			}
 
 			unk158.setRotate(JGeometry::TVec3<f32>(0.0f, 0.0f, 1.0f), flat);

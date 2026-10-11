@@ -159,9 +159,7 @@ BOOL TBGBeakHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 	unkA4 += delta;
 
 	mPosition = where_to;
-#ifdef TARGET_PC
 	return FALSE;
-#endif
 }
 
 BOOL TBGBeakHit::receiveMessage(THitActor* sender, u32 message)
@@ -184,6 +182,7 @@ BOOL TBGBeakHit::receiveMessage(THitActor* sender, u32 message)
 	    || mOwner->getLatestNerve() == &TNerveBGPolDrop::theNerve()
 	    || mOwner->getLatestNerve() == &TNerveBGBeakDamage::theNerve())
 		return false;
+	char trash[64];
 
 	if (sender->getActorType() == 0x80000001) {
 		if (message == HIT_MESSAGE_TAKE) {

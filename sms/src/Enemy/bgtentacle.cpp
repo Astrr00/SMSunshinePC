@@ -237,7 +237,6 @@ static inline JGeometry::TVec3<f32> fromPolar(f32 theta, f32 radius)
 BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 {
 	JGeometry::TVec3<f32> local_EC = where_to;
-	char trash[4];
 	gpMap->isTouchedOneWallAndMoveXZ(&local_EC.x, local_EC.y, &local_EC.z,
 	                                 150.0f);
 
@@ -246,7 +245,6 @@ BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 	TBGTentacle* ten            = mOwner;
 	delta -= ten->mOwner->getPosition();
 	f32 totalLenLimit = ten->getParams()->mTotalLenLimit.value;
-	char trash2[4];
 
 	if (delta.length() > totalLenLimit) {
 		unk74 = fromPolar(
@@ -266,7 +264,6 @@ BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 		mOwner->getLastNode()->setPosition(local_EC);
 		return true;
 	}
-	char trash3[40];
 }
 
 BOOL TBGTakeHit::receiveMessage(THitActor* sender, u32 message)
@@ -740,6 +737,7 @@ void TBGTentacle::setAttackTarget()
 		local_3c.scale(iVar9);
 
 		JGeometry::TVec3<f32> local_ac = local_3c;
+		char trash[152];
 		local_ac.scale(80.0f);
 		unk84 += local_ac;
 	}
@@ -878,7 +876,9 @@ void TBGTentacle::moveNode()
 		unk44 = MsWrap(unk44 + fVar1 * 1.3f, 0.0f, 360.0f);
 	}
 
+	char trash[4];
 	JGeometry::TVec3<f32> local_88;
+	char trash2[156];
 	switch (mIndex) {
 	case 0:
 		local_88.x = MsSin(unk40) * -1.9f * fVar2;
@@ -1283,24 +1283,31 @@ void TBGTentacle::calcAttackGuideAnm()
 	local_3c -= local_30;
 	JGeometry::TVec3<f32> local_b4 = MsGetRotFromZaxis(local_3c);
 
-	f32 scaleZ = 1.0f;
-	if (mState != 10) {
-		f32 len = JGeometry::TUtil<f32>::sqrt(local_3c.x * local_3c.x
-		                                       + local_3c.y * local_3c.y
-		                                       + local_3c.z * local_3c.z);
-		if (unk80->checkCurBckFromIndex(20))
+	f32 scaleZ;
+	if (mState == 10) {
+		scaleZ = 1.0f;
+	} else {
+		if (unk80->checkCurBckFromIndex(20)) {
+			f32 len = JGeometry::TUtil<f32>::sqrt(local_3c.x * local_3c.x
+			                                       + local_3c.y * local_3c.y
+			                                       + local_3c.z * local_3c.z);
 			scaleZ = len * (1.0f / 1500.0f);
-		else
+		} else {
+			f32 len = JGeometry::TUtil<f32>::sqrt(local_3c.x * local_3c.x
+			                                       + local_3c.y * local_3c.y
+			                                       + local_3c.z * local_3c.z);
 			scaleZ = len * (1.0f / 1200.0f);
-		if (scaleZ > 2.0f)
-			scaleZ = 2.0f;
+		}
 	}
+	if (scaleZ > 2.0f)
+		scaleZ = 2.0f;
 
 	Mtx afStack_78;
 	MsMtxSetTRS(afStack_78, local_30.x, local_30.y, local_30.z, local_b4.x,
 	            local_b4.y, local_b4.z, 1.0f, 1.0f, scaleZ);
 
 	Mtx local_a8;
+	char trash[24];
 	if (mState == 10) {
 		static const f32 zangle[] = { 80.0f, 60.0f, -80.0f, -60.0f };
 		MsMtxSetRotZ(local_a8, zangle[mIndex]);

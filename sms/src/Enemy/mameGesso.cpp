@@ -283,6 +283,7 @@ bool TMameGesso::isCollidMove(THitActor*)
 
 void TMameGesso::calcObjCollision()
 {
+	char trash[0x18];
 	mHeadHeight = 50.0f;
 
 	f32 scale = unk194->mSLCollisionScale.get() * mAttackRadius * mBodyScale;
@@ -538,6 +539,7 @@ DEFINE_NERVE(TNerveMameGessoPickUp, TLiveActor)
 
 DEFINE_NERVE(TNerveMameGessoThrown, TLiveActor)
 {
+	char trash[0x8];
 	TMameGesso* self = (TMameGesso*)spine->getBody();
 
 	if (spine->getTime() == 0) {

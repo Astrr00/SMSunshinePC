@@ -206,6 +206,7 @@ void TBossHanachanPartsBase::entryCircleShadow_()
 
 void TBossHanachanPartsBase::setDamageFog_(JDrama::TGraphics* graphics)
 {
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 	bool notHead = true;
 	if (mActorType == 0x8000014)
 		notHead = false;

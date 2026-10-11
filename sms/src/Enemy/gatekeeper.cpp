@@ -361,7 +361,7 @@ void TBiancoGateKeeper::init(TLiveManager* manager)
 
 	MActorAnmData* anmData = mMActorKeeper->getMActorAnmData();
 	mMultiBtk              = new TMultiBtk(2, getModel()->getModelData());
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i <= 1; i++)
 		mMultiBtk->setNthData(i, anmData->getUnk38()->getAnmPtr(i));
 
 	mObstacle = new TBGKObstacle(this, "TBGKObstacle");
@@ -454,7 +454,9 @@ void TBiancoGateKeeper::launchNamekuri()
 			scale.set(1.0f, 1.0f, 1.0f);
 			s16 angle = (s16)(182.04445f * (36.0f * (f32)i));
 			JGeometry::TVec3<f32> vel;
-			vel.set(4.0f * JMASSin(angle), 12.0f, 4.0f * JMASCos(angle));
+			vel.x = 4.0f * JMASSin(angle);
+			vel.y = 12.0f;
+			vel.z = 4.0f * JMASCos(angle);
 
 			enemy->reset();
 			enemy->mPosition  = pos;
@@ -498,7 +500,8 @@ void TBiancoGateKeeper::deathRumble()
 		J3DFrameCtrl* fc = mMActor->getFrameCtrl(ANM_TYPE_BCK);
 		if (fc != NULL) {
 			f32 t        = 1.0f - fc->getFrame() / (f32)fc->getEnd();
-			mRumblePower = t * getRumblePow();
+			t *= getRumblePow();
+			mRumblePower = t;
 			SMSRumbleMgr->start(8, &mRumblePower);
 		}
 	}
@@ -772,7 +775,7 @@ DEFINE_NERVE(TNerveBGKSleep, TLiveActor)
 			self->unk298--;
 		if (self->unk298 == 0) {
 			int timer    = self->getSaveParams()->mSLLaunchTimerNormal.get();
-			self->unk298 = (s32)(240.0f * MsRandF()) + timer - 120;
+			self->unk298 = (s32)(240.0f * MsRandF()) - 120 + timer;
 			spine->pushAfterCurrent(&TNerveBGKLaunchGoro::theNerve());
 			return true;
 		}
@@ -1063,7 +1066,7 @@ DEFINE_NERVE(TNerveBGKDive, TLiveActor)
 	if (self->getMActor()->curAnmEndsNext(ANM_TYPE_BCK, nullptr)) {
 		if (self->mVariant == TBiancoGateKeeper::VARIANT_GENERIC) {
 			int timer    = self->getSaveParams()->mSLLaunchTimerNormal.get();
-			self->unk298 = (s32)(240.0f * MsRandF()) + timer - 120;
+			self->unk298 = (s32)(240.0f * MsRandF()) - 120 + timer;
 			self->launchGorogoro();
 			self->rumblePad();
 		}

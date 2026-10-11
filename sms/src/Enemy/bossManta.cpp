@@ -68,8 +68,8 @@ static inline void lerp_hack(f32& value, f32 target, f32 progress)
 
 DEFINE_NERVE(TNerveMantaMove, TLiveActor)
 {
-	TBossManta* self = (TBossManta*)spine->getBody();
 	s32 time         = spine->getTime();
+	TBossManta* self = (TBossManta*)spine->getBody();
 	TGraphWeb* graph = self->getTracer()->getGraph();
 
 	if (time == 0) {
@@ -487,7 +487,7 @@ void TBossManta::moveObject()
 
 	for (int i = 0; i < mColCount; ++i)
 		if (mCollisions[i]->isActorType(0x80000001))
-			AttackMario(mCollisions[i]);
+			AttackMario(this);
 }
 
 BOOL TBossManta::isSpawnState()
@@ -1202,8 +1202,8 @@ void TBossMantaManager::updateMantaEscape()
 {
 	TBossManta::sEscapeFromMario = 0;
 
-	JGeometry::TVec3<f32> marioPos = SMS_GetMarioPos();
-	marioPos.y = 0.0f;
+	JGeometry::TVec3<f32> marioPos2 = SMS_GetMarioPos();
+	JGeometry::TVec3<f32> marioPos(marioPos2.x, 0.0f, marioPos2.z);
 
 	for (int i = 0; i < 7; ++i) {
 		if (unk74[i].distance(marioPos) < 350.0f)
@@ -1306,7 +1306,6 @@ void TBossMantaManager::spawn(int gen, const JGeometry::TVec3<f32>& pos)
 			return;
 
 		JGeometry::TVec3<f32> dir(0.0f, 0.0f, 1.0f);
-		(void)&dir;
 
 		f32 angle = baseAngle + (2.0f * (f32)i * M_PI) / (f32)count;
 

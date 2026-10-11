@@ -287,12 +287,12 @@ void TTelesa::perform(u32 cue, JDrama::TGraphics* graphics)
 	if (!checkLiveFlag(LIVE_FLAG_UNK200 | LIVE_FLAG_DEAD)) {
 		if (mImitatedBmd) {
 			if (cue & CUE_CALC_ANIM) {
-				const TBGCheckData* pTStack_5c;
-				gpMap->checkGround(mPosition.x, mPosition.y, mPosition.z,
-				                   &pTStack_5c);
 				Mtx afStack_58;
+				const TBGCheckData* pTStack_5c;
+				f32 groundY = gpMap->checkGround(mPosition.x, mPosition.y,
+				                                 mPosition.z, &pTStack_5c);
 				MtxPtr afStackPtr = afStack_58;
-				MsMtxSetXYZRPH(afStackPtr, mPosition.x, mPosition.y,
+				MsMtxSetXYZRPH(afStackPtr, mPosition.x, groundY,
 				               mPosition.z, mRotation.x, mRotation.y,
 				               mRotation.z);
 				mImitatedBmd->getMActor()->getModel()->setBaseTRMtx(afStackPtr);
@@ -526,7 +526,8 @@ void TTelesa::bind()
 
 BOOL TTelesa::isReachedToGoal() const
 {
-	JGeometry::TVec3<f32> local_c = unk104.getPoint();
+	const TPathNode& node = unk104;
+	JGeometry::TVec3<f32> local_c = node.getPoint();
 	local_c -= mPosition;
 	local_c.y = 0.0f;
 
@@ -794,8 +795,8 @@ void TTelesa::setFirstAttackPoint()
 	f32 s = MsSin(mRotation.y);
 	f32 c = MsCos(mRotation.y);
 
-	pos.x += c * 1000.0f;
-	pos.z += s * 1000.0f;
+	pos.x += s * 1000.0f;
+	pos.z += c * 1000.0f;
 
 	setGoalPath(TPathNode(pos));
 }
@@ -1092,25 +1093,23 @@ DEFINE_NERVE(TNerveTelesaImitate, TLiveActor)
 	if (!self->checkLiveFlag(LIVE_FLAG_DEAD)) {
 		// TODO: this is an inline
 
-		if (!self->resetBaseGround()) {
-			if (self->isInSight(SMS_GetMarioPos(), 0.0f, 0.0f, searchAware))
-				return false;
+		if (self->resetBaseGround()
+		    || self->isInSight(SMS_GetMarioPos(), 0.0f, 0.0f, searchAware)) {
+			gpMarioParticleManager->emitAndBindToPosPtr(0xCD, &self->mPosition, 0,
+			                                            nullptr);
+
+			self->mImitatedBmd = nullptr;
+			self->setFlyParam(1.0f);
+
+			spine->pushAfterCurrent(&TNerveWalkerGraphWander::theNerve());
+
+			SMSGetMSound()->startSoundActor(MSD_SE_EN_KM_TELSA_REVEAL,
+			                                &self->mPosition, 0, nullptr, 0, 4);
+
+			// end of inline
+
+			return true;
 		}
-
-		gpMarioParticleManager->emitAndBindToPosPtr(0xCD, &self->mPosition, 0,
-		                                            nullptr);
-
-		self->mImitatedBmd = nullptr;
-		self->setFlyParam(1.0f);
-
-		spine->pushAfterCurrent(&TNerveWalkerGraphWander::theNerve());
-
-		SMSGetMSound()->startSoundActor(MSD_SE_EN_KM_TELSA_REVEAL,
-		                                &self->mPosition, 0, nullptr, 0, 4);
-
-		// end of inline
-
-		return true;
 	}
 
 	return false;

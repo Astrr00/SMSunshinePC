@@ -138,6 +138,7 @@ void TAmenbo::bind()
 
 void TAmenbo::control()
 {
+	char trash[8];
 	if (mWaterGunHitCooldown > 0)
 		mWaterGunHitCooldown--;
 
@@ -632,7 +633,9 @@ DEFINE_NERVE(TNerveAmenboHitWater, TLiveActor)
 		}
 	}
 
-	self->setVelocity(JGeometry::TVec3<f32>(0.0f));
+	JGeometry::TVec3<f32> zero(0.0f);
+	char trash[24];
+	self->setVelocity(zero);
 
 	if (self->checkCurAnmEnd(0)) {
 		if (self->getMActor()->checkCurAnm("amenbo_hit1_start", ANM_TYPE_BCK))

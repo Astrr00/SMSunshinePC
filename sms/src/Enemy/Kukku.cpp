@@ -257,7 +257,7 @@ void TKukku::perform(u32 cue, JDrama::TGraphics* graphics)
 
 static inline bool isRecoverGraph(const TNerveBase<TLiveActor>* nerve)
 {
-	return nerve == &TNerveKukkuRecoverGraph::theNerve() ? true : false;
+	return nerve != &TNerveKukkuRecoverGraph::theNerve() ? false : true;
 }
 
 void TKukku::behaveToWater(THitActor*)

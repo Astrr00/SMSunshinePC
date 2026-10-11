@@ -218,6 +218,7 @@ TCommonLauncher::TCommonLauncher(const char* name)
 
 void TCommonLauncher::init(TLiveManager* param_1)
 {
+	char trash[0x8];
 	mManager = param_1;
 	mManager->manageActor(this);
 	mMActorKeeper = new TMActorKeeper(mManager, 2);

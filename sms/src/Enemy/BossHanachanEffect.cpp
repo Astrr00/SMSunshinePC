@@ -59,6 +59,7 @@ void TBossHanachan::emitCamShake_()
 
 	if (nerve == &TNerveBossHanachanGraphWander::theNerve()) {
 		f32 dist = sqrtf1(mDistToMarioSquared);
+		char trash[0x10];
 
 		f32 shakeScale;
 		if (dist <= mCommonSaveParams->mSLCamShakeMaxDist.get()) {
@@ -109,6 +110,7 @@ void TBossHanachan::emitCamShake_()
 
 void TBossHanachan::emitOneTimeSandPillar_(TBossHanachanPartsBody* body)
 {
+	char trash[8];
 	onLiveFlag(LIVE_FLAG_UNK10000);
 
 	MtxPtr bodyMtx = body->mJointMtx;

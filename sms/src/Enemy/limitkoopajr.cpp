@@ -158,6 +158,7 @@ BOOL TLimitKoopaJr::receiveMessage(THitActor*, u32 message)
 
 void TLimitKoopaJr::moveRun()
 {
+	char trash[0x38]; // unused stack slot (present in the retail frame)
 	f32 turnSpeed
 	    = 0.017453294f * getSaveParam2()->mSLRoundAngleVelocity.get();
 
@@ -222,6 +223,7 @@ BOOL TNerveLimitKoopaJrRun::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveLimitKoopaJrWait::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 	TLimitKoopaJr* self = (TLimitKoopaJr*)spine->getBody();
 
 	if (spine->getTime() == 0) {
