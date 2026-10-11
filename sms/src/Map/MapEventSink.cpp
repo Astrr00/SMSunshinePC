@@ -271,6 +271,7 @@ void TMapEventSinkInPollutionReset::loadAfter()
 
 void TMapEventSinkBianco::finishControl()
 {
+	char trash[0x18];
 	char buffer[64];
 	if (mRaisingBuildingIdx == 0) {
 		TMapObjBase::setJointTransY(unk64, 0.0f);
@@ -426,9 +427,8 @@ void TMapEventSinkShadowMario::loadAfter()
 	for (int i = 0; i < mBuildingNum; ++i) {
 		unk64[i] = static_cast<JDrama::TPlacement*>(
 		    JDrama::TNameRefGen::search(unk68[i]));
-		TJointObj* obj = getBuilding(i);
-		unk64[i]->mPosition.y
-		    -= obj->getJoint()->getMax().y - obj->getJoint()->getMin().y;
+		J3DJoint* joint = getBuilding(i)->getJoint();
+		unk64[i]->mPosition.y -= joint->getMax().y - joint->getMin().y;
 	}
 }
 

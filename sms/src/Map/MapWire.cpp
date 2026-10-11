@@ -200,7 +200,7 @@ void TMapWire::release()
 		}
 	}
 
-	if (mNumMapWirePoints - halfNumPoints != 0) {
+	if (mNumActiveMapWirePoints - halfNumPoints != 0) {
 		f32 posAdvancePerPoint
 		    = (1.0f - mHangPos) / (mNumActiveMapWirePoints - halfNumPoints);
 

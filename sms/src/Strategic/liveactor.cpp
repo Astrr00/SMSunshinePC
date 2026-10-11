@@ -438,8 +438,8 @@ MtxPtr TLiveActor::getTakingMtx()
 
 void TLiveActor::initAnmSound()
 {
-	if (mAnmSound)
 	char trash[8];
+	if (mAnmSound)
 		return;
 
 	if (checkActorType(0x4000000))

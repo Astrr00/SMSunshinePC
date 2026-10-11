@@ -444,8 +444,7 @@ public:
 			int lifeTime = bw->unk8C->lifeTime.get();
 			if (lifeTime > 0) {
 				for (TDrop* drop = bw->unk88; drop < end2; --end2, ++drop) {
-					drop->unk4C++;
-					if (drop->unk4C > lifeTime)
+					if (++drop->unk4C > lifeTime)
 						bw->eraseDrop(drop);
 				}
 			}
@@ -1076,17 +1075,15 @@ public:
 
 		TProjection3f proj;
 		f32 halfW = 0.5f * unk80134->meshWidth.get();
-		proj.orthographic(
-		    halfW,
-		    halfW
-		        - unk800B0
-		              * (unk80134->meshWidth.get()
-		                 * (f32)SMSGetGameRenderHeight()),
-		    -halfW,
-		    unk800B0
-		            * (unk80134->meshWidth.get() * (f32)SMSGetGameRenderWidth())
-		        - halfW,
-		    0.0f, R3 - negR);
+		f32 top = halfW
+		          - unk800B0
+		                * (unk80134->meshWidth.get()
+		                   * (f32)SMSGetGameRenderHeight());
+		f32 bottom = unk800B0
+		                 * (unk80134->meshWidth.get()
+		                    * (f32)SMSGetGameRenderWidth())
+		             - halfW;
+		proj.orthographic(halfW, top, -halfW, bottom, 0.0f, R3 - negR);
 
 		GXSetProjection(proj.mMtx, GX_ORTHOGRAPHIC);
 		GXSetScissor(0, 0, unk800AC, unk800AC);
@@ -1810,8 +1807,7 @@ void TBathWaterManager::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	if (cue & CUE_MOVE) {
 		unk30 = unk28[unk18->displaysMesh.get()];
-		unk1C += 1;
-		if (!(unk1C & 3)) {
+		if (!(++unk1C & 3)) {
 			for (int actor = 0; actor < 2; ++actor) {
 				TBathWater* bw           = unk20[actor];
 				const TBathtubData& data = unk24->getBathtubData();

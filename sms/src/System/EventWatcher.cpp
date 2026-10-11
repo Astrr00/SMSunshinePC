@@ -1277,9 +1277,11 @@ static void evIsWaterMelonIsReached(TSpcTypedInterp<TEventWatcher>* interp,
 	TBigWatermelon* melon = SPC_GET_PTR(TBigWatermelon*, interp->pop());
 
 	int result = 0;
-	f32 dx     = -4660.0f - melon->mPosition.x;
-	f32 dz     = 12000.0f - melon->mPosition.z;
-	if (dx * dx + dz * dz <= 90000.0f)
+	JGeometry::TVec3<f32> delta;
+	delta.x = -4660.0f - melon->mPosition.x;
+	delta.y = 0.0f;
+	delta.z = 12000.0f - melon->mPosition.z;
+	if (delta.squared() <= 90000.0f)
 		result = 1;
 
 	interp->push(result);

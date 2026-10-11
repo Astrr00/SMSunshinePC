@@ -614,8 +614,9 @@ void TMarDirector::setMario()
 	} break;
 	}
 
+	const TGameSequence& curArea = gpApplication.mCurrArea;
 	if (gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD)) {
-		switch (gpApplication.mCurrArea.getStage()) {
+		switch (curArea.getStage()) {
 		case 0x3C:
 			gpMarioOriginal->mWaterGun->changeNozzle(TWaterGun::Rocket, true);
 			break;
@@ -633,16 +634,17 @@ void TMarDirector::setMario()
 		case 0x34:
 		case 0x39:
 			break;
-		default: // asm 0x800EC094: flag nozzle, then Spray
-			gpMarioOriginal->mWaterGun->changeNozzle(
+		default: { // asm 0x800EC094: flag nozzle, then Spray
+			TWaterGun* waterGun = gpMarioOriginal->mWaterGun;
+			waterGun->changeNozzle(
 			    (TWaterGun::TNozzleType)TFlagManager::getInstance()->getFlag(0x40004),
 			    true);
 			gpMarioOriginal->mWaterGun->changeNozzle(TWaterGun::Spray, true);
-			break;
+		} break;
 		}
 	}
 
-	u32 uVar6 = SMS_getShineIDofExStage(gpApplication.mCurrArea.getStage());
+	u8 uVar6 = SMS_getShineIDofExStage(curArea.getStage());
 	if (uVar6 != 0xff && TFlagManager::getInstance()->getShineFlag(uVar6) == 0)
 		gpMarioOriginal->offFlag(MARIO_FLAG_HAS_FLUDD);
 }
@@ -850,8 +852,9 @@ u8 TMarDirector::updateGameMode()
 				MSBgm::startBGM(MSD_BGM_CHUBOSS);
 				TFlagManager::getInstance()->setBool(true, 0x30006);
 				TFlagManager::getInstance()->setShineFlag(unk25C->getEventId());
-				f32 fVar3 = unkDC->mRate;
-				unkDC->registFadeout(fVar3 * 1.0f, fVar3 * 5.3333333f);
+				f32 fVar3     = unkDC->mRate;
+				f32 fadeInSec = 1.0f;
+				unkDC->registFadeout(fadeInSec * fVar3, fVar3 * 5.3333333f);
 				unk4C |= 0x8202;
 				unk261 = 6;
 				decideNextStage();
@@ -1015,7 +1018,7 @@ u8 TMarDirector::updateGameMode()
 			else
 				MSMainProc::toInnerCameraDemo();
 			unk18[0]->onFlag(TMarioGamePad::PAD_FLAG_NO_INPUT);
-			if (unk12C[unk24D].unk20.mValue == 1) {
+			if ((int)unk12C[unk24D].unk20.mValue == 1) {
 				gpCamera->startGateDemoCamera(unk12C[unk24D].unk1C);
 			} else {
 				TDemoInfo* info = &unk12C[unk24D];

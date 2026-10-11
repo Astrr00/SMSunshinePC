@@ -61,7 +61,7 @@ def claim(agent):
     def f(st):
         now = time.time()
         st["claims"] = {u: c for u, c in st["claims"].items() if now - c["t"] < 7200}
-        recent = {d["unit"] for d in st["done"] if now - d["t"] < 6 * 3600}
+        recent = {d["unit"] for d in st["done"] if now - d["t"] < 2 * 3600}
         for u in order:
             if u not in st["claims"] and u not in recent:
                 st["claims"][u] = {"agent": agent, "t": now}
@@ -98,8 +98,28 @@ def status():
     for u, c in st["claims"].items():
         print(" ", c["agent"], u, f"{(time.time() - c['t']) / 60:.0f} min")
 
+def ledger(unit, fn, pct, status_, agent, evidence):
+    """Insert or update one row of docs/decomp-verified.tsv under the queue lock."""
+    path = os.path.join(ROOT, "sunshine-pc", "docs", "decomp-verified.tsv")
+    key = lambda u, f: (u.removeprefix("mario/"), f.split("(")[0].strip())
+
+    def f(_st):
+        lines = open(path, encoding="utf8").read().splitlines()
+        row = "\t".join([unit.removeprefix("mario/"), fn, pct, status_, agent, evidence])
+        for i, l in enumerate(lines):
+            c = l.split("\t")
+            if not l.startswith("#") and len(c) >= 2 and key(c[0], c[1]) == key(unit, fn):
+                lines[i] = row
+                break
+        else:
+            lines.append(row)
+        open(path, "w", encoding="utf8", newline="\n").write("\n".join(lines) + "\n")
+    locked(f)
+    print("ledger", unit, fn, status_)
+
 
 if __name__ == "__main__":
     a = sys.argv[1:]
     {"claim": lambda: claim(a[1]), "release": lambda: release(a[1], a[2], " ".join(a[3:])),
-     "hold": lambda: hold(a[1], a[2:]), "free": lambda: free(a[1]), "status": status}[a[0]]()
+     "hold": lambda: hold(a[1], a[2:]), "free": lambda: free(a[1]), "status": status,
+     "ledger": lambda: ledger(a[1], a[2], a[3], a[4], a[5], " ".join(a[6:]))}[a[0]]()

@@ -302,9 +302,11 @@ BOOL TFenceWater::receiveMessage(THitActor* sender, u32 message)
 
 void TFenceWater::changeStatusToGo()
 {
+	int newState;
+	newState = 2;
 	SMSGetMSound()->startSoundActor(MSD_SE_OBJ_WATER_FENCE_FW, &mPosition, 0,
 	                                nullptr, 0, 4);
-	mState = 2;
+	mState = newState;
 }
 
 void TFenceWater::changeStatusToWait()

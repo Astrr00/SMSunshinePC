@@ -96,6 +96,7 @@ J3DMaterialTable* TMapObjManager::loadMatTable(const char* name)
 
 void TMapObjManager::load(JSUMemoryInputStream& stream)
 {
+	char trash[0x78]; // retail stack reservation, never read
 	TMapObjBaseManager::load(stream);
 	unk40 = new MActorAnmData;
 
@@ -405,8 +406,8 @@ TMapObjBase* TMapObjBaseManager::newAndRegisterObjByEventID(u32 event_id,
 
 	switch (event_id) {
 	case 777: {
-		char buffer[64];
-		snprintf(buffer, 64, "シャイン（%s）", name);
+		char buffer[256];
+		snprintf(buffer, 256, "シャイン（%s）", name);
 		return static_cast<TMapObjBase*>(JDrama::TNameRefGen::search(buffer));
 	} break;
 

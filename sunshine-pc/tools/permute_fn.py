@@ -4,6 +4,7 @@ usage: python permute_fn.py <unit> <mangled_sym> [--seconds 900] [--jobs 4]
 
 Needs <permuter>/nonmatchings/<sym>/base.c (hand-written C-syntax function, see
 platform-notes.md) and optional defs.h (#define aliases for typedef stubs).
+Member functions: base.c is a free function whose first argument is the class pointer.
 Writes prelude.h, compile.sh, settings.toml, target.o; then runs permuter.py.
 Windowless + BELOW_NORMAL priority; the tree is killed after --seconds.
 """
@@ -71,14 +72,19 @@ cd "{SMS.as_posix()}"
 
 
 def objdump_fn(args):
-    """objdump_command hook for the permuter: keep only one symbol's block (target.o holds the whole unit)."""
+    """objdump_command hook for the permuter. target.o holds the whole unit: keep only <sym>'s block.
+    Candidates come from a base.c free function, whose mangled name differs for members
+    (changeStatusToGo__FP11TFenceWater vs changeStatusToGo__11TFenceWaterFv): keep the blocks named
+    <base>__ and drop the unit's other functions (__sinit__, dtors)."""
     sym, objdump, rest = args[0], args[1], args[2:]
+    base, is_target = sym.split("__")[0], Path(rest[-1]).name == "target.o"
     out = subprocess.run([objdump, *rest], capture_output=True, text=True, encoding="utf-8",
                          errors="replace", check=True, creationflags=FLAGS).stdout
     keep, on = [], False
     for line in out.splitlines():
-        if re.match(r"^[0-9a-f]+ <.*>:$", line):
-            on = line.endswith(f" <{sym}>:")
+        m = re.match(r"^[0-9a-f]+ <(.*)>:$", line)
+        if m:
+            on = m.group(1) == sym if is_target else m.group(1).startswith(base + "__")
         if on:
             keep.append(line)
     print("\n".join(keep))

@@ -421,7 +421,7 @@ inline void TGuide::rotatePattern(J2DPicture* picture, s16 period, u32 frame,
 
 inline void TGuide::shinePattern(TBoundPane* pane, s16 period, u32 frame)
 {
-	u32 phase = frame % period;
+	int phase = frame % period;
 	if (phase == 0) {
 		pane->setPanePosition(period / 2, JUTPoint(0, 0), JUTPoint(0, -5),
 		                      JUTPoint(0, 0));
@@ -845,7 +845,7 @@ void TGuide::load(JSUMemoryInputStream& stream)
 	}
 
 	for (int i = 0; i < 13; ++i) {
-		u32 tag = 0x3030 + i % 10 + i / 10 * 0x100;
+		u32 tag = i % 10 + 0x3030 + i / 10 * 0x100;
 
 		mStagePane[i] = mScreen->search(tag);
 		unk1C0[i]     = new TExPane(mScreen, (tag << 16) + '\0\0_0');
@@ -905,16 +905,15 @@ void TGuide::load(JSUMemoryInputStream& stream)
 
 	void* messages = JKRGetResource("/guide/guidemess.bmg");
 	for (int i = 0; i < 13; ++i) {
-		u32 key = i / 10 * 0x1000000 + 0x30300000 + i % 10 * 0x10000
-		          + '\0\0_0';
+		u32 base = i / 10 * 0x1000000 + 0x30300000 + i % 10 * 0x10000;
 
-		J2DTextBox* title = (J2DTextBox*)mScreen->search(key + 3);
+		J2DTextBox* title = (J2DTextBox*)mScreen->search(base + '\0\0_3');
 		SMSMakeTextBuffer(title, 30);
 		title->setFont(gpSystemFont);
 		strncpy(title->getStringPtr(), SMSGetMessageData(messages, i + 13),
 		        30);
 
-		J2DTextBox* body = (J2DTextBox*)mScreen->search(key + 5);
+		J2DTextBox* body = (J2DTextBox*)mScreen->search(base + '\0\0_5');
 		SMSMakeTextBuffer(body, 0x200);
 		body->setFont(gpSystemFont);
 		strncpy(body->getStringPtr(), SMSGetMessageData(messages, i), 0x200);

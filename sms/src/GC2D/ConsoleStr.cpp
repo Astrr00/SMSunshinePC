@@ -74,8 +74,8 @@ void TConsoleStr::load(JSUMemoryInputStream& stream)
 		unk2A0[i]->setFont(gpSystemFont);
 	}
 
-	unk298 = new TExPane(unk14, 'wp_l');
-	unk29C = new TExPane(unk14, 'wp_r');
+	unk298[0] = new TExPane(unk14, 'wp_l');
+	unk298[1] = new TExPane(unk14, 'wp_r');
 
 	u32 uVar1     = SMS_getShineStage(gpMarDirector->mMap);
 	u32 uVar9     = TFlagManager::getInstance()->getFlag(0x40003);
@@ -177,12 +177,12 @@ void TConsoleStr::perform(u32 cue, JDrama::TGraphics* graphics)
 			} else if (unk2BC == 5) {
 				bool uVar13 = true;
 				for (int i = 0; i < 2; ++i)
-					uVar13 &= unk290[i]->update();
+					uVar13 &= unk298[i]->update();
 				if (uVar13) {
 					unk2BC = 6;
 					bVar6  = true;
-					unk298->getPane()->hide();
-					unk29C->getPane()->hide();
+					unk298[0]->getPane()->hide();
+					unk298[1]->getPane()->hide();
 				}
 			} else if (unk2BC == 3) {
 				unk18 += 1.0f;
@@ -644,16 +644,15 @@ void TConsoleStr::startCloseWipe(bool param_1)
 		unk2A0[0]->hide();
 		unk2A0[1]->hide();
 
-		JUTRect bounds0 = unk290[0]->getPane()->getBounds();
-		unk290[0]->setPaneSize(0x2D, bounds0.getWidth(), 224, bounds0.getWidth(),
-		                       0);
+		JUTRect local_74 = unk290[0]->getPane()->getBounds();
+		s32 h            = 224;
+		unk290[0]->setPaneSize(0x2D, local_74.getWidth(), h, local_74.getWidth(), 0);
 		unk290[0]->setPaneAlpha(0x2D, 255, 0);
 
-		s32 y1      = unk290[1]->getPane()->getBounds().y1;
-		s32 width   = unk290[1]->getPane()->getBounds().getWidth();
+		local_74    = unk290[1]->getPane()->getBounds();
 		s32 offsetY = 465 - unk290[1]->getInitialBounds().y1;
-		unk290[1]->setPaneOffset(0x2D, 0, 224 - y1, 0, offsetY);
-		unk290[1]->setPaneSize(0x2D, width, offsetY + 224, width, 0);
+		unk290[1]->setPaneOffset(0x2D, 0, h - local_74.y1, 0, offsetY);
+		unk290[1]->setPaneSize(0x2D, local_74.getWidth(), offsetY + h, local_74.getWidth(), 0);
 		unk290[1]->setPaneAlpha(0x2D, 255, 0);
 
 		unk2BC = 8;
@@ -667,16 +666,14 @@ void TConsoleStr::startCloseWipe(bool param_1)
 	}
 	unk2BC = 2;
 
-	JUTRect bounds0 = unk290[0]->getPane()->getBounds();
-	unk290[0]->setPaneSize(0x2D, bounds0.getWidth(), 224, bounds0.getWidth(),
-	                       bounds0.getHeight());
+	JUTRect local_88 = unk290[0]->getPane()->getBounds();
+	s32 h            = 224;
+	unk290[0]->setPaneSize(0x2D, local_88.getWidth(), h, local_88.getWidth(), local_88.getHeight());
 	unk290[0]->setPaneAlpha(0x2D, 255, unk290[0]->getPane()->getAlpha());
 
-	s32 y1     = unk290[1]->getPane()->getBounds().y1;
-	s32 width  = unk290[1]->getPane()->getBounds().getWidth();
-	s32 height = unk290[1]->getPane()->getBounds().getHeight();
-	unk290[1]->setPaneOffset(0x2D, 0, 224 - y1, 0, 0);
-	unk290[1]->setPaneSize(0x2D, width, 240, width, height);
+	local_88 = unk290[1]->getPane()->getBounds();
+	unk290[1]->setPaneOffset(0x2D, 0, h - local_88.y1, 0, 0);
+	unk290[1]->setPaneSize(0x2D, local_88.getWidth(), 464 - h, local_88.getWidth(), local_88.getHeight());
 	unk290[1]->setPaneAlpha(0x2D, 255, unk290[1]->getPane()->getAlpha());
 }
 
@@ -685,17 +682,17 @@ void TConsoleStr::startOpenWipe()
 	unk2A8 = 0;
 	unk2BC = 5;
 	unk290[0]->getPane()->hide();
-	unk298->getPane()->show();
+	unk298[0]->getPane()->show();
 	unk290[1]->getPane()->hide();
-	unk29C->getPane()->show();
+	unk298[1]->getPane()->show();
 
 	// TODO: TExPane::setPaneAlpha is wrong
 
-	JUTRect local_3c = unk298->getPane()->getBounds();
-	unk298->setPaneOffset(0x1E, -local_3c.getWidth(), 0, 0, 0);
-	unk298->setPaneAlpha(30, 100, 255);
+	JUTRect local_3c = unk298[0]->getPane()->getBounds();
+	unk298[0]->setPaneOffset(0x1E, -local_3c.getWidth(), 0, 0, 0);
+	unk298[0]->setPaneAlpha(30, 100, 255);
 
-	local_3c = unk29C->getPane()->getBounds();
-	unk29C->setPaneOffset(0x1E, local_3c.getWidth(), 0, 0, 0);
-	unk29C->setPaneAlpha(30, 100, 255);
+	local_3c = unk298[1]->getPane()->getBounds();
+	unk298[1]->setPaneOffset(0x1E, local_3c.getWidth(), 0, 0, 0);
+	unk298[1]->setPaneAlpha(30, 100, 255);
 }

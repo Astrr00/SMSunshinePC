@@ -51,14 +51,14 @@ public:
 class MSStageCubeSwitch : public MSStageCubeFade {
 public:
 #ifdef TARGET_PC
-	MSStageCubeSwitch(u8 param_1)
-	    : unk10(param_1)
+	MSStageCubeSwitch()
+	    : unk10(0)
 	    , unk11(0) // proc() reads unk11 before anything writes it; the console left it as heap garbage
 	{
 	}
 #else
-	MSStageCubeSwitch(u8 param_1)
-	    : unk10(param_1)
+	MSStageCubeSwitch()
+	    : unk10(0)
 	{
 	}
 #endif

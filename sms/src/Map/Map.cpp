@@ -206,8 +206,8 @@ static void initStage()
 
 void TMap::updateDelfino()
 {
-	int cube = gpCubeArea->unk1C;
-	if (cube != mWarp->unk8) {
+	if (gpCubeArea->unk1C != mWarp->unk8) {
+		int cube = gpCubeArea->unk1C;
 		if (cube != -1)
 			mWarp->changeModel(cube);
 		else if (gpMarDirector->getCurrentStage() != 0)
@@ -233,6 +233,7 @@ static void updateRicco()
 
 void TMap::update()
 {
+	char trash[0xA0]; // unused stack slot (present in the retail frame)
 	switch (gpMarDirector->mMap) {
 	case 3:
 		updateRicco();

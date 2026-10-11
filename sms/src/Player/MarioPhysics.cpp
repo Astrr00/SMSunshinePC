@@ -27,7 +27,6 @@ void TMario::playerRefrection(int param_1)
 void TMario::keepDistance(const JGeometry::TVec3<f32>& target, f32 param_2,
                           f32 param_3)
 {
-	char trash[8];
 	f32 dz = mPosition.z - target.z;
 	f32 dx = mPosition.x - target.x;
 
@@ -65,6 +64,7 @@ void TMario::keepDistance(const JGeometry::TVec3<f32>& target, f32 param_2,
 	}
 
 	JGeometry::TVec3<f32> newPos;
+	char trash[8];
 	newPos.x = target.x + thresh * JMASSin(angle);
 	newPos.y = mPosition.y;
 	newPos.z = target.z + thresh * JMASCos(angle);
@@ -101,7 +101,7 @@ void TMario::checkDescent()
 	if (mHeldObject == nullptr && !onYoshi())
 		active = true;
 
-	if (active != true)
+	if ((int)active != 1)
 		return;
 
 	if (!(mForwardVel < descentSp))
@@ -112,8 +112,9 @@ void TMario::checkDescent()
 	if (!gpMap->isTouchedWallsAndMoveXZ(&rec))
 		return;
 
-	f32 floorY;
 	const TBGCheckData* ground;
+	f32 floorY;
+	char trash[0x10];
 	checkGroundPlane(rec.mCenter.x, mPosition.y + 30.0f, rec.mCenter.z, &floorY,
 	                 &ground);
 
@@ -302,11 +303,12 @@ BOOL TMario::hangonCheck(const TBGCheckData* wall, const Vec& prev,
 	if ((curr.x - prev.x) * mVel.x + (curr.z - prev.z) * mVel.z > 0.0f)
 		return false;
 
+	const TBGCheckData* ground;
 	JGeometry::TVec3<f32> newPos;
+	char trash[8];
 	newPos.x = curr.x - 60.0f * wall->getNormal().x;
 	newPos.z = curr.z - 60.0f * wall->getNormal().z;
 
-	const TBGCheckData* ground;
 	checkGroundPlane(newPos.x, curr.y + 160.0f, newPos.z, &newPos.y, &ground);
 
 	if (newPos.y - curr.y <= 100.0f)
@@ -333,6 +335,7 @@ BOOL TMario::hangonCheck(const TBGCheckData* wall, const Vec& prev,
 int TMario::checkGroundAtJumping(const Vec& target, int param_2)
 {
 	Vec pos             = target;
+	char trash[4];
 	TBGCheckData* wall1 = checkWallPlane(&pos, 150.0f, unk15C);
 	TBGCheckData* wall2 = checkWallPlane(&pos, 30.0f, unk15C);
 
@@ -419,15 +422,16 @@ int TMario::checkGroundAtJumping(const Vec& target, int param_2)
 		wall2Passable = true;
 	}
 
-	if ((param_2 & 0x1) && wall1Passable == 1 && wall2Passable == 0) {
-		BOOL canHang = (mHeldObject == nullptr && !onYoshi());
-		if (canHang == 1) {
-			mWallPlane = wall2;
-			if (hangonCheck(wall2, target, pos))
-				wallCode = 3;
-			else
-				wallCode = 0;
-		}
+	BOOL canHang = false;
+	if ((param_2 & 0x1) && wall1Passable == 1 && wall2Passable == 0)
+		canHang = (mHeldObject == nullptr && !onYoshi());
+
+	if (canHang == 1) {
+		mWallPlane = wall2;
+		if (hangonCheck(wall2, target, pos))
+			wallCode = 3;
+		else
+			wallCode = 0;
 	} else if (wall1Passable == 0 || wall2Passable == 0) {
 		mWallPlane = wall1 != nullptr ? wall1 : wall2;
 		s16 diff   = matan(mWallPlane->getNormal().z, mWallPlane->getNormal().x)

@@ -604,7 +604,7 @@ u32 TMareEventBumpyWall::touchWater(THitActor*)
 void TMareEventBumpyWall::bumpDownZ()
 {
 	f32 z = TMapObjBase::getJointTransZ(unk13C);
-	JGeometry::TVec3<f32> trans(z, 0.0f, 0.0f);
+	JGeometry::TVec3<f32> trans(0.0f, 0.0f, z);
 	if (z > -unk144) {
 		if (!TMapObjBase::isDemo()) {
 			z -= unk140;
@@ -630,7 +630,7 @@ void TMareEventBumpyWall::bumpDownZ()
 void TMareEventBumpyWall::bumpUpZ()
 {
 	f32 z = TMapObjBase::getJointTransZ(unk13C);
-	JGeometry::TVec3<f32> trans(z, 0.0f, 0.0f);
+	JGeometry::TVec3<f32> trans(0.0f, 0.0f, z);
 	if (z < unk144) {
 		if (!TMapObjBase::isDemo()) {
 			z += unk140;

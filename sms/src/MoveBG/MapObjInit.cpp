@@ -10817,6 +10817,7 @@ void TMapObjBase::setMatTableTex(J3DMaterialTable* table)
 
 void TMapObjBase::initUnique()
 {
+	char trash[0x1d8];
 	// TODO: I hate switches, someone fix this please...
 	switch (getActorType()) {
 	case 0x2000003C:
@@ -11047,6 +11048,7 @@ bool isAlreadyRegistered(const TMapObjAnimDataInfo* anim, int i)
 MActor* TMapObjBase::initMActor(const char* param_1, const char* param_2,
                                 u32 param_3)
 {
+	char trash[0x8];
 	MActor* oldActor = mMActor;
 	MActor* newActor = getActorKeeper()->createMActor(param_1, param_3);
 	mMActor          = newActor;
@@ -11063,6 +11065,7 @@ MActor* TMapObjBase::initMActor(const char* param_1, const char* param_2,
 
 void TMapObjBase::makeMActors()
 {
+	char trash[0x54];
 	u16 uVar6 = 1;
 	if (mMapObjData->mAnim)
 		uVar6 = mMapObjData->mAnim->unk2;
@@ -11127,6 +11130,7 @@ void TMapObjBase::initModelData()
 
 void TMapObjBase::initActorData()
 {
+	char trash[0x18];
 	int i    = 0;
 	u16 code = JDrama::TNameRef::calcKeyCode(unkF4);
 	for (; sObjDataTable[i]->unk4; ++i) {
@@ -11156,6 +11160,7 @@ void TMapObjBase::initActorData()
 
 void TMapObjBase::initMapObj()
 {
+	char trash[0x10];
 	mInitialPosition = mPosition;
 	mInitialRotation = mRotation;
 	mInitialScaling  = mScaling;

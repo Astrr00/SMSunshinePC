@@ -1214,6 +1214,7 @@ BOOL TMario::hipAttacking()
 
 BOOL TMario::diving()
 {
+	char trash[0x40];
 	if (mHolder != nullptr) {
 		MtxPtr mtx      = mHolder->getTakingMtx();
 		mPosition.x     = mtx[0][3];
