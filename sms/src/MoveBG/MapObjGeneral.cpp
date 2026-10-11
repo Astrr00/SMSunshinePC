@@ -221,7 +221,6 @@ void TMapObjGeneral::breaking()
 
 void TMapObjGeneral::appearing()
 {
-	char trash[0x8];
 	// TODO: uuuuuuuh...
 	if (hasAnim(1)) {
 		if (animIsFinished())
@@ -233,10 +232,10 @@ void TMapObjGeneral::appearing()
 		mScaling.x += mNormalAppearingScaleUp;
 		mScaling.y += mNormalAppearingScaleUp;
 		mScaling.z += mNormalAppearingScaleUp;
-		if (mScaling.x < mInitialScaling.x)
+		if (mScaling.x < getInitialScaling().x)
 			return;
 
-		mScaling.set(mInitialScaling);
+		mScaling.set(getInitialScaling());
 	}
 
 uuuh:

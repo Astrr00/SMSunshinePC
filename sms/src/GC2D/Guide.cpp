@@ -652,12 +652,11 @@ void TGuide::resetScore()
 	if (TFlagManager::getInstance()->getBool(0x10058))
 		secret += 1;
 
-	const ResTIMG* secretTex = mNumberTex[secret]->getTexInfo();
-	((J2DPicture*)mScreen->search('0s_1'))->changeTexture(secretTex, 0);
+	((J2DPicture*)mScreen->search('0s_1'))->changeTexture(mNumberTex[secret]->getTexInfo(), 0);
 	total += secret;
 
 	int totalShines = TFlagManager::getInstance()->getFlag(0x40000);
-	u8 rest         = totalShines - total;
+	u8 rest = totalShines - total;
 	if (rest > 99)
 		rest = 99;
 

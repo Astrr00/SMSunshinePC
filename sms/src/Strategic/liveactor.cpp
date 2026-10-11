@@ -92,6 +92,7 @@ BOOL TLiveActor::belongToGround() const
 
 void TLiveActor::calcRideMomentum()
 {
+	char trash[4];
 	if (unkE8 == 0)
 		return;
 
@@ -104,6 +105,7 @@ void TLiveActor::calcRideMomentum()
 			if (unkE8 >= 2 && mGroundActor != nullptr)
 				mGroundActorYaw = mGroundActor->mRotation.y;
 		} else {
+			JGeometry::TVec3<f32> rideVelocity;
 			Mtx mtx;
 			if (!mGroundActor->getRootJointMtx())
 				SMS_GetActorMtx(*mGroundActor, mtx);
@@ -112,7 +114,6 @@ void TLiveActor::calcRideMomentum()
 
 			// Did they call this function calcRideMomentum because they
 			// didn't know the difference between momentum and velocity?
-			JGeometry::TVec3<f32> rideVelocity;
 			// mRidePos is from last frame here
 			MTXMultVec(mtx, &mRidePos, &rideVelocity);
 			rideVelocity -= mPosition;

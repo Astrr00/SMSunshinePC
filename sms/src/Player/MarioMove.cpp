@@ -1196,6 +1196,7 @@ static inline void thinkHeightBody(TMario* self)
 
 void TMario::thinkHeight()
 {
+	char trash[8];
 	thinkHeightBody(this);
 }
 

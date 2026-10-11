@@ -68,6 +68,7 @@ int TMarDirector::direct()
 	u32 desiredAppState = TApplication::APP_STATE_DEFAULT;
 
 	JDrama::TGraphics local_140;
+	char trash[0x48];
 #ifdef TARGET_PC
 	JDrama::SunshineApplyDisplay(unkC0, &local_140); // retail leans on stale stack data here, see JDRFrmGXSet.cpp
 #endif
@@ -211,6 +212,7 @@ int TMarDirector::direct()
 static void decideNextStage()
 {
 	// TODO: inline hell. TFlagT is my mortal enemy
+	char trash[8];
 	TGameSequence local_3C;
 
 	int stage = SMS_getShineStage(gpApplication.mCurrArea.getStage());
@@ -256,6 +258,7 @@ static inline bool decideSomething()
 
 static int decideNextScenario(u8 param_1)
 {
+	char trash[0x18];
 	if ((int)param_1 != 1)
 		return 0;
 
@@ -552,6 +555,7 @@ void TMarDirector::currentStateFinalize(u8 next_state)
 
 void TMarDirector::setMario()
 {
+	char trash[0x50];
 	bool cVar4 = false;
 	if (TFlagManager::getInstance()->getBool(0x30006)) {
 		TFlagManager::getInstance()->setBool(false, 0x30006);
@@ -961,8 +965,8 @@ u8 TMarDirector::updateGameMode()
 				unk126 = unk124 == 4 ? 2 : 0;
 				if (uVar15 != 0)
 					gpCamera->endDemoCamera();
-				if (unk12C[prev].unk14 != nullptr)
-					(*unk12C[prev].unk14)(unk12C[prev].unk18, 1);
+				if (info->unk14 != nullptr)
+					(*info->unk14)(info->unk18, 1);
 			}
 		}
 	} break;
@@ -1050,6 +1054,7 @@ void TMarDirector::moveStage()
 	unkB4 = TApplication::APP_STATE_GAMEPLAY;
 	unkE4 = 15;
 	gpApplication.mFader->setColor(JUtility::TColor(0, 0, 0, 0xff));
+	char trash[0x24];
 
 	u8 sVar4 = SMS_getShineStage(gpApplication.mNextArea.getStage());
 	u8 sVar5 = SMS_getShineStage(gpApplication.mCurrArea.getStage());

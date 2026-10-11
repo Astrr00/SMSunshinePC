@@ -1270,15 +1270,14 @@ void TModelWaterManager::drawMirror(MtxPtr param_1)
 	}
 	JGeometry::TVec3<f32> local_bc[8];
 
-	f32 fVar3 = 1.0f / pTVar4->getNormal().y;
+	const JGeometry::TVec3<f32>& normal = pTVar4->getNormal();
+	f32 fVar3                           = 1.0f / normal.y;
 
 	for (int i = 0; i < 8; ++i) {
 		local_bc[i].x = SMS_GetMarioPos().x + JMASSin(i * 0x2000) * 1000.0f;
 		local_bc[i].z = SMS_GetMarioPos().z + JMASCos(i * 0x2000) * 1000.0f;
 		local_bc[i].y
-		    = fVar3
-		          * -(fVar1 + (pTVar4->getNormal().x * local_bc[0].x
-		              + pTVar4->getNormal().z * local_bc[0].z))
+		    = fVar3 * -(fVar1 + (normal.x * local_bc[0].x + normal.z * local_bc[0].z))
 		      + 4.0f;
 	}
 

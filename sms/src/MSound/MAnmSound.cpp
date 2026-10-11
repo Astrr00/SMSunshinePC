@@ -54,7 +54,8 @@ void MAnmSound::startAnimSound(void* interface, u32 id,
 
 		case 7: {
 			u32 bVar2 = actor->mGroundNumber >> 24;
-			u32 a     = bVar2 & 0xF;
+			// Mask is a no-op on the value; it keeps mwcc's codegen (and retail's register allocation) matching.
+			u32 a     = (bVar2 & 0xF) & 0xFFFFFFFFFFFFFFFF;
 			u8 b      = bVar2 >> 4;
 			MSGMSound->startMarioVoice(id, a, b);
 			return;

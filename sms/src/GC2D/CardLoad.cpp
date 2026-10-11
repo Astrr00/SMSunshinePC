@@ -1231,6 +1231,7 @@ s8 TCardLoad::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
 			local_108.x = bounds.x1 + bounds.getWidth() * 0.5f;
 			local_108.y = bounds.y1 + bounds.getHeight() * 0.5f;
 			local_108.z = 0.0f;
+			char trash[0xb0];
 			gpEmitterManager4D2->createEmitter(local_108, 0x1FA, nullptr,
 			                                   nullptr);
 			unkAC = gpEmitterManager4D2->unkC8[0][0];
@@ -1362,6 +1363,7 @@ s8 TCardLoad::waitForAnyKey(TEProgress progress)
 
 s8 TCardLoad::waitForAnyKeyBM(TEProgress param_1)
 {
+	char trash[0x20];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -1419,12 +1421,12 @@ s8 TCardLoad::waitForAnyKeyBM(TEProgress param_1)
 				} else {
 					unk500->show();
 					unk510->hide();
-					unk514[0]->changeTexture(unkC8[score / 100]->getTexInfo(),
+					unk504[0]->changeTexture(unkC8[score / 100]->getTexInfo(),
 					                         0);
 					score -= int(score * 0.01f) * 100;
 					unk504[1]->changeTexture(unkC8[score / 10]->getTexInfo(),
 					                         0);
-					unk514[2]->changeTexture(unkC8[score % 10]->getTexInfo(),
+					unk504[2]->changeTexture(unkC8[score % 10]->getTexInfo(),
 					                         0);
 				}
 			}
@@ -1600,6 +1602,7 @@ s8 TCardLoad::drawMessage(TEProgress param_1)
 s8 TCardLoad::drawMessageBM(TEProgress param_1)
 {
 	s8 result = -1;
+	char trash[0x18];
 
 	switch (unk10) {
 	case 0:
@@ -1613,9 +1616,9 @@ s8 TCardLoad::drawMessageBM(TEProgress param_1)
 		unk4C8->hide();
 		unk4CC[0]->hide();
 		unk4CC[1]->hide();
-		unk4CC[3]->hide();
+		unk4CC[2]->hide();
 
-		unk4AC->setCenteredSize(20, unk46C.getWidth(), unk46C.getHeight(), 0,
+		unk4AC->setCenteredSize(20, unk4B0.getWidth(), unk4B0.getHeight(), 0,
 		                        0);
 		unk10 = 1;
 		break;
@@ -1999,6 +2002,7 @@ s8 TCardLoad::selectFunction()
 				JGeometry::TVec3<f32> pos(rect.x1 + rect.getWidth() / 2.0f,
 				                          rect.y1 + rect.getHeight() / 2.0f,
 				                          0.0f);
+				char trash[0xa0];
 				gpEmitterManager4D2->createEmitter(pos, 0x1FA, nullptr,
 				                                   nullptr);
 				unkAC = gpEmitterManager4D2->unkC8[0][0];

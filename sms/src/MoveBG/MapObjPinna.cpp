@@ -334,6 +334,7 @@ BOOL TPinnaShell::receiveMessage(THitActor* sender, u32 message)
 
 void TPinnaShell::control()
 {
+	char trash[0x8];
 	if (unk7C > 0)
 		--unk7C;
 
@@ -395,7 +396,7 @@ void TPinnaShell::control()
 		TMapObjBase::concatOnlyRotFromRight(unk74, rotMtx, rotMtx);
 		unk84->moveMtx(rotMtx);
 	}
-	char trash[0x40];
+	char trash2[0x38];
 }
 
 void TShellCup::control()
@@ -566,7 +567,7 @@ void TMerrygoround::initMapObj()
 	unk1A0->mScaling.y *= 1.5f;
 	unk1A0->makeObjAppeared();
 	joinToGroup("マップグループ", unk1A0);
-	char trash[0x8];
+	char trash[0x4];
 }
 
 TMerrygoround::TMerrygoround(const char* name)
@@ -755,6 +756,7 @@ void TAmiKing::calcRootMatrix()
 		gpMSound->startSoundActor(MSD_SE_EN_AMIKING_FLY, &mPosition, 0, nullptr,
 		                          0, 4);
 	}
+	char trash[0x34];
 }
 
 void TAmiKing::bind()

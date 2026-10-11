@@ -152,6 +152,7 @@ int TMapCollisionData::checkWallList(const TBGCheckList* param_1,
 
 int TMapCollisionData::checkWalls(TBGWallCheckRecord* param_1) const
 {
+	char trash[0x40];
 	param_1->mResultWallsNum = 0;
 	if (param_1->mCenter.x < -mGridExtentX || mGridExtentX <= param_1->mCenter.x
 	    || param_1->mCenter.z < -mGridExtentY
@@ -175,6 +176,7 @@ f32 TMapCollisionData::checkRoofList(f32 x, f32 y, f32 z, u8 param_4,
                                      const TBGCheckList* head,
                                      const TBGCheckData** result)
 {
+	char trash[0x38];
 	while (head) {
 		const TBGCheckData* data = head->unk8;
 		head                     = head->mNext;
@@ -223,11 +225,13 @@ f32 TMapCollisionData::checkRoof(f32 x, f32 y, f32 z, u8 flags,
 	int gridX = (x + mGridExtentX) * (1.0f / 1024);
 	int gridZ = (z + mGridExtentY) * (1.0f / 1024);
 
+	char trash[8];
 	const TBGCheckData* local_4c;
 	f32 dVar5 = checkRoofList(
 	    x, y, z, flags, getGridRoot18(gridX, gridZ).getRoofList(), &local_4c);
 
 	const TBGCheckData* local_50;
+	char trash2[8];
 	f32 dVar6 = checkRoofList(
 	    x, y, z, flags, getGridRoot14(gridX, gridZ).getRoofList(), &local_50);
 
@@ -244,6 +248,7 @@ f32 TMapCollisionData::checkGroundList(f32 x, f32 y, f32 z, u8 flags,
                                        const TBGCheckList* head,
                                        const TBGCheckData** result)
 {
+	char trash[0x40];
 	while (head) {
 		const TBGCheckData* data = head->unk8;
 		head                     = head->getNext();
@@ -299,6 +304,7 @@ f32 TMapCollisionData::checkGround(f32 x, f32 y, f32 z, u8 flags,
 	int gridX = (x + mGridExtentX) * (1.0f / 1024);
 	int gridZ = (z + mGridExtentY) * (1.0f / 1024);
 
+	char trash[8];
 	const TBGCheckData* local_60;
 	// asm 0x801DE178/0x801DE1A8: ground lists are unk0[0] (+0x4), not roof unk0[1] (+0x10)
 	f32 dVar5 = checkGroundList(
@@ -310,6 +316,7 @@ f32 TMapCollisionData::checkGround(f32 x, f32 y, f32 z, u8 flags,
 
 	if (mGroundPlane != nullptr) {
 		const TBGCheckData* local_68;
+		char trash2[8];
 		f32 dVar7 = mGroundPlane->checkPlaneGround(x, y, z, &local_68);
 		if (dVar7 > dVar6) {
 			local_64 = local_68;

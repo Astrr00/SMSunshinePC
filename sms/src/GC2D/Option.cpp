@@ -875,6 +875,7 @@ static inline void fake(TOptionSoundUnit* unit) { int v = unit->getValue(); }
 // mario walks back from the options screen to the card select screen
 bool TOptionControl::movementOption2Card()
 {
+	char trash[0x10];
 	if (gpCameraOption->unk12 == 0) {
 		mScreen->search('oya0')->hide();
 		mScreen->search('oya1')->hide();
@@ -946,6 +947,7 @@ void TOptionControl::writeValue()
 
 bool TOptionControl::isChangedSetting() const
 {
+	char trash[8];
 	bool result = true;
 
 	if (mInitialRumbleValue == mRumbleOption->getValue()

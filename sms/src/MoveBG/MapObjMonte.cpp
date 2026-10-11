@@ -550,10 +550,10 @@ void TSwingBoard::drawOneRope(const JGeometry::TVec3<f32>& lower,
                               const JGeometry::TVec3<f32>& upper) const
 {
 	f32 upperXPlus  = upper.x + mRopeWidthX;
-	f32 lowerZPlus  = lower.z + mRopeWidthZ;
-	f32 upperZMinus = upper.z - mRopeWidthZ;
 	f32 upperZPlus  = upper.z + mRopeWidthZ;
+	f32 upperZMinus = upper.z - mRopeWidthZ;
 	f32 lowerXPlus  = lower.x + mRopeWidthX;
+	f32 lowerZPlus  = lower.z + mRopeWidthZ;
 	f32 lowerZMinus = lower.z - mRopeWidthZ;
 	f32 texV        = mRopeLength * mTexPosRate;
 	f32 upperXMinus = upper.x - mRopeWidthX;

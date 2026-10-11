@@ -1251,6 +1251,7 @@ void TPictureTelesa::afterFinishedAnim()
 
 void TPictureTelesa::touchActor(THitActor* actor)
 {
+	char trash[8];
 	TWaterHitPictureHideObj::touchActor(actor);
 	if (isActorType(0x400001A2) && !unk174 && isState(STATE_FINISHED)
 	    && !isStateTimerEngaged()) {

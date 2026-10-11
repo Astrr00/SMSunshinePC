@@ -19,7 +19,7 @@ public:
 	int getAddColor() const;
 
 	// fabricated
-	u8 getUnk1CAlpha() { return unk1C.a; }
+	u8 getUnk18Alpha() { return unk18.a; }
 
 	bool isThing() const { return unk15 & 2; }
 

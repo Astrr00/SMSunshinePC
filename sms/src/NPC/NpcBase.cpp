@@ -592,7 +592,6 @@ void TBaseNPC::moveObject()
 	}
 }
 
-#pragma dont_inline on
 void TBaseNPC::execMotionBlend_()
 {
 	char trash[0x18];
@@ -604,7 +603,6 @@ void TBaseNPC::execMotionBlend_()
 	if (mInbetweenCtrl->isForcedBlendRatio())
 		mKeepAnmCtrl->reset();
 }
-#pragma dont_inline off
 
 void TBaseNPC::calcRootMatrix()
 {
@@ -825,7 +823,6 @@ void TBaseNPC::setBalloonMessage(u32 param_1, s32 param_2)
 	mBalloonCtrl->setNextMessage(param_1, param_2);
 }
 
-#pragma dont_inline on
 bool TBaseNPC::isPollutionNpc() const
 {
 	bool result = false;
@@ -845,7 +842,6 @@ bool TBaseNPC::isPollutionNpc() const
 
 	return result;
 }
-#pragma dont_inline off
 
 const GXColor* TBaseNPC::getPtrInitPollutionColor() const
 {
