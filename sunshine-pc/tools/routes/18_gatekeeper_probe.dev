@@ -11,58 +11,11 @@ walkto x=-2134 z=329 radius=100 timeout=500
 log
 walkto x=-1500 z=900 radius=150 timeout=500
 log
-walkto x=-1500 z=1500 radius=330 spray=1 timeout=900
+walkto x=-1500 z=1500 radius=470 timeout=900
+faceto x=-1544 z=1469 tol=6 timeout=240
 log
 shot gk0.png
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
-log
-hold trig=0,255 stick=0,30 frames=60
+aimboss frames=1500
 log
 shot gk1.png
 wait frames=60

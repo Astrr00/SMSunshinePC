@@ -47,7 +47,7 @@ u32 sunshineInterpStep();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss };
 
 struct Command {
 	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed };
@@ -61,6 +61,7 @@ struct Command {
 	int maxTicks = 0;       // waitfor/mash/walkto: fail loudly after this many logic ticks
 	float radius = 80.f;    // walkto: arrival distance in the XZ plane
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
+	float tol = 8.f;        // faceto: accepted angle error in degrees
 	int period = 30;        // mash: press for 2 ticks every `period` ticks
 };
 
@@ -209,9 +210,9 @@ Command parseLine(const std::string& text, int line)
 		if (c.op == Op::Mash && c.period < 2) fail(line, "period must be >= 2", text);
 		return c;
 	}
-	if (verb == "walkto") {
+	if (verb == "walkto" || verb == "faceto") {
 		// walkto x=<x> z=<z> [radius=R] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
-		c.op = Op::WalkTo;
+		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
 		bool gotX = false, gotZ = false;
 		std::string tok;
 		while (in >> tok) {
@@ -223,11 +224,22 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "z") { c.pos[2] = v; gotZ = true; }
 			else if (key == "radius") c.radius = v;
 			else if (key == "spray") c.spray = v != 0.f;
+			else if (key == "tol") c.tol = v;
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
 			else fail(line, "unexpected token in walkto", tok);
 		}
 		if (!gotX || !gotZ) fail(line, "walkto needs x= and z=", text);
 		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
+		return c;
+	}
+	if (verb == "aimboss") {
+		// aimboss frames=N: every tick turn Mario toward the airport GateKeeper's head hit object (small stick deflection) while the
+		// analog R trigger is held; ends early when the boss is dead. Dev-only aim aid for the tutorial fight.
+		c.op = Op::AimBoss;
+		std::string tok;
+		while (in >> tok)
+			if (tok.rfind("frames=", 0) == 0) c.frames = std::atoi(tok.c_str() + 7);
+		if (c.frames <= 0) fail(line, "aimboss needs frames=N", text);
 		return c;
 	}
 	if (verb == "hurt") {
@@ -310,6 +322,14 @@ int washedCount()
 		if (const TWaterHitPictureHideObj* w = dynamic_cast<const TWaterHitPictureHideObj*>(gpMapObjManager->getObj(i)))
 			n += w->mState == TWaterHitPictureHideObj::STATE_FINISHED;
 	return n;
+}
+
+// The airport GateKeeper object by its Shift-JIS scene name (null outside airport scenario 1 and before the scene is built).
+TBiancoGateKeeper* findBoss()
+{
+	static const char kName[] = "\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x72\x83\x41\x83\x93\x83\x52\x81\x6a";
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
+	return dynamic_cast<TBiancoGateKeeper*>(JDrama::TNameRefGen::search(kName));
 }
 
 // The airport GateKeeper (scene object "ゲートキーパー（ビアンコ）", Shift-JIS bytes below): hit points, vulnerability window,
@@ -550,6 +570,88 @@ void step()
 				gStarted = false;
 				++gCursor;
 			}
+			return;
+		}
+		if (c.op == Op::AimBoss) {
+			if (!gStarted) {
+				gStarted   = true;
+				gRemaining = c.frames;
+				std::printf("[devscript] aimboss start line=%d frames=%d tick=%d\n", c.line, c.frames, gTick);
+			}
+			PADStatus pad{};
+			pad.triggerRight = 255;
+			TBiancoGateKeeper* b = findBoss();
+			if (b && b->mHead && gpMarioOriginal && gpCamera) {
+				if (b->checkLiveFlag(LIVE_FLAG_DEAD)) {
+					std::printf("[devscript] aimboss boss dead line=%d left=%d tick=%d\n", c.line, gRemaining, gTick);
+					const PADStatus neutral{};
+					PADSetVirtualStatus(0, &neutral);
+					gStarted = false;
+					++gCursor;
+					continue;
+				}
+				Command t{};
+				t.pos[0]            = b->mHead->mPosition.x;
+				t.pos[2]            = b->mHead->mPosition.z;
+				const float dx      = t.pos[0] - gpMarioOriginal->mPosition.x;
+				const float dz      = t.pos[2] - gpMarioOriginal->mPosition.z;
+				// The nozzle pitch follows the camera pitch (WaterGun.cpp:224); the C-stick tilts the camera. The head hangs about
+				// 400-500 units above Mario's floor in the awake phases, so tilt up while it is clearly higher than Mario.
+				if (b->mHead->mPosition.y - gpMarioOriginal->mPosition.y > 150.f) pad.substickY = 100;
+				const float bearing = std::atan2(dx, dz) * 57.29578f;
+				const float face    = static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (360.0f / 65536.0f);
+				float err           = bearing - face;
+				while (err > 180.f) err -= 360.f;
+				while (err < -180.f) err += 360.f;
+				if (std::fabs(err) > 3.f) {
+					float dist = 0.f;
+					walkStick(t, pad.stickX, pad.stickY, dist);
+					pad.stickX = static_cast<s8>(pad.stickX * 0.4f);
+					pad.stickY = static_cast<s8>(pad.stickY * 0.4f);
+				}
+			}
+			PADSetVirtualStatus(0, &pad);
+			if (--gRemaining == 0) {
+				gStarted = false;
+				++gCursor;
+			}
+			return;
+		}
+		if (c.op == Op::FaceTo) {
+			if (!gStarted) {
+				gStarted = true;
+				gRemaining = 0;
+				std::printf("[devscript] faceto start line=%d to=(%.0f,%.0f) tol=%.0f tick=%d\n", c.line, c.pos[0], c.pos[2], c.tol, gTick);
+			}
+			PADStatus pad{};
+			if (gpMarioOriginal && gpCamera) {
+				const float dx      = c.pos[0] - gpMarioOriginal->mPosition.x;
+				const float dz      = c.pos[2] - gpMarioOriginal->mPosition.z;
+				const float bearing = std::atan2(dx, dz) * 57.29578f; // yaw convention: forward = (sin, cos)
+				const float face    = static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (360.0f / 65536.0f);
+				float err           = bearing - face;
+				while (err > 180.f) err -= 360.f;
+				while (err < -180.f) err += 360.f;
+				if (std::fabs(err) <= c.tol) {
+					std::printf("[devscript] faceto met line=%d after=%d err=%.1f tick=%d\n", c.line, gRemaining, err, gTick);
+					const PADStatus neutral{};
+					PADSetVirtualStatus(0, &neutral);
+					gStarted = false;
+					++gCursor;
+					continue;
+				}
+				float dist = 0.f;
+				walkStick(c, pad.stickX, pad.stickY, dist);
+				pad.stickX = static_cast<s8>(pad.stickX * 0.4f); // small deflection: turns more than it walks
+				pad.stickY = static_cast<s8>(pad.stickY * 0.4f);
+			}
+			if (gRemaining >= c.maxTicks) {
+				std::printf("[devscript] TIMEOUT faceto line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			PADSetVirtualStatus(0, &pad);
+			++gRemaining;
 			return;
 		}
 		if (c.op == Op::WalkTo) {
