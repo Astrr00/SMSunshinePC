@@ -202,6 +202,9 @@ public:
 
 	void* getVcdVatCmd() const { return mVcdVatCmd; }
 	void setVcdVatCmd(void* pVatCmd) { mVcdVatCmd = pVatCmd; }
+#ifdef TARGET_PC
+	u32 getVcdVatCmdSize() const { return mVcdVatCmdSize; }
+#endif
 
 	enum {
 #ifdef TARGET_PC
@@ -234,6 +237,9 @@ private:
 	/* 0x54 */ Mtx33** mNormMatrices;
 	/* 0x58 */ u32* mCurrentViewNo;
 	/* 0x5C */ u32 mBumpMtxOffset;
+#ifdef TARGET_PC
+	/* 0x60 */ u32 mVcdVatCmdSize; // bytes makeVcdVatCmd emitted; draw() submits only these (PC-only, appended)
+#endif
 };
 
 #endif

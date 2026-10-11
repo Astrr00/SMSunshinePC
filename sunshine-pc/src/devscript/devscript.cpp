@@ -493,6 +493,7 @@ void step()
 				std::exit(3);
 			}
 			const bool press = c.op == Op::Mash && gRemaining % c.period < 2;
+			if (press) std::printf("[devscript] mash press line=%d tick=%d button=0x%04x\n", c.line, gTick, c.pad.button);
 			PADSetVirtualStatus(0, press ? &c.pad : &neutral);
 			++gRemaining;
 			return;

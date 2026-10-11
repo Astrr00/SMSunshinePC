@@ -1,0 +1,54 @@
+diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
+--- a/lib/gx/command_processor.cpp
++++ b/lib/gx/command_processor.cpp
+@@ -217,12 +217,25 @@ u8 line_mode_for_prim(GXPrimitive prim) noexcept {
+ static void handle_draw(u8 cmd, ByteReader& reader) noexcept;
+ static void handle_aurora(ByteReader& reader) noexcept;
+ 
++// Last FIFO commands (opcode and stream position), printed when a draw overruns: shows the first command whose length
++// the parser got wrong.
++struct CmdRecord {
++  u8 cmd;
++  size_t pos;
++};
++static constexpr size_t kCmdRingSize = 64;
++static std::array<CmdRecord, kCmdRingSize> sCmdRing;
++static size_t sCmdRingNext = 0;
++static void record_cmd(u8 cmd, size_t pos) noexcept { sCmdRing[sCmdRingNext++ % kCmdRingSize] = {cmd, pos}; }
++
+ ProcessResult process(const u8* data, u32 size) noexcept {
+   ZoneScoped;
+   ByteReader reader{{data, size}};
+ 
+   while (!reader.empty()) {
++    const size_t cmdPos = reader.offset();
+     const u8 cmd = reader.read<u8>();
++    record_cmd(cmd, cmdPos);
+     u8 opcode = cmd & CP_OPCODE_MASK;
+ 
+     switch (opcode) {
+@@ -390,6 +403,15 @@ extern "C" __declspec(dllimport) void* __stdcall GetModuleHandleW(const wchar_t*
+   // Hex dump around the draw command for debugging
+   const size_t pos = reader.offset();
+   dump_draw_ring();
++  {
++    std::string cmds;
++    const size_t n = std::min(sCmdRingNext, kCmdRingSize);
++    for (size_t k = n; k > 0; --k) {
++      const auto& r = sCmdRing[(sCmdRingNext - k) % kCmdRingSize];
++      cmds += fmt::format(" {:02X}@{}", r.cmd, r.pos);
++    }
++    Log.error("  last {} FIFO commands (opcode@pos):{}", n, cmds);
++  }
+   aurora_gx_dump_begin_ring(fifo::processing_chunk_base() + (pos - 3));
+ #ifdef _WIN32
+   Log.error("  module base {}", GetModuleHandleW(nullptr));
+@@ -397,7 +419,7 @@ extern "C" __declspec(dllimport) void* __stdcall GetModuleHandleW(const wchar_t*
+   const size_t size = reader.size();
+   const u8* data = reader.data();
+   size_t cmdPos = pos - 2 - 1; // opcode byte position (before vtxCount and pos++)
+-  size_t dumpStart = (cmdPos > 16) ? cmdPos - 16 : 0;
++  size_t dumpStart = (cmdPos > 256) ? cmdPos - 256 : 0;
+   size_t dumpEnd = (cmdPos + 32 < size) ? cmdPos + 32 : size;
+   std::string hex;
+   for (size_t i = dumpStart; i < dumpEnd; i++) {

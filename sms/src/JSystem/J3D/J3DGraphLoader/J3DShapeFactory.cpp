@@ -86,4 +86,8 @@ J3DShapeDraw* J3DShapeFactory::newShapeDraw(int shapeNo, int mtxGroupNo,
 void J3DShapeFactory::allocVcdVatCmdBuffer(u32 count)
 {
 	mpVcdVatCmdBuffer = new (0x20) u8[J3DShape::kVcdVatDLSize * count];
+#ifdef TARGET_PC
+	// The slot is larger than the commands makeVcdVatCmd writes; anything copied past them must be NOPs, not heap garbage.
+	__builtin_memset(mpVcdVatCmdBuffer, 0, J3DShape::kVcdVatDLSize * count);
+#endif
 }

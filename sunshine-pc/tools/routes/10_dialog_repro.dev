@@ -1,0 +1,16 @@
+# Diagnosis only: reproduces the FIFO overrun on the "hear the story again?" prompt. Run with
+# SUNSHINE_DEV_START=airport/0 SUNSHINE_ALLOW_CPU_ADAPTER=0 SUNSHINE_DEV_STEP_RETRACE=1 (logic ~150 ticks/s; the THP movie
+# still plays in wall time, so the waitfor timeouts below are generous). About 60 s instead of 105 s.
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=3000
+wait frames=90
+hold A frames=4
+wait frames=60
+walkto x=-1198 z=167 radius=150 timeout=600
+walkto x=-5876 z=976 radius=150 timeout=900
+walkto x=-6630 z=1600 radius=250 timeout=600
+waitfor thp=2 timeout=600
+waitfor thp=0 timeout=60000
+log
+mash A period=30 until stage=1 director mario dirstate=4 timeout=3000
+log
+end

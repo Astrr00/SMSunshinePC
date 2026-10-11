@@ -114,6 +114,9 @@ void J3DShape::initialize()
 	mNormMatrices   = nullptr;
 	mCurrentViewNo  = &j3dDefaultViewNo;
 	mHasNBT         = false;
+#ifdef TARGET_PC
+	mVcdVatCmdSize  = kVcdVatDLSize; // until makeVcdVatCmd records the real size
+#endif
 }
 
 J3DShape::~J3DShape() { }
@@ -242,6 +245,9 @@ void J3DShape::makeVcdVatCmd()
 	J3DSetVtxAttrFmtv(GX_VTXFMT0, mVertexData->getVtxAttrFmtList(), mHasNBT);
 	GDPadCurr32();
 	GDFlushCurrToMem();
+#ifdef TARGET_PC
+	mVcdVatCmdSize = GDGetCurrOffset();
+#endif
 	GDSetCurrent(nullptr);
 }
 
@@ -281,7 +287,11 @@ void J3DShape::loadVtxArray() const
 
 void J3DShape::draw() const
 {
+#ifdef TARGET_PC
+	GXCallDisplayList(mVcdVatCmd, mVcdVatCmdSize);
+#else
 	GXCallDisplayList(mVcdVatCmd, J3DShape::kVcdVatDLSize);
+#endif
 
 	J3DShapeMtx::currentPipeline = mFlags >> 2 & 3;
 	loadVtxArray();

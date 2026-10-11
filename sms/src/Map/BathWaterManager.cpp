@@ -1130,8 +1130,13 @@ public:
 		J3DLOADARRAYBASEPTR(GX_VA_CLR0,
 		                    modelData->getVertexData().getVtxColorArray(0),
 		                    modelData->getVertexData().getVtxColorSize(0));
+#ifdef TARGET_PC
+		GXCallDisplayList(modelData->getShapeNodePointer(0)->getVcdVatCmd(),
+		                  modelData->getShapeNodePointer(0)->getVcdVatCmdSize());
+#else
 		GXCallDisplayList(modelData->getShapeNodePointer(0)->getVcdVatCmd(),
 		                  J3DShape::kVcdVatDLSize);
+#endif
 		GXLoadNrmMtxImm(unk80020, GX_PNMTX0);
 		GXSetCurrentMtx(GX_PNMTX0);
 

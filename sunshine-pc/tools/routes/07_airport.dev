@@ -4,7 +4,7 @@ wait frames=240
 mash A period=30 until cardprog=19 timeout=900
 walkto x=1080 z=-1000 radius=20 timeout=600
 mash A period=24 until cardprog=27 timeout=900
-mash A period=30 until stage=0 timeout=2400
+mash A START period=30 until stage=0 timeout=2400
 waitfor stage=0 scen=0 director mario dirstate=4 timeout=5400
 log
 shot ap0.png
@@ -21,8 +21,10 @@ walkto x=-6630 z=1600 radius=250 timeout=600
 log
 waitfor thp=2 timeout=600
 log
-waitfor thp=0 timeout=6000
-wait frames=600
+mash START period=20 until thp=0 timeout=6000
+shot movie_end.png
+# After the airport briefing the game asks "hear the story again?" (cursor on No): A confirms No, then dolpic0 (stage 1) loads.
+mash A period=30 until stage=1 director mario dirstate=4 timeout=3000
 log
 shot dolpic.png
 end

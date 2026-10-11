@@ -73,6 +73,7 @@ def main():
         AURORA_SCREENSHOT_EVERY="60:" + os.path.join(out, "live.png"),
     )
     env.setdefault("SUNSHINE_DEV_STATUS", "1")
+    env.setdefault("SUNSHINE_ALLOW_CPU_ADAPTER", "1")  # GPU-less host: Null backend renders nothing, PNGs would be blank
     env.update(extra)
     if lock("acquire") != "LOCKED":
         print("run lock not acquired")
