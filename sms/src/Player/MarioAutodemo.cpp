@@ -43,7 +43,7 @@ BOOL TMario::winDemo()
 BOOL TMario::readBillboard()
 {
 	// Missing stack space
-	// volatile u32 padding[16];
+	volatile u32 padding[16];
 
 	TBaseNPC* talkingNpc = gpMarDirector->unkA0;
 	switch (mStatusState) {
@@ -157,7 +157,7 @@ BOOL TMario::downLoser()
 BOOL TMario::warpIn()
 {
 	// Missing stack space
-	// volatile u32 padding[10];
+	volatile u32 padding[6];
 	mStatusTimer += 1;
 	const JGeometry::TVec3<f32>& gatePosOffset
 	    = ((TModelGate*)mHolder)->mFrontPos;
@@ -200,7 +200,7 @@ BOOL TMario::warpIn()
 
 		// Possibly TVec3 inaccuracies?
 		JGeometry::TVec3<f32> marioDist = holderPosOffset - mPosition;
-		mPosition                       = marioDist * 0.02f + mPosition;
+		mPosition                       = mPosition + marioDist * 0.02f;
 
 		f32 dist
 		    = mAutoDemoParams.mWarpInTremble.get() - marioDist.length() * 0.1f;

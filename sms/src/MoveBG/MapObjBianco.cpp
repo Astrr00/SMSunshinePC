@@ -556,7 +556,7 @@ void TLeafBoat::control()
 
 	if (marioIsOn()) {
 		mVelocity.y -= unk150;
-		if (SMS_GetMarioWaterGun()->mIsEmitWater > 0) {
+		if ((s32)SMS_GetMarioWaterGun()->mIsEmitWater > 0) {
 			MtxPtr emitMtx = SMS_GetMarioWaterGun()->getEmitMtx(0);
 			mVelocity.x -= emitMtx[0][0] * unk144;
 			mVelocity.z -= emitMtx[2][0] * unk144;
@@ -568,6 +568,7 @@ void TLeafBoat::control()
 		TCubeStreamInfo* info
 		    = (TCubeStreamInfo*)gpCubeStream->unk14->begin()[cubeNo];
 		Mtx mtx;
+		char trash[0x30];
 		MsMtxSetXYZRPH(mtx, 0.0f, 0.0f, 0.0f, info->unk18.x, info->unk18.y,
 		               info->unk18.z);
 		f32 flow = 0.0001f * info->unk40;

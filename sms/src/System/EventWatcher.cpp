@@ -171,6 +171,15 @@ static void evSetFlagNPCDead(TSpcTypedInterp<TEventWatcher>* interp,
 	interp->push();
 }
 
+static f32 evLength(const JGeometry::TVec3<f32>& v)
+{
+	f32 sq = v.squared();
+#pragma dont_inline on
+	f32 len = JGeometry::TUtil<f32>::sqrt(sq);
+#pragma dont_inline off
+	return len;
+}
+
 static void evIsNearSameActors(TSpcTypedInterp<TEventWatcher>* interp,
                                u32 arg_num)
 {
@@ -196,7 +205,7 @@ static void evIsNearSameActors(TSpcTypedInterp<TEventWatcher>* interp,
 		if (type == obj->getActorType()) {
 			JGeometry::TVec3<f32> diff = which->mPosition;
 			diff -= obj->mPosition;
-			if (diff.length() <= dist)
+			if (evLength(diff) <= dist)
 				count++;
 		}
 	}
@@ -224,7 +233,7 @@ static void evIsNearActors(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 				if (other) {
 					JGeometry::TVec3<f32> diff = which->mPosition;
 					diff -= other->mPosition;
-					if (diff.length() <= dist)
+					if (evLength(diff) <= dist)
 						count++;
 				}
 			}

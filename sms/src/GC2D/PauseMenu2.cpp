@@ -585,6 +585,7 @@ void TPauseMenu2::drawAppearPane(J2DPicture* picture, f32 anim, JUTRect& rect,
 
 		if (anim == 2.0f) {
 			JUTRect rect = picture->getGlobalBounds();
+			char trash[8];
 
 			// TODO: This doesn't fully match.
 			gpEmitterManager4D2->createEmitter(

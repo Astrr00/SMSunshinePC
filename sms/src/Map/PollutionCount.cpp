@@ -672,7 +672,7 @@ void TPollutionCounterLayer::calcViewMtx()
 		TPollutionLayer* layer = gpPollution->getLayer(i);
 
 		TPosition3f local_a4;
-		char trash[0x18];
+		char trash[0x1c];
 		makeWorldToPollutionMtx(layer->mPos.mInverseTexelScale, layer->mMinX,
 		                        layer->mMinZ, &local_a4);
 

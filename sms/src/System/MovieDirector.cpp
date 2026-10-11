@@ -61,6 +61,18 @@ void* TMovieDirector::setupThreadFunc(void* self)
 extern OSThread gSetupThread;
 extern u8* gpSetupThreadStack;
 
+static void thpSetPos(TTHPRender* render, const JGeometry::TVec2<u32>& pos)
+{
+	render->x = pos.x;
+	render->y = pos.y;
+}
+
+static void thpSetSize(TTHPRender* render, const JDrama::TSize& size)
+{
+	render->polyW = size.mWidth;
+	render->polyH = size.mHeight;
+}
+
 void TMovieDirector::setup(JDrama::TDisplay* param_1, TMarioGamePad* param_2)
 {
 	unk14         = new JDrama::TDStageGroup(param_1);
@@ -166,10 +178,10 @@ int TMovieDirector::rsetup()
 	THPPlayerGetVideoInfo(&videoInfo);
 
 	// asm 0x8010BD64: retail centres the movie, x = (W - xSize) >> 1, y = (H - ySize) >> 1
-	JGeometry::TVec2<u32> pos((SMSGetGameRenderWidth() - videoInfo.xSize) / 2,
-	                          (SMSGetGameRenderHeight() - videoInfo.ySize) / 2);
-	JDrama::TSize size(videoInfo.xSize, videoInfo.ySize);
-	thpRender->setParams(pos.x, pos.y, size.mWidth, size.mHeight);
+	thpSetPos(thpRender, JGeometry::TVec2<u32>(
+	                         (SMSGetGameRenderWidth() - videoInfo.xSize) / 2,
+	                         (SMSGetGameRenderHeight() - videoInfo.ySize) / 2));
+	thpSetSize(thpRender, JDrama::TSize(videoInfo.xSize, videoInfo.ySize));
 
 	DVDChangeDir("/");
 

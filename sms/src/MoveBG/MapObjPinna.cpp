@@ -567,7 +567,7 @@ void TMerrygoround::initMapObj()
 	unk1A0->mScaling.y *= 1.5f;
 	unk1A0->makeObjAppeared();
 	joinToGroup("マップグループ", unk1A0);
-	char trash[0x4];
+	char trash[0x8];
 }
 
 TMerrygoround::TMerrygoround(const char* name)

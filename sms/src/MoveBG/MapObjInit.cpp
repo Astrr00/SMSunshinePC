@@ -11065,6 +11065,7 @@ MActor* TMapObjBase::initMActor(const char* param_1, const char* param_2,
 
 void TMapObjBase::makeMActors()
 {
+	char buffer[64];
 	char trash[0x54];
 	u16 uVar6 = 1;
 	if (mMapObjData->mAnim)
@@ -11099,7 +11100,6 @@ void TMapObjBase::makeMActors()
 			}
 		}
 	} else {
-		char buffer[64];
 		snprintf(buffer, 64, "%s.bmd", mMapObjData->unk0);
 		mMActor = initMActor(buffer, nullptr, getSDLModelFlag());
 	}

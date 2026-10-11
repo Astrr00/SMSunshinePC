@@ -104,7 +104,7 @@ static inline u32 getPressureFlashColor(u8 frame)
 	} else if (frame < 15) {
 		color = 0xffff0000;
 	} else if (frame < 25) {
-		u8 fade = 25 - frame;
+		s32 fade = 25 - frame;
 		color += ((u32)(s16)(s32)((f32)fade * -6.3f)) << 8;
 		color += ((u32)(s32)((f32)fade * 19.2f)) << 16;
 	}
@@ -2813,9 +2813,6 @@ void TGCConsole2::drawWaterBack()
 			if (unk49)
 				unk49 = 0;
 
-			if (unk30C >= 25)
-				unk30C = 0;
-
 			u32 color = getPressureFlashColor(unk30C);
 			GXSetTevColor(GX_TEVREG0, JUtility::TColor(color + 0xc8));
 			GXSetTevColor(GX_TEVREG1, JUtility::TColor(color));
@@ -2828,16 +2825,14 @@ void TGCConsole2::drawWaterBack()
 		}
 
 		drawGaugeQuadF32(bounds, fillTop, bounds.y2, hiddenRatio, 1.0f);
-	} else if (unk48) {
-		if (unk30C != 0) {
+	} else {
+		if (unk48 && unk30C != 0) {
 			unk274->setPanePosition(90, JUTPoint(0, 0), JUTPoint(0, -100),
 			                        JUTPoint(0, 0));
 			unk30C = 0;
 			unk49  = 1;
 		}
 
-		drawGaugeQuadF32(bounds, bounds.y1, bounds.y2, 0.0f, 1.0f);
-	} else {
 		drawGaugeQuadF32(bounds, bounds.y1, bounds.y2, 0.0f, 1.0f);
 	}
 

@@ -479,14 +479,13 @@ JAISound* MSoundSE::startSoundSystemSE(u32 id, u32 param_2,
 	return sound;
 }
 
-// Retail calls std::sqrtf out of line; the MSL inline would be expanded here.
-static f32 vecLength(const Vec& vec)
-{
+// Retail calls std::sqrtf out of line; keep it a real call.
 #pragma dont_inline on
-	f32 r = std::sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-#pragma dont_inline off
-	return r;
+static f32 sqrtfNoInline(f32 x)
+{
+	return std::sqrtf(x);
 }
+#pragma dont_inline off
 
 void MSoundSE::startSoundActorWithInfo(u32 id, const Vec* position,
                                        Vec* param_3, f32 param_4, u32 param_5,
@@ -517,7 +516,7 @@ void MSoundSE::startSoundActorWithInfo(u32 id, const Vec* position,
 
 	case MSD_SE_IT_EGG_BOUND:
 	case MSD_SE_IT_DRIAN_BOUND:
-		fVar7 = vecLength(*param_3);
+		fVar7 = sqrtfNoInline(param_3->x * param_3->x + param_3->y * param_3->y + param_3->z * param_3->z);
 		fVar7 = std::fabs(fVar7);
 		break;
 

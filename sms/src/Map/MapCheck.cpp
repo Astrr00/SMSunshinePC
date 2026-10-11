@@ -119,6 +119,7 @@ inline static bool someUnknownInline(TBGCheckData* r31, TBGWallCheckRecord* r29)
 int TMapCollisionData::checkWallList(const TBGCheckList* param_1,
                                      TBGWallCheckRecord* param_2)
 {
+	char trash[0xe0];
 	if (!param_1)
 		return 0;
 
@@ -168,7 +169,8 @@ int TMapCollisionData::checkWalls(TBGWallCheckRecord* param_1) const
 	if (iVar6 >= param_1->mMaxResults)
 		return iVar6;
 
-	iVar6 += checkWallList(getGridRoot14(gridX, gridZ).getWallList(), param_1);
+	TBGWallCheckRecord* new_var = param_1;
+	iVar6 += checkWallList(getGridRoot14(gridX, gridZ).getWallList(), new_var);
 	return iVar6;
 }
 
@@ -358,6 +360,8 @@ static bool bgIntersectLine(const TBGCheckData* data,
 	JGeometry::TVec3<f32> normal = data->getNormal();
 	JGeometry::TVec3<f32> dir    = end;
 	dir -= start;
+
+	char trash[0x60];
 
 	f32 nDotDir = normal.dot(dir);
 	if (front_only && nDotDir >= 0.0f)

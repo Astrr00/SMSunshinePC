@@ -109,6 +109,7 @@ void TMapObjBall::touchWaterSurface() { kill(); }
 
 void TMapObjBall::rebound(JGeometry::TVec3<f32>* pos)
 {
+	char trash[40];
 	calcReflectingVelocity(mGroundPlane, mMapObjData->mPhysical->unk4->unk4,
 	                       &mVelocity);
 	pos->y = mGroundHeight;
@@ -133,6 +134,7 @@ void TMapObjBall::rebound(JGeometry::TVec3<f32>* pos)
 void TMapObjBall::touchGround(JGeometry::TVec3<f32>* pos)
 {
 	f32 speed = abs(JGeometry::TVec3<f32>(mVelocity).length());
+	char trash[64];
 	if (speed > 0.05f && isActorType(0x400000D0)) {
 		if (mScaling.y >= 5.0f)
 			SMSGetMSound()->startSoundActorWithInfo(
@@ -448,7 +450,7 @@ void TMapObjBall::makeObjAppeared()
 #pragma dont_inline on
 void TMapObjBall::control()
 {
-	char trash[16];
+	char trash[8];
 	TMapObjGeneral::control();
 
 	if (mHitCooldown != 0)

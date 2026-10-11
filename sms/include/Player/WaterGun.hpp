@@ -16,7 +16,8 @@ public:
 	TWaterGunParams(const char* prm)
 	    : TParams(prm)
 	    , PARAM_INIT(mRocketHeight, 1500.0f)
-	    , PARAM_INIT(mHoverHeight, 160.0f)
+	    // retail param key is "mHHoverHeight"; field name kept for callers
+	    , mHoverHeight(this, 160.0f, JDrama::TNameRef::calcKeyCode("mHHoverHeight"), "mHHoverHeight")
 	    , PARAM_INIT(mLAngleNormal, 60.0f)
 	    , PARAM_INIT(mNozzleAngleYSpeed, 1.0f)
 	    , PARAM_INIT(mNozzleAngleYBrake, 0.995f)
