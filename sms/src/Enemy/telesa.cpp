@@ -514,7 +514,7 @@ void TTelesa::bind()
 	if (nextPos.y <= mGroundHeight + 0.05f) {
 		offLiveFlag(LIVE_FLAG_AIRBORNE);
 		mVelocity.set(0.0f, 0.0f, 0.0f);
-		if (mSpine->getCurrentNerve() != &TNerveTelesaDie::theNerve())
+		if (mSpine->getCurrentNerve() == &TNerveTelesaDie::theNerve())
 			nextPos.y = mGroundHeight;
 	} else {
 		onLiveFlag(LIVE_FLAG_AIRBORNE);
@@ -1053,9 +1053,8 @@ void TMarioModokiTelesa::imitateAnm()
 
 DEFINE_NERVE(TNerveTelesaImitate, TLiveActor)
 {
+	TSharedParts* imitatedItem = ((TTelesa*)spine->getBody())->mImitatedBmd;
 	TTelesa* self = (TTelesa*)spine->getBody();
-
-	TSharedParts* imitatedItem = self->mImitatedBmd;
 
 	if (gpApplication.mCurrArea.unk0 != 7
 	    && gpApplication.mCurrArea.unk0 != 14) {

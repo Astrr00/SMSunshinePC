@@ -61,7 +61,7 @@ def claim(agent):
     def f(st):
         now = time.time()
         st["claims"] = {u: c for u, c in st["claims"].items() if now - c["t"] < 7200}
-        recent = {d["unit"] for d in st["done"] if now - d["t"] < 2 * 3600}
+        recent = {d["unit"] for d in st["done"] if now - d["t"] < 1200}
         for u in order:
             if u not in st["claims"] and u not in recent:
                 st["claims"][u] = {"agent": agent, "t": now}

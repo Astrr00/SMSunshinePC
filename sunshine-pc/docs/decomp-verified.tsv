@@ -295,7 +295,7 @@ Enemy/igaiga	TRollEnemy::setBehavior	94.63	partial (pending review)	W54	frame 0x
 System/TalkCursor	TTalkCursor::associateNPC	93.62857	partial (pending review)	DecompMix1
 System/MarDirectorEvent	TMarDirector::findNearestTalkNPC	94.83	partial (pending review)	W40	check OK but unresolved: b target 0x9b4 retail vs 0xa44 ours (loop layout), pool 5000000.0f not hand-checked; reg 9 (x/y load order: retail x->f2 y->f4, ours x->f4 y->f3; fsubs operands same semantics); stack 3 (frame 0x50 vs retail 0x58; trash[36] best of 36/40/44); insert 1 delete 1
 System/MarDirectorEvent	TMarDirector::setNextStage	95.03	logic-verified	W40	check: histogram addi -1 (ours extra addi r28=gpApp+0x12 temp, +2 gives same +0x14 TFlagT address), b+1/beq+1/bne-1 (retail places 0x37 body out of line, taken=beq; semantics same: body sets 0x100 + setMovie(6), else epilogue); call order same; no pool floats; li consts equal; rows: reg 5 (lis/lhz/addi base regs), insert 2, delete 2, replace 1, imm 1, op_mismatch 1 (branch layout); frame 0x50 with char trash[4]
-Animal/BeeHive	TBeeHive::appearBee	85.6	partial (pending review)	DecompMix1
+Animal/BeeHive	TBeeHive::appearBee	85.6	partial (pending review)	W68	triage score, no change kept; wrap-up
 MoveBG/MapObjLib	TMapObjTurn::control	91.49	logic-verified	DecompMix2
 Enemy/chuuhana	TChuuHana::behaveToWater	91.83	partial (pending review)	W41	stack 53 local 47 delete 25; no edit
 Enemy/bossManta	TNerveMantaDeath::execute	99.881355	logic-verified	DecompEnemyBoss
@@ -385,7 +385,7 @@ Player/MarioMove	TMario::checkRideMovement()	99.96	logic-verified (codegen-only:
 Player/MarioMove	TMario::changePlayerStatus(unsigned long, unsigned long, bool)	99.83	logic-verified	W01	
 Player/MarioMove	TMario::checkWallPlane(Vec*, float, float)	99.69	logic-verified (codegen-only: frame 0x88 vs 0x78, record temp layout; same calls and branches)	W01
 Player/MarioMove	TMario::warpRequest(const JGeometry::TVec3<float>&, float)	99.82	logic-verified (codegen-only: trash[0x10] pad, stack offsets)	W01
-Player/MarioRun	TWaterGun::isEmitting()	98.41	logic-verified (codegen-only: frame 0x28 vs 0x18, reg choice; WaterGun.hpp untouched)	W02
+Player/MarioRun	TWaterGun::isEmitting()	98.41	logic-verified	W84	check OK (only histogram diff: addi vs mr for self copy; inline in shared WaterGun.hpp, not changed); rows 6: stack 5 (frame 0x28 vs 0x18, extra retail local), replace 1 (self copy); branches mapped; pool constant values equal
 Player/MarioRun	TMario::doSliding(float)	98.49	logic-verified (codegen-only: load/operand order, frame 0x98 vs 0x90)	W02
 Player/MarioRun	TMario::oilRun()	98.77	logic-verified (codegen-only: gpPollution arg-load order, frame 0x58 vs 0x50)	W02
 Player/MarioRun	TMario::doRunningAnimation()	98.69	logic-verified (codegen-only: fcmpo operand order, frame 0xd8 vs 0x88)	W02
@@ -1420,9 +1420,9 @@ Enemy/enemymanager	TEnemyManager::performShared(unsigned long, JDrama::TGraphics
 Enemy/enemymanager	TEnemyManager::copyAnmMtx(TSpineEnemy*)	96.03	partial (pending review)	W69	logic matches retail call order. const& mScaling kept (copy form dropped to 85.43). Open: 12-byte frame offset (afStack 0x64 vs 0x58), reg alloc
 Enemy/enemymanager	TEnemyManager::createEnemies(int)	98.76	partial (pending review)	W69	diff only stack 20 / reg 17; no logic diff. Open: frame layout, reg alloc
 Enemy/cannon	TChorobei::checkHit()	95.96319	logic-verified	W56	--check: calls differ only by one extra retail call to __ct__24TNerveBase<10TLiveActor>Fv in the second inlined TNerveCannonDamage::theNerve() guard (retail out of line, ours inline vtable store). Branch senses match: SendMessage beq, nerve compare beq, isDamageToCannon beq, pushNerve bge, isRollFly beq, init bne. residuals: register allocation (this r22/r23, loop r21/r24-r26); static-local names instance$3408 and init$3410 vs init$localstatic0/1$theNerve__18TNerveCannonDamageFv; register_global_object handle offsets 0x3c/0x18 (TU static order); store order in second guard.
-Enemy/koopajr	TKoopaJr::init(TLiveManager*)	88.76712	partial (pending review)	W50	Triage: 23 rows (stack 9, delete 11, insert 4); opcode delta addi -3, cmplwi +2, lwz +4; branch sense not diffed.
+Enemy/koopajr	TKoopaJr::init(TLiveManager*)	88.76712	partial (pending review)	W50	Triage: 23 rows (stack 9, delete 11, insert 4, imm 6). Opcode and branch-sense deltas not diffed.
 Enemy/koopajr	TKoopaJrSubmarine::checkNerve()	87.454956	partial (pending review)	W50	Retail calls TVec3 dot/scale out of line (from inlined normalize); ours inline them. Other calls match.
-Enemy/koopajr	TKoopaJrSubmarine::init(TLiveManager*)	90.9781	partial (pending review)	W50	Triage: 32 rows (reg 101, stack 42); opcode delta addi -6, stwx +1; branch sense not diffed.
+Enemy/koopajr	TKoopaJrSubmarine::init(TLiveManager*)	90.9781	partial (pending review)	W50	Triage: 32 rows (reg 101, stack 42, insert 11, imm 10). Opcode and branch-sense deltas not diffed.
 Enemy/koopajr	TKoopaJrSubmarine::makeKillerVelocity(TBathtubKiller*, JGeometry::TVec3<f32>)	92.82705	partial (pending review)	W50	Triage: 25 rows (stack 93, reg 184). Pool: ours literal -0.157/-0.314, retail positive pool plus fneg.
 Enemy/koopajr	TKoopaJrSubmarine::makeRoundVelocity()	94.98324	partial (pending review)	W50	TVec3::set wrapper tried, dropped to 91.78, reverted. Residual: retail out-of-line TVec3::set call; triage stack 25, reg 38.
 Enemy/koopajr	TKoopaJrParams::TKoopaJrParams(const char*)	99.875	partial (pending review)	W50	Triage: imm 16 (float pool constant loads only).
@@ -1450,3 +1450,40 @@ Enemy/gesso	TGesso::calcRootMatrix	99.67	logic-verified	W73	codegen-only; logic 
 Enemy/Amenbo	TAmenbo::control	97.37	partial (pending review)	W77	check: opcode beq+1/bne-1 at row 166 (cmplw latest nerve; body rows 167-245 identical; branch sense unresolved by hand); reg 8, stack 21 (locals 8B low vs retail, saves matched after trash[8] frame pad), insert/delete 6
 Enemy/BossHanachanEffect	TBossHanachan::emitCamShake_	99.745	logic-verified	W81	decomp_triage --check OK; diff rows only: stack offset of volatile y in sqrtf1 (0x34 vs retail 0x40), swapped loop-counter regs r25/r26; no branch or opcode diffs
 Enemy/BossHanachanEffect	TBossHanachan::emitParticle_	98.038	logic-verified	W81	decomp_triage --check; only non-reg diff extsh. r0,r0 vs cmpwi r0,0 after lha (same CR0 result); no branch diffs; frame 0xc8 vs 0xb8 and reg allocation differ
+Enemy/walkerEnemy	TNerveWalkerEscape::execute	99.94318	logic-verified	W79	char trash[40] at top; residual: stack-slot offsets 0x44 vs 0x24; branches/calls identical
+Enemy/walkerEnemy	TWalkerEnemy::isReachedToGoalXZ	99.68	logic-verified	W79	frame 0x30 vs 0x20; stack-slot rows only; no branch/call rows
+Enemy/walkerEnemy	TWalkerEnemy::isResignationAttack	99.65455	logic-verified	W79	frame 0x58 vs 0x48; dist helper; stack-slot rows only; const-ref operator- variant grew frame, reverted
+Enemy/walkerEnemy	TWalkerEnemy::reset	99.83146	logic-verified	W79	frame matches; TPathNode temp slot offset only; branches/calls identical
+Enemy/walkerEnemy	TWalkerEnemy::moveObject	99.91964	logic-verified	W79	char trash[40] at top; residual: return temp 0x30 vs 0x50 and local copy slots; no branch/call rows
+Enemy/telesa	TNerveTelesaImitate::execute	99.84	logic-verified	W75	check OK; logic fixed: isInSight test was inverted (retail: return false only when !resetBaseGround && !isInSight; now reset||isInSight emit, matches upstream sibling); restructured to || form to match retail branch layout; rows 37: stack only (frame 0xb0 vs 0x98, slot layout); branches aligned, same sense; reg swap fixed by declaring imitatedItem first
+Animal/BeeHive	TBeeHive::receiveMessage	77.613045	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::doWait	92.69451	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::getCenterOfGravity	89.30049	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::calcRootMatrix	75.44444	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::bind	90.70395	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::load	91.354836	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	JGeometry::TRotation3<JGeometry::TMatrix34<JGeometry::SMatrix34C<float>>>::setSQ	88.78125	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::receiveMessageFromChild	89.46774	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::controlCollision	89.583336	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TNerveBeeHiveFall::execute	99.18633	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TNerveBeeHiveWait::execute	98.98125	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TNerveBeeHiveReset::execute	99.916664	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TNerveBeeHiveMarioWaterIn::execute	99.882355	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TNerveBeeHiveAttack::execute	99.82456	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TNerveBeeHiveBreak::execute	99.818184	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::controlSound	99.29412	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBeeHive::reset	99.79915	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/BeeHive	TBee::receiveMessage	99.844444	partial (pending review)	W68	triage score, no change kept; wrap-up
+Animal/Butterfly	TButterfloid::load(JSUMemoryInputStream&)	99.7	logic-verified	W66	99.7, stack 48 rows, --check OK. Calls, mnemonics, branch sense match (retail targets = ours minus constant 0x1a8). Frame 0x108 vs 0x80 and TVec3 slot offsets differ (codegen; source comment at Butterfly.cpp:116 already notes padding limit). Only diffs are stack offsets and sda/rodata symbol names.
+Animal/AnimalNerve	TNerveAnimalGraphWander::execute	99.532936	partial (pending review)	W64	logic matches upstream except literal 0x800001 for ACTOR_TYPE_ANIMAL_MEW (same value); rows: stack frame 0x118 vs retail 0xe8, count/instIdx register swap (r6/r7, r27/r28), pool labels @703 vs @2162
+Enemy/coasterkiller	TCoasterEnemy::moveCoaster()	85.747665	partial (pending review)	W80	frame 0x250 vs 0x208 (extra f20 save, locals 0x44 higher); fp reg alloc differs; inv_sqrt bl matches; source normalize edit (mQuat.normalize) applied; branch sense not checked
+Enemy/coasterkiller	TCoasterKiller::perform(unsigned long, JDrama::TGraphics*)	95.45556	partial (pending review)	W80	frame 0x58 vs 0x50 (8B extra local, no visible r1 refs); distance-expr scheduling differs (2 insert/2 delete)
+Enemy/coasterkiller	TCoasterKillerManager::load(JSUMemoryInputStream&)	98.35616	partial (pending review)	W80	frame 0x70 vs 0x30 (inlined TCoasterKillerSaveLoadParams ctor locals); extra unconditional stw r0,0x38 from unk38 hack lines
+Enemy/coasterkiller	TCoasterEnemy::bind()	99.87273	partial (pending review)	W80	only stack slot offset differs: retail nextPos at 0x10, ours 0x1c; split-temp variant tested and reverted (88%)
+Enemy/yunbo	TYumbo::init(TLiveManager*)	97.34	partial (pending review)	W78	frame fixed via char trash[0x20]; rows: sched 24-27 (retail loads mMActorKeeper via r0), flower reg r29 vs r27 at 32/38/40
+Enemy/yunbo	TNerveYumboDancing::execute(TSpineBase<TLiveActor>*) const	99.98	logic-verified	W78	check OK; branch sense matches (no branch rows); only stack-offset rows 97-99,120: dir 12B lower than retail, trash[8] after dir kept; tried 0xc/pre-dir/top placements, worse
+Enemy/telesa	TTelesa::initAttacker	99.68	logic-verified	W75	check ok: 1 addi; retail addi r3,r30,0 vs ours mr r3,r30 for zero-offset (TLiveActor*) cast before getModel, same value; symbol diff instance$3374 vs $1620; theNerve init$3376 guard branch maps identically
+Animal/boid	TBoidLeader::calcBoids	95.64	partial (pending review)	W71	reg/stack permutations, frame 0x1e0 vs 0x150; d/d2*radius temp copy chain 2x vs 1x; radius reload via mNeighborRadius (+0.165); branch targets unchecked
+Animal/boid	TBoidLeader::calcForces	99.55	partial (pending review)	W71	frame 0x90 vs 0xa0; first temp 0x28 (retail) vs 0x44 (ours), later temps shift 0xc-0x10; no source cause found
+Animal/boid	TBoidLeader::calcGoalForce	99.59	partial (pending review)	W71	frame 0x48 vs 0x50; force local 0x34 vs 0x38; 8 extra bytes between force and r31 save; no source cause found
+Enemy/telesa	TTelesa::bind	99.80	logic-verified	W75	logic fix: Die nerve test inverted (store nextPos.y=mGroundHeight only when nerve==TNerveTelesaDie; retail bne at 3524-3525, upstream 514-515); op_mismatch gone; remaining 41 stack rows = frame layout only, check OK

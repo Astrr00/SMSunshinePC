@@ -42,13 +42,13 @@ static const char* sambohead_bastable[] = {
 void TYumboSeed::init()
 {
 	initHitActor(0x1000002A, 1, ACTOR_TYPE_PLAYER, 30.0f, 30.0f, 0.0f, 0.0f);
-	static_cast<TIdxGroupObj*>(JDrama::TNameRefGen::search("敵グループ"))
-	    ->getChildren()
-	    .push_back(this);
+	TIdxGroupObj* group = static_cast<TIdxGroupObj*>(JDrama::TNameRefGen::search("敵グループ"));
+	group->getChildren().push_back(this);
 }
 
 void TYumboSeed::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x10];
 	if (mFlags & SEED_FLAG_INACTIVE)
 		return;
 
@@ -355,6 +355,7 @@ DEFINE_NERVE(TNerveYumboDancing, TLiveActor)
 	JGeometry::TVec3<f32> dir = SMS_GetMarioPos();
 	dir -= self->mPosition;
 	self->mRotation.y = MsGetRotFromZaxisY(dir);
+	char trash[8];
 
 	if (isMarioInSight(self)) {
 		spine->pushAfterCurrent(&TNerveYumboHiding::theNerve());

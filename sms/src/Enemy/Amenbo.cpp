@@ -559,6 +559,7 @@ DEFINE_NERVE(TNerveAmenboSearch, TLiveActor)
 		return true;
 	}
 
+	char trash[24];
 	return false;
 }
 

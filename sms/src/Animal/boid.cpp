@@ -64,7 +64,7 @@ void TBoidLeader::calcBoids()
 				f32 radius = mNeighborRadius;
 				if (d2 < radius * radius) {
 					i->mSeparationForce += d / d2 * radius;
-					j->mSeparationForce -= d / d2 * radius;
+					j->mSeparationForce -= d / d2 * mNeighborRadius;
 
 					i->mAlignmentForce += j->mHeading;
 					j->mAlignmentForce += i->mHeading;

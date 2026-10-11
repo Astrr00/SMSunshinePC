@@ -679,6 +679,7 @@ void TShine::touchPlayer(THitActor* actor)
 
 void TShine::appearWithTime(int param_1, int param_2, int param_3, int param_4)
 {
+	char trash[0x20];
 	TItem::appear();
 	TFlagManager::smInstance->setBool(true, 0x50000);
 
