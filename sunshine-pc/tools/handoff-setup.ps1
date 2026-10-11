@@ -73,6 +73,9 @@ if (-not (Test-Path (Join-Path $aur "CMakeLists.txt")) -and (Test-Path (Join-Pat
   Copy-Item -Recurse -Force (Join-Path $bundle "aurora-worktree\*") $aur
 }
 
+# 7b. apply the aurora patch series on the pinned upstream (50e5be3); verified state here = 50e5be3 + patches 0001-0007
+Push-Location (Join-Path $repo "sunshine-pc"); python tools\apply-aurora-patches.py; Pop-Location
+
 # 8. WIP patch (optional)
 $wip = Join-Path $bundle "wip-uncommitted.patch"
 if (Test-Path $wip) { git -C $repo apply --check $wip 2>$null; if ($LASTEXITCODE -eq 0) { Write-Host "WIP patch applies cleanly; apply with: git -C `"$repo`" apply `"$wip`"" } }
