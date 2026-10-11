@@ -20,7 +20,7 @@ Runtime bugs keep coming from NonMatching functions (wrong masks, swapped branch
 
 | Item | State | Next |
 | --- | --- | --- |
-| Game-code functions open (not 100 % and no whole-function review) | PART (1381 open in 217 units after the first full pass; 646 reviews recorded; 10889/12881 functions bytegleich) | second pass via unit queue (`sunshine-pc/tools/decomp_queue.py`, protocol: worker loop with `--build`/`--diff`/`--check`) |
+| Game-code functions open (not 100 % and no whole-function review) | PART (973 open in 165 units; 954 logic-verified reviews; game code 6945/8806 bytegleich, all 10960/12881) | second pass via unit queue; deep passes on <80 % functions; `--branchscan`/`--immscan` hit triage |
 | Empty decomp bodies with `TARGET_PC` stubs | PART (40 found and resolved: removed when no retail symbol, otherwise reconstructed) | re-scan each wave |
 | Fully matching units flipped to `Matching` in `configure.py` | PART (439 → 445 units) | lead, per-unit SHA-1 check each wave |
 | Ledger quality | PART (audit 1: 10 % wrong → `--check` gate; audit 2 running) | periodic sampling audits |
