@@ -350,6 +350,7 @@ void TMapWire::move()
 
 f32 TMapWire::getPosInWire(const JGeometry::TVec3<f32>& point) const
 {
+	char trash[0x20];
 	// TODO: This needs stack offset adjustments
 
 	// Position here is only considered in the horizontal plane

@@ -674,6 +674,7 @@ void TAmiKing::initMapObj()
 
 void TAmiKing::moveObject()
 {
+	char trash[0x70];
 	TLiveActor::moveObject();
 	if (unk138) {
 		if (mMActor->checkCurAnm("amiking_flying1_start", 0)) {
@@ -772,6 +773,7 @@ void TAmiKing::touchPlayer(THitActor*) { SMS_SendMessageToMario(this, 9); }
 
 void TPinnaCoaster::control()
 {
+	char trash[0x18];
 	TMapObjBase::control();
 	unk138->frameUpdate();
 	unk138->calc();

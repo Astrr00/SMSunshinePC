@@ -1890,8 +1890,9 @@ DEFINE_NERVE(TNerveBGDie, TLiveActor)
 		}
 	}
 
+	// asm 0x802869A4: retail runs the body only when both checks hold
 	if (self->getMActor()->checkCurBckFromIndex(2)
-	    || self->getMActor()->curAnmEndsNext()) {
+	    && self->getMActor()->curAnmEndsNext()) {
 
 		self->changeBck(6);
 		self->changeAllTentacleState(8);

@@ -513,6 +513,7 @@ void TRope::constraintHead(const JGeometry::TVec3<f32>& param)
 
 void TRope::constraintTail(const JGeometry::TVec3<f32>& param)
 {
+	char trash[24];
 	mPoints[mNumPoints - 1].unkC = param;
 	for (int i = mNumPoints - 1; i > 0; --i) {
 		TRopePoint& cur  = mPoints[i];
@@ -532,6 +533,7 @@ void TRope::constraintTail(const JGeometry::TVec3<f32>& param)
 
 void TRope::moveHead(const JGeometry::TVec3<f32>& param)
 {
+	char trash[8];
 	for (int i = 0; i < mNumPoints; ++i) {
 		mPoints[i].unkC.y += unkC;
 		mPoints[i].unkC += mPoints[i].unk18;

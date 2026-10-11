@@ -463,7 +463,8 @@ bool TAmenbo::isFreeze() const
 
 bool TAmenbo::isChangedBlock() const
 {
-	return mSpine->getLatestNerve() == &TNerveSmallEnemyChange::theNerve();
+	// asm 0x8033F138: retail skips the isFreeze() body when getLatestNerve() == TNerveSmallEnemyChange
+	return mSpine->getLatestNerve() != &TNerveSmallEnemyChange::theNerve();
 }
 
 bool TAmenbo::isWaterFromWaterGun(THitActor* param_1)

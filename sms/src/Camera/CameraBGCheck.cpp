@@ -37,15 +37,16 @@ void CPolarSubCamera::calcInHouseNo_(bool param_1)
 			return;
 		}
 
-		JGeometry::TVec3<f32> local_120[18];
 		S16Vec SStack_134;
+		JGeometry::TVec3<f32> local_120[18];
 
 		CLBCalcNearNinePos(local_120, &SStack_134, unk124, unk148,
 		                   getFinalAngleZ(), mNear, mFovy, mAspect);
 
 		f32 fVar1 = unk2C4;
-		for (int i = 0; i < 9; ++i) {
-			local_120[9 + i].scaleAdd(fVar1, local_120[i], unk25C);
+		JGeometry::TVec3<f32>* src = local_120;
+		for (int i = 0; i < 9; ++i, ++src) {
+			src[9].scaleAdd(fVar1, *src, unk25C);
 		}
 
 		f32 tmp = unk2C0;
@@ -196,6 +197,7 @@ bool CPolarSubCamera::execRoofCheck_(Vec param_1)
 	bool moved               = false;
 	bool skipCheck           = false;
 	const TBGCheckData* roof = nullptr;
+	char trash[8];
 	f32 roofHeight           = 0.0f;
 	if (SMS_GetMonteVillageAreaInMario() == 0
 	    && gpCamera->mMode != CAMERA_MODE_MONTE_HANG) {

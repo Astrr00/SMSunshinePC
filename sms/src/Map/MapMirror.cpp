@@ -219,6 +219,7 @@ void TMirrorModel::init(const char* name)
 	                                     | (1 << J3DMLF_TevStageNumShift));
 
 	TPosition3f local_44;
+	char trash[20];
 	local_44.identity();
 	unk4->getModel()->setBaseTRMtx(local_44);
 	unk4->calc();
@@ -270,6 +271,7 @@ void TMirrorModelObj::calc()
 void TMirrorModelObj::init(const char* name)
 {
 	TMirrorModel::init(name);
+	char trash[20];
 	gpMirrorModelManager->registerObjMirror(this);
 }
 
@@ -369,6 +371,7 @@ void TMirrorModelManager::load(JSUMemoryInputStream& stream)
 		for (int i = 0; i < local_28; ++i) {
 			unk1C[i] = new TMirrorModel;
 			char acStack_130[0x100];
+			char trash[8];
 			if (gpMarDirector->getCurrentMap() == 7) {
 				static const char* table[] = { "205", nullptr };
 				snprintf(acStack_130, 0x100, "/scene/map/mirror/mirror%s.bmd",

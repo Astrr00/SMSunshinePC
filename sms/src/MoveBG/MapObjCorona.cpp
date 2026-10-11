@@ -777,7 +777,7 @@ BOOL TBathtub::receiveMessage(THitActor* sender, u32 message)
 		hipdrop(*gpMarioPos);
 		return true;
 	case HIT_MESSAGE_TRAMPLE:
-		if (!unk29A && unk250 <= unk16C->trampleRelease.get()) {
+		if (!unk29A && unk16C->trampleRelease.get() >= unk250) {
 			unk250 = unk16C->trampleRelease.get();
 			unk258 = unk16C->trampleRecover.get();
 			unk25C = unk16C->trampleRecover.get();
@@ -840,6 +840,7 @@ int TBathtub::getNumGripsDead() const
 
 void TBathtub::quake(const JGeometry::TVec3<f32>& pos)
 {
+	char trash[8];
 	if (unk29A)
 		return;
 
@@ -866,6 +867,7 @@ void TBathtub::quake(const JGeometry::TVec3<f32>& pos)
 #pragma dont_inline on
 void TBathtub::hipdrop(const JGeometry::TVec3<f32>& pos)
 {
+	char trash[0x10];
 	if (unk29A)
 		return;
 	if (unk250 > unk16C->hipdropRelease.get())
@@ -1157,6 +1159,7 @@ BOOL TBathtubGripPartsFragile::receiveMessage(THitActor* sender, u32 message)
 
 Mtx* TBathtubGripParts::getRootJointMtx() const
 {
+	char trash[0x10];
 	return (Mtx*)mGrip->getModel()->getAnmMtx(mGrip->mJointIdx[mIndex]);
 }
 

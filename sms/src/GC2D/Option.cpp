@@ -238,7 +238,8 @@ void TPatternAnmControl::set(const TPatternAnmControl::TAnmChunk* chunks,
                              int num_chunks)
 {
 	mChunks.set(chunks, num_chunks);
-	hide();
+	for (const TAnmChunk* it = mChunks.begin(); it != mChunks.end(); ++it)
+		mScreen->search(it->mTag)->hide();
 }
 
 void TPatternAnmControl::setupAnm()

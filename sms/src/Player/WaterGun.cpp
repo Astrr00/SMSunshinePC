@@ -127,6 +127,7 @@ TNozzleBmdData nozzleBmdData = {
 
 static BOOL NozzleCtrl(J3DNode* node, BOOL param_2)
 {
+	char trash[0x10];
 	// TODO: Inlined stack space
 	if (!param_2) {
 		if (gpMarioForCallBack != nullptr) {
@@ -146,6 +147,7 @@ static BOOL NozzleCtrl(J3DNode* node, BOOL param_2)
 
 static BOOL RotateCtrl(J3DNode* node, BOOL param_2)
 {
+	char trash[0x20];
 	if (!param_2 && gpMarioForCallBack != nullptr) {
 		s16 local1cd0 = gpMarioForCallBack->mWaterGun->unk1CD0;
 		Mtx mtx;
@@ -159,6 +161,7 @@ static BOOL RotateCtrl(J3DNode* node, BOOL param_2)
 
 static BOOL WaterGunDivingCtrlL(J3DNode* node, BOOL param_2)
 {
+	char trash[0x18];
 	if (!param_2) {
 		// This looks very weird to me, probably because of some inline?
 		// I could imagine some s32 getNozzleSpeedY() and
@@ -176,6 +179,7 @@ static BOOL WaterGunDivingCtrlL(J3DNode* node, BOOL param_2)
 
 static BOOL WaterGunDivingCtrlR(J3DNode* node, BOOL param_2)
 {
+	char trash[0x18];
 	if (!param_2) {
 		// This looks very weird to me, probably because of some inline?
 		// I could imagine some s32 getNozzleSpeedY() and
@@ -217,6 +221,7 @@ void TNozzleBase::init()
 
 void TNozzleBase::calcGunAngle(const TMarioControllerWork& work)
 {
+	char trash[0x48];
 	// volatile u32 unused1[17];
 	if (mFludd->mMario == gpMarioAddress
 	    && (gpCamera->isLButtonCamera() || gpCamera->isJetCoaster1stCamera())) {
@@ -270,6 +275,7 @@ void TNozzleBase::movement(const TMarioControllerWork& controllerWork)
 
 void TNozzleBase::emitCommon(int param_1, TWaterEmitInfo* param_2)
 {
+	char trash[0x18];
 	param_2->mAlive.set(
 	    gpModelWaterManager->mWaterParticleTypes[mEmitParams.mType.get()]
 	        ->mAlive.get());
@@ -296,6 +302,7 @@ void TNozzleBase::emitCommon(int param_1, TWaterEmitInfo* param_2)
 
 void TNozzleBase::emit(int param_1)
 {
+	char trash[0xa0];
 	if (mFludd->mCurrentWater > 0 && unk378 != 0.0f) {
 		TWaterEmitInfo* emitInfo = mFludd->mEmitInfo;
 		emitCommon(param_1, emitInfo);
@@ -363,6 +370,7 @@ void TNozzleBase::emit(int param_1)
 // properly
 void TNozzleBase::animation(int param_1)
 {
+	char trash[0xa0];
 	J3DFrameCtrl* ctrl = unk380->getFrameCtrl(ANM_TYPE_BCK);
 
 	if (param_1 != 2)
@@ -509,6 +517,7 @@ void TNozzleTrigger::init()
 
 void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 {
+	char trash[0xb8];
 	if (mFludd->mCurrentWater <= 0) {
 		unk385 = TNozzleTrigger::INACTIVE;
 		unk386 = 0;
@@ -612,6 +621,7 @@ void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 
 void TNozzleTrigger::emit(int param_1)
 {
+	char trash[0x88];
 	if (mFludd->mCurrentWater > 0 && (u8)unk385 == TNozzleTrigger::ACTIVE) {
 		TWaterEmitInfo* emitInfo = mFludd->mEmitInfo;
 		emitCommon(param_1, emitInfo);
@@ -688,6 +698,7 @@ void TNozzleTrigger::emit(int param_1)
 
 void TNozzleTrigger::animation(int param_1)
 {
+	char trash[0x90];
 	// TODO: stack size likely influenced by inlined temporaries in original.
 	// volatile u32 unused[38];
 
@@ -883,6 +894,7 @@ void TNozzleDeform::movement(const TMarioControllerWork& controllerWork)
 
 void TNozzleDeform::emit(int param_1)
 {
+	char trash[0xa8];
 
 	if (param_1 == TWaterGun::Yoshi && mFludd->mMario->mYoshi->mType == 0) {
 		return;
@@ -892,7 +904,7 @@ void TNozzleDeform::emit(int param_1)
 		return;
 	}
 
-	if (mBomb.unk385 == TNozzleTrigger::INACTIVE && unk378 > 0.0f) {
+	if ((int)(u8)mBomb.unk385 == TNozzleTrigger::INACTIVE && unk378 > 0.0f) {
 		TWaterEmitInfo* emitInfo = mFludd->mEmitInfo;
 		emitCommon(param_1, emitInfo);
 
@@ -1482,6 +1494,7 @@ void TWaterGun::changeNozzle(TNozzleType nozzleType, bool animate)
 
 void TWaterGun::movement()
 {
+	char trash[0xf0];
 	if (!canSpray()) {
 		unk1CC2 = 0;
 		unk1CC4 = 0;
@@ -1635,6 +1648,7 @@ void TWaterGun::calcAnimation(JDrama::TGraphics* graphics)
 
 void TWaterGun::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x58];
 	// TODO: Missing stack space
 	// volatile u32 unused2[24];
 

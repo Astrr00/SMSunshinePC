@@ -218,6 +218,14 @@ THitActor* TYoshiTongue::findTarget(bool allowExtra, bool checkForward)
 	return best;
 }
 
+// Retail keeps TUtil<f32>::sqrt out of line for rem.length() in movement.
+#pragma dont_inline on
+static f32 sqrtCall(f32 mag)
+{
+	return JGeometry::TUtil<f32>::sqrt(mag);
+}
+#pragma dont_inline off
+
 void TYoshiTongue::movement()
 {
 	if (unkD4 != 0) {
@@ -306,7 +314,7 @@ void TYoshiTongue::movement()
 			mInitialVelocity = mTipPos - prevTip;
 
 			JGeometry::TVec3<f32> rem = tpos - mTipPos;
-			if (rem.length() < 200.0f
+			if (sqrtCall(rem.squared()) < 200.0f
 			    && target->receiveMessage(this, HIT_MESSAGE_TAKE) == true) {
 				mHeldObject = (TTakeActor*)target;
 				SMSGetMSound()->startSoundActor(MSD_SE_YV_PERON, &mTipPos, 0,

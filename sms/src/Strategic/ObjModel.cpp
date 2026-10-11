@@ -17,6 +17,7 @@ bool TModelDataNode::isSameName(const char* name, u16 key) const
 		return false;
 }
 
+#pragma dont_inline on
 void TModelDataNode::registerDataAndJoinNewNode(SDLModelData* data,
                                                 const char* name)
 {
@@ -32,6 +33,7 @@ void TModelDataNode::registerDataAndJoinNewNode(SDLModelData* data,
 	mKey  = JDrama::TNameRef::calcKeyCode(name);
 	mNext = new TModelDataNode;
 }
+#pragma dont_inline off
 
 TModelDataNode::TModelDataNode()
     : mData(nullptr)
@@ -41,6 +43,7 @@ TModelDataNode::TModelDataNode()
 {
 }
 
+#pragma dont_inline on
 SDLModelData* TModelDataKeeper::loadModelData(const char* name, u32 flags,
                                               const char* folder)
 {
@@ -51,6 +54,7 @@ SDLModelData* TModelDataKeeper::loadModelData(const char* name, u32 flags,
 	SDLModelData* sdlData = new SDLModelData(data);
 	return sdlData;
 }
+#pragma dont_inline off
 
 SDLModelData* TModelDataKeeper::createAndKeepData(const char* name, u32 flags)
 {
@@ -58,8 +62,26 @@ SDLModelData* TModelDataKeeper::createAndKeepData(const char* name, u32 flags)
 	while (node->getNext())
 		node = node->getNext();
 
-	SDLModelData* data = loadModelData(name, flags, mFolder);
-	node->registerDataAndJoinNewNode(data, name);
+	// Retail inlines loadModelData and registerDataAndJoinNewNode here; copied so the
+	// out-of-line versions stay the callees of createMActor.
+	char fullPath[256];
+	sprintf(fullPath, "%s/%s", mFolder, name);
+	void* res               = JKRGetResource(fullPath);
+	J3DModelData* j3dData   = J3DModelLoaderDataBase::load(res, flags);
+	SDLModelData* sdlData   = new SDLModelData(j3dData);
+	SDLModelData* data      = sdlData;
+
+	node->mData = data;
+#ifdef TARGET_PC
+	// makeMActors passes a stack buffer as the name; the node outlives the frame, so keep a copy.
+	char* copy = new char[strlen(name) + 1];
+	strcpy(copy, name);
+	node->mName = copy;
+#else
+	node->mName = name;
+#endif
+	node->mKey  = JDrama::TNameRef::calcKeyCode(name);
+	node->mNext = new TModelDataNode;
 	return data;
 }
 
@@ -167,7 +189,12 @@ MActor* TMActorKeeper::createMActor(const char* model_data_name, u32 flags)
 	int index = keeper->getIndex(model_data_name);
 
 	if (index < 0) {
-		keeper->createAndKeepData(model_data_name, mModelLoaderFlags);
+		TModelDataNode* node = &keeper->mHead;
+		while (node->getNext())
+			node = node->getNext();
+		SDLModelData* data = TModelDataKeeper::loadModelData(
+		    model_data_name, mModelLoaderFlags, keeper->mFolder);
+		node->registerDataAndJoinNewNode(data, model_data_name);
 		index = keeper->getIndex(model_data_name);
 	}
 

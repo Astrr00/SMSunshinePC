@@ -856,6 +856,7 @@ bool TCardLoad::titleDraw()
 		u16 alpha = unkF0->getPane()->getAlpha() + 1;
 		if (alpha > 255) {
 			bool any = true;
+			alpha = 255;
 			for (int i = 0; i < 13; ++i)
 				any &= unk1D4[i]->update();
 			if (any) {

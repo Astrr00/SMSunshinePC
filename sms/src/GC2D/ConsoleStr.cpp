@@ -418,7 +418,7 @@ bool TConsoleStr::processGo(float param_1)
 				}
 			}
 		}
-	} else if (param_1 >= 95.0f) {
+	} else if (!(param_1 < 95.0f)) {
 		if (param_1 == 95.0f) {
 			unk28[0]->setPanePosition(0x50, JUTPoint(0, 0), JUTPoint(-170, -180), JUTPoint(-340, -360));
 			unk28[1]->setPanePosition(0x50, JUTPoint(0, 0), JUTPoint(0, -220), JUTPoint(0, -440));
@@ -427,7 +427,7 @@ bool TConsoleStr::processGo(float param_1)
 				JUTPoint* row = &unk34[22 * i];
 				for (int j = 0; j < 16; ++j) {
 					JUTRect r = unk28[i]->getPane()->getGlobalBounds();
-					row[j] = JUTPoint(r.x1, r.y1);
+					row[j].set(r.x1, r.y1);
 				}
 				JUTRect bounds = unk28[i]->getPane()->getBounds();
 				float w = (float)bounds.getWidth();
@@ -445,16 +445,17 @@ bool TConsoleStr::processGo(float param_1)
 				}
 				JUTRect r = unk28[i]->getPane()->getGlobalBounds();
 				unk28[i]->getPane()->setAlpha(alpha);
+				unk28[i]->getPane()->resize(r.getWidth() + 2, r.getHeight() + 2);
 				float w = (float)r.getWidth();
 				float h = (float)r.getHeight();
-				unk28[i]->getPane()->resize(r.getWidth() + 2, r.getHeight() + 2);
 				unk2AC[i]->setGlobalTranslation((float)r.x1 + 0.5f * w, (float)r.y1 + 0.5f * h, 0.0f);
 				unk28[i]->update();
 				if (parity == 0) {
+					JUTPoint* row = &unk34[22 * i];
 					for (int k = 14; k >= 0; --k) {
-						unk34[22 * i + k + 1] = unk34[22 * i + k];
+						row[k + 1] = row[k];
 					}
-					unk34[22 * i] = JUTPoint(r.x1, r.y1);
+					row[0].set(r.x1, r.y1);
 				}
 			}
 		} else if (param_1 == 175.0f) {
@@ -543,6 +544,7 @@ bool TConsoleStr::processShineGet(int param_1)
 		}
 	}
 
+	char trash[0x10];
 	return result;
 }
 
@@ -606,6 +608,7 @@ bool TConsoleStr::processMiss(int param_1)
 		}
 	}
 
+	char trash[0x10];
 	return result;
 }
 #pragma dont_inline off

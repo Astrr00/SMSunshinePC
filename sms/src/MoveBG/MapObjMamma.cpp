@@ -1006,6 +1006,7 @@ u32 TMammaBlockRotate::touchWater(THitActor*)
 
 void TMammaBlockRotate::control()
 {
+	char trash[0x28];
 	TMapObjBase::control();
 
 	switch (mState) {
@@ -1062,6 +1063,7 @@ void TMammaBlockRotate::initMapObj()
 	f32 height      = joint->getMax().y - joint->getMin().y;
 	moveJoint(joint, 0.0f, height, 0.0f);
 	JGeometry::TVec3<f32> offset(0.0f, height, 0.0f);
+	char trash[0x78];
 	mColDown->setUp();
 	mColDown->moveTrans(offset);
 
@@ -1301,6 +1303,7 @@ void TMammaMirrorMapOperator::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TMammaMirrorMapOperator::loadAfter()
 {
+	char trash[0x10];
 	JDrama::TPlacement* mirrorS = (JDrama::TPlacement*)
 	    JDrama::TNameRefGen::getInstance()->getRootNameRef()->search("mirrorS");
 	mMirrorPos[0].set(mirrorS->mPosition);
