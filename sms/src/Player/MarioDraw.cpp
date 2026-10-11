@@ -401,7 +401,7 @@ BOOL TMarioAnimeData::isPumpOK() const
 
 static int MarioHeadCtrl(J3DNode* param_1, int param_2)
 {
-	// volatile u32 padding[34];
+	volatile u32 padding[30];
 	Mtx transform;
 	if (param_2 == 0) {
 		if (gpMarioForCallBack->mStatus == MARIO_STATUS_READ_BILLBOARD) {
@@ -941,7 +941,7 @@ void TMario::changeHand(int idx)
 
 f32 TMario::setAnimation(int anm_id, f32 rate)
 {
-	// volatile u32 padding[37];
+	volatile u32 padding[30];
 	if (onYoshi()) {
 		if (anm_id == ANIM_LOST) {
 			mYoshi->changeAnimation(0x12);
@@ -1450,7 +1450,7 @@ void TMario::finalDrawInitialize()
 
 void TMario::considerWaist()
 {
-	// volatile u32 padding[6];
+	volatile u32 padding[6];
 	f32 maxPitch;
 	f32 targetPitch;
 	f32 angleChangeRate;
@@ -1901,6 +1901,7 @@ void TMario::addUpper()
 
 void TMario::calcAnim(u32 param_1, JDrama::TGraphics* graphics)
 {
+	volatile u32 padding[34];
 	addCallBack(graphics);
 	addUpper();
 	Mtx baseMtx;
@@ -2179,7 +2180,7 @@ void TMario::addDirty()
 
 void TMario::addDamageFog(JDrama::TGraphics* graphics)
 {
-	// volatile u32 padding[30];
+	volatile u32 padding[16];
 	bool check       = true;
 	GXColor fogColor = (GXColor) { 0xff, 0x00, 0x80, 0xff };
 

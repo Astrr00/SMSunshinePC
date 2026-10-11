@@ -307,6 +307,7 @@ void TCoin::loadAfter()
 
 	if (gpMarDirector->getCurrentMap() == 2) {
 		const TBGCheckData* check;
+		char trash[8];
 		gpMap->checkGround(mPosition, &check);
 		if (!check->isWaterSurface())
 			return;
@@ -398,6 +399,7 @@ void TCoinBlue::loadBeforeInit(JSUMemoryInputStream& stream)
 
 void TCoinBlue::load(JSUMemoryInputStream& stream)
 {
+	char trash[8];
 	TCoin::load(stream);
 	if (TFlagManager::getInstance()->getBlueCoinFlag(
 	        gpMarDirector->getCurrentMap(), getEventId()))
@@ -419,6 +421,7 @@ f32 TShine::mSpeedDownRate = 0.99f;
 
 void TShine::calc()
 {
+	char trash[0x38];
 	MtxPtr mtxPos = getMActor()->getModel()->getAnmMtx(2);
 
 	if (checkLiveFlag(LIVE_FLAG_UNK200 | LIVE_FLAG_CLIPPED_OUT
@@ -539,6 +542,7 @@ void TShine::movingDown()
 
 void TShine::control()
 {
+	char trash[0x58];
 	if (!isState(0x10))
 		TMapObjGeneral::control();
 
@@ -642,6 +646,7 @@ void TShine::perform(u32 cue, JDrama::TGraphics* graphics)
 
 BOOL TShine::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[8];
 	unkF8 &= 0xF7FFFFFF;
 	mPosition.set(SMS_GetMarioPos());
 	mRotation.y = 180.0f * (f32)*gpMarioAngleY / 32768.0f;
@@ -729,6 +734,7 @@ s32 TShine::appearWithTimeCallback(TMarDirector::DemoCallbackArg param_1,
 
 void TShine::appearSimple(int param_1)
 {
+	char trash[0x10];
 	TItem::appear();
 	TFlagManager::smInstance->setBool(true, 0x50000);
 
@@ -753,6 +759,7 @@ void TShine::appearSimple(int param_1)
 
 void TShine::appearWithDemo(const char* param_1)
 {
+	char trash[8];
 	unk18C = static_cast<TCameraMapTool*>(JDrama::TNameRefGen::search(param_1))
 	             ->mDemoLengthFrames;
 	SMSGetMarDirector()->fireStartDemoCamera(
@@ -768,6 +775,7 @@ void TShine::kill()
 
 void TShine::makeMActors()
 {
+	char trash[8];
 	mMActorKeeper                    = new TMActorKeeper(mManager, 1);
 	mMActorKeeper->mModelLoaderFlags = J3DMLF_MaterialPEFull
 	                                   | J3DMLF_UseUniqueMaterials
@@ -816,6 +824,7 @@ void TShine::loadBeforeInit(JSUMemoryInputStream& stream)
 		unk154 = 1;
 
 	s32 eventId;
+	char trash[8];
 	stream >> eventId;
 	if (eventId == -1)
 		eventId = 120;
@@ -911,6 +920,7 @@ void TEggYoshi::startBalloonAnim()
 
 void TEggYoshi::touchFruit(THitActor* fruit)
 {
+	char trash[0x20];
 	if (isState(0xE) || isState(STATE_HOLDING))
 		return;
 

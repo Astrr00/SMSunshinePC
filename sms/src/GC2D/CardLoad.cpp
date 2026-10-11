@@ -924,9 +924,7 @@ bool TCardLoad::titleDraw()
 		++unk258;
 	} break;
 
-	case 5:
-	case 6:
-	case 7:
+	default:
 		break;
 	}
 
@@ -1060,8 +1058,8 @@ s8 TCardLoad::waitForChoice(TEProgress param_1, TEProgress param_2, int param_3)
 		} else if (unkC4 == 44) {
 			unk484[unkB7]->setCenteredSize(40, unk48C[unkB7].getWidth(),
 			                               unk48C[unkB7].getHeight(),
-			                               unk48C[unkB7].getWidth() * 0.5f,
-			                               unk48C[unkB7].getHeight() * 0.5f);
+			                               unk48C[unkB7].getWidth() * 1.5f,
+			                               unk48C[unkB7].getHeight() * 1.5f);
 		}
 
 		int thing = unkC4 < 40 ? unkC4 : 80 - unkC4;

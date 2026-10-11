@@ -193,8 +193,8 @@ void TBathtub::load(JSUMemoryInputStream& stream)
 	unk138->init("scene/map/map/stand_effect", nullptr);
 	for (int i = 0; i < 5; ++i) {
 		f32 angle = 360.0f * (0.5f + i) / 5.0f;
-		unk168[i % 5]
-		    = new TBathtubGrip(this, angle - 180.0f, unk138, "壊れかけのバスタブの取っ手");
+		f32 ctorAngle = angle - 180.0f;
+		unk168[i % 5] = new TBathtubGrip(this, ctorAngle, unk138, "壊れかけのバスタブの取っ手");
 		unk168[i % 5]->appear();
 		unk13C[i] = -180.0f + angle;
 		unk150[i] = -180.0f + 360.0f * i / 5.0f;
@@ -695,9 +695,9 @@ void TBathtub::perform(u32 cue, JDrama::TGraphics* graphics)
 	}
 
 	if (cue & 1) {
+		int ticks = gpMarDirector->mMoveTickCount;
 		int dead = getNumGripsDead();
 
-		int ticks = gpMarDirector->mMoveTickCount;
 		switch (dead) {
 		case 0:
 			if (ticks >= 7200) {

@@ -101,6 +101,7 @@ void TMario::emitSweat(s16 rot)
 	    && !checkFlag(MARIO_FLAG_IN_ANY_WATER) && !isUnderWater()) {
 		MtxPtr mtx = mModel->getModel()->getAnmMtx(mJointIdHead);
 		JGeometry::TVec3<f32> pos;
+		char trash[8];
 		pos.x = mtx[0][3];
 		pos.y = mtx[1][3];
 		pos.z = mtx[2][3];
@@ -224,6 +225,7 @@ void TBubbleCallBack::execute(JPABaseEmitter*, JPABaseParticle* particle)
 {
 	if (!gpMarioOriginal->checkFlag(MARIO_FLAG_HELMET_FLW_CAMERA)) {
 		JGeometry::TVec3<f32> pos;
+		char trash[12];
 		particle->getCurrentPosition(pos);
 		if (pos.y > gpMarioOriginal->mFloorPosition.z) {
 			particle->unk10 |= 2;
@@ -713,6 +715,7 @@ void TMario::elecEndEffect()
 
 void TMario::kickRoofEffect()
 {
+	char trash[8];
 	if (getMotionFrameCtrl().checkPass(8.0f)) {
 		MtxPtr mtx      = mModel->getModel()->getAnmMtx(mJointIdChnFootR);
 		mFootprintPos.x = mtx[0][3];
@@ -740,6 +743,7 @@ void TMario::sleepingEffectKill()
 
 void TMario::toroccoEffect()
 {
+	char trash[8];
 	f32 dist = JGeometry::TVec3<f32>(mPosition - mToroccoPos).length();
 
 	JPABaseEmitter* emitter = gpMarioParticleManager->emitAndBindToMtxPtr(

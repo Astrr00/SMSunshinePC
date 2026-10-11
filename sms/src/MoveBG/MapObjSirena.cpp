@@ -753,7 +753,7 @@ u32 TCasinoPanelGate::touchWater(THitActor* water)
 	if (fabsf(mPosition.z - water->mPosition.z) < 50.0f) {
 		unk164 = 1;
 		int idx;
-		if (water->mPosition.y > 3.0f * unk144 + mPosition.y) {
+		if (water->mPosition.y > mPosition.y + 3.0f * unk144) {
 			if (water->mPosition.x < mPosition.x - unk140)
 				idx = 12;
 			else if (water->mPosition.x < mPosition.x)
@@ -762,9 +762,9 @@ u32 TCasinoPanelGate::touchWater(THitActor* water)
 				idx = 15;
 			else
 				idx = 14;
-			if (water->mPosition.y < 3.5f * unk144 + mPosition.y)
+			if (water->mPosition.y < mPosition.y + 3.5f * unk144)
 				unk164 = -1;
-		} else if (water->mPosition.y > 2.0f * unk144 + mPosition.y) {
+		} else if (water->mPosition.y > mPosition.y + 2.0f * unk144) {
 			if (water->mPosition.x < mPosition.x - unk140)
 				idx = 8;
 			else if (water->mPosition.x < mPosition.x)
@@ -773,7 +773,7 @@ u32 TCasinoPanelGate::touchWater(THitActor* water)
 				idx = 11;
 			else
 				idx = 10;
-			if (water->mPosition.y < 2.5f * unk144 + mPosition.y)
+			if (water->mPosition.y < mPosition.y + 2.5f * unk144)
 				unk164 = -1;
 		} else if (water->mPosition.y > mPosition.y + unk144) {
 			if (water->mPosition.x < mPosition.x - unk140)
@@ -784,7 +784,7 @@ u32 TCasinoPanelGate::touchWater(THitActor* water)
 				idx = 7;
 			else
 				idx = 6;
-			if (water->mPosition.y < 1.5f * unk144 + mPosition.y)
+			if (water->mPosition.y < mPosition.y + 1.5f * unk144)
 				unk164 = -1;
 		} else {
 			if (water->mPosition.x < mPosition.x - unk140)
@@ -795,7 +795,7 @@ u32 TCasinoPanelGate::touchWater(THitActor* water)
 				idx = 3;
 			else
 				idx = 2;
-			if (water->mPosition.y < 0.5f * unk144 + mPosition.y)
+			if (water->mPosition.y < mPosition.y + 0.5f * unk144)
 				unk164 = -1;
 		}
 		unk138[idx] += unk154 * unk164;
@@ -978,8 +978,8 @@ void TCloset::moveObject()
 									continue;
 								if (unk138[j] != 0.0f)
 									return;
-								if (!(unk13C[j] < 180.0f
-								      || unk13C[j] >= 360.0f))
+								if (unk13C[j] >= 180.0f
+								    && unk13C[j] < 360.0f)
 									return;
 							}
 							unk16C = 1;

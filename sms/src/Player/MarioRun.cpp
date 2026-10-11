@@ -115,6 +115,7 @@ void TMario::getRunningInWaterBrake() { }
 
 BOOL TMario::doRunningAnimation()
 {
+	char trash[80];
 	BOOL loop = true;
 
 	f32 rate;
@@ -325,6 +326,7 @@ void TMario::slideProcess(f32 baseAcc, f32 friction)
 	                  + ground->getNormal().z * ground->getNormal().z);
 
 	s16 angDiff = mSlopeAngle - mFaceAngle.y;
+	char trash[0x10];
 	f32 slopeUp;
 	f32 slopeDown;
 	getSlopeSlideAccele(&slopeUp, &slopeDown);
@@ -387,6 +389,7 @@ BOOL TMario::doSliding(f32 stopThreshold)
 		cs *= 0.01f * (0.5f * mForwardVel) + 0.5f;
 
 	f32 slipFr;
+	char trash[8];
 	if (mStatus == MARIO_STATUS_OIL_SLIP) {
 		slipFr = mSlipParamsOil.mSlipFriction.get();
 	} else if (isForceSlip()) {
@@ -473,9 +476,9 @@ void TMario::doStopping() { }
 
 void TMario::doRunning()
 {
-	f32 sp = mIntendedMag < mRunParams.mMaxSpeed.get()
-	             ? mIntendedMag
-	             : mRunParams.mMaxSpeed.get();
+	char trash[0x48];
+	f32 maxSp = mRunParams.mMaxSpeed.get();
+	f32 sp    = mIntendedMag < maxSp ? mIntendedMag : maxSp;
 
 	if (onYoshi())
 		sp *= mYoshiParams.mRunYoshiMult.get();
@@ -554,9 +557,12 @@ TMario::TSurfingParams* TMario::getSurfingParamsGround()
 
 void TMario::doSurfing()
 {
+	char trash[8];
 	const TBGCheckData* below;
+	char trash2[0x10];
 	gpMap->checkGround(mPosition.x, mPosition.y - mVel.y, mPosition.z, &below);
 
+	f32 want;
 	f32 rotMin;
 	f32 rotMax;
 	f32 powMin;
@@ -574,7 +580,7 @@ void TMario::doSurfing()
 		powMax = getSurfingParamsGround()->mPowMax.get();
 	}
 
-	f32 want = 2.0f * mIntendedMag;
+	want = 2.0f * mIntendedMag;
 	if (want > powMax)
 		want = powMax;
 	if (want < powMin)
@@ -708,6 +714,7 @@ BOOL TMario::running()
 	bool pushed                   = false;
 	mStatusState                  = 0;
 	JGeometry::TVec3<f32> prevPos = mPosition;
+	char trash[0x34];
 	doRunning();
 	setNormalAttackArea();
 
@@ -998,6 +1005,7 @@ BOOL TMario::toroccoing()
 
 BOOL TMario::walkEnd()
 {
+	char trash[8];
 	if (!(mInput & 0x10)) {
 		if (isRunningSlipStart())
 			return changePlayerStatus(MARIO_STATUS_SLIP, 0, false);
@@ -1244,6 +1252,7 @@ BOOL TMario::squatSlipping()
 
 BOOL TMario::oilRun()
 {
+	char trash[8];
 	if (mInput & 0x2) {
 		setPlayerVelocity(0.0f);
 		return changePlayerJumping(MARIO_STATUS_JUMP, 0);
@@ -1262,7 +1271,10 @@ BOOL TMario::oilRun()
 	}
 
 	f32 tmp = mDirtyParams.mPolSizeRun.get();
-	gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, tmp);
+	f32 z = mPosition.z;
+	f32 y = mPosition.y;
+	f32 x = mPosition.x;
+	gpPollution->stamp(1, x, y, z, tmp);
 
 	{
 		f32 rotSp = mDirtyParams.mSlipRotate.get();
@@ -1367,8 +1379,11 @@ BOOL TMario::oilSlope()
 		mOilBrake   = 0.0f;
 		changePlayerStatus(MARIO_STATUS_CATCH, 0, false);
 	}
-	gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z,
-	                   mDirtyParams.mPolSizeSlip.get());
+	f32 tmp = mDirtyParams.mPolSizeSlip.get();
+	f32 z   = mPosition.z;
+	f32 y   = mPosition.y;
+	f32 x   = mPosition.x;
+	gpPollution->stamp(1, x, y, z, tmp);
 	return slipBackCommon(MARIO_STATUS_CATCH_LOST, MARIO_STATUS_LANDING, 0x89);
 }
 
@@ -1671,6 +1686,7 @@ BOOL TMario::broadJumpSlip()
 BOOL TMario::moveMain()
 {
 	BOOL ret = 0;
+	char trash[0x18];
 
 	checkEnforceJump();
 	checkReturn();

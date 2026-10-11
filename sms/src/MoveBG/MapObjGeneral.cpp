@@ -48,6 +48,7 @@ inline f32 distToMario(const JGeometry::TVec3<f32>& v)
 
 void TMapObjGeneral::waitingToAppear()
 {
+	char trash[0x8];
 	if (isStateTimerEngaged())
 		return;
 
@@ -118,17 +119,19 @@ void TMapObjGeneral::thrown()
 	mHolder       = nullptr;
 
 	mVelocity.set(*gpMarioThrowPower
-	                      * (JMASSin((s32)*gpMarioAngleY)
+	                      * (JMASSin(SMS_GetMarioAngleY())
 	                         * mMapObjData->mPhysical->unk4->unk2C)
 	                  + (mNormalThrowSpeedRate * *gpMarioSpeedX),
 	              mMapObjData->mPhysical->unk4->unk30,
 	              *gpMarioThrowPower
-	                      * (JMASCos((s32)*gpMarioAngleY)
+	                      * (JMASCos(SMS_GetMarioAngleY())
 	                         * mMapObjData->mPhysical->unk4->unk2C)
 	                  + (mNormalThrowSpeedRate * *gpMarioSpeedZ));
 
 	offLiveFlag(LIVE_FLAG_UNK10);
+	char trash[4];
 	JGeometry::TVec3<f32> vel = mVelocity;
+	char trash2[0x34];
 	mPosition.add(vel);
 	onLiveFlag(LIVE_FLAG_AIRBORNE);
 	removeMapCollision();
@@ -159,16 +162,17 @@ void TMapObjGeneral::holding()
 
 void TMapObjGeneral::recovering()
 {
+	char trash[0x28];
 	startSound(9);
 	if (hasModelOrAnimData(6)) {
 		J3DModel* model = getModel();
 		MtxPtr mat      = model->getAnmMtx(0);
-		f32 fVar1       = mat[3][1] - unk144;
+		f32 fVar1       = mat[1][3] - unk144;
 		mDamageHeight += fVar1;
 		calcEntryRadius();
 		if (mHeldObject)
 			mHeldObject->mPosition.y += fVar1;
-		unk144 = mat[3][1];
+		unk144 = mat[1][3];
 		if (!animIsFinished())
 			return;
 	} else if (mPosition.y < unk144) {
@@ -217,6 +221,7 @@ void TMapObjGeneral::breaking()
 
 void TMapObjGeneral::appearing()
 {
+	char trash[0x8];
 	// TODO: uuuuuuuh...
 	if (hasAnim(1)) {
 		if (animIsFinished())
@@ -290,6 +295,7 @@ void TMapObjGeneral::touchPlayer(THitActor* player)
 
 void TMapObjGeneral::recover()
 {
+	char trash[0x28];
 	gpPollution->clean(mPosition.x, unk144, mPosition.z,
 	                   (u16)(mMapObjData->mHit->unkC[2].unk0 / 6.0f));
 
@@ -412,6 +418,8 @@ void TMapObjGeneral::checkWallCollision(JGeometry::TVec3<f32>* param_1)
 	TBGWallCheckRecord check(*param_1, mBodyRadius, 4,
 	                         mMapObjData->mPhysical->mWallCheckFlags);
 
+	char trash[0x18];
+
 	bool touched = gpMap->isTouchedWallsAndMoveXZ(&check);
 
 	param_1->y -= mMapObjData->mPhysical->unk4->unk1C;
@@ -439,6 +447,7 @@ void TMapObjGeneral::checkRoofCollision(JGeometry::TVec3<f32>* param_1)
 
 void TMapObjGeneral::touchGround(JGeometry::TVec3<f32>* param_1)
 {
+	char trash[0x38];
 	if (mMapObjData->mPhysical ? true : false) {
 		mVelocity.x *= mMapObjData->mPhysical->unk4->unk10;
 		mVelocity.z *= mMapObjData->mPhysical->unk4->unk10;
@@ -477,6 +486,7 @@ void TMapObjGeneral::checkGroundCollision(JGeometry::TVec3<f32>* param_1)
 
 void TMapObjGeneral::calcVelocity()
 {
+	char trash[0x28];
 	if (isAirborne()) {
 		f32 dVar5 = getGravityY();
 		mVelocity.y -= dVar5;
@@ -606,6 +616,7 @@ void TMapObjGeneral::perform(u32 cue, JDrama::TGraphics* graphics)
 
 BOOL TMapObjGeneral::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x18];
 	int ret = TMapObjBase::receiveMessage(sender, message);
 	if (ret)
 		return true;

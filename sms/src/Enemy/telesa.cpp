@@ -245,7 +245,7 @@ void TTelesa::init(TLiveManager* manager)
 	                     *img);
 	mMActor->setLightType(LIGHT_TYPE_INDIRECT);
 	if (mInstanceIndex == 0) {
-		for (u16 i = 0; i < getModel()->getModelData()->getJointNum(); ++i)
+		for (u8 i = 0; i < getModel()->getModelData()->getJointNum(); ++i)
 			;
 	}
 
@@ -458,7 +458,7 @@ void TTelesa::calcRootMatrix()
 
 		if (JPABaseEmitter* emitter
 		    = gpMarioParticleManager->emitAndBindToMtxPtr(
-		        0x188, mMActor->getModel()->getAnmMtx(4), 1, this)) {
+		        0x188, mMActor->getModel()->getAnmMtx(3), 1, this)) {
 			emitter->setGlobalAlpha(mTelesaFadeColor.a);
 		}
 	}

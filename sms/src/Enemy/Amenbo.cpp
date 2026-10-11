@@ -97,9 +97,9 @@ void TAmenbo::bind()
 		return;
 
 	JGeometry::TVec3<f32> local_14 = mPosition;
+	local_14.y += mHeadHeight;
 	local_14 += mLinearVelocity;
 	local_14 += mVelocity;
-	local_14.y += mHeadHeight;
 
 	mVelocity.y -= getGravityY();
 
@@ -225,6 +225,7 @@ void TAmenbo::calcRootMatrix()
 	}
 
 	TPosition3f mtx;
+	char trash[4];
 	mtx.setQT(mQuat, mPosition);
 	getModel()->setBaseScale(mScaling);
 	getModel()->setBaseTRMtx(mtx);
@@ -331,7 +332,7 @@ void TAmenbo::doAdjustTarget()
 	vel *= 0.9f;
 	mVelocity = vel;
 
-	unk1E0 = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() / 63;
+	unk1E0 = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() * (1.0f / 63.0f);
 
 	if (1.0f <= unk1E0)
 		unk1E0 = 1.0f;
@@ -565,6 +566,7 @@ DEFINE_NERVE(TNerveAmenboSearch, TLiveActor)
 
 DEFINE_NERVE(TNerveAmenboTurn, TLiveActor)
 {
+	char trash[16];
 	TAmenbo* self = (TAmenbo*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->changeBck("amenbo_run1", self->mIsChasingMario ? 3.0f : 1.0f);

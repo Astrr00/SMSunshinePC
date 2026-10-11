@@ -312,7 +312,7 @@ bool TMap::isTouchedOneWall(f32 x, f32 y, f32 z, f32 radius) const
 bool TMap::isTouchedOneWallAndMoveXZ(f32* x, f32 y, f32* z, f32 radius) const
 {
 	TBGWallCheckRecord record(*x, y, *z, radius, 1, 0);
-	char trash[4]; // unused stack slot (present in the retail frame)
+	char trash[8]; // unused stack slot (present in the retail frame)
 
 	int r = mCollisionData->checkWalls(&record);
 	if (r != 0 ? true : false) {

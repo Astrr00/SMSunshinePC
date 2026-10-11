@@ -383,7 +383,7 @@ public:
 						JGeometry::TVec3<f32> local_2D8;
 						local_2D8.sub(b->unk0, a->unk0);
 						(void)&local_2D8;
-						if (!(local_2D8.squared() > sep2)) {
+						if (local_2D8.squared() <= sep2) {
 							f32 dist = local_2D8.length();
 							JGeometry::TVec3<f32> local_2E4;
 							local_2E4.scale(1.0f / dist, local_2D8);
@@ -482,7 +482,7 @@ public:
 
 static void initScreen2D(s16, s16) { }
 
-static void drawCap(const JGeometry::TVec3<f32>& pos, f32 radius)
+static void drawCapBody(const JGeometry::TVec3<f32>& pos, f32 radius)
 {
 	static f32 delta = 2.0f * 3.1415927f / 30.0f;
 	f32 angle;
@@ -498,6 +498,12 @@ static void drawCap(const JGeometry::TVec3<f32>& pos, f32 radius)
 	}
 	GXEnd();
 }
+#pragma dont_inline on
+static void drawCap(const JGeometry::TVec3<f32>& pos, f32 radius)
+{
+	drawCapBody(pos, radius);
+}
+#pragma dont_inline off
 
 namespace {
 void clearEFB_alpha(s16 x, s16 y, s16 wd, s16 ht, u8 alpha)
@@ -845,7 +851,7 @@ public:
 		GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1,
 		                GX_TRUE, GX_TEVPREV);
 		GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-		GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+		GXSetZMode(GX_TRUE, GX_LESS, GX_FALSE);
 		GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_NOOP);
 		GXSetColorUpdate(GX_FALSE);
 		GXSetAlphaUpdate(GX_TRUE);
@@ -888,7 +894,7 @@ public:
 		}
 
 		if (unk2C->showsCap.get() && !data.unk65) {
-			drawCap(data.getThing(),
+			drawCapBody(data.getThing(),
 			        JGeometry::TUtil<f32>::sqrt(data.unk3C * data.unk3C
 			                                    - data.unk44 * data.unk44));
 		}
@@ -1173,9 +1179,9 @@ public:
 			JGeometry::TVec3<f32> capCenter = data.getThing();
 			f32 rad = JGeometry::TUtil<f32>::sqrt(data.unk3C * data.unk3C
 			                                      - data.unk44 * data.unk44);
-			drawCap(capCenter, rad);
+			drawCapBody(capCenter, rad);
 			capCenter.y += 0.5f * negR;
-			drawCap(capCenter, unk800B0 * unk80134->meshWidth.get() + rad);
+			drawCapBody(capCenter, unk800B0 * unk80134->meshWidth.get() + rad);
 		}
 
 		GXSetCopyFilter(GX_FALSE, 0, GX_FALSE, 0);

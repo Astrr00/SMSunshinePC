@@ -469,6 +469,7 @@ void TSwingBoard::control()
 	f32 s       = sinf(3.14f * (mRotation.x / 180.0f));
 	f32 c       = cosf(3.14f * (mRotation.x / 180.0f));
 	TMtx34f swingMtx;
+	char trash[0x88]; // unused stack slot (present in the retail frame)
 	swingMtx.set(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, c, -s, 0.0f, 0.0f, s, c, 0.0f);
 	MtxPtr mtx = getModel()->getAnmMtx(0);
 	PSMTXConcat(mYawMtx, swingMtx, mtx);
@@ -587,7 +588,7 @@ THangingBridge::THangingBridge(const char* name)
 {
 }
 
-void THangingBridge::initMonte()
+inline void THangingBridge::initMonte()
 {
 	struct BoardPosition {
 		f32 x, y, z, rotation;
@@ -973,6 +974,7 @@ void THangingBridgeBoard::calcDefaultMtx()
 {
 	Mtx rotX;
 	Mtx rotY;
+	char trash[4]; // unused stack slot (present in the retail frame)
 	makeRootMtxRotX(rotX);
 	makeRootMtxRotY(rotY);
 	PSMTXConcat(rotY, rotX, rotY);

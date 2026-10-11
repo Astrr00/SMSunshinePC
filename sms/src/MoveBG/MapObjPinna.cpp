@@ -173,18 +173,16 @@ void TViking::roll()
 		unk144 -= unk13C;
 		unk148 += unk144;
 		if (unk148 < 0.0f) {
-			f32 volume = fabsf(unk144);
-			gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_PIN_BIKING_WING,
-			                                  &mPosition, nullptr, volume, 0, 0,
-			                                  nullptr, 0, 4);
+			gpMSound->startSoundActorWithInfo(
+			    MSD_SE_OBJ_PIN_BIKING_WING, &mPosition, nullptr, fabsf(unk144),
+			    0, 0, nullptr, 0, 4);
 			mState = 2;
 		}
 		if (unk148 > 180.0f) {
 			unk148 -= 360.0f;
-			f32 volume = fabsf(unk144);
-			gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_PIN_BIKING_WING,
-			                                  &mPosition, nullptr, volume, 0, 0,
-			                                  nullptr, 0, 4);
+			gpMSound->startSoundActorWithInfo(
+			    MSD_SE_OBJ_PIN_BIKING_WING, &mPosition, nullptr, fabsf(unk144),
+			    0, 0, nullptr, 0, 4);
 			mState = 4;
 		}
 		break;
@@ -193,18 +191,16 @@ void TViking::roll()
 		unk144 += unk13C;
 		unk148 += unk144;
 		if (unk148 > 0.0f) {
-			f32 volume = fabsf(unk144);
-			gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_PIN_BIKING_WING,
-			                                  &mPosition, nullptr, volume, 0, 0,
-			                                  nullptr, 0, 4);
+			gpMSound->startSoundActorWithInfo(
+			    MSD_SE_OBJ_PIN_BIKING_WING, &mPosition, nullptr, fabsf(unk144),
+			    0, 0, nullptr, 0, 4);
 			mState = 1;
 		}
 		if (unk148 < -180.0f) {
 			unk148 += 360.0f;
-			f32 volume = fabsf(unk144);
-			gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_PIN_BIKING_WING,
-			                                  &mPosition, nullptr, volume, 0, 0,
-			                                  nullptr, 0, 4);
+			gpMSound->startSoundActorWithInfo(
+			    MSD_SE_OBJ_PIN_BIKING_WING, &mPosition, nullptr, fabsf(unk144),
+			    0, 0, nullptr, 0, 4);
 			mState = 3;
 		}
 		break;
@@ -213,10 +209,9 @@ void TViking::roll()
 		unk144 -= unk13C;
 		unk148 += unk144;
 		if (unk148 < 0.0f) {
-			f32 volume = fabsf(unk144);
-			gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_PIN_BIKING_WING,
-			                                  &mPosition, nullptr, volume, 0, 0,
-			                                  nullptr, 0, 4);
+			gpMSound->startSoundActorWithInfo(
+			    MSD_SE_OBJ_PIN_BIKING_WING, &mPosition, nullptr, fabsf(unk144),
+			    0, 0, nullptr, 0, 4);
 			if (unk144 > -unk150)
 				mState = 2;
 			else
@@ -228,10 +223,9 @@ void TViking::roll()
 		unk144 += unk13C;
 		unk148 += unk144;
 		if (unk148 > 0.0f) {
-			f32 volume = fabsf(unk144);
-			gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_PIN_BIKING_WING,
-			                                  &mPosition, nullptr, volume, 0, 0,
-			                                  nullptr, 0, 4);
+			gpMSound->startSoundActorWithInfo(
+			    MSD_SE_OBJ_PIN_BIKING_WING, &mPosition, nullptr, fabsf(unk144),
+			    0, 0, nullptr, 0, 4);
 			if (unk144 < unk150)
 				mState = 1;
 			else

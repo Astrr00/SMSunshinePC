@@ -141,7 +141,8 @@ void TCardSave::initData(TMarioGamePad* param_1)
 			snprintf(acStack_48, 0x28, "/game_6/timg/coin_number_%d.bti", i);
 		}
 
-		unk1C[i] = new JUTTexture((ResTIMG*)JKRGetResource(acStack_48));
+		JUTTexture* texture = new JUTTexture((ResTIMG*)JKRGetResource(acStack_48));
+		unk1C[i] = texture;
 	}
 	unk48 = new TExPane(unk14, 0x775f30);
 	unk4C = unk48->getPane()->getBounds();
@@ -321,6 +322,7 @@ void TCardSave::setMessage(J2DTextBox* text_box, s32 param_2, u32 param_3)
 
 s8 TCardSave::waitForStop(TEProgress param_1)
 {
+	char trash[8];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -414,6 +416,7 @@ void TCardSave::endWaitForChoice()
 
 s8 TCardSave::waitForChoice(TEProgress param_1, TEProgress param_2, s8 param_3)
 {
+	char trash[0xc0];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -597,6 +600,7 @@ s8 TCardSave::waitForChoice(TEProgress param_1, TEProgress param_2, s8 param_3)
 s8 TCardSave::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
                               s8 param_3)
 {
+	char trash[0xb8];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -870,6 +874,7 @@ s8 TCardSave::drawMessage(TEProgress param_1)
 
 s8 TCardSave::drawMessageBM(TEProgress param_1)
 {
+	char trash[0x10];
 
 	s8 result = -1;
 
@@ -1001,6 +1006,7 @@ s8 TCardSave::waitForAnyKey(TEProgress param_1)
 
 s8 TCardSave::waitForSelectOver()
 {
+	char trash[0x20];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -1084,6 +1090,7 @@ s8 TCardSave::waitForSelectOver()
 
 s8 TCardSave::waitForSelect2(TEProgress param_1, TEProgress param_2)
 {
+	char trash[0x20];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -1205,6 +1212,7 @@ s8 TCardSave::waitForSelect2(TEProgress param_1, TEProgress param_2)
 s8 TCardSave::waitForSelect3(TEProgress param_1, TEProgress param_2,
                              TEProgress param_3)
 {
+	char trash[0x28];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -1367,6 +1375,7 @@ s8 TCardSave::waitForSelect3(TEProgress param_1, TEProgress param_2,
 
 s8 TCardSave::waitForAnyKeyBM(TEProgress param_1)
 {
+	char trash[8];
 	s8 result = -1;
 
 	switch (unk10) {
@@ -1478,6 +1487,7 @@ void TCardSave::changePattern(J2DPicture*, s16, u32) { }
 
 void TCardSave::execMovement_()
 {
+	char trash[0x108];
 
 	TEProgress prevState = unk310;
 	s32 prevMode         = unk10;

@@ -49,14 +49,15 @@ TWaterEmitInfo::TWaterEmitInfo(const char* name)
     , PARAM_INIT(mDirTremble, 0.0f)
     , PARAM_INIT(mPow, 0.0f)
     , PARAM_INIT(mPowTremble, 0.0f)
-    , PARAM_INIT(mSize, 0.0f)
+    , PARAM_INIT(mSize, 17.0f)
     , PARAM_INIT(mSizeTremble, 0.0f)
-    , PARAM_INIT(mHitRadius, 0.0f)
-    , PARAM_INIT(mHitHeight, 0.0f)
+    , PARAM_INIT(mHitRadius, 50.0f)
+    , PARAM_INIT(mHitHeight, 80.0f)
     , PARAM_INIT(mFlag, 0)
     , PARAM_INIT(mType, 0)
     , PARAM_INIT(__padding, 0)
 {
+	char trash[0x30];
 	TParams::load(mPrmPath);
 }
 
@@ -201,6 +202,7 @@ void TModelWaterManager::load(JSUMemoryInputStream& stream)
 
 void TModelWaterManager::loadAfter()
 {
+	char trash[0x18];
 	unk5D34 = static_cast<TScreenTexture*>(
 	              JDrama::TNameRefGen::search("スクリーンテクスチャ"))
 	              ->getTexture();
@@ -247,7 +249,7 @@ bool TModelWaterManager::askHitWaterParticleOnGround(
 }
 
 static inline f32 MsRandF() { return rand() * (1.f / (RAND_MAX + 1)); }
-static inline f32 rand11() { return ((rand() & 0xff) - 128) / 128.0f; }
+static inline f32 rand11() { return (1.0f / 128.0f) * ((rand() & 0xff) - 128); }
 
 void TModelWaterManager::makeEmit(const TWaterEmitInfo& param_1)
 {
@@ -993,6 +995,7 @@ void TModelWaterManager::drawTouchingMask()
 
 void TModelWaterManager::drawSilhouette(MtxPtr param_1)
 {
+	char trash[0x20];
 	if (!gpSilhouetteManager->isUnk48Positive())
 		return;
 
@@ -1070,6 +1073,7 @@ void TModelWaterManager::drawSilhouette(MtxPtr param_1)
 
 void TModelWaterManager::drawWaterVolume(MtxPtr param_1)
 {
+	char trash[8];
 	SMS_FillScreenAlpha(0);
 	Mtx afStack_48;
 	MTXIdentity(afStack_48);
@@ -1398,7 +1402,8 @@ void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 		}
 		f32 trans[3] = { 0.0f, 3600.0f, -7458.0f };
 
-		f32 f30 = (((unk5E0C + unk5E40) - unk5E0C) / f32(unk5E44 - 1));
+		int r31 = unk5E44;
+		f32 f30 = (((unk5E0C + unk5E40) - unk5E0C) / f32(r31 - 1));
 		f32 f31 = unk5E0C;
 
 		GXColor local_2C;
@@ -1459,8 +1464,7 @@ void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 		GXEnd();
 
 		GXColor local_28;
-		int r31    = unk5E44;
-		local_28.a = f32(0xff - unk5E45) / unk5E44 + 0.5f;
+		local_28.a = f32(0xff - r27) / r31 + 0.5f;
 		GXSetTevColor(GX_TEVREG0, local_28);
 		GXSetZMode(GX_TRUE, GX_GREATER, GX_TRUE);
 		GXClearVtxDesc();
@@ -1522,6 +1526,7 @@ void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 
 void TModelWaterManager::drawRefracAndSpec() const
 {
+	char trash[8];
 
 	Mtx afStack_3c;
 	PSMTXIdentity(afStack_3c);
@@ -1621,6 +1626,7 @@ void TModelWaterManager::drawRefracAndSpec() const
 
 void TModelWaterManager::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x38];
 	MtxPtr r29 = graphics->mViewMtx;
 
 	if (cue & CUE_MOVE) {

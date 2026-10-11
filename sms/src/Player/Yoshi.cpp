@@ -48,10 +48,12 @@ void TYoshi::startVoice(u32 param_1) { }
 
 BOOL YoshiHeadCtrl(J3DNode* param_1, int param_2)
 {
+	char trash[4];
 	if (param_2 == 0) {
 		const TWaterGun* waterGun = SMS_GetMarioWaterGun();
 		s16 angle                 = waterGun->getCurrentNozzle()->getGunAngle();
 		Mtx mtx;
+		char trash[4];
 		MsMtxSetRotRPH(mtx, 0.0f, 0.0f, SHORTANGLE2DEG(angle));
 		MTXConcat(J3DSys::mCurrentMtx, mtx, J3DSys::mCurrentMtx);
 	}
@@ -966,6 +968,7 @@ void TYoshi::movement()
 
 void TYoshi::calcAnim()
 {
+	char trash[4];
 	Mtx mtx;
 
 	switch (mState) {
@@ -1026,6 +1029,7 @@ void TYoshi::calcAnim()
 		mMirrorModels[0]->calc();
 		mMirrorModels[1]->calc();
 		Mtx tongueMtx;
+		char trash2[4];
 		PSMTXCopy(mActor->getModel()->getAnmMtx(mJointIdxTongue), tongueMtx);
 		mTongue->calcAnim(tongueMtx);
 	}
