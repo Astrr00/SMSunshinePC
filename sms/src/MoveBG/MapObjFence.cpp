@@ -386,12 +386,7 @@ void TFenceWaterH::control()
 	TMapObjBase::control();
 	controlRotation();
 
-	f32 angle = unk140 + mInitialRotation.z;
-	while (angle >= 360.0f)
-		angle -= 360.0f;
-	while (angle < 0.0f)
-		angle += 360.0f;
-	mRotation.z = angle;
+	mRotation.z = MsWrap(unk140 + mInitialRotation.z, 0.0f, 360.0f);
 
 	TPosition3f rotY;
 	rotY.identity();
@@ -403,7 +398,7 @@ void TFenceWaterH::control()
 
 	MTXConcat(rotY, rotZ, rotY);
 	rotY.setTrans(mPosition.x, mPosition.y, mPosition.z);
-	MTXCopy(rotY, getModel()->getAnmMtx(0));
+	getModel()->setAnmMtx(0, rotY);
 
 	// only x and y are updated here (z is set once in initMapObj)
 	unk144->mPosition.x = mPosition.x;
@@ -465,8 +460,7 @@ void TRailFence::goOnRail()
 	JGeometry::TVec3<f32> toTarget = unk13C->getCurrentPos();
 	toTarget.sub(mPosition);
 	if (toTarget.squared() < 50.0f) {
-		TGraphTracer* tracer = unk13C;
-		TRailNode* node      = tracer->unk0->unk0[tracer->mCurrIdx].unk0;
+		TRailNode* node = unk13C->unk0->unk0[unk13C->mCurrIdx].unk0;
 		if (node->mConnectionNum == 0 && node->mFlags & 0x8) {
 			gpMSound->startSoundActor(MSD_SE_OBJ_MVING_FENCT_SET, &mPosition, 0,
 			                          nullptr, 0, 4);
@@ -476,7 +470,7 @@ void TRailFence::goOnRail()
 			return;
 		}
 
-		tracer->moveToShortestNext();
+		unk13C->moveToShortestNext();
 		// retail quirk: the new direction is the node position itself, not
 		// the offset from mPosition
 		toTarget.set(unk13C->getCurrentPos());

@@ -524,6 +524,7 @@ TWaterHitPictureHideObj::TWaterHitPictureHideObj(const char* name)
 
 void THideObjPictureTwin::afterFinishedAnim()
 {
+	char trash[0x10];
 	removeMapCollision();
 	onHitFlag(HIT_FLAG_NO_COLLISION);
 

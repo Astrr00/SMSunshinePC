@@ -78,6 +78,7 @@ TDoor::TDoor(const char* name)
 
 void TManhole::touchPlayer(THitActor*)
 {
+	char trash[0x48];
 	mState = STATE_NORMAL;
 	if (!animationFinished()) {
 		mPosition.y = mInitialPosition.y;
@@ -295,6 +296,7 @@ void TMapObjBillboard::touchActor(THitActor* param_1) {
 
 u32 TMapObjBillboard::touchWater(THitActor* param_1)
 {
+	char trash[0x10];
 	swing(param_1);
 	if (mHiddenObj && mAllowReveal) {
 		JGeometry::TVec3<f32> rot = mRotation;
@@ -501,6 +503,7 @@ void TMapObjSwitch::control()
 
 BOOL TMapObjSwitch::receiveMessage(THitActor*, u32 message)
 {
+	char trash[8];
 	if (message == HIT_MESSAGE_HIP_DROP) {
 		startBck("objswitch");
 		SMSGetMSound()->startSoundActor(MSD_SE_OBJ_AP_BUTTON, &mPosition, 0,
@@ -527,6 +530,7 @@ void TMapObjSwitch::registerObjInfo(THideObjInfo* info)
 
 void TMapObjSwitch::load(JSUMemoryInputStream& stream)
 {
+	char trash[0x10];
 	TMapObjBase::load(stream);
 	stream >> unk140;
 	if (unk140 <= 0)
@@ -608,6 +612,7 @@ void TRedCoinSwitch::control()
 
 void TRedCoinSwitch::loadAfter()
 {
+	char trash[8];
 	TMapObjBase::loadAfter();
 	for (int i = 0; i < 8; ++i) {
 		char buf[0x40];
@@ -619,6 +624,7 @@ void TRedCoinSwitch::loadAfter()
 
 void TRedCoinSwitch::load(JSUMemoryInputStream& stream)
 {
+	char trash[8];
 	TMapObjBase::load(stream);
 	u32 tmp;
 	stream >> tmp;

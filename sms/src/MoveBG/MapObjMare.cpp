@@ -389,7 +389,7 @@ void TMuddyBoat::calcRootMatrix() { }
 
 void TMuddyBoat::moveByWater()
 {
-	if (SMS_GetMarioWaterGun()->mIsEmitWater > 0) {
+	if ((s32)SMS_GetMarioWaterGun()->mIsEmitWater > 0) {
 		MtxPtr nozzle = SMS_GetMarioWaterGun()->getEmitMtx(0);
 		JGeometry::TVec3<f32> dir(-nozzle[0][0], 0.0f, -nozzle[2][0]);
 		MsVECNormalize(&dir, &dir);
@@ -617,10 +617,9 @@ void TMapObjGrowTree::control()
 			}
 
 			f32 frame = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-			if (67.0f <= frame && frame <= 240.0f
-			    && gpMSound->gateCheck(MSD_SE_OBJ_SAMDBOMB_REVERSE))
-				gpMSound->startSoundActor(MSD_SE_OBJ_SAMDBOMB_REVERSE,
-				                          &mPosition, 0, nullptr, 0, 4);
+			if (67.0f <= frame && frame <= 240.0f)
+				SMSGetMSound()->startSoundActor(MSD_SE_OBJ_SAMDBOMB_REVERSE,
+				                                &mPosition, 0, nullptr, 0, 4);
 
 			updateHeight();
 			if (mHeldObject) {

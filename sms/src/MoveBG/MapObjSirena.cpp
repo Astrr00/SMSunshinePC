@@ -76,6 +76,7 @@ TRoulette::TRoulette(const char* name)
 
 void TRoulette::initMapObj()
 {
+	char trash[4];
 	mPosition.y += 500.0f;
 	TMapObjBase::initMapObj();
 	for (u16 i = 0; i < getModel()->getModelData()->getMaterialNum(); i++) {
@@ -114,7 +115,7 @@ void TRoulette::moveObject()
 {
 	TLiveActor::moveObject();
 	if (unk142 != 0)
-		mRotation.x += unk13C;
+		mRotation.y += unk13C;
 
 	if (unk141 != 0 && unk140 != 0) {
 		gpMarioOriginal->mGamePad->onNeutralMarioKey();
@@ -257,6 +258,7 @@ void TSlotDrum::initMapObj()
 void TSlotDrum::initNeonMatColor()
 {
 	const char* matNames[3] = { "_NEON_A", "_NEON_B", "_NEON_C" };
+	char trash[4];
 	for (int i = 0; i < 3; i++) {
 		unk170[i].r = 120;
 		unk170[i].g = 230;
@@ -341,6 +343,7 @@ void TSlotDrum::moveObject()
 			}
 		}
 	}
+	char trash[16];
 }
 
 void TSlotDrum::calcRootMatrix()
@@ -505,6 +508,7 @@ void TItemSlotDrum::calcRootMatrix()
 
 u32 TItemSlotDrum::touchWater(THitActor* water)
 {
+	char trash[4];
 	if (unk194 || !unk1A2)
 		return 1;
 
@@ -837,6 +841,7 @@ void TDonchou::loadAfter()
 		unk148 = static_cast<TItemSlotDrum*>(
 		    JDrama::TNameRefGen::search("itemsrotdram"));
 	}
+	char trash[8];
 }
 
 void TDonchou::calcRootMatrix()
@@ -868,6 +873,7 @@ void TDonchou::calcRootMatrix()
 			}
 		}
 	}
+	char trash[16];
 }
 
 u32 TDonchou::touchWater(THitActor* water)
@@ -1000,6 +1006,7 @@ void TCloset::calcRootMatrix()
 	if (unk16C != 0 && mMActor->checkCurAnm("closetopen", ANM_TYPE_BCK)
 	    && mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr))
 		mMapCollisionWarp->remove();
+	char trash[8];
 }
 
 u32 TCloset::touchWater(THitActor* water)

@@ -363,8 +363,8 @@ void TMapObjBall::calcCurrentMtx()
 		JGeometry::TVec3<f32> vel1 = mVelocity;
 		JGeometry::TVec3<f32> vel2 = vel1;
 		JGeometry::TVec3<f32> vel3 = vel1;
-		f32 speed = JGeometry::TUtil<f32>::sqrt(vel2.z * vel2.z
-		                                        + vel3.x * vel3.x);
+		f32 speed = JGeometry::TUtil<f32>::sqrt(vel3.x * vel3.x
+		                                        + vel2.z * vel2.z);
 
 		rotation.setRotate(axis, 2.0f * (speed / mBodyRadius));
 	}

@@ -471,6 +471,7 @@ void TSpcInterp::execshr()
 
 void TSpcInterp::execcall()
 {
+	char trash[0x20];
 	u32 address = fetchU32();
 	s32 argNum  = fetchS32();
 	u32 counter = mProgramCounter;

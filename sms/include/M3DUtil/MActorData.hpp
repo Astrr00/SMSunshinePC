@@ -59,6 +59,7 @@ public:
 			} else {
 				snprintf(buf, 0xff, "%s%s", mAnmNames[i], extension);
 			}
+			char trash[8];
 			void* res = JKRGetResource(buf);
 			if (res)
 				mAnimations[i] = J3DAnmLoaderDataBase::load(res);

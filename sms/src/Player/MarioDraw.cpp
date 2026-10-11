@@ -517,10 +517,10 @@ static int MarioWaistCtrl(J3DNode* param_1, int param_2)
 
 static int MarioFootPosRCtrl(J3DNode* param_1, int param_2)
 {
-	// volatile u32 padding[9];
+	volatile u32 padding[9];
 	if (param_2 == 0) {
 
-		BOOL check2;
+		BOOL check2 = FALSE;
 		bool check;
 
 		// Definitely some inline shenanigans
@@ -530,8 +530,8 @@ static int MarioFootPosRCtrl(J3DNode* param_1, int param_2)
 		    && gpMarioForCallBack->mStatus != MARIO_STATUS_BRAKE_END
 		    && gpMarioForCallBack->onYoshi() == 0) {
 
-			check2 = !(gpMarioForCallBack->mStatus != MARIO_STATUS_SLEEPY
-			           && gpMarioForCallBack->mStatus != MARIO_STATUS_SLEEP)
+			check2 = !(gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEPY
+			           || gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEP)
 			             ? TRUE
 			             : FALSE;
 		}
@@ -641,10 +641,10 @@ static int MarioFootDirRCtrl(J3DNode* param_1, int param_2)
 
 static int MarioFootPosLCtrl(J3DNode* param_1, int param_2)
 {
-	// volatile u32 padding[9];
+	volatile u32 padding[9];
 	if (param_2 == 0) {
 
-		BOOL check2;
+		BOOL check2 = FALSE;
 		bool check;
 
 		// Definitely some inline shenanigans
@@ -654,8 +654,8 @@ static int MarioFootPosLCtrl(J3DNode* param_1, int param_2)
 		    && gpMarioForCallBack->mStatus != MARIO_STATUS_BRAKE_END
 		    && gpMarioForCallBack->onYoshi() == 0) {
 
-			check2 = !(gpMarioForCallBack->mStatus != MARIO_STATUS_SLEEPY
-			           && gpMarioForCallBack->mStatus != MARIO_STATUS_SLEEP)
+			check2 = !(gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEPY
+			           || gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEP)
 			             ? TRUE
 			             : FALSE;
 		}
@@ -1219,7 +1219,7 @@ void TMario::initModel()
 		u16 matCount   = anmTexPattern[i]->getUpdateMaterialNum();
 		anmTexNoAnm[i] = new J3DTexNoAnm[matCount];
 
-		for (int j = 0; j < matCount; ++j) {
+		for (int j = 0; j < anmTexPattern[i]->getUpdateMaterialNum(); ++j) {
 			anmTexNoAnm[i][j].setAnmIndex(j);
 			anmTexNoAnm[i][j].setAnmTexPattern(anmTexPattern[i]);
 		}
@@ -1576,7 +1576,8 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 		return;
 	}
 
-	if (!checkStatusType(MARIO_STATUS_FLAG_SWIMMING)) {
+	// Swimming
+	if (checkStatusType(MARIO_STATUS_FLAG_SWIMMING)) {
 		J3DTransformInfo ti;
 		ti.mScale.x     = 1.0f;
 		ti.mScale.y     = 1.0f;
@@ -1594,7 +1595,6 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 		return;
 	}
 
-	// Swimming
 	if (mHolder != nullptr && mHolder->getTakingMtx() != nullptr) {
 		MTXCopy(mHolder->getTakingMtx(), mtx);
 		return;
@@ -2067,7 +2067,7 @@ void TMario::drawSpecial(JDrama::TGraphics* graphics)
 
 void TMario::drawLogic()
 {
-	// volatile u32 padding[2];
+	volatile u32 padding[2];
 	j3dSys.mFlags |= 2;
 	j3dSys.unk4C = 7;
 	SMS_DrawInit();

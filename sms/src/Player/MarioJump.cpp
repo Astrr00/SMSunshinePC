@@ -92,6 +92,7 @@ void TMario::askStrongGroundTouch() { }
 
 BOOL TMario::jumpingBasic(int statusOnGround, int animation, int processArg)
 {
+	char trash[0x48];
 	doJumping();
 	int result = jumpProcess(processArg);
 	switch (result) {

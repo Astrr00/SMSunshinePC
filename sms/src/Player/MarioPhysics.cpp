@@ -27,6 +27,7 @@ void TMario::playerRefrection(int param_1)
 void TMario::keepDistance(const JGeometry::TVec3<f32>& target, f32 param_2,
                           f32 param_3)
 {
+	char trash[8];
 	f32 dz = mPosition.z - target.z;
 	f32 dx = mPosition.x - target.x;
 

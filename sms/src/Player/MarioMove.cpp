@@ -152,6 +152,7 @@ BOOL TMario::moveRequest(const JGeometry::TVec3<f32>& pos)
 
 void TMario::warpRequest(const JGeometry::TVec3<f32>& pos, f32 angle)
 {
+	char trash[0x10];
 	JGeometry::TVec3<f32> offset = pos - mPosition;
 	moveRequest(pos);
 	mFaceAngle.y    = (s16)DEG2SHORTANGLE(angle);
@@ -675,8 +676,9 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 
 	if (onYoshi()) {
 		mVel.y *= mYoshiParams.mJumpYoshiMult.get();
-		mYoshi->mFlutterState = 0;
-		mYoshi->mFlutterTimer = mYoshi->mMaxFlutterTimer;
+		TYoshi* yoshi = mYoshi;
+		yoshi->mFlutterState = 0;
+		yoshi->mFlutterTimer = yoshi->mMaxFlutterTimer;
 	}
 
 	unk104 = mPosition.y;
@@ -961,6 +963,7 @@ void TMario::checkGraffitoElec()
 
 void TMario::checkGraffito()
 {
+	char trash[0x18];
 	if (mGroundPlane->isIllegalData())
 		return;
 
@@ -1358,7 +1361,7 @@ void TMario::checkController(JDrama::TGraphics*)
 	// 3-segment (zero, middle, max) trigger curve, run 4 times:
 	// for unk108->mAnalogR (R trigger), unk108->mAnalogL (L trigger),
 	// then again for unk10C (L) and unk110 (R) Mario-side copies.
-	// TODO: doesn't match at all!
+	// Op sequence matches retail; remaining diffs are register/stack allocation.
 	{
 		u8 zero    = mControllerParams.mAnalogLRToZeroVal.get();
 		u8 middle  = mControllerParams.mAnalogLRToMiddleVal.get();
@@ -2439,6 +2442,7 @@ void TMario::gunExec()
 
 void TMario::playerControl(JDrama::TGraphics* param_1)
 {
+	char trash[0x30];
 	unk9C         = mFaceAngle.y;
 	mPrevPosition = mPosition;
 	offUnk114(UNK114_FLAG_UNK8);

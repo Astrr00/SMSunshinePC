@@ -96,11 +96,12 @@ TObjHitCheck::checkWaterWithActorsInList(const JGeometry::TVec3<f32>& pos,
 #pragma dont_inline on
 void TObjHitCheck::checkWater()
 {
+	char trash[0x10];
 	f32 fVar2 = TModelWaterManager::mStaticHitActor.getEntryRadius();
 
+	THitActor** particleHitActors = gpModelWaterManager->getParticleUnk2514();
 	const JGeometry::TVec3<f32>* particlePositions
 	    = gpModelWaterManager->getParticlePositions();
-	THitActor** particleHitActors = gpModelWaterManager->getParticleUnk2514();
 
 	for (int i = 0; i < gpModelWaterManager->getParticleCount(); ++i) {
 		if (!gpModelWaterManager->checkFlagBottom4Bits(i, 0x1))

@@ -814,7 +814,8 @@ u32 TBiancoWatermillVertical::touchWater(THitActor* water)
 		return 0;
 	}
 
-	if (!waterHitPlane(water))
+	// Retail tests the BOOL result as a byte (clrlwi.); the cast matches it.
+	if (!(u8)waterHitPlane(water))
 		return 0;
 
 	const JGeometry::TVec3<f32>& waterPos   = getWaterPos(water);

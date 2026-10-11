@@ -401,7 +401,8 @@ void TWarpInCallBack::execute(JPABaseEmitter* emitter,
 	f32 timer = (f32)gpMarioOriginal->mStatusTimer;
 	f32 tmp   = gpMarioOriginal->unk468;
 
-	f32 factor = (((PTR_S32(particle) >> 2) & 0x3F) / 16.0f + 1.0f);
+	f32 factor = (((PTR_S32(particle) >> 2) & 0x3F) / 16.0f);
+	factor += 1.0f;
 
 	JGeometry::TVec3<f32> v = *vel;
 
@@ -713,7 +714,7 @@ void TMario::elecEndEffect()
 void TMario::kickRoofEffect()
 {
 	if (getMotionFrameCtrl().checkPass(8.0f)) {
-		MtxPtr mtx      = mModel->getModel()->getAnmMtx(mJointIdHead);
+		MtxPtr mtx      = mModel->getModel()->getAnmMtx(mJointIdChnFootR);
 		mFootprintPos.x = mtx[0][3];
 		mFootprintPos.y = mtx[1][3];
 		mFootprintPos.z = mtx[2][3];

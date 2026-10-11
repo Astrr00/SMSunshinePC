@@ -282,6 +282,7 @@ void TFluff::control()
 	case 1: {
 		mGroundHeight = gpMap->checkGround(mPosition, &mGroundPlane);
 		JGeometry::TVec3<f32> velocity = mVelocity;
+		char trash[0x14]; // unused stack slot (present in the retail frame)
 		if (velocity.y < 0.0f) {
 			if (mGroundHeight > mPosition.y - mFallSpeed
 			    || mPosition.y < -1000.0f)
@@ -339,6 +340,7 @@ void TFluff::move()
 	mWindOffset.z += mWindRatio * gpMapObjManager->unkD0.z;
 
 	JGeometry::TVec3<f32> velocity = mVelocity;
+	char trash[0x40]; // unused stack slot (present in the retail frame)
 	mWindOffset.x += velocity.x;
 	mWindOffset.y += velocity.y;
 	mWindOffset.z += velocity.z;
@@ -380,6 +382,7 @@ void TGoalFlag::initMapObj() { TMapObjBase::initMapObj(); }
 
 void TGoalFlag::touchActor(THitActor* actor)
 {
+	char trash[8]; // unused stack slot (present in the retail frame)
 	if (actor->isActorType(0x80000001)) {
 		if (!TFlagManager::smInstance->getBool(0x50005))
 			TFlagManager::smInstance->setBool(true, 0x50005);
@@ -438,7 +441,7 @@ void TSwingBoard::control()
 		MtxPtr mtx = getModel()->getAnmMtx(0);
 		mAngularSpeed
 		    += mPushAccel
-		       * (mtx[1][2] * push.y + mtx[0][2] * push.x + mtx[2][2] * push.z);
+		       * (mtx[0][2] * push.x + mtx[1][2] * push.y + mtx[2][2] * push.z);
 	}
 
 	mSwingAngle += mAngularSpeed;
@@ -489,6 +492,7 @@ void TSwingBoard::draw() const
 	MtxPtr mtx = getModel()->getAnmMtx(0);
 	JGeometry::TVec3<f32> board;
 	JGeometry::TVec3<f32> pivot;
+	char trash[12]; // unused stack slot (present in the retail frame)
 	pivot.x = mBoardWidth * mtx[0][0] + getInitialPosition().x;
 	pivot.y = mRopeLength + getInitialPosition().y;
 	pivot.z = mBoardWidth * mtx[2][0] + getInitialPosition().z;
@@ -524,6 +528,7 @@ void TSwingBoard::initDraw() const
 	                  GX_FALSE, GX_PTIDENTITY);
 	JUTTexture texture(gpMapObjManager->unkCC);
 	texture.load(GX_TEXMAP0);
+	char trash[8]; // unused stack slot (present in the retail frame)
 	GXSetNumTevStages(1);
 	GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
 	GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO,
@@ -582,6 +587,50 @@ THangingBridge::THangingBridge(const char* name)
 {
 }
 
+void THangingBridge::initMonte()
+{
+	struct BoardPosition {
+		f32 x, y, z, rotation;
+	};
+	// clang-format off
+	const BoardPosition positions[21] = {
+		{ 0.0f, -130.0f, 11965.0f, 30.0f },
+		{ 0.0f, -275.0f, 12225.0f, 29.0f },
+		{ 0.0f, -415.0f, 12490.0f, 28.0f },
+		{ 0.0f, -540.0f, 12760.0f, 26.0f },
+		{ 0.0f, -660.0f, 13035.0f, 24.0f },
+		{ 0.0f, -770.0f, 13315.0f, 22.0f },
+		{ 0.0f, -875.0f, 13595.0f, 20.0f },
+		{ 0.0f, -960.0f, 13895.0f, 12.0f },
+		{ 0.0f, -1020.0f, 14190.0f, 8.0f },
+		{ 0.0f, -1060.0f, 14490.0f, 4.0f },
+		{ 0.0f, -1090.0f, 14790.0f, 2.0f },
+		{ 0.0f, -1090.0f, 15090.0f, 0.0f },
+		{ 0.0f, -1080.0f, 15395.0f, -4.0f },
+		{ 0.0f, -1040.0f, 15695.0f, -6.0f },
+		{ 0.0f, -995.0f, 15990.0f, -8.0f },
+		{ 0.0f, -945.0f, 16285.0f, -8.0f },
+		{ 0.0f, -900.0f, 16580.0f, -8.0f },
+		{ 0.0f, -855.0f, 16880.0f, -8.0f },
+		{ 0.0f, -800.0f, 17175.0f, -10.0f },
+		{ -1.0f, 0.0f, 0.0f, 0.0f },
+		{ -99999.0f, 0.0f, 0.0f, 0.0f },
+	};
+	// clang-format on
+	for (int i = 0; i < mBoardNum; ++i) {
+		// The original tests the terminator twice (break, then skip).
+		if (positions[i].x == -1.0f)
+			break;
+		if (positions[i].x != -1.0f) {
+			mBoards[i]->mInitialPosition.set(positions[i].x, positions[i].y,
+			                                 positions[i].z);
+			mBoards[i]->mPosition.set(mBoards[i]->mInitialPosition);
+			mBoards[i]->mRotation.x = positions[i].rotation;
+			mBoards[i]->calcDefaultMtx();
+		}
+	}
+}
+
 void THangingBridge::loadAfter()
 {
 	JDrama::TNameRef::loadAfter();
@@ -634,45 +683,8 @@ void THangingBridge::loadAfter()
 		mBoards[i]->appear();
 	}
 
-	if (gpMarDirector->getCurrentMap() == 8) {
-		// clang-format off
-		f32 table[21][4] = {
-			{ 0.0f, -130.0f, 11965.0f, 30.0f },
-			{ 0.0f, -275.0f, 12225.0f, 29.0f },
-			{ 0.0f, -415.0f, 12490.0f, 28.0f },
-			{ 0.0f, -540.0f, 12760.0f, 26.0f },
-			{ 0.0f, -660.0f, 13035.0f, 24.0f },
-			{ 0.0f, -770.0f, 13315.0f, 22.0f },
-			{ 0.0f, -875.0f, 13595.0f, 20.0f },
-			{ 0.0f, -960.0f, 13895.0f, 12.0f },
-			{ 0.0f, -1020.0f, 14190.0f, 8.0f },
-			{ 0.0f, -1060.0f, 14490.0f, 4.0f },
-			{ 0.0f, -1090.0f, 14790.0f, 2.0f },
-			{ 0.0f, -1090.0f, 15090.0f, 0.0f },
-			{ 0.0f, -1080.0f, 15395.0f, -4.0f },
-			{ 0.0f, -1040.0f, 15695.0f, -6.0f },
-			{ 0.0f, -995.0f, 15990.0f, -8.0f },
-			{ 0.0f, -945.0f, 16285.0f, -8.0f },
-			{ 0.0f, -900.0f, 16580.0f, -8.0f },
-			{ 0.0f, -855.0f, 16880.0f, -8.0f },
-			{ 0.0f, -800.0f, 17175.0f, -10.0f },
-			{ -1.0f, 0.0f, 0.0f, 0.0f },
-			{ -99999.0f, 0.0f, 0.0f, 0.0f },
-		};
-		// clang-format on
-		for (int i = 0; i < mBoardNum; ++i) {
-			// The original tests the terminator twice (break, then skip).
-			if (table[i][0] == -1.0f)
-				break;
-			if (table[i][0] != -1.0f) {
-				mBoards[i]->mInitialPosition.set(table[i][0], table[i][1],
-				                                 table[i][2]);
-				mBoards[i]->mPosition.set(mBoards[i]->mInitialPosition);
-				mBoards[i]->mRotation.x = table[i][3];
-				mBoards[i]->calcDefaultMtx();
-			}
-		}
-	}
+	if (gpMarDirector->getCurrentMap() == 8)
+		initMonte();
 
 	if (gpMarDirector->getCurrentMap() == 13) {
 		mStartPos.set(1350.0f, 2980.0f, -9410.0f);
@@ -701,6 +713,7 @@ void THangingBridge::loadAfter()
 
 void THangingBridge::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 	if (cue & CUE_DRAW) {
 		initDraw();
 		for (int i = 0; i < mBoardNum; ++i)
@@ -735,6 +748,7 @@ void THangingBridge::initDraw() const
 		JUTTexture texture(gpMapObjManager->unkCC);
 		texture.load(GX_TEXMAP0);
 	}
+	char trash[0x20]; // unused stack slot (present in the retail frame)
 	GXSetNumTevStages(1);
 	GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
 	GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO,
@@ -989,6 +1003,7 @@ inline void THangingBridgeBoard::pushNeighbor(f32 accel)
 
 void THangingBridgeBoard::control()
 {
+	char trash[0xd8]; // unused stack slot (present in the retail frame)
 	TLeanBlock::control();
 
 	if (marioIsOn()) {
@@ -1026,6 +1041,7 @@ inline void THangingBridgeBoard::drawRopes() const
 
 void THangingBridgeBoard::drawOneRope(const JGeometry::TVec3<f32>& pos) const
 {
+	char trash[8]; // unused stack slot (present in the retail frame)
 	f32 bottom    = pos.y;
 	f32 xPlus     = pos.x + mRopeWidthX;
 	f32 xMinus    = pos.x - mRopeWidthX;
@@ -1055,8 +1071,9 @@ void THangingBridgeBoard::drawOneRope(const JGeometry::TVec3<f32>& pos) const
 
 void TJumpMushroom::load(JSUMemoryInputStream& stream)
 {
-	TMapObjBase::load(stream);
 	s32 value;
+	char trash[8]; // unused stack slot (present in the retail frame)
+	TMapObjBase::load(stream);
 	stream >> value;
 	if (mMapCollisionManager)
 		mMapCollisionManager->unk8->setAllData(value);

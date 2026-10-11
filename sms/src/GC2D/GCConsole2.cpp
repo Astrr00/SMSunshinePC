@@ -1404,14 +1404,10 @@ static inline void updateWaterTankState(TGCConsole2* console)
 
 	if (console->unk4B) {
 		bool done = true;
-		if (!console->unk2F8->update())
-			done = false;
-		if (!console->unk26C->update())
-			done = false;
-		if (!console->unk270->update())
-			done = false;
-		if (!console->unk274->update())
-			done = false;
+		done &= console->unk2F8->update();
+		done &= console->unk26C->update();
+		done &= console->unk270->update();
+		done &= console->unk274->update();
 		if (done) {
 			console->unk2F8->getPane()->hide();
 			console->unk274->getPane()->hide();
@@ -2946,6 +2942,8 @@ void TGCConsole2::setTimer(s32 param_1)
 				timerValue = unk514 - timerValue;
 			}
 		}
+	} else {
+		timerValue = param_1;
 	}
 
 	// Cap at 5999.99 seconds (99:59.99)
@@ -3814,18 +3812,18 @@ void TGCConsole2::drawWater(J2DOrthoGraph& graph)
 		                  GX_FALSE, GX_PTIDENTITY);
 		GXSetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR_NULL);
 
-		int top    = unk29C->getPane()->mGlobalBounds.y1 + topDiff[layer - 1];
-		int bottom = top + unk2BC[layer].getHeight();
+		f32 top    = unk29C->getPane()->mGlobalBounds.y1 + topDiff[layer - 1];
+		f32 bottom = top + unk2A0[layer]->getHeight();
 		int left   = unk2BC[layer].x1;
 		int right  = unk2BC[layer].x2;
 		GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-		GXPosition2f32((f32)left, (f32)top);
+		GXPosition2f32((f32)left, top);
 		GXTexCoord2s8(0, 0);
-		GXPosition2f32((f32)right, (f32)top);
+		GXPosition2f32((f32)right, top);
 		GXTexCoord2s8(1, 0);
-		GXPosition2f32((f32)right, (f32)bottom);
+		GXPosition2f32((f32)right, bottom);
 		GXTexCoord2s8(1, 1);
-		GXPosition2f32((f32)left, (f32)bottom);
+		GXPosition2f32((f32)left, bottom);
 		GXTexCoord2s8(0, 1);
 	}
 

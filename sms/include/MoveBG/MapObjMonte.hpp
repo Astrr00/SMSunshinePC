@@ -77,6 +77,7 @@ public:
 	void initDraw() const;
 	void perform(u32, JDrama::TGraphics*);
 	void loadAfter();
+	void initMonte();
 
 	static f32 mRopeWidthBetweenBoards;
 	static f32 mRopeWidthBetweenBoardsY;

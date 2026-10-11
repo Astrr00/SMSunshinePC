@@ -569,7 +569,7 @@ void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 				SMSRumbleMgr->start(20, (int)mFludd->mMario->unk564,
 				                    (f32*)nullptr);
 		}
-		if (unk384 && unk385 == TNozzleTrigger::INACTIVE
+		if (unk384 != true && unk385 == TNozzleTrigger::INACTIVE
 		    && controllerWork.mAnalogR > 0.0f) {
 			SMSGetMSound()->startSoundActor(
 			    MSD_SE_SY_NEWP_AIR_TAME, mFludd->mEmitPos[0], 0, nullptr, 0, 4);
@@ -1218,7 +1218,6 @@ void TWaterGun::init()
 	mCurrentNozzle             = Spray;
 	mSecondNozzle              = Hover;
 	mNozzleRocket.unk38C       = MSD_SE_PO_ROCKET_TRIGGER;
-	mNozzleTurbo.unk38C        = MSD_SE_PO_SNIPER_TRIGGER;
 	mNozzleDeform.mBomb.unk38C = MSD_SE_PO_SHOTGUN_TRIGGER;
 	mCurrentWater = mNozzleList[mCurrentNozzle]->mEmitParams.mAmountMax.get();
 	mIsEmitWater  = false;
@@ -1324,7 +1323,7 @@ void TWaterGun::init()
 			                     *mFluddModel->getModel()
 			                          ->getModelData()
 			                          ->getTexture()
-			                          ->getResTIMG(0));
+			                          ->getResTIMG(1));
 
 			mNozzleList[i]->unk380->initDL();
 

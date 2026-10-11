@@ -80,6 +80,7 @@ void MActorAnmDataBase::sortByFileNameRaw(void** anms)
 MActorAnmData::MActorAnmData()
     : unk0(0)
 {
+	char trash[0x10];
 	mBckAnms = nullptr;
 	mBpkAnms = nullptr;
 	mBtpAnms = nullptr;
@@ -141,6 +142,7 @@ void MActorAnmData::init(const char* anm_folder, const char** additional_files)
 		return;
 
 	char anmFolder[256];
+	char trash[0xc];
 	snprintf(anmFolder, 0xff, "%s%s", fullAnmPath, "/");
 
 	JKRFileFinder* fileFinder = JKRFileLoader::findFirstFile(fullAnmPath);
@@ -229,6 +231,7 @@ char* MActorAnmData::getSimpleName(const char* file_name)
 
 void MActorAnmData::addFileTable(const char* param_1)
 {
+	char trash[0x60];
 	if (strstr(param_1, ".bck") != nullptr) {
 		char* simple_name               = getSimpleName(param_1);
 		mBckAnms->mAnmNames[mBckNum]    = simple_name;

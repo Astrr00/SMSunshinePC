@@ -437,16 +437,15 @@ bool TConsoleStr::processGo(float param_1)
 		} else if (param_1 < 175.0f) {
 			bool even = ((int)param_1 % 2) == 0;
 			for (int i = 0; i < 3; ++i) {
-				J2DPane* pane = unk28[i]->getPane();
-				int alpha = pane->getAlpha() - 4;
+				int alpha = unk28[i]->getPane()->getAlpha() - 4;
 				if (alpha < 0) {
 					alpha = 0;
 				}
-				JUTRect r = pane->getGlobalBounds();
-				pane->setAlpha(alpha);
+				JUTRect r = unk28[i]->getPane()->getGlobalBounds();
+				unk28[i]->getPane()->setAlpha(alpha);
 				float w = (float)r.getWidth();
 				float h = (float)r.getHeight();
-				pane->resize(r.getWidth() + 2, r.getHeight() + 2);
+				unk28[i]->getPane()->resize(r.getWidth() + 2, r.getHeight() + 2);
 				unk2AC[i]->setGlobalTranslation((float)r.x1 + 0.5f * w, (float)r.y1 + 0.5f * h, 0.0f);
 				unk28[i]->update();
 				if (even) {

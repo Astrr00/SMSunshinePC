@@ -248,6 +248,7 @@ void TYoshi::init(TMario* param_1)
 	// clang-format on
 
 	changeAnimation(0x17);
+	char trash[0x20];
 }
 
 void TYoshi::initInLoadAfter()
@@ -359,7 +360,7 @@ u16 TYoshi::changeHand()
 	}
 
 	u32 a2 = mMario->mStatus;
-	if (a2 == 0x8023C)
+	if (a2 == MARIO_STATUS_HIP_ATTACK_END)
 		return 6;
 	if (a2 == MARIO_STATUS_WIN_DEMO)
 		return 2;
@@ -541,8 +542,9 @@ void TYoshi::thinkAnimation()
 				newIdx = 12;
 		}
 	} else if ((status & MARIO_STATUS_FLAG_UNK200)
-	           && (status == MARIO_STATUS_CATCH_LOST || status == 0xC000023D
-	               || status == 0xC000023E)) {
+	           && (status == MARIO_STATUS_CATCH_LOST
+	               || status == MARIO_STATUS_BRAKE_END
+	               || status == MARIO_STATUS_SLIP_END)) {
 		newIdx = 18;
 	} else {
 		bool sliding = (status & MARIO_STATUS_FLAG_UNK8000) ? true : false;
@@ -550,6 +552,7 @@ void TYoshi::thinkAnimation()
 			if (mMario->mGamePad->checkMeaning(TMarioGamePad::MEANING_L)) {
 				E_SIDEWALK_TYPE type;
 				f32 dummy;
+				char trash[0xE0];
 				mMario->getSideWalkValues(&type, &nextFrame, &dummy);
 				switch (type) {
 				case 0:
@@ -571,7 +574,7 @@ void TYoshi::thinkAnimation()
 		} else {
 		walking:
 			u32 act = mMario->mStatus;
-			if (act == 0x8023C)
+			if (act == MARIO_STATUS_HIP_ATTACK_END)
 				newIdx = 6;
 			else if (act == MARIO_STATUS_WIN_DEMO)
 				newIdx = 2;
@@ -680,8 +683,6 @@ void TYoshi::emitTongue()
 			break;
 		++tries;
 	} while (tries < 10);
-
-	unkDC = 3;
 }
 
 void TYoshi::doSearch()
@@ -708,6 +709,7 @@ void TYoshi::doSearch()
 		mEggRotSpeed = prev + delta;
 		if (delta > -256 && delta < 256) {
 			emitTongue();
+			unkDC = 3;
 			changeAnimation(3);
 		}
 		break;
@@ -716,6 +718,7 @@ void TYoshi::doSearch()
 	case 2:
 		if (mTongue->findTarget(false, true) != nullptr) {
 			emitTongue();
+			unkDC = 3;
 		} else {
 			unkDE = (s16)((f32)(unkEA - unkE8) * MsRandF() + (f32)unkE8);
 			unkDC = 0;
@@ -732,6 +735,7 @@ void TYoshi::doSearch()
 		break;
 	}
 	}
+	char trash[0x68];
 }
 
 void TYoshi::doEat(u32 param_1)
@@ -809,6 +813,7 @@ void TYoshi::thinkHoldOut()
 		mFlutterTimer = 0;
 		break;
 	}
+	char trash[0x48];
 }
 
 void TYoshi::movement()
@@ -874,7 +879,7 @@ void TYoshi::movement()
 		mTranslation = mMario->mPosition;
 		mEggRotSpeed = mMario->mFaceAngle.y;
 
-		if (mMario->mGamePad->checkMeaning(TMarioGamePad::MEANING_B)) {
+		if (mMario->mGamePad->checkFrameMeaning(TMarioGamePad::MEANING_B)) {
 			emitTongue();
 		}
 		if (unkC <= 0)
@@ -956,6 +961,7 @@ void TYoshi::movement()
 		unk74.y  = m[1][3];
 		unk74.z  = m[2][3];
 	}
+	char trash[0xB8];
 }
 
 void TYoshi::calcAnim()

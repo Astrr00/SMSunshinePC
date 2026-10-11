@@ -1233,7 +1233,7 @@ JGeometry::TVec3<f32> rotateY(JGeometry::TVec3<f32> vec, s16 angleY)
 	f32 z = -vec.x * JMASSin(angleY) + vec.z * JMASCos(angleY);
 	vec.x = x;
 	vec.z = z;
-	return JGeometry::TVec3<f32>(vec.x, vec.y, vec.z);
+	return JGeometry::TVec3<f32>(static_cast<const Vec&>(vec));
 }
 
 static void evWarpFrontToMario(TSpcTypedInterp<TEventWatcher>* interp,

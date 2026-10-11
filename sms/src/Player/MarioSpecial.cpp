@@ -21,7 +21,7 @@ void TMario::barJumpSetting() { }
 BOOL TMario::barWait()
 {
 	if (mHolder == nullptr)
-		return changePlayerStatus(MARIO_STATUS_WALL_JUMP, 0, false);
+		return changePlayerStatus(MARIO_STATUS_LAND_SAFE_DOWN, 0, false);
 
 	if (mInput & 0x2) {
 		mPosition.x -= 200.0f * JMASSin(mFaceAngle.y);
@@ -34,7 +34,7 @@ BOOL TMario::barWait()
 	mPosition.y = mHolder->mPosition.y + mHolderHeightDiff;
 	mPosition.z = mHolder->mPosition.z;
 
-	if ((mInput & 0x10000) || mHolderHeightDiff > 100.0f) {
+	if ((mInput & 0x8000) || mHolderHeightDiff > 100.0f) {
 		setPlayerVelocity(-2.0f);
 		mPosition.x -= 200.0f * JMASSin(mFaceAngle.y);
 		mPosition.z -= 200.0f * JMASCos(mFaceAngle.y);
@@ -695,7 +695,7 @@ BOOL TMario::wireMove(f32 param_1)
 		mWirePosRatio = margin;
 		clean         = false;
 	}
-	if (clean)
+	if (clean == TRUE)
 		mWirePosRatio += delta;
 	return clean;
 }
@@ -733,7 +733,7 @@ BOOL TMario::wireWait()
 		}
 	}
 
-	if (mInput & 0x10000) {
+	if (mInput & 0x8000) {
 		mWireBounceVel = 5.0f;
 		return changePlayerStatus(MARIO_STATUS_WIRE_WAIT_TO_HANG, 0, false);
 	}
@@ -785,20 +785,20 @@ BOOL TMario::wireSWait()
 			mHolder  = nullptr;
 			BOOL ret = changePlayerStatus(MARIO_STATUS_WIRE_JUMP, 0, false);
 			setPlayerVelocity(0.0f);
-			if (mWireBounceVelPrev < 0.0f)
-				mVel.y -= 5.0f * mWireBounceVelPrev;
+			if (mWireBounceVel < 0.0f)
+				mVel.y -= 5.0f * mWireBounceVel;
 			return ret;
 		}
 	}
 
-	if (mInput & 0x10000) {
-		mWireBounceVelPrev = 5.0f;
+	if (mInput & 0x8000) {
+		mWireBounceVel = 5.0f;
 		startVoice(MSD_SE_MV30_FRIGHT_01);
 		return changePlayerStatus(MARIO_STATUS_WIRE_WAIT_TO_HANG, 0, false);
 	}
 
 	if (mInput & 0x1) {
-		s16 diff = mIntendedYaw - wireAngle;
+		s16 diff = wireAngle - mIntendedYaw;
 		if (diff > -0x4000 && diff < 0x4000)
 			return changePlayerStatus(MARIO_STATUS_WIRE_S_WAIT_TO_WAIT_L, 0,
 			                          false);
@@ -1135,9 +1135,9 @@ BOOL TMario::wireRolling()
 			unkF6          = 0;
 			mWireBounceVel = 0.0f;
 			mWireSag       = 0.0f;
-			BOOL noHold    = FALSE;
+			bool noHold    = false;
 			if (mHeldObject == nullptr && !onYoshi())
-				noHold = TRUE;
+				noHold = true;
 			if (noHold)
 				return changePlayerStatus(MARIO_STATUS_WIRE_HANGING, 0, false);
 			return changePlayerStatus(MARIO_STATUS_LANDING, 0, false);
@@ -1214,7 +1214,7 @@ BOOL TMario::pulling()
 		((THitActor*)mHeldObject)->receiveMessage(this, 8);
 		mHeldObject = nullptr;
 		startVoice(MSD_SE_MV30_FRIGHT_01);
-		return changePlayerStatus(0xc0022f, 0, false);
+		return changePlayerStatus(MARIO_STATUS_PULL_END, 0, false);
 	}
 
 	if (mInput & 0x2) {
@@ -1231,7 +1231,7 @@ BOOL TMario::pulling()
 
 	JGeometry::TVec3<f32> pos = mPosition;
 	s16 backAngle             = mFaceAngle.y + 0x8000;
-	s16 diff                  = mIntendedYaw - backAngle;
+	s16 diff                  = backAngle - mIntendedYaw;
 	f32 cosF                  = JMASCos(diff);
 	if (cosF < 0.0f)
 		cosF = 0.0f;
