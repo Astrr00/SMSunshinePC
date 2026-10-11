@@ -31,15 +31,24 @@ def owner():
 
 
 def alive(pid):
-    """True while a process with this PID exists (Windows: OpenProcess; elsewhere: signal 0)."""
+    """True while the process is running (Windows: OpenProcess + exit code STILL_ACTIVE; elsewhere: signal 0)."""
     try:
         if os.name == "nt":
             import ctypes
-            h = ctypes.windll.kernel32.OpenProcess(0x1000, False, int(pid))  # PROCESS_QUERY_LIMITED_INFORMATION
+            from ctypes import wintypes
+            k = ctypes.WinDLL("kernel32", use_last_error=True)
+            k.OpenProcess.restype = wintypes.HANDLE
+            k.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+            k.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+            k.CloseHandle.argtypes = (wintypes.HANDLE,)
+            h = k.OpenProcess(0x1000, False, int(pid))  # PROCESS_QUERY_LIMITED_INFORMATION
             if not h:
                 return False
-            ctypes.windll.kernel32.CloseHandle(h)
-            return True
+            code = wintypes.DWORD()
+            ok = k.GetExitCodeProcess(h, ctypes.byref(code))
+            k.CloseHandle(h)
+            # A terminated process whose handle someone still holds opens fine but has a real exit code.
+            return bool(ok) and code.value == 259  # STILL_ACTIVE
         os.kill(int(pid), 0)
         return True
     except (OSError, ValueError):

@@ -4,9 +4,6 @@
 #include <JSystem/JUtility/JUTResource.hpp>
 #include <JSystem/JSupport/JSURandomInputStream.hpp>
 #include <dolphin/gx.h>
-#ifdef TARGET_PC
-#include <cstdio>
-#endif
 
 J2DPicture::J2DPicture() { }
 
@@ -350,18 +347,8 @@ void J2DPicture::draw(int x, int y, int param_3, int param_4, bool param_5,
 
 	for (u8 i = 0; i < mTextureNum; ++i) {
 		GXTexMapID idx = (GXTexMapID)i;
-		if (i < mTextureNum) {
-#ifdef TARGET_PC
-			// Diagnosis (full retail-flow run, first spray): name the picture that owns a corrupt GXTexObj.
-			if (GXGetTexObjWidth(&mTextures[idx]->mTexObj) > 4096) {
-				const JUTTexture* t = mTextures[idx];
-				std::fprintf(stderr, "[j2d] corrupt texobj: picture=%p kind=%08x slot=%d/%d tex=%p timg=%p data=%p w=%d h=%d fmt=%u\n",
-				             (void*)this, getKind(), (int)i, (int)mTextureNum, (const void*)t, (const void*)t->mTexInfo,
-				             t->mTexData, (int)t->mWidth, (int)t->mHeight, (unsigned)t->mFormat);
-			}
-#endif
+		if (i < mTextureNum)
 			mTextures[idx]->load(idx);
-		}
 	}
 
 	GXClearVtxDesc();

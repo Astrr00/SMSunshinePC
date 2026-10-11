@@ -78,10 +78,13 @@ def main():
     env.setdefault("SUNSHINE_DEV_STATUS", "1")
     env.setdefault("SUNSHINE_ALLOW_CPU_ADAPTER", "1")  # GPU-less host: Null backend renders nothing, PNGs would be blank
     # WARP is fill-rate bound: 0.25 keeps dolpic0 at ~30 logic ticks/s (full size: 14-17/s, measured m4_s025 vs m1_inbox).
-    # Screenshots are then low-res; pass SUNSHINE_RENDER_SCALE=1 for a sharp frame.
     env.setdefault("SUNSHINE_RENDER_SCALE", "0.25")
+    env.setdefault("SUNSHINE_DEV_EXIT_ON_END", "1")  # the game ends right after the script's `end` (keep a `wait` after the last `shot`)
     env.update(extra)
-    if lock("acquire") != "LOCKED":
+    print(f"[route] render scale {env['SUNSHINE_RENDER_SCALE']} (SUNSHINE_RENDER_SCALE=1 for a sharp frame), cpu adapter {env['SUNSHINE_ALLOW_CPU_ADAPTER']}")
+    # ROUTE_NOLOCK=1: skip the run lock for functional diagnosis runs in parallel (6 cores). Never for timing measurements.
+    use_lock = os.environ.get("ROUTE_NOLOCK", "") in ("", "0")
+    if use_lock and lock("acquire") != "LOCKED":
         print("run lock not acquired")
         return 1
     rc = 124
@@ -107,7 +110,8 @@ def main():
             rc = p.returncode
         print(f"run '{name}' ended rc={rc} after {time.time() - t0:.0f}s, log {os.path.join(out, 'run.log')}")
     finally:
-        lock("release")
+        if use_lock:
+            lock("release")
     return rc
 
 

@@ -5,6 +5,7 @@
 #ifdef TARGET_PC
 #include <JSystem/ResTIMG.hpp>
 #include <JSystem/JKernel/JKRHeap.hpp>
+#include <malloc.h> // _aligned_malloc
 #include <glyphs.h>
 #endif
 
@@ -50,7 +51,10 @@ ResTIMG* sGlyphTimg[kGlyphSlotCount][(size_t)GlyphStyle::Count];
 // Aspect-fits the glyph into a w x h RGBA8 texture (transparent border), box-filtered with alpha weighting.
 ResTIMG* buildGlyphTimg(const GlyphImage& g, u32 w, u32 h)
 {
-	u8* block = new (0x20) u8[sizeof(ResTIMG) + w * h * 4];
+	// Host memory, not the JKR heap: the block is cached for the whole run, but a JKR heap (title / stage) is freed and reused
+	// when the stage changes, which left sGlyphTimg pointing at foreign data (full retail flow: corrupt JUTTexture in the first
+	// tutorial frame with the water button).
+	u8* block = (u8*)_aligned_malloc(sizeof(ResTIMG) + w * h * 4, 0x20);
 	ResTIMG* t = (ResTIMG*)block;
 	memset(t, 0, sizeof(ResTIMG));
 	t->format          = kGlyphTexFormatRGBA8Pc; // GX_TF_RGBA8_PC (Aurora: 0x6 | _GX_TF_PC)

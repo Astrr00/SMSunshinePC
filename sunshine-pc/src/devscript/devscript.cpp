@@ -466,6 +466,12 @@ void finish()
 	gDone = true;
 	PADClearVirtualStatus(0);
 	std::printf("[devscript] done at tick=%d\n", gTick);
+	// SUNSHINE_DEV_EXIT_ON_END: end the process right after the script (route.py sets it), instead of idling until the wall limit.
+	const char* exitOnEnd = std::getenv("SUNSHINE_DEV_EXIT_ON_END");
+	if (exitOnEnd != nullptr && *exitOnEnd != '\0' && *exitOnEnd != '0') {
+		std::fflush(stdout);
+		std::_Exit(0); // no static teardown: it aborts with 0xC0000409 after a script exit
+	}
 }
 
 void step()
