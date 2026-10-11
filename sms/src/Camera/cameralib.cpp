@@ -332,6 +332,13 @@ void CLBCalcScaleTranslateMatrix(MtxPtr mtx, const Vec& scale,
 	mtx[2][3] = translate.z;
 }
 
+#pragma dont_inline on
+static f32 clbSqrtOutOfLine(f32 x)
+{
+	return MsSqrtf(x);
+}
+#pragma dont_inline off
+
 void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
                         const JGeometry::TVec3<f32>& origin,
                         const JGeometry::TVec3<f32>& lookat, s16 roll,
@@ -358,8 +365,8 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 	// Center point
 	out_grid[4].scaleAdd(near_dist, origin, local_a8);
 
-	f32 xzDistance = MsSqrtf(((origin.x - lookat.x) * (origin.x - lookat.x)
-	                          + (origin.z - lookat.z) * (origin.z - lookat.z)));
+	f32 xzDistance = clbSqrtOutOfLine(((origin.x - lookat.x) * (origin.x - lookat.x)
+	                                   + (origin.z - lookat.z) * (origin.z - lookat.z)));
 	out_euler->x   = -matan(xzDistance, origin.y - lookat.y);
 	out_euler->y   = matan(origin.z - lookat.z, origin.x - lookat.x);
 	out_euler->z   = roll;

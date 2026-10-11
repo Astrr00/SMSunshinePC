@@ -110,6 +110,7 @@ public:
 	    , unk1A4(2)
 	    , unk1E0(false)
 	{
+		char trash[16]; // unused stack slot (present in the retail frame)
 		unk1A8[0] = false;
 		unk1A8[1] = false;
 		unk1A8[2] = false;

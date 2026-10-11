@@ -794,19 +794,21 @@ void TCogwheel::initMapObj()
 	f32 dz    = radius * sn + zero * cs;
 
 	JGeometry::TVec3<f32> pos(mPosition.x + dx, mPosition.y, mPosition.z - dz);
-	unk150 = (TCogwheelScale*)TMapObjBaseManager::newAndRegisterObj(
+	TCogwheelScale* plate = (TCogwheelScale*)TMapObjBaseManager::newAndRegisterObj(
 	    "cogwheel_plate", pos, mRotation);
+	unk150 = plate;
 	unk150->unk154 = true;
 	unk150->unk158 = this;
-	unk150->appear();
+	plate->appear();
 	unk154.set(pos.x, mPosition.y, pos.z);
 
 	pos.set(mPosition.x - dx, mPosition.y, mPosition.z + dz);
-	unk164 = (TCogwheelScale*)TMapObjBaseManager::newAndRegisterObj(
+	TCogwheelScale* pot = (TCogwheelScale*)TMapObjBaseManager::newAndRegisterObj(
 	    "cogwheel_pot", pos, mRotation);
+	unk164 = pot;
 	unk164->unk154 = false;
 	unk164->unk158 = this;
-	unk164->appear();
+	pot->appear();
 	unk168.set(pos.x, mPosition.y, pos.z);
 
 	if (strcmp(getName(), "天秤上") == 0) {

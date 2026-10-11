@@ -265,6 +265,7 @@ void TConsoleStr::perform(u32 cue, JDrama::TGraphics* graphics)
 		local_1a0.setup2D();
 		graphics->setScissor(rect);
 	}
+	char trash[0x40];
 }
 
 void TConsoleStr::startAppearReady()
@@ -679,6 +680,7 @@ void TConsoleStr::startCloseWipe(bool param_1)
 	unk290[1]->setPaneOffset(0x2D, 0, h - local_88.y1, 0, 0);
 	unk290[1]->setPaneSize(0x2D, local_88.getWidth(), 464 - h, local_88.getWidth(), local_88.getHeight());
 	unk290[1]->setPaneAlpha(0x2D, 255, unk290[1]->getPane()->getAlpha());
+	char trash[0x40];
 }
 
 void TConsoleStr::startOpenWipe()

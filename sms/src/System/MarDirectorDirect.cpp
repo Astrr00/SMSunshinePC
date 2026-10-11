@@ -1028,8 +1028,8 @@ u8 TMarDirector::updateGameMode()
 				TDemoInfo* info = &unk12C[unk24D];
 				gpCamera->startDemoCamera(info->unk0, info->unk4, info->unk8,
 				                          info->unkC, info->unk10);
-				if (info->unk14 != nullptr)
-					(*info->unk14)(info->unk18, 0);
+				if (unk12C[unk24D].unk14 != nullptr)
+					(*unk12C[unk24D].unk14)(unk12C[unk24D].unk18, 0);
 			}
 			OSStopStopwatch(&unkE8);
 			unk60 = mTickCount;

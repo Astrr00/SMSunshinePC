@@ -788,15 +788,14 @@ u32 TResetFruit::touchWater(THitActor* water)
 void TResetFruit::touchActor(THitActor* other)
 {
 	char trash[16];
-	if (isState(STATE_APPEARING) || isState(STATE_BREAKING) || isState(0xC)
-	    || isState(STATE_WAITING_TO_APPEAR))
-		return;
+	if (!(isState(STATE_APPEARING) || isState(STATE_BREAKING) || isState(0xC)
+	      || isState(STATE_WAITING_TO_APPEAR))) {
+		TMapObjBall::touchActor(other);
 
-	TMapObjBall::touchActor(other);
-
-	if (!checkMapObjFlag(MAP_OBJ_FLAG_UNK4000000) && isState(STATE_NORMAL)
-	    && !checkLiveFlag(LIVE_FLAG_UNK10))
-		makeObjLiving();
+		if (!checkMapObjFlag(MAP_OBJ_FLAG_UNK4000000) && isState(STATE_NORMAL)
+		    && !checkLiveFlag(LIVE_FLAG_UNK10))
+			makeObjLiving();
+	}
 }
 
 void TResetFruit::touchGround(JGeometry::TVec3<f32>* pos)

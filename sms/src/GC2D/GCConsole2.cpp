@@ -222,7 +222,8 @@ static inline void playHudMoveSound(u32 soundID)
 		return;
 	if ((s16)gpMarioOriginal->mAir == 0)
 		return;
-	SMSGetMSound()->startSoundSystemSE(soundID, 0, nullptr, 0);
+	if (SMSGetMSound()->gateCheck(soundID))
+		MSoundSESystem::MSoundSE::startSoundSystemSE(soundID, 0, nullptr, 0);
 }
 
 // fabricated
@@ -1306,27 +1307,20 @@ static inline void updateRedCoinAppearState(TGCConsole2* console)
 {
 	if (console->unk3C && console->processAppearRed(console->unk74++)) {
 		console->unk3C = 0;
-		console->unk74 = 0;
 	}
 }
 
 // fabricated
 static inline void updateTimerAppearState(TGCConsole2* console)
 {
-	if (console->unk3E && console->processAppearTimer(console->unk76++)) {
+	if (console->unk3E && console->processAppearTimer((s8)console->unk76++)) {
 		console->unk3E = 0;
-		console->unk76 = 0;
 	}
 }
 
 // fabricated
 static inline void updateTelopState(TGCConsole2* console)
 {
-	if (console->unk3F && console->unk44C->update()) {
-		console->unk44C->getPane()->hide();
-		console->unk3F = 0;
-	}
-
 	if (console->unk42) {
 		if (console->unk520->update()) {
 			console->unk42 = 0;
@@ -1445,10 +1439,17 @@ static inline void updateMarioAppearState(TGCConsole2* console)
 	    && console->unk3A8->getPane()->isVisible()
 	    && gpMarioOriginal->mStatus != 0xC400201
 	    && gpMarDirector->mState != TMarDirector::STATE_PAUSE_MENU) {
-		if (++console->unk70 > 0x190)
-			console->startDisappearMario();
+		if (++console->unk70 > 0x190) {
+			TExPane* pane = console->unk3A8;
+			pane->updatePaneOffset(50, 0, -(pane->getInitialBounds().y2 + 1));
+			console->unk3B = 1;
+		}
 	}
+}
 
+// fabricated
+static inline void updateMarioHideState(TGCConsole2* console)
+{
 	if (console->unk3B && console->unk3A8->update()) {
 		console->unk3B = 0;
 		console->unk3A8->getPane()->hide();
@@ -3932,12 +3933,6 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 
 		updateWaterGaugeFill(this);
 		updateCounterState(this);
-		updateJetAppearState(this);
-
-		updateRedCoinCounter(this);
-		updateRedCoinAppearState(this);
-		updateTimerAppearState(this);
-		updateTelopState(this);
 
 		if (!unk46 && gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD) && !unk45 && !unk50)
 			startAppearTank();
@@ -3959,8 +3954,23 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 
 		updateMarioLifeCounter(this);
 
-		if (!unk3F && unk4A)
+		updateMarioHideState(this);
+		updateTelopState(this);
+		updateJetAppearState(this);
+		updateRedCoinCounter(this);
+		updateRedCoinAppearState(this);
+
+		if (unk58 && unk428->update())
+			unk58 = 0;
+
+		updateTimerAppearState(this);
+
+		if (unk3F) {
+			if (unk44C->update())
+				unk3F = 0;
+		} else if (unk4A) {
 			setTimer(-1);
+		}
 
 		if (unk59) {
 			playHudMoveSound(0x4819);

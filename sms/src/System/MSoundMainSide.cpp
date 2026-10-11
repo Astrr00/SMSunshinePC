@@ -705,7 +705,7 @@ void MSStageDistFade::proc()
 
 	f32 dVar6 = MSHandle::calcPan(local_68, fVar8, 10000.0f);
 	f32 dVar7 = MSHandle::calcDolby(local_68, fVar8);
-	if (r29 < r30) {
+	if (r30 < r29) {
 		dVar6 = (dVar6 - 0.5f) * r30 / r29;
 		dVar6 += 0.5f;
 		dVar7 = dVar7 * r30 / r29;

@@ -652,20 +652,23 @@ void TMoePuku::calcRootMatrix()
 {
 	gpCurTobiPuku = this;
 	TSpineEnemy::calcRootMatrix();
-	if (mRotation.x != 0.0f) {
-		if (isEaten())
-			return;
-		MsMtxSetXYZRPH(getModel()->getBaseTRMtx(), mPosition.x,
-		               mPosition.y + 70.0f * mRotation.x / mLandAngle,
-		               mPosition.z, mRotation.x, mRotation.y, mRotation.z);
-	}
-	if (isPichiEffect()) {
-		unk1A0.set(mMActor->getModel()->getAnmMtx(1)[0][3],
-		           mMActor->getModel()->getAnmMtx(1)[1][3],
-		           mMActor->getModel()->getAnmMtx(1)[2][3]);
-		gpMarioParticleManager->emitAndBindToPosPtr(PARTICLE_MS_PUKU_PICHI,
-		                                            &unk1A0, 1, this);
-	}
+	// asm 0x802AE694: retail skips MsMtx and pichi block when eaten, still runs Fly block
+	do {
+		if (mRotation.x != 0.0f) {
+			if (isEaten())
+				break;
+			MsMtxSetXYZRPH(getModel()->getBaseTRMtx(), mPosition.x,
+			               mPosition.y + 70.0f * mRotation.x / mLandAngle,
+			               mPosition.z, mRotation.x, mRotation.y, mRotation.z);
+		}
+		if (isPichiEffect()) {
+			unk1A0.set(mMActor->getModel()->getAnmMtx(1)[0][3],
+			           mMActor->getModel()->getAnmMtx(1)[1][3],
+			           mMActor->getModel()->getAnmMtx(1)[2][3]);
+			gpMarioParticleManager->emitAndBindToPosPtr(PARTICLE_MS_PUKU_PICHI,
+			                                            &unk1A0, 1, this);
+		}
+	} while (false);
 	if (mSpine->getCurrentNerve() == &TNerveTobiPukuFly::theNerve()) {
 		SMSGetMSound()->startSoundActor(MSD_SE_EN_MOEKURI_FLAME, &mPosition, 0,
 		                                nullptr, 0, 4);
@@ -908,8 +911,10 @@ DEFINE_NERVE(TNerveTobiPukuHitWater, TLiveActor)
 		self->mPosition.y += 5.0f;
 	}
 
-	if (self->checkCurAnmEnd(0) && self->isAttackBck()) {
-		spine->pushAfterCurrent(&TNerveTobiPukuFall::theNerve());
+	// asm 0x802ADA04: retail returns true at anim end; pushes Fall only if isAttackBck()
+	if (self->checkCurAnmEnd(0)) {
+		if (self->isAttackBck())
+			spine->pushAfterCurrent(&TNerveTobiPukuFall::theNerve());
 		return true;
 	}
 	return false;

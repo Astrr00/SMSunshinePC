@@ -58,6 +58,8 @@ SDLModelData* TModelDataKeeper::loadModelData(const char* name, u32 flags,
 
 SDLModelData* TModelDataKeeper::createAndKeepData(const char* name, u32 flags)
 {
+	char trash[0x10];
+	u32 loaderFlags = flags;
 	TModelDataNode* node = &mHead;
 	while (node->getNext())
 		node = node->getNext();
@@ -67,7 +69,7 @@ SDLModelData* TModelDataKeeper::createAndKeepData(const char* name, u32 flags)
 	char fullPath[256];
 	sprintf(fullPath, "%s/%s", mFolder, name);
 	void* res               = JKRGetResource(fullPath);
-	J3DModelData* j3dData   = J3DModelLoaderDataBase::load(res, flags);
+	J3DModelData* j3dData   = J3DModelLoaderDataBase::load(res, loaderFlags);
 	SDLModelData* sdlData   = new SDLModelData(j3dData);
 	SDLModelData* data      = sdlData;
 
@@ -184,21 +186,31 @@ MActor* TMActorKeeper::createMActorFromNthData(int n, u32 flags)
 
 MActor* TMActorKeeper::createMActor(const char* model_data_name, u32 flags)
 {
+	char trash[0x20];
 	TModelDataKeeper* keeper = getModelDataKeeper();
 
 	int index = keeper->getIndex(model_data_name);
 
 	if (index < 0) {
+		u32 loaderFlags = mModelLoaderFlags;
 		TModelDataNode* node = &keeper->mHead;
 		while (node->getNext())
 			node = node->getNext();
 		SDLModelData* data = TModelDataKeeper::loadModelData(
-		    model_data_name, mModelLoaderFlags, keeper->mFolder);
+		    model_data_name, loaderFlags, keeper->mFolder);
 		node->registerDataAndJoinNewNode(data, model_data_name);
 		index = keeper->getIndex(model_data_name);
 	}
 
-	return createMActorFromNthData(index, flags);
+	mActorModelDataIndices[mActorNum] = index;
+	SDLModelData* data                = keeper->getNthData(index);
+	// Retail inlines createAndRegister here; copied so it stays out of line for the other callers.
+	SDLModel* model = new SDLModel(data, flags, 1);
+	MActor* actor   = new MActor(mActorAnmData);
+	actor->setModel(model, flags);
+	mActors[mActorNum] = actor;
+	++mActorNum;
+	return actor;
 }
 
 MActor* TMActorKeeper::createMActorFromAllBmd(u32 flags)

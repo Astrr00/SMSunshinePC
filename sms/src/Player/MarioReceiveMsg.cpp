@@ -686,6 +686,7 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 		}
 		break;
 
+	case 0x08000003:
 	case 0x08000006:
 	case 0x08000007:
 	case 0x08000008:
@@ -759,7 +760,6 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 		}
 		// fallthrough
 
-	case 0x4000002A:
 	case 0x4000002C: { // big spinning enemy with rotation-based attack window
 		if (mInput & 0x8000) {
 			s16 attackAngle = getAttackAngle(sender);
@@ -883,7 +883,7 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 	case 0x40000393: // fruit kick targets (durian & smth else)
 		if (mFreezeImmunityTimer <= 0) {
 			mFreezeTimer = mDeParams.mKickFreezeTime.get();
-			rumbleStart(0x15, mMotorParams.mMotorTrample.get());
+			rumbleStart(0x15, mMotorParams.mMotorWall.get());
 			calcDamagePos(sender->mPosition);
 			kickFruitEffect();
 			return TRUE;

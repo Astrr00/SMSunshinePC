@@ -12,7 +12,7 @@ Known false positive: string-pool offsets (addi rX, rY, imm) show as imm.
   python sunshine-pc/tools/decomp_triage.py [unit-substring]   all units -> sms/build/triage.json
   python sunshine-pc/tools/decomp_triage.py --build <unit>      recompile one unit with mwcc, print its rows
   python sunshine-pc/tools/decomp_triage.py --diff <unit> <sym> [ctx]  differing rows only: retail | ours (ctx rows around)
-  python sunshine-pc/tools/decomp_triage.py --branchscan [unit...]   conditional-branch sense/cr flips after an identical compare -> sms/build/branch_inversions.tsv
+  python sunshine-pc/tools/decomp_triage.py --branchscan [unit...]   conditional-branch sense/cr flips after an identical compare -> sms/build/branch_inversions.tsv (full run; unit args print to stdout)
 """
 import json, os, re, subprocess, sys, collections, struct
 from concurrent.futures import ThreadPoolExecutor
@@ -56,7 +56,7 @@ def risk(ins, rins, lsyms, rsyms):
 
 
 def objdiff_syms(name):
-    """objdiff (ours, retail) symbol lists for one unit; None if its object is missing or fails."""
+    """objdiff (retail, ours) symbol lists for one unit; None if its object is missing or fails."""
     out = subprocess.run([OBJDIFF, "diff", "-p", SMS, "-u", name, "-o", "-", "--format", "json"],
                          capture_output=True, text=True, creationflags=NOWIN)
     if out.returncode:
@@ -286,7 +286,8 @@ def target(rows, amap, j):
 def scan_fn(L, R):
     """Rows where ours and retail are both conditional branches with different mnemonic or cr field,
     after an identical compare. Class: same-layout (fallthrough row equal in both = likely real inversion),
-    swapped-blocks (ours' fallthrough is retail's taken target = legal block reorder), other."""
+    swapped-blocks (ours' fallthrough is retail's taken target = legal block reorder), other.
+    L is ours, R is retail; returns (row, retail formatted, ours formatted, class)."""
     aL, aR = byaddr(L), byaddr(R)
     out = []
     for i in range(min(len(L), len(R))):
@@ -320,15 +321,16 @@ def scan_unit(name):
         if s.get("kind") != "SYMBOL_FUNCTION" or s.get("target_symbol") is None or (m is not None and m >= 100):
             continue
         nfn += 1
-        L = s.get("instructions", [])
-        R = rs[s["target_symbol"]].get("instructions", [])
-        for i, rt, ou, cls in scan_fn(L, R):
+        L = s.get("instructions", [])  # objdiff left: retail
+        R = rs[s["target_symbol"]].get("instructions", [])  # objdiff right: ours
+        for i, rt, ou, cls in scan_fn(R, L):
             hits.append((name, s.get("demangled_name", s["name"]), i, rt, ou, cls))
     return hits, nfn
 
 
 def branchscan(units):
-    if not units:
+    full = not units
+    if full:
         triage = json.load(open(os.path.join(SMS, "build", "triage.json")))
         units = sorted({f["unit"] for f in triage if f["unit"].split("/")[1] not in GAME_SKIP})
     with ThreadPoolExecutor(6) as ex:
@@ -339,10 +341,15 @@ def branchscan(units):
     hits = [h for r in res if r for h in r[0]]
     nfn = sum(r[1] for r in res if r)
     path = os.path.join(SMS, "build", "branch_inversions.tsv")
-    with open(path, "w") as fh:
-        for u, fn, i, rt, ou, cls in hits:
-            fh.write(f"{u}\t{fn}\t{i}\t{rt}\t{ou}\t{cls}\n")
     c = collections.Counter(h[5] for h in hits)
+    if full:
+        with open(path, "w") as fh:
+            for u, fn, i, rt, ou, cls in hits:
+                fh.write(f"{u}\t{fn}\t{i}\t{rt}\t{ou}\t{cls}\n")
+    else:
+        for u, fn, i, rt, ou, cls in hits:
+            print(f"{u}\t{fn}\t{i}\t{rt}\t{ou}\t{cls}")
+        path = "stdout (unit-filtered run; branch_inversions.tsv untouched)"
     print(f"units={len(units) - len(skipped)} functions={nfn} hits={len(hits)} same-layout={c['same-layout']} "
           f"swapped-blocks={c['swapped-blocks']} other={c['other']} -> {path}")
 

@@ -291,6 +291,8 @@ void TPauseMenu2::disappearWindow()
 
 void TPauseMenu2::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0xB0];
+
 	if (gpMarDirector->mState == TMarDirector::STATE_PAUSE_MENU) {
 		if (mState == MENU_SAVING) {
 			if (cue & CUE_MOVE) {

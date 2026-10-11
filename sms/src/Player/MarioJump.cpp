@@ -140,7 +140,7 @@ BOOL TMario::jumpingBasic(int statusOnGround, int animation, int processArg)
 				SMSGetMSound()->startSoundActor(MSD_SE_MA_FALL_AFTER,
 				                                &mPosition, 0, nullptr, 0, 4);
 				strongTouchDownEffect();
-				floorDamageExec(1, 3, 0, mMotorParams.mMotorTrample.get());
+				floorDamageExec(1, 3, 0, mMotorParams.mMotorReturn.get()); // asm: lha r7,0x27bc(r28)
 			}
 		}
 

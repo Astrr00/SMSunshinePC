@@ -1673,7 +1673,8 @@ void TFireWanwan::bind()
 	}
 
 	if (isFlying() && !checkLiveFlag(LIVE_FLAG_AIRBORNE)) {
-		mVelocity *= getSaveParam2()->mAirFric.get();
+		// asm 0x8029C27C: grounded (!airborne) branch scales by mFloorFric (0x384), not mAirFric
+		mVelocity *= getSaveParam2()->mFloorFric.get();
 		mVelocity.y *= -0.05f;
 	}
 }

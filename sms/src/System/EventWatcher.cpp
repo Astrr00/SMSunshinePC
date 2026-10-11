@@ -266,10 +266,10 @@ static void evGetTalkNPCName(TSpcTypedInterp<TEventWatcher>* interp,
 
 	TBaseNPC* npc = SMSGetMarDirector()->getTalkingNPC();
 
-	if (!npc)
-		interp->push("");
-	else
-		interp->push(npc->getName());
+	const char* name = "";
+	if (npc)
+		name = npc->getName();
+	interp->push(name);
 }
 
 // TODO: `TSpcSlice(interp->pop()).getDataInt()` is a placeholder for something
@@ -645,7 +645,7 @@ static void evInsertTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 	int p1 = interp->pop().getDataInt();
 	int p2 = interp->pop().getDataInt();
 
-	if (p2 == 0)
+	if (p2 == 1)
 		SMSGetMarDirector()->getConsole()->startAppearTimer(0, p1);
 	else if (p2 == 2)
 		SMSGetMarDirector()->getConsole()->startAppearTimer(1, p1);

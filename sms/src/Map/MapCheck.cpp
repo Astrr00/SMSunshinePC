@@ -361,8 +361,6 @@ static bool bgIntersectLine(const TBGCheckData* data,
 	JGeometry::TVec3<f32> dir    = end;
 	dir -= start;
 
-	char trash[0x60];
-
 	f32 nDotDir = normal.dot(dir);
 	if (front_only && nDotDir >= 0.0f)
 		return false;
@@ -380,13 +378,14 @@ static bool bgIntersectLine(const TBGCheckData* data,
 
 	dir *= planeDist;
 
-	JGeometry::TVec3<f32> hit = start + dir;
-
 	JGeometry::TVec3<f32> a;
-	a.sub(data->getPoint1(), hit);
 	JGeometry::TVec3<f32> b;
-	b.sub(data->getPoint2(), hit);
 	JGeometry::TVec3<f32> c;
+	JGeometry::TVec3<f32> hit = start + dir;
+	char trash[0x60];
+
+	a.sub(data->getPoint1(), hit);
+	b.sub(data->getPoint2(), hit);
 	c.sub(data->getPoint3(), hit);
 
 	f32 angleSum = 0.0f;
