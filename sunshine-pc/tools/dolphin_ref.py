@@ -16,6 +16,7 @@ hidden + below-normal process), pauses it through Dolphin's built-in GDB stub
 --dump F     write MEM1 (0x80000000, 24 MiB) to F
 """
 import argparse
+import os
 import re
 import shutil
 import socket
@@ -30,7 +31,7 @@ CREATE_NO_WINDOW = 0x08000000
 BELOW_NORMAL_PRIORITY = 0x4000
 
 ROOT = Path(__file__).resolve().parents[2]  # ".../Sunshine Decomp"
-DOLPHIN = Path("C:/Users/niemc/Documents/Projekte/SunshineRecomp/ref/ModernGekko/build/DolphinNoGUI.exe")
+DOLPHIN = Path(os.environ.get("DOLPHIN_NOGUI", "DolphinNoGUI.exe"))  # blocked for GMSJ01, see platform-notes.md
 RVZ = ROOT / "sms/orig/GMSJ01/Super Mario Sunshine (Japan).rvz"
 SYMBOLS = ROOT / "sms/config/GMSJ01/symbols.txt"
 

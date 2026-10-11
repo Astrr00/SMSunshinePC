@@ -35,6 +35,9 @@ Run `sunshine-pc/tools/handoff-setup.ps1` from the bundle root (it clones the re
 5. Copy `toolchain/sms-build-tools/*` to `sms/build/tools/` and `toolchain/sms-build-compilers/` to `sms/build/compilers/` (otherwise `configure.py` downloads dtk/objdiff/sjiswrap/compilers).
 6. Optional repos next to the project (sibling folders): `decomp-permuter/` (used by `sunshine-pc/tools/permute_fn.py`; path `..\decomp-permuter` relative to the repo's parent) and `sms-upstream/` (doldecomp/sms upstream bodies for reference, commit 20b801cb).
 7. Optional: `git apply wip-uncommitted.patch` (see section 7).
+8. `sms/build/triage.json` + `decomp_queue.json` (bundle `state/`) are needed by `decomp_queue.py`; the setup copies them. To regenerate triage after a full `ninja`: `python sunshine-pc/tools/decomp_triage.py` (writes `sms/build/triage.json`).
+9. Set `origin` to `https://github.com/Astrr00/SMSunshinePC.git` (the setup does this; a bundle clone points at the bundle file).
+10. sccache is optional (`winget install Mozilla.sccache`); `build-alt.cmd` finds it if present.
 
 ## 4. Gates (run these to confirm the new PC reproduces the state)
 
@@ -86,7 +89,7 @@ Next steps in order:
 
 - `sunshine-pc/build/` is huge (tens of GB of experiment trees) and untracked; start fresh on the new PC.
 - Untracked scratch at the repo root (`artifact_*.txt`, `_mr.json`, `crash.log`, `$env`, `sms/_e*.py`, `sms/_*.py`) is leftover and can be deleted.
-- Stateroot (`.stateroot/`, `AGENTS.md` StateRoot block) is optional project memory; the copy in the bundle (`state/stateroot/`) can be restored if you use the `stateroot` CLI.
+- Stateroot (`.stateroot/`, `AGENTS.md` StateRoot block) is optional project memory. `stateroot handoff write` failed on the old PC (CLI error 'system cannot find the path'), so no CLI-written handoff exists; `state/stateroot/` is a raw reference copy (never edit `.stateroot` by hand). Continue from this file, `status.md` and the git log instead.
 
 ## 9. Legal
 

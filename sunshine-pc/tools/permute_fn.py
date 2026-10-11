@@ -19,8 +19,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-SMS = Path("C:/Users/niemc/Documents/Projekte/Sunshine Decomp/sms")
-PERMUTER = Path("C:/Users/niemc/Documents/Projekte/decomp-permuter")
+ROOT = Path(__file__).resolve().parents[2]
+SMS = ROOT / "sms"
+PERMUTER = ROOT.parent / "decomp-permuter"
 FLAGS = 0x08000000 | 0x4000  # CREATE_NO_WINDOW | BELOW_NORMAL_PRIORITY_CLASS
 GIT_DIRS = ["C:/Program Files/Git/bin", "C:/Program Files/Git/usr/bin"]
 

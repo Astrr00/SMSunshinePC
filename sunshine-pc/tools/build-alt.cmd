@@ -16,6 +16,11 @@ if "%TARGET%"=="" set "TARGET=sunshine"
 rem Set ASAN=1 to build with AddressSanitizer (see SUNSHINE_ASAN in CMakeLists.txt).
 set "XCMAKE="
 if defined ASAN set "XCMAKE=-DSUNSHINE_ASAN=ON"
-cmake -S "%SRC%" -B "%BLD%" -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DSUNSHINE_ALLOW_UNRESOLVED=ON -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded "-DCMAKE_C_COMPILER_LAUNCHER=%LOCALAPPDATA%\Microsoft\WinGet\Packages\Mozilla.sccache_Microsoft.Winget.Source_8wekyb3d8bbwe\sccache-v0.18.0-x86_64-pc-windows-msvc\sccache.exe" "-DCMAKE_CXX_COMPILER_LAUNCHER=%LOCALAPPDATA%\Microsoft\WinGet\Packages\Mozilla.sccache_Microsoft.Winget.Source_8wekyb3d8bbwe\sccache-v0.18.0-x86_64-pc-windows-msvc\sccache.exe" %XCMAKE% >nul || exit /b 1
+set "SCCACHE="
+for /f "delims=" %%S in ('where sccache.exe 2^>nul') do if not defined SCCACHE set "SCCACHE=%%S"
+if not defined SCCACHE for /d %%D in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\Mozilla.sccache_*") do for /d %%E in ("%%D\sccache-*") do if exist "%%E\sccache.exe" set "SCCACHE=%%E\sccache.exe"
+set "XLAUNCH="
+if defined SCCACHE set "XLAUNCH=-DCMAKE_C_COMPILER_LAUNCHER=%SCCACHE% -DCMAKE_CXX_COMPILER_LAUNCHER=%SCCACHE%"
+cmake -S "%SRC%" -B "%BLD%" -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DSUNSHINE_ALLOW_UNRESOLVED=ON -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded %XLAUNCH% %XCMAKE% >nul || exit /b 1
 rem One build at a time across all trees (8 jobs, low priority); the lock is released when the build process ends.
 start "" /b /wait /low python "%~dp0locked.py" cmake --build "%BLD%" --target %TARGET% -j 8
