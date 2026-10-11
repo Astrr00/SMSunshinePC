@@ -1,0 +1,18 @@
+# Diagnosis only (airport/1 + dev verbs): confirm the airport exit end to end. Run with SUNSHINE_DEV_SKIP_MOVIES=1 to skip the
+# arrest film. Success = a live Mario and director in stage 1 (dolpic0) after the save prompt, with shines=1.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=90
+killboss
+wait frames=300
+tpshine
+wait frames=120
+log
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=6000
+log
+wait frames=120
+shot dolpic_arrival.png
+wait frames=60
+log
+end
