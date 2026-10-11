@@ -763,6 +763,7 @@ void TFlyEnemy::fly()
 	nextPos += mLinearVelocity;
 
 	JGeometry::TVec3<f32> vel = mVelocity;
+	char trash[24];
 	vel.x += *gpMarioSpeedX / mTestMarioSpMax;
 	vel.z += *gpMarioSpeedZ / mTestMarioSpMax;
 	nextPos += vel;

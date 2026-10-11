@@ -419,7 +419,7 @@ void TTinKoopaLaunchOrder::checkOrder()
 				count = mCount;
 			}
 
-			if (mKind == 1)
+			if ((int)mKind == 1)
 				count = count <= 2 ? count : 2;
 
 			mOwner->setLaunchSchedule(count, mKind);

@@ -296,7 +296,6 @@ void TMario::checkCollision()
 			continue;
 		}
 
-		// TODO: switch still a bit wrong!
 		switch (mCollisions[i]->getActorType()) {
 		// Other mario (enemy mario?)
 		case 0x80000001:
@@ -390,6 +389,8 @@ void TMario::checkCollision()
 			break;
 
 		// R1: keepDistance (cases sharing L_80161364 leaf)
+		case 0x8000022:
+		case 0x8000023:
 		case 0x10000033:
 		case 0x400001A6:
 			keepDistance(*mCollisions[i], 0.0f);

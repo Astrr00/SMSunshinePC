@@ -304,6 +304,7 @@ void TBWLeashNode::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	if (mIndex < mOwner->mRope->mNumPoints - 1)
 		mMActor->perform(cue, graphics);
+	char trash[0x60];
 }
 
 TBWLeash::TBWLeash(TBossWanwan* owner, int numNodes, const char* name)

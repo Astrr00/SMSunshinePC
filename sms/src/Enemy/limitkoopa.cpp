@@ -465,23 +465,26 @@ BOOL TNerveLimitKoopaGetDown::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveLimitKoopaGetShowered::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TLimitKoopa* koopa = (TLimitKoopa*)spine->getBody();
 	koopa->changeAnm(0xE, koopa->getParam()->waterhitSpeed.get());
-	return koopa->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? true : false;
+	return koopa->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? TRUE : FALSE;
 }
 
 BOOL TNerveLimitKoopaStagger::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TLimitKoopa* koopa = (TLimitKoopa*)spine->getBody();
 	koopa->changeAnm(9, koopa->getParam()->staggerSpeed.get());
-	return koopa->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? true : false;
+	return koopa->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? TRUE : FALSE;
 }
 
 BOOL TNerveLimitKoopaTumble::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TLimitKoopa* koopa = (TLimitKoopa*)spine->getBody();
 	koopa->changeAnm(8, koopa->getParam()->tumbleSpeed.get());
-	return koopa->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? true : false;
+	return koopa->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? TRUE : FALSE;
 }
 
 BOOL TNerveLimitKoopaWait::execute(TSpineBase<TLiveActor>* spine) const

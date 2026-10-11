@@ -272,6 +272,7 @@ DEFINE_NERVE(TNerveMantaSpawn, TLiveActor)
 
 DEFINE_NERVE(TNerveMantaDeath, TLiveActor)
 {
+	char trash[8];
 	TBossManta* self = (TBossManta*)spine->getBody();
 
 	if (spine->getTime() == 0) {

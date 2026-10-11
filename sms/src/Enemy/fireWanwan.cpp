@@ -794,6 +794,7 @@ void TFireWanwan::init(TLiveManager* manager)
 	unk150     = 1;
 	mSpine->initWith(&TNerveFireWanwanGraphWander::theNerve());
 	TPosition3f mtx;
+	char trash[0x8];
 	mtx.translation(mPosition);
 	getModel()->setBaseTRMtx(mtx);
 	getModel()->setBaseScale(mScaling);
@@ -807,9 +808,9 @@ void TFireWanwan::init(TLiveManager* manager)
 	initParticle();
 
 	mCenterJointIdx
-	    = getModel()->getModelData()->getMaterialName()->getIndex("center");
+	    = getModel()->getModelData()->getJointName()->getIndex("center");
 	mHeadJointIdx
-	    = getModel()->getModelData()->getMaterialName()->getIndex("jnt_head");
+	    = getModel()->getModelData()->getJointName()->getIndex("jnt_head");
 	int idx
 	    = getModel()->getModelData()->getMaterialName()->getIndex("_mat_body");
 	SMS_InitPacket_OneTevColor(mMActor->getModel(), idx, GX_TEVREG0,

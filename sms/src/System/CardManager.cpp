@@ -438,6 +438,7 @@ s32 TCardManager::filledInitData_(CARDFileInfo* file)
 		if (errc != 0)
 			return errc;
 	}
+	char trash[0x18];
 
 	sector->clearData();
 	sector->setCheckSum(0);

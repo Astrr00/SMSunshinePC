@@ -276,7 +276,7 @@ void TBEelTears::init(TLiveManager* manager)
 {
 	TSpineEnemy::init(manager);
 	mActorType = 0x08000003;
-	onHitFlag(HIT_FLAG_UNK8000000);
+	onHitFlag(0x80000000);
 	setMActorAndKeeper();
 	mTearsParams = static_cast<TBEelTearsSaveLoadParams*>(getSaveParam());
 	mSpine->initWith(&TNerveBEelTearsGenerate::theNerve());

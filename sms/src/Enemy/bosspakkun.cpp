@@ -1112,10 +1112,10 @@ const char** TBossPakkun::getBasNameTable() const
 
 void TBossPakkun::setGroundCollision()
 {
+	TPosition3f collisionMtx;
 	const TNerveBase<TLiveActor>* dieNerve = &TNerveBPDie::theNerve();
 	if (mSpine->getLatestNerve() != dieNerve
 	    && mMapCollisionManager != nullptr) {
-		TPosition3f collisionMtx;
 		collisionMtx.set(getModel()->getAnmMtx(2));
 		if (mMapCollisionManager->unk8 != nullptr)
 			mMapCollisionManager->unk8->moveMtx(collisionMtx);
@@ -1600,7 +1600,7 @@ DEFINE_NERVE(TNerveBPSwallow, TLiveActor)
 	gpMarioParticleManager->emitAndBindToMtxPtr(
 	    SCENE_BOSSPAKKUN_JPA_MS_BOPA_WATHIT, jointMtx, 1, boss);
 	gpMarioParticleManager->emitAndBindToMtxPtr(
-	    SCENE_BOSSPAKKUN_JPA_MS_BOPA_WATHIT_W, jointMtx, 1, boss);
+	    SCENE_BOSSPAKKUN_JPA_MS_BOPA_WATHIT_W, jointMtx, 1, (u8*)boss + 1);
 
 	if (boss->unk170 != 0) {
 		boss->changeBck(26);
@@ -1649,7 +1649,7 @@ DEFINE_NERVE(TNerveBPTumble, TLiveActor)
 
 	gpMarioParticleManager->emitAndBindToMtxPtr(
 	    SCENE_BOSSPAKKUN_JPA_MS_BOPA_JITA, boss->getModel()->getAnmMtx(0), 1,
-	    boss);
+	    (u8*)boss + 8);
 	gpCameraShake->keepShake(static_cast<EnumCamShakeMode>(0x11), 1.0f);
 	if ((spine->getTime() / 60) % 2 != 0)
 		boss->rumblePad(0, boss->mPosition);

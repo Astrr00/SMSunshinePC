@@ -801,6 +801,7 @@ DEFINE_NERVE(TNerveBGKSleep, TLiveActor)
 
 DEFINE_NERVE(TNerveBGKAppear, TLiveActor)
 {
+	char trash[0x20];
 	TBiancoGateKeeper* self = (TBiancoGateKeeper*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -834,6 +835,7 @@ DEFINE_NERVE(TNerveBGKAppear, TLiveActor)
 
 DEFINE_NERVE(TNerveBGKWait, TLiveActor)
 {
+	char trash[0x20];
 	TBiancoGateKeeper* self = (TBiancoGateKeeper*)spine->getBody();
 	MActor* actor           = self->getMActor();
 
@@ -906,6 +908,7 @@ DEFINE_NERVE(TNerveBGKWait, TLiveActor)
 
 DEFINE_NERVE(TNerveBGKWait2, TLiveActor)
 {
+	char trash[0x28];
 	TBiancoGateKeeper* self = (TBiancoGateKeeper*)spine->getBody();
 	MActor* actor           = self->getMActor();
 
@@ -974,6 +977,7 @@ DEFINE_NERVE(TNerveBGKSleepDamage, TLiveActor)
 
 DEFINE_NERVE(TNerveBGKAwakeDamage, TLiveActor)
 {
+	char trash[8];
 	TBiancoGateKeeper* self = (TBiancoGateKeeper*)spine->getBody();
 
 	if (spine->getTime() == 0)
@@ -1079,6 +1083,7 @@ DEFINE_NERVE(TNerveBGKDive, TLiveActor)
 
 DEFINE_NERVE(TNerveBGKLaunchGoro, TLiveActor)
 {
+	char trash[8];
 	TBiancoGateKeeper* self = (TBiancoGateKeeper*)spine->getBody();
 
 	if (spine->getTime() == 0)

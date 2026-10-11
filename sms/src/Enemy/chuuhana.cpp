@@ -651,8 +651,8 @@ void TChuuHana::forceKill()
 	if (!(mGroundPlane->isIllegalData()
 	      || (!mGroundPlane->isDeathPlane() && !mGroundPlane->isPool()
 	          && !mGroundPlane->isWaterSurface()))
-	    || (gpMap->isInArea(mPosition.x, mPosition.z)
-	        && mGroundPlane->isIllegalData()))
+	    || !gpMap->isInArea(mPosition.x, mPosition.z)
+	    || mGroundPlane->isIllegalData())
 		kill();
 }
 

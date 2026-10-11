@@ -460,7 +460,7 @@ void TKoopaFlame::fire(const JGeometry::TVec3<f32>& pos,
 
 void TKoopaFlame::control()
 {
-	if (mCurLength >= mMaxLength) {
+	if (!(mCurLength < mMaxLength)) {
 		onHitFlag(HIT_FLAG_CANNOT_ATTACK);
 		onHitFlag(HIT_FLAG_CANNOT_GET_HIT);
 		onHitFlag(HIT_FLAG_NO_COLLISION);
@@ -472,10 +472,6 @@ void TKoopaFlame::control()
 	f32 y = mDirection.y * mCurLength + mBase.y;
 	f32 z = mDirection.z * mCurLength + mBase.z;
 
-	offHitFlag(HIT_FLAG_CANNOT_ATTACK);
-	offHitFlag(HIT_FLAG_CANNOT_GET_HIT);
-	offHitFlag(HIT_FLAG_NO_COLLISION);
-
 	f32 height = mHeight;
 	if (height <= 0.0f)
 		height = 2.0f * mRadius;
@@ -483,6 +479,9 @@ void TKoopaFlame::control()
 	mPosition.x = x;
 	mPosition.y = y;
 	mPosition.z = z;
+	offHitFlag(HIT_FLAG_CANNOT_ATTACK);
+	offHitFlag(HIT_FLAG_CANNOT_GET_HIT);
+	offHitFlag(HIT_FLAG_NO_COLLISION);
 	mAttackRadius = mRadius;
 	mAttackHeight = height;
 	mDamageRadius = mRadius;
@@ -945,31 +944,22 @@ f32 TKoopa::getNeckFocus() const
 
 	f32 focus = 1.0f;
 	switch (anmIdx) {
-	case 0:
-		if (frame <= 40.0f)
-			focus = 1.0f - frame / 40.0f;
+	case 6:
+		focus = 0.0f;
+		if (frame >= 164.0f)
+			focus = (frame - 164.0f) / (end - 164.0f);
 		break;
 	case 1:
 		focus = 0.0f;
 		break;
-	case 2:
-		focus = 0.0f;
-		break;
-	case 3:
-		focus = frame / end;
-		break;
-	case 4:
-		focus = 0.0f;
-		break;
-	case 5:
-		if (frame <= 103.0f)
-			focus = 1.0f - frame / 103.0f;
-		break;
-	case 6:
-		if (frame >= 164.0f)
-			focus = (frame - 164.0f) / (end - 164.0f);
+	case 0:
+		if (frame <= 40.0f)
+			focus = 1.0f - frame / 40.0f;
 		else
 			focus = 0.0f;
+		break;
+	case 2:
+		focus = 0.0f;
 		break;
 	case 7:
 		if (frame <= 125.0f)
@@ -977,17 +967,41 @@ f32 TKoopa::getNeckFocus() const
 		else
 			focus = (frame - 125.0f) / (end - 125.0f);
 		break;
-	case 8:
-		if (frame <= 30.0f)
-			focus = 1.0f - frame / 30.0f;
-		else if (frame > 170.0f)
-			focus = (frame - 170.0f) / (end - 170.0f);
-		break;
 	case 9:
 		if (frame <= 30.0f)
 			focus = 1.0f - frame / 30.0f;
-		else if (frame > 65.0f)
+		else if (frame <= 65.0f)
+			focus = 0.0f;
+		else
 			focus = (frame - 65.0f) / (end - 65.0f);
+		break;
+	case 8:
+		if (frame <= 30.0f)
+			focus = 1.0f - frame / 30.0f;
+		else if (frame <= 170.0f)
+			focus = 0.0f;
+		else
+			focus = (frame - 170.0f) / (end - 170.0f);
+		break;
+	case 14:
+		if (frame <= 20.0f)
+			focus = 1.0f - frame / 20.0f;
+		else if (frame <= 40.0f)
+			focus = 0.0f;
+		else
+			focus = (frame - 40.0f) / (end - 40.0f);
+		break;
+	case 4:
+		focus = 0.0f;
+		break;
+	case 5:
+		if (frame <= 103.0f)
+			focus = 1.0f - frame / 103.0f;
+		else
+			focus = 0.0f;
+		break;
+	case 3:
+		focus = frame / end;
 		break;
 	case 12:
 		if (frame <= 200.0f)
@@ -1009,12 +1023,9 @@ f32 TKoopa::getNeckFocus() const
 		else
 			focus = 1.0f;
 		break;
-	case 14:
-		if (frame <= 20.0f)
-			focus = 1.0f - frame / 20.0f;
-		else if (frame > 40.0f)
-			focus = (frame - 40.0f) / (end - 40.0f);
-		break;
+	case 10:
+	case 11:
+	case 13:
 	default:
 		break;
 	}

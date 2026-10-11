@@ -423,6 +423,7 @@ void TLampSeesaw::load(JSUMemoryInputStream& stream)
 	TMapObjBase::load(stream);
 
 	f32 height;
+	char trash[4]; // unused stack slot (present in the retail frame)
 	stream >> height;
 	unk13C = mInitialPosition.y - height;
 	stream >> unk140;
@@ -755,6 +756,7 @@ TBiancoWatermillVertical::TBiancoWatermillVertical(const char* name)
     , unk148(nullptr)
     , unk14C(nullptr)
 {
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 }
 
 void TBiancoWatermillVertical::load(JSUMemoryInputStream& stream)
@@ -806,6 +808,7 @@ void TBiancoWatermillVertical::control()
 
 void TBiancoWatermillVertical::setGroundCollision()
 {
+	char trash[8]; // unused stack slot (present in the retail frame)
 	if (unk144 || mColCount != 0) {
 		MtxPtr mtx = getModel()->getAnmMtx(0);
 		if (TMapCollisionBase* col = mMapCollisionManager->unk8)

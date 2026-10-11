@@ -1265,9 +1265,7 @@ static inline void updateCoinBlendPaneState(TBlendPane*& pane, bool& isFinished)
 {
 	pane->update();
 
-	if (pane->unk24) {
-		isFinished = false;
-	} else {
+	if (!pane->unk24) {
 		bool paneFinished = false;
 		if (pane->unk14.x1 == 0 && pane->unk14.y1 == 0)
 			paneFinished = true;
@@ -1277,6 +1275,8 @@ static inline void updateCoinBlendPaneState(TBlendPane*& pane, bool& isFinished)
 			                      TGCConsole2::cCoinBotPoint);
 			isFinished = false;
 		}
+	} else {
+		isFinished = false;
 	}
 }
 
@@ -2640,18 +2640,18 @@ bool TGCConsole2::startAppearBalloon(u32 messageID, bool autoClose)
 		return false;
 
 	if (unk10 != 0) {
-		if (unk3F4 != 0xffffffff)
-			return false;
-
-		unk3F4 = messageID;
-		// The ROM compares unk3E0 with itself here, so the middle term is
-		// always true. Probably a copy-paste slip in the original source.
-		if (unk3F4 != 0xffffffff || (unk3E0 == unk3E0 && unk3E4 == 0)) {
-			unk3B8->hide();
-			unk48 = 0;
-			unk10 = 4;
+		if (unk3F4 == 0xffffffff) {
+			unk3F4 = messageID;
+			// The ROM compares unk3E0 with itself here, so the middle term is
+			// always true. Probably a copy-paste slip in the original source.
+			if (unk3F4 != 0xffffffff || (unk3E0 == unk3E0 && unk3E4 == 0)) {
+				unk3B8->hide();
+				unk48 = 0;
+				unk10 = 4;
+			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	if (gpMarDirector->mState == TMarDirector::STATE_PAUSE_MENU || !unk46)
@@ -3086,7 +3086,7 @@ bool TGCConsole2::processAppearStar(int param_1)
 	for (int i = 0; i < 3; ++i) {
 		if (param_1 == i * 6 + 28) {
 			if (i == 2) {
-				if ((!unk50 && shines >= 100) || (unk50 && shines > 100))
+				if ((!unk50 && shines >= 100) || (shines > 100 && unk50))
 					unk134[i]->getPane()->show();
 			} else {
 				unk134[i]->getPane()->show();

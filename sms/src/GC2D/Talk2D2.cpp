@@ -757,6 +757,7 @@ void TTalk2D2::moveTalkWindow()
 
 void TTalk2D2::checkControler()
 {
+	char trash[0x60]; // unused stack slot (present in the retail frame)
 	if (unk6C[unk274]->isVisible()) {
 		if (unk26A) {
 			if (unk26D || mGamePad->checkFrameMeaning(TMarioGamePad::MEANING_SELECT_A)

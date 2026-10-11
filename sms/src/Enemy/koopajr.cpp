@@ -316,9 +316,10 @@ void TKoopaJr::init(TLiveManager* manager)
 	mMActor->setLightType(1);
 	initAnmSound();
 
+	f32 height = ((TKoopaJrParams*)getSaveParam())->mSLDamageHeight.get();
 	initHitActor(0x8000028, 1, 0, 0.0f, 0.0f,
 	             ((TKoopaJrParams*)getSaveParam())->mSLDamageRadius.get(),
-	             ((TKoopaJrParams*)getSaveParam())->mSLDamageHeight.get());
+	             height);
 	offHitFlag(HIT_FLAG_NO_COLLISION);
 
 	mSpine->initWith(&TNerveKoopaJrWait::theNerve());
@@ -327,11 +328,13 @@ void TKoopaJr::init(TLiveManager* manager)
 	// the result.
 	mKillerManager = (TBathtubKillerManager*)JDrama::TNameRefGen::search(
 	    "バスタブキラーマネージャー");
+	(void)(*(volatile u32*)&mKillerManager->unk38 == 0);
 
 	if (!mSubmarineManager) {
 		mSubmarineManager
 		    = (TKoopaJrSubmarineManager*)JDrama::TNameRefGen::search(
 		        "クッパジュニアサブマリンマネージャー");
+		(void)(*(volatile u32*)&mSubmarineManager->unk38 == 0);
 	}
 
 	f32 scale = ((TKoopaJrParams*)getSaveParam())->mSLKoopaJrScale.get();
@@ -983,13 +986,13 @@ void TKoopaJrSubmarine::makeKillerVelocity(TBathtubKiller* killer,
 		axis.cross(velocity, toMario);
 		axis.normalize();
 
-		f32 angle = 0.62831855f;
 		JGeometry::TQuat4<f32> rotation;
-		rotation.setRotate(axis, angle);
+		rotation.setRotate(axis, 0.62831855f);
 		rotation.rotate(velocity, velocity);
 
 		axis = toMario;
 		int phase = mKillerIndex % 4;
+		f32 angle = 0.62831855f;
 		if (phase == 0)
 			angle = -0.15707964f;
 		else if (phase == 1)
@@ -1221,15 +1224,21 @@ void TKoopaJrSubmarineManager::createModelData()
 	createModelDataArray(entry);
 }
 
-// The retail load()/loadAfter() of this manager also read unk38 around the
-// calls and drop the result; that is not reproduced (it has no effect).
+// Retail load()/loadAfter() read unk38 around the base call and drop the
+// result; volatile reads keep those loads (the dead compares fold away).
 void TKoopaJrSubmarineManager::load(JSUMemoryInputStream& stream)
 {
+	(void)(*(volatile u32*)&unk38 == 0);
 	TEnemyManager::load(stream);
 	unk38 = new TKoopaJrSubmarineParams("/enemy/koopajrsubmarine.prm");
+	(void)(*(volatile u32*)&unk38 == 0);
 }
 
-void TKoopaJrSubmarineManager::loadAfter() { TEnemyManager::loadAfter(); }
+void TKoopaJrSubmarineManager::loadAfter()
+{
+	TEnemyManager::loadAfter();
+	(void)(*(volatile u32*)&unk38 == 0);
+}
 
 TSpineEnemy* TKoopaJrSubmarineManager::createEnemyInstance()
 {

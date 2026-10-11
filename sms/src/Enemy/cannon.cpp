@@ -65,6 +65,7 @@ f32 TCannon::mSearchRate        = 0.02f;
 
 BOOL TNerveCannonObject::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x18];
 	TCannon* self = (TCannon*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -1108,6 +1109,7 @@ TCannonDom::TCannonDom(TLiveActor* owner, int jointIndex, SDLModelData* model,
     , unk30(0.0f)
 {
 	TMsRange<f32> range(0.0f, 360.0f);
+	char trash[4];
 	unk30 = range.rand();
 	if (mAnmSound != nullptr)
 		return;
