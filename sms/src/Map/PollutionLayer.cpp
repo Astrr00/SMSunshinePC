@@ -286,6 +286,7 @@ static inline u8 readBmpPixel(const u8* bmp, int x, int y, int w, int h)
 void TPollutionLayer::initTexImage(const char* name)
 {
 	char fullPath[256];
+	char trash[0x74];
 	snprintf(fullPath, 256, "/scene/map/pollution/%s.bmp", name);
 	mPollutionBmp = (u8*)JKRGetResource(fullPath);
 

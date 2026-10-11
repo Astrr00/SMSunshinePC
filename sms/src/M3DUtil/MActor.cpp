@@ -13,6 +13,7 @@
 
 MActor::MActor(MActorAnmData* anm_data)
 {
+	char trash[8];
 	mAnmData   = nullptr;
 	mModel     = nullptr;
 	unk8       = nullptr;
@@ -102,6 +103,7 @@ void MActor::setMActorAnmData(MActorAnmData* anm_data) { mAnmData = anm_data; }
 
 void MActor::setModel(J3DModel* param_1, u32 param_2)
 {
+	char trash[0x18];
 	mModel       = param_1;
 	mMaterialNum = param_1->getModelData()->getMaterialNum();
 	unk2C        = new u16[mMaterialNum];

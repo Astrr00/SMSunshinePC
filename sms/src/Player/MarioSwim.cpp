@@ -12,6 +12,7 @@ void TMario::isSwimWaiting() { }
 
 void TMario::doSwimming()
 {
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 	if (mInput & 0x8000) {
 		changePlayerStatus(MARIO_STATUS_SWIM_DIVE, 0, false);
 		return;
@@ -34,7 +35,7 @@ void TMario::doSwimming()
 		rotMaxF = (f32)mSwimParams.mSwimmingRotSpMax.get();
 	}
 
-	s16 rotSp    = mForwardVel / 32.0f * (rotMaxF - rotMinF) + rotMinF;
+	s16 rotSp    = mForwardVel * (rotMaxF - rotMinF) / 32.0f + rotMinF;
 	s16 diff     = mIntendedYaw - mFaceAngle.y;
 	mFaceAngle.y = mIntendedYaw - IConverge(diff, 0, rotSp, rotSp);
 

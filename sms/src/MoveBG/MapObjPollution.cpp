@@ -92,6 +92,7 @@ void TMapObjRevivalPollution::perform(u32 cue, JDrama::TGraphics*)
 
 void TMapObjRevivalPollution::loadAfter()
 {
+	char trash[0x28];
 	JDrama::TViewObj::loadAfter();
 
 	for (int i = 0; i < unk10; ++i)

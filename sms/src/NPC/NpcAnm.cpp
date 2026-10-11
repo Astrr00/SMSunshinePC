@@ -264,6 +264,7 @@ void TBaseNPC::randomizeBckAndBtpFrame_()
 
 void TBaseNPC::walkAnmRateChange_()
 {
+	char trash[0x8];
 	f32 dVar13 = MsSqrtf(mLinearVelocity.x * mLinearVelocity.x
 	                     + mLinearVelocity.z * mLinearVelocity.z);
 	if (dVar13 < 0.001f) {
@@ -517,6 +518,7 @@ void TBaseNPC::npcTalking()
 
 void TBaseNPC::npcTalkOut()
 {
+	char trash[0x10];
 	mTalkForbidCount = 60;
 
 	if (checkLiveFlag(LIVE_FLAG_UNK80000)) {
@@ -805,6 +807,7 @@ void TBaseNPC::npcMadIn()
 
 bool TBaseNPC::npcMadding()
 {
+	char trash[0x28];
 	bool result = false;
 
 	if (!checkLiveFlag(LIVE_FLAG_UNK2000000)) {

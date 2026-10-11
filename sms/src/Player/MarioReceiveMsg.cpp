@@ -91,6 +91,7 @@ void TMario::getCoinBlue()
 
 BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0xa0];
 	if (checkFlag(MARIO_FLAG_GAME_OVER))
 		return FALSE;
 

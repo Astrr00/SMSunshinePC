@@ -39,6 +39,7 @@ void TTalkCursor::associateNPC(TBaseNPC* param_1)
 {
 	if (param_1) {
 		TPosition3f mtx(param_1->getCursorPos());
+		char trash[0x10];
 		unk10->getModel()->setBaseTRMtx(mtx);
 		unkC.off(CUE_CALC_VIEW | CUE_ENTRY);
 	} else {

@@ -52,9 +52,9 @@ public:
 	void emitCamShake_();
 	void emitOneTimeSandPillar_(TBossHanachanPartsBody*);
 	void emitParticle_();
-	static void staticLoadParticle();
 
 public:
+	static void staticLoadParticle();
 	/* 0x150 */ TBossHanachanPartsBody* mBodyParts[8];
 	/* 0x170 */ TBossHanachanPartsHead* mHeadPart;
 	/* 0x174 */ s32 mWeakBodyIndex;

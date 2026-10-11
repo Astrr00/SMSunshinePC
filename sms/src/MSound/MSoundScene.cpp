@@ -19,6 +19,7 @@ MSSceneSE::MSSceneSE(u32 param_1)
 
 void MSSceneSE::frameLoop(u32 sound_id, Vec* trans, u8 trans_num)
 {
+	char trash[0x10];
 	if (MSGMSound->gateCheck(sound_id) && trans_num <= ARRAY_COUNT(mTrans)) {
 		Vec* ptr = trans;
 		for (u8 i = 0; i < trans_num; ++i) {
@@ -37,6 +38,7 @@ void MSSceneSE::frameLoop(u32 sound_id, Vec* trans, u8 trans_num)
 
 		for (u8 i = 0; i < trans_num; ++i) {
 			Vec listenerTrans;
+			char trash[0x1c];
 			MTXMultVec(listenerMtx, mTrans[i], &listenerTrans);
 
 			f32 angle = atan2f(listenerTrans.x, listenerTrans.z);

@@ -59,6 +59,7 @@ void TMovieRumble::checkRumbleOn()
 #pragma dont_inline on
 void TMovieRumble::checkRumbleOff()
 {
+	char trash[16];
 	if (unk24 != -1 && unk20 <= unk10->getFrameNumber()) {
 		SMSRumbleMgr->stop();
 		unk18 += 1;
@@ -70,10 +71,10 @@ void TMovieRumble::checkRumbleOff()
 
 void TMovieRumble::readCurInfo()
 {
+	Koga::ToolData* toolData = unk14;
 	int group = unk18;
 
-	if (isValid() && unk14->isIndexValid(group)) {
-		Koga::ToolData* toolData = unk14;
+	if (isValid() && toolData->isIndexValid(group)) {
 		toolData->GetValue(group, "start_frame", unk1C);
 		toolData->GetValue(group, "end_frame", unk20);
 		const char* type;

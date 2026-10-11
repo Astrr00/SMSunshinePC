@@ -50,7 +50,9 @@ void TMapObjWaterFilter::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	// TODO: mother of all intern codes...
 
-	if (!unk44 || gpMarDirector->unk124 != 0)
+	if (!unk44)
+		return;
+	if (gpMarDirector->unk124 != 0)
 		return;
 
 	if (gpCamera->isDemoCamera())

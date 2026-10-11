@@ -95,6 +95,7 @@ TLensGlow::TLensGlow(bool param_1, const char* name)
 
 void TLensGlow::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x60];
 	bool inBounds = false;
 	if (gpCameraMario->isMarioIndoor()) {
 		inBounds = false;

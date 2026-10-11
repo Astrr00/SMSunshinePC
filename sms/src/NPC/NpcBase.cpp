@@ -288,6 +288,7 @@ bool TBaseNPC::isSmallNpc() const
 	return result;
 }
 
+#pragma dont_inline on
 bool TBaseNPC::isPollutionNpc() const
 {
 	bool result = false;
@@ -307,6 +308,7 @@ bool TBaseNPC::isPollutionNpc() const
 
 	return result;
 }
+#pragma dont_inline off
 
 bool TBaseNPC::isBeTrampledNpc() const
 {
@@ -383,6 +385,7 @@ bool TBaseNPC::isBehaveToHitNpc() const
 	return result;
 }
 
+#pragma dont_inline on
 bool TBaseNPC::isPartsAnmNpc() const
 {
 	bool result = false;
@@ -399,6 +402,7 @@ bool TBaseNPC::isPartsAnmNpc() const
 	}
 	return result;
 }
+#pragma dont_inline off
 
 bool TBaseNPC::isNeedNeckStraight() const
 {

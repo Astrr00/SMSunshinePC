@@ -168,6 +168,7 @@ void TMapObjTree::initEach()
 
 void TMapObjTree::initMapObj()
 {
+	char trash[8];
 	TMapObjGeneral::initMapObj();
 	initEach();
 	mLeaves = new TMapObjLeaf[mLeafNum];

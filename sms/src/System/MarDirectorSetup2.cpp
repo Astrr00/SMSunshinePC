@@ -45,7 +45,7 @@ void TMarDirector::setup2()
 	    JDrama::TNameRefGen::search("イベントテーブル"));
 	if (unkBC) {
 		u16 index = 0;
-		for (TStageEventInfo* it = unkBC->begin(); it != unkBC->end(); ++it, ++index) {
+		for (TStageEventInfo* it = unkBC->begin(); it != unkBC->end(); ++index, ++it) {
 			JDrama::TNameRef* ref = JDrama::TNameRefGen::search(it->unk14);
 			if (ref) {
 				// TODO: what is ref?
@@ -61,9 +61,10 @@ void TMarDirector::setup2()
 
 	static_cast<TMario*>(JDrama::TNameRefGen::search("マリオ"))
 	    ->setGamePad(unk18[0]);
+	TMarioGamePad* pad = unk18[0];
 	static_cast<CPolarSubCamera*>(JDrama::TNameRefGen::search("camera 1"))
 	    ->unk120
-	    = unk18[0];
+	    = pad;
 
 	unk84 = static_cast<TTalkCursor*>(
 	    JDrama::TNameRefGen::search("会話カーソル"));
@@ -84,8 +85,8 @@ void TMarDirector::setup2()
 	unk78 = static_cast<TGuide*>(JDrama::TNameRefGen::search("ガイド画面"));
 	unkAC = static_cast<TPauseMenu2*>(
 	    JDrama::TNameRefGen::search("ポーズメニュー"));
-	unkB0 = static_cast<TTalk2D2*>(JDrama::TNameRefGen::search("会話表示"));
 	unkAC->mGamePad = unk18[0]; // asm 0x800EFEAC: stw -> 0x10C(unkAC)
+	unkB0 = static_cast<TTalk2D2*>(JDrama::TNameRefGen::search("会話表示"));
 	unkB0->mGamePad = unk18[0]; // asm 0x800EFEEC: stw -> 0x24C(unkB0)
 	unk70
 	    = static_cast<TCardLoad*>(JDrama::TNameRefGen::search("データロード"));
@@ -123,6 +124,7 @@ void TMarDirector::setup2()
 	GXSetDrawDone();
 	GXWaitDrawDone();
 
+	char trash[0xF8];
 	TMapEventSinkInPollution* sinkInPollutionEvent;
 
 	sinkInPollutionEvent = static_cast<TMapEventSinkInPollution*>(

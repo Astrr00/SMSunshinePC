@@ -185,8 +185,9 @@ void TMapObjFlagManager::perform(u32 cue, JDrama::TGraphics* graphics)
 	TMapObjFlag* flag;
 	if (cue & CUE_CALC_ANIM) {
 		for (int i = 0; i < 15; ++i) {
-			for (int j = 0; j < mInfos[i].mFlagNum; ++j) {
-				flag = mInfos[i].mFlags[j];
+			TMapObjFlagInfo& info = mInfos[i];
+			for (int j = 0; j < info.mFlagNum; ++j) {
+				flag = info.mFlags[j];
 				MsMtxSetXYZRPH(flag->mModelMtx, flag->mPosition.x,
 				               flag->mPosition.y, flag->mPosition.z,
 				               flag->mRotation.x, flag->mRotation.y,

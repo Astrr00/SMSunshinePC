@@ -253,10 +253,10 @@ bool TMarDirector::setupObjects()
 	measurementGroup->insert(
 	    new TSnapTimeObj(0xFF00FFFF, "Pollution Check SnapTime"));
 	measurementGroup->insert(
-	    new TSnapTimeObj(0xFF00FFFF, "Pollution Draw SnapTime"));
+	    new TSnapTimeObj(0x0000FFFF, "Pollution Draw SnapTime"));
 	measurementGroup->insert(new TSnapTimeObj(0xFFFFFFFF, "Map Draw SnapTime"));
 	measurementGroup->insert(
-	    new TSnapTimeObj(0xFF00FFFF, "MapObj Draw SnapTime"));
+	    new TSnapTimeObj(0x0000FFFF, "MapObj Draw SnapTime"));
 	measurementGroup->insert(
 	    new TSnapTimeObj(0xFF00FFFF, "Player Draw SnapTime"));
 	measurementGroup->insert(
@@ -265,7 +265,7 @@ bool TMarDirector::setupObjects()
 	measurementGroup->insert(
 	    new TSnapTimeObj(0xFF00FFFF, "PollutionModel Draw SnapTime"));
 	measurementGroup->insert(
-	    new TSnapTimeObj(0xFFFF00FF, "Shadow Draw SnapTime"));
+	    new TSnapTimeObj(0xFF0000FF, "Shadow Draw SnapTime"));
 	measurementGroup->insert(
 	    new TSnapTimeObj(0x000000FF, "Silhouette Draw SnapTime"));
 	measurementGroup->insert(
@@ -307,7 +307,7 @@ bool TMarDirector::setupObjects()
 
 		JDrama::TLookAtCamera* cam = static_cast<JDrama::TLookAtCamera*>(
 		    JDrama::TNameRefGen::search("camera 1"));
-		cam->mAspect = (u16)SMSGetGameVideoWidth() * 0.9134614f
+		cam->mAspect = (u16)SMSGetGameVideoWidth() * 0.91346145f
 		               / (u16)SMSGetGameVideoHeight();
 #ifdef TARGET_PC
 		// Widescreen (Hor+): fovy is unchanged, so the view widens by the EFB width ratio (1.0 at 4:3).

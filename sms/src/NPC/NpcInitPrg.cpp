@@ -123,6 +123,7 @@ inline void TBaseNPC::initSinkNpc_()
 void TBaseNPC::init(TLiveManager* param_1)
 {
 	int iVar18 = mActorType - 0x4000001;
+	char trash[0x70];
 
 	mIndividualParams = gpConductor->unkF4->unk8[iVar18];
 
@@ -384,6 +385,7 @@ void TBaseNPC::setIndividualDifference_(JSUMemoryInputStream& stream)
 	f32 local_a0 = stream.readS32();
 	f32 local_a4 = stream.readS32();
 	int local_a8 = stream.readU32();
+	char trash[0x98];
 
 	if (uVar21 < 0)
 		uVar21 = 0;

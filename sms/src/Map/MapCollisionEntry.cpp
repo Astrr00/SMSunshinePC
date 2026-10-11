@@ -242,6 +242,7 @@ void TMapCollisionWarp::setUp()
 
 	if (checkFlag(FLAG_UNK8000)) {
 		JGeometry::TVec3<f32> local_18(unk20[0][3], unk20[1][3], unk20[2][3]);
+		char trash[4];
 		TMapCollisionBase::updateTrans(local_18);
 	} else {
 		TMapCollisionBase::update();

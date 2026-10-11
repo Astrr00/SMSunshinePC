@@ -134,6 +134,7 @@ void SDLModelData::entrySDLModels()
 	typedef JGadget::TList<SDLDrawBufToken*>::iterator I;
 	for (I it = mDbTokenList.begin(), e = mDbTokenList.end(); it != e; it++) {
 		recursiveEntry(unk0->getRootNode(), *it);
+		char trash[4];
 
 		SDLModel* model = (*it)->mHead;
 		while (model != nullptr) {
@@ -322,6 +323,7 @@ void SDLModel::entry()
 
 	onSdlFlag(FLAG_UNK1);
 	mNextSameMat = nullptr;
+	char trash[16];
 
 	mSdlModelData->registerSDLModel(this);
 }

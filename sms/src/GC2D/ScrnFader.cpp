@@ -157,6 +157,7 @@ void TSMSFader::perform(u32 cue, JDrama::TGraphics*)
 
 void TSMSFader::update()
 {
+	char trash[0x10];
 	updateRequest();
 
 	if (mFadeStatus == TSMSFader::FADE_STATUS_FULLY_FADED_OUT)
@@ -173,7 +174,8 @@ void TSMSFader::updateRequest()
 	if (mWipeRequest.unk0 == UNK30_UNK_18)
 		return;
 
-	f32 fVar1 = mWipeRequest.unk8 - 1.0f / mRate;
+	f32 fVar1 = mWipeRequest.unk8;
+	fVar1 -= 1.0f / mRate;
 	if (fVar1 < 0.0f)
 		fVar1 = 0.0f;
 	mWipeRequest.unk8 = fVar1;
@@ -396,8 +398,7 @@ void TSMSFader::load(JSUMemoryInputStream& stream)
 
 	startFadein(local_1c);
 
-	u32 local_18;
-	stream >> local_18;
+	u32 local_18 = stream.readU32();
 
 	setColor(JUtility::TColor(local_18 >> 24, local_18 >> 16 & 0xFF,
 	                          local_18 >> 8 & 0xFF, local_18 & 0xFF));

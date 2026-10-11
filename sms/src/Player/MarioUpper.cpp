@@ -69,6 +69,7 @@ BOOL TMario::checkPumpEnable()
 
 void TMario::stateMachineUpper()
 {
+	char trash[0x48];
 	switch (mUpperState) {
 	case UPPER_STATE_PUMPING:
 		if (!checkPumpEnable()) {
@@ -80,7 +81,7 @@ void TMario::stateMachineUpper()
 			mPumpCooldown = mUpperBodyParams.mPumpWaitTime.get();
 		}
 		if (!checkFlag(MARIO_FLAG_IN_ANY_WATER) && mWaterGun != nullptr) {
-			s32 flag;
+			bool flag;
 			if (mWaterGun->mCurrentWater == 0) {
 				flag = 0;
 			} else {

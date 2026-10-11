@@ -14,6 +14,7 @@ void TPerformList::forEachPerform(
 
 void TPerformList::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[40];
 	forEachPerform(getChildren().begin(), getChildren().end(), graphics, cue);
 }
 

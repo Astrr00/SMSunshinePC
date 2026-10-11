@@ -85,6 +85,7 @@ void CPolarSubCamera::ctrlMultiPlayerCamera_()
 		mCurrentTarget.unk18.set(unk124);
 	} else {
 		JGeometry::TVec3<f32> center(0.0f, 0.0f, 0.0f);
+		char trash[0x10];
 
 		{
 			TMultiPlayerData* it = unk2BC->mPlayers;

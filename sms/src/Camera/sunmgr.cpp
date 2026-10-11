@@ -31,6 +31,7 @@ TSunMgr::TSunMgr(const char* name)
 
 void TSunMgr::load(JSUMemoryInputStream& stream)
 {
+	char trash[0x40]; // unused stack slot (present in the retail frame)
 	JDrama::TViewObj::load(stream);
 
 	u32 local_24;
@@ -72,8 +73,16 @@ void TSunMgr::load(JSUMemoryInputStream& stream)
 	}
 }
 
+static inline bool sunInBoundsAt(const JGeometry::TVec2<f32>& p, f32 bounds)
+{
+	return -bounds <= p.x && p.x <= bounds && -bounds <= p.y && p.y <= bounds
+	           ? true
+	           : false;
+}
+
 void TSunMgr::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x38]; // unused stack slot (present in the retail frame)
 	if (!(unk15 & 1))
 		return;
 	if (!(cue & CUE_MOVE))
@@ -87,7 +96,7 @@ void TSunMgr::perform(u32 cue, JDrama::TGraphics* graphics)
 	// Transition to noki bay
 	f32 dx = gpMarioPos->x - unk24.x;
 	f32 dz = gpMarioPos->z - unk24.z;
-	if (dx * dx + dz * dz < 160000.0f && gpSunModel->isInBounds(0.3f)) {
+	if (dx * dx + dz * dz < 160000.0f && sunInBoundsAt(gpSunModel->unkF8[0], 0.3f)) {
 		gpMarDirector->setNextStage(9, nullptr);
 		MSound* sound = SMSGetMSound();
 		if (sound->unk7C != nullptr) {
