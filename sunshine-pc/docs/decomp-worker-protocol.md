@@ -1,4 +1,4 @@
-# Decomp worker protocol v3 (Super Mario Sunshine GMSJ01, repo `C:/Users/niemc/Documents/Projekte/Sunshine Decomp`)
+# Decomp worker protocol v3 (Super Mario Sunshine GMSJ01, repo root = the folder containing `sms/` and `sunshine-pc/`)
 
 ## Goal (user rule, latest)
 Every non-100 % GAME function (sms/, mwcc decomp; also PC-valid with clang-cl, keep every `#ifdef TARGET_PC`) must have BEHAVIOUR equal to retail, proven from the retail asm and recorded as `logic-verified` in the ledger. Byte-identical is preferred but NOT required: where it is not reachable you may use your own code (non-retail helpers/wrappers, extra locals, restructured control flow, header edits) as long as behaviour equals retail. Codegen score is only a hint; spend NO effort on codegen-only residue beyond ~8 builds per function. Matching units stay 100 %, DOL SHA-1 stays `9f5a8caf56f5356aeac9d3ed28bf8de976a03625`. Shared/JSystem headers may be edited when it helps (rebuild every includer via `--build`, no drop in Matching units; tell the header owner agent if one is named). No MSL/MetroTRK/THPPlayer/dolphin SDK edits.
@@ -13,7 +13,7 @@ Every non-100 % GAME function (sms/, mwcc decomp; also PC-valid with clang-cl, k
 - `python sunshine-pc/tools/decomp_queue.py claim <You>` next unit; `claim <You> --quick` unit with most >=99 % functions (fast wins); `claim <You> <unit>` specific unit (prints `CLAIMED_BY x` if taken: skip it); `hold <You> <unit>...` same check for several; `release <You> <unit> <note>`; `free <You>`; `status`.
 - `python sunshine-pc/tools/decomp_queue.py ledger <unit> "<bare fn name>" <pct> <status> <You> "<evidence>"`. The tool downgrades `logic-verified` rows lacking `branches mapped` (or `no branches`) to partial and stores pct 100 as `matched`.
 - `python sunshine-pc/tools/decomp_triage.py --build <unit>` (single-unit mwcc, per-function %), `--diff <unit> <sym|demangled-substring> [ctx]`, `--check <unit> <sym>` (call order, vtable slots, fused vs unfused FP, opcode histogram, pool constant VALUES), `--branchscan <unit>` (branch-sense mismatches after identical compares), `--immscan <unit>` (compare immediates / field displacements).
-- `python -m m2c.main --target ppc-mwcc-c++ -f <mangled> sms/build/GMSJ01/asm/<Dir>/<Unit>.s` (retail draft). Upstream bodies: `C:/Users/niemc/Documents/Projekte/sms-upstream/src`. Permuter: `cd sunshine-pc && python tools/permute_fn.py <unit> <sym> --seconds 600 --jobs 2` (>=97 % reg-only functions).
+- `python -m m2c.main --target ppc-mwcc-c++ -f <mangled> sms/build/GMSJ01/asm/<Dir>/<Unit>.s` (retail draft). Upstream bodies: `../sms-upstream/src` (sibling folder). Permuter: `cd sunshine-pc && python tools/permute_fn.py <unit> <sym> --seconds 600 --jobs 2` (>=97 % reg-only functions).
 - Progress: one line per finished function in `sunshine-pc/build/progress.log`: `HH:MM <You> <unit> <fn> <before%>-><after%>`.
 
 ## Loop per unit
