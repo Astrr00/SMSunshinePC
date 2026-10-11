@@ -40,6 +40,7 @@ void TMirrorActor::checkIsInMirror()
 
 	MtxPtr mtx = unk10->getAnmMtx(0);
 	JGeometry::TVec3<f32> local_18;
+	char trash[0x10];
 	if (!(unk1A & 4)) {
 		local_18.set(mtx[0][3], mtx[1][3], mtx[2][3]);
 	} else {
@@ -61,6 +62,7 @@ void TMirrorActor::checkIsInMirror()
 
 void TMirrorActor::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x20];
 	if (cue & CUE_CALC_ANIM) {
 		checkIsInMirror();
 		if (unk18 == 0)
@@ -85,9 +87,9 @@ void TMirrorActor::entryMirrorDrawBufferAlways(J3DModel* model)
 	JDrama::TDrawBufObj* dbOpa = static_cast<JDrama::TDrawBufObj*>(
 	    JDrama::TNameRefGen::search("DrawBuf MirrorAlways Opa"));
 	j3dSys.setDrawBuffer(dbOpa->getDrawBuffer(), 0);
-	JDrama::TDrawBufObj* dbXlu = static_cast<JDrama::TDrawBufObj*>(
+	dbOpa = static_cast<JDrama::TDrawBufObj*>(
 	    JDrama::TNameRefGen::search("DrawBuf MirrorAlways Xlu"));
-	j3dSys.setDrawBuffer(dbXlu->getDrawBuffer(), 1);
+	j3dSys.setDrawBuffer(dbOpa->getDrawBuffer(), 1);
 	model->calc();
 	model->viewCalc();
 	model->entry();
@@ -105,6 +107,7 @@ void TMirrorActor::init(J3DModel* param_1, u16 param_2)
 		unk14                   = new J3DModel(modelData, 0, 1);
 	}
 
+	char trash[8];
 	JDrama::TViewObjPtrListT<JDrama::TViewObj>* mirrorScene
 	    = static_cast<JDrama::TViewObjPtrListT<JDrama::TViewObj>*>(
 	        JDrama::TNameRefGen::search("鏡シーン"));

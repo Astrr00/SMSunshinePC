@@ -578,6 +578,7 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 			console->unk17C[console->unk1CC[0] * 2]->show();
 			playLifeChangeSound(0x4801);
 		} else if (console->unk1CC[0] > 0) {
+			playLifeChangeSound(0x4823);
 			console->unk17C[console->unk1CC[0] * 2]->hide();
 			console->unk17C[console->unk1CC[0] * 2]->setBounds(
 			    JUTRect(console->unk1D0[console->unk1CC[0]].x1,
@@ -590,33 +591,31 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 			            console->unk1D0[console->unk1CC[0]].x2,
 			            console->unk1D0[console->unk1CC[0]].y2));
 			--console->unk1CC[0];
-			playLifeChangeSound(0x4823);
+			if (console->unk1CC[0] == 0) {
+				console->unk17C[0]->hide();
+				console->unk17C[0]->setBounds(
+				    JUTRect(console->unk1D0[0].x1, console->unk1D0[0].y1,
+				            console->unk1D0[0].x2, console->unk1D0[0].y2));
+				console->unk17C[1]->setBounds(
+				    JUTRect(console->unk1D0[0].x1, console->unk1D0[0].y1,
+				            console->unk1D0[0].x2, console->unk1D0[0].y2));
+			}
 		}
 		console->unk1C = console->unk1CC[0];
 		if (console->unk1CC[0] >= 4) {
 			if (airMode) {
 				((J2DPicture*)console->unk178->getPane())->mWhite = 0x00FFFFFF;
-				((J2DPicture*)console->unk178->getPane())->mBlack = 0x003CFF00;
 				((J2DPicture*)console->unk17C[0])->mWhite         = 0x00FFFFFF;
-				((J2DPicture*)console->unk17C[0])->mBlack         = 0x003CFF00;
 			} else {
 				((J2DPicture*)console->unk178->getPane())->mWhite = 0xFFFFFFFF;
-				((J2DPicture*)console->unk178->getPane())->mBlack = 0;
 				((J2DPicture*)console->unk17C[0])->mWhite         = 0xFFFFFFFF;
-				((J2DPicture*)console->unk17C[0])->mBlack         = 0;
 			}
+		} else if (airMode) {
+			((J2DPicture*)console->unk178->getPane())->mWhite = 0x00A0FFFF;
+			((J2DPicture*)console->unk17C[0])->mWhite         = 0x008080FF;
 		} else {
-			if (airMode) {
-				((J2DPicture*)console->unk178->getPane())->mWhite = 0x0010FFFF;
-				((J2DPicture*)console->unk178->getPane())->mBlack = 0x003CFF00;
-				((J2DPicture*)console->unk17C[0])->mWhite         = 0x0010FFFF;
-				((J2DPicture*)console->unk17C[0])->mBlack         = 0x003CFF00;
-			} else {
-				((J2DPicture*)console->unk178->getPane())->mWhite = 0x7F7F7FFF;
-				((J2DPicture*)console->unk178->getPane())->mBlack = 0;
-				((J2DPicture*)console->unk17C[0])->mWhite         = 0x7F7F7FFF;
-				((J2DPicture*)console->unk17C[0])->mBlack         = 0;
-			}
+			((J2DPicture*)console->unk178->getPane())->mWhite = 0x808080FF;
+			((J2DPicture*)console->unk17C[0])->mWhite         = 0x808080FF;
 		}
 	}
 }
@@ -951,18 +950,18 @@ static inline void updateCounterState(TGCConsole2* console)
 		console->unk20 = coins;
 	}
 
-	bool waitForStarHud
-	    = gpMarioOriginal->mStatus == 0xC400201
-	      && gpMarDirector->mState != TMarDirector::STATE_PAUSE_MENU
-	      && !console->unk50 && !console->unk140->isInterpolatorAtZero();
-	if (waitForStarHud) {
-		++console->unk30;
-		if (console->unk30 > 0xc8) {
-			console->startAppearStar();
-			console->startAppearMario(false);
-			console->unk70 = 0xffff;
-			console->unk59 = 0;
-			console->unk30 = 0;
+	if (gpMarioOriginal->mStatus == 0xC400201
+	    && gpMarDirector->mState != TMarDirector::STATE_PAUSE_MENU
+	    && !console->unk50) {
+		if (!console->unk140->isInterpolatorAtZero()) {
+			++console->unk30;
+			if (console->unk30 > 0xc8) {
+				console->startAppearStar();
+				console->startAppearMario(false);
+				console->unk70 = 0xffff;
+				console->unk59 = 0;
+				console->unk30 = 0;
+			}
 		}
 	} else {
 		console->unk30 = 0;
@@ -1407,13 +1406,10 @@ static inline void updateWaterTankState(TGCConsole2* console)
 	if (console->unk4B) {
 		bool done = true;
 		done &= console->unk2F8->update();
-		done &= console->unk26C->update();
-		done &= console->unk270->update();
 		done &= console->unk274->update();
+		done &= console->unk270->update();
+		done &= console->unk26C->update();
 		if (done) {
-			console->unk2F8->getPane()->hide();
-			console->unk274->getPane()->hide();
-			console->unk29C->getPane()->hide();
 			console->unk4B = 0;
 			console->unk46 = 0;
 		}
@@ -3916,11 +3912,11 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 
 		if (unk35) {
 			bool done = true;
+			if (!unk108->update())
+				done = false;
 			if (!unk140->update())
 				done = false;
 			if (!unk160->update())
-				done = false;
-			if (!unk108->update())
 				done = false;
 
 			setEmitterToPaneCenter(unk124, unkCC->getPane());
@@ -3945,7 +3941,7 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 		updateTimerAppearState(this);
 		updateTelopState(this, flags);
 
-		if (!unk46 && SMS_CheckMarioFlag(0x10000) && !unk45 && !unk50)
+		if (!unk46 && gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD) && !unk45 && !unk50)
 			startAppearTank();
 		updateWaterTankState(this);
 

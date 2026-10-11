@@ -84,6 +84,7 @@ void TBaseNPC::execWalk(bool param_1)
 
 bool TBaseNPC::execUTurn()
 {
+	char trash[0x10];
 	JGeometry::TVec3<f32> local_24 = unkF4.getPoint();
 	local_24 -= mPosition;
 	f32 targetYaw = MsGetRotFromZaxis(local_24).y;

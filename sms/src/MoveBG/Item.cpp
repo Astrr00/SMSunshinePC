@@ -239,6 +239,7 @@ void TCoin::appearWithoutSound()
 
 void TCoin::appear()
 {
+	char trash[0x20];
 	if (isActorType(0x20000010)) {
 		if (!TFlagManager::smInstance->getBlueCoinFlag(
 		        gpMarDirector->getCurrentMap(), mEventId))
@@ -1054,7 +1055,9 @@ BOOL TEggYoshi::receiveMessage(THitActor* sender, u32 message)
 	}
 
 	if (message == HIT_MESSAGE_UNK10) {
+		char trash2[8];
 		JGeometry::TVec3<f32> v = mVelocity;
+		char trash[8];
 		makeObjAppeared();
 		mVelocity.y = v.y;
 		offLiveFlag(LIVE_FLAG_UNK10);

@@ -275,6 +275,14 @@ TSelectMenu::TSelectMenu(const char* pName)
 {
 }
 
+// wrapper: keeps SMS_getShineID out of line, as retail does
+#pragma dont_inline on
+static s16 getShineIDOutOfLine(u32 stage, u32 scenario, bool is_etc_shine)
+{
+	return SMS_getShineID(stage, scenario, is_etc_shine);
+}
+#pragma dont_inline off
+
 void TSelectMenu::initData(u8 stage, JKRArchive* pArch,
                            TSelectShineManager* pShineMgr,
                            TSelectDir* pSelectDir)
@@ -819,8 +827,8 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					                         1.0f);
 					mScenarioShadow1->remove(1);
 
-					s16 shineID = SMS_getShineID(SMS_getShineStage(mStage),
-					                             mSelectedShine, false);
+					s16 shineID = getShineIDOutOfLine(SMS_getShineStage(mStage),
+                                  mSelectedShine, false);
 					const char* scenarioName = SMSGetMessageData(
 					    mScenarioBmg2, SMS_getNormalStage(shineID));
 
@@ -834,8 +842,8 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 
 					mSelectedShine = prevIndex;
 
-					s16 shineID2 = SMS_getShineID(SMS_getShineStage(mStage),
-					                              mSelectedShine, false);
+					s16 shineID2 = getShineIDOutOfLine(SMS_getShineStage(mStage),
+                                   mSelectedShine, false);
 					const char* scenarioName2 = SMSGetMessageData(
 					    mScenarioBmg2, SMS_getNormalStage(shineID2));
 					strncpy(mScenarioText2->getStringPtr(), scenarioName2, 127);
@@ -893,8 +901,8 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					                         1.0f);
 					mScenarioShadow1->remove(1);
 
-					s16 shineID = SMS_getShineID(SMS_getShineStage(mStage),
-					                             mSelectedShine, false);
+					s16 shineID = getShineIDOutOfLine(SMS_getShineStage(mStage),
+                                  mSelectedShine, false);
 					const char* scenarioName = SMSGetMessageData(
 					    mScenarioBmg2, SMS_getNormalStage(shineID));
 
@@ -907,8 +915,8 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 
 					mSelectedShine = nextIndex;
 
-					s16 shineID2 = SMS_getShineID(SMS_getShineStage(mStage),
-					                              mSelectedShine, false);
+					s16 shineID2 = getShineIDOutOfLine(SMS_getShineStage(mStage),
+                                   mSelectedShine, false);
 					const char* scenarioName2 = SMSGetMessageData(
 					    mScenarioBmg2, SMS_getNormalStage(shineID2));
 					strncpy(mScenarioText2->getStringPtr(), scenarioName2, 127);

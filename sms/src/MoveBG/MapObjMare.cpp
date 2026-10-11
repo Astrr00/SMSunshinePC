@@ -389,7 +389,7 @@ void TMuddyBoat::calcRootMatrix() { }
 
 void TMuddyBoat::moveByWater()
 {
-	if ((s32)SMS_GetMarioWaterGun()->mIsEmitWater > 0) {
+	if ((s32)SMS_GetMarioWaterGun()->mIsEmitWater != 0) {
 		MtxPtr nozzle = SMS_GetMarioWaterGun()->getEmitMtx(0);
 		JGeometry::TVec3<f32> dir(-nozzle[0][0], 0.0f, -nozzle[2][0]);
 		MsVECNormalize(&dir, &dir);

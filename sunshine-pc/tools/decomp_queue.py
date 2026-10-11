@@ -46,11 +46,11 @@ def open_units():
     for l in open(os.path.join(ROOT, "sunshine-pc", "docs", "decomp-verified.tsv"), encoding="utf8"):
         c = l.rstrip("\n").split("\t")
         if len(c) >= 4 and c[3].startswith("logic-verified"):
-            led.add(c[1])
+            led.add((c[0].removeprefix("mario/"), c[1].split("(")[0].strip()))
     count = {}
     for f in rows:
         d = f["unit"].split("/")[1]
-        if d in TIER and f["match"] is not None and f["fn"].split("(")[0] not in led:
+        if d in TIER and f["match"] is not None and (f["unit"].removeprefix("mario/"), f["fn"].split("(")[0].strip()) not in led:
             count[f["unit"]] = count.get(f["unit"], 0) + 1
     return sorted(count, key=lambda u: (TIER[u.split("/")[1]], -count[u])), count
 

@@ -247,7 +247,8 @@ void TApplication::initialize()
 	                       SMSGetGCLogoRenderHeight());
 	TFlagManager::start(JKRGetCurrentHeap());
 	TTimeRec::start(0xDFC0);
-	TTimeRec::instance()->unk81C |= 1;
+	u16* flags = &TTimeRec::instance()->unk81C;
+	*flags |= 1;
 	TDrawSyncManager::smInstance->setCallback(0, 0xDFC0, 0xDFFF,
 	                                          TTimeRec::instance());
 	mMeter = new TProcessMeter(2);
@@ -283,6 +284,7 @@ void* TApplication::setupThreadFuncLogo()
 	SMSLoadArchiveARAM(&gArBkConsole, "/data/game_6.arc");
 
 	SMSLoadArchiveARAM(&gArBkGuide, "/data/guide.arc");
+	char trash[4];
 
 	return nullptr;
 }

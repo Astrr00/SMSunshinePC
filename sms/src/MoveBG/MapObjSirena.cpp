@@ -487,6 +487,7 @@ void TItemSlotDrum::moveObject()
 			}
 		}
 	}
+	char trash[16];
 }
 
 void TItemSlotDrum::calcRootMatrix()
@@ -991,6 +992,7 @@ void TCloset::moveObject()
 			}
 		}
 	}
+	char trash[16];
 }
 
 void TCloset::calcRootMatrix()
