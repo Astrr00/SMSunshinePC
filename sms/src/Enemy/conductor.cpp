@@ -129,11 +129,10 @@ void TConductor::polluterExterminated() { }
 
 BOOL TConductor::isBossDefeated()
 {
+	// asm 0x80248AAC: retail merges default into case 2 (mMap<2, mMap>=4)
 	switch (gpMarDirector->mMap) {
-#ifdef TARGET_PC
-	default:
-#endif
-	case 2: {
+	case 2:
+	default: {
 		TLiveManager* mgr = getManagerByName("ヒノクリ２マネージャー");
 		if (!mgr)
 			return true;

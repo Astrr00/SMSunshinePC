@@ -703,14 +703,10 @@ DEFINE_NERVE(TNervePoihanaTrapped, TLiveActor)
 			self->onLiveFlag(LIVE_FLAG_AIRBORNE);
 			if (self->unk1A8) {
 				// TODO: rand interval class
-				volatile f32 trapJumpMaxSpY
-				    = self->unk19C->mSLTrapJumpMaxSpY.get();
-				volatile f32 trapJumpMaxSpXZ
-				    = self->unk19C->mSLTrapJumpMaxSpXZ.get();
-				volatile f32 trapJumpMinSpY
-				    = self->unk19C->mSLTrapJumpMinSpY.get();
-				volatile f32 trapJumpMinSpXZ
-				    = self->unk19C->mSLTrapJumpMinSpXZ.get();
+				f32 trapJumpMaxSpY = self->unk19C->mSLTrapJumpMaxSpY.get();
+				f32 trapJumpMaxSpXZ = self->unk19C->mSLTrapJumpMaxSpXZ.get();
+				f32 trapJumpMinSpY = self->unk19C->mSLTrapJumpMinSpY.get();
+				f32 trapJumpMinSpXZ = self->unk19C->mSLTrapJumpMinSpXZ.get();
 
 				JGeometry::TVec3<f32> local_48;
 				const TLiveActor* groundActor

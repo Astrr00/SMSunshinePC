@@ -394,13 +394,15 @@ int TMario::checkGroundAtJumping(const Vec& target, int param_2)
 				if (checkFlag(MARIO_FLAG_VISIBLE))
 					onFlag(MARIO_FLAG_UNK200);
 
-				if (param_2 & 0x2) {
-					BOOL canHang = (mHeldObject == nullptr && !onYoshi());
-					if (canHang && mRoofPlane->isFence())
-						roofCode = 4;
-					else
-						roofCode = 0;
-				}
+				// asm 0x80135E54: retail keeps a BOOL local and one shared roofCode = 0 store
+				BOOL roofHang = false;
+				if (param_2 & 0x2)
+					roofHang = (mHeldObject == nullptr && !onYoshi());
+
+				if (roofHang && mRoofPlane->isFence())
+					roofCode = 4;
+				else
+					roofCode = 0;
 			}
 		}
 	}

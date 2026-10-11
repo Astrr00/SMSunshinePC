@@ -398,10 +398,11 @@ void TMapObjBall::checkWallCollision(JGeometry::TVec3<f32>* pos)
 {
 	JGeometry::TVec3<f32> checkPos;
 	char trash[24];
+	f32 radius = mBodyRadius;
 	checkPos.x = pos->x;
-	checkPos.y = pos->y + mBodyRadius;
+	checkPos.y = pos->y + radius;
 	checkPos.z = pos->z;
-	TBGWallCheckRecord record(checkPos, mBodyRadius, 4,
+	TBGWallCheckRecord record(checkPos, radius, 4,
 	                          mMapObjData->mPhysical->mWallCheckFlags);
 
 	if (gpMap->isTouchedWallsAndMoveXZ(&record)) {
@@ -827,7 +828,7 @@ void TResetFruit::kicked()
 		return;
 
 	f32 speedY = *gpMarioSpeedY;
-	if (speedY < 0.0f)
+	if (!(speedY >= 0.0f))
 		return;
 
 	JGeometry::TVec3<f32> vel = mVelocity;

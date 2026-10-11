@@ -447,7 +447,6 @@ bool TBaseNPC::isNowCanTaken() const
 
 void TBaseNPC::changeNerveProc_()
 {
-	char trash[0x40];
 	bool bVar4                                = false;
 	const TNerveBase<TLiveActor>* latestNerve = mSpine->getLatestNerve();
 	if (latestNerve == &TNerveNPCTalk::theNerve()) {
@@ -472,7 +471,9 @@ void TBaseNPC::changeNerveProc_()
 			    && !SMS_IsMarioOpeningDoor()) {
 				bool bInCube = true;
 				if (gpMarDirector->mMap == 7) {
+					char trash[0x18];
 					JGeometry::TVec3<f32> local_58 = mPosition;
+					char trash2[0x28];
 					local_58.y += 75.0f;
 					bInCube = SMS_IsInSameCameraCube(local_58);
 				}

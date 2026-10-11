@@ -995,7 +995,8 @@ void TTalk2D2::perform(u32 cue, JDrama::TGraphics* graphics)
 				break;
 
 			case 7: {
-				s16 alpha = mWindowPane->mAlpha - 16;
+				s16 alpha = mWindowPane->mAlpha;
+				alpha -= 16;
 				if (alpha < 0) {
 					unk234[0] = 1.0f;
 					unk3C[0]->hide();

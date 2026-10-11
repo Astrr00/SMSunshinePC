@@ -493,6 +493,7 @@ void TMapObjBase::makeMtxRotByAxis(const JGeometry::TVec3<f32>& param_1,
                                    f32 param_2, MtxPtr param_3)
 {
 	TPosition3f rotation;
+	(void)&rotation;
 	rotation.identity();
 	rotation.setRotate(param_1, param_2);
 

@@ -79,11 +79,13 @@ void TMarDirector::movement_game()
 {
 	char trash[40];
 	unk84->associateNPC(nullptr);
-	if ((int)unk124 == 0)
+	if ((int)unk124 != 0)
 		return;
 
 	unk18[0]->offFlag(TMarioGamePad::PAD_FLAG_TALK_NPC);
-	if (!gpMarioOriginal->isHolding() && gpCamera->isLButtonCamera())
+	if (gpMarioOriginal->isHolding())
+		return;
+	if (gpCamera->isLButtonCamera())
 		return;
 
 	if (!gpCamera->isDemoCamera()) {

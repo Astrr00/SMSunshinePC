@@ -998,7 +998,7 @@ void TNozzleDeform::emit(int param_1)
 
 void TNozzleDeform::animation(int param)
 {
-	volatile u8 stackPad[0x118];
+	volatile u8 stackPad[0x130];
 	(void)stackPad;
 
 	bool check = 0;
@@ -1111,17 +1111,18 @@ void TNozzleDeform::animation(int param)
 		if (!mactor->checkCurBckFromIndex(6))
 			mactor->setBckFromIndex(6);
 
+		TWaterGun* fludd     = mFludd;
 		bool updateAnimation = false;
-		if (mFludd->mCurrentWater == 0) {
+		if (fludd->mCurrentWater == 0) {
 			updateAnimation = false;
-		} else if (mFludd->getCurrentNozzle()->getNozzleKind() == 1) {
-			if (((TNozzleTrigger*)mFludd->getCurrentNozzle())->unk385
+		} else if (fludd->getCurrentNozzle()->getNozzleKind() == 1) {
+			if (((TNozzleTrigger*)fludd->getCurrentNozzle())->unk385
 			    == TNozzleTrigger::ACTIVE)
 				updateAnimation = true;
 			else
 				updateAnimation = false;
 		} else {
-			if (mFludd->getCurrentNozzle()->unk378 > 0.0f)
+			if (fludd->getCurrentNozzle()->unk378 > 0.0f)
 				updateAnimation = true;
 			else
 				updateAnimation = false;
@@ -1217,6 +1218,7 @@ TWaterGun::TWaterGun(TMario* mario)
 
 void TWaterGun::init()
 {
+	volatile u8 stackPad[0x108];
 	mFlags                     = 0;
 	mNozzleList[Spray]         = &mNozzleDeform;
 	mNozzleList[Rocket]        = &mNozzleRocket;

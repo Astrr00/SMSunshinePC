@@ -60,7 +60,7 @@ void TMapObjWaterFilter::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	const JGeometry::TVec3<f32>& camPos = gpCamera->getUnk124();
 	if (camPos.y > 0.0f
-	    && camPos.y < gpMapObjWave->getHeight(camPos.x, camPos.y, camPos.z))
+	    && camPos.y >= gpMapObjWave->getHeight(camPos.x, camPos.y, camPos.z))
 		return;
 
 	if (cue & CUE_CALC_ANIM) {

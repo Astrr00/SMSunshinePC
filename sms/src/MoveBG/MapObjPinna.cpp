@@ -773,6 +773,7 @@ void TAmiKing::touchPlayer(THitActor*) { SMS_SendMessageToMario(this, 9); }
 
 void TPinnaCoaster::control()
 {
+	char trash[0x18];
 	TMapObjBase::control();
 	unk138->frameUpdate();
 	unk138->calc();
@@ -785,7 +786,6 @@ void TPinnaCoaster::control()
 	mPosition.set(mtx[0][3], mtx[1][3], mtx[2][3]);
 
 	f32 speed = JGeometry::TVec3<f32>(mPosition - unk140).length();
-	char trash[0x18];
 	if (switchSnd)
 		gpMSound->startSoundActorWithInfo(MSD_SE_OBJ_JET_COASTER, &mPosition,
 		                                  nullptr, speed, 0, 0, nullptr, 0, 4);

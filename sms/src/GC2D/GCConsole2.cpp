@@ -702,8 +702,7 @@ static inline void updateMarioLifeCounter(TGCConsole2* console)
 }
 
 // fabricated
-template <class Pane>
-static inline void setCounterDigits(Pane** panes, JUTTexture** textures,
+static inline void setCounterDigits(TBlendPane** panes, JUTTexture** textures,
                                     int value)
 {
 	if (value < 100) {
@@ -719,8 +718,7 @@ static inline void setCounterDigits(Pane** panes, JUTTexture** textures,
 }
 
 // fabricated
-template <class Pane>
-static inline void setBlueCoinDigits(Pane** panes, JUTTexture** textures,
+static inline void setBlueCoinDigits(TBoundPane** panes, JUTTexture** textures,
                                      int value)
 {
 	if (value < 100) {
@@ -740,8 +738,7 @@ static inline void setBlueCoinDigits(Pane** panes, JUTTexture** textures,
 }
 
 // fabricated
-template <class Pane>
-static inline void setShineDigits(Pane** panes, JUTTexture** textures,
+static inline void setShineDigits(TBlendPane** panes, JUTTexture** textures,
                                   int value)
 {
 	if (value < 100) {
@@ -935,7 +932,7 @@ static inline void updateJetCounterAnimation(TGCConsole2* console)
 }
 
 // fabricated
-static inline void updateCounterState(TGCConsole2* console)
+static inline void updateCoinCountState(TGCConsole2* console)
 {
 	TFlagManager* flags = TFlagManager::smInstance;
 
@@ -967,6 +964,12 @@ static inline void updateCounterState(TGCConsole2* console)
 	} else {
 		console->unk30 = 0;
 	}
+}
+
+// fabricated
+static inline void updateCounterState(TGCConsole2* console)
+{
+	TFlagManager* flags = TFlagManager::smInstance;
 
 	int blueTotal = flags->getFlag(0x40001);
 	if ((int)console->unk168 != blueTotal) {
@@ -2174,6 +2177,7 @@ void TGCConsole2::endCameraDemo()
 		startAppearCoin();
 }
 
+#pragma dont_inline on
 void TGCConsole2::startAppearTank()
 {
 	if (unk45 || TFlagManager::smInstance->getBool(0x30002)) {
@@ -2194,6 +2198,7 @@ void TGCConsole2::startAppearTank()
 	unk274->getPane()->show();
 	unk29C->getPane()->show();
 }
+#pragma dont_inline off
 
 void TGCConsole2::startDisappearTank()
 {
@@ -3906,8 +3911,8 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 		}
 
 		updateLifeMeterState(this);
+		updateCoinCountState(this);
 		updateStarHudAutoHide(this);
-		updateShineAppearState(this);
 
 		if (unk35) {
 			bool done = true;
@@ -3931,8 +3936,9 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 			}
 		}
 
-		updateWaterGaugeFill(this);
 		updateCounterState(this);
+		updateShineAppearState(this);
+		updateWaterGaugeFill(this);
 
 		if (!unk46 && gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD) && !unk45 && !unk50)
 			startAppearTank();

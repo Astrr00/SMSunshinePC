@@ -321,7 +321,7 @@ void TModelWaterManager::splashGround(int i)
 	gpPollution->clean(
 	    mParticlePositionSOA[i].x, mParticlePositionSOA[i].y,
 	    mParticlePositionSOA[i].z,
-	    mWaterParticleTypes[mParticleTypeSOA[i]]->mCleanSize.get() * 10.0f);
+	    mWaterParticleTypes[mParticleTypeSOA[i]]->mCleanSize.get() * 32.0f);
 }
 
 void TModelWaterManager::touchingExec(int i) { }
@@ -818,17 +818,18 @@ void TModelWaterManager::calcDrawVtx(MtxPtr viewMtx)
 			f32 k = (1.0f / sqrtf1(len2)) * s;
 			f32 ax = vel.x * k;
 			f32 ay = vel.y * k;
+			f32 nax = -ax;
 			quad[0].x = pos.x + ax + vel.x * unk5D18;
 			quad[0].y = pos.y + ay + vel.y * unk5D18;
 			quad[0].z = pos.z;
 			quad[1].x = pos.x + ay;
-			quad[1].y = pos.y - ax;
+			quad[1].y = pos.y + nax;
 			quad[1].z = pos.z;
 			quad[2].x = pos.x - ax - vel.x * unk5D18;
 			quad[2].y = pos.y - ay - vel.y * unk5D18;
 			quad[2].z = pos.z;
 			quad[3].x = pos.x - ay;
-			quad[3].y = pos.y + ax;
+			quad[3].y = pos.y - nax;
 			quad[3].z = pos.z;
 		} else {
 			quad[0].x = pos.x - s;
