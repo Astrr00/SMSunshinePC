@@ -288,8 +288,7 @@ void TModelGate::screenBlur(JDrama::TGraphics* graphics)
 	}
 
 	f32 alpha = mBlurMaxAlpha * factor;
-	f32 angle = 182.04445f * mRotation.y - gpCamera->unk258;
-	s16 angleS16 = (s16)angle;
+	s16 angleS16 = (s16)(182.04445f * mRotation.y - gpCamera->unk258);
 	if (angleS16 < -0x2AAA || angleS16 > 0x2AAA)
 		alpha = 0.0f;
 

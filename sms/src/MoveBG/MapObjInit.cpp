@@ -10857,7 +10857,10 @@ void TMapObjBase::initUnique()
 		SMS_UnifyMaterial(getModel());
 		break;
 	case 0x40000263:
-		startAllAnim(mMActor, unkF4);
+		{
+			const char* anim = unkF4;
+			startAllAnim(mMActor, anim);
+		}
 		break;
 	case 0x4000003C:
 		mMActor->initSimpleMotionBlend(0x14);

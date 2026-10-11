@@ -136,16 +136,6 @@ bool CPolarSubCamera::isTalkCameraInbetween() const
 	return result;
 }
 
-bool CPolarSubCamera::isNormalCameraCompletely() const
-{
-	bool result = false;
-	if (isNormalCameraSpecifyMode(mMode)
-	    && (!isNowInbetween() || isNormalCameraSpecifyMode(mPrevMode)))
-		result = true;
-
-	return result;
-}
-
 bool CPolarSubCamera::isNormalCameraSpecifyMode(int param) const
 {
 	bool result = false;
@@ -194,6 +184,16 @@ bool CPolarSubCamera::isNormalCameraSpecifyMode(int param) const
 		result = true;
 		break;
 	}
+	return result;
+}
+
+bool CPolarSubCamera::isNormalCameraCompletely() const
+{
+	bool result = false;
+	if (isNormalCameraSpecifyMode(mMode)
+	    && (!isNowInbetween() || isNormalCameraSpecifyMode(mPrevMode)))
+		result = true;
+
 	return result;
 }
 

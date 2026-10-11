@@ -812,23 +812,32 @@ DEFINE_NERVE(TNerveBathtubKillerWander, TLiveActor)
 	bool cond;
 	if (!self->unk1CC->isKillerAttackable()) {
 		cond = false;
-	} else if (self->unk194 != 2) {
-		cond = true;
-	} else {
+	} else if (self->unk194 == 2) {
 		TBathtub* bathtub = self->unk1CC;
-		f32 dxMB = gpMarioPos->x - bathtub->mPosition.x;
-		f32 dzMB = gpMarioPos->z - bathtub->mPosition.z;
-		f32 distMB = dxMB * dxMB + dzMB * dzMB;
+		JGeometry::TVec3<f32> marioFlat = *gpMarioPos;
+		marioFlat.y = 0.0f;
+		JGeometry::TVec3<f32> selfFlat = self->mPosition;
+		selfFlat.y = 0.0f;
+		JGeometry::TVec3<f32> bathFlat = bathtub->mPosition;
+		bathFlat.y = 0.0f;
+
+		f32 dxMB = marioFlat.x - bathFlat.x;
+		f32 dyMB = marioFlat.y - bathFlat.y;
+		f32 dzMB = marioFlat.z - bathFlat.z;
+		f32 distMB = dzMB * dzMB + (dxMB * dxMB + dyMB * dyMB);
 		if (distMB > 0.0f)
 			distMB = JGeometry::TUtil<f32>::sqrt(distMB);
 
-		f32 dxSB = self->mPosition.x - bathtub->mPosition.x;
-		f32 dzSB = self->mPosition.z - bathtub->mPosition.z;
-		f32 distSB = dxSB * dxSB + dzSB * dzSB;
+		f32 dxSB = selfFlat.x - bathFlat.x;
+		f32 dySB = selfFlat.y - bathFlat.y;
+		f32 dzSB = selfFlat.z - bathFlat.z;
+		f32 distSB = dzSB * dzSB + (dxSB * dxSB + dySB * dySB);
 		if (distSB > 0.0f)
 			distSB = JGeometry::TUtil<f32>::sqrt(distSB);
 
 		cond = distSB <= distMB + 100.0f;
+	} else {
+		cond = true;
 	}
 
 	if (!cond) {
@@ -836,8 +845,10 @@ DEFINE_NERVE(TNerveBathtubKillerWander, TLiveActor)
 		return TRUE;
 	}
 
-	bool chase = false;
-	if (self->unk20C <= 0) {
+	bool chase;
+	if (self->unk20C > 0) {
+		chase = false;
+	} else {
 		f32 chaseDistY = self->getSaveParam2()->mSLChaseDistanceY.get();
 		f32 bathtubY = (*self->unk1CC->getRootJointMtx())[1][3];
 		chase = self->mPosition.y <= self->unk200 + bathtubY + chaseDistY;
@@ -864,23 +875,32 @@ DEFINE_NERVE(TNerveBathtubKillerChase, TLiveActor)
 	bool cond;
 	if (!self->unk1CC->isKillerAttackable()) {
 		cond = false;
-	} else if (self->unk194 != 2) {
-		cond = true;
-	} else {
+	} else if (self->unk194 == 2) {
 		TBathtub* bathtub = self->unk1CC;
-		f32 dxMB = gpMarioPos->x - bathtub->mPosition.x;
-		f32 dzMB = gpMarioPos->z - bathtub->mPosition.z;
-		f32 distMB = dxMB * dxMB + dzMB * dzMB;
+		JGeometry::TVec3<f32> marioFlat = *gpMarioPos;
+		marioFlat.y = 0.0f;
+		JGeometry::TVec3<f32> selfFlat = self->mPosition;
+		selfFlat.y = 0.0f;
+		JGeometry::TVec3<f32> bathFlat = bathtub->mPosition;
+		bathFlat.y = 0.0f;
+
+		f32 dxMB = marioFlat.x - bathFlat.x;
+		f32 dyMB = marioFlat.y - bathFlat.y;
+		f32 dzMB = marioFlat.z - bathFlat.z;
+		f32 distMB = dzMB * dzMB + (dxMB * dxMB + dyMB * dyMB);
 		if (distMB > 0.0f)
 			distMB = JGeometry::TUtil<f32>::sqrt(distMB);
 
-		f32 dxSB = self->mPosition.x - bathtub->mPosition.x;
-		f32 dzSB = self->mPosition.z - bathtub->mPosition.z;
-		f32 distSB = dxSB * dxSB + dzSB * dzSB;
+		f32 dxSB = selfFlat.x - bathFlat.x;
+		f32 dySB = selfFlat.y - bathFlat.y;
+		f32 dzSB = selfFlat.z - bathFlat.z;
+		f32 distSB = dzSB * dzSB + (dxSB * dxSB + dySB * dySB);
 		if (distSB > 0.0f)
 			distSB = JGeometry::TUtil<f32>::sqrt(distSB);
 
 		cond = distSB <= distMB + 100.0f;
+	} else {
+		cond = true;
 	}
 
 	if (!cond) {
@@ -909,16 +929,35 @@ DEFINE_NERVE(TNerveBathtubKillerChaseStraight, TLiveActor)
 		    = self->getSaveParam2()->mSLChaseStraightPeriod.get();
 	}
 
-	bool cond = self->unk1CC->isKillerAttackable();
-	if (cond && self->unk194 == 2) {
-		const JGeometry::TVec3<f32>& bathPos = self->unk1CC->mPosition;
-		f32 dx = gpMarioPos->x - bathPos.x;
-		f32 dz = gpMarioPos->z - bathPos.z;
-		f32 d1 = JGeometry::TUtil<f32>::sqrt(dx * dx + dz * dz);
-		dx = self->mPosition.x - bathPos.x;
-		dz = self->mPosition.z - bathPos.z;
-		f32 d2 = JGeometry::TUtil<f32>::sqrt(dx * dx + dz * dz);
-		cond = !(d2 > d1 + 100.0f);
+	bool cond;
+	if (!self->unk1CC->isKillerAttackable()) {
+		cond = false;
+	} else if (self->unk194 == 2) {
+		TBathtub* bathtub = self->unk1CC;
+		JGeometry::TVec3<f32> marioFlat = *gpMarioPos;
+		marioFlat.y = 0.0f;
+		JGeometry::TVec3<f32> selfFlat = self->mPosition;
+		selfFlat.y = 0.0f;
+		JGeometry::TVec3<f32> bathFlat = bathtub->mPosition;
+		bathFlat.y = 0.0f;
+
+		f32 dxMB = marioFlat.x - bathFlat.x;
+		f32 dyMB = marioFlat.y - bathFlat.y;
+		f32 dzMB = marioFlat.z - bathFlat.z;
+		f32 distMB = dzMB * dzMB + (dxMB * dxMB + dyMB * dyMB);
+		if (distMB > 0.0f)
+			distMB = JGeometry::TUtil<f32>::sqrt(distMB);
+
+		f32 dxSB = selfFlat.x - bathFlat.x;
+		f32 dySB = selfFlat.y - bathFlat.y;
+		f32 dzSB = selfFlat.z - bathFlat.z;
+		f32 distSB = dzSB * dzSB + (dxSB * dxSB + dySB * dySB);
+		if (distSB > 0.0f)
+			distSB = JGeometry::TUtil<f32>::sqrt(distSB);
+
+		cond = distSB <= distMB + 100.0f;
+	} else {
+		cond = true;
 	}
 	if (!cond) {
 		spine->pushNerve(&TNerveBathtubKillerStraight::theNerve());

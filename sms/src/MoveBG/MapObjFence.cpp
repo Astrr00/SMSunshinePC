@@ -378,9 +378,10 @@ void TFenceWater::initMapObj()
 	unk144->initHitActor(mActorType, 1, 0, 0.0f, 0.0f, 100.0f, 300.0f);
 	unk144->offHitFlag(HIT_FLAG_NO_COLLISION);
 	unk144->mPosition.set(mPosition.x, mPosition.y - 150.0f, mPosition.z);
-	static_cast<JDrama::TViewObjPtrListT<THitActor>*>(
-	    JDrama::TNameRefGen::search("オブジェクトグループ"))
-	    ->push_back(unk144);
+	JDrama::TViewObjPtrListT<THitActor>* group
+	    = static_cast<JDrama::TViewObjPtrListT<THitActor>*>(
+	        JDrama::TNameRefGen::search("オブジェクトグループ"));
+	group->getChildren().push_back(unk144);
 }
 
 void TFenceWaterH::control()

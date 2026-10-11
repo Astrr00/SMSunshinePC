@@ -387,7 +387,7 @@ bool TMarDirector::setupObjects()
 	    ->getDrawBuffer()
 	    ->setMatAnmSort();
 	gpLightManager->addChildGroupObj(drawBufferGroup);
-	unk40->push_back(drawBufferGroup, CUE_DRAW);
+	unk40->push_back(drawInit, CUE_DRAW);
 	initECTGft(unk38, unk3C, perfEventGroup, normalScene);
 	initECTMir(mPerformListGX, perfEventGroup);
 

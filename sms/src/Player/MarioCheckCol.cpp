@@ -314,18 +314,6 @@ void TMario::checkCollision()
 		case 0x8000001:
 		case 0x8000003:
 		case 0x8000013:
-		case 0x8000016:
-		case 0x8000017:
-		case 0x8000018:
-		case 0x8000019:
-		case 0x800001A:
-		case 0x800001B:
-		case 0x800001C:
-		case 0x800001D:
-		case 0x800001E:
-		case 0x800001F:
-		case 0x8000020:
-		case 0x8000021:
 		case 0x8000024:
 		case 0x10000001:
 		case 0x10000002:
@@ -541,6 +529,19 @@ void TMario::checkCollision()
 			break;
 
 		// empty cases
+		// asm 0x6f8-0x720: retail keys 0x8000016..0x8000021 -> break (node D 0x714: lwz 0xc0, bge 0xee4 / b 0x1324)
+		case 0x8000016:
+		case 0x8000017:
+		case 0x8000018:
+		case 0x8000019:
+		case 0x800001A:
+		case 0x800001B:
+		case 0x800001C:
+		case 0x800001D:
+		case 0x800001E:
+		case 0x800001F:
+		case 0x8000020:
+		case 0x8000021:
 		case 0x8000004:
 		case 0x8000012:
 		case 0x10000005:

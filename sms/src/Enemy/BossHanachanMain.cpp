@@ -55,6 +55,19 @@ static inline f32 MsWrapAngle180(f32 angle)
 	return MsWrap(angle, -180.0f, 180.0f);
 }
 
+// Largest-magnitude mRotation.z over the body parts. Static inline so
+// execSlip folds it in; getBodyMaxRotateZ stays out of line for perform.
+static inline f32 bodyMaxRotateZ(TBossHanachanPartsBody* const* body)
+{
+	f32 maxRotateZ = 0.0f;
+	for (int i = 0; i < 8; ++i, ++body) {
+		f32 rotateZ = (*body)->mRotation.z;
+		if (fabsf(rotateZ) > fabsf(maxRotateZ))
+			maxRotateZ = rotateZ;
+	}
+	return maxRotateZ;
+}
+
 BOOL TBossHanachan::hasMapCollision() const { return TRUE; }
 
 void TBossHanachan::removeAllMapCollision()
@@ -136,7 +149,7 @@ void TBossHanachan::execSlip()
 		if (mMarchSpeed > 4.0f) {
 			// Push along the boss' own Z axis (towards the side it is leaning
 			// to), rotated by its yaw.
-			f32 maxRotateZ = getBodyMaxRotateZ();
+			f32 maxRotateZ = bodyMaxRotateZ(mBodyParts);
 			f32 dirY       = 0.0f;
 			f32 dirX       = dirY;
 			f32 dirZ       = 1.0f;
@@ -215,14 +228,7 @@ void TBossHanachan::execWalk(bool run)
 #pragma dont_inline on
 f32 TBossHanachan::getBodyMaxRotateZ() const
 {
-	f32 maxRotateZ = 0.0f;
-	TBossHanachanPartsBody* const* body = mBodyParts;
-	for (int i = 0; i < 8; ++i, ++body) {
-		f32 rotateZ = (*body)->mRotation.z;
-		if (fabsf(rotateZ) > fabsf(maxRotateZ))
-			maxRotateZ = rotateZ;
-	}
-	return maxRotateZ;
+	return bodyMaxRotateZ(mBodyParts);
 }
 #pragma dont_inline off
 
