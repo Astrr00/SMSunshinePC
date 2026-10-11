@@ -259,7 +259,7 @@ static inline void processBalloonTextStep(TGCConsole2* console)
 		if (value == 0x1A) {
 			u8 skip;
 			input->read(&skip, 1);
-			input->seek((s32)skip - 2, JSUStreamSeekFrom_CUR);
+			console->unk3D4->skip((s32)skip - 2);
 			continue;
 		}
 

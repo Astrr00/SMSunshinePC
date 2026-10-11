@@ -777,7 +777,7 @@ BOOL TBathtub::receiveMessage(THitActor* sender, u32 message)
 		hipdrop(*gpMarioPos);
 		return true;
 	case HIT_MESSAGE_TRAMPLE:
-		if (!unk29A && unk16C->trampleRelease.get() >= unk250) {
+		if (!unk29A && unk250 <= unk16C->trampleRelease.get()) {
 			unk250 = unk16C->trampleRelease.get();
 			unk258 = unk16C->trampleRecover.get();
 			unk25C = unk16C->trampleRecover.get();

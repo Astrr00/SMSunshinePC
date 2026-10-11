@@ -378,7 +378,7 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 	local_80.sub(lookat, origin);
 	normalizeInner1(local_80);
 
-	fVar16.z = out_euler->z * SHORTANGLE_TO_DEGREES * DEGREES_TO_RADIANS;
+	fVar16.z = DEGREES_TO_RADIANS * (SHORTANGLE_TO_DEGREES * out_euler->z);
 
 	// Basically transform the up/right vectors from cam space into world space.
 	// TODO: Definitely inlines...

@@ -523,8 +523,9 @@ BOOL TMario::hanging()
 			}
 
 			TBGCheckData* foundWall2 = nullptr;
-			TBGWallCheckRecord record3(newPos.x, newPos.y, newPos.z, 50.0f, 1,
-			                           0);
+			// asm: retail fadds 10.0f + newPos.y before record3 (extra 10.0f pool entry); rows 20-505 branches match
+			TBGWallCheckRecord record3(newPos.x, 10.0f + newPos.y, newPos.z,
+			                           50.0f, 1, 0);
 			gpMap->isTouchedWallsAndMoveXZ(&record3);
 			newPos = record3.mCenter;
 

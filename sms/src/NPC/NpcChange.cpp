@@ -556,7 +556,7 @@ void TBaseNPC::changeNerveProc_()
 	unk15C->unk0 = 0;
 
 	if (latestNerve == &TNerveNPCSink::theNerve()) {
-		if (gpPollution->isPolluted(mPosition.x, mPosition.y, mPosition.z))
+		if (gpPollution->isPolluted(mPosition.x, unk1C4, mPosition.z))
 			return;
 
 		mSpine->setNext(&TNerveNPCRecoverFromSink::theNerve());

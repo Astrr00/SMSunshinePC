@@ -334,6 +334,7 @@ BOOL TMario::hangonCheck(const TBGCheckData* wall, const Vec& prev,
 
 int TMario::checkGroundAtJumping(const Vec& target, int param_2)
 {
+	char trash2[4];
 	Vec pos             = target;
 	char trash[4];
 	TBGCheckData* wall1 = checkWallPlane(&pos, 150.0f, unk15C);
@@ -394,12 +395,9 @@ int TMario::checkGroundAtJumping(const Vec& target, int param_2)
 				if (checkFlag(MARIO_FLAG_VISIBLE))
 					onFlag(MARIO_FLAG_UNK200);
 
-				// asm 0x80135E54: retail keeps a BOOL local and one shared roofCode = 0 store
-				BOOL roofHang = false;
-				if (param_2 & 0x2)
-					roofHang = (mHeldObject == nullptr && !onYoshi());
-
-				if (roofHang && mRoofPlane->isFence())
+				BOOL canHang;
+				if ((param_2 & 0x2) && (canHang = (mHeldObject == nullptr && !onYoshi()))
+				    && mRoofPlane->isFence())
 					roofCode = 4;
 				else
 					roofCode = 0;

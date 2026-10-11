@@ -468,9 +468,9 @@ void TKoopaFlame::control()
 	}
 
 	mCurLength += mSpeed;
-	mPosition.x = mDirection.x * mCurLength + mBase.x;
-	mPosition.y = mDirection.y * mCurLength + mBase.y;
-	mPosition.z = mDirection.z * mCurLength + mBase.z;
+	f32 x = mDirection.x * mCurLength + mBase.x;
+	f32 y = mDirection.y * mCurLength + mBase.y;
+	f32 z = mDirection.z * mCurLength + mBase.z;
 
 	offHitFlag(HIT_FLAG_CANNOT_ATTACK);
 	offHitFlag(HIT_FLAG_CANNOT_GET_HIT);
@@ -480,6 +480,9 @@ void TKoopaFlame::control()
 	if (height <= 0.0f)
 		height = 2.0f * mRadius;
 
+	mPosition.x = x;
+	mPosition.y = y;
+	mPosition.z = z;
 	mAttackRadius = mRadius;
 	mAttackHeight = height;
 	mDamageRadius = mRadius;
@@ -801,12 +804,10 @@ inline void TKoopa::breathFlame()
 	int freeIdx   = -1;
 	bool anyDying = false;
 	for (int i = 0; i < 10; ++i) {
-		if (mFlames[i]->isAlive()) {
-			if (mFlames[i]->getLength() < 2.0f * getParam()->flameRadius.get())
-				anyDying = true;
-		} else {
+		if (!mFlames[i]->isAlive())
 			freeIdx = i;
-		}
+		else if (mFlames[i]->getLength() < 2.0f * getParam()->flameRadius.get())
+			anyDying = true;
 	}
 
 	if (!anyDying && freeIdx >= 0) {

@@ -444,11 +444,11 @@ void TBathtubKiller::perform(u32 cue, JDrama::TGraphics* graphics)
 				    0x1BD, unk220, 1, this);
 			}
 
-			f32 dx = mPosition.x - gpMarioPos->x;
 			f32 dy = mPosition.y - gpMarioPos->y;
+			f32 dx = mPosition.x - gpMarioPos->x;
 			f32 dz = mPosition.z - gpMarioPos->z;
 			f32 dist
-			    = JGeometry::TUtil<f32>::sqrt(dx * dx + dy * dy + dz * dz);
+			    = JGeometry::TUtil<f32>::sqrt(dy * dy + dx * dx + dz * dz);
 			if (gpMSound->gateCheck(MSD_SE_EN_KILLER_FLY)) {
 				MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 				    MSD_SE_EN_KILLER_FLY, &mPosition, nullptr, dist, 0, 0,
