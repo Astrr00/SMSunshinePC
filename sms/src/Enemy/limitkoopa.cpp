@@ -510,8 +510,8 @@ BOOL TNerveLimitKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 	toMario2.y = 0.0f;
 	facing.makeDirection(toMario2);
 
-	if (koopa->mDirection.absDirection(facing.mDirection) <= 0.31415927f
-	    && koopa->mMActor->isCurAnmAlreadyEnd(ANM_TYPE_BCK)) {
+	BOOL facingMario = koopa->mDirection.absDirection(facing.mDirection) <= 0.31415927f;
+	if (facingMario && koopa->mMActor->isCurAnmAlreadyEnd(ANM_TYPE_BCK)) {
 		spine->pushAfterCurrent(&TNerveLimitKoopaHipDropStart::theNerve());
 		return true;
 	}

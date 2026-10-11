@@ -153,6 +153,7 @@ BOOL TBGBeakHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 	                      * params->mSLBeakStretch.get());
 
 	JGeometry::TVec3<f32> delta = mOwner->mPosition;
+	char trash[12];
 	delta -= where_to;
 	delta.scale(0.001f);
 	unkA4 += delta;
@@ -322,7 +323,8 @@ void TBGEyeHit::perform(u32 cue, JDrama::TGraphics* graphics)
 }
 
 TBGBodyHit::TBGBodyHit(TBossGesso* owner, int joint_index, const char* name)
-    : mOwner(owner)
+    : THitActor(name)
+    , mOwner(owner)
     , mJointIndex(joint_index)
 {
 	static_cast<TIdxGroupObj*>(JDrama::TNameRefGen::search("敵グループ"))
@@ -684,6 +686,7 @@ void TBossGesso::continuousRumble() { }
 
 f32 TBossGesso::lenFromToeToMario()
 {
+	char trash[8];
 	f32 min = 100000.0f;
 
 	for (int i = 0; i < 4; ++i) {
@@ -1521,7 +1524,7 @@ TBossGessoManager::TBossGessoManager(const char* name)
 
 void TBossGessoManager::createModelData()
 {
-	static TModelDataLoadEntry entry[] = {
+	static const TModelDataLoadEntry entry[] = {
 		{ "bgeso_body.bmd", 0x10300000, 0 },
 		{ "bgeso_hand.bmd", 0x10240000, 0 },
 		{ "bgeso_shand.bmd", 0x200000, 0 },

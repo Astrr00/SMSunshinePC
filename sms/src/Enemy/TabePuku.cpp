@@ -49,6 +49,7 @@ BOOL TTPHitActor::receiveMessage(THitActor* sender, u32 message)
 
 void TTPHitActor::updateTerrainCollsion()
 {
+	char trash[0x70];
 	JGeometry::TQuat4<f32> quat = mOwner->mQuat;
 	JGeometry::TVec3<f32> dir;
 	quat.getYDir(dir);
@@ -80,6 +81,7 @@ void TTPHitActor::updateTerrainCollsion()
 
 void TTPHitActor::bind()
 {
+	char trash[0x48];
 	JGeometry::TVec3<f32> pos = mPosition;
 	pos += mLinearVelocity;
 	JGeometry::TVec3<f32> velocity = mOwner->mVelocity;
@@ -170,6 +172,7 @@ void TTabePuku::control()
 
 void TTabePuku::bind()
 {
+	char trash[0x20];
 	mHitActor->updateHitParam();
 	mHitActor->updateTerrainCollsion();
 	mHitActor->bind();
@@ -186,6 +189,7 @@ void TTabePuku::bind()
 
 void TTabePuku::calcRootMatrix()
 {
+	char trash[0x10];
 	if (isTaken()) {
 		TSmallEnemy::calcRootMatrix();
 		return;
@@ -291,6 +295,7 @@ bool TTabePuku::doKeepDistance()
 
 void TTabePuku::swimTo(const JGeometry::TVec3<f32>& target)
 {
+	char trash[0x78];
 	JGeometry::TVec3<f32> dir = target;
 	if (JGeometry::TUtil<f32>::epsilonEquals(0.0f, dir.squared())) {
 		TABEPUKU_MOVE_FORWARD(this)
@@ -367,6 +372,7 @@ DEFINE_NERVE(TNerveTabePukuFound, TLiveActor)
 	}
 
 	TABEPUKU_MOVE_FORWARD(self)
+	char trash[0x10];
 
 	if (self->checkCurAnmEnd(0)) {
 		spine->pushAfterCurrent(&TNerveTabePukuAttack::theNerve());
@@ -454,6 +460,7 @@ DEFINE_NERVE(TNerveTabePukuAttack, TLiveActor)
 
 DEFINE_NERVE(TNerveTabePukuBite, TLiveActor)
 {
+	char trash[0x8];
 	TTabePuku* self = (TTabePuku*)spine->getBody();
 
 	self->setBckAnm(2);

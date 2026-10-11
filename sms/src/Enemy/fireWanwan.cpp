@@ -420,39 +420,36 @@ void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
 		// both zeroed when lenSq <= 2^-18; Z column is dir as given.
 		const f32 kEps = 1.0f / 262144.0f;
 
-		f32 xx = param_4.z;
-		f32 xz = -param_4.x;
-		f32 lsq = xx * xx + xz * xz;
+		JGeometry::TVec3<f32> xDir;
+		xDir.cross(JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f), param_4);
+		f32 lsq = xDir.squared();
 		if (lsq <= kEps) {
-			xx = 0.0f;
-			xz = 0.0f;
+			xDir.zero();
 		} else {
-			f32 k = invSqrtCall(lsq);
-			xx *= k;
-			xz *= k;
+			f32 k = 1.0f * invSqrtCall(lsq);
+			xDir.x *= k;
+			xDir.y *= k;
+			xDir.z *= k;
 		}
 
-		f32 yx = param_4.y * xz;
-		f32 yy = param_4.z * xx - param_4.x * xz;
-		f32 yz = -param_4.y * xx;
-		lsq = yx * yx + yy * yy + yz * yz;
+		JGeometry::TVec3<f32> yDir;
+		yDir.cross(param_4, xDir);
+		lsq = yDir.squared();
 		if (lsq <= kEps) {
-			yx = 0.0f;
-			yy = 0.0f;
-			yz = 0.0f;
+			yDir.zero();
 		} else {
-			f32 k = invSqrtCall(lsq);
-			yx *= k;
-			yy *= k;
-			yz *= k;
+			f32 k = 1.0f * invSqrtCall(lsq);
+			yDir.x *= k;
+			yDir.y *= k;
+			yDir.z *= k;
 		}
 
-		mtx.ref(0, 0) = xx;
-		mtx.ref(1, 0) = 0.0f;
-		mtx.ref(2, 0) = xz;
-		mtx.ref(0, 1) = yx;
-		mtx.ref(1, 1) = yy;
-		mtx.ref(2, 1) = yz;
+		mtx.ref(0, 0) = xDir.x;
+		mtx.ref(1, 0) = xDir.y;
+		mtx.ref(2, 0) = xDir.z;
+		mtx.ref(0, 1) = yDir.x;
+		mtx.ref(1, 1) = yDir.y;
+		mtx.ref(2, 1) = yDir.z;
 		mtx.ref(0, 2) = param_4.x;
 		mtx.ref(1, 2) = param_4.y;
 		mtx.ref(2, 2) = param_4.z;
@@ -1180,6 +1177,7 @@ void TFireWanwan::calcRootMatrix()
 
 void TFireWanwan::moveObject()
 {
+	char trash[0x10];
 	if (checkLiveFlag(LIVE_FLAG_DEAD))
 		return;
 
@@ -1236,10 +1234,11 @@ void TFireWanwan::updateCollisionFromParam()
 	if (isDefeat())
 		return;
 
-	setHitParams(getSaveParam2()->mSLAttackRadius.get(),
-	             getSaveParam2()->mSLAttackHeight.get(),
-	             getSaveParam2()->mSLDamageRadius.get(),
-	             getSaveParam2()->mSLDamageHeight.get());
+	f32 attackRadius = getSaveParam2()->mSLAttackRadius.get();
+	f32 attackHeight = getSaveParam2()->mSLAttackHeight.get();
+	f32 damageRadius = getSaveParam2()->mSLDamageRadius.get();
+	f32 damageHeight = getSaveParam2()->mSLDamageHeight.get();
+	setHitParams(attackRadius, attackHeight, damageRadius, damageHeight);
 }
 
 // Tiny size mismatch

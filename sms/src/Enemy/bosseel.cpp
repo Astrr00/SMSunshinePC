@@ -226,6 +226,7 @@ void TBEelTearsManager::createEnemies(int count)
 
 void TBEelTearsManager::splitTears(JGeometry::TVec3<f32>& position)
 {
+	char trash[0x18];
 	int tearsLeft = getSaveParam()->mSLTearsSplitNum.get();
 	position.y += 600.0f;
 	TMsRange<f32> positionRange(-250.0f, 250.0f);
@@ -653,6 +654,7 @@ void TOilBall::moveObject()
 		} else {
 			JGeometry::TVec3<f32> velocity(0.0f, 0.0f, 0.0f);
 			JGeometry::TVec3<f32> push;
+			char trash[0x18];
 			push.sub(mPosition, actor->mPosition);
 			if (push.x == 0.0f && push.y == 0.0f && push.z == 0.0f)
 				push.x += 1.0f;
@@ -1090,6 +1092,7 @@ TBossEelEye::TBossEelEye(const TLiveActor* owner, int jointIndex,
 
 void TBossEelEye::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x28];
 	const TBossEel* owner = getOwner();
 	if (owner->mLiveFlag
 	    & (LIVE_FLAG_DEAD | LIVE_FLAG_HIDDEN | LIVE_FLAG_CLIPPED_OUT))

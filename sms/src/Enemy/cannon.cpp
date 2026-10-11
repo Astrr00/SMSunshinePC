@@ -606,7 +606,7 @@ void TCannon::killerShoot()
 
 			JPABaseEmitter* emitter = gpMarioParticleManager->emitWithRotate(
 			    0xCB, &igaiga->mPosition, 0,
-			    (s16)(mRotation.y * (65536.0f / 360.0f)), 0, 0, nullptr);
+			    (s16)(igaiga->mRotation.y * (65536.0f / 360.0f)), 0, 0, nullptr);
 			if (emitter != nullptr) {
 				emitter->setGlobalScale(JGeometry::TVec3<f32>(
 				    1.5f * mScaling.x, 1.5f * mScaling.y, 1.5f * mScaling.z));
@@ -1182,6 +1182,7 @@ TChorobei::TChorobei(TCannon* cannon, int jointIndex, const char* name)
     , mAnmSoundPath(nullptr)
     , unk7C(300.0f)
 {
+	char trash[0x8];
 	mSharedParts = new TSharedParts(mCannon, jointIndex,
 	                                "/scene/cannon/tyorobe_model1.bmd",
 	                                0x10020000, 3, "<TSharedParts>");

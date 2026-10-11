@@ -611,8 +611,6 @@ void TPopo::attackToMario()
 
 void TPopo::calcRootMatrix()
 {
-	// Unused stack space
-	volatile u32 padding[6];
 	u8 centerJnt = mCenterJntIndex;
 	gpCurPopo    = this;
 	MtxPtr jointMtx = getModel()->getAnmMtx(centerJnt);

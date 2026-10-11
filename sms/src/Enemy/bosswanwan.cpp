@@ -436,6 +436,7 @@ BOOL TBWPicket::receiveMessage(THitActor* sender, u32 message)
 
 BOOL TBWPicket::moveRequest(const JGeometry::TVec3<f32>& target)
 {
+	char trash[0x30]; // stack padding to match the retail frame size
 	if (&TNerveBWJumpToBath::theNerve() == mOwner->mSpine->getLatestNerve()
 	    || &TNerveBWDie::theNerve() == mOwner->mSpine->getLatestNerve())
 		return false;
@@ -568,6 +569,7 @@ void TBWHit::perform(u32 flags, JDrama::TGraphics* graphics)
 void TBWBinder::bind(TLiveActor* actor)
 {
 	TBossWanwan* boss = static_cast<TBossWanwan*>(actor);
+	char trash[0xa8]; // stack padding to match the retail frame size
 
 	JGeometry::TVec3<f32> velocity = boss->mLinearVelocity;
 	JGeometry::TVec3<f32> nextPos  = boss->mPosition;

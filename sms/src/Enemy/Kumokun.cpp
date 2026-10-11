@@ -1101,6 +1101,7 @@ DEFINE_NERVE(TNerveKumokunPostWalk, TLiveActor)
 
 DEFINE_NERVE(TNerveKumokunSearch, TLiveActor)
 {
+	char trash[0x18];
 	TKumokun* self = (TKumokun*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -1191,6 +1192,7 @@ DEFINE_NERVE(TNerveKumokunPostFreeze, TLiveActor)
 
 DEFINE_NERVE(TNerveKumokunFly, TLiveActor)
 {
+	char trash[0x8];
 	TKumokun* self = (TKumokun*)spine->getBody();
 
 	if (spine->getTime() == 0) {

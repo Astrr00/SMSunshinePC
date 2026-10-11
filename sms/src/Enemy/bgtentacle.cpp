@@ -237,6 +237,7 @@ static inline JGeometry::TVec3<f32> fromPolar(f32 theta, f32 radius)
 BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 {
 	JGeometry::TVec3<f32> local_EC = where_to;
+	char trash[4];
 	gpMap->isTouchedOneWallAndMoveXZ(&local_EC.x, local_EC.y, &local_EC.z,
 	                                 150.0f);
 
@@ -245,6 +246,7 @@ BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 	TBGTentacle* ten            = mOwner;
 	delta -= ten->mOwner->getPosition();
 	f32 totalLenLimit = ten->getParams()->mTotalLenLimit.value;
+	char trash2[4];
 
 	if (delta.length() > totalLenLimit) {
 		unk74 = fromPolar(
@@ -264,6 +266,7 @@ BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 		mOwner->getLastNode()->setPosition(local_EC);
 		return true;
 	}
+	char trash3[40];
 }
 
 BOOL TBGTakeHit::receiveMessage(THitActor* sender, u32 message)
@@ -470,7 +473,7 @@ void TBGTentacle::TNode::calcVelocity(TBGTentacle* param_1,
 		if (unk24) {
 			if (!param_2->unk24) {
 				local_8C.scale(nodeLenLimit);
-				mPosition += local_8C;
+				param_2->mPosition += local_8C;
 			}
 		} else {
 			local_8C.scale(nodeLenLimit);
@@ -478,7 +481,7 @@ void TBGTentacle::TNode::calcVelocity(TBGTentacle* param_1,
 			mPosition += local_8C;
 		}
 	} else {
-		if (nodeLen < fVar5) {
+		if (fVar5 < nodeLen) {
 			f32 m = nodeLen - fVar5;
 			if (m > speedMax)
 				m = speedMax;
@@ -497,6 +500,7 @@ void TBGTentacle::TNode::calcVelocity(TBGTentacle* param_1,
 
 		JGeometry::TVec3<f32> local_74 = local_80;
 		local_74 -= mPosition;
+		char trash[16];
 
 		local_74.scale(param_3);
 
@@ -533,6 +537,7 @@ void TBGTentacle::TNode::calcPosition(TBGTentacle* param_1)
 	JGeometry::TVec3<f32> local_1c = unk18;
 	local_1c -= mPosition;
 	f32 len = local_1c.squared();
+	char trash[32];
 	if (len > 0.01f) {
 
 		// TODO: inline?
@@ -1082,7 +1087,9 @@ void TBGTentacle::decideOwnState()
 		break;
 
 	case 5: {
+		char trash[4];
 		JGeometry::TVec3<f32> delta = getLastNode()->getPosition();
+		char trash2[28];
 		delta -= mOwner->getPosition();
 		f32 rot = MsGetRotFromZaxisY(delta);
 		if (abs(MsAngleDiff(mOwner->getRotation().y, rot)) > 45.0f) {

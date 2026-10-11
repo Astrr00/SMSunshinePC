@@ -211,8 +211,9 @@ void TTobiPukuLaunchPad::launch()
 void TTobiPukuLaunchPad::forceLaunch(TTobiPuku* param_1)
 {
 	JGeometry::TVec3<f32> pos = mPosition;
-	f32 sinY                  = MsSin(mRotation.y);
-	f32 cosY                  = MsCos(mRotation.y);
+	s16 yaw                   = mRotation.y * 16384.0f / 90.0f;
+	f32 sinY                  = JMASSin(yaw);
+	f32 cosY                  = JMASCos(yaw);
 
 	JGeometry::TVec3<f32> velocity;
 	if (((TTobiPukuLaunchPadManager*)mManager)->unk60) {
@@ -223,9 +224,11 @@ void TTobiPukuLaunchPad::forceLaunch(TTobiPuku* param_1)
 		f32 flyGravityY     = param_1->unk19C->mSLFlyGravityY.get();
 		velocity = calcVelocityToJumpToY(pos, launchVelocityY, flyGravityY);
 	} else {
-		velocity.set(sinY * unk19C * MsCos(mRotation.x),
-		             1.0f * unk19C * MsSin(mRotation.x),
-		             cosY * unk19C * MsCos(mRotation.x));
+		JGeometry::TVec3<f32> direction(sinY, 1.0f, cosY);
+		direction.scale(unk19C);
+		s16 pitch = mRotation.x * 16384.0f / 90.0f;
+		f32 cosX  = JMASCos(pitch);
+		velocity.set(direction.x * cosX, direction.y * JMASSin(pitch), direction.z * cosX);
 	}
 
 	param_1->reset();
@@ -414,7 +417,13 @@ void TTobiPuku::setJumpStartAnm()
 		setBckAnm(7);
 }
 
-bool TTobiPuku::canBound() { return false; }
+bool TTobiPuku::canBound()
+{
+	if (unk198 < unk19C->mSLBoundNum.get())
+		return true;
+	unk1AE = 0;
+	return false;
+}
 
 bool TTobiPuku::isRoll() { return false; }
 
@@ -996,17 +1005,10 @@ DEFINE_NERVE(TNerveTobiPukuLand, TLiveActor)
 				self->unk1E8 = (180.0f - self->mRotation.x)
 				               / fabsf(600.0f / self->unk1E4);
 			}
-			return false;
 		} else {
-			if (TTobiPuku::mBoundSw) {
-				if (self->unk198 < self->unk19C->mSLBoundNum.get())
-					self->unk1AE = 1;
-				else
-					self->unk1AE = 0;
-				if (self->unk1AE) {
-					spine->pushAfterCurrent(&TNerveTobiPukuBound::theNerve());
-					return true;
-				}
+			if (TTobiPuku::mBoundSw && self->canBound()) {
+				spine->pushAfterCurrent(&TNerveTobiPukuBound::theNerve());
+				return true;
 			}
 
 			self->unk1B8[0] = self->mPosition;

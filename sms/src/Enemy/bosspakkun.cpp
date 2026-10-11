@@ -831,6 +831,7 @@ void TBossPakkun::init(TLiveManager* manager)
 	}
 
 	mHitPoints = getMaxHitPoints();
+	char trash[0x80];
 }
 
 BOOL TBossPakkun::checkMarioRiding()
@@ -1486,6 +1487,7 @@ DEFINE_NERVE(TNerveBPCannon, TLiveActor)
 		}
 	}
 
+	char trash[0x8];
 	return false;
 }
 
@@ -1536,6 +1538,7 @@ DEFINE_NERVE(TNerveBPVomit, TLiveActor)
 		                           MsCos(boss->mRotation.y));
 		gpModelWaterManager->wind(wind);
 	}
+	char trash[0x38];
 	return false;
 }
 
@@ -1554,6 +1557,7 @@ DEFINE_NERVE(TNerveBPTornado, TLiveActor)
 		boss->launchTornado();
 	if (actor->isCurAnmAlreadyEnd(ANM_TYPE_BCK))
 		return true;
+	char trash[0x10];
 	return false;
 }
 
@@ -1606,6 +1610,7 @@ DEFINE_NERVE(TNerveBPSwallow, TLiveActor)
 
 	boss->mWeakPoint = TBossPakkun::WEAK_POINT_NONE;
 	spine->pushAfterCurrent(&TNerveBPWait::theNerve());
+	char trash[0x10];
 	return true;
 }
 
@@ -1630,6 +1635,7 @@ DEFINE_NERVE(TNerveBPTumbleIn, TLiveActor)
 		spine->pushAfterCurrent(&TNerveBPTumble::theNerve());
 		return true;
 	}
+	char trash[0x8];
 	return false;
 }
 
@@ -1653,6 +1659,7 @@ DEFINE_NERVE(TNerveBPTumble, TLiveActor)
 		spine->pushAfterCurrent(&TNerveBPTumbleOut::theNerve());
 		return true;
 	}
+	char trash[0x10];
 	return false;
 }
 
@@ -1690,6 +1697,7 @@ DEFINE_NERVE(TNerveBPTumbleOut, TLiveActor)
 		if (35.0f < frame)
 			boss->unk1BC = 1;
 	}
+	char trash[0x48];
 	return false;
 }
 
@@ -1708,6 +1716,7 @@ DEFINE_NERVE(TNerveBPGetUp, TLiveActor)
 		else
 			return true;
 	}
+	char trash[0x8];
 	return false;
 }
 
@@ -1724,6 +1733,7 @@ DEFINE_NERVE(TNerveBPSwing, TLiveActor)
 	}
 	if (actor->curAnmEndsNext(0, nullptr))
 		return true;
+	char trash[0x8];
 	return false;
 }
 
@@ -1748,6 +1758,7 @@ DEFINE_NERVE(TNerveBPStompReact, TLiveActor)
 		return true;
 	}
 
+	char trash[0x20];
 	return false;
 }
 
@@ -1759,6 +1770,7 @@ DEFINE_NERVE(TNerveBPJumpReact, TLiveActor)
 		boss->changeBck(17);
 	if (actor->curAnmEndsNext(0, nullptr))
 		return true;
+	char trash[0x8];
 	return false;
 }
 
@@ -1778,6 +1790,7 @@ DEFINE_NERVE(TNerveBPPreDie, TLiveActor)
 		spine->pushAfterCurrent(&TNerveBPDie::theNerve());
 		return true;
 	}
+	char trash[0x18];
 	return false;
 }
 
@@ -1804,6 +1817,7 @@ DEFINE_NERVE(TNerveBPDie, TLiveActor)
 		return true;
 	}
 
+	char trash[0x20];
 	return false;
 }
 
@@ -1838,6 +1852,7 @@ DEFINE_NERVE(TNerveBPTakeOff, TLiveActor)
 
 DEFINE_NERVE(TNerveBPFly, TLiveActor)
 {
+	char trash[0x4];
 	TBossPakkun* boss = static_cast<TBossPakkun*>(spine->getBody());
 	if (spine->getTime() == 0) {
 		boss->changeBck(11);
@@ -1857,6 +1872,7 @@ DEFINE_NERVE(TNerveBPFly, TLiveActor)
 		}
 	}
 
+	char trash2[0x4];
 	boss->flyToCurPathNode(boss->getBossPakkunParams()->mSLFlySpeed.get(),
 	                       boss->mTurnSpeed);
 	return false;
@@ -1910,6 +1926,7 @@ DEFINE_NERVE(TNerveBPFlyPivot, TLiveActor)
 		boss->switchNextGoalPath();
 		return true;
 	}
+	char trash[0x4];
 	return false;
 }
 
@@ -1941,6 +1958,7 @@ DEFINE_NERVE(TNerveBPHover, TLiveActor)
 		return true;
 	}
 
+	char trash[0x10];
 	return false;
 }
 
@@ -1989,6 +2007,7 @@ DEFINE_NERVE(TNerveBPFall, TLiveActor)
 		return true;
 	}
 
+	char trash[0x30];
 	return false;
 }
 
@@ -2011,6 +2030,7 @@ DEFINE_NERVE(TNerveBPBreakSleep, TLiveActor)
 		spine->pushAfterCurrent(&TNerveBPTakeOff::theNerve());
 		return true;
 	}
+	char trash[0x8];
 	return false;
 }
 
@@ -2046,6 +2066,7 @@ DEFINE_NERVE(TNerveBPWaitL, TLiveActor)
 		return true;
 	}
 
+	char trash[0x10];
 	return false;
 }
 
@@ -2067,5 +2088,6 @@ DEFINE_NERVE(TNerveBPCannonL, TLiveActor)
 		}
 	}
 
+	char trash[0x8];
 	return false;
 }

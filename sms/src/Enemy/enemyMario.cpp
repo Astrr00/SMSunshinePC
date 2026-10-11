@@ -614,6 +614,7 @@ void TEnemyMario::startMonteReplay(u32 replayIndex)
 	    &currentPoint);
 	mPosition = currentPoint;
 	JGeometry::TVec3<f32> nextPoint;
+	char trash[8];
 	mEMario->getTracer()
 	    ->getGraph()
 	    ->getGraphNode(nodeIndex + 1)
@@ -698,6 +699,7 @@ void TEnemyMario::emRunAway()
 
 void TEnemyMario::emJumping()
 {
+	char trash[0x20];
 	if (mStatus & MARIO_STATUS_FLAG_JUMPING) {
 		if (mStatus != MARIO_STATUS_WALL_SLIDE || mStatusTimer >= 10) {
 			setStickToAngle(mFaceAngle.y, 1.0f);
@@ -1111,6 +1113,7 @@ void TEnemyMario::findRunAwayNearestNode()
 	f32 secondDistance  = 100000.0f;
 	JGeometry::TVec3<f32> nearestPoint;
 	JGeometry::TVec3<f32> secondPoint;
+	char trash[0x18];
 
 	for (int i = 0; i < mEMario->getTracer()->getGraph()->getNodeNum(); ++i) {
 		JGeometry::TVec3<f32> point;
@@ -1148,9 +1151,10 @@ void TEnemyMario::runAwayMoveEffect()
 
 void TEnemyMario::emRunAwayToNearestNode()
 {
-	TGraphWeb* graph = mEMario->getTracer()->getGraph();
 	JGeometry::TVec3<f32> targetPoint;
-	graph->getGraphNode(mRunAwayNodeIndex).getPoint(&targetPoint);
+	char trash[8];
+	mEMario->getTracer()->getGraph()->getGraphNode(mRunAwayNodeIndex)
+	    .getPoint(&targetPoint);
 	runAwayMoveEffect();
 
 	if (mEMDoingTimer >= 8 && mEMDoingTimer < 300) {
@@ -1197,7 +1201,9 @@ void TEnemyMario::emRunAwayToNearestNode()
 	case 300:
 		if (gpMarDirector->getCurrentMap() == 1) {
 			JGeometry::TVec3<f32> waitingPoint;
-			graph->getGraphNode(7).getPoint(&waitingPoint);
+			char trash[0x28];
+			mEMario->getTracer()->getGraph()->getGraphNode(7).getPoint(
+			    &waitingPoint);
 			mFaceAngle.y    = matan(waitingPoint.z - targetPoint.z,
 			                        waitingPoint.x - targetPoint.x);
 			mModelFaceAngle = mFaceAngle.y;
@@ -1269,6 +1275,7 @@ void TEnemyMario::emDrawStamp()
 
 void TEnemyMario::emWaitingToInviteMario()
 {
+	char trash[0x18];
 	JGeometry::TVec3<f32> waitingPoint;
 	mEMario->getTracer()->getGraph()->getGraphNode(7).getPoint(&waitingPoint);
 	mPosition           = waitingPoint;
@@ -1545,6 +1552,7 @@ void TEnemyMario::checkReturn()
 	BOOL searching = true;
 	while (searching) {
 		JGeometry::TVec3<f32> point;
+		char trash[8];
 		mEMario->getTracer()->getGraph()->getGraphNode(nodeIndex).getPoint(
 		    &point);
 

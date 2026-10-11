@@ -2004,7 +2004,7 @@ DEFINE_NERVE(TNerveBossTelesaSpit, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaHide, TLiveActor)
 {
-	char trash[8];
+	char trash[0x10];
 	TBossTelesa* boss = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (!boss->mMActor->checkCurBckFromIndex(4)) {
@@ -2256,7 +2256,7 @@ DEFINE_NERVE(TNerveBossTelesaFallDemo, TLiveActor)
 	}
 
 	if (boss->rouletteFall()) {
-		JGeometry::TVec3<f32> toMario = boss->mPosition - *gpMarioPos;
+		JGeometry::TVec3<f32> toMario(boss->mPosition - *gpMarioPos);
 		if (boss->slotFall()) {
 			boss->offHitFlag(HIT_FLAG_NO_COLLISION);
 			boss->mBody->offHitFlag(HIT_FLAG_NO_COLLISION);

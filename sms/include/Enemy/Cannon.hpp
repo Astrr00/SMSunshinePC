@@ -17,8 +17,6 @@ class SDLModelData;
 class TMapCollisionMove;
 class TMapObjBase;
 
-// The nerves are only used in this file, and their theNerve() is defined
-// in-class so that every use is inlined (no out-of-line copy).
 #define CANNON_NERVE(Name)                                                     \
 	class Name : public TNerveBase<TLiveActor> {                               \
 	public:                                                                    \
@@ -76,14 +74,6 @@ public:
 
 	void setBckAnm(int index);
 
-	void initAnmSound()
-	{
-		if (mAnmSound != nullptr)
-			return;
-		mAnmSound = new MAnmSound(SMSGetMSound());
-		mAnmSound->initAnmSound(nullptr, 1, 0.0f);
-	}
-
 public:
 	/* 0x1C */ MAnmSound* mAnmSound;
 	/* 0x20 */ const char* mAnmSoundPath;
@@ -103,14 +93,6 @@ public:
 
 	void checkHit();
 	void setBckAnm(int index);
-
-	void initAnmSound()
-	{
-		if (mAnmSound != nullptr)
-			return;
-		mAnmSound = new MAnmSound(SMSGetMSound());
-		mAnmSound->initAnmSound(nullptr, 1, 0.0f);
-	}
 
 	bool checkHideEnd()
 	{

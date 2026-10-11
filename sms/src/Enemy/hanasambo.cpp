@@ -200,7 +200,7 @@ void TSamboLeaf::perform(u32 cue, JDrama::TGraphics* graphics)
 		Mtx mtx;
 		MtxPtr mtxP = mtx;
 		MsMtxSetXYZRPH(mtxP, mPosition.x, mPosition.y, mPosition.z, 0,
-		               DEG2SHORTANGLE(mRotation.y), 0);
+		               (s16)(mRotation.y * (65536.0f / 360.0f)), 0);
 
 		s16 angle = DEG2SHORTANGLE(-MsGetRotFromZaxis(mVelocity).x);
 
@@ -1041,6 +1041,8 @@ static int SamboHeadRollCallback(J3DNode* node, int param_2)
 		if (gpCurSamboHead == nullptr || !gpCurSamboHead->isUseCallBack())
 			return true;
 
+		Mtx rotMtx;
+
 		J3DJoint* joint = (J3DJoint*)node;
 		MtxPtr anmMtx
 		    = gpCurSamboHead->getModel()->getAnmMtx(joint->getJntNo());
@@ -1071,7 +1073,6 @@ static int SamboHeadRollCallback(J3DNode* node, int param_2)
 
 		JGeometry::TVec3<f32> axis(rateX, rateY, rateZ);
 
-		Mtx rotMtx;
 		PSMTXRotAxisRad(rotMtx, &axis, 0.017453292f * gpCurSamboHead->unk1AC);
 		PSMTXConcat(anmMtx, rotMtx, anmMtx);
 		PSMTXConcat(j3dSys.mCurrentMtx, rotMtx, j3dSys.mCurrentMtx);

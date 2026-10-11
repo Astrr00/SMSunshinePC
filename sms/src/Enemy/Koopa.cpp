@@ -62,6 +62,7 @@ static const char* koopa_bastable[] = {
 
 BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x108];
 	TKoopa* self               = (TKoopa*)spine->getBody();
 	TKoopaSaveLoadParams* params = self->getParam();
 
@@ -528,6 +529,7 @@ TKoopaHead::TKoopaHead(TKoopa* koopa)
 
 BOOL TKoopaHead::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x18];
 	if (message == HIT_MESSAGE_SPRAYED_BY_WATER) {
 		if (mOwner->getShowered()) {
 			gpMarioParticleManager->emit(0xE7, &sender->mPosition, 0, nullptr);
@@ -583,6 +585,7 @@ TKoopaBody::TKoopaBody(TKoopa* koopa)
 
 BOOL TKoopaBody::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x10];
 	if (message != HIT_MESSAGE_ATTACK)
 		return true;
 
@@ -933,6 +936,7 @@ bool TKoopa::isFlaming() const
 
 f32 TKoopa::getNeckFocus() const
 {
+	char trash[0x8];
 	int anmIdx           = mMActor->getCurAnmIdx(ANM_TYPE_BCK);
 	J3DFrameCtrl* ctrl   = mMActor->getFrameCtrl(ANM_TYPE_BCK);
 	f32 frame            = ctrl->getFrame();
@@ -1171,6 +1175,7 @@ void TKoopa::loadAfter()
 
 void TKoopa::init(TLiveManager* manager)
 {
+	char trash[0x30];
 	mBodyRadius = 800.0f;
 	mHeadHeight = 2000.0f;
 
@@ -1242,6 +1247,7 @@ void TKoopa::reset()
 
 void TKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x58];
 	if (cue & CUE_MOVE) {
 		unk1B8 = getNeckFocus();
 		if (unk19C > 0)

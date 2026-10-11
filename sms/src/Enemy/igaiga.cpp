@@ -143,6 +143,8 @@ TRollEnemy::TRollEnemy(const char* name)
 
 void TRollEnemy::reset()
 {
+	// stack padding to match the retail frame size
+	char trash[0x30];
 	gpCurRollEnemy = this;
 	TWalkerEnemy::reset();
 
@@ -182,6 +184,8 @@ void TRollEnemy::walkBehavior(int param_1, f32 param_2)
 		if (unk1A0 > unk1B0) {
 			bound();
 			JGeometry::TVec3<f32> vel;
+			// stack padding to match the retail frame size
+			char trash[8];
 			vel.x = 0.0f;
 			vel.y = unk1A0;
 			vel.z = 0.0f;
@@ -234,6 +238,8 @@ void TRollEnemy::attackToMario()
 void TRollEnemy::flagJump()
 {
 	JGeometry::TVec3<f32> point;
+	// stack padding to match the retail frame size
+	char trash[0x20];
 	unk124->getCurrent().getPoint(&point);
 	mPosition.y += 30.0f;
 	f32 speed = unk124->unkC;
@@ -438,6 +444,8 @@ bool TIgaiga::isRolling()
 
 void TIgaiga::behaveToWater(THitActor*)
 {
+	// stack padding to match the retail frame size
+	char trash[8];
 	mSprayedByWaterCooldown = 0;
 	if (unk1E4 < unk1A4->mSLExpandMax.get())
 		unk1E4 = unk1E4 * unk1A4->mSLExpandRate.get();
@@ -478,6 +486,8 @@ void TIgaiga::kill()
 
 void TIgaiga::moveObject()
 {
+	// stack padding to match the retail frame size
+	char trash[0x18];
 	TWalkerEnemy::moveObject();
 
 	unk1CC = igaClamp(unk1CC - 0.0002f, 0.5f, 1.0f);
@@ -581,6 +591,8 @@ void TIgaiga::setWalkAnm() { setBckAnm(3); }
 
 void TIgaiga::setDeadAnm()
 {
+	// stack padding to match the retail frame size
+	char trash[0x18];
 	if (checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
 		unk1C0 = mPosition;
 	} else {
@@ -902,6 +914,8 @@ void TGorogoroManager::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TGorogoro::init(TLiveManager* manager)
 {
+	// stack padding to match the retail frame size
+	char trash[0x10];
 	TWalkerEnemy::init(manager);
 	mActorType = 0x10000019;
 	unk150     = 0x31;
@@ -1132,6 +1146,8 @@ void TGorogoro::walkBehavior(int param_1, f32 param_2)
 void TGorogoro::flagJump()
 {
 	JGeometry::TVec3<f32> goal;
+	// stack padding to match the retail frame size
+	char trash[0x20];
 	unk124->getCurrent().getPoint(&goal);
 	mPosition.y += 30.0f;
 	f32 speed = unk124->unkC;

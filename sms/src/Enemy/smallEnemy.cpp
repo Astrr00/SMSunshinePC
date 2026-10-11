@@ -1050,6 +1050,7 @@ DEFINE_NERVE(TNerveSmallEnemyJump, TLiveActor)
 		self->jumpBehavior();
 
 		JGeometry::TVec3<f32> v = self->getVelocity();
+		char trash[0x8];
 		v.y = self->getSaveParams()->getSLJumpForce() * self->getBodyScale();
 		self->setVelocity(v);
 

@@ -197,8 +197,8 @@ void THamuKuriManager::loadAfter()
 static const char* anmlist[] = {
 	"hamukuri_walk",
 	"hamukuri_run",
-	// TODO: this shouldn't be here but rodata ordering looks like it should?!
-	// "default.bmd",
+	// rodata order: keeps "default.bmd" string pool position matching retail.
+	"default.bmd",
 	"hanekuri_wait",
 };
 
@@ -673,6 +673,7 @@ void THamuKuri::init(TLiveManager* param_1)
 
 void THamuKuri::setMActorAndKeeper()
 {
+	char trash[8];
 	mMActorKeeper = new TMActorKeeper(mManager, 1);
 	mMActor       = mMActorKeeper->createMActor("default.bmd", 3);
 	int idx       = getModel()->getModelData()->getMaterialName()->getIndex(
@@ -1184,10 +1185,12 @@ bool THamuKuri::isResignationAttack()
 
 bool THamuKuri::isHitValid(u32 param_1)
 {
+	char trash[24];
 	if (isBckAnm(3)) {
 		THamuKuriManager* manager = getManager();
 		THamuKuriSaveLoadParams* params = (THamuKuriSaveLoadParams*)manager->unk38;
 		int trampled = 1;
+		s32 trampleBonusNum = params->mSLTrampleBonusNum.get();
 
 		for (int i = 0; i < manager->getActiveObjNum(); ++i) {
 			THamuKuri* obj = (THamuKuri*)manager->unk18[i];
@@ -1197,7 +1200,7 @@ bool THamuKuri::isHitValid(u32 param_1)
 			}
 		}
 
-		if (trampled >= params->mSLTrampleBonusNum.get()) {
+		if (trampled >= trampleBonusNum) {
 			gpItemManager->makeObjAppear(mPosition.x, mPosition.y, mPosition.z, 0x20000005, true);
 		}
 		return true;
@@ -2216,6 +2219,7 @@ void TFireHamuKuri::reset()
 
 void TFireHamuKuri::setMActorAndKeeper()
 {
+	char trash[8];
 	mMActorKeeper = new TMActorKeeper(mManager, 1);
 	mMActor       = mMActorKeeper->createMActor("default.bmd", 3);
 	ResTIMG* img

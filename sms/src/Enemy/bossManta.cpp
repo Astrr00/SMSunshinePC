@@ -742,17 +742,15 @@ void TBossManta::updateAttractor()
 		JGeometry::TVec3<f32> otherPos = other->mPosition;
 		otherPos += otherFacing;
 
-		JGeometry::TVec3<f32> delta;
-		delta.sub(selfPos, otherPos);
+		JGeometry::TVec3<f32> delta = selfPos;
+		delta -= otherPos;
 		delta.y = 0.0f;
 
 		if (0.1f < delta.length()
 		    && delta.length() < getSaveParams()->mSLEscapeRegion.get()) {
-			JGeometry::TVec3<f32> thing;
-			thing.set(delta);
-			thing.normalize();
-			thing *= getSaveParams()->mSLPusherPower.get() / thing.length();
-			local_108 += thing;
+			delta.normalize();
+			delta *= getSaveParams()->mSLPusherPower.get() / delta.length();
+			local_108 += delta;
 		}
 	}
 
@@ -1204,8 +1202,8 @@ void TBossMantaManager::updateMantaEscape()
 {
 	TBossManta::sEscapeFromMario = 0;
 
-	JGeometry::TVec3<f32> marioPos2 = SMS_GetMarioPos();
-	JGeometry::TVec3<f32> marioPos(marioPos2.x, 0.0f, marioPos2.z);
+	JGeometry::TVec3<f32> marioPos = SMS_GetMarioPos();
+	marioPos.y = 0.0f;
 
 	for (int i = 0; i < 7; ++i) {
 		if (unk74[i].distance(marioPos) < 350.0f)

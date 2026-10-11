@@ -98,7 +98,7 @@ static int PakkunRootCallback(J3DNode* node, int type)
 			}
 
 			scaling.setScale(scale, scaleY, scaleZ);
-			MTXConcat(scaling, anmMtx, anmMtx);
+			MTXConcat(anmMtx, scaling, anmMtx);
 
 			scaling.setScale(scale, scale, scale);
 			MTXConcat(J3DSys::mCurrentMtx, scaling, J3DSys::mCurrentMtx);

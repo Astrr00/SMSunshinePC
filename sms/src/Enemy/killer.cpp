@@ -413,6 +413,7 @@ void TKiller::genEventCoin()
 	char trash[4];
 	Vec offset;
 	Mtx rotMtx;
+	char trash2[8];
 	for (int i = 0; i < coinNum; ++i) {
 		offset.x = 0.0f;
 		offset.y = 0.0f;
@@ -724,6 +725,7 @@ void TFlyEnemy::calcChaseParam()
 	target.x = mPosition.x + toMario.x;
 	target.y = mPosition.y + toMario.y;
 	target.z = mPosition.z + toMario.z;
+	char trash[16];
 
 	if (mIsHoming)
 		setGoalPath(TPathNode(target));

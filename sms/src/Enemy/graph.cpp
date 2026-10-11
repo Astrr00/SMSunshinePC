@@ -780,6 +780,7 @@ TGraphWeb::getNearestPosOnGraphLink(const JGeometry::TVec3<f32>& param_1) const
 int TGraphWeb::getNeighborNodeIndexByFlag(int param_1, int param_2,
                                           u32 param_3) const
 {
+	char trash[0x10];
 	int goodConnectionNum = 0;
 	int goodConnections[8];
 
@@ -885,6 +886,7 @@ TGraphGroup::~TGraphGroup() { }
 
 void TGraphGroup::initGraphGroup()
 {
+	char trash[0x8];
 	for (int i = 0; i < unk4; ++i) {
 		if (unk8[i]->unk10 >= 0)
 			continue;
@@ -995,6 +997,7 @@ f32 TGraphTracer::calcSplineSpeed(f32 param_1)
 
 bool TGraphTracer::traceSpline(f32 param_1)
 {
+	char trash[0x40];
 	if (!unk0->unk14)
 		return false;
 

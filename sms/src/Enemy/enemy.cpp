@@ -474,7 +474,7 @@ void TSpineEnemy::walkToCurPathNode(f32 march_speed, f32 turn_speed,
 	f32 fVar5 = fVar2;
 	if (fVar7 > fVar3 * 2.0f) {
 		if (fVar2 > 0.0f) {
-			fVar5 = fVar2 < turn_speed ? fVar2 : turn_speed;
+			fVar5 = fVar2 > turn_speed ? turn_speed : fVar2;
 		} else {
 			fVar5 = fVar2 > -turn_speed ? fVar2 : -turn_speed;
 		}
@@ -542,7 +542,7 @@ void TSpineEnemy::zigzagToCurPathNode(f32 march_speed, f32 turn_speed,
 	f32 fVar2 = fVar1;
 	if (dVar9 > fVar3 * 2.0f) {
 		if (fVar1 > 0.0f) {
-			fVar2 = fVar1 < turn_speed ? fVar1 : turn_speed;
+			fVar2 = fVar1 > turn_speed ? turn_speed : fVar1;
 		} else {
 			fVar2 = fVar1 > -turn_speed ? fVar1 : -turn_speed;
 		}
