@@ -125,6 +125,7 @@ bool TBaseNPC::execTurnToFirstState()
 	s16 angle2 = CLBDegToShortAngle(unk1A0.y);
 	s16 angle3
 	    = CLBDegToShortAngle(mIndividualParams->mFirstStateTurnSpeed.get());
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 	if (!CLBChaseGeneralConstantSpecifySpeed(&angle1, angle2, angle3)) {
 		result      = true;
 		mRotation.y = unk1A0.y;

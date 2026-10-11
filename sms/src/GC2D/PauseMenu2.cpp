@@ -163,6 +163,7 @@ void TPauseMenu2::loadAfter()
 
 void TPauseMenu2::appearWindow()
 {
+	char trash[0x20]; // unused stack slot (present in the retail frame)
 	if (mFadeAnim <= 45.0f) {
 		for (s32 i = 0; i < 5; i++) {
 			// Animate each letter with a delay.
@@ -220,7 +221,7 @@ void TPauseMenu2::appearWindow()
 				rect.reform(hx, hy, -hx, -hy);
 
 				mMenuItems[i]->setBounds(rect);
-			} else if (mFadeAnim <= 46.0f) {
+			} else if (mFadeAnim >= 46.0f) {
 				// Fade in animation complete; set state to open.
 				if (mState != MENU_OPEN) {
 					mState = MENU_OPEN;

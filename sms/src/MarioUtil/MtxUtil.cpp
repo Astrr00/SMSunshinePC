@@ -303,7 +303,7 @@ void TMultiMtxEffect::setup(J3DModel* model, const char* prmLocation)
 	mModel        = model;
 	mMtxEffectTbl = new TMtxEffectBase*[mNumBones];
 
-	for (int i = 0; i < mNumBones; ++i) {
+	for (u16 i = 0; i < mNumBones; ++i) {
 		char* path = new char[0x40];
 		snprintf(path, 0x40, "/%s/MtxEffect%d.prm", prmLocation, mBoneIDs[i]);
 

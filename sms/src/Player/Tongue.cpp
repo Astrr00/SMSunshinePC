@@ -89,6 +89,7 @@ void TYoshiTongue::emit(const JGeometry::TVec3<f32>& src,
                         const JGeometry::TVec3<f32>& dir,
                         const JGeometry::TVec3<f32>& vel)
 {
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 	if (mState == STATE_IDLE) {
 		mProgress = 0;
 		mState    = STATE_EXTENDING;
@@ -118,6 +119,7 @@ void TYoshiTongue::rest(const JGeometry::TVec3<f32>& a,
 #pragma dont_inline on
 BOOL TYoshiTongue::canGo()
 {
+	char trash[0x8]; // unused stack slot (present in the retail frame)
 	JGeometry::TVec3<f32> toTip = mTipPos - mHeadPos;
 
 	if (toTip.dot(mHeadDir) < 0.0f)
@@ -148,6 +150,7 @@ BOOL TYoshiTongue::canGo()
 
 THitActor* TYoshiTongue::findTarget(bool allowExtra, bool checkForward)
 {
+	char trash[0x28]; // unused stack slot (present in the retail frame)
 	THitActor* best = nullptr;
 	f32 bestDist    = 10000.0f;
 

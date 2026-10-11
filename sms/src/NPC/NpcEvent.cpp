@@ -91,7 +91,7 @@ static void evIsGameModeNormal(TSpcTypedInterp<TEventWatcher>* interp,
 static void ev__ForceStartTalkExceptNpc(TSpcTypedInterp<TEventWatcher>* interp,
                                         u32 arg_num)
 {
-	char trash[0x28];
+	char trash[0x20];
 	interp->verifyArgNum(1, &arg_num);
 	int result = 0;
 	// TODO: uuuh...

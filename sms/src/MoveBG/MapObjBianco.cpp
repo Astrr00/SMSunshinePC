@@ -142,6 +142,7 @@ void TBellWatermill::loadAfter()
 
 void TBellWatermill::control()
 {
+	char trash[0x68]; // unused stack slot (present in the retail frame)
 	TMapObjBase::control();
 
 	if (unk158 != 0.0f || unk178 != 0.0f || unk170 != 0.0f) {
@@ -585,6 +586,7 @@ void TLeafBoat::control()
 
 void TLeafBoat::bind()
 {
+	char trash[0x40]; // unused stack slot (present in the retail frame)
 	const TBGCheckData* ground;
 	JGeometry::TVec3<f32> newPos(mPosition);
 	JGeometry::TVec3<f32> velX(mVelocity);
@@ -621,15 +623,15 @@ void TLeafBoat::bind()
 void TLeafBoat::touchWall(JGeometry::TVec3<f32>* pos,
                           TBGWallCheckRecord* record)
 {
+	char trash[0x38]; // unused stack slot (present in the retail frame)
 	int wallNum = record->mResultWallsNum;
 	for (int i = 0; i < wallNum; ++i) {
 		TBGCheckData* wall = record->mResultWalls[i];
 		JGeometry::TVec3<f32> vel(mVelocity);
 		if (vel.dot(wall->mNormal) < 0.0f) {
 			f32 dist = pos->dot(wall->mNormal) + wall->mPlaneDistance;
-			f32 pen  = mBodyRadius - dist;
-			pos->x += pen * wall->mNormal.x;
-			pos->z += pen * wall->mNormal.z;
+			pos->x += (mBodyRadius - dist) * wall->mNormal.x;
+			pos->z += (mBodyRadius - dist) * wall->mNormal.z;
 
 			JGeometry::TVec3<f32> reflected(mVelocity);
 			calcReflectingVelocity(wall, 1.0f, &reflected);
@@ -907,6 +909,7 @@ void TBigWindmill::load(JSUMemoryInputStream& stream)
 
 void TBigWindmill::control()
 {
+	char trash[0x8]; // unused stack slot (present in the retail frame)
 	TMapObjBase::control();
 
 	mRotation.z -= sSpeed;

@@ -75,6 +75,7 @@ static void thpSetSize(TTHPRender* render, const JDrama::TSize& size)
 
 void TMovieDirector::setup(JDrama::TDisplay* param_1, TMarioGamePad* param_2)
 {
+	char trash[0x18];
 	unk14         = new JDrama::TDStageGroup(param_1);
 	unk20         = param_2;
 	unk20->mFlags = TMarioGamePad::PAD_FLAG_MENU_INPUT;
@@ -136,7 +137,7 @@ int TMovieDirector::rsetup()
 		if ((s32)gpApplication.getMovie() < 16) {
 			(void)gpApplication.getMovie();
 		} else {
-			unk24 = new TCardSave;
+			unk24 = new TCardSave("card save", true);
 			unk24->initData(unk20);
 			group2d->getChildren().push_back(unk24);
 		}

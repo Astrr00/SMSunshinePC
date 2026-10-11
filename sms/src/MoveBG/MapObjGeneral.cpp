@@ -522,6 +522,7 @@ void TMapObjGeneral::bind()
 
 	calcVelocity();
 	JGeometry::TVec3<f32> vec = getPosition();
+	char trash[0x28];
 	vec.add(mLinearVelocity);
 	vec.add(mVelocity);
 	checkGroundCollision(&vec);

@@ -84,6 +84,7 @@ CPolarSubCamera::CPolarSubCamera(const char* name)
     , unk2C0(3.0f)
     , unk2C4(2.0f)
 {
+	char trash[0x14];
 	gpCamera                    = this;
 	gpCameraShake               = new TCameraShake;
 	TCameraMarioData* marioData = new TCameraMarioData;

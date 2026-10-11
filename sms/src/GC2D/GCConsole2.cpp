@@ -2632,6 +2632,7 @@ bool TGCConsole2::startDisappearBalloon(u32 param_1, bool param_2)
 
 bool TGCConsole2::startAppearBalloon(u32 messageID, bool autoClose)
 {
+	char trash[0x20];
 	TMessageLoader::EntryInfo* entry
 	    = unk3D0->getMessageEntry(messageID & 0xffff);
 

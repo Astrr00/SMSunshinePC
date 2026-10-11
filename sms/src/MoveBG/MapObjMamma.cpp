@@ -167,15 +167,16 @@ void TSandLeafBase::control()
 
 void TSandLeafBase::initMapObj()
 {
+	char trash[8];
 	mGrowSpeed   = 0.003f;
 	mWitherSpeed = 0.001f;
 	mWaitTime    = 0;
 	mScaling.y   = mScaleMin;
 	TMapObjBase::initMapObj();
 
-	JGeometry::TVec3<f32> scale(1.0f, 1.0f, 1.0f);
 	mLeaf = (TSandLeaf*)TMapObjBaseManager::newAndRegisterObj(
-	    "SandLeaf", mPosition, mRotation, scale);
+	    "SandLeaf", mPosition, mRotation,
+	    JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f));
 	mLeaf->mBase = this;
 	mLeaf->appear();
 }
@@ -467,6 +468,7 @@ static s32 SandCastleCallBack(TMarDirector::DemoCallbackArg, u32 state)
 	if (state == 1) {
 		gpTargetArrow->unk14 = 1;
 		JGeometry::TVec3<f32> arrowPos(8400.0f, 300.0f, 8150.0f);
+		char trash[0x20];
 		gpTargetArrow->setPos(arrowPos);
 		const JGeometry::TVec3<f32>& pos = gpCamera->unk124;
 		const JGeometry::TVec3<f32>& at  = gpCamera->unk148;
@@ -755,8 +757,7 @@ void TLeanMirror::control()
 	switch (mState) {
 	case STATE_SHAKE: {
 		controlShake();
-		f32 speed;
-		speed = fabsf(mShake.length());
+		f32 speed = fabsf(mShake.length());
 		if (gpMSound->gateCheck(0x3048)) {
 			MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 			    0x3048, &mPosition, nullptr, speed, 0, 0, nullptr, 0, 4);
@@ -765,8 +766,7 @@ void TLeanMirror::control()
 	}
 	case STATE_GO_TARGET: {
 		controlGoTarget();
-		f32 speed;
-		speed = fabsf(mShake.length());
+		f32 speed = fabsf(mShake.length());
 		if (gpMSound->gateCheck(0x304A)) {
 			MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 			    0x304A, &mPosition, nullptr, speed, 0, 0, nullptr, 0, 4);
@@ -956,14 +956,15 @@ void TShiningStone::load(JSUMemoryInputStream& stream)
 	};
 
 	Mtx mtx;
-	MsMtxSetXYZRPH(mtx, mPosition.x, mPosition.y, mPosition.z, mRotation.x,
+	MtxPtr mtxPtr = mtx;
+	MsMtxSetXYZRPH(mtxPtr, mPosition.x, mPosition.y, mPosition.z, mRotation.x,
 	               mRotation.y, mRotation.z);
 
 	mStoneActors = new MActor*[4];
 	for (int i = 0; i < 4; ++i) {
 		mStoneActors[i] = SMS_MakeMActorWithAnmData(
 		    paths[i], gpMapObjManager->getMActorAnmData(), 3, 0x10020000);
-		MTXCopy(mtx, mStoneActors[i]->getModel()->getBaseTRMtx());
+		MTXCopy(mtxPtr, mStoneActors[i]->getModel()->getBaseTRMtx());
 
 		// Translated: "Sun stone in mirror"
 		TMirrorActor* mirror = new TMirrorActor("太陽石in鏡");

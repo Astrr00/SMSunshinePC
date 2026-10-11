@@ -1038,7 +1038,7 @@ void TCogwheelScale::touchPlayer(THitActor*)
 BOOL TCogwheelScale::receiveMessage(THitActor* sender, u32 message)
 {
 	if (message == HIT_MESSAGE_HIP_DROP) {
-		unk158->unk138 = unk150 + unk158->unk138;
+		unk158->unk138 = unk158->unk138 + unk150;
 		return true;
 	}
 	return TMapObjBase::receiveMessage(sender, message);

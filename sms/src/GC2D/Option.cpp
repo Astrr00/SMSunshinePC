@@ -599,6 +599,7 @@ void TOptionSoundUnit::initSurroundAnm()
 #pragma dont_inline on
 void TOptionSoundUnit::update()
 {
+	char trash[0x1c];
 	switch (mState) {
 	case STATE_DEACTIVATING:
 		mParentPane->update();

@@ -497,8 +497,11 @@ THideObjInfo::THideObjInfo(const char* name)
 void TMapObjSwitch::control()
 {
 	TMapObjBase::control();
-	if (isStateTimerEngaged())
-		SMSGetMSound()->playTimer(mStateTimer);
+	if (isStateTimerEngaged()) {
+		// Retail re-reads mStateTimer; volatile blocks CSE with the check.
+		s32 timer = (volatile int&)mStateTimer;
+		SMSGetMSound()->playTimer(timer);
+	}
 }
 
 BOOL TMapObjSwitch::receiveMessage(THitActor*, u32 message)
@@ -624,9 +627,9 @@ void TRedCoinSwitch::loadAfter()
 
 void TRedCoinSwitch::load(JSUMemoryInputStream& stream)
 {
-	char trash[8];
 	TMapObjBase::load(stream);
 	u32 tmp;
+	char trash[8];
 	stream >> tmp;
 	unk138 = tmp;
 	if (unk138 <= 0)

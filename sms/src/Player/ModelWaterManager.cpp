@@ -773,6 +773,19 @@ void TModelWaterManager::calcWorldMinMax()
 	unk5D7C.z = minZ + 200.0f;
 }
 
+// std::sqrtf here expands to two Newton steps; retail uses one (frsqrte + one step).
+static inline f32 sqrtf1(f32 x)
+{
+	volatile float y;
+	if (x > 0.0f) {
+		double guess = __frsqrte((double)x);
+		guess        = .5 * guess * (3.0 - guess * guess * x);
+		y            = (float)(x * guess);
+		return y;
+	}
+	return x;
+}
+
 #pragma dont_inline on
 void TModelWaterManager::calcDrawVtx(MtxPtr viewMtx)
 {
@@ -802,7 +815,7 @@ void TModelWaterManager::calcDrawVtx(MtxPtr viewMtx)
 		f32 s = 1.414f * (0.5f * mParticleSizeSOA[i]);
 		JGeometry::TVec3<f32> quad[4];
 		if (len2 > 1.0f) {
-			f32 k = (1.0f / std::sqrtf(len2)) * s;
+			f32 k = (1.0f / sqrtf1(len2)) * s;
 			f32 ax = vel.x * k;
 			f32 ay = vel.y * k;
 			quad[0].x = pos.x + ax + vel.x * unk5D18;

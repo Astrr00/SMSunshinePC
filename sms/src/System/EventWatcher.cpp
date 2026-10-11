@@ -302,6 +302,7 @@ static void evSetTalkMsgID(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGetTalkMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(0, &arg_num);
 	interp->push((int)gpTalk2D->getTalkMode());
 }
@@ -309,6 +310,7 @@ static void evGetTalkMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evGetTalkSelectedValue(TSpcTypedInterp<TEventWatcher>* interp,
                                    u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(0, &arg_num);
 	interp->push((int)gpTalk2D->getSelectedValue());
 }
@@ -458,6 +460,7 @@ static void evSetPollutionIncreaseCount(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evGetRestTime(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(0, &arg_num);
 	interp->push(SMSGetMarDirector()->getRestTime());
 }
@@ -1213,10 +1216,12 @@ static void evAppear8RedCoinsAndTimer(TSpcTypedInterp<TEventWatcher>* interp,
                                       u32 arg_num)
 {
 	interp->verifyArgNum(0, &arg_num);
+	const char* name = "赤コイン用スイッチ";
 	TRedCoinSwitch* swtch = static_cast<TRedCoinSwitch*>(
-	    JDrama::TNameRefGen::search("赤コイン用スイッチ"));
+	    JDrama::TNameRefGen::search(name));
 
 	int iVar9 = swtch->unk138;
+	char trash[0x18];
 	for (int i = 0; i < 8; ++i) {
 		TCoinRed* coin = (TCoinRed*)gpItemManager->makeObjAppeared(0x2000000f);
 		coin->killByTimer(iVar9 - coin->unk150);
