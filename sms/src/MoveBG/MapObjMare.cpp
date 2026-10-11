@@ -616,8 +616,9 @@ void TMapObjGrowTree::control()
 				return;
 			}
 
-			if (67.0f <= mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
-			    && mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() <= 240.0f)
+			f32 frame = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+			if (67.0f <= frame && frame <= 240.0f
+			    && gpMSound->gateCheck(MSD_SE_OBJ_SAMDBOMB_REVERSE))
 				gpMSound->startSoundActor(MSD_SE_OBJ_SAMDBOMB_REVERSE,
 				                          &mPosition, 0, nullptr, 0, 4);
 

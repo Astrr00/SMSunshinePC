@@ -227,7 +227,15 @@ static void decideNextStage()
 	gpApplication.setNextArea(local_3C);
 }
 
-static void decideNextStageOfMiss() { }
+static void decideNextStageOfMiss()
+{
+	const TGameSequence& curArea = gpApplication.mCurrArea;
+	if (SMS_isExMap() || curArea.getStage() == 0 || curArea.getStage() == 60) {
+		gpApplication.mNextArea.set(curArea.getStage(), 0, 0);
+	} else {
+		decideNextStage();
+	}
+}
 
 static void checkDefeatShadowMarioAll() { }
 
@@ -431,13 +439,7 @@ int TMarDirector::changeState()
 		    && (MSBgm::getHandle(2) == 0 || mTickCount - unk60 >= 1200)) {
 			if (TFlagManager::smInstance->getFlag(0x20001) >= 0) {
 				TFlagManager::smInstance->setBool(true, 0x30002);
-				const TGameSequence& curArea = gpApplication.mCurrArea;
-				if (SMS_isExMap() || curArea.getStage() == 0
-				    || curArea.getStage() == 60) {
-					gpApplication.mNextArea.set(curArea.getStage(), 0, 0);
-				} else {
-					decideNextStage();
-				}
+				decideNextStageOfMiss();
 				unk4C &= ~0x100;
 				moveStage();
 				unkE4 = 0xf;

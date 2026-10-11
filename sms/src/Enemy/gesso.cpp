@@ -1021,15 +1021,20 @@ DEFINE_NERVE(TNerveGessoFreeze, TLiveActor)
 		if (self->isBckAnm(10)) {
 			self->setBckAnm(9);
 		} else if (self->isBckAnm(9)) {
+			bool wentToAnm8 = false;
 			if (spine->getTime() > self->unk1E8->mSLFreezeWait.get()) {
 				u8 tmp = self->unk165;
 				if (tmp != 0)
 					self->unk165 = 0;
 
-				if (tmp == 0)
+				if (tmp == 0) {
 					self->setBckAnm(8);
+					wentToAnm8 = true;
+				}
 			}
-			self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(0.0f);
+
+			if (!wentToAnm8)
+				self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(0.0f);
 		} else if (self->isBckAnm(8)) {
 			return true;
 		}

@@ -732,9 +732,8 @@ void TBGTentacle::setAttackTarget()
 		JGeometry::TVec3<f32> local_3c;
 		local_3c.cross(JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f), local_148);
 		local_3c.normalize();
+		local_3c.scale(iVar9);
 
-		JGeometry::TVec3<f32> local_cc = local_3c;
-		local_cc.scale(iVar9);
 		JGeometry::TVec3<f32> local_ac = local_3c;
 		local_ac.scale(80.0f);
 		unk84 += local_ac;
@@ -991,8 +990,8 @@ void TBGTentacle::moveConstraint()
 	case 1:
 		for (int i = 0; i < mNodeNum; ++i) {
 			MtxPtr mtx = unk80->getModel()->getAnmMtx(i);
-			mNodes[i].setPosition(
-			    JGeometry::TVec3<f32>(mtx[0][0], mtx[0][1], mtx[0][2]));
+			mNodes[i].setUnk18(
+			    JGeometry::TVec3<f32>(mtx[0][3], mtx[1][3], mtx[2][3]));
 		}
 		int iVar10;
 		if (mOwner->beakHeld()) {
@@ -1014,8 +1013,8 @@ void TBGTentacle::moveConstraint()
 	case 10:
 		for (int i = 0; i < mNodeNum; ++i) {
 			MtxPtr mtx = unk80->getModel()->getAnmMtx(i);
-			mNodes[i].setPosition(
-			    JGeometry::TVec3<f32>(mtx[0][0], mtx[0][1], mtx[0][2]));
+			mNodes[i].setUnk18(
+			    JGeometry::TVec3<f32>(mtx[0][3], mtx[1][3], mtx[2][3]));
 		}
 		break;
 
@@ -1033,7 +1032,7 @@ void TBGTentacle::moveConstraint()
 				local_38.y += getNodeLen();
 			}
 		} else {
-			static int jntidx[] = { 8, 14, 16, 34 };
+			static int jntidx[] = { 8, 14, 28, 34 };
 			int iVar15          = jntidx[mIndex];
 			for (int i = 0; i < mNodeNum; ++i) {
 				MtxPtr mtx = mOwner->getModel()->getAnmMtx(i + iVar15);
@@ -1045,7 +1044,7 @@ void TBGTentacle::moveConstraint()
 
 	case 9: {
 		JGeometry::TVec3<f32> local_58 = mNodes[0].getPosition();
-		mNodes[0].setPosition(local_58);
+		mNodes[0].setUnk18(local_58);
 		for (int i = 1; i < mNodeNum; ++i) {
 			local_58.x -= getNodeLen() * 1.3f;
 			local_58.y -= getNodeLen() * 1.5f;
@@ -1268,14 +1267,22 @@ void TBGTentacle::calcAttackGuideAnm()
 	local_3c -= local_30;
 	JGeometry::TVec3<f32> local_b4 = MsGetRotFromZaxis(local_3c);
 
+	f32 scaleZ = 1.0f;
 	if (mState != 10) {
-		unk80->checkCurBckFromIndex(20);
-		// TODO: a bunch of stuff ghidra refuses to show
+		f32 len = JGeometry::TUtil<f32>::sqrt(local_3c.x * local_3c.x
+		                                       + local_3c.y * local_3c.y
+		                                       + local_3c.z * local_3c.z);
+		if (unk80->checkCurBckFromIndex(20))
+			scaleZ = len * (1.0f / 1500.0f);
+		else
+			scaleZ = len * (1.0f / 1200.0f);
+		if (scaleZ > 2.0f)
+			scaleZ = 2.0f;
 	}
 
 	Mtx afStack_78;
 	MsMtxSetTRS(afStack_78, local_30.x, local_30.y, local_30.z, local_b4.x,
-	            local_b4.y, local_b4.z, 1.875f, 1.875f, 1.875f);
+	            local_b4.y, local_b4.z, 1.0f, 1.0f, scaleZ);
 
 	Mtx local_a8;
 	if (mState == 10) {

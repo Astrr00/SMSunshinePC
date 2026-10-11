@@ -57,7 +57,7 @@ void TMapObjWaterFilter::perform(u32 cue, JDrama::TGraphics* graphics)
 		return;
 
 	if (gpCamera->unk124.y > 0.0f
-	    && gpCamera->unk124.y >= gpMapObjWave->getHeight(
+	    && gpCamera->unk124.y < gpMapObjWave->getHeight(
 	           gpCamera->unk124.x, gpCamera->unk124.y, gpCamera->unk124.z))
 		return;
 

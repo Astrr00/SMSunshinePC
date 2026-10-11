@@ -1734,8 +1734,10 @@ void TBathWaterManager::throwMario(f32 param_1)
 		horiz.setLength(4150.0f);
 
 		JGeometry::TVec3<f32> w;
-		data.unk18.mult33(horiz, w);
-		w += data.mPos;
+		// w = mPos + transpose(unk18) * horiz; horiz.y is 0, so that column drops out.
+		w.x = data.mPos.x + data.unk18.mMtx[0][0] * horiz.x + data.unk18.mMtx[2][0] * horiz.z;
+		w.y = data.mPos.y + data.unk18.mMtx[0][1] * horiz.x + data.unk18.mMtx[2][1] * horiz.z;
+		w.z = data.mPos.z + data.unk18.mMtx[0][2] * horiz.x + data.unk18.mMtx[2][2] * horiz.z;
 		w.y += 120.0f;
 
 		f32 gravity = SMS_GetMarioGravity();

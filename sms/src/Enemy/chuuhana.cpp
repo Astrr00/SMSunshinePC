@@ -349,9 +349,10 @@ void TChuuHana::behaveToWater(THitActor* water)
 		JGeometry::TVec3<f32> dir(mPosition.x - gpMarioPos->x, 0.0f,
 		                          mPosition.z - gpMarioPos->z);
 		MsVECNormalize(&dir, &dir);
-		dir.x *= unk1B4->mSLGetWaterPow.get();
-		dir.y *= unk1B4->mSLGetWaterPow.get();
-		dir.z *= unk1B4->mSLGetWaterPow.get();
+		f32 pow = unk1B4->mSLGetWaterPow.get();
+		dir.x *= pow;
+		dir.y *= pow;
+		dir.z *= pow;
 
 		JGeometry::TVec3<f32> vel = mVelocity;
 		VECAdd(vel, dir, vel);
@@ -372,9 +373,10 @@ void TChuuHana::behaveToWater(THitActor* water)
 		JGeometry::TVec3<f32> dir(mPosition.x - gpMarioPos->x, 0.0f,
 		                          mPosition.z - gpMarioPos->z);
 		MsVECNormalize(&dir, &dir);
-		dir.x *= unk1B4->mSLGetWaterPow2.get();
-		dir.y *= unk1B4->mSLGetWaterPow2.get();
-		dir.z *= unk1B4->mSLGetWaterPow2.get();
+		f32 pow = unk1B4->mSLGetWaterPow2.get();
+		dir.x *= pow;
+		dir.y *= pow;
+		dir.z *= pow;
 
 		if (!isAirborne()) {
 			if (mCompareHeight)

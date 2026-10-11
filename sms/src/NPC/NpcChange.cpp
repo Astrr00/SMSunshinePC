@@ -65,6 +65,7 @@ bool TBaseNPC::isNerveMaybeDontCalcAnim1() const
 	return result;
 }
 
+#pragma dont_inline on
 bool TBaseNPC::isNerveCanGoToTalk() const
 {
 	bool result                         = false;
@@ -85,6 +86,7 @@ bool TBaseNPC::isNerveCanGoToTalk() const
 	}
 	return result;
 }
+#pragma dont_inline off
 
 bool TBaseNPC::isNerveCanGoToWet() const
 {

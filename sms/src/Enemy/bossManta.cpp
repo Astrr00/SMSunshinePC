@@ -716,17 +716,18 @@ f32 TBossManta::getPolluteRadius()
 
 void TBossManta::updateAttractor()
 {
-	JGeometry::TVec3<f32> local_108 = mPosition;
-	local_108 -= unk158;
+	JGeometry::TVec3<f32> local_108 = unk158;
+	local_108 -= mPosition;
 	local_108.y = 0.0f;
 	local_108.normalize();
 	local_108 *= getSaveParams()->mSLAttractorPower.get();
 
 	JGeometry::TVec3<f32> facing = unk170;
-	facing *= getSaveParams()->mSLPusherPower.get();
+	facing *= getSaveParams()->mSLEscapeLookPoint.get();
 
 	JGeometry::TVec3<f32> selfPos = mPosition;
 	selfPos += facing;
+	selfPos.y = 0.0f;
 
 	for (int i = 0; i < getManager()->getActiveObjNum(); ++i) {
 		TBossManta* other = (TBossManta*)getManager()->getObj(i);
@@ -736,9 +737,9 @@ void TBossManta::updateAttractor()
 			continue;
 
 		JGeometry::TVec3<f32> otherFacing = other->unk170;
-		otherFacing *= getSaveParams()->mSLPusherPower.get();
+		otherFacing *= getSaveParams()->mSLEscapeLookedPoint.get();
 
-		JGeometry::TVec3<f32> otherPos = mPosition;
+		JGeometry::TVec3<f32> otherPos = other->mPosition;
 		otherPos += otherFacing;
 
 		JGeometry::TVec3<f32> delta;
@@ -1285,7 +1286,7 @@ void TBossMantaManager::createEnemies(int num)
 		num = getCapacity() - getObjNum();
 
 	if (unk38 != nullptr) {
-		u8 limit = unk38->mSLActiveEnemyNum.get();
+		u8 limit = unk38->mSLInstanceNum.get();
 		if (num + getObjNum() > limit)
 			num = limit - getObjNum();
 	}

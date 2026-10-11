@@ -819,7 +819,7 @@ void MSStageCubeFade::proc()
 		local_74.z = 0.0f;
 
 		Vec local_68 = SMS_GetMarioPos();
-		local_68.y   = gpCubeSoundChange->unk14->begin()[unk4]->unkC.y + 65.0f;
+		local_68.y   = gpCubeSoundChange->unk14->begin()[unk4]->unkC.y + 75.0f;
 
 		gpCubeSoundChange->calcPointInCubeRatio(local_68, unk4, &local_74.x,
 		                                        &local_74.y, &local_74.z);
@@ -842,10 +842,11 @@ void MSStageCubeFade::proc()
 
 			Vec local_d0 = info->getUnkC();
 			Vec marioPos = SMS_GetMarioPos();
+			local_d0.y = marioPos.y;
 
 			f32 d = vec_dist(local_d0, marioPos);
 
-			Vec local_98 = gpMSound->mAudioCameras->toCamSpace(local_2c);
+			Vec local_98 = gpMSound->mAudioCameras->toCamSpace(local_d0);
 			f32 dVar6    = MSHandle::calcPan(local_98, d, 10000.0f);
 			f32 dVar7    = MSHandle::calcDolby(local_98, d);
 			MSBgm::setPan(1, dVar6, 1, 0);
@@ -884,7 +885,7 @@ void MSStageCubeFadeMonte::proc()
 		local_74.z = 0.0f;
 
 		Vec local_68 = SMS_GetMarioPos();
-		local_68.y   = gpCubeSoundChange->unk14->begin()[unk4]->unkC.y + 65.0f;
+		local_68.y   = gpCubeSoundChange->unk14->begin()[unk4]->unkC.y + 75.0f;
 
 		gpCubeSoundChange->calcPointInCubeRatio(local_68, unk4, &local_74.x,
 		                                        &local_74.y, &local_74.z);
@@ -937,14 +938,14 @@ void MSStageCubeFadeMonte::proc()
 
 		if (unk4 != -1 && MSMainProc::MSStageInfo::cubeFadeUsePan) {
 
-			Vec local_e8           = SMS_GetMarioPos();
 			TCubeGeneralInfo* info = gpCubeSoundChange->unk14->begin()[unk4];
 
 			Vec local_d0        = info->getUnkC();
 			const Vec& marioPos = SMS_GetMarioPos();
+			local_d0.y = marioPos.y;
 
 			f32 d        = vec_dist(local_d0, marioPos);
-			Vec local_a4 = gpMSound->mAudioCameras->toCamSpace(local_e8);
+			Vec local_a4 = gpMSound->mAudioCameras->toCamSpace(local_d0);
 
 			f32 dVar6 = MSHandle::calcPan(local_a4, d, 10000.0f);
 			f32 dVar7 = MSHandle::calcDolby(local_a4, d);
@@ -956,13 +957,6 @@ void MSStageCubeFadeMonte::proc()
 	unk8  = unk4;
 	unk14 = unk10;
 }
-
-#ifdef TARGET_PC
-// Never called; the console body is empty and returns whatever f1 held.
-f32 MSStageCubeFade::calcParamRatioInCube(s32 id) { return 0.0f; }
-#else
-f32 MSStageCubeFade::calcParamRatioInCube(s32 id) { }
-#endif
 
 inline Vec getCubeCheckPos(const Vec& pos)
 {

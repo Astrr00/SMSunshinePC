@@ -1155,6 +1155,7 @@ void TBossGesso::doAttackUnison()
 	}
 }
 
+#pragma dont_inline on
 void TBossGesso::doAttackShoot()
 {
 	if (mBeak->getHolder() != nullptr) {
@@ -1178,6 +1179,7 @@ void TBossGesso::doAttackShoot()
 		}
 	}
 }
+#pragma dont_inline off
 
 // TODO: inline seems sus here, probably needed cuz inSight is wrong
 void TBossGesso::doAttackGuard()

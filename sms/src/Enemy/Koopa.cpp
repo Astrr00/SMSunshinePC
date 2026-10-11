@@ -823,6 +823,7 @@ void TKoopa::resetFlame_()
 		mFlames[i]->resetFlame();
 }
 
+#pragma dont_inline on
 void TKoopa::setUpHitActors()
 {
 	if (isBreathing())
@@ -837,6 +838,7 @@ void TKoopa::setUpHitActors()
 	           2.0f * getParam()->headRadius.get());
 	mBody->set(mPosition, 800.0f, 2000.0f);
 }
+#pragma dont_inline off
 
 void TKoopa::changeAnm(int bck, int btp, f32 rate)
 {
@@ -1084,6 +1086,7 @@ void TKoopa::stagger(bool force)
 	mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
 }
 
+#pragma dont_inline on
 f32 TKoopa::getTargetDir(const JGeometry::TVec3<f32>& target) const
 {
 	TBathtub* bathtub
@@ -1099,6 +1102,7 @@ f32 TKoopa::getTargetDir(const JGeometry::TVec3<f32>& target) const
 
 	return matan(localZ, localX) * (360.0f / 65536.0f);
 }
+#pragma dont_inline off
 
 f32 TKoopa::getAnmFrame() const
 {

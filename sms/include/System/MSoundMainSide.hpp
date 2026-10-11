@@ -42,8 +42,6 @@ public:
 
 	virtual void proc();
 
-	f32 calcParamRatioInCube(s32);
-
 public:
 	/* 0x4 */ int unk4;
 	/* 0x8 */ int unk8;
