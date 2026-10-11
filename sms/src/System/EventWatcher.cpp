@@ -266,10 +266,10 @@ static void evGetTalkNPCName(TSpcTypedInterp<TEventWatcher>* interp,
 
 	TBaseNPC* npc = SMSGetMarDirector()->getTalkingNPC();
 
-	const char* name = "";
-	if (npc)
-		name = npc->getName();
-	interp->push(name);
+	if (!npc)
+		interp->push("");
+	else
+		interp->push(npc->getName());
 }
 
 // TODO: `TSpcSlice(interp->pop()).getDataInt()` is a placeholder for something

@@ -454,7 +454,7 @@ void TNozzleBase::animation(int param_1)
 			updateAnimation = false;
 		} else if (!updateAnimation) {
 			updateAnimation = true;
-			u32 nozzleKind  = fludd->getCurrentNozzle()->getNozzleKind();
+			int nozzleKind  = fludd->getCurrentNozzle()->getNozzleKind();
 			if (nozzleKind == 1) {
 				TNozzleTrigger* trigger
 				    = (TNozzleTrigger*)fludd->getCurrentNozzle();
@@ -525,7 +525,7 @@ void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 		return;
 	}
 
-	if (unk385 == TNozzleTrigger::ACTIVE) {
+	if ((u8)unk385 == TNozzleTrigger::ACTIVE) {
 		unk386 -= 1;
 
 		// Very likely an inline
@@ -545,15 +545,11 @@ void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 	if ((unk384 == true
 	     && (controllerWork.mFrameInput & TMarioControllerWork::A) != 0
 	     && (controllerWork.mInput & TMarioControllerWork::R) != 0)
-	    && unk385 == TNozzleTrigger::INACTIVE) {
+	    && (u8)unk385 == TNozzleTrigger::INACTIVE) {
 		unk385 = TNozzleTrigger::ACTIVE;
 		if (unk38C != 0xffffffff) {
-			u32 soundId;
-			if (unk378 < 1.0f) {
-				soundId = MSD_SE_PO_WATER_LOW_TRG;
-			} else {
-				soundId = MSD_SE_PO_WATER_HI_TRG;
-			}
+			u32 soundId = unk378 < 1.0f ? MSD_SE_PO_WATER_LOW_TRG
+			                            : MSD_SE_PO_WATER_HI_TRG;
 			SMSGetMSound()->startSoundActor(soundId, mFludd->mEmitPos[0], 0,
 			                                nullptr, 0, 4);
 		}
@@ -572,13 +568,13 @@ void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 
 	if (canSpray == true) {
 		unk388 += 150.0f * controllerWork.mAnalogR;
-		if (!unk384 && unk385 == TNozzleTrigger::INACTIVE) {
+		if (!unk384 && (u8)unk385 == TNozzleTrigger::INACTIVE) {
 			if (gpMarDirector->mMoveTickCount % (int)mFludd->mMario->unk568
 			    == 0)
 				SMSRumbleMgr->start(20, (int)mFludd->mMario->unk564,
 				                    (f32*)nullptr);
 		}
-		if (unk384 != true && unk385 == TNozzleTrigger::INACTIVE
+		if (unk384 != true && (u8)unk385 == TNozzleTrigger::INACTIVE
 		    && controllerWork.mAnalogR > 0.0f) {
 			SMSGetMSound()->startSoundActor(
 			    MSD_SE_SY_NEWP_AIR_TAME, mFludd->mEmitPos[0], 0, nullptr, 0, 4);
@@ -591,7 +587,7 @@ void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 
 	if (unk388 > mEmitParams.mInsidePressureMax.get()) {
 		unk388 = mEmitParams.mInsidePressureMax.get();
-		if (!unk384 && unk385 == TNozzleTrigger::INACTIVE) {
+		if (!unk384 && (u8)unk385 == TNozzleTrigger::INACTIVE) {
 			unk385      = TNozzleTrigger::ACTIVE;
 			unk386      = mEmitParams.mTriggerTime.get();
 			u32 soundId = unk38C;
@@ -609,7 +605,7 @@ void TNozzleTrigger::movement(const TMarioControllerWork& controllerWork)
 		}
 	}
 
-	if (unk385 == TNozzleTrigger::DEAD) {
+	if ((u8)unk385 == TNozzleTrigger::DEAD) {
 		unk388 = 0.0f;
 		if (controllerWork.mAnalogR == 0.0f) {
 			unk385 = TNozzleTrigger::INACTIVE;
@@ -666,7 +662,7 @@ void TNozzleTrigger::emit(int param_1)
 		if (emittedWater != 0) {
 			mFludd->depleteWater(emittedWater * mEmitParams.mDecRate.get());
 
-			if ((mFludd->mCurrentNozzle == TWaterGun::Hover)
+			if ((mFludd->mCurrentNozzle == (s8)TWaterGun::Hover)
 			    && ((gpMarDirector->mMoveTickCount & 0x7u) == 0u)) {
 				SMSRumbleMgr->start(20, 2, (f32*)nullptr);
 			}
@@ -1086,19 +1082,20 @@ void TNozzleDeform::animation(int param)
 		if (!mactor->checkCurBckFromIndex(5))
 			mactor->setBckFromIndex(5);
 
+		TWaterGun* fludd     = mFludd;
 		bool updateAnimation = false;
-		if (mFludd->mCurrentWater == 0) {
+		if (fludd->mCurrentWater == 0) {
 			updateAnimation = false;
-		} else if (mFludd->getNozzle(mFludd->mCurrentNozzle)->getNozzleKind()
+		} else if (fludd->getNozzle(fludd->mCurrentNozzle)->getNozzleKind()
 		           == 1) {
-			if (((TNozzleTrigger*)mFludd->getNozzle(mFludd->mCurrentNozzle))
+			if (((TNozzleTrigger*)fludd->getNozzle(fludd->mCurrentNozzle))
 			        ->unk385
 			    == TNozzleTrigger::ACTIVE)
 				updateAnimation = true;
 			else
 				updateAnimation = false;
 		} else {
-			if (mFludd->getNozzle(mFludd->mCurrentNozzle)->unk378 > 0.0f)
+			if (fludd->getNozzle(fludd->mCurrentNozzle)->unk378 > 0.0f)
 				updateAnimation = true;
 			else
 				updateAnimation = false;

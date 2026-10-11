@@ -2318,6 +2318,7 @@ void TMario::thinkYoshiHeadCollision()
 	f32 headZ = headPos.z;
 	TBGWallCheckRecord record(headPos.x, headPos.y + 100.0f, headZ,
 	                          mYoshiParams.mHeadRadius.get(), 4, 0);
+	char trash[8];
 
 	if (gpMap->isTouchedWallsAndMoveXZ(&record) == true) {
 		f32 dx = record.mCenter.x - headPos.x;

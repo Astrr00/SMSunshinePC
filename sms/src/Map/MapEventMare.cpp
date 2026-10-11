@@ -480,7 +480,7 @@ void TMareEventDepressWall::initCommon()
 	                     ->getYounger()
 	                     ->getChild();
 
-	int skipCount = 0x43 - (unk14 + (unk10 - 1));
+	int skipCount = 0x43 - ((unk10 - 1) + unk14);
 	for (int i = 0; i < skipCount; ++i)
 		joint = joint->getYounger();
 

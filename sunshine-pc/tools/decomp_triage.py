@@ -13,6 +13,7 @@ Known false positive: string-pool offsets (addi rX, rY, imm) show as imm.
   python sunshine-pc/tools/decomp_triage.py --build <unit>      recompile one unit with mwcc, print its rows
   python sunshine-pc/tools/decomp_triage.py --diff <unit> <sym> [ctx]  differing rows only: retail | ours (ctx rows around)
   python sunshine-pc/tools/decomp_triage.py --branchscan [unit...]   conditional-branch sense/cr flips after an identical compare -> sms/build/branch_inversions.tsv (full run; unit args print to stdout)
+  python sunshine-pc/tools/decomp_triage.py --immscan [unit...]   same-mnemonic rows differing only in a cmp/li/lis/addi immediate or a load/store displacement -> sms/build/imm_mismatches.tsv (full run; unit args print to stdout)
 """
 import json, os, re, subprocess, sys, collections, struct
 from concurrent.futures import ThreadPoolExecutor
@@ -310,7 +311,84 @@ def scan_fn(L, R):
     return out
 
 
-def scan_unit(name):
+IMM_CMP = {"cmpwi", "cmplwi", "cmpi", "cmpli"}
+IMM_LDST = {"lwz", "lhz", "lha", "lbz", "lfs", "lfd", "stw", "sth", "stb", "stfs", "stfd"}
+IMM_FEED = {"li", "lis", "addi"}
+NO_BASE = {"r1", "r2", "r13"}  # stack, sda2, sda
+
+
+def _ops(row):
+    """(mnemonic, opaque operand names); (None, []) for alignment placeholders."""
+    ins = row.get("instruction")
+    if not ins or not ins.get("parts"):
+        return None, []
+    m = next((p["opcode"]["mnemonic"] for p in ins["parts"] if "opcode" in p), None)
+    return m, [p["arg"]["opaque"] for p in ins["parts"] if "arg" in p and "opaque" in p["arg"]]
+
+
+def _shape(row):
+    """(mnemonic, shape with numeric operands blanked, numeric operands as text, registers); None if relocated, a branch, or unparsable."""
+    ins = row.get("instruction")
+    if not ins or not ins.get("parts") or "relocation" in ins or "branch_dest" in ins:
+        return None
+    shape, nums = [], []
+    for p in ins["parts"]:
+        a = p.get("arg")
+        if a is not None and ("signed" in a or "unsigned" in a):
+            k = "signed" if "signed" in a else "unsigned"
+            shape.append("#" + k)
+            nums.append(str(a[k]))
+        elif a is not None and "opaque" not in a:
+            return None
+        else:
+            shape.append(json.dumps(p, sort_keys=True))
+    m, regs = _ops(row)
+    return m, shape, nums, regs
+
+
+def _feeds(rows, j, reg):
+    """True if the result of row j in reg is read by a compare within the next few rows, before reg is overwritten or the block ends."""
+    for k in range(j + 1, min(len(rows), j + 8)):
+        m, regs = _ops(rows[k])
+        if m is None:
+            continue
+        if m.startswith("cmp"):
+            if reg in regs:
+                return True
+        elif m.startswith("b") or (regs and regs[0] == reg and not m.startswith(("st", "mt"))):
+            return False
+    return False
+
+
+def imm_kind(O, T, i):
+    """Class of aligned row i when ours O and retail T share mnemonic and operand shape and differ in exactly one numeric operand:
+    cmp-imm (cmpwi/cmplwi), ldst-disp (load/store displacement off a base other than r1/r2/r13), feed-cmp (li/lis/addi whose
+    result a compare reads nearby, i.e. case values). None otherwise."""
+    so, st = _shape(O[i]), _shape(T[i])
+    if not so or not st or so[0] != st[0] or so[1] != st[1] or len(so[2]) != 1 or so[2] == st[2]:
+        return None
+    m, regs = so[0], so[3]
+    if m in IMM_CMP:
+        return "cmp-imm"
+    if m in IMM_LDST:
+        return None if regs[-1] in NO_BASE else "ldst-disp"
+    if m in IMM_FEED:
+        if m == "addi" and regs[1] in NO_BASE:
+            return None
+        return "feed-cmp" if _feeds(T, i, regs[0]) or _feeds(O, i, regs[0]) else None
+    return None
+
+
+def imm_fn(O, T):
+    out = []
+    for i in range(min(len(O), len(T))):
+        k = imm_kind(O, T, i)
+        if k:
+            out.append((i, T[i]["instruction"]["formatted"], O[i]["instruction"]["formatted"], k))
+    return out
+
+
+def scan_unit(name, scanner):
     loaded = objdiff_syms(name)
     if loaded is None:
         return None
@@ -323,24 +401,25 @@ def scan_unit(name):
         nfn += 1
         L = s.get("instructions", [])  # objdiff left: retail
         R = rs[s["target_symbol"]].get("instructions", [])  # objdiff right: ours
-        for i, rt, ou, cls in scan_fn(R, L):
+        for i, rt, ou, cls in scanner(R, L):
             hits.append((name, s.get("demangled_name", s["name"]), i, rt, ou, cls))
     return hits, nfn
 
 
-def branchscan(units):
+def rowscan(units, scanner, out_name, kinds):
+    """One per-row scanner over units (all game units when none given). Full run writes sms/build/<out_name>; unit args print rows to stdout."""
     full = not units
     if full:
         triage = json.load(open(os.path.join(SMS, "build", "triage.json")))
         units = sorted({f["unit"] for f in triage if f["unit"].split("/")[1] not in GAME_SKIP})
     with ThreadPoolExecutor(6) as ex:
-        res = list(ex.map(scan_unit, units))
+        res = list(ex.map(lambda u: scan_unit(u, scanner), units))
     skipped = [u for u, r in zip(units, res) if r is None]
     if skipped:
         print("skipped (no object):", *skipped)
     hits = [h for r in res if r for h in r[0]]
     nfn = sum(r[1] for r in res if r)
-    path = os.path.join(SMS, "build", "branch_inversions.tsv")
+    path = os.path.join(SMS, "build", out_name)
     c = collections.Counter(h[5] for h in hits)
     if full:
         with open(path, "w") as fh:
@@ -349,9 +428,18 @@ def branchscan(units):
     else:
         for u, fn, i, rt, ou, cls in hits:
             print(f"{u}\t{fn}\t{i}\t{rt}\t{ou}\t{cls}")
-        path = "stdout (unit-filtered run; branch_inversions.tsv untouched)"
-    print(f"units={len(units) - len(skipped)} functions={nfn} hits={len(hits)} same-layout={c['same-layout']} "
-          f"swapped-blocks={c['swapped-blocks']} other={c['other']} -> {path}")
+        path = f"stdout (unit-filtered run; {out_name} untouched)"
+    fns = len({(h[0], h[1]) for h in hits})
+    print(f"units={len(units) - len(skipped)} functions={nfn} with_hits={fns} hits={len(hits)} "
+          + " ".join(f"{k}={c[k]}" for k in kinds) + f" -> {path}")
+
+
+def branchscan(units):
+    rowscan(units, scan_fn, "branch_inversions.tsv", ("same-layout", "swapped-blocks", "other"))
+
+
+def immscan(units):
+    rowscan(units, imm_fn, "imm_mismatches.tsv", ("cmp-imm", "feed-cmp", "ldst-disp"))
 
 
 
@@ -364,6 +452,8 @@ def main():
         return check(sys.argv[2], sys.argv[3])
     if sys.argv[1:2] == ["--branchscan"]:
         return branchscan(sys.argv[2:])
+    if sys.argv[1:2] == ["--immscan"]:
+        return immscan(sys.argv[2:])
     rep = json.load(open(os.path.join(SMS, "build", "GMSJ01", "report.json")))
     flt = sys.argv[1] if len(sys.argv) > 1 else ""
     names = [u["name"] for u in rep["units"] if flt in u["name"]

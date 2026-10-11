@@ -499,6 +499,7 @@ bool TConsoleStr::processShineGet(int param_1)
 			gpEmitterManager4D2->createEmitter(local_80, 0x1FE, nullptr,
 			                                   nullptr);
 		}
+		char trash[4];
 
 		if (param_1 == i * 6 + 40) {
 			unk244[i]->setPanePosition(0x14, cShineGetLeft2, cShineGetLeft2,
@@ -527,7 +528,8 @@ bool TConsoleStr::processShineGet(int param_1)
 		}
 
 		if (param_1 > i * 6 + 200) {
-			s16 alpha = unk244[i]->getPane()->getAlpha() - 7;
+			s16 alpha = unk244[i]->getPane()->getAlpha();
+			alpha -= 7;
 			if (alpha < 0)
 				alpha = 0;
 			unk244[i]->getPane()->setAlpha(alpha);
@@ -545,7 +547,7 @@ bool TConsoleStr::processShineGet(int param_1)
 		}
 	}
 
-	char trash[0x10];
+	char trash[0xc];
 	return result;
 }
 

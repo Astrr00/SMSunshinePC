@@ -562,10 +562,9 @@ void TItemSlotDrum::generateItem()
 			if (item != nullptr) {
 				item->mPosition += off;
 				MsVECNormalize(&off, &off);
-				item->mVelocity.x = 12.0f * off.x;
-				item->mVelocity.y = TMsRange<f32>(5.0f, 10.0f).rand();
-				item->mVelocity.z = 12.0f * off.z;
-				item->offLiveFlag(LIVE_FLAG_UNK10);
+				item->setVelocityAndFlag10(12.0f * off.x,
+				                           TMsRange<f32>(5.0f, 10.0f).rand(),
+				                           12.0f * off.z);
 			}
 		}
 	} else {

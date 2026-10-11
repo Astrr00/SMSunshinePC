@@ -194,8 +194,8 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 		case 0x20000006:
 		case 0x20000007: // collectible fruit
 			if (message == HIT_MESSAGE_ATTACK) {
-				if (*(s8*)((u8*)sender + 0x13A) == 0
-				    && !(*(s32*)((u8*)sender + 0x13C) < 120 ? true : false)) {
+				if (*(s8*)((u8*)sender + 0x13A) != 0
+				    || !(*(s32*)((u8*)sender + 0x13C) < 120 ? true : false)) {
 					mHealth = mDeParams.mHpMax.get();
 					if (checkFlag(MARIO_FLAG_HAS_FLUDD)) {
 						mWaterGun->addWater(mWaterGun->getMaxWater());

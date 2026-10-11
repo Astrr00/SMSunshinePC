@@ -744,6 +744,7 @@ void TMBindShadowManager::drawShadowVolume(bool param_1,
 
 void TMBindShadowManager::drawShadowGD(u32 param_1, JDrama::TGraphics* param_2)
 {
+	char trash[0x270];
 	class TCylinder : public TGDLStatic {
 	public:
 		TCylinder(u32 size)
@@ -1318,6 +1319,7 @@ void TMBindShadowManager::forceRequest(const TCircleShadowRequest& param_1,
 
 void TMBindShadowManager::calcVtx()
 {
+	char trash[0x90];
 	static const f32 calctablex[4] = { -1.0f, 1.0f, 1.0f, -1.0f };
 	static const f32 calctablez[4] = { -1.0f, -1.0f, 1.0f, 1.0f };
 

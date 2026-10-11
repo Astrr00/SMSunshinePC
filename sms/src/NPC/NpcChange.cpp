@@ -447,6 +447,7 @@ bool TBaseNPC::isNowCanTaken() const
 
 void TBaseNPC::changeNerveProc_()
 {
+	char trash[0x40];
 	bool bVar4                                = false;
 	const TNerveBase<TLiveActor>* latestNerve = mSpine->getLatestNerve();
 	if (latestNerve == &TNerveNPCTalk::theNerve()) {
@@ -513,6 +514,7 @@ void TBaseNPC::changeNerveProc_()
 		if (bVar5) {
 			onLiveFlag(LIVE_FLAG_UNK20000);
 			if (checkLiveFlag(LIVE_FLAG_UNK40000)) {
+				bVar4 = true;
 				offLiveFlag(LIVE_FLAG_UNK40000);
 				const TNerveBase<TLiveActor>* current
 				    = mSpine->getCurrentNerve();

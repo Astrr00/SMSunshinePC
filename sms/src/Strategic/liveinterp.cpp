@@ -447,28 +447,6 @@ void linGetSRT(TSpcTypedInterp<TLiveActor>* interp, u32 arg_num)
 	TSpcSlice arg2    = interp->pop();
 
 	switch (arg2.getDataInt()) {
-	case 0:
-		switch (arg1.getDataInt()) {
-		case 0: {
-			TSpcSlice slice;
-			slice.setDataFloat(owner->mPosition.x);
-			interp->push(slice);
-		} break;
-		case 1: {
-			TSpcSlice slice;
-			slice.setDataFloat(owner->mPosition.y);
-			interp->push(slice);
-		} break;
-		case 2: {
-			TSpcSlice slice;
-			slice.setDataFloat(owner->mPosition.z);
-			interp->push(slice);
-		} break;
-		default:
-			interp->push();
-			break;
-		}
-		break;
 	case 1:
 		switch (arg1.getDataInt()) {
 		case 0: {
@@ -484,6 +462,28 @@ void linGetSRT(TSpcTypedInterp<TLiveActor>* interp, u32 arg_num)
 		case 2: {
 			TSpcSlice slice;
 			slice.setDataFloat(owner->mRotation.z);
+			interp->push(slice);
+		} break;
+		default:
+			interp->push();
+			break;
+		}
+		break;
+	case 0:
+		switch (arg1.getDataInt()) {
+		case 0: {
+			TSpcSlice slice;
+			slice.setDataFloat(owner->mPosition.x);
+			interp->push(slice);
+		} break;
+		case 1: {
+			TSpcSlice slice;
+			slice.setDataFloat(owner->mPosition.y);
+			interp->push(slice);
+		} break;
+		case 2: {
+			TSpcSlice slice;
+			slice.setDataFloat(owner->mPosition.z);
 			interp->push(slice);
 		} break;
 		default:

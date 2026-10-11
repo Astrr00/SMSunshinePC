@@ -605,18 +605,18 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 		console->unk1C = console->unk1CC[0];
 		if (console->unk1CC[0] >= 4) {
 			if (airMode) {
-				((J2DPicture*)console->unk178->getPane())->mWhite = 0x00FFFFFF;
-				((J2DPicture*)console->unk17C[0])->mWhite         = 0x00FFFFFF;
+				((J2DPicture*)console->unk178->getPane())->mWhite = JUtility::TColor(0x00, 0xFF, 0xFF, 0xFF);
+				((J2DPicture*)console->unk17C[0])->mWhite         = JUtility::TColor(0x00, 0xFF, 0xFF, 0xFF);
 			} else {
-				((J2DPicture*)console->unk178->getPane())->mWhite = 0xFFFFFFFF;
-				((J2DPicture*)console->unk17C[0])->mWhite         = 0xFFFFFFFF;
+				((J2DPicture*)console->unk178->getPane())->mWhite = JUtility::TColor(0xFF, 0xFF, 0xFF, 0xFF);
+				((J2DPicture*)console->unk17C[0])->mWhite         = JUtility::TColor(0xFF, 0xFF, 0xFF, 0xFF);
 			}
 		} else if (airMode) {
-			((J2DPicture*)console->unk178->getPane())->mWhite = 0x00A0FFFF;
-			((J2DPicture*)console->unk17C[0])->mWhite         = 0x008080FF;
+			((J2DPicture*)console->unk178->getPane())->mWhite = JUtility::TColor(0x00, 0xA0, 0xFF, 0xFF);
+			((J2DPicture*)console->unk17C[0])->mWhite         = JUtility::TColor(0x00, 0x80, 0x80, 0xFF);
 		} else {
-			((J2DPicture*)console->unk178->getPane())->mWhite = 0x808080FF;
-			((J2DPicture*)console->unk17C[0])->mWhite         = 0x808080FF;
+			((J2DPicture*)console->unk178->getPane())->mWhite = JUtility::TColor(0x80, 0x80, 0x80, 0xFF);
+			((J2DPicture*)console->unk17C[0])->mWhite         = JUtility::TColor(0x80, 0x80, 0x80, 0xFF);
 		}
 	}
 }

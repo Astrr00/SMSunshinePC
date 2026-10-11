@@ -36,20 +36,22 @@ BOOL NPCNeckCallBack(J3DNode* param_1, int param_2)
 			}
 
 			JGeometry::TVec3<f32> local_148;
+			char trash[0x20];
 
 			if (useTracking) {
 				JGeometry::TVec3<f32> marioPos = SMS_GetMarioPos();
 				marioPos.y += 85.0f;
+				f32 marioY = marioPos.y;
 
 				JGeometry::TVec3<f32> toMario(marioPos.x - currMtx[0][3],
-				                              marioPos.y - currMtx[1][3],
+				                              marioY - currMtx[1][3],
 				                              marioPos.z - currMtx[2][3]);
 
 				f32 dist2 = toMario.squared();
 				if (dist2 > 0.001f
 				    && dist2 < CLBSquared<f32>(gpCurrentNpc->mIndividualParams
 				                                   ->mNeckTurnSearchDist.get())
-				    && fabs(marioPos.y - currMtx[1][3])
+				    && fabs(marioY - currMtx[1][3])
 				           < gpCurrentNpc->mIndividualParams
 				                 ->mNeckTurnSearchHeight.get()) {
 

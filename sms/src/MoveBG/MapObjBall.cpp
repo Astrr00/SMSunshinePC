@@ -863,8 +863,8 @@ void TResetFruit::kicked()
 
 void TResetFruit::breaking()
 {
-	char trash[16];
 	Mtx scaleMtx;
+	char trash[16];
 	MTXScale(scaleMtx, 1.0f, mBreakingScaleSpeed, 1.0f);
 	MtxPtr mtx = getModel()->getAnmMtx(0);
 	concatOnlyRotFromLeft(scaleMtx, mtx, mtx);

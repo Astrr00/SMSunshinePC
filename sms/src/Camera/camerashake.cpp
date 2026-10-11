@@ -119,7 +119,6 @@ void TCameraShake::execShake(const JGeometry::TVec3<f32>& origin,
                              JGeometry::TVec3<f32>* pos,
                              JGeometry::TVec3<f32>* up)
 {
-	char trash[56];
 	bool anyActive                = false;
 	JGeometry::TVec3<f32> origPos = *pos;
 
@@ -180,6 +179,8 @@ void TCameraShake::execShake(const JGeometry::TVec3<f32>& origin,
 	    dir, -(0.017453294f * (0.005493164f * (f32)mRollAccum)));
 
 	JGeometry::TVec3<f32> oldUp = *up;
+	char trash[56];
+
 	up->x = oldUp.x * rot.at(0, 0) + oldUp.y * rot.at(1, 0)
 	        + oldUp.z * rot.at(2, 0);
 	up->y = oldUp.x * rot.at(0, 1) + oldUp.y * rot.at(1, 1)
