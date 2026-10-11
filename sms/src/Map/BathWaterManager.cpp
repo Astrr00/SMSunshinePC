@@ -1734,6 +1734,14 @@ void CalcJumpVelocityY(const JGeometry::TVec3<f32>& desired_pos,
 }
 } // namespace
 
+// Retail calls TVec3::set out of line here; mwcc would inline the header version.
+#pragma dont_inline on
+static void setOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
+#pragma dont_inline off
+
 void TBathWaterManager::throwMario(f32 param_1)
 {
 	const TBathtubData& data = unk24->getBathtubData();
@@ -1748,7 +1756,7 @@ void TBathWaterManager::throwMario(f32 param_1)
 	data.unk18.getYDir(yDir);
 	data.unk18.getZDir(zDir);
 	JGeometry::TVec3<f32> local;
-	local.set(diff.dot(xDir), diff.dot(yDir), diff.dot(zDir));
+	setOutOfLine(local, diff.dot(xDir), diff.dot(yDir), diff.dot(zDir));
 
 	JGeometry::TVec3<f32> horiz;
 	horiz   = local;

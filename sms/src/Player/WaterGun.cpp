@@ -127,7 +127,6 @@ TNozzleBmdData nozzleBmdData = {
 
 static BOOL NozzleCtrl(J3DNode* node, BOOL param_2)
 {
-	char trash[0x10];
 	// TODO: Inlined stack space
 	if (!param_2) {
 		if (gpMarioForCallBack != nullptr) {
@@ -136,7 +135,7 @@ static BOOL NozzleCtrl(J3DNode* node, BOOL param_2)
 			if (gunAngle < 0) {
 				Mtx mtx;
 				// Unused stack space
-				// volatile u32 unused2[6];
+				volatile u32 unused2[5];
 				MsMtxSetRotRPH(mtx, 0.0f, 0.0f, SHORTANGLE2DEG(gunAngle));
 				MTXConcat(J3DSys::mCurrentMtx, mtx, J3DSys::mCurrentMtx);
 			}
@@ -147,12 +146,11 @@ static BOOL NozzleCtrl(J3DNode* node, BOOL param_2)
 
 static BOOL RotateCtrl(J3DNode* node, BOOL param_2)
 {
-	char trash[0x20];
 	if (!param_2 && gpMarioForCallBack != nullptr) {
 		s16 local1cd0 = gpMarioForCallBack->mWaterGun->unk1CD0;
 		Mtx mtx;
 		// Unused stack space
-		// volatile u32 unused2[7];
+		volatile u32 unused2[7];
 		MsMtxSetRotRPH(mtx, 0.005493164f * local1cd0, 0.0f, 0.0f);
 		MTXConcat(J3DSys::mCurrentMtx, mtx, J3DSys::mCurrentMtx);
 	}
@@ -161,7 +159,6 @@ static BOOL RotateCtrl(J3DNode* node, BOOL param_2)
 
 static BOOL WaterGunDivingCtrlL(J3DNode* node, BOOL param_2)
 {
-	char trash[0x18];
 	if (!param_2) {
 		// This looks very weird to me, probably because of some inline?
 		// I could imagine some s32 getNozzleSpeedY() and
@@ -170,7 +167,7 @@ static BOOL WaterGunDivingCtrlL(J3DNode* node, BOOL param_2)
 		s16 neg          = -nozzleSpeedY;
 		Mtx mtx;
 		// Unused stack space
-		// volatile u32 unused2[7];
+		volatile u32 unused2[7];
 		MsMtxSetRotRPH(mtx, 0.0f, 0.0f, 0.005493164f * neg);
 		MTXConcat(J3DSys::mCurrentMtx, mtx, J3DSys::mCurrentMtx);
 	}
@@ -179,7 +176,6 @@ static BOOL WaterGunDivingCtrlL(J3DNode* node, BOOL param_2)
 
 static BOOL WaterGunDivingCtrlR(J3DNode* node, BOOL param_2)
 {
-	char trash[0x18];
 	if (!param_2) {
 		// This looks very weird to me, probably because of some inline?
 		// I could imagine some s32 getNozzleSpeedY() and
@@ -188,7 +184,7 @@ static BOOL WaterGunDivingCtrlR(J3DNode* node, BOOL param_2)
 		s16 neg          = -nozzleSpeedY;
 		Mtx mtx;
 		// Unused stack space
-		// volatile u32 unused2[7];
+		volatile u32 unused2[7];
 		MsMtxSetRotRPH(mtx, 0.0f, 0.0f, 0.005493164f * neg);
 		MTXConcat(J3DSys::mCurrentMtx, mtx, J3DSys::mCurrentMtx);
 	}

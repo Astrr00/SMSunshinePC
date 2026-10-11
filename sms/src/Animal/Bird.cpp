@@ -92,8 +92,8 @@ void TAnimalBird::initParams()
 	mHomeRot.z = mRotation.z;
 
 	mHitPoints       = getMaxHitPoints();
-	mFloatingTimer   = 0;
 	mWaterproofTimer = 0;
+	mFloatingTimer   = 0;
 	mWalkDir         = 1.0f;
 	offLiveFlag(LIVE_FLAG_AIRBORNE);
 	mSpeedScale = 1.0f - 0.1f * (MsRandF() - 0.5f);

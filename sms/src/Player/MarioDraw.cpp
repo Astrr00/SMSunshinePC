@@ -1906,10 +1906,11 @@ void TMario::addUpper()
 
 void TMario::calcAnim(u32 param_1, JDrama::TGraphics* graphics)
 {
-	volatile u32 padding[34];
+	volatile u32 padHead[1];
+	Mtx baseMtx;
+	volatile u32 padding[33];
 	addCallBack(graphics);
 	addUpper();
-	Mtx baseMtx;
 	calcBaseMtx(baseMtx);
 	considerWaist();
 	MTXCopy(baseMtx, mModel->unk8->getBaseTRMtx());

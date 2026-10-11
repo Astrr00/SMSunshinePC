@@ -573,6 +573,7 @@ BOOL TNerveAmiNokoTurn::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveAmiNokoDie::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TAmiNoko* self = (TAmiNoko*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->setBckAnm(1);

@@ -389,7 +389,7 @@ DEFINE_NERVE(TNerveMameGessoGraphJumpWander, TLiveActor)
 				    local_34, returnJumpSp, self->getGravityY());
 				self->mPosition.y += 2.0f;
 				self->setVelocity(vel);
-				self->onHitFlag(LIVE_FLAG_AIRBORNE);
+				self->onLiveFlag(LIVE_FLAG_AIRBORNE);
 			}
 		}
 	}

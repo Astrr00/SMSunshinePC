@@ -482,7 +482,15 @@ J3DModel::J3DModel(J3DModelData* model_data, u32 model_flag,
 	entryModelData(model_data, model_flag, mtx_buffer_flag);
 }
 
+#ifdef TARGET_PC
+J3DModel::~J3DModel()
+{
+	delete[] mInterpCur;
+	delete[] mInterpPrev;
+}
+#else
 J3DModel::~J3DModel() { }
+#endif
 
 void J3DModel::initialize()
 {
@@ -913,6 +921,9 @@ void J3DModel::calc()
 void J3DModel::entry()
 {
 	j3dSys.setModel(this);
+#ifdef TARGET_PC
+	interpBlend();
+#endif
 
 	if (unk8 & 0x4 ? 1 : 0) {
 		j3dSys.mFlags |= 0x4;
@@ -930,6 +941,66 @@ void J3DModel::entry()
 
 	mModelData->unk14->recursiveEntry(mModelData->mRootNode);
 }
+
+#ifdef TARGET_PC
+// Frame-rate interpolation (sunshine-pc/src/framerate/framerate.cpp). viewCalc snapshots the draw matrices once per
+// logic tick; replayed presents blend the last two snapshots in entry(), so the picture moves between logic states.
+float sunshineInterpAlpha();  // -1: draw the logic state as is; 0..1: blend position between prev and cur
+u32 sunshineInterpStep();     // logic ticks so far
+bool sunshineInterpEnabled(); // fpsLimit above 30, or unlimited
+void sunshineInterpNoteBlend();
+// ponytail: a translation jump above 500 units snaps instead of blending (teleport, camera cut). Ceiling: a legit move
+// over 500 units in one tick also snaps. Upgrade: a teleport flag from the game code.
+static constexpr float kInterpCutDistance = 500.0f;
+
+void J3DModel::interpRecord()
+{
+	const u32 count = mModelData->getDrawMtxNum();
+	const u32 step  = sunshineInterpStep();
+	Mtx* now        = getDrawMtxPtr();
+	if (mInterpValid && step == mInterpStep) {
+		for (u32 i = 0; i < count; ++i)
+			MTXCopy(now[i], mInterpCur[i]);
+		return;
+	}
+	if (mInterpCur == nullptr) {
+		mInterpCur  = new Mtx[count];
+		mInterpPrev = new Mtx[count];
+	}
+	bool snap = !mInterpValid || step - mInterpStep != 1;
+	for (u32 i = 0; !snap && i < count; ++i) {
+		for (int row = 0; row < 3; ++row) {
+			if (fabsf(now[i][row][3] - mInterpCur[i][row][3]) > kInterpCutDistance)
+				snap = true;
+		}
+	}
+	for (u32 i = 0; i < count; ++i) {
+		MTXCopy(snap ? now[i] : mInterpCur[i], mInterpPrev[i]);
+		MTXCopy(now[i], mInterpCur[i]);
+	}
+	mInterpStep  = step;
+	mInterpValid = true;
+}
+
+void J3DModel::interpBlend()
+{
+	const float alpha = sunshineInterpAlpha();
+	if (alpha < 0.0f || !mInterpValid)
+		return;
+	const u32 count = mModelData->getDrawMtxNum();
+	Mtx* out        = getDrawMtxPtr();
+	for (u32 i = 0; i < count; ++i) {
+		const float* p = &mInterpPrev[i][0][0];
+		const float* c = &mInterpCur[i][0][0];
+		float* o       = &out[i][0][0];
+		for (int j = 0; j < 12; ++j)
+			o[j] = p[j] + (c[j] - p[j]) * alpha;
+	}
+	sunshineInterpNoteBlend();
+	calcNrmMtx();
+	DCStoreRange(out, count * sizeof(Mtx));
+}
+#endif
 
 void J3DModel::viewCalc()
 {
@@ -958,6 +1029,10 @@ void J3DModel::viewCalc()
 		}
 	}
 
+#ifdef TARGET_PC
+	if (sunshineInterpEnabled())
+		interpRecord();
+#endif
 	calcNrmMtx();
 	calcBBoard();
 	calcBumpMtx();

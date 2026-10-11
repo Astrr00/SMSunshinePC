@@ -1788,8 +1788,9 @@ void TBossEel::perform(u32 cue, JDrama::TGraphics* graphics)
 		collideToMario();
 
 		TPosition3f collisionMtx;
+		// asm 0x802E5900: retail pairs mMapCollisions[2] with joint index [2]
 		collisionMtx.set(
-		    mMActor->getModel()->getAnmMtx(mMapCollisionJointIndices[0]));
+		    mMActor->getModel()->getAnmMtx(mMapCollisionJointIndices[2]));
 		mMapCollisions[2]->moveMtx(collisionMtx);
 
 		if (mUseMapCollision) {

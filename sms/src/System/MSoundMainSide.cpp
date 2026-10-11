@@ -42,13 +42,15 @@ namespace MSStageInfo {
 
 int MSMainProc::getMonteVillageActorArea(const Vec& param_1)
 {
-	volatile u32 padding[2];
 	int result = 4;
 	if (MSGMSound->unkCD == 8) {
 		// inline?
+		Vec copy;
+		volatile u32 pad;
 		Vec local_10 = param_1;
+		volatile u32 padding[1];
 		local_10.y += 75.0f;
-		Vec copy = local_10;
+		copy = local_10;
 		switch (gpCubeFastC->getInCubeNo(copy)) {
 		case 0:
 			result = 2;
@@ -702,6 +704,7 @@ void MSStageDistFade::proc()
 	// TODO: inline?
 	u32 r30 = unk4;
 	u32 r29 = unk14;
+	volatile u32 pad7[7];
 
 	Vec local_68 = gpMSound->mAudioCameras->toCamSpace(*unk10);
 
@@ -716,6 +719,7 @@ void MSStageDistFade::proc()
 	MSBgm::setPan(1, dVar6, 1, 0);
 	MSBgm::setDolby(1, dVar7, 1, 0);
 	unk4 += 1;
+	volatile u32 trash[10];
 }
 
 MSStageDistFadeMonte::MSStageDistFadeMonte(const Vec* param_1, f32 param_2,

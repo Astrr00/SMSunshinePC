@@ -120,6 +120,7 @@ static void evGetNPCType(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
 	interp->verifyArgNum(1, &arg_num);
 	int result    = -1;
+	char trash[0x10];
 	TBaseNPC* npc = (TBaseNPC*)getNameRefPtr(interp->pop());
 	if (npc)
 		result = npc->getActorType() - 0x4000001;

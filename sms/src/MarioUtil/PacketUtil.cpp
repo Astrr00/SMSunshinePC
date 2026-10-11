@@ -23,11 +23,11 @@ static void FifoSetTevColorS10(GXTevRegID id, GXColorS10 color)
 {
 	// clang-format off
 	u32 ra =
-		(u32)(color.a & 0x7FF) << 12 |
+		((u32)color.a << 12 & 0x7FF000) |
 		(color.r & 0x7FF) |
 		(u32)(0xE0 + id * 2) << 24;
 	u32 bg =
-		(u32)(color.g & 0x7FF) << 12 |
+		((u32)color.g << 12 & 0x7FF000) |
 		(color.b & 0x7FF) |
 		(u32)(0xE1 + id * 2) << 24;
 	// clang-format on

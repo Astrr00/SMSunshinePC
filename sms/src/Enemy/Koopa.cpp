@@ -114,10 +114,11 @@ BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 		case 0:
 		default:
 			self->changeAnm(0xC, 1, params->waitSpeed.get());
-			if (self->getAnmIndex() == 0xC
-			    && (self->endsAnm() || self->passesAnmFrame(2.0f)
-			        || self->passesAnmFrame(400.0f)
-			        || self->passesAnmFrame(700.0f))) {
+			bool tumble = self->getAnmIndex() == 0xC
+			              && (self->endsAnm() || self->passesAnmFrame(2.0f)
+			                  || self->passesAnmFrame(400.0f)
+			                  || self->passesAnmFrame(700.0f));
+			if (tumble) {
 				bathtub = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
 				if (bathtub->allowsTumble())
 					spine->pushNerve(&TNerveKoopaTumble::theNerve());
@@ -531,41 +532,30 @@ TKoopaHead::TKoopaHead(TKoopa* koopa)
 
 BOOL TKoopaHead::receiveMessage(THitActor* sender, u32 message)
 {
-	char trash[0x18];
-	if (message == HIT_MESSAGE_SPRAYED_BY_WATER) {
+	char trash[0x10];
+	switch (message) {
+	case HIT_MESSAGE_SPRAYED_BY_WATER:
 		if (mOwner->getShowered()) {
 			gpMarioParticleManager->emit(0xE7, &sender->mPosition, 0, nullptr);
 			gpMSound->startSoundSet(MSD_SE_EN_COMMON_W_HIT_OK,
-			                        &sender->mPosition, 0, 1.0f, 0, 0, 4);
+			                        &mOwner->mPosition, 0, 0.0f, 0, 0, 4);
 		}
-		return true;
-	}
-
-	if (message == HIT_MESSAGE_ATTACK) {
+		break;
+	case HIT_MESSAGE_ATTACK:
 		if (!sender->isActorType(0x08000024))
-			return true;
+			break;
 
 		TKoopa* koopa = mOwner;
-		if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaFall::theNerve())
-			return true;
-		if (koopa->mSpine->getCurrentNerve()
-		    == &TNerveKoopaProvoke::theNerve())
-			return true;
-		if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaFlame::theNerve())
-			return true;
-		if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve())
-			return true;
-		if (koopa->mSpine->getCurrentNerve()
-		    == &TNerveKoopaGetDown::theNerve())
-			return true;
-		if (koopa->mSpine->getCurrentNerve()
-		    == &TNerveKoopaGetShowered::theNerve())
-			return true;
-
-		koopa->mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
-		return true;
+		if (&TNerveKoopaFall::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaProvoke::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && koopa->mSpine->getCurrentNerve() != &TNerveKoopaFlame::theNerve()
+		    && &TNerveKoopaTumble::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaGetDown::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaGetShowered::theNerve()
+		           != koopa->mSpine->getCurrentNerve())
+			koopa->mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
+		break;
 	}
-
 	return true;
 }
 
@@ -588,28 +578,24 @@ TKoopaBody::TKoopaBody(TKoopa* koopa)
 BOOL TKoopaBody::receiveMessage(THitActor* sender, u32 message)
 {
 	char trash[0x10];
-	if (message != HIT_MESSAGE_ATTACK)
-		return true;
+	switch (message) {
+	case HIT_MESSAGE_SPRAYED_BY_WATER:
+		break;
+	case HIT_MESSAGE_ATTACK:
+		if (!sender->isActorType(0x08000024))
+			break;
 
-	if (!sender->isActorType(0x08000024))
-		return true;
-
-	TKoopa* koopa = mOwner;
-	if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaFall::theNerve())
-		return true;
-	if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaProvoke::theNerve())
-		return true;
-	if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaFlame::theNerve())
-		return true;
-	if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve())
-		return true;
-	if (koopa->mSpine->getCurrentNerve() == &TNerveKoopaGetDown::theNerve())
-		return true;
-	if (koopa->mSpine->getCurrentNerve()
-	    == &TNerveKoopaGetShowered::theNerve())
-		return true;
-
-	koopa->mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
+		TKoopa* koopa = mOwner;
+		if (&TNerveKoopaFall::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaProvoke::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaFlame::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaTumble::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaGetDown::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && &TNerveKoopaGetShowered::theNerve()
+		           != koopa->mSpine->getCurrentNerve())
+			koopa->mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
+		break;
+	}
 	return true;
 }
 
@@ -891,9 +877,8 @@ void TKoopa::setIgnoreMario(bool ignore) { mIgnoreMario = ignore; }
 
 f32 TKoopa::getFlameDirRate() const
 {
-	J3DFrameCtrl* ctrl = mMActor->getFrameCtrl(ANM_TYPE_BCK);
-	f32 frame          = ctrl->getFrame();
-	f32 end            = ctrl->getEnd();
+	f32 frame          = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+	f32 end            = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getEnd();
 	f32 overStart      = getParam()->flameOverStart.get();
 	s32 focusStart     = getParam()->flameFocusStartStep.get();
 	s32 focusEnd       = getParam()->flameFocusEndStep.get();
@@ -908,11 +893,11 @@ f32 TKoopa::getFlameDirRate() const
 	case 3:
 		if (time <= focusStart)
 			rate = -overStart;
-		else if (time > focusEnd)
-			rate = 1.0f;
-		else
+		else if (time <= focusEnd)
 			rate = (1.0f + overStart) * (time - focusStart)
 			       / (focusEnd - focusStart) - overStart;
+		else
+			rate = 1.0f;
 		if (mMActor->getCurAnmIdx(ANM_TYPE_BCK) == 3)
 			rate *= 1.0f - frame / end;
 		break;
@@ -1061,7 +1046,7 @@ bool TKoopa::effectsTumble() const
 	return false;
 }
 
-BOOL TKoopa::getShowered()
+bool TKoopa::getShowered()
 {
 	if (mSpine->getCurrentNerve() == &TNerveKoopaFall::theNerve())
 		return false;
@@ -1134,8 +1119,9 @@ f32 TKoopa::getAnmFrameNext() const
 bool TKoopa::passesAnmFrame(f32 frame) const
 {
 	return mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() <= frame
-	       && 0.005f + mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
-	                   + mMActor->getFrameCtrl(ANM_TYPE_BCK)->getRate()
+	       && 0.005f
+	              + (mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
+	                 + mMActor->getFrameCtrl(ANM_TYPE_BCK)->getRate())
 	              >= frame;
 }
 
@@ -1207,6 +1193,7 @@ void TKoopa::init(TLiveManager* manager)
 
 	// initial facing: angle to mario in the bathtub's frame
 	{
+		JGeometry::TVec3<f32>* marioPos = gpMarioPos;
 		TBathtub* bathtub
 		    = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
 		MtxPtr bathMtx = *bathtub->getRootJointMtx();
@@ -1217,22 +1204,20 @@ void TKoopa::init(TLiveManager* manager)
 		JGeometry::TVec3<f32> trans(bathMtx[0][3], bathMtx[1][3],
 		                            bathMtx[2][3]);
 		JGeometry::TVec3<f32> diff;
-		diff.sub(*gpMarioPos, trans);
+		diff.sub(*marioPos, trans);
 		mTargetDir = matan(col2.dot(diff), col0.dot(diff)) * (360.0f / 65536.0f);
 	}
 
 	initAnmSound();
 	reset();
 
-	for (u16 i = 0;
-	     i < *(u16*)((u8*)getModel()->getModelData()->getJointName() + 0x8);
-	     ++i) {
+	JUTNameTab* jointNames = getModel()->getModelData()->getJointName();
+	for (u16 i = 0; i < jointNames->getNameNum(); ++i) {
 	} // empty loop body in the retail build
 
-	JUTNameTab* jointNames = getModel()->getModelData()->getJointName();
-	mAgoJntIdx             = jointNames->getIndex("ago");
-	mHeadJntIdx            = jointNames->getIndex("head");
-	mNeckJntIdx            = jointNames->getIndex("neck");
+	mAgoJntIdx  = jointNames->getIndex("ago");
+	mHeadJntIdx = jointNames->getIndex("head");
+	mNeckJntIdx = jointNames->getIndex("neck");
 
 	J3DJoint* headJoint
 	    = getModel()->getModelData()->getJointNodePointer(mHeadJntIdx);

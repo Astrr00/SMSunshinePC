@@ -94,12 +94,15 @@ void TLensFlare::perform(u32 cue, JDrama::TGraphics*)
 
 		f32 tx = unk3C * -gpSunModel->unkF8[0].x;
 		f32 ty = unk3C * -gpSunModel->unkF8[0].y;
-		f32 lx = near9grid[4].x + (near9grid[5].x - near9grid[4].x) * tx
-		         + (near9grid[1].x - near9grid[4].x) * ty;
-		f32 ly = near9grid[4].y + (near9grid[5].y - near9grid[4].y) * tx
-		         + (near9grid[1].y - near9grid[4].y) * ty;
-		f32 lz = near9grid[4].z + (near9grid[5].z - near9grid[4].z) * tx
-		         + (near9grid[1].z - near9grid[4].z) * ty;
+		f32 lx = near9grid[4].x;
+		lx += (near9grid[5].x - near9grid[4].x) * tx;
+		lx += (near9grid[1].x - near9grid[4].x) * ty;
+		f32 ly = near9grid[4].y;
+		ly += (near9grid[5].y - near9grid[4].y) * tx;
+		ly += (near9grid[1].y - near9grid[4].y) * ty;
+		f32 lz = near9grid[4].z;
+		lz += (near9grid[5].z - near9grid[4].z) * tx;
+		lz += (near9grid[1].z - near9grid[4].z) * ty;
 
 		JGeometry::TVec3<f32> finalPos;
 		finalPos.set(sunWorldPos);

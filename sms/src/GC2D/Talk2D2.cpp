@@ -257,6 +257,7 @@ void TTalk2D2::loadAfter()
 
 void TTalk2D2::setMessageID(u32 messageID, u32 param)
 {
+	char trash[0x28]; // unused stack slot (present in the retail frame)
 	TBaseNPC* npc = gpMarDirector->unkA0;
 	if (npc->checkActionFlag(TBaseNPC::NPC_ACTION_HAPPY)) {
 		if (npc->isMonte()) {
@@ -364,6 +365,7 @@ void TTalk2D2::setMessageID(u32 messageID, u32 param)
 
 void TTalk2D2::forceCloseTalk()
 {
+	char trash[0x18]; // unused stack slot (present in the retail frame)
 	gpCamera->makeMtxForPrevTalk();
 	if (mIsBoard)
 		startTalkSE(0x4851);
@@ -379,6 +381,7 @@ void TTalk2D2::forceCloseTalk()
 
 void TTalk2D2::openTalkWindow(TBaseNPC* npc)
 {
+	char trash[0x60]; // unused stack slot (present in the retail frame)
 	if (npc)
 		gpCamera->makeMtxForTalk(npc);
 
@@ -642,6 +645,7 @@ void TTalk2D2::moveBoardWindow()
 
 void TTalk2D2::checkBoardControler()
 {
+	char trash[0x38]; // unused stack slot (present in the retail frame)
 	if (unk26A) {
 		if (unk26D || mGamePad->checkFrameMeaning(TMarioGamePad::MEANING_SELECT_A)
 		    || mGamePad->checkFrameMeaning(TMarioGamePad::MEANING_SELECT_B)) {
@@ -1112,7 +1116,8 @@ void TTalk2D2::setupBoardTextBox(const void* data, JMSMesgEntry* entry)
 		default: {
 			in.skip(-1);
 			u8 first = in.readU8();
-			out.write(&first, 1);
+			u8 firstOut = first;
+			out.write(&firstOut, 1);
 			if (first >= 0x80) {
 				u8 second = in.readU8();
 				out.write(&second, 1);

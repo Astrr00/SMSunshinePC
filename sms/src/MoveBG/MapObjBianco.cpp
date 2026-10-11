@@ -87,6 +87,7 @@ void TWoodLog::control()
 			local.x = -141.0f;
 
 		JGeometry::TVec3<f32> world;
+		char trash[0x1c]; // unused stack slot (present in the retail frame)
 		MTXMultVec(getModel()->getAnmMtx(0), local, world);
 		SMS_MarioMoveRequest(world);
 	}
@@ -295,6 +296,7 @@ void TBiancoBell::initMapObj()
 
 void TBiancoBell::touchPlayer(THitActor*)
 {
+	char trash[0x18]; // unused stack slot (present in the retail frame)
 	if (BELL_CAN_RING(this)) {
 		startAnim(4);
 		getMActor()->getFrameCtrl(0)->setRate(SMSGetAnmFrameRate());
@@ -305,6 +307,7 @@ void TBiancoBell::touchPlayer(THitActor*)
 
 u32 TBiancoBell::touchWater(THitActor*)
 {
+	char trash[0x18]; // unused stack slot (present in the retail frame)
 	if (BELL_CAN_RING(this)) {
 		startAnim(4);
 		getMActor()->getFrameCtrl(0)->setRate(SMSGetAnmFrameRate());
@@ -461,6 +464,7 @@ void TLeafBoatRotten::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TLeafBoatRotten::control()
 {
+	char trash[0x18]; // unused stack slot (present in the retail frame)
 	TLeafBoat::control();
 
 	if (marioIsOn() && isState(1)) {
@@ -519,8 +523,10 @@ TLeafBoat::TLeafBoat(const char* name)
     , unk158(0.005f)
     , unk15C(0.98f)
     , unk160(0)
-    , unk164(0.0f)
 {
+	unk164.z = 0.0f;
+	unk164.y = 0.0f;
+	unk164.x = 0.0f;
 }
 
 void TLeafBoat::initMapObj()
@@ -539,6 +545,7 @@ void TLeafBoat::calc()
 			if (fabsf(mVelocity.x) + fabsf(mVelocity.z) > 0.1f) {
 				unk164.set(mPosition.x, mPosition.y - mYOffset, mPosition.z);
 				JGeometry::TVec3<f32> scale(2.0f, 2.0f, 2.0f);
+				char trash[8]; // unused stack slot (present in the retail frame)
 				emitAndBindScale(0x1E8, 3, &unk164, scale);
 				emitAndBindScale(0x107, 1, &unk164, scale);
 			}
@@ -645,11 +652,13 @@ void TLeafBoat::touchWall(JGeometry::TVec3<f32>* pos,
 
 void TLeafBoat::touchActor(THitActor* actor)
 {
+	char trash[4]; // unused stack slot (present in the retail frame)
 	if (actor->isActorType(0x80000001))
 		return;
 
 	JGeometry::TVec3<f32> dir(actor->mPosition.x - mPosition.x, 0.0f,
 	                          actor->mPosition.z - mPosition.z);
+	char trash2[4]; // unused stack slot (present in the retail frame)
 	JGeometry::TVec3<f32> vel(mVelocity);
 	if (dir.dot(vel) < 0.0f)
 		return;
@@ -658,6 +667,7 @@ void TLeafBoat::touchActor(THitActor* actor)
 		MsVECNormalize(&dir, &dir);
 
 	JGeometry::TVec3<f32> vel2(mVelocity);
+	char trash3[8]; // unused stack slot (present in the retail frame)
 	f32 dot = dir.dot(vel2);
 	if (actor->checkActorType(ACTOR_TYPE_ENEMY)) {
 		mVelocity.x -= (1.0f + unk138) * (dir.x * dot);
@@ -680,6 +690,7 @@ TBiancoMiniWindmill::TBiancoMiniWindmill(const char* name)
 
 void TBiancoMiniWindmill::initMapObj()
 {
+	char trash[8]; // unused stack slot (present in the retail frame)
 	TMapObjBase::initMapObj();
 	mAppearSpeed = 0.0f;
 
@@ -725,6 +736,7 @@ void TBiancoMiniWindmill::calc()
 
 u32 TBiancoMiniWindmill::touchWater(THitActor* water)
 {
+	char trash[0xc]; // unused stack slot (present in the retail frame)
 	const JGeometry::TVec3<f32>& waterPos = getWaterPos(water);
 	if (waterPos.y < mPosition.y + sMessengerPosY - 300.0f)
 		return 1;
@@ -741,6 +753,7 @@ u32 TBiancoMiniWindmill::touchWater(THitActor* water)
 		unk154 = mRotSpeedMax;
 		JGeometry::TVec3<f32> pos(mPosition.x, 550.0f + unk15C->mPosition.y,
 		                          mPosition.z);
+		char trash2[0x24]; // unused stack slot (present in the retail frame)
 		mAppearSpeed = 0.0f;
 		appearObjFromPoint(pos);
 	}
@@ -779,6 +792,7 @@ void TBiancoWatermillVertical::loadAfter()
 
 void TBiancoWatermillVertical::control()
 {
+	char trash[8]; // unused stack slot (present in the retail frame)
 	if (unk138 != unk13C) {
 		if (unk138 > unk13C) {
 			unk138 -= mRotSpeedDownRate;

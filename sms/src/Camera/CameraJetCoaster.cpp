@@ -110,7 +110,7 @@ void CPolarSubCamera::ctrlJetCoasterCamera_()
 		if (startedLButton)
 			setUpToLButtonCamera_(CAMERA_MODE_JET_COASTER);
 
-		f32 stickY = -unk120->mCompSPos[5];
+		f32 stickY = -unk120->mCompSPos[1];
 		if (mTargetFreezeFrames == 0)
 			getNozzleTopPos_(&mCurrentTarget.mTarget);
 

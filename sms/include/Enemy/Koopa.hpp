@@ -179,7 +179,7 @@ public:
 	void setUpHitActors();
 	void fall();
 	void stagger(bool force);
-	BOOL getShowered();
+	bool getShowered();
 	void getDown();
 	bool allowsLaunch() const;
 	bool effectsTumble() const;
