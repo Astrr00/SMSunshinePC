@@ -1,0 +1,17 @@
+# Diagnosis only: run with SUNSHINE_DEV_START=airport/1 (starts in the FLUDD tutorial, EXIT_ON_END ends the run after about 50 s).
+# Washes the first M graffiti, then waits and logs to see what the game does when the graffiti is clean.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+wait frames=60
+walkto x=-6300 z=2150 radius=60 timeout=600
+hold trig=0,255 frames=300
+log
+wait frames=300
+log
+shot after1.png
+wait frames=300
+log
+wait frames=300
+log
+shot after2.png
+wait frames=30
+end
