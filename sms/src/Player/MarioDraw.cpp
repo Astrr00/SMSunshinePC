@@ -1700,13 +1700,13 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 			s16 limitP = (s16)((f32)delta * mForwardVel * pitchScale);
 			if (limitR > rMax)
 				limitR = rMax;
-			if (limitR < -rMax)
-				limitR = -rMax;
+			if (limitR < (s16)(-rMax))
+				limitR = (s16)(-rMax);
 
 			if (limitP > pMax)
 				limitP = pMax;
-			if (limitP < -pMax)
-				limitP = -pMax;
+			if (limitP < (s16)(-pMax))
+				limitP = (s16)(-pMax);
 
 			unk414.y = ((f32)limitR - unk414.y)
 			               * mSurfingParamsWaterRed.mAngleChangeRate.get()
@@ -1726,12 +1726,12 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 			s16 limitP = (s16)((f32)delta * mForwardVel * pitchScale);
 			if (limitR > rMax)
 				limitR = rMax;
-			if (limitR < -rMax)
-				limitR = -rMax;
+			if (limitR < (s16)(-rMax))
+				limitR = (s16)(-rMax);
 			if (limitP > pMax)
 				limitP = pMax;
-			if (limitP < -pMax)
-				limitP = -pMax;
+			if (limitP < (s16)(-pMax))
+				limitP = (s16)(-pMax);
 
 			unk414.y = ((f32)limitR - unk414.y)
 			               * mSurfingParamsGroundRed.mAngleChangeRate.get()

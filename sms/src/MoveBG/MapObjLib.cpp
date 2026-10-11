@@ -947,8 +947,9 @@ void TMapObjTurn::control()
 		return;
 
 	turn();
-	Mtx yRot;
 	Mtx mtx;
+	Mtx yRot;
+	char trash[0x40]; // unused stack slot (present in the retail frame)
 	switch (unk150) {
 	case 0:
 		mRotation.x = MsWrap(unk154 + mInitialRotation.x, 0.0f, 360.0f);

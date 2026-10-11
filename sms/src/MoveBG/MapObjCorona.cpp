@@ -143,6 +143,7 @@ TBathtub::TBathtub(const char* name)
 
 void TBathtub::load(JSUMemoryInputStream& stream)
 {
+	char trash[8];
 	unk24C = 0;
 	TMapObjBase::load(stream);
 	mPosition.set(mInitialPosition);
@@ -322,6 +323,7 @@ static f32 fmodDeg(f32 x, f32 y) { return std::fmodf(x, y); }
 bool TBathtub::getNearGrip(const JGeometry::TVec3<f32>& pos, f32 maxDiff,
                            f32* out) const
 {
+	char trash[0x30];
 	f32 angle = getDir(*getRootJointMtx(), pos);
 
 	f32 best  = 360.0f;
@@ -347,6 +349,7 @@ bool TBathtub::getNearGrip(const JGeometry::TVec3<f32>& pos, f32 maxDiff,
 f32 TBathtub::getNextJuncture(const JGeometry::TVec3<f32>& pos,
                               const JGeometry::TVec3<f32>& direction) const
 {
+	char trash[0x28];
 	f32 angle = getDir(*getRootJointMtx(), pos, direction);
 	f32 best  = 360.0f;
 	int index = 0;
@@ -366,6 +369,7 @@ bool TBathtub::getNextGrip(const JGeometry::TVec3<f32>& pos,
                            const JGeometry::TVec3<f32>& direction, f32 maxDiff,
                            f32* out) const
 {
+	char trash[0x28];
 	f32 angle = getDir(*getRootJointMtx(), pos, direction);
 	f32 best  = 360.0f;
 	int index = 0;
@@ -447,6 +451,8 @@ bool TBathtub::allowsTumble() const
 
 void TBathtub::startDemo()
 {
+	char trash[0x40];
+	char trash2[8];
 	if (unk29A)
 		return;
 
@@ -598,6 +604,7 @@ void TBathtub::calcBathtubData()
 
 void TBathtub::control()
 {
+	char trash[0x40];
 	if (unk29A) {
 		if (mMActor->curAnmEndsNext(0, nullptr)) {
 			switch (unk294++) {
@@ -685,6 +692,7 @@ void TBathtub::control()
 
 void TBathtub::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0xc8];
 	TMapObjBase::perform(cue, graphics);
 
 	if (cue & 1) {
@@ -885,6 +893,7 @@ void TBathtub::loadAfter()
 
 void TBathtubGrip::control()
 {
+	char trash[0x20];
 	calcRootMatrix();
 	TMapObjBase::control();
 
@@ -942,8 +951,7 @@ void TBathtubGrip::control()
 		ctrl->setRate(0.0f);
 		if (unk254 > 0) {
 			ctrl->setFrame(1.0f);
-			unk254++;
-			if (unk254 > unk258) {
+			if (++unk254 > unk258) {
 				unk248 = 1;
 				unk254 = 0;
 				gpMarioParticleManager->emitAndBindToMtxPtr(
@@ -975,6 +983,7 @@ Mtx* TBathtubGrip::getRootJointMtx() const
 
 BOOL TBathtubGrip::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x98];
 	switch (message) {
 	case HIT_MESSAGE_SUPER_HIP_DROP: {
 		if (unk248)

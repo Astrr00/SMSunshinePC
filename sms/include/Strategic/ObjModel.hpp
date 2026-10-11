@@ -6,6 +6,7 @@
 class SDLModelData;
 
 class TModelDataNode {
+	friend class TModelDataKeeper;
 public:
 	TModelDataNode();
 	void registerDataAndJoinNewNode(SDLModelData* data, const char* name);

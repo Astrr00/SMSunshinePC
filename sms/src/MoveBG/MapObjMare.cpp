@@ -434,6 +434,8 @@ void TMapObjPuncher::control()
 {
 	TMapObjBase::control();
 	switch (mState) {
+	case 1:
+		break;
 	case 2:
 		soundBas(MSD_SE_OBJ_PUNCHER_RETURN, 101.0f,
 		         mMActor->getFrameCtrl(ANM_TYPE_BCK)->getRate());

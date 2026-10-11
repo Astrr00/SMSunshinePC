@@ -14,6 +14,7 @@
 
 void TMario::hitNormal(THitActor* actor)
 {
+	char trash[0x18];
 	if (checkStatusType(MARIO_STATUS_FLAG_JUMPING) && mVel.y < 0.0f
 	    && actor->mPosition.y < mPosition.y) {
 		if (mStatus == MARIO_STATUS_HIP_DROP) {
@@ -146,6 +147,7 @@ void TMario::hitBrakable(THitActor* actor)
 
 void TMario::hangPole(THitActor* actor)
 {
+	char trash[0x18];
 	if (!checkStatusType(MARIO_STATUS_FLAG_UNK100000)) {
 		// TODO: dirty, needs inlines
 		u8 canHang = 0;
@@ -175,11 +177,11 @@ void TMario::hangPole(THitActor* actor)
 			if (dist == 0.0f)
 				dist = 1.0f;
 
-			f32 a = JMASSin(mFaceAngle.y) * (dx / dist)
-			        + JMASCos(mFaceAngle.y) * (dz / dist);
-
 			f32 b = 50.0f + actor->getDamageRadius()
 			        + mBarParams.mCatchRadius.get();
+
+			f32 a = JMASSin(mFaceAngle.y) * (dx / dist)
+			        + JMASCos(mFaceAngle.y) * (dz / dist);
 
 			bool canCatch = true;
 			if (mPrevStatus & MARIO_STATUS_FLAG_UNK100000)
@@ -240,6 +242,7 @@ void TMario::hitNoKeepPull(THitActor* actor)
 
 void TMario::checkCollision()
 {
+	char trash[0x58];
 	if (checkStatusType(MARIO_STATUS_FLAG_UNK1000))
 		return;
 

@@ -1120,9 +1120,9 @@ static inline void updateLifeMeterBlink(TGCConsole2* console)
 		if (diff < 0.0f)
 			diff = -diff;
 
-		f32 mul     = console->unk1CC[0] > 3 ? 3.0f : 5.0f;
-		int delta   = (int)(0.5f + diff / rate);
-		int scaledY = (int)(mul * (f32)(-delta));
+		f32 mul = console->unk1CC[0] > 3 ? 3.0f : 5.0f;
+		int delta = (int)(0.5f + diff / rate);
+		int scaledY = (int)(mul * (f32)delta);
 
 		for (int i = 0; i < 9; ++i) {
 			if (console->unk17C[i * 2]->isVisible()) {
@@ -1298,7 +1298,6 @@ static inline void updateJetAppearState(TGCConsole2* console)
 {
 	if (console->unk3D && console->processAppearJet(console->unk72++)) {
 		console->unk3D = 0;
-		console->unk72 = 0;
 	}
 }
 
@@ -1321,7 +1320,7 @@ static inline void updateTimerAppearState(TGCConsole2* console)
 }
 
 // fabricated
-static inline void updateTelopState(TGCConsole2* console, u32 flags)
+static inline void updateTelopState(TGCConsole2* console)
 {
 	if (console->unk3F && console->unk44C->update()) {
 		console->unk44C->getPane()->hide();
@@ -1340,11 +1339,10 @@ static inline void updateTelopState(TGCConsole2* console, u32 flags)
 	}
 
 	if (console->unk44 && console->unk520->getPane()->isVisible()) {
-		++console->unk80;
-		if (console->processDrawTelop(flags)) {
-			console->unk534 = console->unk524->getPane()->mBounds;
+		if (console->processDrawTelop(console->unk80++)) {
+			JUTRect telopPaneBounds(console->unk524->getPane()->mBounds);
 			console->unk568 = console->unk544.x2;
-			console->unk534.add(console->mTelopTextWidth + console->unk534.x2,
+			console->unk534.add(console->mTelopTextWidth + telopPaneBounds.x2,
 			                    0);
 
 			if (console->unk56D) {
@@ -3939,7 +3937,7 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 		updateRedCoinCounter(this);
 		updateRedCoinAppearState(this);
 		updateTimerAppearState(this);
-		updateTelopState(this, flags);
+		updateTelopState(this);
 
 		if (!unk46 && gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD) && !unk45 && !unk50)
 			startAppearTank();

@@ -698,8 +698,8 @@ void MSStageDistFade::proc()
 	}
 
 	// TODO: inline?
-	u32 r29 = unk14;
 	u32 r30 = unk4;
+	u32 r29 = unk14;
 
 	Vec local_68 = gpMSound->mAudioCameras->toCamSpace(*unk10);
 
@@ -773,8 +773,8 @@ void MSStageDistFadeMonte::proc()
 		}
 
 		// TODO: inline?
-		u32 uVar4 = unk14;
 		u32 uVar8 = unk4;
+		u32 uVar4 = unk14;
 
 		Vec local_88 = gpMSound->mAudioCameras->toCamSpace(*unk10);
 		f32 dVar10   = MSHandle::calcPan(local_88, fVar12, 10000.0f);

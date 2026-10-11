@@ -226,12 +226,10 @@ void TConsoleStr::perform(u32 cue, JDrama::TGraphics* graphics)
 
 		if (unk2B8 == 1 && unk18 > 60.0f) {
 			for (int i = 0; i < 3; ++i) {
-				TBoundPane* pane = unk28[i];
-
 				int local_b0[3] = { 4, 10, 20 };
 
-				u32 uVar13       = pane->getPane()->getAlpha();
-				JUTRect local_a0 = pane->getPane()->getBounds();
+				u32 uVar13       = unk28[i]->getPane()->getAlpha();
+				JUTRect local_a0 = unk28[i]->getPane()->getBounds();
 				u8 trailAlpha = uVar13;
 
 				for (int j = 0; j < 3; ++j) {
@@ -251,9 +249,9 @@ void TConsoleStr::perform(u32 cue, JDrama::TGraphics* graphics)
 					}
 				}
 
-				pane->getPane()->setAlpha(uVar13);
-				pane->getPane()->resize(local_a0.getWidth(),
-				                        local_a0.getHeight());
+				unk28[i]->getPane()->setAlpha(uVar13);
+				unk28[i]->getPane()->resize(local_a0.getWidth(),
+				                            local_a0.getHeight());
 			}
 		}
 
@@ -413,8 +411,11 @@ bool TConsoleStr::processGo(float param_1)
 		}
 		for (int i = 0; i < 3; ++i) {
 			JUTRect local = unk28[i]->getPane()->getBounds();
-			if (unk28[i]->update() && !(unk28[i]->unk14.x1 == 0 && unk28[i]->unk14.y1 == 0)) {
-				unk28[i]->setPanePosition(0x1E, JUTPoint(0, -40), JUTPoint(0, -40), JUTPoint(0, 0));
+			if (unk28[i]->update()) {
+				bool zero = unk28[i]->unk14.x1 == 0 && unk28[i]->unk14.y1 == 0;
+				if (!zero) {
+					unk28[i]->setPanePosition(0x1E, JUTPoint(0, -40), JUTPoint(0, -40), JUTPoint(0, 0));
+				}
 			}
 		}
 	} else if (param_1 >= 95.0f) {
@@ -423,9 +424,10 @@ bool TConsoleStr::processGo(float param_1)
 			unk28[1]->setPanePosition(0x50, JUTPoint(0, 0), JUTPoint(0, -220), JUTPoint(0, -440));
 			unk28[2]->setPanePosition(0x50, JUTPoint(0, 0), JUTPoint(160, -180), JUTPoint(320, -360));
 			for (int i = 0; i < 3; ++i) {
+				JUTPoint* row = &unk34[22 * i];
 				for (int j = 0; j < 16; ++j) {
 					JUTRect r = unk28[i]->getPane()->getGlobalBounds();
-					unk34[22 * i + j] = JUTPoint(r.x1, r.y1);
+					row[j] = JUTPoint(r.x1, r.y1);
 				}
 				JUTRect bounds = unk28[i]->getPane()->getBounds();
 				float w = (float)bounds.getWidth();
@@ -435,7 +437,7 @@ bool TConsoleStr::processGo(float param_1)
 				unk2AC[i] = gpEmitterManager4D2->unkC8[0][0];
 			}
 		} else if (param_1 < 175.0f) {
-			bool even = ((int)param_1 % 2) == 0;
+			int parity = (int)param_1 % 2;
 			for (int i = 0; i < 3; ++i) {
 				int alpha = unk28[i]->getPane()->getAlpha() - 4;
 				if (alpha < 0) {
@@ -448,7 +450,7 @@ bool TConsoleStr::processGo(float param_1)
 				unk28[i]->getPane()->resize(r.getWidth() + 2, r.getHeight() + 2);
 				unk2AC[i]->setGlobalTranslation((float)r.x1 + 0.5f * w, (float)r.y1 + 0.5f * h, 0.0f);
 				unk28[i]->update();
-				if (even) {
+				if (parity == 0) {
 					for (int k = 14; k >= 0; --k) {
 						unk34[22 * i + k + 1] = unk34[22 * i + k];
 					}
@@ -650,9 +652,8 @@ void TConsoleStr::startCloseWipe(bool param_1)
 		unk290[0]->setPaneAlpha(0x2D, 255, 0);
 
 		local_74    = unk290[1]->getPane()->getBounds();
-		s32 offsetY = 465 - unk290[1]->getInitialBounds().y1;
-		unk290[1]->setPaneOffset(0x2D, 0, h - local_74.y1, 0, offsetY);
-		unk290[1]->setPaneSize(0x2D, local_74.getWidth(), offsetY + h, local_74.getWidth(), 0);
+		unk290[1]->setPaneOffset(0x2D, 0, h - local_74.y1, 0, 465 - unk290[1]->getInitialBounds().y1);
+		unk290[1]->setPaneSize(0x2D, local_74.getWidth(), 465 - unk290[1]->getInitialBounds().y1 + h, local_74.getWidth(), 0);
 		unk290[1]->setPaneAlpha(0x2D, 255, 0);
 
 		unk2BC = 8;

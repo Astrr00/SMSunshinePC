@@ -768,6 +768,7 @@ void THangingBridge::initDraw() const
 
 void THangingBridge::drawRopeBetweenBoards(f32 yOffset, int count) const
 {
+	char trash[0x8];
 	f32 offsetX                 = mSideDir.x * mBoardHalfWidth;
 	f32 offsetZ                 = mSideDir.y * mBoardHalfWidth;
 	JGeometry::TVec2<f32> width = mSideDir;
@@ -777,14 +778,15 @@ void THangingBridge::drawRopeBetweenBoards(f32 yOffset, int count) const
 	GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, vertexNum);
 	JGeometry::TVec3<f32> from(mStartPos.x + offsetX, mStartPos.y + yOffset,
 	                           mStartPos.z + offsetZ);
+	JGeometry::TVec3<f32> to;
+	char trash2[0x4c];
 	for (int i = 0; i < mBoardNum; ++i) {
-		JGeometry::TVec3<f32> to = mBoards[i]->mRopePos[0];
+		to = mBoards[i]->mRopePos[0];
 		to.y += yOffset;
 		drawLowerMinus(from, to, width, count);
 		from = to;
 	}
-	JGeometry::TVec3<f32> to(mEndPos.x + offsetX, mEndPos.y + yOffset,
-	                         mEndPos.z + offsetZ);
+	to.set(mEndPos.x + offsetX, mEndPos.y + yOffset, mEndPos.z + offsetZ);
 	drawLowerMinus(from, to, width, count);
 	from = to;
 	drawLowerMinus(from, to, width, count);

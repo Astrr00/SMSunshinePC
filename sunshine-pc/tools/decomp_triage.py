@@ -12,8 +12,9 @@ Known false positive: string-pool offsets (addi rX, rY, imm) show as imm.
   python sunshine-pc/tools/decomp_triage.py [unit-substring]   all units -> sms/build/triage.json
   python sunshine-pc/tools/decomp_triage.py --build <unit>      recompile one unit with mwcc, print its rows
   python sunshine-pc/tools/decomp_triage.py --diff <unit> <sym> [ctx]  differing rows only: retail | ours (ctx rows around)
+  python sunshine-pc/tools/decomp_triage.py --branchscan [unit...]   conditional-branch sense/cr flips after an identical compare -> sms/build/branch_inversions.tsv
 """
-import json, os, subprocess, sys, collections, struct
+import json, os, re, subprocess, sys, collections, struct
 from concurrent.futures import ThreadPoolExecutor
 
 SMS = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "sms"))
@@ -54,13 +55,21 @@ def risk(ins, rins, lsyms, rsyms):
     return r
 
 
-def unit(name):
+def objdiff_syms(name):
+    """objdiff (ours, retail) symbol lists for one unit; None if its object is missing or fails."""
     out = subprocess.run([OBJDIFF, "diff", "-p", SMS, "-u", name, "-o", "-", "--format", "json"],
                          capture_output=True, text=True, creationflags=NOWIN)
     if out.returncode:
-        return []
+        return None
     j = json.loads(out.stdout)
-    ls, rs = j["left"]["symbols"], j.get("right", {}).get("symbols", [])
+    return j["left"]["symbols"], j.get("right", {}).get("symbols", [])
+
+
+def unit(name):
+    loaded = objdiff_syms(name)
+    if loaded is None:
+        return []
+    ls, rs = loaded
     res = []
     for s in ls:
         if s.get("kind") != "SYMBOL_FUNCTION":
@@ -92,10 +101,11 @@ def build(name):
     print(f"nonmatching={len(rows)} risky={sum(1 for f in rows if f['score'])}")
 
 def lookup(name, sym):
-    out = subprocess.run([OBJDIFF, "diff", "-p", SMS, "-u", name, "-o", "-", "--format", "json"],
-                         capture_output=True, text=True, creationflags=NOWIN)
-    j = json.loads(out.stdout)
-    ls, rs = j["left"]["symbols"], j.get("right", {}).get("symbols", [])
+    loaded = objdiff_syms(name)
+    if loaded is None:
+        print(f"objdiff failed for {name!r} (object missing or unbuildable)")
+        return None
+    ls, rs = loaded
     fns = [s for s in ls if s.get("kind") == "SYMBOL_FUNCTION"]
     hits = [s for s in fns if s["name"] == sym] or [s for s in fns if sym in s.get("demangled_name", "")]
     if len(hits) != 1:
@@ -220,6 +230,124 @@ def diff(name, sym, ctx=0):
 
 
 
+GAME_SKIP = ("JSystem", "PowerPC_EABI_Support", "THPPlayer", "TRK_MINNOW_DOLPHIN", "dolphin", "OdemuExi2")
+COND_BR = re.compile(r"b(?:lt|le|eq|ge|gt|ne|so|ns|dnz|dz)[tf]?l?(?:lr|ctr|r)?[+-]?")
+
+
+def mnem(row):
+    ins = row.get("instruction")
+    if not ins:
+        return None
+    return next((p["opcode"]["mnemonic"] for p in ins.get("parts", []) if "opcode" in p), None)
+
+
+def crf(row):
+    m = re.search(r"\bcr(\d)\b", row["instruction"]["formatted"])
+    return m.group(0) if m else "cr0"
+
+
+def text(row):
+    """Row text for equality: formatted, with the branch target dropped so layout-shifted targets still compare equal."""
+    ins = row.get("instruction")
+    if not ins:
+        return None
+    return ins["formatted"].rsplit(" ", 1)[0] if "branch_dest" in ins else ins["formatted"]
+
+
+def prev_cmp(rows, i):
+    """Nearest compare above row i within its block (cr-logic and other non-branch rows skipped), else None."""
+    for j in range(i - 1, max(-1, i - 9), -1):
+        m = mnem(rows[j])
+        if m is None:
+            continue
+        if m.startswith(("cmp", "fcmp")):
+            return j
+        if m.startswith("b"):
+            return None
+    return None
+
+
+def byaddr(rows):
+    return {r["instruction"]["address"]: j for j, r in enumerate(rows) if r.get("instruction", {}).get("address")}
+
+
+def succ(rows, amap, j):
+    """Text of the row at the address after rows[j] (by address, so alignment placeholders don't shift it)."""
+    a = rows[j]["instruction"].get("address")
+    k = amap.get(str(int(a) + 4)) if a else None
+    return None if k is None else text(rows[k])
+
+
+def target(rows, amap, j):
+    k = amap.get(rows[j]["instruction"].get("branch_dest"))
+    return None if k is None else text(rows[k])
+
+
+def scan_fn(L, R):
+    """Rows where ours and retail are both conditional branches with different mnemonic or cr field,
+    after an identical compare. Class: same-layout (fallthrough row equal in both = likely real inversion),
+    swapped-blocks (ours' fallthrough is retail's taken target = legal block reorder), other."""
+    aL, aR = byaddr(L), byaddr(R)
+    out = []
+    for i in range(min(len(L), len(R))):
+        ml, mr = mnem(L[i]), mnem(R[i])
+        if not (ml and mr and COND_BR.fullmatch(ml) and COND_BR.fullmatch(mr)):
+            continue
+        if ml == mr and crf(L[i]) == crf(R[i]):
+            continue
+        cl, cr = prev_cmp(L, i), prev_cmp(R, i)
+        if cl is None or cr is None or text(L[cl]) != text(R[cr]):
+            continue
+        ftl, ftr, tgt = succ(L, aL, i), succ(R, aR, i), target(R, aR, i)
+        if ftl and ftl == ftr:
+            cls = "same-layout"
+        elif ftl and ftl == tgt:
+            cls = "swapped-blocks"
+        else:
+            cls = "other"
+        out.append((i, R[i]["instruction"]["formatted"], L[i]["instruction"]["formatted"], cls))
+    return out
+
+
+def scan_unit(name):
+    loaded = objdiff_syms(name)
+    if loaded is None:
+        return None
+    ls, rs = loaded
+    hits, nfn = [], 0
+    for s in ls:
+        m = s.get("match_percent")
+        if s.get("kind") != "SYMBOL_FUNCTION" or s.get("target_symbol") is None or (m is not None and m >= 100):
+            continue
+        nfn += 1
+        L = s.get("instructions", [])
+        R = rs[s["target_symbol"]].get("instructions", [])
+        for i, rt, ou, cls in scan_fn(L, R):
+            hits.append((name, s.get("demangled_name", s["name"]), i, rt, ou, cls))
+    return hits, nfn
+
+
+def branchscan(units):
+    if not units:
+        triage = json.load(open(os.path.join(SMS, "build", "triage.json")))
+        units = sorted({f["unit"] for f in triage if f["unit"].split("/")[1] not in GAME_SKIP})
+    with ThreadPoolExecutor(6) as ex:
+        res = list(ex.map(scan_unit, units))
+    skipped = [u for u, r in zip(units, res) if r is None]
+    if skipped:
+        print("skipped (no object):", *skipped)
+    hits = [h for r in res if r for h in r[0]]
+    nfn = sum(r[1] for r in res if r)
+    path = os.path.join(SMS, "build", "branch_inversions.tsv")
+    with open(path, "w") as fh:
+        for u, fn, i, rt, ou, cls in hits:
+            fh.write(f"{u}\t{fn}\t{i}\t{rt}\t{ou}\t{cls}\n")
+    c = collections.Counter(h[5] for h in hits)
+    print(f"units={len(units) - len(skipped)} functions={nfn} hits={len(hits)} same-layout={c['same-layout']} "
+          f"swapped-blocks={c['swapped-blocks']} other={c['other']} -> {path}")
+
+
+
 def main():
     if sys.argv[1:2] == ["--build"]:
         return build(sys.argv[2])
@@ -227,6 +355,8 @@ def main():
         return diff(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 0)
     if sys.argv[1:2] == ["--check"]:
         return check(sys.argv[2], sys.argv[3])
+    if sys.argv[1:2] == ["--branchscan"]:
+        return branchscan(sys.argv[2:])
     rep = json.load(open(os.path.join(SMS, "build", "GMSJ01", "report.json")))
     flt = sys.argv[1] if len(sys.argv) > 1 else ""
     names = [u["name"] for u in rep["units"] if flt in u["name"]
