@@ -1847,30 +1847,31 @@ void TDangoHamuKuri::calcRootMatrix()
 	if (mHolder && mHolder->mHeldObject == this) {
 		MtxPtr takingMtx = mHolder->getTakingMtx();
 		if (takingMtx) {
+			// asm 0x80265614: retail beq skips the spin block when unk230 is 0 and
+			// still runs the holder/takingMtx update below
 			if (unk230) {
 				unk210 += 40.0f;
 				if (unk210 > 360.0f) {
 					unk210 = -TMsRange<f32>(10.0f, 20.0f).rand();
 					unk230 = 0;
 				}
-				TDangoHamuKuri* holder = (TDangoHamuKuri*)mHolder;
-				if (holder->unk230)
-					unk210 = -holder->unk210;
-				takingMtx[0][3] += unk21C;
-				takingMtx[1][3] += unk220;
-				takingMtx[2][3] += unk224;
-
-				getModel()->setBaseScale(mScaling);
-				Mtx afStack_68;
-				char trash[0x40];
-				MsMtxSetRotRPH(afStack_68, 0.0f, unk210, unk214);
-				MTXConcat(takingMtx, afStack_68, takingMtx);
-				getModel()->setBaseTRMtx(takingMtx);
-
-				mPosition.set(takingMtx[0][3], takingMtx[1][3],
-				              takingMtx[2][3]);
-				return;
 			}
+			TDangoHamuKuri* holder = (TDangoHamuKuri*)mHolder;
+			if (holder->unk230)
+				unk210 = -holder->unk210;
+			takingMtx[0][3] += unk21C;
+			takingMtx[1][3] += unk220;
+			takingMtx[2][3] += unk224;
+
+			getModel()->setBaseScale(mScaling);
+			Mtx afStack_68;
+			char trash[0x40];
+			MsMtxSetRotRPH(afStack_68, 0.0f, unk210, unk214);
+			MTXConcat(takingMtx, afStack_68, takingMtx);
+			getModel()->setBaseTRMtx(takingMtx);
+
+			mPosition.set(takingMtx[0][3], takingMtx[1][3], takingMtx[2][3]);
+			return;
 		}
 	}
 

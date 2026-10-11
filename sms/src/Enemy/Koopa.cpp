@@ -428,8 +428,9 @@ void TKoopaParts::remove()
 // ============= TKoopaFlame =============
 
 TKoopaFlame::TKoopaFlame(TKoopa* koopa)
-    : TKoopaParts("クッパの吐く炎", 0x80000029, koopa, 100.0f)
-    , mSpeed(0.0f)
+    // asm 0x80334FCC: retail actorType is 0x08000029 (lis 0x800 + addi 0x29)
+    : TKoopaParts("クッパの吐く炎", 0x08000029, koopa, 100.0f)
+    // asm 0x80334FDC: retail ctor stores only mMaxLength (0x88) and mCurLength (0x8c), no mSpeed (0x84) store
     , mMaxLength(0.0f)
     , mCurLength(1.0f)
 {
@@ -512,7 +513,8 @@ void TKoopaFlame::attack_(THitActor* other)
 // ============= TKoopaHand =============
 
 TKoopaHand::TKoopaHand(TKoopa* koopa)
-    : TKoopaParts("クッパの手", 0x8000002B, koopa, 100.0f)
+    // asm 0x80335034: retail actorType is 0x0800002B (lis 0x800 + addi 0x2b)
+    : TKoopaParts("クッパの手", 0x0800002B, koopa, 100.0f)
 {
 }
 
@@ -526,7 +528,8 @@ void TKoopaHand::attack_(THitActor* other)
 // ============= TKoopaHead =============
 
 TKoopaHead::TKoopaHead(TKoopa* koopa)
-    : TKoopaParts("クッパの頭", 0x8000002A, koopa, 100.0f)
+    // asm 0x8033506C: retail actorType is 0x0800002A (lis 0x800 + addi 0x2a)
+    : TKoopaParts("クッパの頭", 0x0800002A, koopa, 100.0f)
 {
 }
 
@@ -571,7 +574,8 @@ void TKoopaHead::attack_(THitActor* other)
 // ============= TKoopaBody =============
 
 TKoopaBody::TKoopaBody(TKoopa* koopa)
-    : TKoopaParts("クッパの体", 0x8000002A, koopa, 100.0f)
+    // asm 0x803350B0: retail actorType is 0x0800002A (lis 0x800 + addi 0x2a)
+    : TKoopaParts("クッパの体", 0x0800002A, koopa, 100.0f)
 {
 }
 

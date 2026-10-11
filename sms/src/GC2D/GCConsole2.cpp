@@ -2196,8 +2196,9 @@ void TGCConsole2::startAppearTank()
 	unk26C->setPanePosition(50, JUTPoint(0, 100), JUTPoint(0, -30),
 	                        JUTPoint(0, -30));
 
-	unk274->getPane()->show();
-	unk29C->getPane()->show();
+	// asm 0xBB90 / 0xBB9C: retail stores 0 (hide) to unk274 / unk29C pane mVisible
+	unk274->getPane()->hide();
+	unk29C->getPane()->hide();
 }
 #pragma dont_inline off
 

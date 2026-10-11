@@ -1254,11 +1254,12 @@ void TBossMantaManager::setupEfbAlpha(JDrama::TGraphics* graphics)
 	GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
 
 	GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-	GXPosition3f32(0.0f, (f32)SMSGetGameRenderHeight(), -1.0f);
+	// asm 0x803215FC: quad z is -10.0f (pool @3665), not -1.0f
+	GXPosition3f32(0.0f, (f32)SMSGetGameRenderHeight(), -10.0f);
 	GXPosition3f32((f32)SMSGetGameRenderWidth(), (f32)SMSGetGameRenderHeight(),
-	               -1.0f);
-	GXPosition3f32((f32)SMSGetGameRenderWidth(), 0.0f, -1.0f);
-	GXPosition3f32(0.0f, 0.0f, -1.0f);
+	               -10.0f);
+	GXPosition3f32((f32)SMSGetGameRenderWidth(), 0.0f, -10.0f);
+	GXPosition3f32(0.0f, 0.0f, -10.0f);
 	GXEnd();
 
 	GXSetNumChans(1);

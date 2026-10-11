@@ -692,7 +692,8 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 
 u32 TMario::setStatusToRunning(u32 status, u32)
 {
-	f32 mag = mIntendedMag <= 8.0f ? 8.0f : mIntendedMag;
+	// asm 0x801334F4: retail takes 8.0f only when !(mIntendedMag <= 8.0f) (fcmpo/cror/bne to fmr), arms were swapped
+	f32 mag = mIntendedMag <= 8.0f ? mIntendedMag : 8.0f;
 
 	switch (status) {
 	case MARIO_STATUS_RUN:
