@@ -196,15 +196,8 @@ void TEMario::perform(u32 cue, JDrama::TGraphics* graphics)
 		return;
 	}
 
-	if (!(cue & CUE_MOVE)) {
-		return;
-	}
-
-	if (mEnemyMario->canControl() == 0) {
-		return;
-	}
-
-	for (s32 i = 0; i < mColCount; ++i) {
+	// retail: only the attack loop depends on the cue and canControl(); the body perform and the copy always run
+	for (s32 i = 0; (cue & CUE_MOVE) && mEnemyMario->canControl() && i < mColCount; ++i) {
 		switch (mCollisions[i]->mActorType) {
 		case 0x80000001: {
 			if (mPosition.distance(mCollisions[i]->getPosition())

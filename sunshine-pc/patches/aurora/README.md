@@ -35,6 +35,7 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0008-gx-fifo-desync-diagnostics.patch` | on a FIFO "draw vertex data overrun" the parser prints the last 8 parsed draws (vertex layout snapshot) and, from a 8192-entry ring of GXBegin calls, the GXBegin neighbours of the failing stream position with their caller address; diagnostics only, no behaviour change | 4 | +112 / -0 |
 | `0009-gx-fifo-overrun-diagnostics-ring.patch` | on a FIFO overrun the parser also prints the last 64 FIFO commands (opcode@position) and a 256-byte hex dump before the failing draw; diagnostics only (found the J3DShape slot-tail bug, see `sunshine-pc/docs/session-2026-10-11b.md`) | 1 | see patch |
 | `0010-gx-corrupt-texobj-diagnostics.patch` | `GXLoadTexObj` prints caller and module base for a texture object larger than 4096 px; `resolve_static_texture` logs implausible static textures before the allocation; diagnostics only (found a corrupt `JUTTexture` in a `J2DPicture`, see `sunshine-pc/docs/session-2026-10-11b.md`) | 2 | see patch |
+| `0011-gx-alpha-compare-scalar.patch` | `tev_alpha_op` maps the GR16/BGR24 compares to the scalar RGB8 compare (alpha operands are `f32`; `.rg`/`.rgb` made the shader fail and aborted the process once the shadow Mario was drawn); see `sunshine-pc/docs/session-2026-10-11b.md` |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
 

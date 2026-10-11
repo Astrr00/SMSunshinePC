@@ -1,0 +1,8 @@
+# Diagnosis only (dolpic/0 dev start, dev teleport): which stage does the ChangeStage object 0x08 load?
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_health
+wait frames=30
+tp x=876.6 y=3945.8 z=-7487.1
+wait frames=240
+log
+end

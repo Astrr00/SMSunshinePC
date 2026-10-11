@@ -1,0 +1,19 @@
+diff --git a/lib/gx/shader.cpp b/lib/gx/shader.cpp
+--- a/lib/gx/shader.cpp
++++ b/lib/gx/shader.cpp
+@@ -412,10 +412,12 @@ std::string tev_color_op(GXTevOp op, std::string_view bias, std::string_view sca
+ 
+ std::string tev_alpha_op(GXTevOp op, std::string_view bias, std::string_view scale, bool clamp, std::string_view a,
+                          std::string_view b, std::string_view c, std::string_view d) {
+-  // Alpha operands are scalar (no .r swizzle); R8 compares map to RGB8, which has the same scalar math.
+-  if (op == GX_TEV_COMP_R8_GT) {
++  // Alpha operands are scalar (no .r/.rg/.rgb swizzle); every compare maps to the RGB8 scalar math.
++  // shortcut: GR16/BGR24 compares on alpha are undefined on hardware (the game's shadow Mario draw selects one);
++  // compare the scalar like RGB8 so the shader compiles, revisit if a visible difference shows up.
++  if (op == GX_TEV_COMP_R8_GT || op == GX_TEV_COMP_GR16_GT || op == GX_TEV_COMP_BGR24_GT) {
+     op = GX_TEV_COMP_RGB8_GT;
+-  } else if (op == GX_TEV_COMP_R8_EQ) {
++  } else if (op == GX_TEV_COMP_R8_EQ || op == GX_TEV_COMP_GR16_EQ || op == GX_TEV_COMP_BGR24_EQ) {
+     op = GX_TEV_COMP_RGB8_EQ;
+   }
+   std::string expr = tev_op(op, bias, scale, a, b, c, d, "0.0"sv);

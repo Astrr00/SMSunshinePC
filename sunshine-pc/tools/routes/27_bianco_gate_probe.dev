@@ -1,0 +1,33 @@
+# Diagnosis only (dolpic/0 dev start, Null backend, dev verbs): open the Delfino Bianco gate and probe positions behind it.
+# gateopen.sb: GateKeeper dead -> flag 0x10384 -> setNextStage(1,-1) reloads Delfino with the gate raised (dptKing).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_health
+wait frames=60
+log
+killboss
+wait frames=240
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+tp x=0 y=600 z=5250
+wait frames=90
+log
+tp x=0 y=500 z=4900
+wait frames=90
+log
+tp x=0 y=500 z=5600
+wait frames=90
+log
+tp x=0 y=500 z=6200
+wait frames=90
+log
+tp x=400 y=500 z=5400
+wait frames=90
+log
+tp x=-400 y=500 z=5400
+wait frames=90
+log
+tp x=0 y=900 z=5250
+wait frames=90
+log
+end

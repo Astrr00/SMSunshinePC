@@ -47,6 +47,9 @@ TMarDirector::TMarDirector()
     , unk260(0)
 {
 	gpMarDirector  = this;
+#ifdef TARGET_PC
+	mConsole = nullptr; // the console is created later in load(); host memory is not zeroed, devscript logStatus reads it in between
+#endif
 	mMoveTickCount = 0;
 	mTickCount     = 0;
 	mState         = STATE_UNK0;

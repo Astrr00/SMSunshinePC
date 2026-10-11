@@ -25,6 +25,10 @@
 #include "MoveBG/MapObjManager.hpp"
 #include "MoveBG/MapObjTown.hpp"
 #include "MoveBG/MapObjHide.hpp"
+#include "Enemy/Emario.hpp"
+#include "Enemy/EnemyMario.hpp"
+#include "MoveBG/ModelGate.hpp"
+#include "Player/MarioAccess.hpp"
 #include "Enemy/GateKeeper.hpp"
 #include "System/MarioGamePad.hpp"
 #include "Player/Mario.hpp"
@@ -48,10 +52,10 @@ u32 sunshineInterpStep();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -121,6 +125,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("thp=", 0) == 0 || tok.rfind("movie=", 0) == 0) k = Command::Cond::Thp; // THP player state, 0 = no movie
 	else if (tok.rfind("camDemo=", 0) == 0) k = Command::Cond::CamDemo; // 1 while a demo camera owns the view
 	else if (tok.rfind("washed=", 0) == 0) k = Command::Cond::Washed; // graffiti wash finished (see washedCount)
+	else if (tok.rfind("talk=", 0) == 0) k = Command::Cond::Talk; // 1 while a talk/message window owns the game (TMarDirector::isTalkModeNow)
 	else return false;
 	const size_t eq = tok.find('=');
 	c.conds.emplace_back(k, eq == std::string::npos ? 0 : static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0)));
@@ -250,6 +255,16 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "killboss") { c.op = Op::KillBoss; return c; } // dev-only: marks the airport GateKeeper dead (diagnosis, never acceptance)
+	if (verb == "tpem") { // dev-only: puts Mario dz (default 250) units south of the shadow Mario, facing him (diagnosis only)
+		c.op = Op::TpEm;
+		c.pos[2] = 250.f;
+		std::string tok;
+		if (in >> tok) {
+			if (tok.rfind("dz=", 0) != 0) fail(line, "unexpected token in tpem", tok);
+			c.pos[2] = static_cast<float>(std::atof(tok.c_str() + 3));
+		}
+		return c;
+	}
 	if (verb == "tp") {
 		// Dev-only teleport for diagnosis: tp x=<x> y=<y> z=<z> puts Mario there (velocity cleared). Never in an acceptance route.
 		c.op = Op::Tp;
@@ -360,6 +375,26 @@ TBiancoGateKeeper* findBoss()
 	return dynamic_cast<TBiancoGateKeeper*>(JDrama::TNameRefGen::search(kName));
 }
 
+// The shadow Mario of the Delfino gate event ("マリオモドキ_0", Shift-JIS bytes): position, distance to Mario.
+void logEMario(const char* tag)
+{
+	static const char kName[] = "\x83\x7d\x83\x8a\x83\x49\x83\x82\x83\x68\x83\x4c\x5f\x30";
+	if (!gpMarioOriginal || !JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return;
+	THitActor* e = dynamic_cast<THitActor*>(JDrama::TNameRefGen::search(kName));
+	if (!e) return;
+	const float dx = e->mPosition.x - gpMarioOriginal->mPosition.x, dy = e->mPosition.y - gpMarioOriginal->mPosition.y, dz = e->mPosition.z - gpMarioOriginal->mPosition.z;
+	static const char kDummy[] = "\x83\x5f\x83\x7e\x81\x5b\x82\x6d\x82\x6f\x82\x62";
+	TEMario* em = dynamic_cast<TEMario*>(JDrama::TNameRefGen::search(kName));
+	std::printf("[%s-emario] pos=(%.0f,%.0f,%.0f) dist3d=%.0f downWait=%d doing=0x%X frame=%.1f dummyNpc=%d talkOrDemo=%d ground4cm=%d jumping=%d tick=%d\n", tag, e->mPosition.x, e->mPosition.y, e->mPosition.z, std::sqrt(dx * dx + dy * dy + dz * dz),
+	    em ? (int)em->isDownWaitingToTalk() : -1, em ? (unsigned)em->mEnemyMario->mEMDoing : 0u, em ? em->mEnemyMario->getMotionFrameCtrl().getFrame() : -1.0f, JDrama::TNameRefGen::search(kDummy) ? 1 : 0, (int)gpMarDirector->isTalkOrDemoModeNow(), (int)SMS_IsMarioTouchGround4cm(), (int)gpMarioOriginal->checkStatusType(MARIO_STATUS_FLAG_JUMPING), gTick);
+	if (em) std::printf("[%s-emario-take] status=0x%08X held=%p emflags=0x%X timer=%d tick=%d\n", tag, (unsigned)em->mEnemyMario->mStatus, (void*)em->mEnemyMario->mHeldObject, (unsigned)em->mEnemyMario->mEMFlags, (int)em->mEnemyMario->mEMDoingTimer, gTick);
+	for (int i = 0; em && i < em->getColNum(); ++i)
+		std::printf("[%s-emario-col] i=%d type=0x%08X name=%s tick=%d\n", tag, i, (unsigned)em->getCollision(i)->getActorType(), typeid(*em->getCollision(i)).name(), gTick);
+	static const char kGateName[] = "Gate";
+	if (TModelGate* g = dynamic_cast<TModelGate*>(JDrama::TNameRefGen::search(kGateName)))
+		std::printf("[%s-gate] state=%d flags=0x%X dest=%d openRatio=%.2f openTimer=%d hitMaxZ=%.0f pos=(%.0f,%.0f,%.0f) noCollision=%d tick=%d\n", tag, (int)g->mState, (unsigned)g->mFlags, (int)g->mDestination, g->mOpenRatio, (int)g->mOpenTimer, g->mHitMaxZ, g->mPosition.x, g->mPosition.y, g->mPosition.z, (int)g->checkHitFlag(HIT_FLAG_NO_COLLISION), gTick);
+}
+
 // The airport GateKeeper (scene object "ゲートキーパー（ビアンコ）", Shift-JIS bytes below): hit points, vulnerability window,
 // dead flag, position. Killing it starts the airport event (TAirportEventSink::watch) that ends the tutorial.
 void logBoss(const char* tag)
@@ -394,6 +429,7 @@ void logBoss(const char* tag)
 void logStatus(const char* tag)
 {
 	logWash(tag);
+	logEMario(tag);
 	logBoss(tag);
 	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
 	if (gpCardLoad)
@@ -524,6 +560,7 @@ bool condHolds(const Command& c)
 		case Command::Cond::CardProg: ok = gpCardLoad && static_cast<int>(gpCardLoad->unk1C) == val; break;
 		case Command::Cond::CamDemo: ok = gpCamera && gpCamera->isDemoCamera() == (val != 0); break;
 		case Command::Cond::Washed: ok = washedCount() >= val; break;
+		case Command::Cond::Talk: ok = gpMarDirector && gpMarDirector->isTalkModeNow() == (val != 0); break;
 		default: break;
 		}
 		if (!ok) return false;
@@ -749,6 +786,15 @@ void step()
 		if (c.op == Op::Shine) doShine();
 		if (c.op == Op::TpShine) doTpShine(c.pos);
 		if (c.op == Op::Hurt) doHurt(c.frames);
+		if (c.op == Op::TpEm && gpMarioOriginal && JDrama::TNameRefGen::getInstance() && JDrama::TNameRefGen::getInstance()->getRootNameRef()) {
+			static const char kEMarioName[] = "\x83\x7d\x83\x8a\x83\x49\x83\x82\x83\x68\x83\x4c\x5f\x30";
+			if (THitActor* e = dynamic_cast<THitActor*>(JDrama::TNameRefGen::search(kEMarioName))) {
+				gpMarioOriginal->mPosition.set(e->mPosition.x, e->mPosition.y + 20.f, e->mPosition.z + c.pos[2]);
+				gpMarioOriginal->mVel.set(0.f, 0.f, 0.f);
+				gpMarioOriginal->mFaceAngle.y = static_cast<s16>(180.0f * (65536.0f / 360.0f));
+				std::printf("[devscript] tpem: mario=(%.0f,%.0f,%.0f) tick=%d\n", gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.y, gpMarioOriginal->mPosition.z, gTick);
+			}
+		}
 		if (c.op == Op::Tp && gpMarioOriginal) {
 			gpMarioOriginal->mPosition.set(c.pos[0], c.pos[1], c.pos[2]);
 			gpMarioOriginal->mVel.set(0.f, 0.f, 0.f);
