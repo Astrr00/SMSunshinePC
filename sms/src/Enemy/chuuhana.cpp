@@ -147,7 +147,7 @@ void TChuuHanaManager::initSetEnemies()
 		"kohana0", "kohana1", "kohana1", "kohana2", "kohana2", "kohana2",
 	};
 
-	for (int i = 0; i < mObjNum; ++i) {
+	for (int i = 0; i < mCapacity; ++i) { // asm 0x802C29FC
 		TGraphWeb* graph = gpConductor->getGraphByName(graphlist[i]);
 		TChuuHana* enemy = (TChuuHana*)unk18[i];
 
@@ -956,8 +956,10 @@ BOOL TNerveChuuHanaRoll::execute(TSpineBase<TLiveActor>* spine) const
 	}
 
 	JGeometry::TVec3<f32> vel = self->mVelocity;
-	self->unk204.x += 0.2f * (vel.x - self->unk204.x);
-	self->unk204.z += 0.2f * (vel.z - self->unk204.z);
+	volatile f32 stepX = 0.2f * (vel.x - self->unk204.x); // asm 0x802BEFD0-0x802BEFE8: fmuls then fadds (unfused)
+	self->unk204.x += stepX;
+	volatile f32 stepZ = 0.2f * (vel.z - self->unk204.z);
+	self->unk204.z += stepZ;
 
 	f32 speed = JGeometry::TUtil<f32>::sqrt(self->unk204.x * self->unk204.x
 	                                        + self->unk204.z * self->unk204.z);

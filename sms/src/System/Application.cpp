@@ -60,6 +60,9 @@ u8* gpSetupThreadStack;
 #ifdef TARGET_PC
 void sunshineBootAfterHook(); // sunshine-pc/src/saves/save_roundtrip.cpp: runs once after initialize_bootAfter()
 #endif
+#ifdef TARGET_PC
+u32 sunshineRandSeed(u32 fallback); // sunshine-pc/src/sdk/av.cpp
+#endif
 TCardManager* gpCardManager;
 JUTResFont* gpSystemFont;
 JUTRomFont* gpRomFont;
@@ -252,7 +255,11 @@ void TApplication::initialize()
 	TDrawSyncManager::smInstance->setCallback(0, 0xDFC0, 0xDFFF,
 	                                          TTimeRec::instance());
 	mMeter = new TProcessMeter(2);
+#ifdef TARGET_PC
+	srand(sunshineRandSeed(OSGetTick())); // sunshine-pc/src/sdk/av.cpp: SUNSHINE_DEV_SEED
+#else
 	srand(OSGetTick());
+#endif
 	gpSetupThreadStack = new (0x20) u8[0x10000];
 
 	mAppState = APP_STATE_BOOT;

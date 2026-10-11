@@ -55,12 +55,28 @@ def open_units():
     return sorted(count, key=lambda u: (TIER[u.split("/")[1]], -count[u])), count
 
 
-def claim(agent):
+def claim(agent, unit=None, quick=False):
+    """claim <agent>            next open unit (tier order)
+    claim <agent> <unit>      that specific unit (CLAIMED_BY <agent> if taken)
+    claim <agent> --quick     unit with most >=99 % non-100 functions (fast pad wins)"""
     order, count = open_units()
+    if quick:
+        rows = json.load(open(os.path.join(ROOT, "sms", "build", "triage.json")))
+        near = {}
+        for r in rows:
+            if r["match"] is not None and r["match"] >= 99 and r["unit"] in count:
+                near[r["unit"]] = near.get(r["unit"], 0) + 1
+        order = sorted((u for u in order if u in near), key=lambda u: -near[u])
 
     def f(st):
         now = time.time()
         st["claims"] = {u: c for u, c in st["claims"].items() if now - c["t"] < 7200}
+        if unit:
+            u = unit if unit.startswith("mario/") else "mario/" + unit
+            if u in st["claims"] and st["claims"][u]["agent"] != agent:
+                return f"CLAIMED_BY {st['claims'][u]['agent']}"
+            st["claims"][u] = {"agent": agent, "t": now}
+            return f"{u}\t{count.get(u, 0)} open functions"
         recent = {d["unit"] for d in st["done"] if now - d["t"] < 1200}
         for u in order:
             if u not in st["claims"] and u not in recent:
@@ -79,10 +95,21 @@ def release(agent, unit, note):
 
 
 def hold(agent, units):
+    units = [u if u.startswith("mario/") else "mario/" + u for u in units]
+    res = []
+
     def f(st):
+        now = time.time()
+        st["claims"] = {u: c for u, c in st["claims"].items() if now - c["t"] < 7200}
         for u in units:
-            st["claims"][u] = {"agent": agent, "t": time.time()}
+            c = st["claims"].get(u)
+            if c and c["agent"] != agent:
+                res.append(f"CLAIMED_BY {c['agent']} {u}")
+            else:
+                st["claims"][u] = {"agent": agent, "t": now}
+                res.append(f"held {u}")
     locked(f)
+    print("\n".join(res))
 
 
 def free(agent):
@@ -94,12 +121,26 @@ def free(agent):
 def status():
     st = json.load(open(STATE)) if os.path.exists(STATE) else {"claims": {}, "done": []}
     order, count = open_units()
-    print(f"open units {len(order)}, open functions {sum(count.values())}, claimed {len(st['claims'])}, done {len(st['done'])}")
+    out = [f"open units {len(order)}, open functions {sum(count.values())}, claimed {len(st['claims'])}, done {len(st['done'])}"]
     for u, c in st["claims"].items():
-        print(" ", c["agent"], u, f"{(time.time() - c['t']) / 60:.0f} min")
+        out.append(f"  {c['agent']} {u} {(time.time() - c['t']) / 60:.0f} min")
+    sys.stdout.write("\n".join(out) + "\n")
+
+
 
 def ledger(unit, fn, pct, status_, agent, evidence):
-    """Insert or update one row of docs/decomp-verified.tsv under the queue lock."""
+    """Insert or update one row of docs/decomp-verified.tsv under the queue lock.
+    Gate: `logic-verified` needs `branches mapped` (or `no branches`) in the evidence, else it is stored as
+    `partial (pending review)`. pct >= 100 is stored as `matched`."""
+    try:
+        if float(pct) >= 99.9999:
+            status_ = "matched"
+    except ValueError:
+        pass
+    ev = evidence.lower()
+    if status_.startswith("logic-verified") and not ("branches mapped" in ev or "no branches" in ev or "0 branches" in ev):
+        print("WARNING: no 'branches mapped' in evidence -> stored as partial (pending review); add the branch trace and re-ledger")
+        status_ = "partial (pending review)"
     path = os.path.join(ROOT, "sunshine-pc", "docs", "decomp-verified.tsv")
     key = lambda u, f: (u.removeprefix("mario/"), f.split("(")[0].strip())
 
@@ -120,6 +161,7 @@ def ledger(unit, fn, pct, status_, agent, evidence):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    {"claim": lambda: claim(a[1]), "release": lambda: release(a[1], a[2], " ".join(a[3:])),
+    {"claim": lambda: claim(a[1], None if len(a) < 3 or a[2] == "--quick" else a[2], "--quick" in a[2:]),
+     "release": lambda: release(a[1], a[2], " ".join(a[3:])),
      "hold": lambda: hold(a[1], a[2:]), "free": lambda: free(a[1]), "status": status,
      "ledger": lambda: ledger(a[1], a[2], a[3], a[4], a[5], " ".join(a[6:]))}[a[0]]()

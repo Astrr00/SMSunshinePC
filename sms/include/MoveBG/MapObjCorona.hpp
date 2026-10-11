@@ -4,27 +4,12 @@
 #include <MoveBG/MapObjBase.hpp>
 #include <Map/BathWaterManager.hpp>
 #include <JSystem/JGeometry.hpp>
-#include <new>
 
 class MActorAnmData;
 class TBathtub;
 class TBathtubGrip;
 class TBathtubGripParts;
 class MActor;
-
-// The retail ctor/load/calcBathtubData treat TBathtubData::unk18 as a row-major
-// SMatrix33R (the ctor calls SMatrix33R::SMatrix33R and identity()/setXDir()
-// store a direction as three contiguous floats). The shared header declares it
-// as the SMatrix33C view that Map/BathWaterManager.cpp indexes, so go through
-// this layout-identical view here instead of changing that type under it.
-typedef JGeometry::TRotation3<JGeometry::TMatrix33<JGeometry::SMatrix33R<f32> > >
-    TBathtubRot;
-
-// TBathtubData whose rotation member is constructed as the row-major view.
-class TBathtubDataR : public TBathtubData {
-public:
-	TBathtubDataR() { ::new (&unk18) TBathtubRot; }
-};
 
 class TBathtubParams : public TParams {
 public:

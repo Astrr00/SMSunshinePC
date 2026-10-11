@@ -25,8 +25,8 @@ Runtime bugs keep coming from NonMatching functions (wrong masks, swapped branch
 | Fully matching units flipped to `Matching` in `configure.py` | PART (439 → 445 units) | lead, per-unit SHA-1 check each wave |
 | Ledger quality | PART (audit 1: 10 % wrong → `--check` gate; audit 2 running) | periodic sampling audits |
 
-Exit criterion: every function the port builds is an exact match (preferred; user priority) or, where a known codegen limit blocks matching, has a whole-function asm-equivalence review in `sunshine-pc/docs/decomp-verified.tsv` (triage score only ranks the work); no `TARGET_PC` stub over an empty body.
-Scope limit (`sms/AGENTS.md`): agents do no autonomous decomp work on MSL, MetroTRK, THPPlayer, the dolphin SDK or JSystem; only game code. Port fixes in those libraries stay under `TARGET_PC`.
+Exit criterion: every function the port builds is an exact match (preferred) or, where codegen cannot be matched, uses code of our own (helpers, restructured control flow, header edits are allowed since the user's later rule) whose behaviour equals retail, proven by a whole-function asm-equivalence review recorded as `logic-verified` in `sunshine-pc/docs/decomp-verified.tsv` (the triage score only ranks the work); no `TARGET_PC` stub over an empty body.
+Scope limit (`sms/AGENTS.md`): game code is the target; shared and JSystem headers may now be edited when it helps (rebuild every includer, Matching units stay 100 %, SHA-1 unchanged). MSL, MetroTRK, THPPlayer and the dolphin SDK stay untouched; port fixes there stay under `TARGET_PC`.
 
 ## Phase 1: Boot to gameplay (core)
 

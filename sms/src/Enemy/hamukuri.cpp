@@ -2442,7 +2442,7 @@ bool TDoroHamuKuri::isCollidMove(THitActor* param_1)
 			other->onLiveFlag(LIVE_FLAG_AIRBORNE);
 
 			if (!isAirborne()) {
-				JGeometry::TVec3<f32> local_4c = mPosition;
+				JGeometry::TVec3<f32> local_4c = param_1->mPosition; // asm 0x80262E08 (lwz 0x10/0x14(r31); r31=other==param_1)
 				mVelocity
 				    = calcVelocityToJumpToY(local_4c, 6.0f, getGravityY());
 				mPosition.y += 2.0f;
@@ -2458,7 +2458,7 @@ bool TDoroHamuKuri::isCollidMove(THitActor* param_1)
 					return true;
 				}
 
-				if (receiveMessage(param_1, HIT_MESSAGE_PUT)) {
+				if (pTVar1->receiveMessage(param_1, HIT_MESSAGE_PUT)) { // asm 0x80262F00 (blrl on r28=pTVar1); beq 0x80262F08
 					pTVar1->mPosition = param_1->mPosition;
 					if (pTVar1->receiveMessage(this, HIT_MESSAGE_TAKE)) {
 						other->unk198      = 0;
@@ -2467,19 +2467,19 @@ bool TDoroHamuKuri::isCollidMove(THitActor* param_1)
 						mHeldObject = pTVar1;
 
 						// TODO: this is an inline
-						int uVar11 = unk124->getCurGraphIndex();
+						int uVar11 = other->unk124->getCurGraphIndex(); // asm 0x80262F74 (lwz 0x124(r31))
 
 						int count  = TMsRange<s32>(2, 3).rand();
 						int uVar10 = -1;
 						for (int i = 0; i < count; ++i) {
-							int next = unk124->unk0->getRandomNextIndex(
+							int next = other->unk124->unk0->getRandomNextIndex( // asm 0x80262FF0 (lwz 0x124(r31))
 							    uVar11, uVar10, 0xffffffff);
 							uVar10 = uVar11;
 							uVar11 = next;
 						}
 
 						JGeometry::TVec3<f32> VStack_60;
-						unk124->getGraph()->getGraphNode(uVar11).getPoint(
+						other->unk124->getGraph()->getGraphNode(uVar11).getPoint( // asm 0x8026301C (lwz 0x124(r31))
 						    &VStack_60);
 
 						JGeometry::TVec3<f32> local_6c = calcVelocityToJumpToY(

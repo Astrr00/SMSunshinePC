@@ -1225,7 +1225,7 @@ void TBGTentacle::calcAtkParticleAndSE()
 				mOwner->unk1AC = 0xF0;
 
 				SMSGetMSound()->startSoundActor(MSD_SE_BS_GESO_VO_ATTACK,
-				                                &mTakeHit->mPosition, 0,
+				                                &mOwner->mPosition, 0,
 				                                nullptr, 0, 4);
 			}
 		}

@@ -703,6 +703,8 @@ f32 TBossGesso::lenFromToeToMario()
 	return min;
 }
 
+// asm 0x8028BDDC: retail calls showMessage out of line (bl from perform 0x80288C58)
+#pragma dont_inline on
 void TBossGesso::showMessage(u32 param_1)
 {
 	u32 idx  = param_1 == 0xE0028 ? 3 : param_1 - 0xE0003;
@@ -713,6 +715,7 @@ void TBossGesso::showMessage(u32 param_1)
 
 	unk198 |= flag;
 }
+#pragma dont_inline off
 
 void TBossGesso::checkTakeMsg() { }
 
@@ -1836,7 +1839,8 @@ DEFINE_NERVE(TNerveBGDie, TLiveActor)
 	TBossGesso* self = (TBossGesso*)spine->getBody();
 
 	if (spine->getTime() == 0) {
-		self->changeBck(5);
+		// asm 0x80286684/0x802866AC/0x8028671C: retail changeBck(2) (table[2] → 0x8), not 5
+		self->changeBck(2);
 
 		self->getMActor()->setBtpFromIndex(1);
 
@@ -2042,9 +2046,9 @@ DEFINE_NERVE(TNerveBGRoll, TLiveActor)
 			self->changeBck(19);
 
 		if (mactor->curAnmEndsNext()) {
-			if (mactor->checkCurBckFromIndex(13)) {
+			if (mactor->checkCurBckFromIndex(14)) { // asm 0x802857E0, 0x80285994 (retail never uses 13)
 				if (self->unk196 < 3) {
-					self->changeBck(13);
+					self->changeBck(14);
 					self->unk196 += 1;
 				} else {
 					self->changeBck(18);
@@ -2052,7 +2056,7 @@ DEFINE_NERVE(TNerveBGRoll, TLiveActor)
 				}
 			} else {
 				if (mactor->checkCurBckFromIndex(19))
-					self->changeBck(13);
+					self->changeBck(14);
 				else
 					return true;
 			}

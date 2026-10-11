@@ -179,26 +179,10 @@ void SMSCalcJumpVelocityXZ(const JGeometry::TVec3<f32>&,
 void MsVECNormalize(Vec*, Vec*);
 f32 MsVECMag2(Vec*);
 
-inline JGeometry::TVec3<f32>
+JGeometry::TVec3<f32>
 MsPerpendicFootToLineR(const JGeometry::TVec3<f32>& param_1,
                        const JGeometry::TVec3<f32>& param_2,
-                       const JGeometry::TVec3<f32>& param_3)
-{
-	char trash[8]; // unused stack slot (present in the retail frame)
-	// TODO: floats are the worst, doesn't match at all...
-	JGeometry::TVec3<f32> diff = param_2;
-	diff -= param_1;
-	f32 fVar1 = (param_3.dot(diff) - param_1.dot(diff)) / diff.squared();
-
-	if (fVar1 < 0.0f)
-		fVar1 = 0.0f;
-	else if (fVar1 > 1.0f)
-		fVar1 = 1.0f;
-
-	diff.scale(fVar1);
-
-	return param_1 + diff;
-}
+                       const JGeometry::TVec3<f32>& param_3);
 
 #pragma dont_inline on
 inline f32 MsSqrtf(f32 x)

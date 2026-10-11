@@ -2124,6 +2124,7 @@ void TGCConsole2::resetMoveTank() { }
 
 void TGCConsole2::endCameraDemo()
 {
+	char trash[0x20];
 	if (unk39)
 		return;
 
@@ -2246,6 +2247,7 @@ void TGCConsole2::startAppearCoin()
 
 void TGCConsole2::startDisappearCoin()
 {
+	char trash[0x18];
 	unk4D = true;
 	unk5A = true;
 
@@ -3238,6 +3240,7 @@ bool TGCConsole2::processAppearTank(int param_1)
 
 bool TGCConsole2::processAppearCoin(int param_1)
 {
+	char trash[0x20];
 	bool isFinished = true;
 	isFinished &= unk108->update();
 

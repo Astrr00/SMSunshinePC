@@ -295,6 +295,7 @@ static void evGetTalkNPCName(TSpcTypedInterp<TEventWatcher>* interp,
 // TSpcInterp::pop() itself (that one makes the whole file worse).
 static void evSetTalkMsgID(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(2, &arg_num);
 	int p1 = TSpcSlice(interp->pop()).getDataInt();
 	int p2 = TSpcSlice(interp->pop()).getDataInt();

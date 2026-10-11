@@ -205,8 +205,9 @@ void TTailRubber::restrict()
 			JGeometry::TVec3<f32> diff = (it + 1)->mPos;
 			diff -= it->mPos;
 			diff.y = 0.0f;
-			if (avgHorLen < diff.length()) {
-				diff.setLength(diff.length() - avgHorLen);
+			f32 len = diff.length();
+			if (avgHorLen < len) {
+				diff.setLength(len - avgHorLen);
 				it->mPos += diff;
 			}
 		}
@@ -215,8 +216,9 @@ void TTailRubber::restrict()
 			JGeometry::TVec3<f32> diff = (it - 1)->mPos;
 			diff -= it->mPos;
 			diff.y = 0.0f;
-			if (avgHorLen < diff.length()) {
-				diff.setLength(diff.length() - avgHorLen);
+			f32 len = diff.length();
+			if (avgHorLen < len) {
+				diff.setLength(len - avgHorLen);
 				it->mPos += diff;
 			}
 		}
@@ -636,7 +638,8 @@ void TFireWanwanTailHit::performNodes(u32 param_1, JDrama::TGraphics* param_2)
 		unkA8[i]->perform(param_1, param_2, local_68, local_74);
 	}
 
-	for (int i = 0; i < 5; ++i) {
+	// asm 0x8029F1C8/0x8029F264: second loop runs i=0..3 (cmpwi r30,0x4)
+	for (int i = 0; i < 4; ++i) {
 		TPosition3f afStack_a4;
 		MTXCopy(afStack_a4, unkA8[i]->mMActor->getModel()->getBaseTRMtx());
 

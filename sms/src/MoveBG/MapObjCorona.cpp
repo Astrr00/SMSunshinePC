@@ -63,11 +63,6 @@ TBathtubParams::TBathtubParams()
 	TParams::load(mPrmPath);
 }
 
-static inline TBathtubRot& bathRot(TBathtubData& data)
-{
-	return (TBathtubRot&)data.unk18;
-}
-
 u8 TBathtub::getNumKillerBurstable() const
 {
 	if (!isKillerLaunchable())
@@ -177,7 +172,7 @@ void TBathtub::load(JSUMemoryInputStream& stream)
 	}
 
 	mBathtubData.mPos.set(mInitialPosition);
-	bathRot(mBathtubData).identity();
+	mBathtubData.unk18.identity();
 	mBathtubData.unk3C = 3000.0f;
 	mBathtubData.unk40 = 3600.0f;
 	mBathtubData.unk44 = mBathtubData.unk3C * sinf(0.27925268f);
@@ -411,11 +406,9 @@ bool TBathtub::allowsTumble() const
 	if (!getNearGrip(pos, 18.0f, &angle))
 		return false;
 
-	JGeometry::TVec3<f32> d(pos.x - mBathtubData.mPos.x,
-	                        pos.y - mBathtubData.mPos.y,
-	                        pos.z - mBathtubData.mPos.z);
-	JGeometry::TVec3<f32> local;
-	mBathtubData.unk18.mult33(d, local);
+	JGeometry::TVec3<f32> local = mBathtubData.toLocal(
+	    pos.x - mBathtubData.mPos.x, pos.y - mBathtubData.mPos.y,
+	    pos.z - mBathtubData.mPos.z);
 	JGeometry::TVec3<f32> flat = local;
 	flat.y                     = 0.0f;
 	f32 dist                   = flat.length();
@@ -513,11 +506,9 @@ void TBathtub::startDemo()
 
 void TBathtub::setupCollisions_()
 {
-	JGeometry::TVec3<f32> d(gpMarioPos->x - mBathtubData.mPos.x,
-	                        gpMarioPos->y - mBathtubData.mPos.y,
-	                        gpMarioPos->z - mBathtubData.mPos.z);
-	JGeometry::TVec3<f32> local;
-	mBathtubData.unk18.mult33(d, local);
+	JGeometry::TVec3<f32> local = mBathtubData.toLocal(
+	    gpMarioPos->x - mBathtubData.mPos.x, gpMarioPos->y - mBathtubData.mPos.y,
+	    gpMarioPos->z - mBathtubData.mPos.z);
 
 	if (gpMarioPos->y < 300.0f
 	    || local.x * local.x + local.z * local.z < 0.01f) {
@@ -566,19 +557,18 @@ void TBathtub::removeCollisions_()
 void TBathtub::calcBathtubData()
 {
 	Mtx* m = getRootJointMtx();
-	TBathtubRot& rot = bathRot(mBathtubData);
-	rot.setXDir((*m)[0][0], (*m)[1][0], (*m)[2][0]);
-	rot.setYDir((*m)[0][1], (*m)[1][1], (*m)[2][1]);
-	rot.setZDir((*m)[0][2], (*m)[1][2], (*m)[2][2]);
+	mBathtubData.unk18.setXDir((*m)[0][0], (*m)[1][0], (*m)[2][0]);
+	mBathtubData.unk18.setYDir((*m)[0][1], (*m)[1][1], (*m)[2][1]);
+	mBathtubData.unk18.setZDir((*m)[0][2], (*m)[1][2], (*m)[2][2]);
 	mBathtubData.mPos.set((*m)[0][3], (*m)[1][3], (*m)[2][3]);
 
-	f32 y = rot.at(1, 1);
+	f32 y = mBathtubData.unk18.at(1, 1);
 	f32 s = JGeometry::TUtil<f32>::sqrt(1.0f - y * y);
 	mBathtubData.unk44
 	    = mBathtubData.unk3C
 	      * JGeometry::max(unk16C->watermark.get(), s);
 	mBathtubData.unk48 = unk16C->outerHeight.get();
-	rot.getYDir(mBathtubData.unk0C);
+	mBathtubData.unk18.getYDir(mBathtubData.unk0C);
 	mBathtubData.unk58.zero();
 
 	TKoopa* koopa = (TKoopa*)JDrama::TNameRefGen::search("クッパ");
@@ -668,9 +658,8 @@ void TBathtub::control()
 		calcBathtubData();
 		getModel()->calc();
 
-		JGeometry::TVec3<f32> upDir(mBathtubData.unk18.at(1, 0),
-		                            mBathtubData.unk18.at(1, 1),
-		                            mBathtubData.unk18.at(1, 2));
+		JGeometry::TVec3<f32> upDir;
+		mBathtubData.unk18.getYDir(upDir);
 		if (mBathtubData.unk0C.dot(upDir) > 0.995f)
 			gpMarioParticleManager->emit(0x1BE, &unk1F4, 1, this);
 

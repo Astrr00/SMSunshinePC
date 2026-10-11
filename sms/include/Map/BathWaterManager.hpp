@@ -3,6 +3,7 @@
 
 #include <Strategic/HitActor.hpp>
 #include <JSystem/JMath.hpp>
+#include <new>
 #include <System/Params.hpp>
 #include <System/ParamInst.hpp>
 
@@ -10,6 +11,8 @@ class TBathtub;
 class JUTTexture;
 class J3DModelData;
 class J3DModel;
+
+typedef JGeometry::TRotation3<JGeometry::TMatrix33<JGeometry::SMatrix33R<f32> > > TBathtubRot;
 
 class TBathtubData {
 public:
@@ -54,6 +57,15 @@ public:
 		return result;
 	}
 
+	// Memory rows of unk18 applied to (dx,dy,dz): retail M*d (row-major at 0x188).
+	JGeometry::TVec3<f32> toLocal(f32 dx, f32 dy, f32 dz) const
+	{
+		return JGeometry::TVec3<f32>(
+		    unk18.mMtx[0][0] * dx + unk18.mMtx[0][1] * dy + unk18.mMtx[0][2] * dz,
+		    unk18.mMtx[1][0] * dx + unk18.mMtx[1][1] * dy + unk18.mMtx[1][2] * dz,
+		    unk18.mMtx[2][0] * dx + unk18.mMtx[2][1] * dy + unk18.mMtx[2][2] * dz);
+	}
+
 	// fabricated
 	JGeometry::TVec3<f32> getThing() const
 	{
@@ -63,7 +75,7 @@ public:
 public:
 	/* 0x00 */ JGeometry::TVec3<f32> mPos;
 	/* 0x0C */ JGeometry::TVec3<f32> unk0C;
-	/* 0x18 */ JGeometry::TRotation3<TMtx33f> unk18;
+	/* 0x18 */ TBathtubRot unk18;
 	/* 0x3C */ f32 unk3C;
 	/* 0x40 */ f32 unk40;
 	/* 0x44 */ f32 unk44;
@@ -74,6 +86,13 @@ public:
 	/* 0x58 */ JGeometry::TVec3<f32> unk58;
 	/* 0x64 */ u8 unk64;
 	/* 0x65 */ u8 unk65;
+};
+
+// asm 0x801D0684: TBathtub ctor calls SMatrix33R::SMatrix33R on unk18 out-of-line;
+// a derived ctor reproduces that call (a bare member placement-new emits nothing).
+class TBathtubDataR : public TBathtubData {
+public:
+	TBathtubDataR() { ::new (&unk18) TBathtubRot; }
 };
 
 class TBathWaterParams : public TParams {

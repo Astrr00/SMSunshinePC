@@ -473,7 +473,8 @@ TBPHeadHit::TBPHeadHit(TBossPakkun* owner, const char* name)
 
 BOOL TBPHeadHit::receiveMessage(THitActor* sender, u32 message)
 {
-	if (&TNerveBPSleep::theNerve() == mOwner->mSpine->getLatestNerve())
+	const TNerveBase<TLiveActor>* nerve = mOwner->mSpine->getLatestNerve();
+	if (&TNerveBPSleep::theNerve() == nerve)
 		return mOwner->receiveMessage(sender, message);
 
 	TBossPakkun* boss = mOwner;
@@ -486,7 +487,7 @@ BOOL TBPHeadHit::receiveMessage(THitActor* sender, u32 message)
 
 	if (boss->mWeakPoint != TBossPakkun::WEAK_POINT_MOUTH) {
 		if (boss->is2ndFightNow()
-		    && &TNerveBPFly::theNerve() == boss->mSpine->getLatestNerve())
+		    && &TNerveBPFly::theNerve() == nerve)
 			boss->showMessage(0xe0002);
 		if (sender->getActorType() == 0x1000001)
 			return true;

@@ -788,8 +788,8 @@ void CPolarSubCamera::calcPosAndAt_()
 			}
 			if (unk64 & CAMERA_FLAG_UNK4) {
 				chaseXZ = 1.0f;
-			} else if (unk120->mCompSPos[6] != 0.0f
-			           || unk120->mCompSPos[7] != 0.0f) {
+			} else if (unk120->mSubStick.mPosY != 0.0f
+			           || unk120->mSubStick.mPosX != 0.0f) {
 				f32 v = gpCameraMario->mFrameMoveDistHorizontal;
 				if (v > 20.0f)
 					v = 20.0f;
@@ -798,7 +798,7 @@ void CPolarSubCamera::calcPosAndAt_()
 				    mCurrentParams->mPosChaseRateXZ_C,
 				    CLBCalcRatio<f32>(20.0f, 0.0f, v));
 			}
-			if (unk120->mCompSPos[6] != 0.0f) {
+			if (unk120->mSubStick.mPosY != 0.0f) {
 				f32 v = gpCameraMario->mFrameMoveDistVertical;
 				if (v > 20.0f)
 					v = 20.0f;

@@ -175,11 +175,11 @@ void THino2MtxCalc::calc(u16 param_1)
 			info = joint->getTransformInfo();
 
 			calcTransform(param_1, info);
-		} else if (mTwo[0] == 0.0f || !mOne[1]) {
+		} else if (unk78 == 0.0f || !mOne[1]) { // asm 0x80271440/0x8027151C: weight at 0x78, not base mTwo 0x60
 			J3DTransformInfo auStack_74;
 			mOne[0]->getTransform(param_1, &auStack_74);
 			calcTransform(param_1, auStack_74);
-		} else if (mTwo[0] == 1.0f || !mOne[0]) {
+		} else if (unk78 == 1.0f || !mOne[0]) { // asm 0x80271590: weight at 0x78
 			J3DTransformInfo auStack_94;
 			mOne[1]->getTransform(param_1, &auStack_94);
 			calcTransform(param_1, auStack_94);
@@ -189,7 +189,7 @@ void THino2MtxCalc::calc(u16 param_1)
 			mOne[0]->getTransform(param_1, &JStack_d4);
 			J3DTransformInfo* ptr = &JStack_b4;
 			mOne[1]->getTransform(param_1, ptr);
-			M3UMtxCalcBlendAux(param_1, &JStack_d4, ptr, mTwo[0], false);
+			M3UMtxCalcBlendAux(param_1, &JStack_d4, ptr, unk78, false);
 		}
 	}
 
@@ -875,7 +875,8 @@ BOOL THinokuri2::receiveMessage(THitActor* sender, u32 message)
 
 template <class T> static inline T symmetric_clamp(T v, T r)
 {
-	return v > 0 ? (v > r ? v : r) : (v > -r ? -r : v);
+	// asm 0x8026EE28-0x8026EE58 (moveObject): v>0 -> min(v,r); v<=0 -> max(v,-r)
+	return v > 0 ? (v > r ? r : v) : (v > -r ? v : -r);
 }
 
 void THinokuri2::moveObject()
@@ -888,9 +889,8 @@ void THinokuri2::moveObject()
 
 	if (mLevel == 1) {
 		f32 dhp    = calcHitPoints() - mHitPoints;
-		f32 fVar12 = (getSaveParam()->getSLDamageHeadScale() - 1.0f)
-		                 * (1.0f + dhp / calcHitPoints())
-		             - unk194;
+		// asm 0x8026EE08-0x8026EE28: (scale - 1.0f) * (dhp / hp) + 1.0f - unk194 (fmadds f2,f3,f2,f4)
+		f32 fVar12 = (getSaveParam()->getSLDamageHeadScale() - 1.0f) * (dhp / calcHitPoints()) + 1.0f - unk194;
 
 		unk194 += symmetric_clamp(fVar12, 0.004f);
 	} else {

@@ -240,6 +240,10 @@ public:
 	virtual void entry();
 	virtual void calc();
 	virtual void viewCalc();
+#ifdef TARGET_PC
+	void interpRecord();
+	void interpBlend();
+#endif
 
 	void calcNrmMtx();
 	void calcBumpMtx();
@@ -331,6 +335,13 @@ protected:
 	/* 0x94 */ J3DUnkCalc1* unk94;
 	/* 0x98 */ J3DVertexBuffer* mVertexBuffer;
 	/* 0x9C */ J3DUnkCalc2* unk9C;
+#ifdef TARGET_PC
+	// Frame-rate interpolation (framerate.cpp): draw matrices of the last two logic ticks.
+	Mtx* mInterpCur   = nullptr;
+	Mtx* mInterpPrev  = nullptr;
+	u32 mInterpStep   = 0;
+	bool mInterpValid = false;
+#endif
 };
 
 #endif

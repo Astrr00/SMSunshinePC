@@ -658,7 +658,7 @@ void TOilBall::moveObject()
 		} else {
 			JGeometry::TVec3<f32> velocity(0.0f, 0.0f, 0.0f);
 			JGeometry::TVec3<f32> push;
-			char trash[0x18];
+			char trash[0x1c];
 			push.sub(mPosition, actor->mPosition);
 			if (push.x == 0.0f && push.y == 0.0f && push.z == 0.0f)
 				push.x += 1.0f;
@@ -1563,8 +1563,9 @@ MtxPtr TBossEel::getTakingMtx() { return mMActor->getModel()->getAnmMtx(7); }
 
 void TBossEel::calcAndSetCollisionCubeBite_()
 {
+	// asm 0x802E5AE4: retail reads pBegin_[1] (lwz 0x4), not [0]
 	TCubeGeneralInfo* mouthCube
-	    = *mMouthCubeManager->unk14->getChildren().begin();
+	    = mMouthCubeManager->unk14->getChildren().begin()[1];
 	mouthCube->unk18.set(mRotation);
 	mouthCube->unkC.set(mPosition.x, mPosition.y + 1900.0f, mPosition.z);
 	mouthCube->unk24.set(1100.0f, 1000.0f, 1100.0f);

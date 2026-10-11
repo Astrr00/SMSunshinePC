@@ -774,8 +774,7 @@ void TMarDirector::nextStateInitialize(u8 next_state)
 		    ->unkC.on(CUE_MOVE | CUE_CALC_ANIM | CUE_DRAW);
 		static_cast<JDrama::TViewObj*>(JDrama::TNameRefGen::search("Guide"))
 		    ->unkC.off(CUE_MOVE | CUE_CALC_ANIM | CUE_DRAW);
-		SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_WIPE_IN, 0, nullptr,
-		                                   0);
+		SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_WIPE_IN, 0, nullptr, 0);
 		gpApplication.mFader->startWipe(6, 1.0f, 0.0f);
 		unk78->setup(nullptr);
 		unk78->startMoveCursor();

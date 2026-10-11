@@ -24,6 +24,9 @@ public:
 	{
 		return (float)mBounds.getHeight() / (float)mOrtho.getHeight();
 	}
+#ifdef TARGET_PC
+	const JUTRect& getOrtho() const { return mOrtho; }
+#endif
 
 	void setOrtho(f32 x, f32 y, f32 width, f32 height, f32 far, f32 near)
 	{
