@@ -24,6 +24,7 @@
 #include "MoveBG/MapObjManager.hpp"
 #include "MoveBG/MapObjTown.hpp"
 #include "MoveBG/MapObjHide.hpp"
+#include "Enemy/GateKeeper.hpp"
 #include "System/MarioGamePad.hpp"
 #include "Player/Mario.hpp"
 #include "System/Application.hpp"
@@ -309,9 +310,26 @@ int washedCount()
 	return n;
 }
 
+// The airport GateKeeper (scene object "ゲートキーパー（ビアンコ）", Shift-JIS bytes below): hit points, vulnerability window,
+// dead flag, position. Killing it starts the airport event (TAirportEventSink::watch) that ends the tutorial.
+void logBoss(const char* tag)
+{
+	static const char kName[] = "\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x72\x83\x41\x83\x93\x83\x52\x81\x6a";
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return;
+	TGateKeeperBase* g = dynamic_cast<TGateKeeperBase*>(JDrama::TNameRefGen::search(kName));
+	if (!g) return;
+	int bck = -1;
+	if (TBiancoGateKeeper* b = dynamic_cast<TBiancoGateKeeper*>(g))
+		for (int i = 0; i < 0x20; ++i)
+			if (b->getMActor()->checkCurBckFromIndex(i)) { bck = i; break; }
+	std::printf("[%s-boss] hp=%d vulnerable=%d unk154=%d dead=%d bck=0x%X pos=(%.0f,%.0f,%.0f) tick=%d\n", tag, (int)g->getHitPoints(),
+	    (int)g->mVulnerable, g->unk154, g->checkLiveFlag(LIVE_FLAG_DEAD) ? 1 : 0, bck, g->mPosition.x, g->mPosition.y, g->mPosition.z, gTick);
+}
+
 void logStatus(const char* tag)
 {
 	logWash(tag);
+	logBoss(tag);
 	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
 	if (gpCardLoad)
 		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,

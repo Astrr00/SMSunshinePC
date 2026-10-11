@@ -1,0 +1,70 @@
+# Diagnosis only: run with SUNSHINE_DEV_START=airport/1. The airport GateKeeper sits at (-1500, 300, 1500) in the goop pit;
+# killing it (3 water hits in its vulnerable windows) starts TAirportEventSink (airport rises, a Shine appears).
+# Walk the verified y=500 line to the pit rim, go down the ramp and spray toward the boss; the status lines carry [..-boss].
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+wait frames=60
+walkto x=-5876 z=976 radius=100 timeout=900
+walkto x=-4940 z=814 radius=100 timeout=500
+walkto x=-4005 z=652 radius=100 timeout=500
+walkto x=-3069 z=491 radius=100 timeout=500
+walkto x=-2134 z=329 radius=100 timeout=500
+log
+walkto x=-1500 z=900 radius=120 timeout=500
+log
+walkto x=-1500 z=1500 radius=450 timeout=300
+log
+shot gk0.png
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+hold trig=0,255 frames=60
+log
+shot gk1.png
+wait frames=60
+log
+end

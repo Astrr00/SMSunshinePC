@@ -177,7 +177,13 @@ void TPollutionLayer::cleaned(f32 x, f32 y, f32 z, f32 s)
 	if (effect_counter > 5) {
 		effect_counter = 0;
 
+#ifdef TARGET_PC
+		// asm 0x801F34A0: `cmpwi r0, 0xa` wraps now_pos_no only above 10, so pos[10] is written. Retail's neighbour in .bss is
+		// harmless; on x64 it overwrote the offset tables below and cleaned() then read mPollutionMap out of bounds.
+		static JGeometry::TVec3<f32> pos[11];
+#else
 		static JGeometry::TVec3<f32> pos[10];
+#endif
 		static int now_pos_no = 0;
 
 		pos[now_pos_no].set(x, y, z);
