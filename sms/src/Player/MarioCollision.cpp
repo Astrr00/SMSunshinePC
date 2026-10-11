@@ -364,7 +364,7 @@ void TMario::damageExec(THitActor* hittingActor, int damage, int damageAnimType,
 		if (checkStatusType(MARIO_STATUS_FLAG_SWIMMING))
 			canPlayAnimation = false;
 
-		if (canPlayAnimation == true) {
+		if (canPlayAnimation) {
 			// I don't think this is correct, but was the closest i could get
 			u32 statusIdx = animationTypes[damageAnimType + animOffset1 * 4
 			                               + animOffset2 * 8];

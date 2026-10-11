@@ -109,11 +109,14 @@ void TMapWarp::init(JSUMemoryInputStream& stream)
 		{ "warpI1", 16 }, { "warpI0", 17 }, { nullptr, 0 },
 	};
 
-	unk0 = stream.readU32();
+	u32 tmp;
+	stream.read(tmp);
+	unk0 = tmp;
 	if (!unk0)
 		return;
 
-	unk8 = stream.readU32();
+	stream.read(tmp);
+	unk8 = tmp;
 	unk4 = new TMapWarpInfo[unk0 * 2];
 
 	u32 local_1d0[20];
@@ -121,8 +124,10 @@ void TMapWarp::init(JSUMemoryInputStream& stream)
 	JGeometry::TVec3<f32> local_130[20];
 
 	for (int i = 0; i < unk0; ++i) {
-		local_1d0[i] = stream.readU32();
-		local_180[i] = stream.readU32();
+		stream.read(tmp);
+		local_1d0[i] = tmp;
+		stream.read(tmp);
+		local_180[i] = tmp;
 	}
 
 	int cnt = unk0 * 2;

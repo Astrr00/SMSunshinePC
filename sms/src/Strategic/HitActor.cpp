@@ -21,6 +21,7 @@ f32 THitActor::calcEntryRadius()
 	if (rad2 > 0.0f) {
 		// TODO: some kind of a fast sqrt function?
 		volatile f32 f = rad2 * __frsqrte(rad2);
+		char trash[0x30];
 		mEntryRadius   = 1.4142135f * f;
 	} else {
 		mEntryRadius = 0.0f;

@@ -605,6 +605,7 @@ s32 TCardManager::getBookmarkInfos_()
 s32 TCardManager::readBlock_(u32 index)
 {
 	CARDFileInfo info;
+	char trash[0x0c];
 	s32 result = open_(&info);
 	if (result != CARD_RESULT_READY)
 		return result;

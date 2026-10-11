@@ -2154,7 +2154,9 @@ DEFINE_NERVE(TNerveFireWanwanFly, TLiveActor)
 
 DEFINE_NERVE(TNerveFireWanwanFreeze, TLiveActor)
 {
+	char trash[8];
 	TFireWanwan* self = (TFireWanwan*)spine->getBody();
+
 
 	if (spine->getTime() == 0) {
 		self->setBckAnm(0);

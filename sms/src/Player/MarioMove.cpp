@@ -963,7 +963,6 @@ void TMario::checkGraffitoElec()
 
 void TMario::checkGraffito()
 {
-	char trash[0x18];
 	if (mGroundPlane->isIllegalData())
 		return;
 
@@ -974,8 +973,9 @@ void TMario::checkGraffito()
 	    || mPlayerType == PLAYER_TYPE_MONTE_MAN)
 		return;
 
-	JGeometry::TVec3<f32> pos;
 	int isDirty = 0;
+	JGeometry::TVec3<f32> pos;
+	char trash[0x18];
 	mPollutionTypeStandingOn
 	    = gpPollution->getPollutionType(mPosition.x, mPosition.y, mPosition.z);
 
@@ -1455,8 +1455,7 @@ void TMario::checkController(JDrama::TGraphics*)
 	// Stick distance, then mLengthMult^mLengthMultTimes (unrolled in 8s)
 	f32 dist = (unk108->mStickH * unk108->mStickH)
 	           + (unk108->mStickV * unk108->mStickV);
-	if (dist > 0.0f)
-		dist = MsSqrtf(dist);
+	dist = MsSqrtf(dist);
 
 	for (int i = 0; i < mControllerParams.mLengthMultTimes.get(); ++i)
 		dist *= mControllerParams.mLengthMult.get();
@@ -2312,13 +2311,14 @@ void TMario::thinkYoshiHeadCollision()
 	JGeometry::TVec3<f32> headPos = mPosition;
 
 	f32 front = mYoshiParams.mHeadFront.get();
-	headPos.x += front * JMASSin(mFaceAngle.y);
-	headPos.z += front * JMASCos(mFaceAngle.y);
+	s16 faceY = mFaceAngle.y;
+	headPos.x += front * JMASSin(faceY);
+	headPos.z += front * JMASCos(faceY);
 
 	f32 headZ = headPos.z;
 	TBGWallCheckRecord record(headPos.x, headPos.y + 100.0f, headZ,
 	                          mYoshiParams.mHeadRadius.get(), 4, 0);
-	char trash[8];
+	char trash[0xc];
 
 	if (gpMap->isTouchedWallsAndMoveXZ(&record) == true) {
 		f32 dx = record.mCenter.x - headPos.x;

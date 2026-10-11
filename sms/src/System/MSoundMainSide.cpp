@@ -943,7 +943,7 @@ void MSStageCubeFadeMonte::proc()
 			TCubeGeneralInfo* info = gpCubeSoundChange->unk14->begin()[unk4];
 
 			Vec local_d0        = info->getUnkC();
-			const Vec& marioPos = SMS_GetMarioPos();
+			Vec marioPos = SMS_GetMarioPos();
 			local_d0.y = marioPos.y;
 
 			f32 d        = vec_dist(local_d0, marioPos);

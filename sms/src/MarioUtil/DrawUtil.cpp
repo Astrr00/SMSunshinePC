@@ -305,9 +305,10 @@ void TTrembleModelEffect::clash(f32 magnitude)
 		for (u32 i = 0; i < unk0->getModelData()->getVertexData().getVtxNum();
 		     ++i) {
 			JGeometry::TVec3<s16> t = unk14[i] + unk20[i];
+			JGeometry::TVec3<s16> u = t;
 			unk14[i]                = t;
-			unk18[0][i]             = t;
-			unk18[1][i]             = t;
+			unk18[0][i]             = u;
+			unk18[1][i]             = u;
 		}
 		break;
 
@@ -315,9 +316,10 @@ void TTrembleModelEffect::clash(f32 magnitude)
 		for (u32 i = 0; i < unk0->getModelData()->getVertexData().getVtxNum();
 		     ++i) {
 			JGeometry::TVec3<f32> t = unk28[i] + unk34[i];
+			JGeometry::TVec3<f32> u = t;
 			unk28[i]                = t;
-			unk2C[0][i]             = t;
-			unk2C[1][i]             = t;
+			unk2C[0][i]             = u;
+			unk2C[1][i]             = u;
 		}
 		break;
 	}

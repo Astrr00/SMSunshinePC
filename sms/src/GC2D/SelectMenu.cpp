@@ -135,14 +135,17 @@ void TSelectGrad::perform(u32 flags, JDrama::TGraphics* gfx)
 
 		if (nextCycle) {
 			// TODO: This doesn't fully match.
+			s32* cycle0 = &mRgbAnimCycle[0];
 			mRgbAnimCycle[0]++;
-			mRgbAnimCycle[0] = (mRgbAnimCycle[0] >= 6) ? 0 : mRgbAnimCycle[0];
+			*cycle0 = (mRgbAnimCycle[0] >= 6) ? 0 : mRgbAnimCycle[0];
 
+			s32* cycle1 = &mRgbAnimCycle[1];
 			mRgbAnimCycle[1]++;
-			mRgbAnimCycle[1] = (mRgbAnimCycle[1] >= 6) ? 0 : mRgbAnimCycle[1];
+			*cycle1 = (mRgbAnimCycle[1] >= 6) ? 0 : mRgbAnimCycle[1];
 
+			s32* cycle2 = &mRgbAnimCycle[2];
 			mRgbAnimCycle[2]++;
-			mRgbAnimCycle[2] = (mRgbAnimCycle[2] >= 6) ? 0 : mRgbAnimCycle[2];
+			*cycle2 = (mRgbAnimCycle[2] >= 6) ? 0 : mRgbAnimCycle[2];
 		}
 	}
 

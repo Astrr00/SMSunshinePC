@@ -441,10 +441,9 @@ void TMapObjSoundGroup::perform(u32 cue, JDrama::TGraphics* graphics)
 
 		char trash[0x18]; // unused stack slot (present in the retail frame)
 		int count = 0;
-		for (int i = 1; i < mGraph->getNodeNum(); ++i) {
+		for (int i = 1; i < mGraph->getNodeNum(); ++i, ++count) {
 			JGeometry::TVec3<f32> local_c30;
 			mGraph->getGraphNode(i).getPoint(&local_c30);
-
 			camPos.set(gpCamera->unk124);
 
 			JGeometry::TVec3<f32> tmp
@@ -458,8 +457,6 @@ void TMapObjSoundGroup::perform(u32 cue, JDrama::TGraphics* graphics)
 				++i;
 				mGraph->getGraphNode(i).getPoint(&local_c24);
 			}
-
-			++count;
 		}
 		mSceneSE->frameLoop(mSoundID, local_c18, count);
 	}

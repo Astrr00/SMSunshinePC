@@ -722,9 +722,9 @@ int TApplication::gameLoop()
 			GXSetScissor(0, 0, video->mNextRenderMode.fbWidth,
 			             video->mNextRenderMode.efbHeight);
 			Mtx afStack_1ac;
-			C_MTXOrtho(afStack_1ac, 0.0f, (f32)video->mNextRenderMode.fbWidth,
-			           0.0f, (f32)video->mNextRenderMode.efbHeight, -1.0f,
-			           1.0f);
+			C_MTXOrtho(afStack_1ac, 0.0f,
+			           (f32)video->mNextRenderMode.efbHeight, 0.0f,
+			           (f32)video->mNextRenderMode.fbWidth, -1.0f, 1.0f);
 			GXSetProjection(afStack_1ac, GX_ORTHOGRAPHIC);
 			mFader->update();
 			mFader->draw(JDrama::TRect(0, 0, video->mNextRenderMode.fbWidth,
