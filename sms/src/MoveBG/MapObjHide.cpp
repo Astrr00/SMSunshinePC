@@ -475,6 +475,7 @@ void TWaterHitPictureHideObj::loadAfter()
 
 void TWaterHitPictureHideObj::load(JSUMemoryInputStream& stream)
 {
+	char trash[0x20];
 	THideObjBase::load(stream);
 
 	u32 r, g, b;
@@ -524,7 +525,6 @@ TWaterHitPictureHideObj::TWaterHitPictureHideObj(const char* name)
 
 void THideObjPictureTwin::afterFinishedAnim()
 {
-	char trash[0x10];
 	removeMapCollision();
 	onHitFlag(HIT_FLAG_NO_COLLISION);
 
@@ -544,6 +544,7 @@ void THideObjPictureTwin::afterFinishedAnim()
 
 		obj->mPosition.set(unk174->mPosition);
 		Mtx mtx;
+		char trash[0x14];
 		MsMtxSetRotRPH(mtx, unk174->mRotation.x, unk174->mRotation.y,
 		               unk174->mRotation.z);
 		obj->mVelocity.set(mtx[0][2] * mAppearSpeed,
@@ -559,8 +560,8 @@ void THideObjPictureTwin::afterFinishedAnim()
 		SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_TIMECOIN_APPEAR, 0,
 		                                   nullptr, 0);
 
-		SMSGetMarDirector()->fireStartDemoCamera(unk178, &mPosition, -1, 0.0f,
-		                                         true, nullptr, 0, nullptr, 0);
+		SMSGetMarDirector()->fireStartDemoCamera(
+		    unk178, &obj->mPosition, -1, 0.0f, true, nullptr, 0, nullptr, 0);
 	}
 	mState = 3;
 }
@@ -674,6 +675,7 @@ void TWoodBox::fabricatedGroundKillCheck(f32 dX, f32 dY)
 }
 void TWoodBox::kill()
 {
+	char trash[0x94];
 	startAnim(2);
 	removeMapCollision();
 	onHitFlag(HIT_FLAG_NO_COLLISION);

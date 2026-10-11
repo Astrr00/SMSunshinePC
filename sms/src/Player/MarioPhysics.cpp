@@ -503,7 +503,7 @@ int TMario::jumpProcess(int param_1)
 	}
 
 	Vec next;
-	char trash[12];
+	char trash[16];
 	next.x  = mPosition.x + 0.25f * mVel.x;
 	next.y  = mPosition.y + 0.25f * mVel.y;
 	next.z  = mPosition.z + 0.25f * mVel.z;

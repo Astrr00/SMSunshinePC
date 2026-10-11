@@ -24,6 +24,7 @@ static const char cDirtyTexName[]  = "H_ma_rak_dummy";
 BOOL TMario::considerRotateStart()
 {
 	int direction;
+	char trash[0x10];
 	if (checkStickRotate(&direction) == 1 && mWaterGun != nullptr
 	    && mWaterGun->isEmitting()) {
 		if (direction > 0)
@@ -445,6 +446,7 @@ BOOL TMario::doSliding(f32 stopThreshold)
 
 void TMario::slopeProcess()
 {
+	char trash[4];
 	f32 mag = std::sqrtf(
 	    mGroundPlane->getNormal().x * mGroundPlane->getNormal().x
 	    + mGroundPlane->getNormal().z * mGroundPlane->getNormal().z);
@@ -452,6 +454,7 @@ void TMario::slopeProcess()
 	s16 angDiff = mSlopeAngle - mFaceAngle.y;
 	f32 slopeUp;
 	f32 slopeDown;
+	char trash2[0x14];
 	getSlopeNormalAccele(&slopeUp, &slopeDown);
 	if (angDiff > -0x4000 && angDiff < 0x4000) {
 		mForwardVel += slopeUp * mag;
@@ -812,6 +815,7 @@ BOOL TMario::rotating()
 
 BOOL TMario::turnning()
 {
+	char trash[4];
 	if (isThrowStart())
 		return 1;
 
@@ -821,6 +825,7 @@ BOOL TMario::turnning()
 	if (mInput & 0x2)
 		return changePlayerJumping(MARIO_STATUS_U_TURN_JUMP, 0);
 
+	char trash2[4];
 	if (considerRotateStart())
 		return true;
 
@@ -871,6 +876,7 @@ BOOL TMario::turnning()
 
 BOOL TMario::turnEnd()
 {
+	char trash[4];
 	if (isThrowStart())
 		return 1;
 
@@ -880,6 +886,7 @@ BOOL TMario::turnEnd()
 	if (mInput & 0x2)
 		return changePlayerJumping(MARIO_STATUS_U_TURN_JUMP, 0);
 
+	char trash2[4];
 	if (considerRotateStart())
 		return true;
 
@@ -1204,6 +1211,7 @@ BOOL TMario::slipBack()
 
 BOOL TMario::catching()
 {
+	char trash[8];
 	// TODO: removeme
 	(void)0;
 

@@ -21,6 +21,7 @@ void TMarDirector::initECTGft(
     JDrama::TViewObjPtrListT<JDrama::TViewObj>* perf_event_group,
     JDrama::TViewObjPtrListT<JDrama::TViewObj>* scene)
 {
+	char trash[0x38];
 	if (gpPollution->getJointModelNum() == 0) {
 		TBathWaterManager* bathtubWater = static_cast<TBathWaterManager*>(
 		    JDrama::TNameRefGen::search("バスタブの水"));
@@ -94,6 +95,7 @@ JDrama::TViewObj* TMarDirector::initECTMir(
 	    = static_cast<TMirrorCamera*>(JDrama::TNameRefGen::search("鏡カメラ"));
 
 	GXTexObj& obj = mirrorCam->unk60;
+	char trash[0x18];
 	mirrorTex->setTexAttb(obj);
 	mirrorTex->setSrcRect(
 	    JDrama::TRect(0, 0, GXGetTexObjWidth(&obj), GXGetTexObjHeight(&obj)));
@@ -232,6 +234,7 @@ extern JPAEmitterManager* gpEmitterManager4D2;
 
 void TMarDirector::setupPerformList_console()
 {
+	char trash[0x10];
 	JDrama::TViewObjPtrListT<JDrama::TViewObj>* list
 	    = static_cast<JDrama::TViewObjPtrListT<JDrama::TViewObj>*>(
 	        JDrama::TNameRefGen::search("Group 2D"));

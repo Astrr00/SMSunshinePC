@@ -82,7 +82,9 @@ void TBGCheckData::updateTrans(const JGeometry::TVec3<f32>& translate_by)
 
 void TMapCollisionBase::updateTrans(const JGeometry::TVec3<f32>& param_1)
 {
-	JGeometry::TVec3<f32> delta = param_1 - mPrevTranslation;
+	char trash[0x18];
+	JGeometry::TVec3<f32> delta;
+	delta = param_1 - mPrevTranslation;
 
 	TBGCheckData* checkDataIt = mCheckDatas;
 	for (int i = 0; i < mCheckDataNum; ++checkDataIt, ++i) {

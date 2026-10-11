@@ -482,7 +482,7 @@ public:
 
 static void initScreen2D(s16, s16) { }
 
-static void drawCapBody(const JGeometry::TVec3<f32>& pos, f32 radius)
+static void drawCap(const JGeometry::TVec3<f32>& pos, f32 radius)
 {
 	static f32 delta = 2.0f * 3.1415927f / 30.0f;
 	f32 angle;
@@ -498,12 +498,12 @@ static void drawCapBody(const JGeometry::TVec3<f32>& pos, f32 radius)
 	}
 	GXEnd();
 }
-#pragma dont_inline on
-static void drawCap(const JGeometry::TVec3<f32>& pos, f32 radius)
+static void drawCapOut(const JGeometry::TVec3<f32>& pos, f32 radius)
 {
-	drawCapBody(pos, radius);
-}
+#pragma dont_inline on
+	drawCap(pos, radius);
 #pragma dont_inline off
+}
 
 namespace {
 void clearEFB_alpha(s16 x, s16 y, s16 wd, s16 ht, u8 alpha)
@@ -894,7 +894,7 @@ public:
 		}
 
 		if (unk2C->showsCap.get() && !data.unk65) {
-			drawCapBody(data.getThing(),
+			drawCap(data.getThing(),
 			        JGeometry::TUtil<f32>::sqrt(data.unk3C * data.unk3C
 			                                    - data.unk44 * data.unk44));
 		}
@@ -1179,9 +1179,9 @@ public:
 			JGeometry::TVec3<f32> capCenter = data.getThing();
 			f32 rad = JGeometry::TUtil<f32>::sqrt(data.unk3C * data.unk3C
 			                                      - data.unk44 * data.unk44);
-			drawCapBody(capCenter, rad);
+			drawCap(capCenter, rad);
 			capCenter.y += 0.5f * negR;
-			drawCapBody(capCenter, unk800B0 * unk80134->meshWidth.get() + rad);
+			drawCap(capCenter, unk800B0 * unk80134->meshWidth.get() + rad);
 		}
 
 		GXSetCopyFilter(GX_FALSE, 0, GX_FALSE, 0);
@@ -1268,9 +1268,9 @@ public:
 		}
 
 		if (unk80134->showsCap.get() && !data.unk65) {
-			drawCap(data.getThing(),
-			        JGeometry::TUtil<f32>::sqrt(data.unk3C * data.unk3C
-			                                    - data.unk44 * data.unk44));
+			drawCapOut(data.getThing(),
+			           JGeometry::TUtil<f32>::sqrt(data.unk3C * data.unk3C
+			                                       - data.unk44 * data.unk44));
 		}
 
 		GXInitTexObj(&unk800D4, unk800A8, r23, r24, (GXTexFmt)1, GX_CLAMP,

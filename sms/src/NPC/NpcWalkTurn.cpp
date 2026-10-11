@@ -11,7 +11,7 @@ bool TBaseNPC::isCanWalk() const
 	JGeometry::TVec3<f32> pos = unkF4.getPoint();
 	JGeometry::TVec3<f32> diff;
 	diff.set(pos.x - mPosition.x, 0.0f, pos.z - mPosition.z);
-	if (diff.squared() < CLBSquared(2.5625f))
+	if (diff.squared() < CLBSquared(10.0f))
 		result = false;
 	return result;
 }

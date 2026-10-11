@@ -721,7 +721,9 @@ void TLeanMirror::controlShake()
 		f32 mag = MsSqrtf(mShake.x * mShake.x + mShake.z * mShake.z)
 		          * mShakeSoundRate;
 
+#pragma dont_inline on
 		TMtx34f rot;
+#pragma dont_inline off
 		rot.identity();
 		makeMtxRotByAxis(axis, mag, rot);
 		concatOnlyRotFromLeft(rot, nodeMtx, nodeMtx);

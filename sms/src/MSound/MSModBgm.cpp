@@ -99,6 +99,7 @@ f32 MSBgmXFade::scExp[18] = {
 
 void MSBgmXFade::xFadeBgm(f32 param_1)
 {
+	char trash[8];
 	// TODO: some stupid trick with casting the second param?
 	u8 tmp = getTiming(param_1, nullptr);
 
@@ -112,6 +113,7 @@ void MSBgmXFade::xFadeBgm(f32 param_1)
 
 void MSBgmXFade::xFadeBgmForce(f32 param_1)
 {
+	char trash[8];
 	u8 tmp = getTimingForce(param_1);
 	if (tmp != 0xff) {
 		MSBgm::setTrackVolume(0, scExp[17 - tmp], 0, 0);

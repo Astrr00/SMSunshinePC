@@ -1551,9 +1551,18 @@ void TMario::checkController(JDrama::TGraphics*)
 			offFlag(MARIO_FLAG_FLUDD_EMITTING);
 		}
 
-		// asm 0x801314B8: retail stores mIntendedMag/32 to getCurrentNozzle()+0x714.
-		// Turbo nozzle is TWaterGun+0x18D8, so this is TWaterGun+0x1FEC: past the
-		// nozzle and TWaterGunParams. Stray out-of-object write; not replicated.
+		// Turbo nozzle (mNozzleTurbo, TWaterGun+0x18D8, 0x390 bytes) +0x714 lands
+		// past TWaterGun's 0x1DD0-byte allocation (MarioInit.s): retail stray write.
+		// Matched on GC only; PC skips it (out-of-object store).
+#ifndef TARGET_PC
+		if ((s32)mWaterGun->mCurrentNozzle == TWaterGun::Turbo
+		    && (mStatus == MARIO_STATUS_WAIT || mStatus == MARIO_STATUS_RUN)) {
+			// asm 0x801314B8: stfs f31, 0x714(getCurrentNozzle())
+			f32 v = mIntendedMag / 32.0f;
+			TNozzleBase* nozzle = ((const TWaterGun*)mWaterGun)->getCurrentNozzle();
+			*(f32*)((char*)nozzle + 0x714) = v;
+		}
+#endif
 	}
 
 	// mInput bit synthesis

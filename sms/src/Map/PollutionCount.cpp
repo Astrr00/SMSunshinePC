@@ -345,7 +345,7 @@ void TPollutionCounterLayer::drawJointObjStamp(int layer_index) const
 		GXSetChanCtrl(GX_COLOR1A1, 0, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE,
 		              GX_AF_NONE);
 
-		if (mJointObjStampTaskQueue[i].unk0 == 0) {
+		if (info.unk0 == 0) {
 			GXSetChanMatColor(GX_COLOR0A0, (GXColor) { 0, 0, 0, 0xff });
 		} else {
 			GXSetChanMatColor(GX_COLOR0A0,
@@ -364,14 +364,14 @@ void TPollutionCounterLayer::drawJointObjStamp(int layer_index) const
 		                GX_TEVPREV);
 
 		TPosition3f local_6c;
+		char trash[0x10];
 		makeWorldToPollutionMtx(layer->mPos.mInverseTexelScale, layer->mMinX,
 		                        layer->mMinZ, &local_6c);
 		GXLoadPosMtxImm(local_6c, GX_PNMTX0);
 
 		j3dSys.setVtxPos(layer->getModelData()->getVtxPosArray());
-		for (int j = 0; j < mJointObjStampTaskQueue[i].mJointObj->getShapeNum();
-		     ++j)
-			drawShape(mJointObjStampTaskQueue[i].mJointObj->getShape(j));
+		for (int j = 0; j < info.mJointObj->getShapeNum(); ++j)
+			drawShape(info.mJointObj->getShape(j));
 	}
 }
 
@@ -500,6 +500,7 @@ void TPollutionCounterLayer::drawTexStamp(int target_layer) const
 
 void TPollutionCounterLayer::drawRevivalTexStamp(int layer_index) const
 {
+	char trash[4];
 	GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_S16, 0);
 	GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U16, 0);
 	GXClearVtxDesc();
@@ -547,6 +548,7 @@ void TPollutionCounterLayer::drawRevivalTexStamp(int layer_index) const
 			continue;
 
 		JUTTexture texture(stamp.mStampShapeTex);
+		char trash[4];
 		texture.load(GX_TEXMAP0);
 		GXBegin(GX_QUADS, GX_VTXFMT0, 4);
 		GXPosition2s16(stamp.mLeft, stamp.mTop);
@@ -603,6 +605,7 @@ void TPollutionCounterLayer::drawModelStamp(int) { }
 
 void TPollutionCounterLayer::countTexDegree(int layer_index)
 {
+	char trash[0x58];
 	if (!mIsLayerEnabled[layer_index])
 		return;
 
@@ -669,6 +672,7 @@ void TPollutionCounterLayer::calcViewMtx()
 		TPollutionLayer* layer = gpPollution->getLayer(i);
 
 		TPosition3f local_a4;
+		char trash[0x18];
 		makeWorldToPollutionMtx(layer->mPos.mInverseTexelScale, layer->mMinX,
 		                        layer->mMinZ, &local_a4);
 

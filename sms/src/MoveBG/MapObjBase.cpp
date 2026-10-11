@@ -221,10 +221,7 @@ void TMapObjBase::startAnim(u16 param_1)
 	}
 
 	const TMapObjAnimDataInfo* anim = mMapObjData->mAnim;
-	if (!anim)
-		return;
-
-	if (anim->unk0 <= param_1)
+	if (!anim || anim->unk0 <= param_1)
 		return;
 
 	const TMapObjAnimData* data = &anim->unk4[param_1];
@@ -232,7 +229,7 @@ void TMapObjBase::startAnim(u16 param_1)
 		if (unkFE != 0xffff && anim && anim->unk0 != 0) {
 			const TMapObjAnimData* d2 = &anim->unk4[unkFE];
 			if (d2->unk4 != nullptr) {
-				u8 type = d2->unk8;
+				int type = d2->unk8;
 				mMActor->getFrameCtrl(type)->setRate(0.0f);
 				mMActor->getFrameCtrl(type)->setFrame(0.0f);
 				mMActor->getUnk28(type)->unk0 = 0xffffffff;
@@ -319,9 +316,7 @@ void TMapObjBase::makeObjAppeared()
 {
 	char trash[0x28];
 	offLiveFlag(LIVE_FLAG_DEAD | LIVE_FLAG_UNK8);
-	mVelocity.x = 0.0f;
-	mVelocity.y = 0.0f;
-	mVelocity.z = 0.0f;
+	mVelocity.x = mVelocity.y = mVelocity.z = 0.0f;
 	onLiveFlag(LIVE_FLAG_UNK10);
 	mStateTimer = 0;
 	offHitFlag(HIT_FLAG_NO_COLLISION);
@@ -453,9 +448,8 @@ void TMapObjBase::control()
 
 void TMapObjBase::setGroundCollision()
 {
-	if (!mMapCollisionManager)
-		return;
-	if (mMapCollisionManager->unk8->mKind != TMapCollisionBase::KIND_MOVE)
+	if (!mMapCollisionManager
+	    || mMapCollisionManager->unk8->mKind != TMapCollisionBase::KIND_MOVE)
 		return;
 
 	if (checkMapObjFlag(MAP_OBJ_FLAG_UNK2)) {
@@ -494,10 +488,7 @@ void TMapObjBase::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	char trash[0x30];
 	if (gpMarDirector->isTalkModeNow() && !gpMarDirector->isDemoModeNow()) {
-		if (checkLiveFlag(LIVE_FLAG_DEAD))
-			return;
-
-		if (isActorType(0x4000003B))
+		if (checkLiveFlag(LIVE_FLAG_DEAD) || isActorType(0x4000003B))
 			return;
 
 		if (cue & CUE_MOVE) {

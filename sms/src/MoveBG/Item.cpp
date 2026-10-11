@@ -93,6 +93,7 @@ void TItem::calcRootMatrix()
 
 void TItem::calc()
 {
+	char trash[0x20];
 	if (!checkMapObjFlag(MAP_OBJ_FLAG_UNK4000000) && !isState(STATE_HOLDING)) {
 		MtxPtr src = gpItemManager->unk40;
 
@@ -292,6 +293,7 @@ void TCoin::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	} else {
 		if ((cue & CUE_CALC_VIEW) && getMActor() == nullptr) {
+			char trash[0x14];
 			gpQuestionManager->request(mPosition, 60.0f);
 		}
 
@@ -992,6 +994,7 @@ void TEggYoshi::control()
 		break;
 	case 0xF: {
 		JGeometry::TVec3<f32> v = mVelocity;
+		char trash[0xc];
 		if (v.y == 0.0f)
 			mState = 0x10;
 		break;
@@ -1072,6 +1075,7 @@ BOOL TEggYoshi::receiveMessage(THitActor* sender, u32 message)
 
 void TEggYoshi::load(JSUMemoryInputStream& stream)
 {
+	char trash[0x18];
 	TMapObjBase::load(stream);
 
 	if (strcmp(unkF4, "eggYoshiEvent") == 0) {
@@ -1294,6 +1298,7 @@ void TNozzleBox::load(JSUMemoryInputStream& stream)
 {
 	TMapObjBase::load(stream);
 	char strBuf[0x20];
+	char trash[0x20];
 	mContainedNozzleName = stream.readString();
 	stream.readString(strBuf, 0x20);
 	if (strcmp(strBuf, "valid") == 0)

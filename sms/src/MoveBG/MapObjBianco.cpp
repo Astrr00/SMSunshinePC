@@ -324,6 +324,7 @@ TLampSeesawMain::TLampSeesawMain(const char* name)
 
 void TLampSeesawMain::loadAfter()
 {
+	char trash2[4];
 	size_t len = strlen("ランプシーソーＡ");
 	char buffer[4];
 	buffer[0] = mName[len];
@@ -332,6 +333,7 @@ void TLampSeesawMain::loadAfter()
 	buffer[3] = mName[len + 3];
 
 	char buffer2[0x40];
+	char trash[4];
 	snprintf(buffer2, 0x40, "ランプシーソーＢ００");
 	buffer2[len]     = buffer[0];
 	buffer2[len + 1] = buffer[1];
@@ -344,6 +346,7 @@ void TLampSeesawMain::loadAfter()
 
 void TLampSeesawMain::control()
 {
+	char trash[0x20];
 	TMapObjBase::control();
 
 	switch (mState) {
@@ -353,13 +356,13 @@ void TLampSeesawMain::control()
 			if (fabsf(unk144) < unk150)
 				unk144 = 0.0f;
 			else
-				unk144 = unk144 * -unk14C;
+				unk144 *= -unk14C;
 		} else {
 			mPosition.y += unk144;
-			unk138->mPosition.y = unk138->mPosition.y - unk144;
+			unk138->mPosition.y -= unk144;
 		}
 
-		unk144 = unk144 * unk148;
+		unk144 *= unk148;
 		if (fabsf(unk144) < unk150)
 			mState = 3;
 		break;
@@ -375,17 +378,18 @@ void TLampSeesawMain::control()
 			if (fabsf(unk144) < unk150)
 				unk144 = 0.0f;
 			else
-				unk144 = unk144 * -unk14C;
+				unk144 *= -unk14C;
 		} else {
 			mPosition.y += unk144;
-			unk138->mPosition.y = unk138->mPosition.y - unk144;
+			unk138->mPosition.y -= unk144;
 		}
 
-		unk144 = unk144 * unk148;
-		if (fabsf(unk144) <= unk150
-		    && fabsf(mInitialPosition.y - mPosition.y) < unk150) {
-			unk144 = 0.0f;
-			mState = 1;
+		unk144 *= unk148;
+		if (fabsf(unk144) <= unk150) {
+			if (fabsf(mInitialPosition.y - mPosition.y) < unk150) {
+				unk144 = 0.0f;
+				mState = 1;
+			}
 		}
 		break;
 

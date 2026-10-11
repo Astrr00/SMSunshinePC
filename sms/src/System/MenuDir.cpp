@@ -184,9 +184,9 @@ int TMenuDirector::direct()
 		void* res;
 		OSJoinThread(&gSetupThread, &res);
 		gpApplication.mFader->startFadeinT(0.25f);
-		if (TFlagManager::getInstance()->getBool(0x30007)) {
+		if (!TFlagManager::getInstance()->getBool(0x30007)) {
 			TFlagManager::getInstance()->setBool(true, 0x30007);
-			gpMSound->loadWave(MS_WAVE_UNK128);
+			gpMSound->loadWave(MS_WAVE_DEFAULT);
 		}
 		unk50 = true;
 	}
@@ -332,8 +332,7 @@ int TMenuDirector::direct()
 			setFixedStageValue();
 			unk18 = 2;
 			gpApplication.mFader->startFadeoutT(0.25f);
-			TGameSequence nextArea;
-			nextArea.set(unk48, unk4C, 0);
+			TGameSequence nextArea(unk48, unk4C, 0);
 			gpApplication.setNextArea(nextArea);
 		} else if (unk44->checkFlag(0x2)) {
 			unk18 = 0;
@@ -345,7 +344,7 @@ int TMenuDirector::direct()
 
 	case 2:
 		if (gpApplication.mFader->isFullyFadedOut()
-		    && gpMSound->checkWaveOnAram(MS_WAVE_UNK128)) {
+		    && gpMSound->checkWaveOnAram(MS_WAVE_DEFAULT)) {
 			if (unk40->unk2C == 0x11 || unk40->unk2C == 0x12)
 				uVar13 = TApplication::APP_STATE_MOVIE;
 			else
