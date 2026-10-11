@@ -20,9 +20,10 @@ Runtime bugs keep coming from NonMatching functions (wrong masks, swapped branch
 
 | Item | State | Next |
 | --- | --- | --- |
-| Risky functions (triage score > 0) | OPEN (1285 functions, 1.18 MB; 921 more score 0 but still unverified: register, stack or local-static reloc diffs) | subsystem waves: System/Camera/MarioUtil, Player/Map/NPC, GC2D/MoveBG, then Enemy/Animal, JSystem/MSound |
-| Empty decomp bodies with `TARGET_PC` stubs | OPEN (40 found) | reconstruct from asm or inlined call sites, drop the stub |
-| Fully matching units flipped to `Matching` in `configure.py` | OPEN | lead, after SHA-1 gate |
+| Game-code functions open (not 100 % and no whole-function review) | PART (1381 open in 217 units after the first full pass; 646 reviews recorded; 10889/12881 functions bytegleich) | second pass via unit queue (`sunshine-pc/tools/decomp_queue.py`, protocol: worker loop with `--build`/`--diff`/`--check`) |
+| Empty decomp bodies with `TARGET_PC` stubs | PART (40 found and resolved: removed when no retail symbol, otherwise reconstructed) | re-scan each wave |
+| Fully matching units flipped to `Matching` in `configure.py` | PART (439 → 445 units) | lead, per-unit SHA-1 check each wave |
+| Ledger quality | PART (audit 1: 10 % wrong → `--check` gate; audit 2 running) | periodic sampling audits |
 
 Exit criterion: every function the port builds is an exact match (preferred; user priority) or, where a known codegen limit blocks matching, has a whole-function asm-equivalence review in `sunshine-pc/docs/decomp-verified.tsv` (triage score only ranks the work); no `TARGET_PC` stub over an empty body.
 Scope limit (`sms/AGENTS.md`): agents do no autonomous decomp work on MSL, MetroTRK, THPPlayer, the dolphin SDK or JSystem; only game code. Port fixes in those libraries stay under `TARGET_PC`.
