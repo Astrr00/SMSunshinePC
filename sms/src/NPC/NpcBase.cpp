@@ -33,6 +33,7 @@ TBaseNPC* gpCurrentNpc                   = nullptr;
 #pragma dont_inline on
 f32 TBaseNPC::getAnmOffDist_()
 {
+	char trash[0x10];
 	bool bVar3 = false;
 	f32 fVar1  = gpCamera->mFar;
 	int anmKind = unkD0->getCurrentAnmKind();
@@ -288,28 +289,6 @@ bool TBaseNPC::isSmallNpc() const
 	return result;
 }
 
-#pragma dont_inline on
-bool TBaseNPC::isPollutionNpc() const
-{
-	bool result = false;
-
-	switch (mActorType) {
-	case 0x4000001:
-	case 0x4000002:
-	case 0x4000004:
-	case 0x400000A:
-	case 0x400000B:
-	case 0x400000E:
-	case 0x4000013:
-	case 0x4000016:
-		result = true;
-		break;
-	}
-
-	return result;
-}
-#pragma dont_inline off
-
 bool TBaseNPC::isBeTrampledNpc() const
 {
 	bool result = false;
@@ -518,6 +497,7 @@ BOOL TBaseNPC::receiveMessage(THitActor* param_1, u32 param_2)
 
 void TBaseNPC::moveObject()
 {
+	char trash[0x30];
 	if (checkLiveFlag(LIVE_FLAG_DEAD))
 		return;
 
@@ -658,6 +638,7 @@ void TBaseNPC::movementOnlyTalk_(const JDrama::TGraphics* param_1)
 
 void TBaseNPC::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x98];
 	if (mActorType == 0x400001C) {
 		if (!(cue & CUE_MOVE))
 			return;
@@ -839,6 +820,26 @@ void TBaseNPC::setDummyConnectActor(const JDrama::TActor* param_1)
 void TBaseNPC::setBalloonMessage(u32 param_1, s32 param_2)
 {
 	mBalloonCtrl->setNextMessage(param_1, param_2);
+}
+
+bool TBaseNPC::isPollutionNpc() const
+{
+	bool result = false;
+
+	switch (mActorType) {
+	case 0x4000001:
+	case 0x4000002:
+	case 0x4000004:
+	case 0x400000A:
+	case 0x400000B:
+	case 0x400000E:
+	case 0x4000013:
+	case 0x4000016:
+		result = true;
+		break;
+	}
+
+	return result;
 }
 
 const GXColor* TBaseNPC::getPtrInitPollutionColor() const

@@ -140,6 +140,7 @@ void TPollutionLayer::fire()
 
 void TPollutionLayer::action()
 {
+	char trash[0x28];
 	if (getPlaneType() != 0)
 		return;
 

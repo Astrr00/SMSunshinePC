@@ -72,6 +72,7 @@ static bool pointIsInGrid(f32 x, f32 z, f32 minX, f32 minZ, f32 maxX, f32 maxZ)
 bool TMapCollisionData::polygonIsInGrid(f32 minX, f32 minZ, f32 maxX, f32 maxZ,
                                         TBGCheckData* data)
 {
+	char trash[0x260];
 	if (data->mNormal.y < 0.0f) {
 		return true;
 	}

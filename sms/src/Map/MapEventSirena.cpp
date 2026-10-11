@@ -23,6 +23,9 @@ static void dummy(Vec* v)
 
 bool TMapEventSirenaSink::watch()
 {
+	// Unused stack space
+	volatile u32 padding[2];
+
 	if (unk64) {
 		gpPollution->getLayer(0)->startDecay();
 		mRaisingBuildingIdx = 0;

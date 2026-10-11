@@ -227,12 +227,19 @@ static BOOL PopoPossessedCallback(J3DNode* node, int param_2)
 			MTXConcat(gpCurPopo->mPossessedMtx, rotMtx,
 			          gpCurPopo->mPossessedMtx);
 
-			JGeometry::TVec3<f32> axisX(mtx[0][0], mtx[1][0], mtx[2][0]);
-			gpCurPopo->mNozzleScale.y = axisX.length();
-			JGeometry::TVec3<f32> axisY(mtx[0][1], mtx[1][1], mtx[2][1]);
-			gpCurPopo->mNozzleScale.z = axisY.length();
-			JGeometry::TVec3<f32> axisZ(mtx[0][2], mtx[1][2], mtx[2][2]);
-			gpCurPopo->mNozzleScale.x = axisZ.length();
+			JGeometry::TVec3<f32> axis[3];
+			axis[0].x = mtx[0][0];
+			axis[0].y = mtx[1][0];
+			axis[0].z = mtx[2][0];
+			gpCurPopo->mNozzleScale.y = axis[0].length();
+			axis[1].x = mtx[0][1];
+			axis[1].y = mtx[1][1];
+			axis[1].z = mtx[2][1];
+			gpCurPopo->mNozzleScale.z = axis[1].length();
+			axis[2].x = mtx[0][2];
+			axis[2].y = mtx[1][2];
+			axis[2].z = mtx[2][2];
+			gpCurPopo->mNozzleScale.x = axis[2].length();
 
 			// TODO: particle 0x13C has no named enumerator yet
 			JPABaseEmitter* emitter
@@ -604,6 +611,8 @@ void TPopo::attackToMario()
 
 void TPopo::calcRootMatrix()
 {
+	// Unused stack space
+	volatile u32 padding[6];
 	u8 centerJnt = mCenterJntIndex;
 	gpCurPopo    = this;
 	MtxPtr jointMtx = getModel()->getAnmMtx(centerJnt);
@@ -622,15 +631,19 @@ void TPopo::calcRootMatrix()
 		} else {
 			MTXCopy(SMS_GetMarioWaterGun()->getEmitMtx(0), mtx);
 
-			JGeometry::TVec3<f32> axisX(mtx.ref(0, 0), mtx.ref(1, 0),
-			                            mtx.ref(2, 0));
-			f32 lenX = axisX.length();
-			JGeometry::TVec3<f32> axisY(mtx.ref(0, 1), mtx.ref(1, 1),
-			                            mtx.ref(2, 1));
-			f32 lenY = axisY.length();
-			JGeometry::TVec3<f32> axisZ(mtx.ref(0, 2), mtx.ref(1, 2),
-			                            mtx.ref(2, 2));
-			f32 lenZ = axisZ.length();
+			JGeometry::TVec3<f32> axis[3];
+			axis[0].x = mtx.ref(0, 0);
+			axis[0].y = mtx.ref(1, 0);
+			axis[0].z = mtx.ref(2, 0);
+			f32 lenX = axis[0].length();
+			axis[1].x = mtx.ref(0, 1);
+			axis[1].y = mtx.ref(1, 1);
+			axis[1].z = mtx.ref(2, 1);
+			f32 lenY = axis[1].length();
+			axis[2].x = mtx.ref(0, 2);
+			axis[2].y = mtx.ref(1, 2);
+			axis[2].z = mtx.ref(2, 2);
+			f32 lenZ = axis[2].length();
 			if (lenZ != 0.0f) {
 				mtx.ref(0, 0) /= lenX;
 				mtx.ref(1, 0) /= lenX;

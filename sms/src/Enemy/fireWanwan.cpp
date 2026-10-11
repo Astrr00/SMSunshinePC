@@ -1252,6 +1252,7 @@ void TFireWanwan::updateCameraShake()
 	}
 }
 
+#pragma dont_inline on
 void TFireWanwan::updateRumble()
 {
 	f32 fVar1 = getSaveParam2()->mContShakeRange.get();
@@ -1274,6 +1275,7 @@ void TFireWanwan::updateRumble()
 		mHungTailRumbleTimer = 0;
 	}
 }
+#pragma dont_inline off
 
 void TFireWanwan::updatePollute()
 {
@@ -1607,6 +1609,7 @@ void TFireWanwan::attackToMario()
 
 void TFireWanwan::bind()
 {
+	char trash[0x10];
 	mVelocity.y -= getGravityY();
 
 	if (mVelocity.y < mVelocityMinY)
@@ -1623,8 +1626,8 @@ void TFireWanwan::bind()
 
 	mVelocity *= getSaveParam2()->mAirFric.get();
 
-	JGeometry::TVec3<f32> vel     = mVelocity;
 	JGeometry::TVec3<f32> velStep = mLinearVelocity;
+	JGeometry::TVec3<f32> vel     = mVelocity;
 	velStep += vel;
 
 	int stepCount = int(velStep.length() / 25.0f) + 1;
@@ -1638,7 +1641,7 @@ void TFireWanwan::bind()
 		JGeometry::TVec3<f32> stepNormal;
 		iVar12 += bindBody(&boundStep, &stepNormal, velStep);
 
-		bVar2 &= checkLiveFlag2(LIVE_FLAG_AIRBORNE);
+		bVar2 &= isAirborne();
 
 		mPosition += boundStep;
 		totalNormal += stepNormal;

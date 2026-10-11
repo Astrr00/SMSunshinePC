@@ -133,6 +133,7 @@ TMapObjGrassGroup::TMapObjGrassGroup()
 
 void TMapObjGrassManager::initDrawNear() const
 {
+	char trash[0x4];
 	Mtx viewItm;
 	MTXInverse(j3dSys.getViewMtx(), viewItm);
 	JGeometry::TVec3<f32> vec(viewItm[0][0], viewItm[1][0], viewItm[2][0]);
@@ -175,6 +176,7 @@ void TMapObjGrassManager::initDrawNear() const
 	GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
 	GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 	GXSetCullMode(GX_CULL_NONE);
+	char trash2[0x14];
 }
 
 void TMapObjGrassManager::initDrawFar() const

@@ -57,6 +57,7 @@ void TMarDirector::preEntry(TPerformList* list)
 	list->push_back("水飛沫マネージャ", CUE_CALC_VIEW);
 	list->push_back("クエッションマネージャ", CUE_CALC_VIEW);
 
+	char trash[0x30];
 	JDrama::TViewObj* indirectSheen = static_cast<JDrama::TViewObj*>(
 	    JDrama::TNameRefGen::search("インダイレクトシーン"));
 	if (indirectSheen) {

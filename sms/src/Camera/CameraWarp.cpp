@@ -31,6 +31,7 @@ void CPolarSubCamera::warpPosAndAt(f32 ratio, s16 yAngle)
 	if (mMode < CAMERA_MODE_REPRODUCE_DEMO) {
 		mCurrentParams->copySaveParam(*mSaveKindParam[mMode]);
 
+		char trash[0x8];
 		JGeometry::TVec3<f32> usualLookat;
 		usualLookat.set(getUsualLookat());
 

@@ -1086,6 +1086,7 @@ DEFINE_NERVE(TNerveKumokunWalk, TLiveActor)
 
 DEFINE_NERVE(TNerveKumokunPostWalk, TLiveActor)
 {
+	char trash[0x8];
 	TKumokun* self = (TKumokun*)spine->getBody();
 	if (spine->getTime() == 0)
 		self->changeBck("kumo_run1_end");
@@ -1151,6 +1152,7 @@ DEFINE_NERVE(TNerveKumokunWait, TLiveActor)
 
 DEFINE_NERVE(TNerveKumokunFreeze, TLiveActor)
 {
+	char trash[0x10];
 	TKumokun* self = (TKumokun*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->clearAnmStack();
@@ -1174,6 +1176,7 @@ DEFINE_NERVE(TNerveKumokunFreeze, TLiveActor)
 
 DEFINE_NERVE(TNerveKumokunPostFreeze, TLiveActor)
 {
+	char trash[0x8];
 	TKumokun* self = (TKumokun*)spine->getBody();
 	if (spine->getTime() == 0)
 		self->changeBck("kumo_hit_end");

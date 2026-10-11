@@ -3,6 +3,7 @@
 
 void TSnapTimeObj::perform(u32 cue, JDrama::TGraphics*)
 {
+	char trash[0x10];
 	if ((unk14 & 1)) {
 		if ((cue & CUE_DRAW_INIT) != 0) {
 			TTimeRec::snapGxTimeStatic(0);

@@ -89,6 +89,7 @@ void TSky::perform(u32 cue, JDrama::TGraphics* graphics)
 		GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
 		GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ZERO, GX_LO_NOOP);
 		GXDrawSphere(8, 0x10);
+		char trash[0x18];
 	}
 }
 

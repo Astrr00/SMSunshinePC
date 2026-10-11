@@ -60,6 +60,7 @@ void SMS_RideMoveByGroundActor(TRidingInfo* riding_info,
 			SMS_RideMoveCalcLocalPos(riding_info, *pos);
 		} else {
 			TMtx34f mtx;
+			char trash[8];
 			if (!riding_info->unk0->getRootJointMtx()) {
 				SMS_GetActorMtx(*riding_info->unk0, mtx.mMtx);
 			} else {
@@ -72,6 +73,7 @@ void SMS_RideMoveByGroundActor(TRidingInfo* riding_info,
 	} else {
 		riding_info->unk0 = nullptr;
 	}
+	char trash[0xC];
 }
 
 void SMS_RideMoveCalcLocalPos(TRidingInfo* riding_info,

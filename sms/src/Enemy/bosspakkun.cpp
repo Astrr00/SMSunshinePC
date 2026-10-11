@@ -507,6 +507,7 @@ BOOL TBPHeadHit::receiveMessage(THitActor* sender, u32 message)
 		return true;
 	}
 
+	char trash[0x60];
 	return true;
 }
 
@@ -637,10 +638,12 @@ void TBossPakkunMtxCalc::calcBellyScale(u16 jointIndex)
 
 	MTXConcat(jointMtx, scaleMtx, jointMtx);
 	MTXCopy(jointMtx, J3DSys::mCurrentMtx);
+	char trash[0x24];
 }
 
 void TBossPakkunMtxCalc::calcHeadDir(u16 jointIndex)
 {
+	char trash2[0x10];
 	if (jointIndex != 18)
 		return;
 
@@ -684,6 +687,7 @@ void TBossPakkunMtxCalc::calcHeadDir(u16 jointIndex)
 
 	MTXConcat(headMtx, rotation, headMtx);
 	MTXConcat(J3DSys::mCurrentMtx, rotation, J3DSys::mCurrentMtx);
+	char trash[0x60];
 }
 
 void TBossPakkunMtxCalc::joinAnm(int index)

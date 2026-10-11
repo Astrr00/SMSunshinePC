@@ -127,6 +127,7 @@ void TSunShine::perform(u32 cue, JDrama::TGraphics* graphics)
 		} else if (SMS_IsMarioStatusElecDamage()) {
 			unk28 = 1;
 			JGeometry::TVec3<f32> pos(300.0f, 224.0f, 0.0f);
+			char trash[4];
 			gpEmitterManager4D2->createEmitter(pos, 0x200, nullptr, nullptr);
 		}
 	}

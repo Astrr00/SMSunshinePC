@@ -662,6 +662,7 @@ void TCannon::bombSet()
 {
 	TMsRange<f32> range(0.0f, 1.0f);
 	f32 chance = range.rand();
+	char trash[0x8];
 
 	unk21C = false;
 	unk1A4 = nullptr;
@@ -675,9 +676,9 @@ void TCannon::bombSet()
 		if (kind.rand() % 2 == 1) {
 			TPopo* popo = (TPopo*)gpConductor->makeOneEnemyAppear(
 			    mPosition, "ポポマネージャー", 1);
-			enemy = popo;
 			if (popo != nullptr)
 				popo->thrownByChorobei();
+			enemy = popo;
 		} else {
 			enemy = gpConductor->makeOneEnemyAppear(
 			    mPosition, "ハムクリマネージャー", 1);
@@ -1108,8 +1109,10 @@ TCannonDom::TCannonDom(TLiveActor* owner, int jointIndex, SDLModelData* model,
 {
 	TMsRange<f32> range(0.0f, 360.0f);
 	unk30 = range.rand();
-
-	initAnmSound();
+	if (mAnmSound != nullptr)
+		return;
+	mAnmSound = new MAnmSound(SMSGetMSound());
+	mAnmSound->initAnmSound(nullptr, 1, 0.0f);
 }
 #pragma dont_inline off
 
@@ -1183,7 +1186,10 @@ TChorobei::TChorobei(TCannon* cannon, int jointIndex, const char* name)
 	                                "/scene/cannon/tyorobe_model1.bmd",
 	                                0x10020000, 3, "<TSharedParts>");
 
-	initAnmSound();
+	if (mAnmSound != nullptr)
+		return;
+	mAnmSound = new MAnmSound(SMSGetMSound());
+	mAnmSound->initAnmSound(nullptr, 1, 0.0f);
 }
 #pragma dont_inline off
 

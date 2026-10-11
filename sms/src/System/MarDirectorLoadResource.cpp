@@ -127,6 +127,7 @@ void TMarDirector::initLoadParticle()
 
 void TMarDirector::loadParticle()
 {
+	char trash[0x18];
 	void* pvVar1 = new (-0x20) char[0x200000];
 	SMSLoadArchive("/data/particle.arc", pvVar1, 0x200000, nullptr);
 	JKRMemArchive* this_00 = new (-0x20) JKRMemArchive;

@@ -347,8 +347,8 @@ inline void CLBScreenFPosToSPos(JGeometry::TVec2<s16>* out,
 	extern u16 SMSGetGameRenderHeight(); // declared u16 in Resolution.hpp; MWCC does not mangle the return type
 	extern u16 SMSGetGameRenderWidth();
 #else
-	extern s16 SMSGetGameRenderHeight();
-	extern s16 SMSGetGameRenderWidth();
+	extern u16 SMSGetGameRenderHeight();
+	extern u16 SMSGetGameRenderWidth();
 #endif
 
 	f32 x = in.x;

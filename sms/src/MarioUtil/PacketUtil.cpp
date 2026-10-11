@@ -23,13 +23,13 @@ static void FifoSetTevColorS10(GXTevRegID id, GXColorS10 color)
 {
 	// clang-format off
 	u32 ra =
-		(u32)(0xE0 + id * 2) << 24 |
 		(u32)(color.a & 0x7FF) << 12 |
-		(color.r & 0x7FF);
+		(color.r & 0x7FF) |
+		(u32)(0xE0 + id * 2) << 24;
 	u32 bg =
-		(u32)(0xE1 + id * 2) << 24 |
 		(u32)(color.g & 0x7FF) << 12 |
-		(color.b & 0x7FF);
+		(color.b & 0x7FF) |
+		(u32)(0xE1 + id * 2) << 24;
 	// clang-format on
 	// retail: RA once, then BG three times (asm 0x800D1200)
 	GXWGFifo.u8  = GX_LOAD_BP_REG;
@@ -532,82 +532,85 @@ static void ShapePacketCallBackFunc(J3DCallBackPacket* packet, int param)
 static void ShapePacketCallBackFunc(J3DCallBackPacket* packet, int param)
 {
 	void* area = (void*)packet->getUserArea();
-	u32 type   = *(u32*)area;
+	char trash[0x90]; // unused stack slot (present in the retail frame)
 
-	if (param != 0) {
-		// asm 0x800D1894: fog packets switch fog off after the shape draws.
-		if (param == 1 && (type == 5 || type == 8)) {
+	if (param == 0) {
+		// asm 0x800D1164 jump table "@2227"
+		switch (*(u32*)area) {
+		case 0: {
+			PacketUserData_MatColor* d = (PacketUserData_MatColor*)area;
+			FifoSetChanMatColor(d->unk4, *d->unk8);
+			break;
+		}
+		case 1: {
+			PacketUserData_OneTevColor* d = (PacketUserData_OneTevColor*)area;
+			FifoSetTevColorS10(d->unk4, *d->unk8);
+			break;
+		}
+		case 2: {
+			PacketUserData_TwoTevColor* d = (PacketUserData_TwoTevColor*)area;
+			FifoSetTevColorS10(d->unk4, *d->unkC);
+			FifoSetTevColorS10(d->unk8, *d->unk10);
+			break;
+		}
+		case 3: {
+			PacketUserData_ThreeTevColor* d = (PacketUserData_ThreeTevColor*)area;
+			FifoSetTevColorS10(d->unk4, *d->unk10);
+			FifoSetTevColorS10(d->unk8, *d->unk14);
+			FifoSetTevColorS10(d->unkC, *d->unk18);
+			break;
+		}
+		case 4: {
+			PacketUserData_CallDL* d = (PacketUserData_CallDL*)area;
+			GXCallDisplayList(d->unk4, d->unk8);
+			break;
+		}
+		case 5: {
+			PacketUserData_Fog* d = (PacketUserData_Fog*)area;
+			SetFogBase(d->unk4);
+			break;
+		}
+		case 6: {
+			PacketUserData_OneTevKColor* d = (PacketUserData_OneTevKColor*)area;
+			FifoSetTevKColor(d->unk4, *d->unk8);
+			break;
+		}
+		case 7: {
+			PacketUserData_TwoTevKColor* d = (PacketUserData_TwoTevKColor*)area;
+			FifoSetTevKColor(d->unk4, *d->unkC);
+			FifoSetTevKColor(d->unk8, *d->unk10);
+			break;
+		}
+		case 8: {
+			PacketUserData_OneTevKColorAndFog* d = (PacketUserData_OneTevKColorAndFog*)area;
+			FifoSetTevKColor(d->unk8, *d->unkC);
+			SetFogBase(d->unk14);
+			break;
+		}
+		case 9: {
+			PacketUserData_OneTevColorAndOneTevKColor* d = (PacketUserData_OneTevColorAndOneTevKColor*)area;
+			FifoSetTevColorS10(d->unk4, *d->unk8);
+			FifoSetTevKColor(GX_KCOLOR0, *d->unkC);
+			break;
+		}
+		case 10: {
+			PacketUserData_TwoTevColorAndOneTevKColor* d = (PacketUserData_TwoTevColorAndOneTevKColor*)area;
+			FifoSetTevColorS10(d->unk4, *d->unkC);
+			FifoSetTevColorS10(d->unk8, *d->unk10);
+			FifoSetTevKColor(GX_KCOLOR0, *d->unk14);
+			break;
+		}
+		}
+	} else if (param == 1) {
+		switch (*(s32*)area) {
+		case 5:
+		case 8: {
+			// asm 0x800D1894: fog packets switch fog off after the shape draws.
 			static GXColor sFogOffColor = { 0, 0, 0, 0 };
 			FifoSetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, sFogOffColor);
+			break;
 		}
-		return;
-	}
-
-	// asm 0x800D1164 jump table "@2227"
-	switch (type) {
-	case 0: {
-		PacketUserData_MatColor* d = (PacketUserData_MatColor*)area;
-		FifoSetChanMatColor(d->unk4, *d->unk8);
-		break;
-	}
-	case 1: {
-		PacketUserData_OneTevColor* d = (PacketUserData_OneTevColor*)area;
-		FifoSetTevColorS10(d->unk4, *d->unk8);
-		break;
-	}
-	case 2: {
-		PacketUserData_TwoTevColor* d = (PacketUserData_TwoTevColor*)area;
-		FifoSetTevColorS10(d->unk4, *d->unkC);
-		FifoSetTevColorS10(d->unk8, *d->unk10);
-		break;
-	}
-	case 3: {
-		PacketUserData_ThreeTevColor* d = (PacketUserData_ThreeTevColor*)area;
-		FifoSetTevColorS10(d->unk4, *d->unk10);
-		FifoSetTevColorS10(d->unk8, *d->unk14);
-		FifoSetTevColorS10(d->unkC, *d->unk18);
-		break;
-	}
-	case 4: {
-		PacketUserData_CallDL* d = (PacketUserData_CallDL*)area;
-		GXCallDisplayList(d->unk4, d->unk8);
-		break;
-	}
-	case 5: {
-		PacketUserData_Fog* d = (PacketUserData_Fog*)area;
-		SetFogBase(d->unk4);
-		break;
-	}
-	case 6: {
-		PacketUserData_OneTevKColor* d = (PacketUserData_OneTevKColor*)area;
-		FifoSetTevKColor(d->unk4, *d->unk8);
-		break;
-	}
-	case 7: {
-		PacketUserData_TwoTevKColor* d = (PacketUserData_TwoTevKColor*)area;
-		FifoSetTevKColor(d->unk4, *d->unkC);
-		FifoSetTevKColor(d->unk8, *d->unk10);
-		break;
-	}
-	case 8: {
-		PacketUserData_OneTevKColorAndFog* d = (PacketUserData_OneTevKColorAndFog*)area;
-		FifoSetTevKColor(d->unk8, *d->unkC);
-		SetFogBase(d->unk14);
-		break;
-	}
-	case 9: {
-		PacketUserData_OneTevColorAndOneTevKColor* d = (PacketUserData_OneTevColorAndOneTevKColor*)area;
-		FifoSetTevColorS10(d->unk4, *d->unk8);
-		FifoSetTevKColor(GX_KCOLOR0, *d->unkC);
-		break;
-	}
-	case 10: {
-		PacketUserData_TwoTevColorAndOneTevKColor* d = (PacketUserData_TwoTevColorAndOneTevKColor*)area;
-		FifoSetTevColorS10(d->unk4, *d->unkC);
-		FifoSetTevColorS10(d->unk8, *d->unk10);
-		FifoSetTevKColor(GX_KCOLOR0, *d->unk14);
-		break;
-	}
+		}
 	}
 }
 #endif

@@ -129,7 +129,7 @@ void TMarioCap::addDirty() { }
 void TMarioCap::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	// Unused stack space
-	// volatile u32 padding[42];
+	volatile u32 padding[40];
 
 	if ((cue & CUE_CALC_ANIM) != 0) {
 		if (mMario->mAnimationId == TMario::ANIM_DEMO_GATE_OUT_GET2) {

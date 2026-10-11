@@ -73,12 +73,12 @@ MarioUtil/DrawUtil	TTrembleModelEffect::tremble	99.76	partial (pending review)	W
 MarioUtil/MtxUtil	SMS_MakeJointsToArc	84.40	partial (pending review)	W33	232 rows: reg 119, stack 132 (frame 0x1c8 vs 0x1a8), retail extra FPR saves f17-f18; same callees
 GC2D/Talk2D2	TTalk2D2::makeBoxLine	75.15	partial (pending review)	DecompGC2D	recheck: fused FP ops differ, pool constants differ
 GC2D/Talk2D2	TTalk2D2::setTagParam	96.27	logic-verified	DecompGC2D
-NPC/NpcBase	TBaseNPC::perform	70.40	partial (pending review)	DecompMapNPC	recheck: calls differ, fused FP ops differ, pool constants differ
+NPC/NpcBase	TBaseNPC::perform	77.156	partial (pending review)	W54	was 70.40; isPartsAnmNpc dont_inline, isPollutionNpc moved after perform; char trash[0x98] pads frame to 0x1b0; retail saves f31 only, ours f29-f31; CUE_CALC_ANIM order differs (retail calls getAnmOffDist_ before diff.sub); squared() fused fmadds from shared header; pool constants differ; fp_contract pragma no effect
 Map/MapCheck	TMapCollisionData::intersectLine	54.376	partial (pending review)	W32	logic reviewed vs retail: grid math, LineInLineXZ pairs, corners, list offsets match; rows 302: stack 342, reg 646, insert 198, delete 93, replace 9, imm 2; frame 0x758 vs 0x510; out-of-line TVec3 gap; scalar LineInLineXZ variant regressed 39.5%, reverted
 NPC/NpcEvent	evCheckCurNerve4Npc	75.87	partial (pending review)	W42	push inlined vs out-of-line call in retail; arg/pop offsets; frame -0xa0 matches
 NPC/NpcEvent	evCheckLatestNerve4Npc	71.59	partial (pending review)	W42	retail calls push and getLatestNerve out of line, ours inlines; arg/pop slot offsets; reg choice; frame -0x98 matches
 Player/MarioParticle	TWarpInCallBack::execute(JPABaseEmitter*, JPABaseParticle*)	44.65	partial (pending review)	W22	from 36.75; factor split removes fmadds; residual reg 31, stack 52, insert 33, delete 15; 8 builds used
-GC2D/BoundPane	TBoundPane::update	92.06	partial (pending review)	DecompGC2D
+GC2D/BoundPane	TBoundPane::update	99.59821	logic-verified	W53	check OK; diff is reg-only (18 rows: f1/f2 swap for unk28/(1-unk28) and unk30 blocks); frame 0x58, store order and branch sense match; permuter 600s, base 90, no gain
 Player/ModelWaterManager	TModelWaterManager::calcVMMtxGround	72.65	partial (pending review)	DecompPlayer6	check: calls differ, fused FP ops differ
 Player/ModelWaterManager	TModelWaterManager::calcVMMtxWall	83.97	partial (pending review)	DecompPlayer6	check: fused FP ops differ
 Enemy/killer	TNerveFlyEnemyChaseFly::execute	89.22	partial (pending review)	DecompEnemy5	recheck: calls differ, pool constants differ
@@ -87,10 +87,10 @@ Enemy/killer	KillerBodyCallback	84.87	partial (pending review)	DecompEnemy5	chec
 Enemy/killer	TKiller::calcChaseParam	94.31	partial (pending review)	DecompEnemy5	check: calls differ
 Enemy/killer	TKiller::genEventCoin	91.86	logic-verified	DecompEnemy5	
 MoveBG/MapObjSirena	TItemSlotDrum::moveObject	99.25	logic-verified	DecompMoveBG3
-Camera/lensflare	TLensFlare::perform	76.87	partial (pending review)	DecompSystem4	recheck: calls differ, fused FP ops differ
+Camera/lensflare	TLensFlare::perform	76.87	partial (pending review)	W47	retail bl JMASCos/JMASSin via fakeTan (CLBDegToShortAngle->CLBRoundf->JMASSin*(1/JMASCos), cameralib.hpp inline); ours inlines JMAS table lookups. retail set() copies of gpCamera->unk124/unk148 into temps 0x230/0x23c; ours passes by ref. frame 0x2b8 vs 0x1f8. fix needs dont_inline on shared header helper (off-limits). no edit kept; 1 build used.
 Map/MapWarp	TMapWarp::init	93.84	partial (pending review)	W33	no edits; retail frame 0x238 vs ours 0x218; retail uses r19-r31 (ours r24-r31); stack arrays laid out in reverse decl order; 103 reg rows, 26 stack; not attempted further (time-box)
-NPC/NpcBase	TBaseNPC::getAnmOffDist_	99.83	logic-verified	DecompMapNPC	
-NPC/NpcBase	TBaseNPC::moveObject	97.62	logic-verified	DecompMapNPC	
+NPC/NpcBase	TBaseNPC::getAnmOffDist_	100	logic-verified	W54	check OK 100pct; codegen only: char trash[0x10] pads frame to retail 0x68
+NPC/NpcBase	TBaseNPC::moveObject	97.651	logic-verified	W54	check OK 97.651pct; char trash[0x30] pads frame to retail 0x80, stack rows gone; residual 92 reg rows: this/prev register swap r31/r30 and prologue mr order; hoisting prev to fn scope no effect
 NPC/NpcEvent	evIsNpcSinkBottom	72.15	partial (pending review)	W42	retail push call out of line, ours inlined; result reg li r5 vs r3; no padding change
 NPC/NpcEvent	TNpcEvent::reviveOneSunflower	99.94	logic-verified	W42	check OK; frame -0x88 matches retail; 5 stack-slot rows only
 NPC/NpcEvent	evCheckMonteClear	99.87	logic-verified	W42	check OK; frame -0x90 matches retail; 14 stack-slot rows only (4-byte offset)
@@ -102,7 +102,7 @@ Camera/cameragc	CPolarSubCamera::perform	82.78	partial (pending review)	DecompSy
 NPC/NpcAnm	TBaseNPC::setNpcAnm_	97.56	partial (pending review)	W33	frame fixed (trash 0x20); 79 reg rows: this/param_2/bVar8/iVar7/mactor allocation; 4 cmplwi vs mr. at getPartsMActor null checks; @3247=0.0f matches; permuter does not cover members
 NPC/NpcAnm	TBaseNPC::walkAnmRateChange_	99.60	logic-verified	W33	--check OK; frame fix char trash[0x8] (0xd8->0xe0); residual: 2 stack rows (float spill 0x7c vs 0xb4), 9 reg rows (r3/r4/r5 swap), row 69 mr r0,r3 vs li r0,1 (same bool 1 on that path); all branches and fcmp identical; pool values match
 NPC/NpcAnm	TBaseNPC::requestNpcAnm_	99.25	logic-verified	W33	--check OK; 6 reg rows only: inlined keep() pointer r3/r6 and temp r5/r3, same instruction sequence; no branch rows differ
-Map/PollutionManager	TPollutionManager::cleanedAll() const	96.4	logic-verified	DecompMapNPC
+Map/PollutionManager	TPollutionManager::cleanedAll	96.43	partial (pending review)	W41	inlined getPollutionDegree loop identical to retail; residual reg-only shift (sum r7 vs r8, i r6 vs r7) + frame 0x38 vs 0x30 (stack 4); no source change; 96.43<97 so no permuter; 1 build
 Camera/CameraNotice	CPolarSubCamera::calcNoticeTargetYrot_	91.98	partial (pending review)	W41	--check: only extsh diff (retail +1). Residual reg 25, stack 12, s16 yawDiff vs retail extsh. Pad trash[0x20] after mPos. Not logic-verified.
 MoveBG/MapObjSirena	TPictureTelesa::touchActor	94.24	logic-verified	DecompMoveBG3
 MoveBG/MapObjMamma	TSandCastle::waitBeforeExplode	91.63	logic-verified	DecompMoveBG3
@@ -168,7 +168,7 @@ MoveBG/Item	TCoin::loadAfter()	99.84	logic-verified	W05
 MoveBG/Item	TCoin::perform(unsigned long, JDrama::TGraphics*)	99.90	logic-verified	W05
 MoveBG/Item	TCoin::appear()	99.94	logic-verified	W05
 MoveBG/Item	TItem::calc()	99.90	logic-verified	W05
-MarioUtil/PacketUtil	ShapePacketCallBackFunc	64.56	partial (pending review)	DecompSystem4	recheck: calls differ
+MarioUtil/PacketUtil	ShapePacketCallBackFunc	75.65	partial (pending review)	W59	logic checked vs upstream draw==0 switch / draw==1 fog-off (cases 5,8, signed type); rest is codegen: TEV S10/KColor packing base operand (clrlslwi vs clrlwi+rlwimi, histogram +18/-18), locals 0x8c low, retail-only li r3,1 epilogue (CallbackT is void(*), header shared, left as is)
 MoveBG/MapObjBall	TResetFruit::control	99.67	logic-verified	DecompMoveBG3
 MoveBG/MapObjBall	TMapObjBall::calcCurrentMtx	96.29	partial (pending review)	W07
 MoveBG/MapObjBall	TMapObjBall::boundByActor	98.68	partial (pending review)	W07
@@ -237,7 +237,7 @@ GC2D/Talk2D2	TTalk2D2::openTalkWindow	99.86	logic-verified	W03
 GC2D/Talk2D2	TTalk2D2::forceCloseTalk	99.88	logic-verified	W03
 GC2D/Talk2D2	TTalk2D2::checkControler	99.97	logic-verified	W03
 System/MarDirectorEvent	TMarDirector::fireStreamingMovie	72.83	logic-verified	W40	check OK (histogram lhz +7 = per-case unk4C reload, CSE'd in ours; call order same); taken branch skips set+call, fallthrough ori 0x100/sth then bl setNextStage; li consts 0x1/0x3B/0xE06/0xE07/0x3C/0x101/0xF equal per case; no pool floats; rows: codegen only: reload 7, li/ori/sth sched, bne/b offsets; frame 0x40 via trash[40]
-Player/MarioWait	TMario::waitingCommonEvents	99.96	logic-verified	DecompPlayer7
+Player/MarioWait	TMario::waitingCommonEvents	100.00	logic-verified	W41	100% exact; trash[0x10] pad matched frame 0x38; --check OK
 Enemy/igaiga	RollEnemyBodyCallback	81.83	logic-verified	DecompEnemy6
 Enemy/bossManta	TBossMantaManager::updateMantaEscape	90.04651	logic-verified	DecompEnemyBoss
 Enemy/bossManta	TBossManta::moveObject	95.333336	logic-verified	DecompEnemyBoss
@@ -248,7 +248,7 @@ System/MarDirectorDirect	decideNextStage	92.91	partial (pending review)	W22	revi
 MoveBG/MapObjMare	TMapObjGrowTree::touchWater	89.78	partial (pending review): retail out-of-line getMActor call (inline limit); this-register r31/r30 residual	W11
 MoveBG/MapObjSirena	TCloset::moveObject	98.52	partial (pending review)	DecompMoveBG4	audit: uncertain
 MoveBG/MapObjSirena	TItemSlotDrum::generateItem	90.55	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-MoveBG/MapObjFlag	TMapObjFlagManager::perform	93.73	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
+MoveBG/MapObjFlag	TMapObjFlagManager::perform	93.73	partial (pending review)	W41	insert3/delete3/stack4 residual; base-reg swap; info-ref experiment 93.28 reverted
 MoveBG/MapObjBianco	TBiancoMiniWindmill::calc	99.59	logic-verified (codegen-only: 39 stack/frame rows, frame 0x88 vs 0x80; pool @3258=1.0 and @3496=65536/360 match retail; inlined MsMtxSetRotZ and jma table ops match; supersedes partial row by DecompMoveBGA)	W09
 MoveBG/MapObjDolpic	TMonumentShine::hitByWater	91.181816	partial (pending review)	W30	check: lfs -3 only (retail reuses this->mPosition in f7-f9 for marioDir; ours reloads; INSERT rows 43/47/51); NOT fully explained: 44 diff rows; REPLACE row 83 (retail lfs @2803 0.0, ours lfs 0x54(r1)); INSERT row 85 (lfs f3 0x5c(r1)); INSERT row 88 (ours lfs @1140 as compare const, value unchecked per load, pool multiset passes); stack loads reordered rows 80-82; reg rows not verified as one permutation; sym init$2646 vs init$977 only
 MoveBG/MapObjBianco	TLeafBoat::touchWall	92.76	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
@@ -297,7 +297,7 @@ System/MarDirectorEvent	TMarDirector::findNearestTalkNPC	94.83	partial (pending 
 System/MarDirectorEvent	TMarDirector::setNextStage	95.03	logic-verified	W40	check: histogram addi -1 (ours extra addi r28=gpApp+0x12 temp, +2 gives same +0x14 TFlagT address), b+1/beq+1/bne-1 (retail places 0x37 body out of line, taken=beq; semantics same: body sets 0x100 + setMovie(6), else epilogue); call order same; no pool floats; li consts equal; rows: reg 5 (lis/lhz/addi base regs), insert 2, delete 2, replace 1, imm 1, op_mismatch 1 (branch layout); frame 0x50 with char trash[4]
 Animal/BeeHive	TBeeHive::appearBee	85.6	partial (pending review)	DecompMix1
 MoveBG/MapObjLib	TMapObjTurn::control	91.49	logic-verified	DecompMix2
-Enemy/chuuhana	TChuuHana::behaveToWater	91.83	partial (pending review)	DecompEnemy7	recheck: fused FP ops differ, pool constants differ
+Enemy/chuuhana	TChuuHana::behaveToWater	91.83	partial (pending review)	W41	stack 53 local 47 delete 25; no edit
 Enemy/bossManta	TNerveMantaDeath::execute	99.881355	logic-verified	DecompEnemyBoss
 Enemy/bossManta	TNerveMantaAppearDemo::execute	99.915886	partial (pending review)	DecompEnemyBoss	check: fused FP ops differ
 Enemy/bossManta	TNerveMantaHitWater::execute	99.76613	logic-verified	DecompEnemyBoss
@@ -305,7 +305,7 @@ Enemy/bossManta	TNerveMantaSpawn::execute	99.81554	partial (pending review)	Deco
 Enemy/bossManta	TBossManta::getIntoGraphVec	99.78658	logic-verified	DecompEnemyBoss	
 MoveBG/MapObjRailBlock	TRailMapObj::moveToNextNode	94.29	logic-verified	DecompMix2
 Map/BathWaterManager	TBathWaterManager::throwMario	72.48	partial (pending review)	DecompMix1
-Enemy/chuuhana	TChuuHana::moveObject	85.80	partial (pending review)	DecompEnemy7	recheck: fused FP ops differ
+Enemy/chuuhana	TChuuHana::moveObject	85.80	partial (pending review)	W41	stack/reg/delete residuals; no edit
 Enemy/bossManta	TBossMantaAdditionalCollisionSet::adapt	98.77358	logic-verified	DecompEnemyBoss	
 Enemy/bossManta	TBossManta::calcRootMatrix	98.75	logic-verified	DecompEnemyBoss
 Enemy/bossManta	TBossMantaManager::loadAfter	98.17757	logic-verified	DecompEnemyBoss
@@ -331,13 +331,13 @@ Strategic/ObjModel	TModelDataKeeper::createAndKeepData	99.77	logic-verified	Regr
 Enemy/fireWanwan	TFireWanwanTailNode::perform	78.18	partial (pending review)	Regressions
 Enemy/hanasambo	TSamboFlowerCoinUnit::checkGenCoin()	84.55	partial (pending review)	DecompEnemyB
 Enemy/hanasambo	SamboHeadRollCallback(J3DNode*, int)	90.41	partial (pending review)	DecompEnemyB
-Enemy/popo	PopoPossessedCallback(J3DNode*, int)	84.97	partial (pending review)	DecompEnemyB
+Enemy/popo	PopoPossessedCallback	97.10	partial (pending review)	W47	axis[3] TVec3 array (retail 0x78 copies) 84.97->97.10; fp_contract off no effect; bool isActive temp worse (84.85), reverted. Residual: stack 0x30 gap rotMtx/scaleMtx, 0x1b4 branch sense, static-local names
 Enemy/tobiPuku	TobiPukuRollCallback(J3DNode*, int)	95.86	partial (pending review)	DecompEnemyB
 Enemy/tobiPuku	TNerveTobiPukuReturnLaunch::execute(TSpineBase<TLiveActor>*) const	85.66	partial (pending review)	DecompEnemyB
 Enemy/poihana	TNervePoihanaTrapped::execute(TSpineBase<TLiveActor>*) const	81.14	partial (pending review)	DecompEnemyB
 Enemy/tinkoopa	TTinKoopa::makeLaunchSchedule()	68.94	partial (pending review)	DecompEnemyB
 Enemy/tinkoopa	TTinKoopaPartsBase::emitPartsTrackEffects(const char**, int)	98.0	partial (pending review)	DecompEnemyB	check: calls differ
-Enemy/tinkoopa	TTinKoopaPartsBase::emitPartsDisappearEffects()	98.31	partial (pending review)	DecompEnemyB
+Enemy/tinkoopa	TTinKoopaPartsBase::emitPartsDisappearEffects(const char**, int, float)	98.45071	logic-verified	W44	check OK; only residue bge/b vs blt on early-return branch; both exit to epilogue; 0x4 pad matches retail effectScale slot
 Enemy/Kazekun	TKazekun::doAttackPose(bool)	76.12	partial (pending review)	DecompEnemyB
 Enemy/graph	TGraphTracer::calcSplineSpeed(float)	88.97	partial (pending review)	DecompEnemy7
 Animal/Bird	TAnimalBird::moveObject()	78.68	partial (pending review)	DecompSystemB
@@ -346,9 +346,9 @@ Enemy/enemymanager	TEnemyManager::perform(unsigned long, JDrama::TGraphics*)	94.
 Enemy/enemyMario	TEnemyMario::checkController(JDrama::TGraphics*)	99.08	partial (pending review)	DecompEnemyA
 Enemy/enemyMario	TEnemyMario::consider()	94.07	partial (pending review)	DecompEnemyA
 Enemy/enemytable	TStageEnemyInfoTable::getMatchedInfo(long)	92.41	partial (pending review)	DecompEnemyA
-Enemy/bosspakkun	TBPNavel::receiveMessage(THitActor*, unsigned long)	89.09	partial (pending review)	DecompEnemyA
-Enemy/bosspakkun	TBPHeadHit::receiveMessage(THitActor*, unsigned long)	95.32	partial (pending review)	DecompEnemyA
-Enemy/hinokuri2	Hino2HeadCallback	81.06	partial (pending review)	DecompEnemyA
+Enemy/bosspakkun	TBPNavel::receiveMessage	89.09	partial (pending review)	W58	logic matches; retail calls TSpineBase::getLatestNerve out of line, ours inlines it (codegen limit); extra mOwner reload and init$2324 naming follow from that
+Enemy/bosspakkun	TBPHeadHit::receiveMessage	95.36927	partial (pending review)	W58	logic matches; frame 0x110 via char trash[0x60] before return; toMario 4B gap (mwcc 8-aligns TVec3 slot, retail 4-aligned); getLatestNerve inlined vs retail call (codegen limit)
+Enemy/hinokuri2	Hino2HeadCallback	81.06	partial (pending review)	W59	check: histogram addi +2 only; pool values equal; call order equal (4 MTXConcat lv1, 2 else); branches mapped (param==0 bne end, lv==1 bne else); open: retail caches local addr in r30 (addi x2), index r30 vs ours r31, frame 0x100 vs 0xd8 (+0x28 low, saved r30)
 Enemy/spider	TSpider::bind()	83.88	partial (pending review)	DecompEnemyA
 MoveBG/MapObjWater	TMapObjWaterFilter::perform	95.46	partial (pending review)	DecompMoveBGB
 System/Application	TApplication::mountStageArchive	98.31	logic-verified	W09	26 diff rows codegen-only: frame 0xb8 vs 0xa8 with stack slot shifts, reg renames for unk30/children base, vector size end-begin recomputed from same slots (0x14/0x10 off unk30) with reordered loads, bge/b displacement shifts follow the one-load DELETE at row 16, SMSLoadArchive inline strings: .arc literal @2574 vs @1066 (both .arc for strstr), /data/scene @2573 matches source 875. Buffer offset 0x54 vs 0x3c is layout
@@ -368,7 +368,7 @@ GC2D/Option	TOptionRumbleUnit::update	99.81	partial (pending review)	W09	recheck
 GC2D/Option	TOptionRumbleUnit::TOptionRumbleUnit	99.40	logic-verified	W09	
 GC2D/ConsoleStr	TConsoleStr::processMiss	91.79	logic-verified	W17	unchanged; emitter IDs, alpha +7 clamp, fmadds match retail; residual 0x10 frame + reg naming
 Strategic/ObjHitCheck	TObjHitCheck::checkActorsHit	99.88	logic-verified	W25	checkGroupPlayer (inlined): mario arg used getAttackRadius/Height, retail uses getDamageRadius/Height; fixed to match upstream and retail. top pad char trash[0x20] gives frame 0xd8. 25 stack-slot rows left (iterator temps 8 bytes off), no imm/branch/call diffs
-Strategic/HitActor	THitActor::calcEntryRadius()	97.61	partial (pending review)	DecompSystemB
+Strategic/HitActor	THitActor::calcEntryRadius	97.61	partial (pending review)	W41	reg14/stack4: frame 0x10 vs 0x40 unexplained, trash[0x20] no effect, frsqrte reg swap; --check OK
 MoveBG/MapObjSirena	TSlotDrum::moveObject	99.57	partial (pending review): j-loop && branch sense (retail bge+b, ours blt); trailing char trash[16] pad	W13
 Strategic/ObjModel	TMActorKeeper::createMActor(const char*, unsigned long)	60.60	partial (pending review)	DecompSystemB
 Player/MarioMove	TMario::moveRequest	85.58	logic-verified	W01
@@ -417,7 +417,7 @@ Player/MarioSpecial	TMario::pulling()	94.54	partial (pending review)	Regressions
 Camera/cameralib	CLBCalcNearNinePos	40.99	partial (pending review)	W34	check: calls differ: ours sinf/cosf + inline normalize, retail MsVECNormalize/MsSqrtf/setRotate x2; fused FP ops 41 vs 59; constant multiplicities differ (0.5, 1.0, 3.0, 3.8e-6); source TODO: needs matching work
 Camera/CameraDemo	CPolarSubCamera::updateDemoCamera_	60.694836	partial (pending review)	W32	retail bl TVec3::add x2 (rows 104,163) matched by file-local dont_inline addOutOfLine (reloc name differs, 3 reloc rows); residue: retail keeps origin.y/z in f30/f31 across the calls and stages result copies through stack temps (0x58/0x4c/0x60) before unk124/unk148 stores, frame 0xc8 vs 0x80; constants and branch targets not manually reviewed
 System/MarNameRefGen	JGadget::TVector<TCameraMapTool>::InsertRaw	60.22	partial (pending review)	DecompSystem5
-NPC/NpcBase	TSpineEnemy::isReachedToGoal	67.46	partial (pending review)	DecompSystem5
+NPC/NpcBase	TSpineEnemy::isReachedToGoal	67.457	partial (pending review)	W54	blocked by rule: inline in shared Enemy.hpp; retail TVec3 tmp copy + TUtil::sqrt; codegen fix needs shared-header edit; not edited
 Camera/CameraMode	CPolarSubCamera::isNormalCameraCompletely	72.86	partial (pending review)	DecompSystem5
 Map/MapStaticObject	MsPerpendicFootToLineR	84.35	logic-verified	W38	check: lfs -3 = reloads of param_1/param_3 components from memory (retail keeps them in regs); same op sequence sub, 2 dots, squared, div, clamp, scale, add; clamp literals 0.0f/1.0f verified (retail @3140=0 @3141=1; ours @1372/@1373 used for same compares); clamp branch offsets identical; rest ARG_MISM regs only
 Map/MapWire	TMapWire::release	82.75	partial (pending review)	W11	76.93 to 82.75 via line 203 reading mNumActiveMapWirePoints like retail (0x44). Residual: retail inlines getPointPosOnLine and calls TVec3 set out of line, ours inverts it; frame 0x108 vs 0x138; logic rows delete 24 insert 14 replace 4 imm 8 follow from inline graph.
@@ -904,3 +904,71 @@ Strategic/liveinterp	linGetSRT	96.06	partial (pending review)	W47	frame 0xe0 vs 
 M3DUtil/SDLModel	SDLModel::entry	99.802086	logic-verified	W52	Full asm review; diffs only stack-offset ARG_MISM (frame 0xb8 matches via char trash[16]; locals +0xc, loop temps +0x10 remain); branch/call order/FP/opcode check OK
 M3DUtil/SDLModel	SDLModelData::entrySDLModels	99.968506	logic-verified	W52	Full asm review; diffs only stack-offset ARG_MISM (4 rows: loop iterator copies at 0x4c/0x48 vs retail 0x50/0x4c; char trash[4] in for-body); branch/call order/opcode check OK
 Player/MarioAccess	SMS_IsMarioOnWire	93.83	partial (pending review)	W47	retail reloads gpMarioOriginal->mHolder for the deref (test in r0, reload in r3); ours CSEs into r3 (one extra lwz, one reg). nullptr compare: unchanged 93.83; nested if: 82.44 worse. Both reverted
+Camera/CameraMultiPlayer	CPolarSubCamera::ctrlMultiPlayerCamera_	99.33484	logic-verified	W44	check OK: opcode histogram identical, branch rows match; residue is float reg choice in distance loop and one spill slot offset
+Player/MarioInit	TMario::TMario()	99.19621	partial (pending review)	W50	reg 742 stack 2 replace 2 delete 1 imm 3 insert 1; ctor has no branches (no if/for/while/?), opcode histogram addi:1 only. Unresolved: pool multiset retail 16.0f x29 vs ours 0.0f x29 (one lfs f0 @sda21 feeds 29 stfs of TBodyAngleParams TParams block; value unconfirmed); residual register drift (retail zero r27 / data ptr r16 vs ours r29 / r17). Probe: dropping duplicate unk390=0 at end -> 99.17729, reverted.
+MoveBG/MapObjFlag	TMapObjFlag::draw	98.95	logic-verified	W41	reg/imm-only residual (MTXConcat arg load order); --check OK
+System/MarDirectorSetup2	TMarDirector::setup2	99.89373	partial (pending review)	W43	stack 17 rows: trash[0xF8] pad sits mid-frame, low-region locals 0x100 off and upper 4 off; reg 4 rows: camera-store pad r26 vs retail r29, lbz arg order at MSStage::init; imm 2: sda21 literal @1640 vs @3415; branch rows all match; --check OK; logic reorders kept
+Player/MarioUpper	TMario::stateMachineUpper()	99.841774	partial (pending review)	W49	stack/frame matched after char trash[0x48] pad and bool flag; 5 reg-only rows (r30 vs r3 water-gun ptr). Hoisted and nested waterGun variants worse (99.27, 99.30).
+System/MarDirectorLoadResource	TMarDirector::loadParticle()	100	matched	W57	check OK; frame padded with char trash[0x18]; reloc naming resolved by same change; staticLoadParticle now called and public; alloc -0x20; mount pvVar1
+MarioUtil/EffectUtil	SMS_EmitSinkInPollutionEffect	99.05738	logic-verified	W44	check OK: opcode histogram identical; frame and stack slots match retail; residue is 23 float reg rows only
+M3DUtil/SampleCtrlNode	SampleCtrlMaterial::SampleCtrlMaterial	99.98	logic-verified	W41	stack-only: frame 0xd0 vs 0xc8 (8 extra bytes of compiler temp); --check OK
+System/SnapTimeObj	TSnapTimeObj::perform(unsigned long, JDrama::TGraphics*)	99.70175	partial (pending review)	W49	char trash[0x10] at top gives frame 0x50; 3 reg rows around unk10 spill (0x38 vs 0x24, r0 vs r30). Pad inside guard same result.
+System/MarDirectorPreEntry	TMarDirector::preEntry	99.99103	logic-verified	W44	check OK; diff 2 rows ARG_MISM Rect temp addi r3/r4 r1 0x84 vs 0xb8 (stack slot); frame 0xe8 and stmw/lmw/lr offsets match; branch rows identical
+Camera/lensglow	TLensGlow::perform	98.77109	partial (pending review)	W58	98.77109; rows reg 66, stack 16 (c/mtx/scaleV 0x64 off; top trash 0x60 keeps frame 0x178, end trash 0x64 gives 0x180), replace 1 (lfsu vs lfs in inlined SunModel::isInBounds, same address), imm 2 (sda21). Branch sense/targets and inBounds predicate checked manually: equivalent
+Player/MarioMain	TMario::perform(unsigned long, JDrama::TGraphics*)	99.95531	partial (pending review)	W49	char trash[0x78] at top matches frame 0x168; 24 stack rows left: local slot order (dir, GXColor, temps, TVec3 at 0x13c) differs.
+Player/MarioWait	TMario::waitMain	100.00	logic-verified	W41	100% exact; trash[0x8] pad matched frame 0x48; --check OK
+System/MarDirector	TMarDirector::TMarDirector	99.995514	logic-verified	W43	check OK; 1 stack row: default TAllocator temp for unk88 at r1+0x20 vs retail r1+0x34, explicit unk88() init no change; branch rows all match
+Camera/CameraNormal	CPolarSubCamera::ctrlNormalOrTowerCamera_	98.48837	partial (pending review)	W55	partial: CLBAbs<int>((s16)) fix; frame/Vec/conv offsets now match via trash[0xc] top and trash[0x34] after tower Vec; open: fVar2 regalloc f29 vs f30 (rows 11,54,57,80,83); sVar9 declaration extsh (row 186, retail none); CLBAbs path extsh retail 3 vs ours 1 (rows 193-200); subf reg (213). Tried SMS_GetMarioAngleY (frame 0xb8, 98.42) and CLBAbs<s16> (96.87), both reverted. check: extsh 2 only; measured on identical text before final experiment
+MoveBG/MapObjCloud	TRideCloud::control	98.96	logic-verified	W56	check OK except opcode histogram addi 1: retail addi r3,r31,0 copy at isDummy call vs ours mr pair; rows 8: reg 8 (FP f0/f1 swap in mDamageRadius expr, same ops; GPR web copy reg), replace 1 + insert 1 = web copy placement; branch sense mapped: beq to return block in both, b/beq targets offset by constant base diff
+System/MarioGamePad	TMarioGamePad::updateMeaning()	99.93	logic-verified	W57	check OK; rows 8: reg only (dc r4/r5 and loop index r5/r4 swapped; both come from inline resetMeaning() in MarioGamePad.hpp, not fixable in .cpp w/o shared-header change); branch rows match (display target offset constant 0xc8, not flagged); frame padded char trash[0x150]
+MoveBG/ItemManager	TItemManager::newAndRegisterCoin	99.59	partial (pending review)	W41	stack-only residual: retail temps 0xc higher; char trash[0x14] moved frame not temps (99.50), reverted to trash[8]; 2 builds
+Map/MapArea	TMapCollisionData::polygonIsInGrid(float, float, float, float, TBGCheckData*)	100.0	logic-verified	W49	char trash[0x260] at top; 100% byte match; decomp_triage --check OK
+Player/SplashManager	TSplashManager::makeDL	99.94898	logic-verified	W44	check OK; 5 ARG_MISM stack rows: GXColor literal and copy temps at 0x54/0x58 swapped; thing[4] slots match; pads before/after thing and in loop lost score
+NPC/NpcInbetween	TNpcInbetween::execPosInbetween	99.09091	partial (pending review)	W58	99.09091; reg 10 only (progress FPR: retail fmuls dest f1 = 1/frame reg, ours dest f2 = timer reg). Tried operand swap (98.07, fdivs realloc) and separate inv local (98.09, frame 0x28); reverted. Check OK, branch targets identical
+Player/MarioCap	TMarioCap::perform	99.96	partial (pending review)	W47	padding[40] at top matches retail frame 0x1e0; residual stack temp offsets (TVec3 0x108 vs 0x174, copy 0x114 vs 0x1ac, stfd 0x128 vs 0x1c8). Tried padding split 27+11 (99.93) and named posDelta copy (94.86), reverted.
+Map/Shimmer	TShimmer::perform(unsigned long, JDrama::TGraphics*)	100.0	logic-verified	W49	pads: char trash2[0x10] top + char trash[0x1c] after info; 100% byte match; decomp_triage --check OK
+Map/PollutionPos	TPollutionPos::getEdgeDegree	97.882355	logic-verified	W44	check OK; frame 0x38 and stack rows match via char trash[0x18]; 29 reg rows: inlined index() temp/load register order, same instruction count 85 as retail 0x154
+Map/Sky	TSky::perform	99.98131	partial (pending review)	W58	builds 3 of 8; frame 0x138 matches retail via char trash[0x18] at end of draw block; check OK; 4 stack rows = GXColor compound-literal temp at 0x3c/0x40 vs retail 0x54/0x58 (mwcc places temp below user locals, pad cannot fix)
+Map/PollutionAction	TPollutionLayer::action()	99.98	logic-verified	W57	stack frame 0xa0 and temps/saved regs match retail via char trash[0x28] pad at top; 5 residual rows: spread/glassWall TVec3 slots 0x20/0x2c vs retail 0x38/0x44 (0x18 low), pads in action/spread/glassWall did not shift them; branch targets identical; --check OK
+MarioUtil/ModelUtil	SMS_RideMoveByGroundActor	99.96	logic-verified	W60	check OK; rows 4: stack (inline mtx slot 0x14 vs retail 0x20; pad placements tried, no fix); branches mapped
+GC2D/Menu	TMenuPlane::perform	99.49	partial (pending review)	W41	GXColor get() temps 8-spaced in ours vs 4 in retail (frame 0x98 vs 0x78); reg swaps on unk2C/unk3C loads; semantics match; no source change; 1 build
+Map/MapEventSirena	TMapEventSirenaSink::watch	99.97	partial (pending review)	W47	padding[2] at top matches retail frame 0x50; residual 2 rows: TFlagT<u16>(0) temp at 0x38 vs retail 0x44 (retail keeps ~12 unused bytes below temp). Named TFlagT local (frame 0x58, 99.87) reverted.
+Map/MapXlu	TMapXlu::changeXluJoint(int)	100.0	logic-verified	W56	frame 0x88 matches retail once loop 1 uses mChildren[i]->sit() (was getChild(i)); 0 diff rows; decomp_triage --check OK
+GC2D/SunGlass	TSunShine::perform(unsigned long, JDrama::TGraphics*)	99.96364	partial (pending review)	W49	char trash[4] after pos in CUE_MOVE block; 2 rows left: draw(unk14) copy temp at 0x14 vs 0x18; top/mid/block-scope pads worse
+Camera/CameraWarp	CPolarSubCamera::warpPosAndAt(float, short)	99.82758	logic-verified	W44	check OK; frame 0x58 matches via char trash[0x8]; 25 stack rows: getUsualLookat temp 0x1c vs retail 0x20, local order variants tried (pos first, split pads) give same score
+GC2D/ProgSelect	TProgSelect::perform	99.869	logic-verified	W54	check OK 99.869pct; stack-only residual 26 rows: spill slots 0xc higher and J2D locals -4 vs retail; char trahs[0x10] pad needed (frame 0x1f8; without pad 0x1e8, 99.80); pad placement top/draw-block/end no effect; file restored to original
+MoveBG/MapObjGrass	TMapObjGrassManager::initDrawNear	99.972786	logic-verified	W55	decomp_triage --check OK (calls, FP ops, opcode histogram match). Frame 0x98, Mtx at r1+0x44, conv temps 0x78-0x8f match retail via trash pads (4 top, 0x14 bottom). Residual: GXColor literal temp r1+0x30/0x34 retail vs r1+0x1c/0x20 ours; retail reserves 40B outgoing area vs our 20B, no local pad reproduces it. Stack layout only, not logic.
+M3DUtil/M3UJoint	M3UMtxCalcBlendAux(unsigned short, J3DTransformInfo*, J3DTransformInfo*, float, bool)	98.79829	logic-verified	W50	check OK; rows 55: reg 56 only, no replace/insert/delete/stack; branch sense and targets mapped (opcodes identical, targets differ by constant 0x1bc); retail reg map param_2 r26 vs r27, param_3 r27 vs r28, basic r28 vs r29, param_1 r29 vs r30, mModel r30 vs r25, bVar5 r25 vs r26; permuter zero-score winner is comma-expr (0, param_2->mRotation.x) in first JMAEulerToQuat arg, reaches 100 pct but non-clean, not applied; clean named-local variant 95.64 pct, rejected
+Enemy/cannon	TCannonDom::TCannonDom(TLiveActor*, int, SDLModelData*, unsigned long, const char*)	99.93	logic-verified	W56	check OK; rows 5: stack 5 (TMsRange temp 4 bytes low, unexplained; temp-object form 99.75); branches mapped: initAnmSound inlined in ctor, early return now beq/alloc layout as retail
+MoveBG/MapObjTrap	TLampTrapSpike::control	98.76363	partial (pending review)	W43	check OK 98.76363; 68 rows all regalloc: this r31/r29, thing r30/r31, bVar1 r28/r30, rodata base r29/r28, plus pool labels; branch sense and targets match (constant 0x344 base offset); stack 0 after char trash[8]; ctrl shadow redecl replaced by reassign (retail reuses r27 after setBck); permuter blocked by C++ syntax in base.c
+Enemy/chuuhana	TChuuHanaManager::TChuuHanaManager	100.00	logic-verified	W41	char trash[0x10] at top; frame matches retail 0x28, exact
+Enemy/chuuhana	TChuuHanaAseParCallback::execute	100.00	logic-verified	W41	char trash[0x10] at top; frame matches retail 0x60, exact
+Enemy/chuuhana	ChuuHanaBodyCallback	84.06	partial (pending review)	W41	reg-heavy residuals; no edit
+Enemy/chuuhana	TChuuHana::willFall	81.09	partial (pending review)	W41	reg/stack residuals; no edit
+Enemy/chuuhana	TNerveChuuHanaRoll::execute	85.65	partial (pending review)	W41	char trash[0x38]; frame matches retail 0x78; stack 11->4; delete/insert residual
+Enemy/chuuhana	TChuuHana::setGoal	85.67	partial (pending review)	W41	stack 38 reg 18; no edit
+Enemy/chuuhana	TChuuHana::isCollidMove	95.09	partial (pending review)	W41	stack 47 reg 39 local 29; no edit
+Enemy/chuuhana	TNerveChuuHanaAttack::execute	96.14	partial (pending review)	W41	extra stw r28 save and DELETE rows; regalloc differs; no edit
+Enemy/chuuhana	TChuuHana::checkStretchType	98.47	partial (pending review)	W41	local 36 reloc 1; no edit
+Enemy/chuuhana	TNerveChuuHanaWalkOnPanel::execute	97.40	partial (pending review)	W41	local 11 insert/replace; no edit
+Enemy/chuuhana	TChuuHana::setBckAnm	93.23	partial (pending review)	W41	stack 7 reg 6; no edit
+Enemy/chuuhana	TNerveChuuHanaForceJumped::execute	99.06	partial (pending review)	W41	char trash[0x30]; frame matches retail 0xd8; stack 40->21 residual
+Enemy/chuuhana	TChuuHana::forceKill	99.93	partial (pending review)	W41	reloc 1 residual; no edit
+Enemy/chuuhana	TChuuHana::attackToMario	98.69	partial (pending review)	W41	char trash[0x8]; frame matches retail 0xc0; stack 32->21 residual
+Enemy/chuuhana	TChuuHanaManager::initSetEnemies	99.90	partial (pending review)	W41	char trash[0x8]; frame matches retail 0xa8; imm 1 residual
+Enemy/chuuhana	TNerveChuuHanaJumpPrepare::execute	99.83	partial (pending review)	W41	char trash[0x10]; frame matches retail 0x90; temps 0xc low, stack 27->18
+Enemy/chuuhana	TNerveChuuHanaFall2::execute	99.60	partial (pending review)	W41	static-local naming instance/init localstatic vs $3192; structural
+Enemy/chuuhana	TNerveChuuHanaStick::execute	99.58	partial (pending review)	W41	char trash[0x10]; stack 19->12; temps +8 residual
+Enemy/chuuhana	TNerveChuuHanaKeepBalance::execute	99.67	partial (pending review)	W41	char trash[0x28]; stack 38->21; static-local naming residual
+Enemy/chuuhana	TChuuHana::getGravityY	98.82	partial (pending review)	W41	local 36 residual; no edit
+Enemy/chuuhana	TChuuHana::setWalkAnm	99.51	partial (pending review)	W41	reg 4 residual; no edit
+Enemy/chuuhana	TChuuHana::receiveMessage	99.40	partial (pending review)	W41	local 12 residual; no edit
+Enemy/chuuhana	TChuuHana::bind	99.34	partial (pending review)	W41	char trash[0x10]; stack 40->33; local 18 residual
+Enemy/chuuhana	TChuuHana::calcRootMatrix	99.35	partial (pending review)	W41	stack 15; temps offset 0x24; no edit
+Enemy/chuuhana	TChuuHana::reset	99.82	partial (pending review)	W41	char trash[0x10]; stack 34->17 residual
+Enemy/chuuhana	TChuuHana::perform	99.91	partial (pending review)	W41	stack 4; TVec3 temps offset residual; no edit
+Enemy/chuuhana	TChuuHana::init	99.64	partial (pending review)	W41	local 6 residual; static-local naming
+Enemy/fireWanwan	TFireWanwan::bind()	98.87	logic-verified	W57	pad 0x10 frame; mVelocity/mLinearVelocity copy order; isAirborne() call; residual stack-slot layout of velStep/vel temps
+GC2D/MessageLoader	TMessageLoader::parseBlock	99.67832	logic-verified	W62	check OK; rows 34: stack 31, reg 3; branches mapped (blt/b unflagged)
+Enemy/bgtentacle	TBGTentacle::perform	99.73214	logic-verified	W62	check OK; rows 1: replace (addi r3,r28,0 vs mr r3,r28, same value); trash[56] pad matches frame; branches mapped
+Enemy/cannon	TCannon::bombSet()	94.14	logic-verified	W56	check OK; branch sense matched (bge else on chance>=rate, beq skips null popo, b join). Residuals: rodata string addi offsets (+0x23c, unit layout), sda21 float const layout, 12B shift of range/kind locals vs retail, rate load hoisted before stb in retail. Fixed: popo null check before enemy copy (removed cmplwi/addi vs mr.), trash[0x8] for frame 0x80.

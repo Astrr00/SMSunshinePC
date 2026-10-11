@@ -62,18 +62,18 @@ void TMessageLoader::readHeader(u32* a, u32* b, void* header)
 
 void* TMessageLoader::parseBlock(u32 param_1, u32 param_2, void* param_3)
 {
+	char trash[8];
+	int local_74;
+	int local_70;
 	JSUMemoryInputStream local_5c(param_3, param_1);
 
 	void* result;
 
 	for (int i = 0; i < param_2; ++i) {
-		int local_74;
 		local_5c.read(&local_74, 4);
 #ifdef TARGET_PC
 		local_74 = (int)be32((u32)local_74); // raw read of a big-endian block tag
 #endif
-
-		int local_70;
 
 		switch (local_74) {
 		case 'INF1': {

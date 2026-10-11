@@ -81,6 +81,7 @@ void TMario::checkPutStart() { }
 
 BOOL TMario::waitingCommonEvents()
 {
+	char trash[0x10];
 	if (mInput & 0x2) {
 		if (considerRotateJumpStart())
 			return 1;
@@ -562,6 +563,7 @@ BOOL TMario::slipEnd()
 
 BOOL TMario::waitMain()
 {
+	char trash[0x8];
 	int result = 0;
 
 	checkEnforceJump();

@@ -68,6 +68,7 @@ void TMario::thinkAloha()
 
 void TMario::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x78];
 	if (unk114 & UNK114_FLAG_PROFILE)
 		TTimeRec::startTimer(0xff, 0x00, 0x00, 0x80);
 

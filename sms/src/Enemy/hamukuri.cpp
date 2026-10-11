@@ -1651,6 +1651,7 @@ bool TDoroHaneKuri::isCollidMove(THitActor* param_1)
 
 		if (mSpine->getCurrentNerve() == &TNerveWalkerAttack::theNerve()) {
 			JGeometry::TVec3<f32> vel = mLinearVelocity;
+			char trash[8];
 			vel.x *= -5.0f;
 			vel.z *= -5.0f;
 			mPosition.x += vel.x;
@@ -1700,6 +1701,7 @@ void THaneHamuKuri2::walkBehavior(int param_1, f32 param_2)
 		unk20C = 0.0f;
 
 	f32 flyBaseHeight = unk22C->mSLFlyBaseHeight.get();
+	char trash[8];
 	if (unk234 < flyBaseHeight)
 		unk234 += 1.0f;
 
@@ -1707,7 +1709,7 @@ void THaneHamuKuri2::walkBehavior(int param_1, f32 param_2)
 		unk234 -= 1.0f;
 
 	unk210      = MsSin(unk20C * 360.0f / flyBaseFrequency) * flyBaseAmplitude;
-	mPosition.y = unk210 + unk230 + unk234;
+	mPosition.y = unk230 + unk234 + unk210;
 	mTurnSpeed
 	    = ((THaneHamuKuriSaveLoadParams*)getSaveParam())->mSLTurnSpeedLow.get();
 	mMarchSpeed = ((THaneHamuKuriSaveLoadParams*)getSaveParam())
@@ -1820,6 +1822,7 @@ MtxPtr TDangoHamuKuri::getTakingMtx()
 	TPosition3f pos;
 	pos.translation(mtx[0][3], mtx[1][3] + fVar2, mtx[2][3]);
 	Mtx afSstack_84;
+	char trash[8];
 	MsMtxSetRotRPH(afSstack_84, 0.0f, mBoss->mRotation.y, 0.0f);
 	MtxPtr result = unk1B0;
 	MTXConcat(pos.mMtx, afSstack_84, result);
@@ -2685,6 +2688,7 @@ DEFINE_NERVE(TNerveHaneHamuKuriUpWait, TLiveActor)
 	if (spine->getTime() < 1) {
 		self->setWaitAnm();
 		self->setGoalPath(TPathNode((THitActor*)gpMarioAddress));
+		char trash2[4];
 	}
 
 	self->mScaling.x = self->mScaling.z

@@ -9,6 +9,7 @@ int TPollutionPos::getEdgeDegree(int x, int y) const
 {
 	if (!isInArea(x, y))
 		return 0;
+	char trash[0x18];
 
 	int count = 0;
 	for (int dy = -1; dy <= 1; ++dy) {

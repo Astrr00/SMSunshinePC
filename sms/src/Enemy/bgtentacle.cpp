@@ -1341,6 +1341,7 @@ void TBGTentacle::resetAllNodes(const JGeometry::TVec3<f32>& param_1)
 
 void TBGTentacle::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[56];
 	mTakeHit->perform(cue, graphics);
 
 	if (cue & CUE_MOVE) {

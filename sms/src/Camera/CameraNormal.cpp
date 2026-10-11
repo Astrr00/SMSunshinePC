@@ -50,6 +50,7 @@ void CPolarSubCamera::ctrlNormalOrTowerCamera_()
 			} else {
 				if (!(unk64 & CAMERA_FLAG_UNK80) && !isMarioCrabWalk_()) {
 					Vec v;
+					char trash[0x34];
 					calcTowerCenterPos_(&v);
 					calcNoticeTargetYrot_(v);
 				}

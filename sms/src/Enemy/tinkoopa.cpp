@@ -529,6 +529,7 @@ void TTinKoopaPartsBase::emitPartsDisappearEffects(const char** names,
                                                    int count, f32 scale)
 {
 	JGeometry::TVec3<f32> effectScale = mScaling;
+	char trash[0x4];
 	effectScale.x *= scale;
 	effectScale.y *= scale;
 	effectScale.z *= scale;

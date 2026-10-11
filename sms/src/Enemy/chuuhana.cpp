@@ -120,6 +120,7 @@ TChuuHanaSaveLoadParams::TChuuHanaSaveLoadParams(const char* path)
 TChuuHanaManager::TChuuHanaManager(const char* name)
     : TSmallEnemyManager(name)
 {
+	char trash[0x10];
 	gpCurChuuHana = nullptr;
 	unk60         = 0;
 	unk61         = 0;
@@ -141,6 +142,7 @@ TSmallEnemy* TChuuHanaManager::createEnemyInstance() { return new TChuuHana; }
 
 void TChuuHanaManager::initSetEnemies()
 {
+	char trash[0x8];
 	static const char* graphlist[] = {
 		"kohana0", "kohana1", "kohana1", "kohana2", "kohana2", "kohana2",
 	};
@@ -234,6 +236,7 @@ static BOOL ChuuHanaBodyCallback(J3DNode* node, BOOL calcTiming)
 void TChuuHanaAseParCallback::execute(JPABaseEmitter* emitter,
                                       JPABaseParticle* particle)
 {
+	char trash[0x10];
 	TChuuHana* owner = mOwner;
 	if (!owner->checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
 		emitter->setGlobalRTMatrix(
@@ -311,6 +314,7 @@ void TChuuHana::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TChuuHana::reset()
 {
+	char trash[0x10];
 	gpCurChuuHana = this;
 	TWalkerEnemy::reset();
 	unk215      = 0;
@@ -408,6 +412,7 @@ void TChuuHana::behaveToWater(THitActor* water)
 
 void TChuuHana::attackToMario()
 {
+	char trash[0x8];
 	if (mSpine->getCurrentNerve() != &TNerveChuuHanaObject::theNerve()) {
 		if (mDamageSw) {
 			SMS_SendMessageToMario(this, 14);
@@ -560,6 +565,7 @@ void TChuuHana::calcRootMatrix()
 
 void TChuuHana::bind()
 {
+	char trash[0x10];
 	if (mSpine->getCurrentNerve() != &TNerveChuuHanaRoll::theNerve()
 	    && mSpine->getCurrentNerve() != &TNerveChuuHanaFall2::theNerve()
 	    && mSpine->getCurrentNerve() != &TNerveChuuHanaJumpPrepare::theNerve()) {
@@ -819,6 +825,7 @@ BOOL TNerveChuuHanaWalkOnPanel::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaForceJumped::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x30];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->unk1A4 = TChuuHana::mCheckOnPanelTime;
@@ -856,6 +863,7 @@ BOOL TNerveChuuHanaForceJumped::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaKeepBalance::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x28];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->setBckAnm(2);
@@ -899,6 +907,7 @@ BOOL TNerveChuuHanaKeepBalance::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaStick::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0 || !self->isBckAnm(4)) {
 		self->setBckAnm(4);
@@ -930,6 +939,7 @@ BOOL TNerveChuuHanaStick::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaRoll::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x38];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->unk210 = 0.0f;
@@ -1018,6 +1028,7 @@ BOOL TNerveChuuHanaAttack::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaJumpPrepare::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0)
 		self->setBckAnm(3);
