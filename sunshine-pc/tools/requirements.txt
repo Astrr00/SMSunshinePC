@@ -1,0 +1,10 @@
+capstone==5.0.9
+colorama==0.4.6
+graphviz==0.20.3
+ninja==1.13.2
+numpy==2.5.3
+pillow==12.3.0
+pycparser==3.0
+pyelftools==0.33
+RapidFuzz==3.14.6
+m2c==0.1.0
