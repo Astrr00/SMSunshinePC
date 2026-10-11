@@ -287,6 +287,11 @@ void logWash(const char* tag)
 		std::printf("[%s-wash] event=%u state=%u progress=%.1f min=%.1f max=%.1f alpha=%d reverse=%d pos=(%.1f,%.1f,%.1f) hidden=%d tick=%d\n",
 		    tag, w->getEventId(), (unsigned)w->mState, w->mProgress, w->mMinProgress, w->mMaxProgress, (int)w->mColor.a,
 		    w->mReverse ? 1 : 0, w->mPosition.x, w->mPosition.y, w->mPosition.z, w->mHiddenObj ? 1 : 0, gTick);
+		if (w->mHiddenObj)
+			std::printf("[%s-wash]   revealed object: type=%s shine=%d coin=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag,
+			    typeid(*w->mHiddenObj).name(), w->mHiddenObj->isActorType(0x20000013) ? 1 : 0,
+			    w->mHiddenObj->isActorType(0x2000000E) ? 1 : 0, w->mHiddenObj->mPosition.x, w->mHiddenObj->mPosition.y,
+			    w->mHiddenObj->mPosition.z, gTick);
 	}
 	for (int i = 0; gpMapObjManager && i < gpMapObjManager->getObjNum(); ++i)
 		if (const TMapObjStartDemo* d = dynamic_cast<const TMapObjStartDemo*>(gpMapObjManager->getObj(i)))

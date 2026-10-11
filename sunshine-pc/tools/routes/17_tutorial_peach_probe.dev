@@ -1,0 +1,24 @@
+# Diagnosis only: run with SUNSHINE_DEV_START=airport/1 (EXIT_ON_END ends the run). After the first M is washed, walk back east
+# along the airport plateau (waypoints of the 07 route reversed) to Peach at (953.8, 500, 1054.6) and press A to talk.
+# Question: does talking to Peach (or anything on the way) end the tutorial / change the stage?
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+wait frames=60
+walkto x=-6300 z=2150 radius=60 timeout=600
+hold trig=0,255 frames=240
+walkto x=-5876 z=976 radius=100 timeout=900
+log
+# the straight segment (-5876,976) -> (-1198,167) is on the y=500 plateau (+-70 units); closed-loop walking drifts, so use waypoints
+walkto x=-4940 z=814 radius=100 timeout=500
+walkto x=-4005 z=652 radius=100 timeout=500
+walkto x=-3069 z=491 radius=100 timeout=500
+walkto x=-2134 z=329 radius=100 timeout=500
+walkto x=-1198 z=167 radius=100 timeout=500
+log
+walkto x=700 z=1100 radius=120 timeout=900
+log
+shot peach0.png
+mash A period=30 until stage=1 timeout=900
+log
+shot peach1.png
+wait frames=30
+end
