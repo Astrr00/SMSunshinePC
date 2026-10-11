@@ -866,16 +866,15 @@ JKRMemArchive* TApplication::mountStageArchive()
 	JKRMemArchive* result = nullptr;
 
 	TNameRefPtrAryT<TNameRefAryT<TScenarioArchiveName> >& tmp = *unk30;
-	if (mCurrArea.getStage() < tmp.size()) {
-		if (mCurrArea.getScenario() < tmp[mCurrArea.getStage()].size()) {
-			// retail reads the archive name at element offset 0xC (unkC); getName() is the display name
-			const char* scenarioArcName = tmp[mCurrArea.getStage()][mCurrArea.getScenario()].unkC;
+	if (mCurrArea.getStage() < tmp.getChildren().size()) {
+		TNameRefAryT<TScenarioArchiveName>& scenarios = tmp[mCurrArea.getStage()];
+		if (mCurrArea.getScenario() < scenarios.size()) {
+			// unkC holds the archive name (upstream getArcName())
+			const char* scenarioArcName = scenarios.getChildren()[mCurrArea.getScenario()].unkC;
 
 			DVDChangeDir("/data/scene");
-			void* archBlob
-			    = SMSLoadArchive(scenarioArcName, nullptr, 0, nullptr);
-
-			if (archBlob) {
+			if (void* archBlob
+			    = SMSLoadArchive(scenarioArcName, nullptr, 0, nullptr)) {
 				JKRMemArchive* arch = new JKRMemArchive;
 				arch->mountFixed(archBlob, MBF_0);
 				result = arch;

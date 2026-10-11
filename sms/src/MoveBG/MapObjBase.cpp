@@ -223,7 +223,7 @@ void TMapObjBase::startAnim(u16 param_1)
 	if (!anim)
 		return;
 
-	if (param_1 >= anim->unk0)
+	if (anim->unk0 <= param_1)
 		return;
 
 	const TMapObjAnimData* data = &anim->unk4[param_1];

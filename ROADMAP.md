@@ -9,7 +9,7 @@ Last updated from observed state (see `sunshine-pc/docs/status.md` section 0 for
 
 1. **Gates before any push**: matching DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged; strict link with 0 unresolved symbols; `TEMP-DEBUG` grep empty; fresh-clone build passes.
 2. **Short tasks**: every agent task is one concrete deliverable time-boxed to ~30 min (edit→build→run→evidence at least every 15 min, one line per cycle in `sunshine-pc/build/progress.log`); it then reports and the next step becomes a new task.
-3. **Concurrency**: at most 3 agents that build the port or run the game. Decomp-only agents (single-unit mwcc + objdiff, ~1 s per compile) may run up to 6 at once, ~45 min per task, one progress.log line per finished function. Each builds only its own tree. Multi-file Aurora work happens in a private copy (`-DSUNSHINE_AURORA_DIR=<copy>`) and lands in one step. Timing measurements (fps, logic rate, latency) are taken only while no other agent runs.
+3. **Concurrency**: at most 3 agents that build the port or run the game. Decomp-only agents (single-unit mwcc + objdiff, ~1 s per compile) may run up to ~13 at once while CPU load stays low (16 threads; check load before adding), ~45 min per task, one progress.log line per finished function. Each agent owns whole units; shared headers through one owner. Multi-file Aurora work happens in a private copy (`-DSUNSHINE_AURORA_DIR=<copy>`) and lands in one step. Timing measurements (fps, logic rate, latency) are taken only while no other agent runs.
 4. **Evidence**: a feature counts as done only with a log excerpt or screenshot. Dev hooks are named as such.
 5. **Decomp changes**: `#ifdef TARGET_PC` for port behaviour; asm-proven decomp bugs are fixed unguarded only in NonMatching units, with an `// asm 0x<addr>` comment.
 6. **Saves**: tests use a temp save directory, never the user's `%APPDATA%\Sunshine\saves`.
@@ -24,7 +24,7 @@ Runtime bugs keep coming from NonMatching functions (wrong masks, swapped branch
 | Empty decomp bodies with `TARGET_PC` stubs | OPEN (40 found) | reconstruct from asm or inlined call sites, drop the stub |
 | Fully matching units flipped to `Matching` in `configure.py` | OPEN | lead, after SHA-1 gate |
 
-Exit criterion: every function the port builds is an exact match or has a recorded asm-equivalence review (triage score only ranks the work), no `TARGET_PC` stub over an empty body.
+Exit criterion: every function the port builds is an exact match (preferred; user priority) or, where a known codegen limit blocks matching, has a whole-function asm-equivalence review in `sunshine-pc/docs/decomp-verified.tsv` (triage score only ranks the work); no `TARGET_PC` stub over an empty body.
 Scope limit (`sms/AGENTS.md`): agents do no autonomous decomp work on MSL, MetroTRK, THPPlayer, the dolphin SDK or JSystem; only game code. Port fixes in those libraries stay under `TARGET_PC`.
 
 ## Phase 1: Boot to gameplay (core)

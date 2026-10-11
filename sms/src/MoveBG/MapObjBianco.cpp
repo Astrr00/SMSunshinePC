@@ -704,11 +704,10 @@ void TBiancoMiniWindmill::calc()
 	MsMtxSetRotZ(rot, unk150);
 	MTXConcat(getModel()->getAnmMtx(0), rot, rot);
 
-	MtxPtr joint = getModel()->getAnmMtx(1);
-	rot.ref(0, 3) = joint[0][3];
-	rot.ref(1, 3) = joint[1][3];
-	rot.ref(2, 3) = joint[2][3];
-	getModel()->setAnmMtx(1, rot);
+	MtxPtr srcMtx = getModel()->getAnmMtx(1);
+	for (int i = 0; i < 3; ++i)
+		rot.ref(i, 3) = srcMtx[i][3];
+	MTXCopy(rot, getModel()->getAnmMtx(1));
 
 	SMSGetMSound()->startSoundActorWithInfo(
 	    MSD_SE_OBJ_BI_COINMILL, &mPosition, nullptr, fabsf(unk154), 0, 0,

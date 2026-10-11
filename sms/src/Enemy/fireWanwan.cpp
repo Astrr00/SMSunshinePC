@@ -401,6 +401,13 @@ void TFireWanwanTailNode::setBarAnmMtx(MtxPtr mtx)
 }
 
 #pragma dont_inline on
+static f32 invSqrtCall(f32 mag)
+{
+	return JGeometry::TUtil<f32>::inv_sqrt(mag);
+}
+#pragma dont_inline off
+
+#pragma dont_inline on
 void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
                                   const JGeometry::TVec3<f32>& param_3,
                                   const JGeometry::TVec3<f32>& param_4)
@@ -410,33 +417,30 @@ void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
 
 		// Basis built inline as retail does: X = norm(up x dir), Y = norm(dir x X),
 		// both zeroed when lenSq <= 2^-18; Z column is dir as given.
-		const f32 dx = param_4.x;
-		const f32 dy = param_4.y;
-		const f32 dz = param_4.z;
 		const f32 kEps = 1.0f / 262144.0f;
 
-		f32 xx = dz;
-		f32 xz = -dx;
+		f32 xx = param_4.z;
+		f32 xz = -param_4.x;
 		f32 lsq = xx * xx + xz * xz;
 		if (lsq <= kEps) {
 			xx = 0.0f;
 			xz = 0.0f;
 		} else {
-			f32 k = JGeometry::TUtil<f32>::inv_sqrt(lsq);
+			f32 k = 1.0f * invSqrtCall(lsq);
 			xx *= k;
 			xz *= k;
 		}
 
-		f32 yx = dy * xz;
-		f32 yy = dz * xx - dx * xz;
-		f32 yz = -dy * xx;
+		f32 yx = param_4.y * xz;
+		f32 yy = param_4.z * xx - param_4.x * xz;
+		f32 yz = -param_4.y * xx;
 		lsq = yx * yx + yy * yy + yz * yz;
 		if (lsq <= kEps) {
 			yx = 0.0f;
 			yy = 0.0f;
 			yz = 0.0f;
 		} else {
-			f32 k = JGeometry::TUtil<f32>::inv_sqrt(lsq);
+			f32 k = 1.0f * invSqrtCall(lsq);
 			yx *= k;
 			yy *= k;
 			yz *= k;
@@ -448,9 +452,9 @@ void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
 		mtx.ref(0, 1) = yx;
 		mtx.ref(1, 1) = yy;
 		mtx.ref(2, 1) = yz;
-		mtx.ref(0, 2) = dx;
-		mtx.ref(1, 2) = dy;
-		mtx.ref(2, 2) = dz;
+		mtx.ref(0, 2) = param_4.x;
+		mtx.ref(1, 2) = param_4.y;
+		mtx.ref(2, 2) = param_4.z;
 
 		mtx.setTrans(param_3);
 

@@ -323,11 +323,11 @@ void TBGTakeHit::perform(u32 cue, JDrama::TGraphics* graphics)
 			JGeometry::TVec3<f32> vec1(mtx[0][0], mtx[1][0], mtx[2][0]);
 
 			JGeometry::TVec3<f32> vec2;
-			vec2.cross(vec1, JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f));
+			vec2.cross(JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f), vec1);
 			vec2.normalize();
 
 			JGeometry::TVec3<f32> vec3;
-			vec3.cross(vec2, JGeometry::TVec3<f32>(0.0f, 0.0f, 1.0f));
+			vec3.cross(vec2, JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f));
 			vec3.normalize();
 
 			unk80.mMtx[0][0] = vec2.x;
@@ -990,8 +990,11 @@ void TBGTentacle::moveConstraint()
 	case 1:
 		for (int i = 0; i < mNodeNum; ++i) {
 			MtxPtr mtx = unk80->getModel()->getAnmMtx(i);
-			mNodes[i].setUnk18(
-			    JGeometry::TVec3<f32>(mtx[0][3], mtx[1][3], mtx[2][3]));
+			JGeometry::TVec3<f32> pos;
+			pos.x = mtx[0][3];
+			pos.y = mtx[1][3];
+			pos.z = mtx[2][3];
+			mNodes[i].setUnk18(pos);
 		}
 		int iVar10;
 		if (mOwner->beakHeld()) {
@@ -1013,8 +1016,11 @@ void TBGTentacle::moveConstraint()
 	case 10:
 		for (int i = 0; i < mNodeNum; ++i) {
 			MtxPtr mtx = unk80->getModel()->getAnmMtx(i);
-			mNodes[i].setUnk18(
-			    JGeometry::TVec3<f32>(mtx[0][3], mtx[1][3], mtx[2][3]));
+			JGeometry::TVec3<f32> pos;
+			pos.x = mtx[0][3];
+			pos.y = mtx[1][3];
+			pos.z = mtx[2][3];
+			mNodes[i].setUnk18(pos);
 		}
 		break;
 
@@ -1036,8 +1042,11 @@ void TBGTentacle::moveConstraint()
 			int iVar15          = jntidx[mIndex];
 			for (int i = 0; i < mNodeNum; ++i) {
 				MtxPtr mtx = mOwner->getModel()->getAnmMtx(i + iVar15);
-				mNodes[i].setUnk18(
-				    JGeometry::TVec3<f32>(mtx[0][3], mtx[1][3], mtx[2][3]));
+				JGeometry::TVec3<f32> pos;
+				pos.x = mtx[0][3];
+				pos.y = mtx[1][3];
+				pos.z = mtx[2][3];
+				mNodes[i].setUnk18(pos);
 			}
 		}
 		break;

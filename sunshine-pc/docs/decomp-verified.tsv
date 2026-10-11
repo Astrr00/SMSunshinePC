@@ -1,6 +1,7 @@
 # Decomp asm-equivalence review ledger. One row per function reviewed line-by-line against retail asm whose remaining
 # objdiff diffs are codegen only (register, stack, scheduling, out-of-line helper). Columns: unit, function, match %, status, reviewer.
 # Rows are the reviewing agent's record; spot checks by the lead are noted in the status column.
+# Only status "logic-verified" counts, and only for a whole-function review; partially read functions are "partial (pending review)".
 MoveBG/MapObjCorona	TBathtub::allowsTumble		logic-verified	DecompMoveBG2
 MoveBG/MapObjCorona	TBathtub::setupCollisions_		logic-verified	DecompMoveBG2
 MoveBG/MapObjCorona	TBathtub::startDemo		logic-verified	DecompMoveBG2
@@ -38,12 +39,12 @@ System+Camera	TRope::moveHead		logic-verified	DecompSystem3
 System+Camera	CLBRotatePosAndUp		logic-verified	DecompSystem3
 System+Camera	calcInHouseNo_		logic-verified	DecompSystem3
 System+Camera	changeCamModeSub_		logic-verified	DecompSystem3
-System+Camera	CPolarSubCamera::loadAfter (tail unchecked)		logic-verified	DecompSystem3
+System+Camera	CPolarSubCamera::loadAfter (tail unchecked)		partial (pending review)	DecompSystem3
 System+Camera	calcPosAndAt_		logic-verified	DecompSystem3
 System+Camera	nextStateInitialize		logic-verified	DecompSystem3
-System+Camera	decideNextStage		logic-verified	DecompSystem3
+System+Camera	decideNextStage		partial (pending review)	DecompSystem3
 System+Camera	fireStreamingMovie		logic-verified	DecompSystem3
-System+Camera	findNearestTalkNPC		logic-verified	DecompSystem3
+System+Camera	findNearestTalkNPC		partial (pending review)	DecompSystem3
 Player/MarioMove+WaterGun	isForceSlip		logic-verified	DecompPlayer5
 Player/MarioMove+WaterGun	moveRequest		logic-verified	DecompPlayer5
 Player/MarioMove+WaterGun	thinkYoshiHeadCollision		logic-verified	DecompPlayer5
@@ -133,10 +134,10 @@ Player/MarioWait	TMario::waitingCommonEvents	99.96	logic-verified	DecompPlayer7
 Enemy/igaiga	RollEnemyBodyCallback	81.83	logic-verified	DecompEnemy6
 Enemy/bossManta	TBossMantaManager::updateMantaEscape	90.04651	logic-verified	DecompEnemyBoss
 Enemy/bossManta	TBossManta::moveObject	95.333336	logic-verified	DecompEnemyBoss
-System/MarDirectorDirect	TMarDirector::updateGameMode	89.62	logic-verified	DecompMix1
+System/MarDirectorDirect	TMarDirector::updateGameMode	89.62	partial (pending review)	DecompMix1
 Enemy/bossManta	TBossManta::updateAttractor	87.06422	logic-verified	DecompEnemyBoss
-System/MarDirectorDirect	TMarDirector::setMario	92.97	logic-verified	DecompMix1
-System/MarDirectorDirect	decideNextStage	92.91	logic-verified	DecompMix1
+System/MarDirectorDirect	TMarDirector::setMario	92.97	partial (pending review)	DecompMix1
+System/MarDirectorDirect	decideNextStage	92.91	partial (pending review)	DecompMix1
 MoveBG/MapObjMare	TMapObjGrowTree::touchWater	89.78	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjMare	TMuddyBoat::bind	81.65	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjSirena	TCloset::moveObject	98.52	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
@@ -150,8 +151,8 @@ MoveBG/MapObjMamma	TSandCastle::expanded	90.48	logic-verified (insert/delete row
 MoveBG/MapObjTown	TMapObjSwitch::control	92.27	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjPollution	TMapObjRevivalPollution::loadAfter	88.07	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjInit	TMapObjBase::initMActor	86.88	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-System/EventWatcher	evWarpFrontToMario	84.08	logic-verified (set(const Vec&) TVec3 helper out of line; reloc = same TSpcStack strings; stack/reg)	DecompMix1
-System/EventWatcher	evAppear8RedCoinsAndTimer	92.25	logic-verified (reg/stack/rodata-base scheduling only)	DecompMix1
+System/EventWatcher	evWarpFrontToMario	84.08	partial (pending review)	DecompMix1
+System/EventWatcher	evAppear8RedCoinsAndTimer	92.25	partial (pending review)	DecompMix1
 MoveBG/MapObjLib	TMapObjBase::makeMtxRotByAxis	65.93	logic-verified	DecompMix2
 MoveBG/MapObjCorona	TBathtubGripPartsHard::~TBathtubGripPartsHard	83.88	logic-verified	DecompMix2
 MoveBG/MapObjCorona	TBathtubGripPartsFragile::~TBathtubGripPartsFragile	83.88	logic-verified	DecompMix2
@@ -167,10 +168,10 @@ Enemy/bossManta	TBossMantaManager::createEnemies	99.78824	logic-verified	DecompE
 Enemy/bossManta	TNerveMantaMove::execute	97.95813	logic-verified	DecompEnemyBoss
 GC2D/Menu	TMenuPlane::TMenuPlane	93.07	logic-verified	DecompMix2
 Enemy/igaiga	TRollEnemy::setBehavior	94.63	logic-verified	DecompEnemy7
-System/TalkCursor	TTalkCursor::associateNPC	93.62857	logic-verified	DecompMix1
-System/MarDirectorEvent	TMarDirector::findNearestTalkNPC	94.75	logic-verified	DecompMix1
-System/MarDirectorEvent	TMarDirector::setNextStage	94.77	logic-verified	DecompMix1
-Animal/BeeHive	TBeeHive::appearBee	85.6	logic-verified	DecompMix1
+System/TalkCursor	TTalkCursor::associateNPC	93.62857	partial (pending review)	DecompMix1
+System/MarDirectorEvent	TMarDirector::findNearestTalkNPC	94.75	partial (pending review)	DecompMix1
+System/MarDirectorEvent	TMarDirector::setNextStage	94.77	partial (pending review)	DecompMix1
+Animal/BeeHive	TBeeHive::appearBee	85.6	partial (pending review)	DecompMix1
 MoveBG/MapObjLib	TMapObjTurn::control	91.49	logic-verified	DecompMix2
 Enemy/chuuhana	TChuuHana::behaveToWater	91.83	logic-verified	DecompEnemy7
 Enemy/bossManta	TNerveMantaDeath::execute	99.881355	logic-verified	DecompEnemyBoss
@@ -179,7 +180,7 @@ Enemy/bossManta	TNerveMantaHitWater::execute	99.76613	logic-verified	DecompEnemy
 Enemy/bossManta	TNerveMantaSpawn::execute	99.81554	logic-verified	DecompEnemyBoss
 Enemy/bossManta	TBossManta::getIntoGraphVec	99.78658	logic-verified	DecompEnemyBoss
 MoveBG/MapObjRailBlock	TRailMapObj::moveToNextNode	94.29	logic-verified	DecompMix2
-Map/BathWaterManager	TBathWaterManager::throwMario	72.48	logic-verified	DecompMix1
+Map/BathWaterManager	TBathWaterManager::throwMario	72.48	partial (pending review)	DecompMix1
 Enemy/chuuhana	TChuuHana::moveObject	85.80	logic-verified	DecompEnemy7
 Enemy/bossManta	TBossMantaAdditionalCollisionSet::adapt	98.77358	logic-verified	DecompEnemyBoss
 Enemy/bossManta	TBossManta::calcRootMatrix	98.75	logic-verified	DecompEnemyBoss
@@ -188,3 +189,10 @@ MoveBG/MapObjRailBlock	TRailBlock::control	88.40	logic-verified	DecompMix2
 Enemy/bgtentacle	TBGTentacle::setAttackTarget	81.77738	logic-verified	DecompEnemy7
 GC2D/SelectMenu	TSelectGrad::perform	94.91	logic-verified	DecompMix2
 GC2D/ConsoleStr	TConsoleStr::processShineGet	90.26	logic-verified	DecompMix2
+Enemy/bgtentacle	TBGTentacle::moveConstraint	97.52	logic-verified	DecompEnemy7
+GC2D/SelectShine2	TSelectShineManager::initData	93.32	partial (pending review)	DecompMix2
+Enemy/bosswanwan	TNerveBWDie::execute	97.29	logic-verified	DecompEnemyBoss2
+MSound/MSoundSE	MSoundSESystem::MSoundSE::construct()	99.72	partial (pending review)	DecompSystemB
+Enemy/bgtentacle	TBGTakeHit::perform	92.48	partial (pending review)	DecompEnemy7
+Enemy/bgtentacle	TBGTentacle::moveConstraint	97.52	partial (pending review)	DecompEnemy7
+Enemy/bgtentacle	TBGTentacle::setAttackTarget	81.77738	partial (pending review)	DecompEnemy7
