@@ -423,7 +423,7 @@ void TSelectMenu::initData(u8 stage, JKRArchive* pArch,
 	mScenarioBmg = JKRGetResource("/common/2d/scenarioname.bmg");
 
 	strncpy(mStageName->getStringPtr(),
-	        SMSGetMessageData(mScenarioBmg, tags[mStage] & 0xFFFF), 0x11);
+	        SMSGetMessageData(mScenarioBmg, unkArr[mStage] & 0xFFFF), 0x11);
 	mStageName->setFont((JUTFont*)gpSystemFont);
 
 	mShineUnlockStates[0] = 2;
