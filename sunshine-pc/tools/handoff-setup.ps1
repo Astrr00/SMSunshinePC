@@ -73,7 +73,7 @@ if (-not (Test-Path (Join-Path $aur "CMakeLists.txt")) -and (Test-Path (Join-Pat
   Copy-Item -Recurse -Force (Join-Path $bundle "aurora-worktree\*") $aur
 }
 
-# 7b. apply the aurora patch series on the pinned upstream (50e5be3); verified state here = 50e5be3 + patches 0001-0007
+# 7b. apply the aurora patch series on the pinned upstream (50e5be3); verified state here = 50e5be3 + patches 0001-0008
 Push-Location (Join-Path $repo "sunshine-pc"); python tools\apply-aurora-patches.py; Pop-Location
 
 # 8. WIP patch (optional)
