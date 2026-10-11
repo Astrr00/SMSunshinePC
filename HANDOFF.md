@@ -28,7 +28,7 @@ No game data and no PowerPC code are tracked in git. The disc image lives under 
 
 Run `sunshine-pc/tools/handoff-setup.ps1` from the bundle root (it clones the repo from `repo.bundle`, extracts the toolchain, installs Python wheels, copies the game data, applies the WIP patch, runs the first gates). Manual equivalent:
 
-1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 8 patches`).
+1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 9 patches`).
 2. Extract `toolchain/llvm.tar.xz`; `setx LLVM_BIN <folder>\bin`.
 3. `pip install -r sunshine-pc/tools/requirements.txt` (online).
 4. Copy the game data folder to `sms/orig/GMSJ01/` (keep the layout: `Super Mario Sunshine (Japan).rvz`, `extracted/`, `files/`, `sys/`).
@@ -50,7 +50,7 @@ ninja baseline && ninja changes_all                # per-function score drops (n
 cd ..\sunshine-pc
 set LLVM_BIN=<llvm>\bin
 python tools\locked.py cmd /c tools\_strict.cmd    # strict link: 0 unresolved symbols
-python tools\apply-aurora-patches.py --check       # "applied: 8 patches"
+python tools\apply-aurora-patches.py --check       # "applied: 9 patches"
 ```
 Expected at handoff: 11 013 / 12 881 functions byte-identical, 445 / 736 units Matching, 58.57 % code, 97.98 % fuzzy.
 
@@ -70,7 +70,7 @@ Expected at handoff: 11 013 / 12 881 functions byte-identical, 445 / 736 units M
 - `tools/reap.py --loop` (if running) kills `sunshine.exe` that is older than 6 min or older than `src/sdk/av.cpp`: rebuild after av.cpp edits, keep runs < 6 min, check `build/reap.log` when a process dies. Serialise game runs with `python sunshine-pc/tools/runlock.py acquire <name>` / `release` (owner-only release, `touch` heartbeat, log in `build/runlock.log`). Kill only your own PID.
 - Scripted runs: `python tools/route.py <tree> <script.dev> --name <n> --seconds 330` from `sunshine-pc` (wraps the rules above: invisible, muted, temp APPDATA, run lock, own PID only). Scripts live in `tools/routes/`; verbs and conditions are listed in `docs/session-2026-10-11.md` section 2.1. Run `tools\_strict.cmd` from PowerShell (Git Bash turns `cmd /c` into `cmd C:\`), and start long runs with the harness's background mode, not `( ... &)`. After a killed run release a stale lock with `python tools/runlock.py release lead`.
 - Dev switches (`SUNSHINE_DEV_START=bianco/0`, `SUNSHINE_DEV_SCRIPT`, `SUNSHINE_DEV_STATUS`, `SUNSHINE_DEV_SEED`, `SUNSHINE_DEV_MAX_SECONDS`, `SUNSHINE_CHECK_HEAP`, `AURORA_SCREENSHOT*`) are for diagnosis; the acceptance flow (B1) must run without start/skip switches.
-- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0008`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
+- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0009`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
 - Dolphin as a reference emulator is blocked (apploader stall, popups); do not run it.
 
 Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit, not on a known remote branch), but `apply-aurora-patches.py --check` says its files equal upstream 50e5be3 + patches 0001-0007 (0008, the FIFO diagnostics patch, was added on 2026-10-11). On a new PC `git submodule update --init` checks out 50e5be3; then run `python sunshine-pc/tools/apply-aurora-patches.py` (the setup script does) and expect `applied: 8 patches`. `aurora-worktree/` in the bundle is the already-patched fallback.
@@ -80,7 +80,7 @@ Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit,
 Measured state: see `README.md` table and `sunshine-pc/docs/session-2026-10-11.md` (gates, observed vs inferred, decomp
 changes, crash analysis). Highlights (2026-10-11):
 
-- Gates: SHA-1 ok, 11 013 / 12 881 functions, 445 / 736 units, strict link 0 unresolved, Aurora series 8 patches.
+- Gates: SHA-1 ok, 11 013 / 12 881 functions, 445 / 736 units, strict link 0 unresolved, Aurora series 9 patches.
 - **The retail flow is now scripted by conditions and reproducible up to airport0**: from `sunshine-pc`, after
   `tools\_strict.cmd`: `python tools/route.py Strict tools/routes/07_airport.dev --name <n> --seconds 330`.
   Title (option map, stage 15) -> card prompts (`cardprog=19`) -> bump file block B -> new game -> opening movie -> airport0

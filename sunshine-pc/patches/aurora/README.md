@@ -33,6 +33,7 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0006-pass-dump-and-screenshot.patch` | `AURORA_DUMP_PASSES` pass dump with per-draw descriptions (`TitleRender` fields in `command_processor.cpp`); frame screenshot with `AURORA_SCREENSHOT_EVERY=<n>:<file.png>` live monitor mode and `aurora_screenshot_next(path)`; `CopySrc` usage flags on render/conv textures (topic by inference, see below) | 12 | +705 / -2 |
 | `0007-texture-side-channel.patch` | `GX_AURORA_SET_TEX_DATA` / `SET_TLUT_DATA` / `SET_TEX_TLUT`: texture host pointers and TLUT state passed from `GDTexture.cpp` to the GX command stream | 4 | +76 / -3 |
 | `0008-gx-fifo-desync-diagnostics.patch` | on a FIFO "draw vertex data overrun" the parser prints the last 8 parsed draws (vertex layout snapshot) and, from a 8192-entry ring of GXBegin calls, the GXBegin neighbours of the failing stream position with their caller address; diagnostics only, no behaviour change | 4 | +112 / -0 |
+| `0009-gx-fifo-overrun-diagnostics-ring.patch` | on a FIFO overrun the parser also prints the last 64 FIFO commands (opcode@position) and a 256-byte hex dump before the failing draw; diagnostics only (found the J3DShape slot-tail bug, see `sunshine-pc/docs/session-2026-10-11b.md`) | 1 | see patch |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
 
