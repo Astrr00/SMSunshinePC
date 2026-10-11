@@ -96,6 +96,7 @@ void TMario::dropObject()
 
 bool TMario::isTakeSituation(THitActor* object)
 {
+	char trash[0x10];
 	if (mInvincibilityFrames > 0)
 		return false;
 
@@ -289,6 +290,7 @@ void TMario::damageExec(THitActor* hittingActor, int damage, int damageAnimType,
                         int waterEmit, f32 knockbackSpeed, int rumbleFrames,
                         f32 pollutionAmount, s16 invincibilityFrames)
 {
+	char trash[0x20];
 	// volatile u32 padding[10];
 	u32 animationTypes[16] = {
 		MARIO_STATUS_SAFE_BACK_DOWN,

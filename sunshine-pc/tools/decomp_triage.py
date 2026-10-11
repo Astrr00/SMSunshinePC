@@ -13,7 +13,7 @@ Known false positive: string-pool offsets (addi rX, rY, imm) show as imm.
   python sunshine-pc/tools/decomp_triage.py --build <unit>      recompile one unit with mwcc, print its rows
   python sunshine-pc/tools/decomp_triage.py --diff <unit> <sym> [ctx]  differing rows only: retail | ours (ctx rows around)
 """
-import json, os, subprocess, sys, collections
+import json, os, subprocess, sys, collections, struct
 from concurrent.futures import ThreadPoolExecutor
 
 SMS = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "sms"))
@@ -91,7 +91,7 @@ def build(name):
         print(f["score"], f["match"], f["fn"], f["diffs"])
     print(f"nonmatching={len(rows)} risky={sum(1 for f in rows if f['score'])}")
 
-def diff(name, sym, ctx=0):
+def lookup(name, sym):
     out = subprocess.run([OBJDIFF, "diff", "-p", SMS, "-u", name, "-o", "-", "--format", "json"],
                          capture_output=True, text=True, creationflags=NOWIN)
     j = json.loads(out.stdout)
@@ -100,10 +100,112 @@ def diff(name, sym, ctx=0):
     hits = [s for s in fns if s["name"] == sym] or [s for s in fns if sym in s.get("demangled_name", "")]
     if len(hits) != 1:
         print(f"{len(hits)} matches for {sym!r}:", *[s["name"] for s in hits[:10]])
-        return
+        return None
     s = hits[0]
     L = s.get("instructions", [])
     R = rs[s["target_symbol"]].get("instructions", []) if s.get("target_symbol") is not None else []
+    return s, L, R, ls, rs
+
+
+FUSED = {"fmadds", "fmsubs", "fnmadds", "fnmsubs", "fmadd", "fmsub", "fnmadd", "fnmsub"}
+
+
+def check(name, sym):
+    """Mechanical gate for a logic-verified claim: same calls in order, same fused/unfused FP ops,
+    same non-move opcode histogram. Prints OK or each mismatch; every mismatch must be explained."""
+    r = lookup(name, sym)
+    if not r:
+        return
+    s, L, R, ls, rs = r
+    ins = lambda rows: [i["instruction"] for i in rows if i.get("instruction")]
+    li, ri = ins(L), ins(R)
+    mn = lambda i: i.get("formatted", "").split(" ")[0]
+
+    def calls(rows, syms):
+        out = []
+        for i in rows:
+            m = mn(i)
+            if m in ("bl", "b") and "relocation" in i:
+                out.append(norm(syms[i["relocation"]["target_symbol"]]["name"]))
+            elif m in ("bctrl", "bctr"):
+                out.append(m)
+        return out
+
+    def vslots(rows):
+        return [i["formatted"].split(",")[1].strip() for i in rows
+                if i.get("formatted", "").startswith("lwz r12, ") and i["formatted"].endswith("(r12)")]
+
+    moves = {"mr", "fmr", "li", "lis", "nop"}
+    stack = lambda i: "(r1)" in i.get("formatted", "")
+    hist = lambda rows: collections.Counter(mn(i) for i in rows if mn(i) not in moves and not stack(i))
+    problems = []
+    cl, cr = calls(li, ls), calls(ri, rs)
+    if cl != cr:
+        problems.append(f"calls differ:\n  retail {cl}\n  ours   {cr}")
+    if vslots(li) != vslots(ri):
+        problems.append(f"vtable slots differ: retail {vslots(li)} ours {vslots(ri)}")
+    hl, hr = hist(li), hist(ri)
+    fl = sum(v for k, v in hl.items() if k in FUSED)
+    fr = sum(v for k, v in hr.items() if k in FUSED)
+    if fl != fr:
+        problems.append(f"fused FP ops differ: retail {fl} ours {fr} (rounding differs)")
+    d = {k: hl[k] - hr[k] for k in set(hl) | set(hr) if hl[k] != hr[k]}
+    if d:
+        problems.append(f"opcode histogram (retail-ours, excl. moves/stack): {dict(sorted(d.items()))}")
+    cvl, cvr = consts(name, li, ls, "target_path"), consts(name, ri, rs, "base_path")
+    if cvl is not None and cvr is not None and sorted(cvl) != sorted(cvr):
+        problems.append(f"pool constants differ (as multisets):\n  retail {sorted(cvl)}\n  ours   {sorted(cvr)}")
+    print(f"{s['name']} {s.get('match_percent')}%:", "OK" if not problems else "")
+    for p in problems:
+        print(" -", p)
+    print("note: branch sense/targets (which code sits on the taken vs fallthrough path) still need a manual check")
+
+
+_elf_cache = {}
+
+
+def consts(name, rows, syms, which):
+    """Values of literal-pool / small-data constants loaded by these rows (lfs/lfd/lwz/lha… via @NNN symbols)."""
+    try:
+        from elftools.elf.elffile import ELFFile
+    except ImportError:
+        return None
+    p = json.load(open(os.path.join(SMS, "objdiff.json")))
+    path = os.path.join(SMS, next(u[which] for u in p["units"] if u["name"] == name))
+    if path not in _elf_cache:
+        f = ELFFile(open(path, "rb"))
+        tab = {}
+        for sym in f.get_section_by_name(".symtab").iter_symbols():
+            if sym["st_shndx"] not in ("SHN_UNDEF", "SHN_ABS", "SHN_COMMON"):
+                tab[sym.name] = (f.get_section(sym["st_shndx"]), sym["st_value"], sym["st_size"])
+        _elf_cache[path] = tab
+    tab = _elf_cache[path]
+    out = []
+    for i in rows:
+        m = i.get("formatted", "").split(" ")[0]
+        if "relocation" not in i or m not in ("lfs", "lfd", "lwz", "lhz", "lha", "lbz", "lfsu"):
+            continue
+        n = syms[i["relocation"]["target_symbol"]]["name"]
+        if n not in tab or not (n.startswith("@") or n.startswith("lbl_")):
+            continue
+        sec, off, size = tab[n]
+        width = 8 if m == "lfd" else 4 if m in ("lfs", "lfsu", "lwz") else 2 if m in ("lhz", "lha") else 1
+        data = sec.data()[off:off + width] if sec.header["sh_type"] != "SHT_NOBITS" else b"\0" * width
+        if m in ("lfs", "lfsu"):
+            val = f"{struct.unpack('>f', data)[0]!r}f"
+        elif m == "lfd":
+            val = repr(struct.unpack('>d', data)[0])
+        else:
+            val = "0x" + data.hex()
+        out.append(val)
+    return out
+
+
+def diff(name, sym, ctx=0):
+    r = lookup(name, sym)
+    if not r:
+        return
+    s, L, R, ls, rs = r
     fmt = lambda i: i.get("instruction", {}).get("formatted", "")
     marks = [i for i, (a, b) in enumerate(zip(L, R)) if a.get("diff_kind") or b.get("diff_kind")]
     show = sorted({k for i in marks for k in range(max(0, i - ctx), min(len(L), i + ctx + 1))})
@@ -123,6 +225,8 @@ def main():
         return build(sys.argv[2])
     if sys.argv[1:2] == ["--diff"]:
         return diff(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 0)
+    if sys.argv[1:2] == ["--check"]:
+        return check(sys.argv[2], sys.argv[3])
     rep = json.load(open(os.path.join(SMS, "build", "GMSJ01", "report.json")))
     flt = sys.argv[1] if len(sys.argv) > 1 else ""
     names = [u["name"] for u in rep["units"] if flt in u["name"]

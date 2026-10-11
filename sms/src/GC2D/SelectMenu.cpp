@@ -978,10 +978,10 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					}
 				}
 
-				alpha = mArrowR->getAlpha();
+				s32 alpha2 = mArrowR->getAlpha();
 				if (getNextIndex() == -1) {
-					if (alpha > 0) {
-						s32 alpha2 = alpha - 4;
+					if (alpha2 > 0) {
+						alpha2 -= 4;
 						if (alpha2 < 0) {
 							alpha2 = 0;
 							mArrowR->hide();
@@ -990,8 +990,8 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					}
 				} else {
 					u8 alphaRef = mMarkAlpha;
-					if (alpha < alphaRef) {
-						s32 alpha2 = alpha + 4;
+					if (alpha2 < alphaRef) {
+						alpha2 = alpha2 + 4;
 						if (alpha2 > alphaRef) {
 							alpha2 = alphaRef;
 						}

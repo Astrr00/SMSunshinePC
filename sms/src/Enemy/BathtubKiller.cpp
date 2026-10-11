@@ -13,10 +13,16 @@
 #include <MoveBG/MapObjCorona.hpp>
 #include <MoveBG/MapObjManager.hpp>
 #include <Player/MarioAccess.hpp>
+#include <Map/Map.hpp>
+#include <MSound/MSound.hpp>
+#include <MSound/MSoundSE.hpp>
+#include <MSound/SoundEffects.hpp>
+#include <System/EmitterViewObj.hpp>
 #include <Player/WaterGun.hpp>
 #include <System/FlagManager.hpp>
 #include <System/Particles.hpp>
 #include <stdlib.h>
+#include <math.h>
 
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
@@ -327,24 +333,192 @@ void TBathtubKiller::breakBathtubKiller()
 
 void TBathtubKiller::explodeBathtubKiller() { }
 
-void TBathtubKiller::bind() { }
+void TBathtubKiller::bind()
+{
+	JGeometry::TVec3<f32> pos = mPosition;
+	pos += mLinearVelocity;
+	pos += mVelocity;
+	mVelocity += unk1BC;
+
+	bool dying = mSpine->getCurrentNerve()
+	             == &TNerveBathtubKillerExplosion::theNerve();
+	if (!dying)
+		dying = mSpine->getCurrentNerve()
+		        == &TNerveBathtubKillerBreak::theNerve();
+
+	if (!dying) {
+		mGroundHeight = gpMap->checkGround(pos.x, pos.y + mHeadHeight, pos.z,
+		                                   &mGroundPlane);
+		mGroundHeight += 1.0f;
+		if (pos.y <= mGroundHeight + 0.05f) {
+			mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
+			unk1BC.zero();
+			mVelocity = unk1BC;
+			pos.y = mGroundHeight;
+		}
+
+		if (gpMap->isTouchedOneWallAndMoveXZ(&pos.x, pos.y + mHeadHeight,
+		                                     &pos.z, mBodyRadius)) {
+			dying = mSpine->getCurrentNerve()
+			        == &TNerveBathtubKillerExplosion::theNerve();
+			if (!dying)
+				dying = mSpine->getCurrentNerve()
+				        == &TNerveBathtubKillerBreak::theNerve();
+			if (!dying)
+				mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
+		}
+	}
+
+	mLinearVelocity = pos - mPosition;
+}
 
 void TBathtubKiller::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	// TODO: only the bathtub lookup is reconstructed; the cue handling that
-	// follows it in the object is still missing.
 	TSmallEnemy::perform(cue, graphics);
 
 	if (unk1CC == nullptr)
 		unk1CC
 		    = static_cast<TBathtub*>(JDrama::TNameRefGen::search("バスタブ"));
+
+	if ((cue & 1) && !checkLiveFlag(LIVE_FLAG_DEAD)) {
+		if (unk208 > 0)
+			unk208 -= 1;
+		if (unk20C > 0)
+			unk20C -= 1;
+		if (unk210 > 0)
+			unk210 -= 1;
+		if (unk214 > 0)
+			unk214 -= 1;
+		if (unk218 > 0)
+			unk218 -= 1;
+
+		if (unk208 <= 0) {
+			bool dying = mSpine->getCurrentNerve()
+			             == &TNerveBathtubKillerExplosion::theNerve();
+			if (!dying)
+				dying = mSpine->getCurrentNerve()
+				        == &TNerveBathtubKillerBreak::theNerve();
+			if (!dying)
+				mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
+		}
+
+		if (!gpMap->isInArea(mPosition.x, mPosition.z)) {
+			unk21C = 0;
+			onLiveFlag(LIVE_FLAG_DEAD);
+			stopAnmSound();
+		}
+
+		if (unk1CC->unk29A != 0) {
+			unk21C = 0;
+			onLiveFlag(LIVE_FLAG_DEAD);
+			stopAnmSound();
+		}
+	}
+
+	if ((cue & 2) && !checkLiveFlag(LIVE_FLAG_DEAD)) {
+		bool dying = mSpine->getCurrentNerve()
+		             == &TNerveBathtubKillerExplosion::theNerve();
+		if (!dying)
+			dying = mSpine->getCurrentNerve()
+			        == &TNerveBathtubKillerBreak::theNerve();
+
+		if (!dying) {
+			if (unk194 == 2) {
+				unk1FC += unk1F8;
+				if (unk1FC > 1.0f) {
+					unk1FC = 1.0f;
+					unk1F8 = -getSaveParam2()->mSLColorChangeRateDelta.get();
+				}
+				if (unk1FC < 0.0f) {
+					unk1FC = 0.0f;
+					unk1F8 = getSaveParam2()->mSLColorChangeRateDelta.get();
+				}
+				mNoseColor.r = (s16)((s32)(255.0f * unk1FC) & 0xFF);
+			}
+
+			unk1D4 += 1;
+			if (unk1D4 >= getSaveParam2()->mSLSmokeInterval.get()) {
+				unk1D4 = 0;
+				unk220.setQT(mQuat, mPosition);
+				gpMarioParticleManager->emitAndBindToMtxPtr(
+				    0x1BD, unk220, 1, this);
+			}
+
+			f32 dx = mPosition.x - gpMarioPos->x;
+			f32 dy = mPosition.y - gpMarioPos->y;
+			f32 dz = mPosition.z - gpMarioPos->z;
+			f32 dist
+			    = JGeometry::TUtil<f32>::sqrt(dx * dx + dy * dy + dz * dz);
+			if (gpMSound->gateCheck(MSD_SE_EN_KILLER_FLY)) {
+				MSoundSESystem::MSoundSE::startSoundActorWithInfo(
+				    MSD_SE_EN_KILLER_FLY, &mPosition, nullptr, dist, 0, 0,
+				    nullptr, 0, 4);
+			}
+		}
+	}
 }
 
 void TBathtubKiller::makeNoseColor() { }
 
 f32 TBathtubKiller::getBathtubY() { return 0.0f; }
 
-void TBathtubKiller::makeInitialVelocity(JGeometry::TVec3<f32>) { }
+void TBathtubKiller::makeInitialVelocity(JGeometry::TVec3<f32> v)
+{
+	f32 lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
+	f32 len = JGeometry::TUtil<f32>::sqrt(lenSq);
+	f32 maxSpeed = getSaveParam2()->mSLFlyingSpeedMax.get();
+
+	if (len > maxSpeed) {
+		if (lenSq > JGeometry::TUtil<f32>::epsilon())
+			v.scale(JGeometry::TUtil<f32>::inv_sqrt(lenSq));
+		else
+			v.zero();
+		v.scale(maxSpeed);
+	}
+
+	mVelocity = v;
+
+	f32 vLenSq = v.x * v.x + v.y * v.y + v.z * v.z;
+	if (vLenSq <= JGeometry::TUtil<f32>::epsilon())
+		v.zero();
+	else
+		v.scale(JGeometry::TUtil<f32>::inv_sqrt(vLenSq));
+
+	// zDir of mQuat, written out (retail inlines getZDir)
+	f32 ox = mQuat.x;
+	f32 oy = mQuat.y;
+	f32 oz = mQuat.z;
+	f32 ow = mQuat.w;
+	f32 cx = 2.0f * (ox * oz + ow * oy);
+	f32 cy = 2.0f * (oy * oz - ow * ox);
+	f32 cz = 1.0f - 2.0f * (ox * ox + oy * oy);
+
+	f32 ax = cy * v.z - cz * v.y;
+	f32 ay = cz * v.x - cx * v.z;
+	f32 az = cx * v.y - cy * v.x;
+	f32 axisLenSq = ax * ax + ay * ay + az * az;
+
+	f32 qx = 0.0f;
+	f32 qy = 0.0f;
+	f32 qz = 0.0f;
+	f32 qw = 1.0f;
+	if (axisLenSq > JGeometry::TUtil<f32>::epsilon()) {
+		f32 axisLen = JGeometry::TUtil<f32>::sqrt(axisLenSq);
+		f32 dot = cx * v.x + cy * v.y + cz * v.z;
+		f32 halfAngle = 0.5f * atan2f(axisLen, dot);
+		f32 s = sinf(halfAngle);
+		qx = ax * s / axisLen;
+		qy = ay * s / axisLen;
+		qz = az * s / axisLen;
+		qw = cosf(halfAngle);
+	}
+
+	// mQuat = q * mQuat
+	mQuat.x = qw * ox + qx * ow + qy * oz - qz * oy;
+	mQuat.y = qw * oy + qy * ow + qz * ox - qx * oz;
+	mQuat.z = qw * oz + qz * ow + qx * oy - qy * ox;
+	mQuat.w = qw * ow - qx * ox - qy * oy - qz * oz;
+}
 
 void TBathtubKiller::moveParabolic() { }
 

@@ -141,6 +141,7 @@ void TMapEventSink::startControl()
 
 	unk5C[mRaisingBuildingIdx]->setUpTrans(JGeometry::TVec3<f32>(
 	    info.mTranslate.x, info.mTranslate.y, info.mTranslate.z));
+	char trash[0x14];
 }
 
 void TMapEventSink::initBuilding(int index, JSUMemoryInputStream& stream)
@@ -170,6 +171,7 @@ void TMapEventSink::initWithBuildingNum(JSUMemoryInputStream& stream)
 
 void TMapEventSink::load(JSUMemoryInputStream& stream)
 {
+	char trash[0x18];
 	TMapEvent::load(stream);
 	mBuildingNum = stream.readU32();
 	initWithBuildingNum(stream);
@@ -262,6 +264,7 @@ void TMapEventSinkInPollutionReset::makeBuildingRecovered(int i)
 
 void TMapEventSinkInPollutionReset::loadAfter()
 {
+	char trash[0x88];
 	TMapEventSinkInPollution::loadAfter();
 	for (int i = 0; i < mBuildingNum; ++i) {
 		getPollutionObj(i)->alive();
@@ -271,8 +274,8 @@ void TMapEventSinkInPollutionReset::loadAfter()
 
 void TMapEventSinkBianco::finishControl()
 {
-	char trash[0x18];
 	char buffer[64];
+	char trash[0x1c];
 	if (mRaisingBuildingIdx == 0) {
 		TMapObjBase::setJointTransY(unk64, 0.0f);
 		for (int i = 0; i < 6; ++i) {

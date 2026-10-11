@@ -11,6 +11,7 @@
 DEFINE_NERVE(TNerveNPCGraphWander, TLiveActor)
 {
 	TBaseNPC* self = (TBaseNPC*)spine->getBody();
+	volatile u32 padding[2];
 	if (spine->getTime() == 0) {
 		self->unk22C->doThing();
 	}
@@ -77,7 +78,7 @@ DEFINE_NERVE(TNerveNPCGraphWait, TLiveActor)
 	TBaseNPC* self = (TBaseNPC*)spine->getBody();
 
 	if (spine->getTime() == 0)
-		self->unk22C->doThing();
+		self->unk22C->doThingWait();
 
 	if (self->getMarchSpeed() < 0.001f) {
 		if (self->unk22C->doThing2()) {
@@ -108,19 +109,21 @@ DEFINE_NERVE(TNerveNPCWaitContinue, TLiveActor)
 DEFINE_NERVE(TNerveNPCWaitMarioApproach, TLiveActor)
 {
 	TBaseNPC* self = (TBaseNPC*)spine->getBody();
+	volatile u32 padding[2];
 
 	if (self->isInBodyTurnSearchRange() && self->isClean()) {
 		spine->pushAfterCurrent(&TNerveNPCTurnToMario::theNerve());
 		return true;
 	}
 
-	if (self->getActorType() - 0x400001C > 1) {
+	u32 actorType = self->getActorType();
+	if (actorType - 0x400001C > 1) {
 
 		if (!self->isPeachTired()) {
 
 			if (self->isSunflowerReviving()) {
 				self->sunflowerReviving();
-			} else if (self->getActorType() == 0x4000006) {
+			} else if (actorType == 0x4000006) {
 				self->monteMESetAnmWhenFar();
 				self->execTurnToFirstState();
 			} else {
@@ -149,11 +152,12 @@ DEFINE_NERVE(TNerveNPCTurnToMario, TLiveActor)
 		return true;
 	}
 
-	if (self->getActorType() - 0x400001C > 1) {
+	u32 actorType = self->getActorType();
+	if (actorType - 0x400001C > 1) {
 		if (!self->isPeachTired()) {
 			if (self->isSunflowerReviving()) {
 				self->sunflowerReviving();
-			} else if (self->getActorType() == 0x4000006) {
+			} else if (actorType == 0x4000006) {
 				self->monteMESetAnmWhenNear();
 				self->execTurnToFirstState();
 			} else if (self->isTurnToMarioWhenApproach()) {

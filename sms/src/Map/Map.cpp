@@ -54,6 +54,7 @@ static void initMonte()
 	    || gpMarDirector->getCurrentStage() == 7) {
 		SMS_LoadParticle("/scene/map/map/ms_monte_yuge.jpa", 0x156);
 	}
+	char trash[0x50]; // unused stack slot (present in the retail frame)
 }
 
 static void initMare()
@@ -99,6 +100,7 @@ static void initMare()
 		event->init3rdEvent();
 		group->getChildren().push_back(event);
 	}
+	char trash[0x18]; // unused stack slot (present in the retail frame)
 }
 
 #pragma dont_inline on
@@ -117,6 +119,7 @@ static void initPinnaParco()
 
 static void initStageCommon()
 {
+	char trash[0x78]; // unused stack slot (present in the retail frame)
 	JDrama::TViewObjPtrListT<JDrama::TViewObj>* group
 	    = static_cast<JDrama::TViewObjPtrListT<JDrama::TViewObj>*>(
 	        JDrama::TNameRefGen::search("インダイレクトシーン"));
@@ -158,6 +161,7 @@ static void initStageCommon()
 
 static void initStage()
 {
+	char trash[0x38]; // unused stack slot (present in the retail frame)
 	if (gpMarDirector->getCurrentStage() > 9)
 		return;
 
@@ -206,7 +210,7 @@ static void initStage()
 
 void TMap::updateDelfino()
 {
-	if (gpCubeArea->unk1C != mWarp->unk8) {
+	if (mWarp->unk8 != gpCubeArea->unk1C) {
 		int cube = gpCubeArea->unk1C;
 		if (cube != -1)
 			mWarp->changeModel(cube);
@@ -301,12 +305,14 @@ const TBGCheckData* TMap::intersectLine(const JGeometry::TVec3<f32>& param_1,
 
 bool TMap::isTouchedOneWall(f32 x, f32 y, f32 z, f32 radius) const
 {
+	char trash[4]; // unused stack slot (present in the retail frame)
 	return isTouchedOneWallAndMoveXZ(&x, y, &z, radius);
 }
 
 bool TMap::isTouchedOneWallAndMoveXZ(f32* x, f32 y, f32* z, f32 radius) const
 {
 	TBGWallCheckRecord record(*x, y, *z, radius, 1, 0);
+	char trash[4]; // unused stack slot (present in the retail frame)
 
 	int r = mCollisionData->checkWalls(&record);
 	if (r != 0 ? true : false) {

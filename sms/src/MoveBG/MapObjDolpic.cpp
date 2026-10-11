@@ -90,6 +90,7 @@ void TMonumentShine::hitByWater(THitActor* actor)
 	} else {
 		unk140 -= 0.004f;
 	}
+	char trash[8]; // unused stack slot (present in the retail frame)
 }
 
 BOOL TMonumentShine::receiveMessage(THitActor* sender, u32 message)
@@ -236,6 +237,7 @@ void TBellDolpic::calcRootMatrix()
 
 void TBellDolpic::ring(const JGeometry::TVec3<f32>& pos)
 {
+	char trash[4]; // unused stack slot (present in the retail frame)
 	if (fabsf(unk150) > 0.01f)
 		return;
 	JGeometry::TVec3<f32> diff = mPosition;
@@ -256,6 +258,7 @@ void TBellDolpic::ring(const JGeometry::TVec3<f32>& pos)
 
 	f32 tmp = (f32)rand() * 0.000030517578f;
 	unk158  = (int)(tmp * 14400.0f) + 0x5460;
+	char trash2[4]; // unused stack slot (present in the retail frame)
 }
 
 void TBellDolpic::touchPlayer(THitActor* actor) { ring(actor->mPosition); }

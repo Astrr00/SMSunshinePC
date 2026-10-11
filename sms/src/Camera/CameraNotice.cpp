@@ -49,6 +49,7 @@ void CPolarSubCamera::setNoticeInfo()
 
 TLiveActor* CPolarSubCamera::getNoticeActor_()
 {
+	char trash[0x30];
 	if (mNoticeActor != nullptr && !mNoticeActor->checkLiveFlag(LIVE_FLAG_DEAD)
 	    && !mNoticeActor->checkLiveFlag(LIVE_FLAG_HIDDEN)) {
 
@@ -107,7 +108,7 @@ TLiveActor* CPolarSubCamera::getNoticeActor_()
 		if (!inClipY)
 			continue;
 
-		if (!MsIsInSight(*gpMarioPos, DEG2SHORTANGLE(*gpMarioAngleY),
+		if (!MsIsInSight(*gpMarioPos, SHORTANGLE2DEG(*gpMarioAngleY),
 		                 unk2A0[i]->mPosition, dist2,
 		                 mSaveNotice->mOnDegree.get(), -1.0f))
 			continue;
@@ -148,6 +149,7 @@ void CPolarSubCamera::execNoticeOnOffProc_(EnumNoticeOnOffMode mode)
 void CPolarSubCamera::calcNoticeTargetYrot_(const Vec& target)
 {
 	Vec mPos     = gpCameraMario->unk0;
+	char trash[0x20];
 	f32 dz2      = CLBSquared<f32>(mPos.z - target.z);
 	f32 dx2      = CLBSquared<f32>(mPos.x - target.x);
 	f32 dist2    = dx2 + dz2;
@@ -207,6 +209,7 @@ void CPolarSubCamera::getNozzleTopPos_(JGeometry::TVec3<f32>* out) const
 
 void CPolarSubCamera::ctrlLButtonCamera_()
 {
+	char trash[0x30];
 	f32 stickX = -unk120->mCompSPos[4];
 	f32 stickY = -unk120->mCompSPos[5];
 

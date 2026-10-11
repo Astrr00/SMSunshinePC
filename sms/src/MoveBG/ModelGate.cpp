@@ -40,6 +40,7 @@ static const char* gateMActorNames[] = {
 
 void TModelGate::perform(u32 param_1, JDrama::TGraphics* param_2)
 {
+	char trash[156];
 	if (!(mFlags & 1))
 		return;
 
@@ -295,6 +296,7 @@ void TModelGate::screenBlur(JDrama::TGraphics* graphics)
 
 	u8 blur = (u8)(mBlurAlpha * (1.0f - gpCamera->unk270));
 	JGeometry::TVec3<f32> offset(viewDir.x, viewDir.y, viewDir.z);
+	char trash[16];
 	TAfterEffect* effect                    = gpAfterEffect;
 	effect->unk15                           = 2;
 	effect->unk1C                           = blur;
@@ -390,6 +392,7 @@ void TModelGate::loadAfter()
 	    ->getChildren()
 	    .push_back(this);
 
+	char trash[64];
 	Mtx mtx;
 	SMS_GetActorMtx(*this, mtx);
 	mActor->getModel()->setBaseTRMtx(mtx);

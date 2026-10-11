@@ -52,6 +52,14 @@ void CPolarSubCamera::endSimpleDemoCamera_()
 	}
 }
 
+// Retail calls TVec3::add out of line here; mwcc would inline the header version.
+#pragma dont_inline on
+static void addOutOfLine(JGeometry::TVec3<f32>& dst, const JGeometry::TVec3<f32>& src)
+{
+	dst += src;
+}
+#pragma dont_inline off
+
 void CPolarSubCamera::updateDemoCamera_(bool param_1)
 {
 	if (param_1) {
@@ -74,7 +82,7 @@ void CPolarSubCamera::updateDemoCamera_(bool param_1)
 					f32 cs                       = JMASCos(angle);
 					JGeometry::TVec3<f32> delta(dx * cs + dz * sn, dy,
 					                            -dx * sn + dz * cs);
-					result += delta;
+					addOutOfLine(result, delta);
 					unk124 = result;
 				}
 
@@ -87,7 +95,7 @@ void CPolarSubCamera::updateDemoCamera_(bool param_1)
 					f32 cs                       = JMASCos(angle);
 					JGeometry::TVec3<f32> delta(dx * cs + dz * sn, dy,
 					                            -dx * sn + dz * cs);
-					result += delta;
+					addOutOfLine(result, delta);
 					unk148 = result;
 				}
 
@@ -137,6 +145,7 @@ void CPolarSubCamera::updateGateDemoCamera_()
 void CPolarSubCamera::startGateDemoCamera(const JDrama::TActor* actor)
 {
 	char buf[0x80];
+	char trash[4];
 
 	snprintf(buf, 0x80, "%s前カメラ", actor->getName());
 	TCameraMapTool* tool = (TCameraMapTool*)gpCamMapToolTable->searchF(

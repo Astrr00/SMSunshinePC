@@ -98,6 +98,7 @@ static void initDraw()
 
 void TMapWireActorManager::doActorToWire()
 {
+	char trash[0x30];
 	TMapWire* previousWire = unk7C;
 	int cubeNo             = gpCubeWire->getInCubeNo(unk0->mPosition);
 	if (cubeNo != -1)
@@ -110,7 +111,7 @@ void TMapWireActorManager::doActorToWire()
 		unk4.unk70       = 1;
 	}
 
-	if (unk0->mHeldObject != nullptr) {
+	if (unk4.unk74->unk7C != nullptr) {
 		for (int i = 0; i < unk4.mColCount; ++i) {
 			THitActor* col = unk4.mCollisions[i];
 			if (col->isActorType(0x80000001)
@@ -232,7 +233,9 @@ void TMapWireManager::load(JSUMemoryInputStream& stream)
 	stream >> TMapWire::mDrawWidth;
 	stream >> TMapWire::mDrawHeight;
 
+	char trash[0x8];
 	s32 val;
+	char trash2[0x8];
 	stream >> val;
 	mUpperSurface.r = val;
 	stream >> val;

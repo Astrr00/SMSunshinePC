@@ -34,6 +34,7 @@ TNpcParts::TNpcParts(u32 param_1, const J3DGXColorS10* param_2,
                      TBaseNPC* param_3)
     : unk60(param_3)
 {
+	char trash[0x68];
 	const TNpcInitInfo* initInfo
 	    = SMSGetNpcInitData(unk60->getActorType() - 0x4000001);
 
@@ -56,24 +57,24 @@ TNpcParts::TNpcParts(u32 param_1, const J3DGXColorS10* param_2,
 			if (j >= unk60->getManager()->unk28)
 				break;
 
-			const TNpcModelData* puVar6 = &initInfo->unk4[i][j];
-			const char* puVar3          = puVar6->unk8[0];
+			const char* puVar3 = iVar10->unk8[j];
 			if (puVar3 == nullptr)
 				continue;
 
-			int iVar6 = strcmp(puVar6->unk0, cNpcPartsNameRootJoint) == 0
+			const char* jointName = iVar10->unk0[j];
+			int iVar6 = strcmp(jointName, cNpcPartsNameRootJoint) == 0
 			                ? -1
 			                : unk60->mMActorKeeper->getMActor(j)
 			                      ->getModel()
 			                      ->getModelData()
 			                      ->getJointName()
-			                      ->getIndex(initInfo->unk4[i + j]->unk0);
+			                      ->getIndex(jointName);
 
 			TNPCManager* manager    = (TNPCManager*)unk60->getManager();
 			SDLModelData* modelData = manager->getPartsSDLModelData(puVar3);
 			// asm 80176E68: unk0 is [lod][part] (flat part + 12*lod, stride 4 per part, 0x30 per lod)
 			unk0[j][i] = new TSharedParts(unk60, iVar6, modelData, 3);
-			if (initInfo->unk4[j]->unk2B)
+			if (iVar10->unk2B)
 				SMS_UnifyMaterial(unk0[j][i]->getMActor()->getModel());
 
 			switch (unk60->getActorType()) {
@@ -109,7 +110,7 @@ TNpcParts::TNpcParts(u32 param_1, const J3DGXColorS10* param_2,
 				break;
 
 			case 0x4000010:
-				if (i == 0 && j == 9)
+				if (j == 0 && i == 9)
 					unk0[j][i]->getMActor()->initSimpleMotionBlend(20);
 				break;
 
@@ -125,8 +126,7 @@ TNpcParts::TNpcParts(u32 param_1, const J3DGXColorS10* param_2,
 			}
 
 			for (int k = 0; k < 3; ++k) {
-				const TColorChangeInfo* ccInfo
-				    = initInfo->unk4[i][j].unk10[k].unk0;
+				const TColorChangeInfo* ccInfo = iVar10->unk10[k].unk0[j];
 				if (ccInfo != nullptr)
 					SMS_InitChangeNpcColor(unk0[j][i]->getMActor(), ccInfo,
 					                       param3, param4);
@@ -154,6 +154,7 @@ TNpcParts::TNpcParts(u32 param_1, const J3DGXColorS10* param_2,
 
 void TNpcParts::addJellyFishParts(f32 param_1)
 {
+	char trash[8];
 	// asm 80176B60: jellyfish slot is this+0x2c = part 11, lod 0
 	TSharedParts** slot = &unk0[0][11];
 
@@ -178,6 +179,7 @@ void TNpcParts::addJellyFishParts(f32 param_1)
 
 void TNpcParts::setPartsAnmFrame(f32 param_1)
 {
+	char trash[0x28];
 	switch (unk60->getActorType()) {
 	case 0x4000010: {
 		if (MActor* mactor = getPartsMActor(9, 0))
@@ -230,6 +232,9 @@ void TNpcParts::partsFrameUpdate()
 
 void TNpcParts::partsPerform(u32 param_1, JDrama::TGraphics* param_2)
 {
+	char trash[0x24];
+	Mtx mtx;
+	char trash2[0x14];
 	int i = 0;
 
 	TSharedParts** it = unk0[unk60->getLodAnm()->unk8];
@@ -273,7 +278,6 @@ void TNpcParts::partsPerform(u32 param_1, JDrama::TGraphics* param_2)
 		if (param_1 & 2) {
 			if (unk60->isJellyFishMare() && i == 11) {
 				MActor* mactor = (*it)->getMActor();
-				Mtx mtx;
 				SMS_GetLightPerspectiveForEffectMtx(mtx);
 				J3DModelData* data = mactor->getModel()->getModelData();
 				int starglowMatIdx

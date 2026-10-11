@@ -101,6 +101,7 @@ void TMapObjBase::removeMapCollision()
 
 void TMapObjBase::setUpCurrentMapCollision()
 {
+	char trash[8];
 	TMapCollisionManager* colman = mMapCollisionManager;
 	if (!colman)
 		return;
@@ -198,8 +199,7 @@ void TMapObjBase::startControlAnim(u16 param_1)
 {
 	startAnim(param_1);
 	if (mMapObjData->mAnim && param_1 < mMapObjData->mAnim->unk0)
-		mMActor->getFrameCtrl(mMapObjData->mAnim->unk4[param_1].unk8)
-		    ->setRate(0);
+		mMActor->getFrameCtrl(mMapObjData->mAnim->unk4[param_1].unk8)->setRate(0);
 }
 
 void TMapObjBase::startBck(const char* param_1)
@@ -210,6 +210,7 @@ void TMapObjBase::startBck(const char* param_1)
 
 void TMapObjBase::startAnim(u16 param_1)
 {
+	char trash[0x10];
 	if (mAnmSound)
 		setAnmSound(nullptr);
 
@@ -316,6 +317,7 @@ void TMapObjBase::makeObjDead()
 
 void TMapObjBase::makeObjAppeared()
 {
+	char trash[0x28];
 	offLiveFlag(LIVE_FLAG_DEAD | LIVE_FLAG_UNK8);
 	mVelocity.x = 0.0f;
 	mVelocity.y = 0.0f;
@@ -471,6 +473,7 @@ void TMapObjBase::setGroundCollision()
 	} else {
 		JGeometry::TVec3<f32> pos(mPosition.x, mPosition.y - mYOffset,
 		                          mPosition.z);
+		char trash[0x28];
 		if (checkMapObjFlag(MAP_OBJ_FLAG_UNK4)) {
 			mMapCollisionManager->unk8->offFlag(
 			    TMapCollisionBase::FLAG_UNK8000);
@@ -489,6 +492,7 @@ void TMapObjBase::setGroundCollision()
 
 void TMapObjBase::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x30];
 	if (gpMarDirector->isTalkModeNow() && !gpMarDirector->isDemoModeNow()) {
 		if (checkLiveFlag(LIVE_FLAG_DEAD))
 			return;
@@ -634,6 +638,7 @@ BOOL TMapObjBase::receiveMessage(THitActor* sender, u32 message)
 
 void TMapObjBase::initAndRegister(const char* param_1)
 {
+	char trash[8];
 	unkF4 = param_1;
 	initMapObj();
 	if (mMapObjData->unkC) {

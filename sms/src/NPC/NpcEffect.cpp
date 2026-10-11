@@ -15,6 +15,7 @@ static const char dummy[] = "__ROOT_JOINT__";
 
 void TBaseNPC::setHappyEffectMtxPtr_(const JUTNameTab* tab)
 {
+	char trash[8];
 	const char* monte    = "koshi_null";
 	const char* mare     = "koshi";
 	const char* kinoppio = "jnt_body";
@@ -29,8 +30,10 @@ void TBaseNPC::setHappyEffectMtxPtr_(const JUTNameTab* tab)
 	else
 		jointName = nullptr;
 
-	if (jointName != nullptr)
-		mHappyEffectMtxPtr = getModel()->getAnmMtx(tab->getIndex(jointName));
+	if (jointName != nullptr) {
+		int idx = tab->getIndex(jointName);
+		mHappyEffectMtxPtr = getModel()->getAnmMtx(idx & 0xFFFF);
+	}
 }
 
 void TBaseNPC::setNoteEffectMtxPtr_(const JUTNameTab* tab)
@@ -50,8 +53,10 @@ void TBaseNPC::setNoteEffectMtxPtr_(const JUTNameTab* tab)
 		break;
 	}
 
-	if (jointName)
-		mNoteEffectMtxPtr = getModel()->getAnmMtx(tab->getIndex(jointName));
+	if (jointName) {
+		int idx = tab->getIndex(jointName);
+		mNoteEffectMtxPtr = getModel()->getAnmMtx(idx & 0xFFFF);
+	}
 }
 
 void TBaseNPC::setPollutionEffectMtxPtr_(const JUTNameTab* tab)
@@ -132,6 +137,7 @@ void TBaseNPC::emitSinkEffect_()
 
 void TBaseNPC::emitHappyEffect_()
 {
+	char trash[8];
 	JGeometry::TVec3<f32> scale = getEffectScale_();
 	scale *= mPtrSaveNormal->mSLCleanEffectScale.get();
 	if (isNormalMonte()) {

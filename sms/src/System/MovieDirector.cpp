@@ -81,8 +81,8 @@ int TMovieDirector::rsetup()
 	JKRMemArchive* subtitleArc = new JKRMemArchive;
 	subtitleArc->mountFixed(subtitleArcBlob, MBF_0);
 
-	if (gpApplication.getMovie() < 20) {
-		if (gpApplication.getMovie() < 16) {
+	if ((s32)gpApplication.getMovie() < 20) {
+		if ((s32)gpApplication.getMovie() < 16) {
 			(void)gpApplication.getMovie();
 		} else {
 			void* arcBlob
@@ -120,8 +120,8 @@ int TMovieDirector::rsetup()
 	unk2C->init(movie);
 	group2d->getChildren().push_back(unk2C);
 
-	if (gpApplication.getMovie() < 20) {
-		if (gpApplication.getMovie() < 16) {
+	if ((s32)gpApplication.getMovie() < 20) {
+		if ((s32)gpApplication.getMovie() < 16) {
 			(void)gpApplication.getMovie();
 		} else {
 			unk24 = new TCardSave;
@@ -165,18 +165,11 @@ int TMovieDirector::rsetup()
 	THPVideoInfo videoInfo;
 	THPPlayerGetVideoInfo(&videoInfo);
 
-	// TODO: Huh? TBox2 or something?
-#ifdef TARGET_PC
-	// The retail code centres the movie: x = (W - xSize) >> 1, y = (H - ySize) >> 1 (see asm 8010BD64..8010BD94). The
-	// expression kept below under #else is the decompilation's approximation (95.7% match) and puts the quad off-screen.
-	thpRender->setParams((SMSGetGameRenderWidth() - videoInfo.xSize) / 2,
-	                     (SMSGetGameRenderHeight() - videoInfo.ySize) / 2,
-	                     videoInfo.xSize, videoInfo.ySize);
-#else
-	thpRender->setParams(SMSGetGameRenderWidth() - videoInfo.xSize / 2,
-	                     SMSGetGameRenderHeight() - videoInfo.ySize / 2,
-	                     videoInfo.xSize, videoInfo.ySize);
-#endif
+	// asm 0x8010BD64: retail centres the movie, x = (W - xSize) >> 1, y = (H - ySize) >> 1
+	JGeometry::TVec2<u32> pos((SMSGetGameRenderWidth() - videoInfo.xSize) / 2,
+	                          (SMSGetGameRenderHeight() - videoInfo.ySize) / 2);
+	JDrama::TSize size(videoInfo.xSize, videoInfo.ySize);
+	thpRender->setParams(pos.x, pos.y, size.mWidth, size.mHeight);
 
 	DVDChangeDir("/");
 
@@ -295,13 +288,13 @@ int TMovieDirector::direct()
 
 	if (unk1C == STATE_SAVE_TO_TITLE || unk1C == STATE_SAVE_AND_CONTINUE) {
 		JDrama::TGraphics graphics;
-		graphics.unk2 = 1;
+		graphics.unk0 = 1;
 		unk10->testPerform(CUE_MOVE, &graphics);
-		graphics.unk2 = 0;
+		graphics.unk0 = 0;
 		unk10->testPerform(CUE_MOVE, &graphics);
-		graphics.unk2 = 0;
+		graphics.unk0 = 0;
 		unk10->testPerform(CUE_MOVE, &graphics);
-		graphics.unk2 = 0;
+		graphics.unk0 = 0;
 		unk10->testPerform(CUE_MOVE | CUE_CALC_ANIM, &graphics);
 		unk14->testPerform(CUE_DRAW, &graphics);
 	} else {
@@ -393,7 +386,7 @@ int TMovieDirector::direct()
 			THPPlayerStop();
 			unk28->unkC.on(CUE_DRAW | CUE_MOVE);
 			unk2C->unkC.on(CUE_DRAW | CUE_MOVE);
-			gpApplication.mFader->startWipe(15, 0.3f, 0.0f);
+			gpApplication.mFader->startWipe(14, 0.3f, 0.0f);
 			gpApplication.mFader->setColor(JUtility::TColor(0, 0, 0, 255));
 			unk24->init(gpApplication.getMovie() == 17 ? 8 : 0);
 			break;

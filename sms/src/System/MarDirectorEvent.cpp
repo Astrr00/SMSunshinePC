@@ -38,6 +38,7 @@ TBaseNPC* TMarDirector::findNearestTalkNPC()
 		f32 bestDist                   = 5000000.0f;
 		JGeometry::TVec3<f32> marioPos = *gpMarioPos;
 		JGadget::TVector_pointer<TBaseNPC>::iterator it;
+		char trash[36];
 
 		for (it = unk88.begin(); it != unk88.end(); ++it) {
 			TBaseNPC* npc = *it;
@@ -76,6 +77,7 @@ TBaseNPC* TMarDirector::findNearestTakeNPC()
 
 void TMarDirector::movement_game()
 {
+	char trash[40];
 	unk84->associateNPC(nullptr);
 	if ((int)unk124 == 0)
 		return;
@@ -187,6 +189,7 @@ void TMarDirector::setNextStage(u16 param_1, JDrama::TActor* param_2)
 		return;
 
 	TGameSequence local;
+	char trash[4];
 	if (param_1 >= 0x100) {
 		local.unk0 = (param_1 >> 8) - 1;
 		local.unk1 = param_1 & 0xff;
@@ -250,6 +253,7 @@ void TMarDirector::fireEndDemoCamera() { unk4C |= 0x80; }
 
 void TMarDirector::fireStreamingMovie(u8 param_1)
 {
+	char trash[40];
 	switch (param_1) {
 	case 0:
 		if (!checkUnk4CFlag(0x100)) {

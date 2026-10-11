@@ -64,6 +64,7 @@ void TMapCollisionBase::setCheckData(const f32* vertices, const s16* indices,
 
 	if (kind != 3)
 		gpMapCollisionData->addCheckDataToGrid(param_3, getUnk8());
+	char trash[0x18];
 }
 
 void TBGCheckData::updateTrans(const JGeometry::TVec3<f32>& translate_by)
@@ -124,6 +125,7 @@ void TMapCollisionBase::initAllCheckData(s16 default_additional_data,
                                          const f32* vertices, u16 param_3,
                                          const TLiveActor* actor)
 {
+	char trash[4];
 	mCheckDatas   = gpMapCollisionData->getCheckDataPoolTop();
 	mCheckDataNum = 0;
 
@@ -173,6 +175,7 @@ void TMapCollisionBase::initAllCheckData(s16 default_additional_data,
 			++mCheckDataNum;
 		}
 	}
+	char trash2[4];
 }
 
 void TMapCollisionBase::initCheckData(s16 param_1, u16 param_2,

@@ -19,7 +19,6 @@ JAISound* MSModBgm::modBgm(u8 param_1, u8 param_2)
 
 	JAISound* sound = MSBgm::getHandle(param_2);
 	if (!sound) {
-		sound = nullptr;
 		unk0  = false;
 	} else {
 		switch (unk4) {

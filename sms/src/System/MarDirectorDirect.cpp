@@ -1192,7 +1192,7 @@ void TMarDirector::moveStage()
 	}
 
 	if (gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD)) {
-		u32 r5 = gpMarioOriginal->mWaterGun->mSecondNozzle; // asm 0x800EAF2C: lbz 0x1C85, value unless 3
+		int r5 = gpMarioOriginal->mWaterGun->mSecondNozzle; // asm 0x800EAF2C: lbz 0x1C85, value unless 3
 		if (r5 == 3)
 			r5 = 4;
 		TFlagManager::smInstance->setFlag(0x40004, r5);

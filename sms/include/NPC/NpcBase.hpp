@@ -405,11 +405,20 @@ public:
 
 		void doThing()
 		{
-			int iVar13 = mPtrSaveNormal->mSLGraphWanderMinFrame.get();
 			int sVar1  = mPtrSaveNormal->mSLGraphWanderMaxFrame.get();
+			int iVar13 = mPtrSaveNormal->mSLGraphWanderMinFrame.get();
 
 			unk0 = 0;
-			unk4 = MsRandI(sVar1, iVar13);
+			unk4 = MsRandI(iVar13, sVar1);
+		}
+
+		void doThingWait()
+		{
+			int iVar13 = mPtrSaveNormal->mSLGraphWaitMinFrame.get();
+			int sVar1  = mPtrSaveNormal->mSLGraphWaitMaxFrame.get();
+
+			unk0 = 0;
+			unk4 = MsRandI(iVar13, sVar1);
 		}
 
 		bool doThing2()

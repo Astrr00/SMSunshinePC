@@ -166,7 +166,6 @@ f32 MSHandle::calcPan(const Vec& param_1, f32 param_2, f32 param_3)
 		fVar4 = fVar2 * fVar4;
 	}
 
-	f32 fVar1;
 	if (param_2 < cPan_HiSence_Dist) {
 		fVar4 *= param_2 / cPan_HiSence_Dist;
 	} else {
@@ -215,6 +214,7 @@ f32 MSHandle::calcDolby(const Vec& pos, f32 dist)
 
 void MSHandle::setSeDistanceVolume(u8 moveTime)
 {
+	char trash[8];
 	u32 swBit = getSwBit();
 	if (swBit & MSSeSwBit_ModDistanceVolume) {
 		f32 d = JALSystem::processModDistVolume(mSoundID, unk1C->unk18);

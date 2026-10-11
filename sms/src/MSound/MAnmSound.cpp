@@ -1,6 +1,7 @@
 #include <MSound/MAnmSound.hpp>
 #include <MSound/MSHandle.hpp>
 #include <math.h>
+#include <MarioUtil/MathUtil.hpp>
 
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
@@ -43,6 +44,7 @@ void MAnmSound::startAnimSound(void* interface, u32 id,
                                JAISoundHandle* out_handle, JAIActor* actor,
                                u8 camera_idx)
 {
+	char trash[8];
 	if (MSGMSound->gateCheck(id)) {
 		switch (get_thing(id)) {
 		case 0:
@@ -77,9 +79,9 @@ f32 MSMarioPosVolume::getDistFromMario(const Vec& pos)
 {
 	if (MSGMSound->cameraLooksAtMario()) {
 		const Vec* mario = MSGMSound->unkAC[0].mPosition;
-		return std::sqrtf(std::powf(pos.x - mario->x, 2.0f)
-		                  + std::powf(pos.y - mario->y, 2.0f)
-		                  + std::powf(pos.z - mario->z, 2.0f));
+		return MsSqrtf(std::powf(pos.x - mario->x, 2.0f)
+		               + std::powf(pos.y - mario->y, 2.0f)
+		               + std::powf(pos.z - mario->z, 2.0f));
 	}
 
 	return 0.0f;

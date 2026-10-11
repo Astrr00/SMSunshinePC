@@ -232,6 +232,7 @@ void TObjHitCheck::checkGroup(TIdxGroupObj* group) { }
 
 void TObjHitCheck::checkActorsHit()
 {
+	char trash[0x20];
 	initTable();
 
 	if (!(gpStrategy->unk50 & 0x800))

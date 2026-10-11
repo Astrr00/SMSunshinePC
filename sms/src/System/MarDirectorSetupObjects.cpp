@@ -133,8 +133,8 @@ bool TMarDirector::setupObjects()
 	TFlagManager::getInstance()->setFlag(0x60003, 1);
 	switch (gpApplication.mCurrArea.unk0) {
 	case 1: {
-		TFlagManager::getInstance()->setBool(true, 0x3000D);
-		TFlagManager::getInstance()->setBool(true, 0x30005);
+		TFlagManager::getInstance()->setBool(false, 0x3000D);
+		TFlagManager::getInstance()->setBool(false, 0x30005);
 		if (!TFlagManager::getInstance()->getBool(0x30003)) {
 			TFlagManager::getInstance()->setBool(true, 0x30003);
 			unk4E |= 0x2;

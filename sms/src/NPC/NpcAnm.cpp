@@ -39,6 +39,7 @@ void TBaseNPC::onStopMotionBlend() { }
 void TBaseNPC::setNpcAnm_(EnumNpcAnmKind param_1,
                           EnumNpcStopMotionBlendOnOff param_2)
 {
+	char trash[0x20];
 	if (mActorType < 0x400001E && mActorType >= 0x400001C)
 		return;
 

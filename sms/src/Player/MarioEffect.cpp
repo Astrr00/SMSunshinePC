@@ -80,6 +80,7 @@ void TMarioEffect::setJumpIntoWaterEffect()
 		return;
 
 	Mtx localMtx;
+	char trash[0x40];
 	MTXCopy(unk68->unk220, localMtx);
 
 	f32 minY = unk68->mWaterEffectParams.mJumpIntoMinY.get();
@@ -128,6 +129,7 @@ void TMarioEffect::setJumpIntoWaterEffectSmall()
 
 	Mtx localMtx;
 	Mtx scaleMtx;
+	char trash[8];
 	MTXCopy(unk68->unk220, localMtx);
 	MTXScale(scaleMtx, 0.8f, 0.4f, 0.8f);
 	MTXConcat(localMtx, scaleMtx, localMtx);

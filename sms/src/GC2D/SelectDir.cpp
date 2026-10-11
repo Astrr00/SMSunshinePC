@@ -78,6 +78,7 @@ void* TSelectDir::setupThreadFunc(void* param_1)
 
 int TSelectDir::rsetup()
 {
+	char trash[0x38];
 	void* arcData = SMSLoadArchive("/data/select.arc", 0, 0, 0);
 
 	JKRMemArchive* archive = new JKRMemArchive;
@@ -214,6 +215,7 @@ void TSelectDir::changeOrder()
 
 int TSelectDir::direct()
 {
+	char trash[0x80];
 	if (!unk38) {
 		if (!OSIsThreadTerminated(&gSetupThread))
 			return TApplication::APP_STATE_WAIT;

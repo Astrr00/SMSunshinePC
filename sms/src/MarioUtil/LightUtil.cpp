@@ -120,6 +120,7 @@ void TLightCommon::perform(u32 cue, JDrama::TGraphics* graphics)
 		ReInitializeGX();
 		SMS_DrawInit();
 		GXLightObj light;
+		char trash[0xc]; // unused stack slot (present in the retail frame)
 		GXInitLightPos(&light, getLightPosition(0)->x, getLightPosition(0)->y,
 		               getLightPosition(0)->z);
 		GXInitLightColor(&light, getLightColor(0));

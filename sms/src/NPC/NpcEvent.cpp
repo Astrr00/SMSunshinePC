@@ -60,12 +60,14 @@ static void evGetAddressFromViewObjName(TSpcTypedInterp<TEventWatcher>* interp,
 static void evCheckCurNerve4Npc(TSpcTypedInterp<TEventWatcher>* interp,
                                 u32 arg_num)
 {
+	char trash[0x10];
 	CheckNerve4Npc_(interp, arg_num, false);
 }
 
 static void evCheckLatestNerve4Npc(TSpcTypedInterp<TEventWatcher>* interp,
                                    u32 arg_num)
 {
+	char trash[0x18];
 	CheckNerve4Npc_(interp, arg_num, true);
 }
 
@@ -78,6 +80,7 @@ static void evIsNpcSinkBottom(TSpcTypedInterp<TEventWatcher>* interp,
 static void evIsGameModeNormal(TSpcTypedInterp<TEventWatcher>* interp,
                                u32 arg_num)
 {
+	char trash[0x10];
 	interp->verifyArgNum(0, &arg_num);
 	int result = 0;
 	if (gpMarDirector->unk124 == 0)
@@ -88,6 +91,7 @@ static void evIsGameModeNormal(TSpcTypedInterp<TEventWatcher>* interp,
 static void ev__ForceStartTalkExceptNpc(TSpcTypedInterp<TEventWatcher>* interp,
                                         u32 arg_num)
 {
+	char trash[0x28];
 	interp->verifyArgNum(1, &arg_num);
 	int result = 0;
 	// TODO: uuuh...
@@ -112,6 +116,7 @@ static void ev__ForceStartTalkExceptNpc(TSpcTypedInterp<TEventWatcher>* interp,
 static void ev__ForceStartTalk(TSpcTypedInterp<TEventWatcher>* interp,
                                u32 arg_num)
 {
+	char trash[0x20];
 	interp->verifyArgNum(1, &arg_num);
 
 	int result = 0;
@@ -288,6 +293,7 @@ static void evFireStartDemoCamera(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evIsDemoMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[0x8];
 	interp->verifyArgNum(0, &arg_num);
 	int result = 0;
 	if (gpMarDirector->isDemoModeNow())
@@ -298,6 +304,7 @@ static void evIsDemoMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evCheckMonteClear(TSpcTypedInterp<TEventWatcher>* interp,
                               u32 arg_num)
 {
+	char trash[0x4];
 	interp->verifyArgNum(1, &arg_num);
 	int fVar1 = interp->pop().getDataInt();
 
@@ -367,6 +374,7 @@ static s32 ReviveSunflowerCallBack(TMarDirector::DemoCallbackArg param_1,
 
 void TNpcEvent::reviveOneSunflower()
 {
+	char trash[0x8];
 	if (mDownSunflowerNum > 0) {
 		static const char* sViewObjName = "ひまわり";
 

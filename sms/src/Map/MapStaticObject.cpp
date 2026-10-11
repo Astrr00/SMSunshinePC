@@ -216,6 +216,7 @@ void TMapStaticObj::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	if ((cue & CUE_CALC_VIEW)
 	    && (mActorData->mFlags & TActorData::FLAG_IS_INDIRECT)) {
+		char trash[8]; // unused stack slot (present in the retail frame)
 		Mtx afStack_7c;
 		SMS_GetLightPerspectiveForEffectMtx(afStack_7c);
 
@@ -438,6 +439,7 @@ void TMapObjSoundGroup::perform(u32 cue, JDrama::TGraphics* graphics)
 		JGeometry::TVec3<f32> tmp;
 		JGeometry::TVec3<f32>& camPos = tmp;
 
+		char trash[0x18]; // unused stack slot (present in the retail frame)
 		int count = 0;
 		for (int i = 1; i < mGraph->getNodeNum(); ++i) {
 			JGeometry::TVec3<f32> local_c30;

@@ -184,6 +184,7 @@ MsPerpendicFootToLineR(const JGeometry::TVec3<f32>& param_1,
                        const JGeometry::TVec3<f32>& param_2,
                        const JGeometry::TVec3<f32>& param_3)
 {
+	char trash[8]; // unused stack slot (present in the retail frame)
 	// TODO: floats are the worst, doesn't match at all...
 	JGeometry::TVec3<f32> diff = param_2;
 	diff -= param_1;
@@ -194,12 +195,9 @@ MsPerpendicFootToLineR(const JGeometry::TVec3<f32>& param_1,
 	else if (fVar1 > 1.0f)
 		fVar1 = 1.0f;
 
-	JGeometry::TVec3<f32> thing;
-	thing.scale(fVar1, diff);
+	diff.scale(fVar1);
 
-	JGeometry::TVec3<f32> copy = thing;
-	thing += param_1;
-	return thing;
+	return param_1 + diff;
 }
 
 #pragma dont_inline on

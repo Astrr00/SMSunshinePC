@@ -176,6 +176,7 @@ MActor* TMActorKeeper::createMActor(const char* model_data_name, u32 flags)
 
 MActor* TMActorKeeper::createMActorFromAllBmd(u32 flags)
 {
+	char trash[8]; // unused stack slot (present in the retail frame)
 	int num = mModelDataKeeper->getModelDataNum();
 	for (int i = 0; i < num; ++i)
 		createMActorFromNthData(i, flags);

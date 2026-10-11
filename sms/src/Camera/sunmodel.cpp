@@ -191,6 +191,7 @@ void TSunModel::calcDispRatioAndScreenPos_()
 #pragma dont_inline off
 void TSunModel::perform(u32 cue, JDrama::TGraphics*)
 {
+	char trash[24];
 	bool sunInBounds;
 	if (gpCameraMario->isMarioIndoor()) {
 		sunInBounds = false;

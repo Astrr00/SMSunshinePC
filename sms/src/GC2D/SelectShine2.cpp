@@ -38,7 +38,8 @@ static inline JGeometry::TVec3<f32> getScrollPos(s32 scroll, int idx)
 static inline s16 getShineYaw(const JGeometry::TVec3<f32>& pos,
                               const JGeometry::TVec3<f32>& shinePos)
 {
-	JGeometry::TVec2<f32> diff(300.0f - shinePos.x, 1300.0f - shinePos.z);
+	JGeometry::TVec2<f32> diff;
+	diff.sub(JGeometry::TVec2<f32>(300.0f, 1300.0f), JGeometry::TVec2<f32>(shinePos.x, shinePos.z));
 
 	f32 cs  = 1.0f;
 	f32 sn  = 0.0f;
@@ -46,7 +47,7 @@ static inline s16 getShineYaw(const JGeometry::TVec3<f32>& pos,
 	f32 ry  = diff.x * sn + diff.y * cs;
 	s16 yaw = 57.295776f * fabsf(atan2f(rx, ry));
 	if (pos.x > TSelectShineManager::cCenter.x)
-		yaw = -yaw;
+		yaw *= -1;
 	return yaw;
 }
 

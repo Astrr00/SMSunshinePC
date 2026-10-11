@@ -468,4 +468,5 @@ void TFruitLauncher::loadAfter()
 	unk138[1]->unk138 = this;
 	unk140            = 1;
 	unk138[0]->pushDown();
+	char trash[0x8];
 }

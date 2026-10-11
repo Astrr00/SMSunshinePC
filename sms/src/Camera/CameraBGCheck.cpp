@@ -38,9 +38,9 @@ void CPolarSubCamera::calcInHouseNo_(bool param_1)
 		}
 
 		JGeometry::TVec3<f32> local_120[18];
-		S16Vec SStack_134[9];
+		S16Vec SStack_134;
 
-		CLBCalcNearNinePos(local_120, SStack_134, unk124, unk148,
+		CLBCalcNearNinePos(local_120, &SStack_134, unk124, unk148,
 		                   getFinalAngleZ(), mNear, mFovy, mAspect);
 
 		f32 fVar1 = unk2C4;
@@ -209,11 +209,10 @@ bool CPolarSubCamera::execRoofCheck_(Vec param_1)
 	}
 
 	if (skipCheck || should_clip_fabricated(roof)) {
-		if (mCurrentTarget.mPosition.y
-		    > roofHeight - mSaveEx->mSLRoofHeight.get()) {
-			mCurrentTarget.mPosition.y
-			    = roofHeight - mSaveEx->mSLRoofHeight.get();
-			moved = true;
+		f32 limit = roofHeight - mSaveEx->mSLRoofHeight.get();
+		if (mCurrentTarget.mPosition.y > limit) {
+			mCurrentTarget.mPosition.y = limit;
+			moved                      = true;
 		}
 	}
 	return moved;
