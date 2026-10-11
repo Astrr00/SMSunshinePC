@@ -395,6 +395,7 @@ void TMapObjBall::calcCurrentMtx()
 void TMapObjBall::checkWallCollision(JGeometry::TVec3<f32>* pos)
 {
 	JGeometry::TVec3<f32> checkPos;
+	char trash[24];
 	checkPos.x = pos->x;
 	checkPos.y = pos->y + mBodyRadius;
 	checkPos.z = pos->z;
@@ -819,7 +820,9 @@ void TResetFruit::makeObjLiving()
 
 void TResetFruit::kicked()
 {
-	if (checkMapObjFlag(MAP_OBJ_FLAG_UNK2000000) || isState(STATE_HOLDING))
+	if (checkMapObjFlag(MAP_OBJ_FLAG_UNK2000000))
+		return;
+	if (isState(STATE_HOLDING))
 		return;
 
 	f32 speedY = *gpMarioSpeedY;
@@ -1363,9 +1366,10 @@ void TBigWatermelon::startEvent()
 		startAnim(7);
 
 		// Translated: "Watermelon goal camera"
-		gpMarDirector->fireStartDemoCamera("スイカゴールカメラ", &mPosition, -1,
-		                                   0.0f, true, nullptr, 0, nullptr,
-		                                   JDrama::TFlagT<u16>(0));
+		TMarDirector* director = gpMarDirector;
+		director->fireStartDemoCamera("スイカゴールカメラ", &mPosition, -1,
+		                              0.0f, true, nullptr, 0, nullptr,
+		                              JDrama::TFlagT<u16>(0));
 		// Translated: "Shine (for ghost watermelon)", "Watermelon shine camera"
 		gpItemManager->makeShineAppearWithDemoOffset(
 		    "シャイン（お化けスイカ用）", "スイカシャインカメラ", 0.0f, 0.0f,

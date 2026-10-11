@@ -123,6 +123,9 @@ void TMarioEffect::setJumpIntoWaterEffect()
 
 void TMarioEffect::setJumpIntoWaterEffectSmall()
 {
+	int idx = getThing();
+	if (idx < 0)
+		return;
 
 	Mtx localMtx;
 	Mtx scaleMtx;
@@ -130,9 +133,6 @@ void TMarioEffect::setJumpIntoWaterEffectSmall()
 	MTXCopy(unk68->unk220, localMtx);
 	MTXScale(scaleMtx, 0.8f, 0.4f, 0.8f);
 	MTXConcat(localMtx, scaleMtx, localMtx);
-	int idx = getThing();
-	if (idx < 0)
-		return;
 
 	unk74[idx]->setBck("04_tobikomi");
 	unk74[idx]->setBpk("04_tobikomi");

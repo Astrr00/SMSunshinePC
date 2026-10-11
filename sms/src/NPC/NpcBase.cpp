@@ -592,6 +592,7 @@ void TBaseNPC::moveObject()
 	}
 }
 
+#pragma dont_inline on
 void TBaseNPC::execMotionBlend_()
 {
 	char trash[0x18];
@@ -603,6 +604,7 @@ void TBaseNPC::execMotionBlend_()
 	if (mInbetweenCtrl->isForcedBlendRatio())
 		mKeepAnmCtrl->reset();
 }
+#pragma dont_inline off
 
 void TBaseNPC::calcRootMatrix()
 {
@@ -684,7 +686,7 @@ void TBaseNPC::perform(u32 cue, JDrama::TGraphics* graphics)
 		                  gpCamera->unk148.x - gpCamera->unk124.x);
 		JGeometry::TVec3<f32> local_4C = gpCamera->unk124;
 		if (!MsIsInSight(local_4C, SHORTANGLE2DEG(angle), mPosition,
-		                 farClip + 500.0f, 3.46875f, 4.28125f)) {
+		                 farClip + 500.0f, 120.0f, 800.0f)) {
 			updateSquareToMario();
 			bVar5 = false;
 		}
@@ -764,9 +766,10 @@ void TBaseNPC::perform(u32 cue, JDrama::TGraphics* graphics)
 			if (!isAirborne() && !belongToGround()
 			    && (isNerveMaybeDontCalcAnim0()
 			        || isNerveMaybeDontCalcAnim1())) {
+				f32 anmOffDist = getAnmOffDist_();
 				JGeometry::TVec3<f32> diff;
 				diff.sub(mPosition, gpCamera->unk124);
-				if (CLBSquared(getAnmOffDist_()) < diff.squared() && !bVar6
+				if (CLBSquared(anmOffDist) < diff.squared() && !bVar6
 				    && mSpine->getTime() > 2) {
 					r31 = true;
 					execMotionBlend_();
@@ -822,6 +825,7 @@ void TBaseNPC::setBalloonMessage(u32 param_1, s32 param_2)
 	mBalloonCtrl->setNextMessage(param_1, param_2);
 }
 
+#pragma dont_inline on
 bool TBaseNPC::isPollutionNpc() const
 {
 	bool result = false;
@@ -841,6 +845,7 @@ bool TBaseNPC::isPollutionNpc() const
 
 	return result;
 }
+#pragma dont_inline off
 
 const GXColor* TBaseNPC::getPtrInitPollutionColor() const
 {

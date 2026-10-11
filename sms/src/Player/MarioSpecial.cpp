@@ -20,6 +20,7 @@ void TMario::barJumpSetting() { }
 
 BOOL TMario::barWait()
 {
+	char trash[0x28];
 	if (mHolder == nullptr)
 		return changePlayerStatus(MARIO_STATUS_LAND_SAFE_DOWN, 0, false);
 
@@ -341,6 +342,7 @@ BOOL TMario::waitRoof()
 
 BOOL TMario::moveRoof()
 {
+	char trash[0x20];
 	if (roofCommonEvents())
 		return 1;
 

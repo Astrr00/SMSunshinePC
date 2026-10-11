@@ -82,6 +82,7 @@ inline void TSelectShine::playEmitters()
 
 void TSelectShine::move()
 {
+	char trash[0x20];
 #ifdef TARGET_PC
 	// retail leaves y uninitialized when mTime >= 4
 	f32 y = 0.0f;
@@ -185,6 +186,7 @@ TSelectShine::TSelectShine(J3DModelData* pModelData, J3DAnmColor* pAnm,
     , mKind(0)
     , mEmitterMgr(nullptr)
 {
+	char trash[0x30];
 	mEmitters[0] = nullptr;
 	mEmitters[1] = nullptr;
 	mEmitters[2] = nullptr;
@@ -228,6 +230,7 @@ TSelectShine::TSelectShine(J3DModelData* pModelData, J3DAnmColor* pAnm,
 
 void TSelectShineManager::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x88];
 	if (cue & CUE_MOVE) {
 		for (int i = 0; i < mNumShines; ++i)
 			mShines[i]->move();
@@ -322,6 +325,7 @@ void TSelectShineManager::startClose()
 void TSelectShineManager::initData(u8* pTypes, u8 numShines, u8 current,
                                    JPAEmitterManager* pEmitterMgr)
 {
+	char trash[0x48];
 	mDrawBufferOpa = new J3DDrawBuffer(0x400);
 	j3dSys.setDrawBuffer(mDrawBufferOpa, 0);
 	mDrawBufferXlu = new J3DDrawBuffer(0x400);

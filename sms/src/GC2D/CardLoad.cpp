@@ -2097,6 +2097,7 @@ void TCardLoad::setSelected(u8 param_1)
 
 void TCardLoad::changeScene()
 {
+	char trash[0x68];
 	TEProgress prevUnk1C = unk1C;
 	int prevUnk0         = unk10;
 	switch (prevUnk1C) {

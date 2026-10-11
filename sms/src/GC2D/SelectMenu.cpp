@@ -177,8 +177,8 @@ void TSelectGrad::perform(u32 flags, JDrama::TGraphics* gfx)
 	if (flags & 0x8) {
 		GXSetDither(GX_TRUE);
 
+		char trash[4];
 		Mtx mtx;
-		char trash[8];
 		PSMTXIdentity(mtx);
 		GXLoadPosMtxImm(mtx, GX_PNMTX0);
 

@@ -1185,7 +1185,7 @@ void TTalk2D2::setupTextBox(const void* data, JMSMesgEntry* entry)
 				text[1] = 0;
 			}
 
-			J2DTextBox*& box = unk9C[col + line * 30];
+			J2DTextBox* box = unk9C[col + line * 30];
 			box->mCharColor  = unk27C.get();
 			box->mGradColor  = unk27C.get();
 			box->setBlackWhite(

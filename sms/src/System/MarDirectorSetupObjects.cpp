@@ -40,6 +40,7 @@ extern int gpSceneCmnDatSize;
 
 void TMarDirector::decideMarioPosIdx()
 {
+	char trash[0x18];
 	unkD0 = 0;
 	unkD1 = 0;
 	unkE4 = 1;
