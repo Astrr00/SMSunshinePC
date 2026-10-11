@@ -72,6 +72,8 @@ Expected at handoff: 11 012 / 12 881 functions byte-identical, 445 / 736 units M
 - Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0007`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
 - Dolphin as a reference emulator is blocked (apploader stall, popups); do not run it.
 
+Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit, not on a known remote branch), but `apply-aurora-patches.py --check` says its files equal upstream 50e5be3 + patches 0001-0007. On a new PC `git submodule update --init` checks out 50e5be3; then run `python sunshine-pc/tools/apply-aurora-patches.py` (the setup script does) and expect `applied: 7 patches`. `aurora-worktree/` in the bundle is the already-patched fallback.
+
 ## 7. State at handoff and next steps
 
 Measured state: see `README.md` table and `sunshine-pc/docs/status.md` ("Latest lead update"). Last pushed commit: see `git log -1` (docs commit `e36f87c` at handoff time, code wave `a3a6709`).
