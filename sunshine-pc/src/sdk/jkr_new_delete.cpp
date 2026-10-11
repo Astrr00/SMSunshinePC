@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <new>
+#include <mutex>
 
 static bool isJkrMemory(void* p)
 {
@@ -89,6 +90,7 @@ void* pageAlloc(size_t size)
 	return user;
 }
 
+std::mutex quarantineMutex; // ponytail: one lock for both debug rings; debug-only path, contention does not matter
 constexpr size_t kPageQuarantine = 20000;
 PageBlock pageQuarantine[kPageQuarantine];
 size_t pageQuarantineNext = 0;
@@ -99,6 +101,7 @@ void pageFree(void* user)
 	PageBlock mine = *blk;
 	DWORD old;
 	VirtualProtect(mine.base, mine.total, PAGE_NOACCESS, &old);
+	std::lock_guard lock{quarantineMutex};
 	PageBlock& slot = pageQuarantine[pageQuarantineNext++ % kPageQuarantine];
 	if (slot.base)
 		VirtualFree(slot.base, 0, MEM_RELEASE);
@@ -170,6 +173,7 @@ void operator delete(void* p) noexcept
 		h->magic = kFreedMagic;
 		std::memset((uint8_t*)p, 0xDD, (size_t)h->size);
 		// Quarantine: re-verify the oldest freed block (poison intact => no write after free) before really freeing it.
+		std::lock_guard lock{quarantineMutex}; // operator delete runs on every thread; the ring must not race
 		void*& slot = quarantine[quarantineNext++ % kQuarantine];
 		if (slot) {
 			Header* old = (Header*)slot;

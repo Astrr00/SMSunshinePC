@@ -14,6 +14,16 @@ Observed by the lead with `AURORA_SCREENSHOT` and `SUNSHINE_DEV_STATUS` logs (de
 - Known decomp gaps: none empty any more; `PacketUtil::ShapePacketCallBackFunc` (75.7 %, partial review) and `TGCConsole2::perform` (69.5 %) are the largest open game functions on the gameplay path; open list in `decomp-verified.tsv` / `decomp_queue.py status`. `EmitterViewObj`/`EmitterIndirectViewObj` resolve to null in the perform lists (particles likely not drawn).
 - `probe-units`: clang-cl 624/733 clean (all 584 built units); MSVC `cl /Zs` 565/733 (66 built units fail on MWCC-specific syntax; reasons in platform-notes).
 
+### Latest lead update (end of the agent session; supersedes the notes above where they conflict)
+
+Measured by the lead: `ninja -k 0 -j4` in `sms/` exit 0, DOL SHA-1 `9f5a8caf…` OK, strict link 0 unresolved, `apply-aurora-patches.py --check` "applied: 7 patches", 11 012 / 12 881 functions bytegleich (58.56 % code, 97.98 % fuzzy), 445 / 736 units Matching. Ledger: 1 196 `logic-verified`, 66 `matched`, 614 `partial`. Last commit `a3a6709`.
+
+- A3 correction: `airport0` was reached once, by a pad script (`SUNSHINE_DEV_SCRIPT`, itself a dev switch), on an earlier build (`build/RouteB1/prev_airport_watch.log:1194`). Not reproducible: two fresh runs of the same script stayed at file select, and the uncommitted pad-clock rework (clock in `JUTGamePad::read()`, event-driven scripts still to do) never reaches stage 0. Likely reason (not proven): the THP movie advances on its own retrace/audio clock, not per logic tick. `TMarDirector::unk261` is never written in retail either (uninitialised there); its readers take no branch on 0.
+- R02/R03: `bianco/0` and `dolpic/0` ran stable for 100 s each (normal and heap-check mode). Check-mode `0xc0000374` was a data race in the debug quarantine (fixed, mutex). The earlier normal-mode crashes were not reproduced; cause unproven.
+- B3: an intermittent flat red/blue wedge in Bianco frames (about 1 of 6 runs at frame 600) also occurs with widescreen off and FSR off; cause open (the command stream differs run to run before the renderer; seeds do not pin it).
+- Phase 4/5/6/7 items: see the README table. Verified by log/PNG: FSR1 pass, cheats lives/coins, glyph style change, Hor+ frame widths. Not verified: 4:3 identity, interpolation at 60/120/144, mod overlay effect, water cheat.
+- Process note: `tools/reap.py --loop` kills `sunshine.exe` older than 6 min or older than `src/sdk/av.cpp`; rebuild after av.cpp edits. Use `tools/runlock.py` to serialise game runs.
+
 ## 1. Verified measurements (this audit)
 
 | Check | Result | Source |
@@ -38,7 +48,7 @@ Observed by the lead with `AURORA_SCREENSHOT` and `SUNSHINE_DEV_STATUS` logs (de
 | --- | --- | --- | --- |
 | A1 | `probe-units` 733/733 or justified exclusions | **Partial** | 151 exclusions with reasons (`excluded-units.txt`). Count not reproducible from `report.json` here. Re-run `probe-units` |
 | A2 | No empty/stub source in port build; missing-function list empty or justified | **Open** | `unresolved.md`: 157 class/method + 10 game-global symbols from empty or unfinished decomp sources (Enemy bosses/NPCs, `SMS_EmitRipple*`, `FeetInvCalc`, `j3dDefault*`). Not justified per-symbol |
-| A3 | `sunshine.exe` links with 0 unresolved and boots image → title → file select → Delfino → Bianco Ep1 with Shine and saving | **Partial** | Link 0 unresolved (lead, not re-verified). Boot to title works but washed out. Only `delfino/0` reached gameplay (fps 144 run). `bianco/0` crashes in `TNpcParts::TNpcParts`. Shine, saving, file select flow unverified |
+| A3 | `sunshine.exe` links with 0 unresolved and boots image → title → file select → Delfino → Bianco Ep1 with Shine and saving | **Partial** | Link 0 unresolved (lead, not re-verified). Boot to title works but washed out. Stage 0 `airport0` (scen 0) reached by pad input with no skip switches in a PortFlow run (`build/PortFlow/watch.log` 1237–1270: `dir.state=4`, billboard dismissed by A, status 0x10001308 → 0x0C400201). No observed exit from airport0 to stage 1: no ChangeStage or StartDemo exit in its nodes, no `setNextStage`/`registerMovie` in its bound scripts (`call` targets not followed). Movie 2 self-reloads airport0 (scen 1). Delfino (`dolpic0`) blocked by R03 (crash at 12–19 s). `delfino/0` reached gameplay (fps 144 run). `bianco/0` crashes in `TNpcParts::TNpcParts`. Bianco entry from dolpic0 unidentified. Shine, saving, file select flow unverified |
 | A4 | Matching `sms/` build passes SHA-1 | **Done** | Verified above |
 | A5 | Phases 4-8 done or documented with blocker | **Partial** | Phases 4-8 not done. Blockers documented in `platform-notes.md` and `dlss-feasibility.md` |
 
@@ -49,8 +59,8 @@ Order: P0 blocks playing the game from the disc image. P1 is required to ship. P
 | ID | Req | Phase | State | Evidence | Gaps |
 | --- | --- | --- | --- | --- | --- |
 | R01 | Title screen renders correctly | 2 | **Open** | Sun emblem only in black box at top-left (~40%×57%). Platform-notes line 404 onward | Root cause not fixed. `GXCopyDisp` is an empty stub (`extern/aurora/lib/dolphin/gx/GXFrameBuffer.cpp:206`). Retail clears the EFB after display copy; Aurora ignores it. Hypothesis unproven |
-| R02 | Stage loads: bianco, ricco, mamma, sirena | 3 | **Open** | Crash `TNpcParts::TNpcParts` at `sms/src/NPC/NpcParts.cpp:56` | Not fixed (StageBianco owns the fix) |
-| R03 | Stage load: dolpic (Delfino) without memory corruption | 3 | **Open** | Crash on read of `000002AC5FFC0008`. Heap-corruption writer unidentified. Crash at 12-19 s with `0xc0000409`, or `0xc0000374` with `SUNSHINE_CHECK_HEAP=1` | Probes negative (footer, live sweep, page heap). Next probe: never release freed operator-new blocks. Not built |
+| R02 | Stage loads: bianco, ricco, mamma, sirena | 3 | **Open** | Earlier crash `TNpcParts::TNpcParts` at `sms/src/NPC/NpcParts.cpp:56`. Not reproduced in 3 normal and 2 `SUNSHINE_CHECK_HEAP=1` `bianco/0` runs at 100 s (`build/StageCrash/bianco-*.watch.log`) | Root cause unproven. Zero-clear loop is in bounds. Only bianco run; ricco, mamma, sirena not run. Owner: StageBianco |
+| R03 | Stage load: dolpic (Delfino) without memory corruption | 3 | **Open** | Check mode `0xc0000374`: fixed. Cause was a race in the debug quarantine (`src/sdk/jkr_new_delete.cpp`), now mutex-guarded. Normal mode `0xc0000409` at 12-19 s not reproduced in 4 normal runs at 100 s (`build/StageCrash/dolpic-*.watch.log`) | Normal-mode cause unproven. Quarantine is not active in normal mode, so the mutex does not explain it. [INFERENCE] may be the WGSL shader error (platform-notes ~515), not heap damage |
 | R04 | Empty/unfinished decomp sources filled (Enemy bosses, NPCs, fences, rails, Rocket, Sand, Talk2D2, Guide, Select shine, etc.) | 1, 3, 4 | **Open** | 157 symbols + 10 globals (`unresolved.md`) | Full list is in `unresolved.md`. Boss Hanachan nerves, BW nerves (`TNerveBW*`), Manta, Sand, Select shine manager, Talk2D2 all still empty |
 | R05 | `__fres` (bit-exact reciprocal estimate) | 2, 3 | **Open** | Undefined symbol, blocks `JPABaseField::calcFieldFadeScale` (68/284 particle resources) and `JPAVecToRotaMtx` (185/284) | Every particle emitter hits it. No emitter runs |
 | R06 | Global `JKR_NEW`/`JKR_DELETE` allocator | 2 | **Partial** | `src/sdk/jkr_new_delete.cpp` exists. Global operator new/delete only as placement overloads under `TARGET_PC` | Goal-Port B.4 not done (`JKR_NEW` path). OOM aborts |
@@ -94,8 +104,8 @@ Order: P0 blocks playing the game from the disc image. P1 is required to ship. P
 1. Fix `GXCopyDisp`: snapshot EFB into display source before any clear, and present that source (R01). Owner: GxCopy2 (coordinate; they own `lib/gx/*`).
 2. Gate title-frame logs on copy-2 count, check background quad vs viewport and `drain()` (R01).
 3. Verify copy-2 source rect (1280x960) vs logical 640x448 with aspect offset (0,32) (R01).
-4. Fix `TNpcParts::TNpcParts` crash at `NpcParts.cpp:56` for bianco/ricco/mamma/sirena (R02). Owner: StageBianco.
-5. Implement heap-writer probe: `SUNSHINE_CHECK_HEAP=1` never releases freed operator-new blocks (R03). Owner: HeapHunt.
+4. `TNpcParts::TNpcParts` crash at `NpcParts.cpp:56` for bianco/ricco/mamma/sirena (R02): not reproduced in 5 bianco runs. Prove the cause or retire it. Owner: StageBianco.
+5. R03: check-mode quarantine race fixed. Prove or retire the normal-mode `0xc0000409` at 12-19 s. Owner: HeapHunt.
 6. Run `probe-units` once and reconcile 151 excluded vs `report.json` 736 units. Update `excluded-units.txt` and `blocked-units.txt` if needed (A1).
 7. Re-run `tools/gen-files.py` and confirm `files.cmake` matches blocked list (now empty) (A3).
 8. Implement `__fres` with bit-exact reciprocal estimate (R05). Unblocks particle emitters.

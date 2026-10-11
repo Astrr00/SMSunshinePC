@@ -474,7 +474,7 @@ Next: gate draw/viewport/scissor/texture-bind logs on a title-frame counter (cop
 - Verified: `tools/port_tests.cmd` 38 checks, 0 failed (JSON, manifest, load order, ABI check, overlay merge, cheat registry). Example mods build in `build/CheatsMods`. Own `sunshine.exe` builds with no errors in the new files.
 - Startup hang fixed: the `std::ifstream`/`rdbuf` reads in the cheat and mod loaders hung boot. Both now use `util/read_file.*` (`readWholeFile`: Win32 `ReadFile`, bounded loop, 256 MiB cap).
 - Verified (`build/CheatsMods`, 30 s run to title): `[cheats] 4 cheats loaded`, both example mods load, game logic at 30/s, `[mod hello] entered stage 15`, `[cheats] infinite_lives = on`, `[mod faulty] faulted ... disabled` while the game keeps running (SEH isolation works).
-- Not verified in-game: effects on health, water, and lives values; nozzle read-back; `cheats.user.json`; overlays. `SUNSHINE_DEV_START=bianco/0` crashes in stage load at `TNpcParts::TNpcParts` (`sms/src/NPC/NpcParts.cpp:56`), before the tick hook runs.
+- Not verified in-game: effects on health, water, and lives values; nozzle read-back; `cheats.user.json`; overlays. Stale: `SUNSHINE_DEV_START=bianco/0` no longer crashes at `TNpcParts::TNpcParts` (`NpcParts.cpp:56`). 100 s runs log logic 30/s (`build/StageCrash/bianco-*.watch.log`).
 - Known limits: instant-death paths (`loserExec`, `MarioMove.cpp` ~1948 and ~2247, `MarioRun.cpp` ~978) bypass the `decHP` guard. `gpMarioOriginal` is never cleared on stage unload, so it may dangle; the tick only runs from the director's logic step after setup (`unk260 == 0` returns early).
 
 ## Frame-rate pacing window (`src/framerate/`, `TVideo::waitForRetrace`) — partial, designed + partly verified
@@ -485,7 +485,7 @@ Next: gate draw/viewport/scissor/texture-bind logs on a title-frame counter (cop
 - Not verified: window present rate at fpsLimit 144 and 60 (no per-second window count was logged in the gameplay runs); logic 30 ± 0.1 Hz in gameplay; mid-window screenshots. A 90 s `delfino/0` run's log stopped after the devstart shadow line, so the log flush in that run is unexplained.
 - Known limits: skeletal animation is not interpolated (the entry replay masks `CUE_MOVE | CUE_CALC_ANIM | CUE_DRAW`). Menus, pause, movies and title keep one present per tick. Ceiling: fixed slot grid with about 1 ms sleep margin, not vblank-aligned. Upgrade: align slots to vblank.
 - Not done: step 2 (camera/actor interpolation with discontinuity snap) and part B (widescreen, Hor+, 4:3 UI anchoring). Designed only; no code written.
-- Stage loads: `bianco/0`, `ricco/0`, `mamma/0`, `sirena/0` crash in `TNpcParts::TNpcParts` (`NpcParts.cpp:56`, BootStage); `dolpic/0` crashes at a read of `000002AC5FFC0008` (not yet attributed).
+- Stage loads: `bianco/0` `TNpcParts::TNpcParts` crash (`NpcParts.cpp:56`) not reproduced in 5 runs at 100 s. `ricco/0`, `mamma/0`, `sirena/0` not run. `dolpic/0` normal-mode crash at a read of `000002AC5FFC0008` not reproduced in 4 runs at 100 s (see StageDolpic).
 - Not mine, flagged: `sms/src/System/Application.cpp` `TApplication::proc()` has a `[TEMP-DEBUG] proc state` printf that must be removed by its owner.
 - Bianco check (fpsLimit 144, rebuilt tree): logic 30/s early, dropping to 15–24/s later in the run (load not profiled). `window presents` stayed 0/s for the whole run: the replay gate is closed because `mState` is 1 or 3 (`[TEMP-DEBUG] gate app=5 mState=1|3 unk260=1`, all lists non-null), not 4. Replay only runs in the `STATE_UNK4` movement state, so Bianco gets no extra presents. Fix candidate: admit the other drawing states after checking what they run. Not done.
 
@@ -504,7 +504,7 @@ Results:
 - Not reached: dolpic gameplay. Pollution goop counters, sun `GXPeekZ`, and EventWatcher scripts are not verified in-game.
 
 Open items:
-- Heap writer not identified. Likely a stale write after free, or a non-operator write (C `malloc` or the JKRHeap arena). Next probe: under `SUNSHINE_CHECK_HEAP=1`, never release freed operator-new blocks, so a stale write hits the poison check. Needs no debugger, but is unbuilt.
+- Check-mode fatal (`0xc0000374`) is a race in the debug quarantine (`src/sdk/jkr_new_delete.cpp`): an unlocked ring shared by main and render-worker threads let two threads pop the same slot and free one block twice. Fixed with a mutex. Post-fix check runs `dolpic-check`, `dolpic-check-final` and `bianco` check are clean at 100 s. Normal mode has no quarantine, so its cause is still open. Temporary heap-validate probes were removed after this result.
 - Not a debugger: no `cdb.exe` is installed.
 - StageBianco owns the J3D TEMP-DEBUG prints (`J3DModel.cpp`, `J3DPacket.cpp`, `J3DShape.cpp`) and the `NpcParts` ctor. Not edited here.
 

@@ -9,27 +9,27 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
-| Decomp logic correctness (non-matching functions) | partial | 48 | 10 960/12 881 functions bytegleich; game code: 6 945/8 806 bytegleich, 954 whole-function asm reviews (`sunshine-pc/docs/decomp-verified.tsv`), 973 game functions still open; asm-proven logic fixes include inverted branches (`barWait`, Amenbo, bossgesso), wrong switch case sets (`TMario::receiveMessage`, `initUnique`), wrong members/constants (motor params, splash radius), misplaced braces (`TSelectMenu::initData`); scanners `--branchscan`/`--immscan` in `decomp_triage.py` |
+| Decomp logic correctness (non-matching functions) | partial | 55 | 11 012/12 881 functions bytegleich (58.6 % code, 97.98 % fuzzy), 445/736 units Matching; ledger `sunshine-pc/docs/decomp-verified.tsv`: 1 196 `logic-verified` + 66 `matched` rows, 614 `partial`; about 750 game functions without a finished equivalence review (most blocked by header-inline codegen). Own code is allowed where byte-identical is not reachable if behaviour equals retail. Asm-proven bug fixes include inverted branches, wrong case sets, wrong members/offsets/constants/indices (e.g. CardLoad scale 1.5f, camera sub-stick axes, Kumokun velocity member). 30/30 sampled rows confirmed by independent audit, 4 wrong hunks found and fixed |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
 | Units compiled (clang-cl) | done | 100 | 583/583 built units, 150 excluded with reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
 | Title screen | partial | 70 | logo, Shine Sprite, seagulls render, logic 30/s; area behind the logo black (retail background unverified) |
-| Title → file select → new game → Delfino | partial | 35 | select and slot panel run clean (`sunshine-pc/build/FlowFileSelect/s3.png`; flow6 to tick 3146, no fatal); CardLoad crashes fixed (titleDraw loop 13→11, asm 0x8022D16C; selectFunction unk2A4 loop 4→3, asm 0x80226050/0x802273B0); play of slot A hides card UI (`s6.png`) but stage stays 15; slot A still reads NEW after File created; new game/Delfino pending |
-| Bianco Hills Ep.1 (dev start) | partial | 60 | textured, HUD, Mario walks/jumps, camera follows; flat untextured polygon at the screen edge |
+| Title → file select → new game → Delfino | partial | 35 | file select and slot pick work (dir.state 4→9 at tick 4530); `airport0` was reached ONCE per pad script (earlier build, `build/RouteB1/prev_airport_watch.log:1194`), not reproducible: scripted input is non-deterministic (THP movie advances on its own clock) and the uncommitted pad-clock rework never reaches it; no exit from airport0 observed yet (probable exit: `MapObjStartDemo`); Delfino/Bianco entry not reached without dev switches |
+| Bianco Hills Ep.1 (dev start) | partial | 60 | textured, HUD, Mario walks/jumps, camera follows; `bianco/0` and `dolpic/0` ran stable for 100 s each (normal and heap-check mode, `build/StageCrash/`); an intermittent flat red/blue wedge appears in about 1 of 6 runs at frame 600 (also with widescreen off and FSR off), cause open (`build/ArtifactHunt/`) |
 | First Shine + save + reload | open | 10 | tpshine finds the Shine via the shine manager (eventId 42, `build/ShineSave2-2/watch.log:73`); Mario falls to the ground, no collect, no `.gci` yet |
 | Goop / pixel metric | open | 15 | GPU occlusion gives 0/1 only; needs real fragment counts |
 | Audio | partial | 50 | movies and title music play; gameplay output turns into noise after ~20 s |
 | Particles | partial | 50 | JPA loads; some particle view objects not in the draw lists |
-| Unlocked framerate | partial | 30 | replay works on the title but halves logic speed; default is retail 30 fps; interpolation not started |
-| Widescreen | partial | 60 | implemented, visuals not verified |
-| Launcher, settings | partial | 60 | pages render; clicks/runtime effects unverified |
-| Cheats, mods | partial | 60 | 38 headless checks pass; in-game effects unverified |
-| Controller glyphs | partial | 60 | assets + hook, unverified in game |
-| FSR1 upscaling | partial | 50 | implemented, unverified |
+| Unlocked framerate | partial | 30 | logic 30/s, replay/interpolation code present; 60/120/144 not verified (host load, "presents 0/s" counter) |
+| Widescreen | partial | 55 | Hor+ frame widths 1706x960 (16:9) and 2242x960 (21:9) observed, HUD at the edges in the 21:9 frame; 4:3-identical, world scale and camera-cut reset NOT verified |
+| Launcher, settings | partial | 65 | FSR1/scale/cheat rows persist to the INI, launcher screenshot rendered; DLSS row wrap fix not visually verified |
+| Cheats, mods | partial | 60 | cheats verified by log (lives/coins held at 99); water/health cheat and mod overlay effect not verified |
+| Controller glyphs | partial | 65 | Xbox/PlayStation/Switch/GameCube styles load and change the water-button glyph (PNGs); PlayStation X asset is a square; keyboard style missing |
+| FSR1 upscaling | partial | 65 | FSR1 pass observed in log at 429x322 → 1279x960 (`build/PortLauncherRun/fsr67_on.log`); quality vs native not compared |
 | DLSS | blocked | 0 | needs motion vectors and a D3D12 handoff Dawn does not expose (`docs/dlss-feasibility.md`) |
 | Release package | partial | 40 | packaging script exists, not run on the current tree |
 
-Overall (mean of the rows): **55 %**.
+Overall (mean of the rows): **56 %**.
 
 Plan and order of work: [`ROADMAP.md`](ROADMAP.md).
 
