@@ -157,6 +157,7 @@ static inline bool checkProgressiveSelect(TGCLogoDir* director)
 
 int TGCLogoDir::direct()
 {
+	char trash[0x30];
 	int desiredAppState = TApplication::APP_STATE_DEFAULT;
 	JDrama::TDirector::direct();
 
@@ -194,6 +195,7 @@ int TGCLogoDir::direct()
 
 bool TGCLogoDir::direct_nlogo()
 {
+	char trash[0x98];
 	bool ended    = false;
 	int nextState = mState;
 	switch (mState) {
@@ -258,6 +260,7 @@ bool TGCLogoDir::direct_nlogo()
 
 bool TGCLogoDir::direct_dolby()
 {
+	char trash[0x30];
 	bool ended    = false;
 	int nextState = mState;
 	switch (mState) {

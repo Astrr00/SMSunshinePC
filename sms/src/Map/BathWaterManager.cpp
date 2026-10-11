@@ -508,8 +508,8 @@ static void drawCapOut(const JGeometry::TVec3<f32>& pos, f32 radius)
 namespace {
 void clearEFB_alpha(s16 x, s16 y, s16 wd, s16 ht, u8 alpha)
 {
-	Mtx44 m;
 	Mtx pmtx;
+	Mtx44 m;
 
 	if (wd <= 0)
 		wd = SMSGetGameRenderWidth();

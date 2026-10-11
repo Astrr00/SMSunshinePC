@@ -94,7 +94,7 @@ static inline void drawGaugeQuadF32(const JUTRect& rect, int top, int bottom,
 }
 
 // fabricated
-static inline u32 getPressureFlashColor(u8 frame)
+static inline u32 getPressureFlashColor(u8& frame)
 {
 	u32 color = 0xff3f3f00;
 
@@ -107,6 +107,8 @@ static inline u32 getPressureFlashColor(u8 frame)
 		s32 fade = 25 - frame;
 		color += ((u32)(s16)(s32)((f32)fade * -6.3f)) << 8;
 		color += ((u32)(s32)((f32)fade * 19.2f)) << 16;
+	} else {
+		frame = 0;
 	}
 
 	return color;

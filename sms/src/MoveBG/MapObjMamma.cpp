@@ -134,6 +134,8 @@ void TSandLeafBase::control()
 	TMapObjBase::control();
 
 	switch (mState) {
+	case STATE_NORMAL:
+		break;
 	case STATE_WITHER:
 		SMSRumbleMgr->start(0x13, -1, &mPosition);
 		if (withering()) {
@@ -476,11 +478,12 @@ static s32 SandCastleCallBack(TMarDirector::DemoCallbackArg, u32 state)
 
 void TSandCastle::waitBeforeExplode()
 {
+	JDrama::TFlagT<u16> flag(0);
 	mState      = STATE_WAIT_BEFORE_EXPLODE;
 	mStateTimer = mExplodeWaitTime;
 	gpMarDirector->fireStartDemoCamera(
 	    "mamma1_sandcastle", nullptr, -1, 0.0f, true, &SandCastleCallBack, 0,
-	    nullptr, JDrama::TFlagT<u16>(0));
+	    nullptr, flag);
 	mCameraDemo = true;
 }
 
@@ -752,7 +755,8 @@ void TLeanMirror::control()
 	switch (mState) {
 	case STATE_SHAKE: {
 		controlShake();
-		f32 speed = fabsf(mShake.length());
+		f32 speed;
+		speed = fabsf(mShake.length());
 		if (gpMSound->gateCheck(0x3048)) {
 			MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 			    0x3048, &mPosition, nullptr, speed, 0, 0, nullptr, 0, 4);
@@ -761,7 +765,8 @@ void TLeanMirror::control()
 	}
 	case STATE_GO_TARGET: {
 		controlGoTarget();
-		f32 speed = fabsf(mShake.length());
+		f32 speed;
+		speed = fabsf(mShake.length());
 		if (gpMSound->gateCheck(0x304A)) {
 			MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 			    0x304A, &mPosition, nullptr, speed, 0, 0, nullptr, 0, 4);
@@ -1125,17 +1130,17 @@ void TSandBird::control()
 	}
 
 	for (int i = 0; i < unk13C; ++i) {
-		TMapObjBase* obj = unk140[i];
-		if (obj->isActorType(0x2000000E) || obj->isActorType(0x40000023)) {
+		if (unk140[i]->isActorType(0x2000000E)
+		    || unk140[i]->isActorType(0x40000023)) {
 			gpMarioParticleManager->emitAndBindToPosPtr(
-			    0x159, &obj->mPosition, 1, obj);
+			    0x159, &unk140[i]->mPosition, 1, unk140[i]);
 			gpMarioParticleManager->emitAndBindToPosPtr(
 			    0x15A, &unk140[i]->mPosition, 1, unk140[i]);
 		}
 	}
 
-	CPolarSubCamera* camera = gpCamera;
 	bool inDemo             = true;
+	CPolarSubCamera* camera = gpCamera;
 	if (!camera->isSimpleDemoCamera()) {
 		bool reproducing
 		    = camera->mMode == CAMERA_MODE_REPRODUCE_DEMO ? true : false;

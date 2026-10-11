@@ -124,7 +124,7 @@ BOOL TYoshiTongue::canGo()
 		return false;
 
 	if (gpMap->isTouchedOneWallAndMoveXZ(&mTipPos.x, 10.0f + mTipPos.y,
-	                                     &mTipPos.z, 50.0f))
+                                     &mTipPos.z, 50.0f))
 		return false;
 
 	const TBGCheckData* ground;

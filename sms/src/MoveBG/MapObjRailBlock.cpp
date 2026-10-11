@@ -287,12 +287,12 @@ void TNormalLift::readRailFlag()
 	if (graph->isDummy())
 		return;
 
-	TRailNode* railNode = graph->getGraphNode(unk138->mCurrIdx).getRailNode();
-	if (railNode->mFlags & 0x800) {
-		unk150 = railNode->mPitch;
+	TGraphNode& node = graph->getGraphNode(unk138->mCurrIdx);
+	if (node.getRailNode()->mFlags & 0x800) {
+		unk150 = node.getRailNode()->mPitch;
 	}
-	if (railNode->mFlags & 0x1000) {
-		u16 roll = railNode->mRoll;
+	if (node.getRailNode()->mFlags & 0x1000) {
+		u16 roll = node.getRailNode()->mRoll;
 		if (roll == 0xffff)
 			roll = 0;
 		unk152 = roll;

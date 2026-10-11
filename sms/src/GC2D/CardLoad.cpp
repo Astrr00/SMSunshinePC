@@ -1908,9 +1908,11 @@ s8 TCardLoad::selectFunction()
 			for (int i = 0; i < 4; ++i) {
 				unk378[unkB0][i]->getPane()->show();
 
-				unk378[unkB0][i]->updateCenteredSize(
+				int oy = unk378[unkB0][i]->mOffsetInterpolator.getCurrentY();
+				int ox = unk378[unkB0][i]->mOffsetInterpolator.getCurrentX();
+				unk378[unkB0][i]->setCenteredSize(
 				    1, unk3A8[unkB0][i].getWidth(),
-				    unk3A8[unkB0][i].getHeight());
+				    unk3A8[unkB0][i].getHeight(), ox, oy);
 
 				unk378[unkB0][i]->update();
 				if (unk40[unkB0].unk18 == 0) {

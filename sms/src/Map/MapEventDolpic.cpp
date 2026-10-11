@@ -99,6 +99,7 @@ void TDolpicEventRiccoMammaGate::rising()
 
 bool TDolpicEventRiccoMammaGate::control()
 {
+	char trash[8];
 	if (unk44 < unk38 - unk3C && unk44 > unk40)
 		rising();
 

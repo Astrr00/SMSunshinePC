@@ -133,6 +133,7 @@ void TPauseMenu2::load(JSUMemoryInputStream& pStream)
 
 void TPauseMenu2::loadAfter()
 {
+	char trash[0x28]; // unused stack slot (present in the retail frame)
 	// "Save data"
 	mCardSave
 	    = static_cast<TCardSave*>(JDrama::TNameRefGen::search("データセーブ"));
@@ -533,6 +534,7 @@ u8 TPauseMenu2::getNextState()
 
 void TPauseMenu2::setDrawStart()
 {
+	char trash[0x38]; // unused stack slot (present in the retail frame)
 	mPressedB               = false;
 	mSelectionConfirmed     = false;
 	mSelectedItem           = 0;

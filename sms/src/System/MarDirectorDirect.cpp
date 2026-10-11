@@ -487,6 +487,7 @@ int TMarDirector::changeState()
 
 void TMarDirector::currentStateFinalize(u8 next_state)
 {
+	char trash[0x78];
 	switch (mState) {
 	case STATE_UNK0:
 		static_cast<JDrama::TViewObj*>(JDrama::TNameRefGen::search("Group 2D"))
