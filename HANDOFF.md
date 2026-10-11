@@ -16,7 +16,7 @@ No game data and no PowerPC code are tracked in git. The disc image lives under 
 ## 2. Requirements on the new PC
 
 - Windows 10/11 x64, ~60 GB free disk (port build trees are large), 16+ GB RAM, 8+ threads recommended.
-- Python 3.12+ (developed on 3.14.7), `pip install -r sunshine-pc/tools/requirements.txt` (offline wheels are in the bundle: `wheelhouse/`).
+- Python 3.12+ (developed on 3.14.7), `pip install -r sunshine-pc/tools/requirements.txt` (the new PC has internet access, so PyPI is used; `wheelhouse/` is an optional offline fallback).
 - Visual Studio 2022 Build Tools (C++ workload, Windows SDK) — NOT bundled (licence). `winget install Microsoft.VisualStudio.2022.BuildTools --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"`.
 - CMake >= 3.28 and Ninja (`pip install ninja` covers Ninja; CMake 4.4 was used).
 - LLVM/clang-cl 23.1.3 (bundled as `toolchain/llvm.tar.xz`; extract and set `LLVM_BIN` to its `bin` folder).
@@ -30,7 +30,7 @@ Run `sunshine-pc/tools/handoff-setup.ps1` from the bundle root (it clones the re
 
 1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 7 patches`).
 2. Extract `toolchain/llvm.tar.xz`; `setx LLVM_BIN <folder>\bin`.
-3. `pip install --no-index --find-links wheelhouse -r sunshine-pc/tools/requirements.txt`.
+3. `pip install -r sunshine-pc/tools/requirements.txt` (online).
 4. Copy the game data folder to `sms/orig/GMSJ01/` (keep the layout: `Super Mario Sunshine (Japan).rvz`, `extracted/`, `files/`, `sys/`).
 5. Copy `toolchain/sms-build-tools/*` to `sms/build/tools/` and `toolchain/sms-build-compilers/` to `sms/build/compilers/` (otherwise `configure.py` downloads dtk/objdiff/sjiswrap/compilers).
 6. Optional repos next to the project (sibling folders): `decomp-permuter/` (used by `sunshine-pc/tools/permute_fn.py`; path `..\decomp-permuter` relative to the repo's parent) and `sms-upstream/` (doldecomp/sms upstream bodies for reference, commit 20b801cb).

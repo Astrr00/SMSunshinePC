@@ -38,7 +38,9 @@ $env:LLVM_BIN = $llvmBin
 Write-Host "LLVM_BIN=$llvmBin"
 
 # 3. python deps (offline wheels)
-python -m pip install --no-index --find-links (Join-Path $bundle "wheelhouse") -r (Join-Path $repo "sunshine-pc\tools\requirements.txt")
+$req = Join-Path $repo "sunshine-pc\tools\requirements.txt"
+if (Test-Path (Join-Path $bundle "wheelhouse\*.whl")) { python -m pip install --no-index --find-links (Join-Path $bundle "wheelhouse") -r $req }
+else { python -m pip install -r $req }   # new PC has internet access
 
 # 4. decomp build tools + compilers
 New-Item -ItemType Directory -Force -Path (Join-Path $repo "sms\build") | Out-Null
