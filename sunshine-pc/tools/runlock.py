@@ -30,7 +30,35 @@ def owner():
         return None, 0.0
 
 
+def alive(pid):
+    """True while a process with this PID exists (Windows: OpenProcess; elsewhere: signal 0)."""
+    try:
+        if os.name == "nt":
+            import ctypes
+            h = ctypes.windll.kernel32.OpenProcess(0x1000, False, int(pid))  # PROCESS_QUERY_LIMITED_INFORMATION
+            if not h:
+                return False
+            ctypes.windll.kernel32.CloseHandle(h)
+            return True
+        os.kill(int(pid), 0)
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def owner_pid():
+    try:
+        s = open(OWN).read().split()
+        return s[2] if len(s) > 2 else ""
+    except OSError:
+        return ""
+
+
 def acquire(agent, pid=""):
+    # route.py runs as "lead" and calls us as a child: its PID is our parent. If it is killed (job deadline), the lock
+    # is stale at once instead of after the 15 min heartbeat gap. Other agents pass their own PID or none (age rule).
+    if not pid and agent == "lead":
+        pid = str(os.getppid())
     end = time.time() + 600
     while time.time() < end:
         try:
@@ -46,8 +74,9 @@ def acquire(agent, pid=""):
                 age = time.time() - (os.path.getmtime(OWN) if os.path.exists(OWN) else os.path.getmtime(D))
             except OSError:
                 age = 0
-            if age > 900:
-                log(f"steal by {agent} from {o} (stale {age:.0f}s)")
+            opid = owner_pid()
+            if age > 900 or (opid.isdigit() and not alive(opid)):
+                log(f"steal by {agent} from {o} (stale {age:.0f}s, owner pid {opid or '-'})")
                 for f in (OWN,):
                     try:
                         os.remove(f)

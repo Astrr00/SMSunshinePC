@@ -1,0 +1,22 @@
+# Diagnosis only: run with SUNSHINE_DEV_START=airport/0 (skips logos/option map, about 2 min instead of 5).
+# airport0 -> briefing movie -> prompt -> scen 1 tutorial -> walk to the M graffiti -> spray (crash seen in the full run f01).
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=3000
+wait frames=90
+hold A frames=4
+wait frames=60
+walkto x=-1198 z=167 radius=150 timeout=600
+walkto x=-5876 z=976 radius=150 timeout=900
+walkto x=-6630 z=1600 radius=250 timeout=600
+waitfor thp=2 timeout=600
+wait frames=600
+waitfor thp=0 timeout=3000
+mash A period=30 until stage=0 scen=1 director mario dirstate=4 timeout=3000
+log
+walkto x=-6300 z=2150 radius=60 timeout=600
+log
+hold trig=0,255 frames=240
+log
+shot wash.png
+wait frames=60
+log
+end

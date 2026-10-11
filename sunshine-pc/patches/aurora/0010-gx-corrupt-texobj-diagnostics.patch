@@ -1,0 +1,44 @@
+diff --git a/lib/gx/texture.cpp b/lib/gx/texture.cpp
+--- a/lib/gx/texture.cpp
++++ b/lib/gx/texture.cpp
+@@ -629,6 +629,11 @@ gfx::TextureHandle resolve_static_texture(const GXTexObj_& obj) {
+       const auto nameStr = "GX Static Texture";
+ #endif
+       const size_t sourceBytes = texture_source_size(obj.format(), obj.width(), obj.height(), obj.mip_count());
++      if (obj.width() == 0 || obj.height() == 0 || obj.mip_count() == 0 || obj.mip_count() > 16 || obj.width() > 4096 ||
++          obj.height() > 4096 || sourceBytes == 0) {
++        Log.error("suspicious static texture: fmt={} {}x{} mips={} sourceBytes={} data={}", obj.format(), obj.width(),
++                  obj.height(), obj.mip_count(), sourceBytes, obj.data);
++      }
+       handle = gfx::new_static_texture_2d(obj.width(), obj.height(), obj.mip_count(), obj.format(),
+                                           {static_cast<const uint8_t*>(obj.data), sourceBytes}, false, nameStr);
+       ++s_stats.misses;
+diff --git a/lib/dolphin/gx/GXTexture.cpp b/lib/dolphin/gx/GXTexture.cpp
+--- a/lib/dolphin/gx/GXTexture.cpp
++++ b/lib/dolphin/gx/GXTexture.cpp
+@@ -5,6 +5,11 @@
+ #include "dolphin/gx/GXAurora.h"
+ 
+ #include <algorithm>
++#include <cstdio>
++
++#ifdef _WIN32
++extern "C" __declspec(dllimport) void* __stdcall GetModuleHandleW(const wchar_t*); // avoids <windows.h> macros
++#endif
+ 
+ #include "tracy/Tracy.hpp"
+ 
+@@ -205,6 +210,13 @@ void* GXGetTexObjUserData(const GXTexObj* obj_) {
+ 
+ void GXLoadTexObj(GXTexObj* obj_, GXTexMapID id) {
+   auto* obj = reinterpret_cast<GXTexObj_*>(obj_);
++  if (obj->width() > 4096 || obj->height() > 4096) {
++    // Corrupt texture object (seen in the full retail-flow run at the first spray): name the caller.
++    std::fprintf(stderr, "[gx] GXLoadTexObj corrupt texobj: fmt=%u %ux%u data=%p id=%u map=%d caller=%p base=%p\n",
++                 static_cast<unsigned>(obj->format()), static_cast<unsigned>(obj->width()),
++                 static_cast<unsigned>(obj->height()), obj->data, obj->texObjId, static_cast<int>(id),
++                 __builtin_return_address(0), GetModuleHandleW(nullptr));
++  }
+   SET_REG_FIELD(0, obj->mode0, 8, 24, GXTexMode0Ids[id]);
+   SET_REG_FIELD(0, obj->mode1, 8, 24, GXTexMode1Ids[id]);
+   SET_REG_FIELD(0, obj->image0, 8, 24, GXTexImage0Ids[id]);

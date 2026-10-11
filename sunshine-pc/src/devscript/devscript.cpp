@@ -22,6 +22,8 @@
 #include "MoveBG/Item.hpp"
 #include "MoveBG/ItemManager.hpp"
 #include "MoveBG/MapObjManager.hpp"
+#include "MoveBG/MapObjTown.hpp"
+#include "MoveBG/MapObjHide.hpp"
 #include "System/MarioGamePad.hpp"
 #include "Player/Mario.hpp"
 #include "System/Application.hpp"
@@ -47,7 +49,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -113,6 +115,8 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("cardmode=", 0) == 0) k = Command::Cond::CardMode; // TCardLoad::unk14
 	else if (tok.rfind("cardprog=", 0) == 0) k = Command::Cond::CardProg; // TCardLoad::unk1C (TEProgress)
 	else if (tok.rfind("thp=", 0) == 0 || tok.rfind("movie=", 0) == 0) k = Command::Cond::Thp; // THP player state, 0 = no movie
+	else if (tok.rfind("camDemo=", 0) == 0) k = Command::Cond::CamDemo; // 1 while a demo camera owns the view
+	else if (tok.rfind("washed=", 0) == 0) k = Command::Cond::Washed; // graffiti wash finished (see washedCount)
 	else return false;
 	const size_t eq = tok.find('=');
 	c.conds.emplace_back(k, eq == std::string::npos ? 0 : static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0)));
@@ -131,6 +135,12 @@ Command parseLine(const std::string& text, int line)
 		c.op = verb == "wait" ? Op::Wait : Op::Hold;
 		std::string tok;
 		while (in >> tok) {
+			if (c.op == Op::Hold && tok == "until") continue;
+			if (c.op == Op::Hold && (tok.rfind("timeout=", 0) == 0 || tok.rfind("max=", 0) == 0)) {
+				c.maxTicks = std::atoi(tok.c_str() + tok.find('=') + 1);
+				continue;
+			}
+			if (c.op == Op::Hold && parseCond(tok, c)) continue;
 			if (tok.rfind("frames=", 0) == 0) {
 				c.frames = std::atoi(tok.c_str() + 7);
 			} else if (c.op == Op::Wait) {
@@ -163,7 +173,8 @@ Command parseLine(const std::string& text, int line)
 			}
 		}
 		if (c.op == Op::Wait && c.frames <= 0) fail(line, "wait needs frames=N", text);
-		if (c.op == Op::Hold && c.frames <= 0) fail(line, "hold needs frames=N", text);
+		if (c.op == Op::Hold && c.frames <= 0 && c.conds.empty()) fail(line, "hold needs frames=N or until <cond>", text);
+		if (c.op == Op::Hold && !c.conds.empty() && c.maxTicks <= 0) fail(line, "hold until needs timeout=N (logic ticks)", text);
 		return c;
 	}
 	if (verb == "waitfor" || verb == "mash" || verb == "pressuntil") {
@@ -265,14 +276,44 @@ int shineCount()
 	return TFlagManager::smInstance->getFlag(0x40000);
 }
 
+// Wash state of each graffiti (TWaterHitPictureHideObj, e.g. the airport FLUDD tutorial M). state 3 = finished;
+// progress runs min..max; alpha tracks progress (0 = fully hidden graffiti); hidden=1 when a reveal object is linked.
+void logWash(const char* tag)
+{
+	if (!gpMapObjManager) return;
+	for (int i = 0; i < gpMapObjManager->getObjNum(); ++i) {
+		TWaterHitPictureHideObj* w = dynamic_cast<TWaterHitPictureHideObj*>(gpMapObjManager->getObj(i));
+		if (!w) continue;
+		std::printf("[%s-wash] event=%u state=%u progress=%.1f min=%.1f max=%.1f alpha=%d reverse=%d pos=(%.1f,%.1f,%.1f) hidden=%d tick=%d\n",
+		    tag, w->getEventId(), (unsigned)w->mState, w->mProgress, w->mMinProgress, w->mMaxProgress, (int)w->mColor.a,
+		    w->mReverse ? 1 : 0, w->mPosition.x, w->mPosition.y, w->mPosition.z, w->mHiddenObj ? 1 : 0, gTick);
+	}
+	for (int i = 0; gpMapObjManager && i < gpMapObjManager->getObjNum(); ++i)
+		if (const TMapObjStartDemo* d = dynamic_cast<const TMapObjStartDemo*>(gpMapObjManager->getObj(i)))
+			std::printf("[%s-startdemo] unk138=%u pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, d->unk138, d->mPosition.x,
+			    d->mPosition.y, d->mPosition.z, gTick);
+}
+
+// Graffiti whose wash finished (state 3). Route condition washed=N: at least N finished.
+int washedCount()
+{
+	int n = 0;
+	for (int i = 0; gpMapObjManager && i < gpMapObjManager->getObjNum(); ++i)
+		if (const TWaterHitPictureHideObj* w = dynamic_cast<const TWaterHitPictureHideObj*>(gpMapObjManager->getObj(i)))
+			n += w->mState == TWaterHitPictureHideObj::STATE_FINISHED;
+	return n;
+}
+
 void logStatus(const char* tag)
 {
+	logWash(tag);
 	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
 	if (gpCardLoad)
 		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,
 		            static_cast<int>(gpCardLoad->unk1C));
 	if (!gpMarioOriginal || !gpCamera || !gpMarDirector) {
-		std::printf("[%s] tick=%d t=%.2fs (no mario/camera/director yet)\n", tag, gTick, gTick / 30.0);
+		std::printf("[%s] tick=%d t=%.2fs stage=%u scen=%u (no mario/camera/director yet)\n", tag, gTick, gTick / 30.0,
+		            gpApplication.mCurrArea.getStage(), gpApplication.mCurrArea.getScenario());
 		return;
 	}
 	const TMario* m = gpMarioOriginal;
@@ -393,6 +434,8 @@ bool condHolds(const Command& c)
 		case Command::Cond::Thp: ok = THPPlayerGetState() == val; break;
 		case Command::Cond::CardMode: ok = gpCardLoad && gpCardLoad->unk14 == val; break;
 		case Command::Cond::CardProg: ok = gpCardLoad && static_cast<int>(gpCardLoad->unk1C) == val; break;
+		case Command::Cond::CamDemo: ok = gpCamera && gpCamera->isDemoCamera() == (val != 0); break;
+		case Command::Cond::Washed: ok = washedCount() >= val; break;
 		default: break;
 		}
 		if (!ok) return false;
@@ -429,6 +472,30 @@ void step()
 {
 	while (gCursor < gScript.size()) {
 		const Command& c = gScript[gCursor];
+		if (c.op == Op::Hold && !c.conds.empty()) {
+			// hold <buttons/trig> until <cond> timeout=N: pad held until the condition is true; timeout fails loudly.
+			if (!gStarted) {
+				gStarted = true;
+				gRemaining = 0;
+				std::printf("[devscript] hold-until start line=%d tick=%d\n", c.line, gTick);
+			}
+			if (condHolds(c)) {
+				std::printf("[devscript] hold-until met line=%d after=%d tick=%d\n", c.line, gRemaining, gTick);
+				const PADStatus neutral{};
+				PADSetVirtualStatus(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
+			if (gRemaining >= c.maxTicks) {
+				std::printf("[devscript] TIMEOUT hold-until line=%d: condition not met after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			PADSetVirtualStatus(0, &c.pad);
+			++gRemaining;
+			return;
+		}
 		if (c.op == Op::Wait || c.op == Op::Hold) {
 			if (!gStarted) {
 				gStarted = true;

@@ -62,6 +62,9 @@ def main():
     out = os.path.join(ROOT, "build", "Route", name)
     os.makedirs(os.path.join(out, "appdata"), exist_ok=True)
     env = dict(os.environ)
+    # Keep tooling of the surrounding agent session (Headroom proxy: HEADROOM_*, its onnxruntime in ORT_DYLIB_PATH) out of the game run.
+    for key in [k for k in env if k.startswith("HEADROOM_") or k == "ORT_DYLIB_PATH"]:
+        del env[key]
     env.update(
         APPDATA=os.path.join(out, "appdata"),
         SUNSHINE_WINDOW_POS="30000,30000",
@@ -74,6 +77,9 @@ def main():
     )
     env.setdefault("SUNSHINE_DEV_STATUS", "1")
     env.setdefault("SUNSHINE_ALLOW_CPU_ADAPTER", "1")  # GPU-less host: Null backend renders nothing, PNGs would be blank
+    # WARP is fill-rate bound: 0.25 keeps dolpic0 at ~30 logic ticks/s (full size: 14-17/s, measured m4_s025 vs m1_inbox).
+    # Screenshots are then low-res; pass SUNSHINE_RENDER_SCALE=1 for a sharp frame.
+    env.setdefault("SUNSHINE_RENDER_SCALE", "0.25")
     env.update(extra)
     if lock("acquire") != "LOCKED":
         print("run lock not acquired")

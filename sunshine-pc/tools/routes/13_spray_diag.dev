@@ -1,0 +1,13 @@
+# Diagnosis only: run with SUNSHINE_DEV_START=airport/1 (starts in the FLUDD tutorial, about 60 s per run).
+# Reproduces the crash seen in the full run when the wash of the M graffiti (-6300.9, 536.2, 2350) starts.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+wait frames=60
+log
+walkto x=-6300 z=2150 radius=60 timeout=600
+log
+hold trig=0,255 frames=240
+log
+shot wash.png
+wait frames=60
+log
+end
