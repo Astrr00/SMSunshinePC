@@ -1,0 +1,24 @@
+# Diagnosis only (airport/1 + Null backend): calibrate the L-button camera aim at the GateKeeper basin rim.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+wait frames=60
+walkto x=-5876 z=976 radius=100 timeout=900
+walkto x=-4940 z=814 radius=100 timeout=500
+walkto x=-4005 z=652 radius=100 timeout=500
+walkto x=-3069 z=491 radius=100 timeout=500
+walkto x=-2134 z=329 radius=100 timeout=500
+log
+walkto x=-1500 z=900 radius=150 timeout=500
+log
+walkto x=-1500 z=1500 radius=470 timeout=900
+faceto x=-1544 z=1469 tol=6 timeout=240
+log
+hold L trig=255,255 stick=0,127 frames=60
+log
+hold L trig=255,255 stick=0,-127 frames=60
+log
+hold L trig=255,255 stick=127,0 frames=60
+log
+hold L trig=255,255 stick=-127,0 frames=60
+log
+wait frames=30
+end
