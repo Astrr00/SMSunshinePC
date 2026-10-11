@@ -533,7 +533,7 @@ static bool devStartArea(TNameRefPtrAryT<TNameRefAryT<TScenarioArchiveName> >& t
 
 void TApplication::proc()
 {
-	char trash[0x68];
+	char trash[0x50];
 	while (mAppState != APP_STATE_QUIT) {
 		u8 nextState = APP_STATE_DEFAULT;
 		int iVar9    = 0;

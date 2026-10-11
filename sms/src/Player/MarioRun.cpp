@@ -474,8 +474,8 @@ void TMario::doStopping() { }
 void TMario::doRunning()
 {
 	f32 sp = mIntendedMag < mRunParams.mMaxSpeed.get()
-	             ? mRunParams.mMaxSpeed.get()
-	             : mIntendedMag;
+	             ? mIntendedMag
+	             : mRunParams.mMaxSpeed.get();
 
 	if (onYoshi())
 		sp *= mYoshiParams.mRunYoshiMult.get();

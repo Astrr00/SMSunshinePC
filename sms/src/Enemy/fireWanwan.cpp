@@ -400,6 +400,7 @@ void TFireWanwanTailNode::setBarAnmMtx(MtxPtr mtx)
 	mMActor->getModel()->setAnmMtx(mJointIdx, mtx);
 }
 
+// Keeps inv_sqrt an out-of-line call as in retail (bl inv_sqrt); mwcc inlines the header version otherwise.
 #pragma dont_inline on
 static f32 invSqrtCall(f32 mag)
 {
@@ -426,7 +427,7 @@ void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
 			xx = 0.0f;
 			xz = 0.0f;
 		} else {
-			f32 k = 1.0f * invSqrtCall(lsq);
+			f32 k = invSqrtCall(lsq);
 			xx *= k;
 			xz *= k;
 		}
@@ -440,7 +441,7 @@ void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
 			yy = 0.0f;
 			yz = 0.0f;
 		} else {
-			f32 k = 1.0f * invSqrtCall(lsq);
+			f32 k = invSqrtCall(lsq);
 			yx *= k;
 			yy *= k;
 			yz *= k;

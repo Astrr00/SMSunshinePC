@@ -11,6 +11,7 @@ Known false positive: string-pool offsets (addi rX, rY, imm) show as imm.
 
   python sunshine-pc/tools/decomp_triage.py [unit-substring]   all units -> sms/build/triage.json
   python sunshine-pc/tools/decomp_triage.py --build <unit>      recompile one unit with mwcc, print its rows
+  python sunshine-pc/tools/decomp_triage.py --diff <unit> <sym> [ctx]  differing rows only: retail | ours (ctx rows around)
 """
 import json, os, subprocess, sys, collections
 from concurrent.futures import ThreadPoolExecutor
@@ -90,10 +91,38 @@ def build(name):
         print(f["score"], f["match"], f["fn"], f["diffs"])
     print(f"nonmatching={len(rows)} risky={sum(1 for f in rows if f['score'])}")
 
+def diff(name, sym, ctx=0):
+    out = subprocess.run([OBJDIFF, "diff", "-p", SMS, "-u", name, "-o", "-", "--format", "json"],
+                         capture_output=True, text=True, creationflags=NOWIN)
+    j = json.loads(out.stdout)
+    ls, rs = j["left"]["symbols"], j.get("right", {}).get("symbols", [])
+    fns = [s for s in ls if s.get("kind") == "SYMBOL_FUNCTION"]
+    hits = [s for s in fns if s["name"] == sym] or [s for s in fns if sym in s.get("demangled_name", "")]
+    if len(hits) != 1:
+        print(f"{len(hits)} matches for {sym!r}:", *[s["name"] for s in hits[:10]])
+        return
+    s = hits[0]
+    L = s.get("instructions", [])
+    R = rs[s["target_symbol"]].get("instructions", []) if s.get("target_symbol") is not None else []
+    fmt = lambda i: i.get("instruction", {}).get("formatted", "")
+    marks = [i for i, (a, b) in enumerate(zip(L, R)) if a.get("diff_kind") or b.get("diff_kind")]
+    show = sorted({k for i in marks for k in range(max(0, i - ctx), min(len(L), i + ctx + 1))})
+    print(f"{s.get('match_percent')}% rows={len(L)} diff_rows={len(marks)}")
+    last = -2
+    for i in show:
+        if i != last + 1:
+            print("  ...")
+        k = (L[i].get("diff_kind") or R[i].get("diff_kind") or "").removeprefix("DIFF_")[:8]
+        print(f"{i:4} {k:8} {fmt(L[i]):40} | {fmt(R[i])}")
+        last = i
+
+
 
 def main():
     if sys.argv[1:2] == ["--build"]:
         return build(sys.argv[2])
+    if sys.argv[1:2] == ["--diff"]:
+        return diff(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 0)
     rep = json.load(open(os.path.join(SMS, "build", "GMSJ01", "report.json")))
     flt = sys.argv[1] if len(sys.argv) > 1 else ""
     names = [u["name"] for u in rep["units"] if flt in u["name"]

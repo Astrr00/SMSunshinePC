@@ -2795,8 +2795,8 @@ void TGCConsole2::drawWaterBack()
 	                  GX_FALSE, GX_PTIDENTITY);
 	GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
 
-	JUTRect bounds(((J2DPicture*)unk26C->getPane())->mBounds);
 	TWaterGun* waterGun = gpMarioOriginal->mWaterGun;
+	JUTRect bounds(((J2DPicture*)unk26C->getPane())->mBounds);
 	GXSetTevColor(GX_TEVREG0, JUtility::TColor(0x0000ff78));
 	GXSetTevColor(GX_TEVREG1, JUtility::TColor(0x0000ff00));
 
@@ -3141,14 +3141,13 @@ bool TGCConsole2::processAppearStar(int param_1)
 		updateDownPaneState(unk154[i], isFinished);
 	}
 
-	JUTRect bounds(unk12C->getPane()->mGlobalBounds);
+	JUTRect bounds = unk12C->getPane()->mGlobalBounds;
 	unk144->mGlobalTranslation.set(bounds.x1 + bounds.getWidth() * 0.5f,
 	                               bounds.y1 + bounds.getHeight() * 0.5f, 0.0f);
 
-	JUTRect bounds2(unk14C->getPane()->mGlobalBounds);
-	unk164->mGlobalTranslation.set(bounds2.x1 + bounds2.getWidth() * 0.5f,
-	                               bounds2.y1 + bounds2.getHeight() * 0.5f,
-	                               0.0f);
+	bounds = unk14C->getPane()->mGlobalBounds;
+	unk164->mGlobalTranslation.set(bounds.x1 + bounds.getWidth() * 0.5f,
+	                               bounds.y1 + bounds.getHeight() * 0.5f, 0.0f);
 
 	return isFinished;
 }

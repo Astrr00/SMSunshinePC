@@ -17,7 +17,6 @@ bool TModelDataNode::isSameName(const char* name, u16 key) const
 		return false;
 }
 
-#pragma dont_inline on
 void TModelDataNode::registerDataAndJoinNewNode(SDLModelData* data,
                                                 const char* name)
 {
@@ -33,7 +32,6 @@ void TModelDataNode::registerDataAndJoinNewNode(SDLModelData* data,
 	mKey  = JDrama::TNameRef::calcKeyCode(name);
 	mNext = new TModelDataNode;
 }
-#pragma dont_inline off
 
 TModelDataNode::TModelDataNode()
     : mData(nullptr)
@@ -43,7 +41,6 @@ TModelDataNode::TModelDataNode()
 {
 }
 
-#pragma dont_inline on
 SDLModelData* TModelDataKeeper::loadModelData(const char* name, u32 flags,
                                               const char* folder)
 {
@@ -54,7 +51,6 @@ SDLModelData* TModelDataKeeper::loadModelData(const char* name, u32 flags,
 	SDLModelData* sdlData = new SDLModelData(data);
 	return sdlData;
 }
-#pragma dont_inline off
 
 SDLModelData* TModelDataKeeper::createAndKeepData(const char* name, u32 flags)
 {
@@ -143,6 +139,7 @@ MActor* TMActorKeeper::getMActor(const char* name) const
 
 MActor* TMActorKeeper::createMActorFromDefaultBmd(const char* folder, u32 flags)
 {
+	char trash[8];
 	// Retail inlines loadModelData here; copied so the helper stays out of line for createMActor.
 	u32 loaderFlags = mModelLoaderFlags;
 	char fullPath[256];

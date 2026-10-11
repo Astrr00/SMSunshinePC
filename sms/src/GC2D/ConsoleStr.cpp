@@ -101,7 +101,9 @@ void TConsoleStr::loadAfter()
 {
 	char trash[8];
 	JDrama::TViewObj::loadAfter();
-	unk2AC[0] = unk2AC[1] = unk2AC[2] = 0;
+	unk2AC[0] = 0;
+	unk2AC[1] = 0;
+	unk2AC[2] = 0;
 }
 
 void TConsoleStr::perform(u32 cue, JDrama::TGraphics* graphics)

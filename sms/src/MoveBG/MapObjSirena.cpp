@@ -331,7 +331,7 @@ void TSlotDrum::moveObject()
 							if (unk138[j] != 0.0f)
 								return;
 							if ((unk13C[j] >= (f32)unk168
-							     && unk13C[j] > 360.0f))
+							     && unk13C[j] < 360.0f))
 								return;
 						}
 						MSBgm::startBGM(MSD_BGM_FANFARE_RACE);

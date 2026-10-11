@@ -13,17 +13,17 @@ MoveBG/MapObjPinna	TAmiKing::moveObject		logic-verified	DecompMoveBG2
 MoveBG/MapObjPinna	TViking::roll		logic-verified	DecompMoveBG2
 MoveBG/MapObjPinna	TPinnaCoaster::control		logic-verified	DecompMoveBG2
 MoveBG/MapObjPinna	TFerrisWheel::control		logic-verified	DecompMoveBG2
-MoveBG/MapObjMare	TMuddyBoat::bind		logic-verified	DecompMoveBG2
+MoveBG/MapObjMare	TMuddyBoat::bind	81.65	partial (pending review): stack/reg/delete/insert rows unexplained	DecompMoveBG4
 MoveBG/MapObjGeneral	TMapObjGeneral::thrown		logic-verified	DecompMoveBG2
-MoveBG/MapObjBase	TMapObjBase::startAnim		logic-verified	DecompMoveBG2
+MoveBG/MapObjBase	TMapObjBase::startAnim	98.55	partial (pending review)	DecompMoveBGB
 MoveBG/MapObjBase	TMapObjBase::setGroundCollision		logic-verified	DecompMoveBG2
 MoveBG/MapObjBase	TMapObjBase::startControlAnim		logic-verified	DecompMoveBG2
 MoveBG/MapObjBase	TMapObjBase::perform		logic-verified	DecompMoveBG2
-MoveBG/MapObjDolpic	hitByWater		logic-verified	DecompMoveBG2
+MoveBG/MapObjDolpic	hitByWater		partial (pending review)	DecompMoveBG2
 MoveBG/MapObjPollution	loadAfter		logic-verified	DecompMoveBG2
-MoveBG/MapObjBall	TResetFruit::kicked		logic-verified	DecompMoveBG2
-MoveBG/MapObjMamma	TMammaMirrorMapOperator::perform		logic-verified	DecompMoveBG2
-MoveBG/MapObjMamma	TSandCastle::expanded		logic-verified	DecompMoveBG2
+MoveBG/MapObjBall	TResetFruit::kicked	91.86	logic-verified	DecompMoveBG3
+MoveBG/MapObjMamma	TMammaMirrorMapOperator::perform	91.18	partial (pending review): mirror index via unk18 reference (retail addi/lwz shape), distance() arithmetic order matches; residual = frame 0x98 vs 0x78 (32 B unidentified) and r27/r28 camera vs hidden-ptr swap	DecompMoveBGA
+MoveBG/MapObjMamma	TSandCastle::expanded	90.48	partial (pending review): retail frame -0x40 vs ours -0x48; retail calls getMActor out of line, ours reads mMActor directly (codegen limit)	DecompMoveBG4
 Enemy/*	TSpineEnemy::goToExclusiveNextGraphNode		logic-verified	DecompEnemy2
 Enemy/*	TSpineEnemy::calcEnemyRootMatrix		logic-verified	DecompEnemy2
 Enemy/*	getTakingMtx		logic-verified	DecompEnemy2
@@ -39,7 +39,7 @@ System+Camera	TRope::moveHead		logic-verified	DecompSystem3
 System+Camera	CLBRotatePosAndUp		logic-verified	DecompSystem3
 System+Camera	calcInHouseNo_		logic-verified	DecompSystem3
 System+Camera	changeCamModeSub_		logic-verified	DecompSystem3
-System+Camera	CPolarSubCamera::loadAfter (tail unchecked)		partial (pending review)	DecompSystem3
+System+Camera	CPolarSubCamera::loadAfter (tail unchecked)	94.25	partial (pending review)	DecompSystem3
 System+Camera	calcPosAndAt_		logic-verified	DecompSystem3
 System+Camera	nextStateInitialize		logic-verified	DecompSystem3
 System+Camera	decideNextStage		partial (pending review)	DecompSystem3
@@ -52,7 +52,8 @@ Player/MarioMove+WaterGun	checkController		logic-verified	DecompPlayer5
 Player/MarioMove+WaterGun	checkGraffito		logic-verified	DecompPlayer5
 Player/MarioMove+WaterGun	checkGraffitoSlip		logic-verified	DecompPlayer5
 Player/MarioMove+WaterGun	checkCurrentPlane		logic-verified	DecompPlayer5
-Player/MarioMove+WaterGun	playerControl		logic-verified	DecompPlayer5
+Player/MarioMove+WaterGun	playerControl	99.91	logic-verified	DecompPlayerB
+Player/MarioMove+WaterGun	thinkHeight	99.88	partial (pending review)	DecompPlayerB
 Player/MarioMove+WaterGun	TNozzleBase::emit		logic-verified	DecompPlayer5
 Player/MarioMove+WaterGun	TNozzleTrigger::emit		logic-verified	DecompPlayer5
 Player/MarioMove+WaterGun	TNozzleDeform::emit		logic-verified	DecompPlayer5
@@ -67,7 +68,7 @@ Map/MapCheck	TMapCollisionData::intersectLine	54.38	logic-verified	DecompMapNPC
 NPC/NpcEvent	evCheckCurNerve4Npc	75.74	logic-verified	DecompMapNPC
 NPC/NpcEvent	evCheckLatestNerve4Npc	71.46	logic-verified	DecompMapNPC
 Player/MarioParticle	TWarpInCallBack::execute	36.75	logic-verified	DecompPlayer6
-GC2D/BoundPane	TBoundPane::update	92.06	logic-verified	DecompGC2D
+GC2D/BoundPane	TBoundPane::update	92.06	partial (pending review)	DecompGC2D
 Player/ModelWaterManager	TModelWaterManager::calcVMMtxGround	72.65	logic-verified	DecompPlayer6
 Player/ModelWaterManager	TModelWaterManager::calcVMMtxWall	83.97	logic-verified	DecompPlayer6
 Enemy/killer	TNerveFlyEnemyChaseFly::execute	89.22	logic-verified	DecompEnemy5
@@ -107,7 +108,6 @@ NPC/NpcAnm	TBaseNPC::npcTalkOut()	99.94	logic-verified	DecompMapNPC
 MoveBG/Item	TShine::appearWithTime	85.88	logic-verified	DecompMoveBG3
 MoveBG/Item	TShine::appearSimple	97.67	logic-verified	DecompMoveBG3
 MarioUtil/PacketUtil	ShapePacketCallBackFunc	64.56	logic-verified	DecompSystem4
-MoveBG/MapObjBall	TResetFruit::kicked	91.86	logic-verified	DecompMoveBG3
 MoveBG/MapObjBall	TResetFruit::control	99.67	logic-verified	DecompMoveBG3
 MoveBG/MapObjBall	TMapObjBall::calcCurrentMtx	96.26	logic-verified	DecompMoveBG3
 Player/MarioPhysics	TMario::keepDistance(const JGeometry::TVec3<float>&, float, float)	95.15	logic-verified	DecompPlayer7
@@ -118,10 +118,13 @@ MarioUtil/ShadowUtil	TMBindShadowManager::drawShadowGD	98.58	logic-verified	Deco
 GC2D/SelectShine2	TSelectShineManager::perform	86.01	logic-verified	DecompGC2D2
 MarioUtil/MtxUtil	TRope::moveHead	93.60	logic-verified	DecompSystem4
 Player/WaterGun	TWaterGun::movement	99.70	logic-verified	DecompPlayer7
+Player/WaterGun	TNozzleBase::emit	89.84	partial (pending review)	W03
+Player/WaterGun	TNozzleTrigger::emit	94.20	partial (pending review)	W03
+Player/WaterGun	TNozzleDeform::emit	93.63	partial (pending review)	W03
 GC2D/ConsoleStr	TConsoleStr::processGo	74.85	logic-verified	DecompGC2D2
 GC2D/ConsoleStr	TConsoleStr::startCloseWipe	74.29	logic-verified	DecompGC2D2
 MarioUtil/LightUtil	TLightCommon::loadAfter	97.47	logic-verified	DecompSystem4
-MoveBG/MapObjInit	TMapObjBase::initMActor	86.88	logic-verified	DecompMoveBG3
+MoveBG/MapObjInit	TMapObjBase::initMActor	86.88	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 Player/MarioCheckCol	TMario::checkCollision	99.682	logic-verified	DecompPlayer7
 GC2D/Guide	TGuide::perform	79.25	logic-verified	DecompGC2D2
 GC2D/Talk2D2	TTalk2D2::loadAfter	93.12	logic-verified	DecompGC2D2
@@ -138,26 +141,22 @@ System/MarDirectorDirect	TMarDirector::updateGameMode	89.62	partial (pending rev
 Enemy/bossManta	TBossManta::updateAttractor	87.06422	logic-verified	DecompEnemyBoss
 System/MarDirectorDirect	TMarDirector::setMario	92.97	partial (pending review)	DecompMix1
 System/MarDirectorDirect	decideNextStage	92.91	partial (pending review)	DecompMix1
-MoveBG/MapObjMare	TMapObjGrowTree::touchWater	89.78	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-MoveBG/MapObjMare	TMuddyBoat::bind	81.65	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
+MoveBG/MapObjMare	TMapObjGrowTree::touchWater	89.78	partial (pending review): op_mismatch row (retail bl getMActor vs ours direct mMActor load) and this-register r31/r30 residual unexplained	DecompMoveBG4
 MoveBG/MapObjSirena	TCloset::moveObject	98.52	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjSirena	TItemSlotDrum::generateItem	90.55	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-MoveBG/MapObjMamma	TMammaMirrorMapOperator::perform	89.51	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjFlag	TMapObjFlagManager::perform	93.73	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-MoveBG/MapObjBianco	TBiancoMiniWindmill::calc	86.73	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-MoveBG/MapObjDolpic	TMonumentShine::hitByWater	90.92	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
+MoveBG/MapObjBianco	TBiancoMiniWindmill::calc	99.59	partial (pending review): opcodes identical, stack-only diff (frame 0x88 vs 0x80, unidentified 8-byte slot); constant-pool operands unchecked	DecompMoveBGA
+MoveBG/MapObjDolpic	TMonumentShine::hitByWater	90.92	partial (pending review): retail frame 0x60 vs ours 0x58; static local up$2645 vs ...bss.0	DecompMoveBG4
 MoveBG/MapObjBianco	TLeafBoat::touchWall	92.76	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-MoveBG/MapObjMamma	TSandCastle::expanded	90.48	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjTown	TMapObjSwitch::control	92.27	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 MoveBG/MapObjPollution	TMapObjRevivalPollution::loadAfter	88.07	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
-MoveBG/MapObjInit	TMapObjBase::initMActor	86.88	logic-verified (insert/delete rows = inlining/scheduling)	DecompMoveBG4
 System/EventWatcher	evWarpFrontToMario	84.08	partial (pending review)	DecompMix1
 System/EventWatcher	evAppear8RedCoinsAndTimer	92.25	partial (pending review)	DecompMix1
 MoveBG/MapObjLib	TMapObjBase::makeMtxRotByAxis	65.93	logic-verified	DecompMix2
 MoveBG/MapObjCorona	TBathtubGripPartsHard::~TBathtubGripPartsHard	83.88	logic-verified	DecompMix2
 MoveBG/MapObjCorona	TBathtubGripPartsFragile::~TBathtubGripPartsFragile	83.88	logic-verified	DecompMix2
-MoveBG/MapObjBianco	TLampSeesawMain::~TLampSeesawMain	86.36	logic-verified	DecompMix2
-MoveBG/MapObjBianco	TLeafBoatRotten::~TLeafBoatRotten	86.36	logic-verified	DecompMix2
+MoveBG/MapObjBianco	TLampSeesawMain::~TLampSeesawMain	86.36	partial (pending review): retail names __vt__ per branch, ours folds to ...data.0; other diff rows unread	DecompMix2
+MoveBG/MapObjBianco	TLeafBoatRotten::~TLeafBoatRotten	86.36	partial (pending review): retail names __vt__ per branch, ours folds to ...data.0; other diff rows unread	DecompMix2
 MoveBG/MapObjBianco	TLeafBoat::bind	93.79	logic-verified	DecompMix2
 MoveBG/MapObjRailBlock	TNormalLift::readRailFlag	92.84	logic-verified	DecompMix2
 Enemy/gesso	TNerveGessoFreeze::execute	98.49	logic-verified	DecompEnemy7
@@ -186,13 +185,78 @@ Enemy/bossManta	TBossMantaAdditionalCollisionSet::adapt	98.77358	logic-verified	
 Enemy/bossManta	TBossManta::calcRootMatrix	98.75	logic-verified	DecompEnemyBoss
 Enemy/bossManta	TBossMantaManager::loadAfter	98.17757	logic-verified	DecompEnemyBoss
 MoveBG/MapObjRailBlock	TRailBlock::control	88.40	logic-verified	DecompMix2
-Enemy/bgtentacle	TBGTentacle::setAttackTarget	81.77738	logic-verified	DecompEnemy7
+Enemy/bgtentacle	TBGTentacle::setAttackTarget	81.77738	partial (pending review)	DecompEnemy7
 GC2D/SelectMenu	TSelectGrad::perform	94.91	logic-verified	DecompMix2
 GC2D/ConsoleStr	TConsoleStr::processShineGet	90.26	logic-verified	DecompMix2
-Enemy/bgtentacle	TBGTentacle::moveConstraint	97.52	logic-verified	DecompEnemy7
+Enemy/bgtentacle	TBGTentacle::moveConstraint	97.52	partial (pending review)	DecompEnemy7
 GC2D/SelectShine2	TSelectShineManager::initData	93.32	partial (pending review)	DecompMix2
 Enemy/bosswanwan	TNerveBWDie::execute	97.29	logic-verified	DecompEnemyBoss2
 MSound/MSoundSE	MSoundSESystem::MSoundSE::construct()	99.72	partial (pending review)	DecompSystemB
 Enemy/bgtentacle	TBGTakeHit::perform	92.48	partial (pending review)	DecompEnemy7
-Enemy/bgtentacle	TBGTentacle::moveConstraint	97.52	partial (pending review)	DecompEnemy7
-Enemy/bgtentacle	TBGTentacle::setAttackTarget	81.77738	partial (pending review)	DecompEnemy7
+Strategic/ObjModel	TModelDataKeeper::createAndKeepData	99.77	logic-verified	Regressions
+Enemy/fireWanwan	TFireWanwanTailNode::perform	78.18	partial (pending review)	Regressions
+Enemy/hanasambo	TSamboFlowerCoinUnit::checkGenCoin()	84.55	partial (pending review)	DecompEnemyB
+Enemy/hanasambo	SamboHeadRollCallback(J3DNode*, int)	90.41	partial (pending review)	DecompEnemyB
+Enemy/popo	PopoPossessedCallback(J3DNode*, int)	84.97	partial (pending review)	DecompEnemyB
+Enemy/tobiPuku	TobiPukuRollCallback(J3DNode*, int)	95.86	partial (pending review)	DecompEnemyB
+Enemy/tobiPuku	TNerveTobiPukuReturnLaunch::execute(TSpineBase<TLiveActor>*) const	85.66	partial (pending review)	DecompEnemyB
+Enemy/poihana	TNervePoihanaTrapped::execute(TSpineBase<TLiveActor>*) const	81.14	partial (pending review)	DecompEnemyB
+Enemy/tinkoopa	TTinKoopa::makeLaunchSchedule()	68.94	partial (pending review)	DecompEnemyB
+Enemy/tinkoopa	TTinKoopaPartsBase::emitPartsTrackEffects(const char**, int)	98.0	logic-verified	DecompEnemyB
+Enemy/tinkoopa	TTinKoopaPartsBase::emitPartsDisappearEffects()	98.31	partial (pending review)	DecompEnemyB
+Enemy/Kazekun	TKazekun::doAttackPose(bool)	76.12	partial (pending review)	DecompEnemyB
+Enemy/graph	TGraphTracer::calcSplineSpeed(float)	88.97	partial (pending review)	DecompEnemy7
+Animal/Bird	TAnimalBird::moveObject()	78.68	partial (pending review)	DecompSystemB
+Animal/AnimalBase	TAnimalBase::execWalk(bool)	78.40	partial (pending review)	DecompSystemB
+Enemy/enemymanager	TEnemyManager::perform(unsigned long, JDrama::TGraphics*)	94.12	partial (pending review)	DecompEnemyA
+Enemy/enemyMario	TEnemyMario::checkController(JDrama::TGraphics*)	99.08	partial (pending review)	DecompEnemyA
+Enemy/enemyMario	TEnemyMario::consider()	94.07	partial (pending review)	DecompEnemyA
+Enemy/enemytable	TStageEnemyInfoTable::getMatchedInfo(long)	92.41	partial (pending review)	DecompEnemyA
+Enemy/bosspakkun	TBPNavel::receiveMessage(THitActor*, unsigned long)	89.09	partial (pending review)	DecompEnemyA
+Enemy/bosspakkun	TBPHeadHit::receiveMessage(THitActor*, unsigned long)	95.32	partial (pending review)	DecompEnemyA
+Enemy/hinokuri2	Hino2HeadCallback	81.06	partial (pending review)	DecompEnemyA
+Enemy/spider	TSpider::bind()	83.88	partial (pending review)	DecompEnemyA
+MoveBG/MapObjWater	TMapObjWaterFilter::perform	95.46	partial (pending review)	DecompMoveBGB
+System/Application	TApplication::mountStageArchive	98.31	partial (pending review)	DecompSystem5
+System/MarDirectorDirect	TMarDirector::changeState	95.03	partial (pending review)	DecompSystem5
+Camera/cameragc	CPolarSubCamera::isMarioCrabWalk_	53.5	logic-verified (whole-function review: retail calls TMario::checkStatusType out of line (pragma-inert inlining here); inlined test is identical; ReadyGun HAS_FLUDD 0x8000 at 0x118 and MEANING_CAM_L 0x8000 at 0xd0 verified; diff rows = prologue/frame, register renames, inlined checkStatusType body)	DecompSystem5
+Camera/cameragc	CPolarSubCamera::isMarioAimWithGun_	53.5	logic-verified (whole-function review: same as isMarioCrabWalk_; MEANING_R 0x400 at 0xd0 verified)	DecompSystem5
+GC2D/ScrnFader	TSMSFader::load	96.59	partial (pending review)	DecompGC2DC
+GC2D/PauseMenu2	TPauseMenu2::drawAppearPane	96.53	partial (pending review)	DecompGC2DC
+GC2D/Option	TOptionSoundUnit::TOptionSoundUnit	87.67	partial (pending review)	DecompGC2DC
+GC2D/ConsoleStr	TConsoleStr::processMiss	91.79	partial (pending review)	DecompGC2DC
+Strategic/ObjHitCheck	TObjHitCheck::checkActorsHit()	99.83	partial (pending review)	DecompSystemB
+Strategic/HitActor	THitActor::calcEntryRadius()	97.61	partial (pending review)	DecompSystemB
+MoveBG/MapObjSirena	TSlotDrum::moveObject	99.47	partial (pending review)	DecompMoveBGB
+Strategic/ObjModel	TMActorKeeper::createMActor(const char*, unsigned long)	60.60	partial (pending review)	DecompSystemB
+Player/MarioMove	TMario::moveRequest	85.58	logic-verified	W01
+Player/MarioRun	TWaterGun::isEmitting()	98.41	logic-verified (codegen-only: frame 0x28 vs 0x18, reg choice; WaterGun.hpp untouched)	W02
+Player/MarioRun	TMario::doSliding(float)	98.49	logic-verified (codegen-only: load/operand order, frame 0x98 vs 0x90)	W02
+Player/MarioRun	TMario::oilRun()	98.77	logic-verified (codegen-only: gpPollution arg-load order, frame 0x58 vs 0x50)	W02
+Player/MarioRun	TMario::doRunningAnimation()	98.69	logic-verified (codegen-only: fcmpo operand order, frame 0xd8 vs 0x88)	W02
+Player/MarioRun	TMario::walkEnd()	99.13	logic-verified (codegen-only: fmul operand load order, frame 0x20 vs 0x18)	W02
+Player/MarioRun	TMario::moveMain()	99.33	logic-verified (codegen-only: gpPollution arg-load order, lis label, frame 0x60 vs 0x40)	W02
+Player/MarioRun	TMario::running()	99.63	logic-verified (codegen-only)	W02
+Player/MarioRun	TMario::doRunning()	99.70	logic-verified (logic bug fixed: sp ternary arms swapped to min; residual codegen only)	W02
+Player/MarioRun	TMario::doSurfing()	99.33	logic-verified (codegen-only: reg renames, frame)	W02
+Player/MarioRun	TMario::slideProcess(float, float)	99.73	logic-verified (codegen-only)	W02
+Player/MarioRun	TMario::slippingBasic(int, int, int)	99.88	logic-verified (codegen-only)	W02
+Player/MarioRun	TMario::catching()	99.94	logic-verified (codegen-only)	W02
+Player/MarioRun	TMario::turnEnd()	99.94	logic-verified (codegen-only)	W02
+Player/MarioRun	TMario::turnning()	99.96	logic-verified (codegen-only)	W02
+Player/MarioRun	TMario::slopeProcess()	99.84	logic-verified (codegen-only)	W02
+Player/MarioRun	TMario::considerRotateStart()	99.87	logic-verified (codegen-only)	W02
+MarioUtil/DrawUtil	TTrembleModelEffect::clash(float)	94.0	partial (pending review)	DecompSystemB
+MarioUtil/DrawUtil	SMS_AddDamageFogEffect(J3DModelData*, const TVec3<float>&, TGraphics*)	89.99	partial (pending review)	DecompSystemB
+MarioUtil/MtxUtil	SMS_MakeJointsToArc(J3DModel*, const TVec3<float>&, const TVec3<float>&, const TVec3<float>&)	84.40	partial (pending review)	DecompSystemB
+MoveBG/MapObjCorona	TBathtub::receiveMessage	95.21	logic-verified (codegen-only)	W06
+MoveBG/MapObjCorona	TBathtub::loadAfter	99.93	logic-verified (codegen-only)	W06
+MoveBG/MapObjCorona	TBathtub::quake	99.44	partial (pending review)	W06
+MoveBG/MapObjCorona	TBathtub::hipdrop	99.30	partial (pending review)	W06
+MoveBG/MapObjCorona	TBathtub::TBathtub	99.80	partial (pending review)	W06
+MoveBG/MapObjCorona	TBathtub::getNearGrip	99.07	partial (pending review)	W06
+MoveBG/MapObjCorona	TBathtub::load	97.06	partial (pending review)	W06
+MoveBG/MapObjCorona	TBathtub::control	98.48	partial (pending review)	W06
+MoveBG/MapObjCorona	TBathtubGrip::control	98.75	partial (pending review)	W06
+MarioUtil/MtxUtil	TMultiMtxEffect::setup(J3DModel*, const char*)	92.53	partial (pending review)	DecompSystemB
+MarioUtil/MtxUtil	TRope::moveHead(const TVec3<float>&)	93.60	partial (pending review)	DecompSystemB

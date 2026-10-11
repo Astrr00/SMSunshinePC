@@ -341,6 +341,7 @@ void TMario::load(JSUMemoryInputStream& stream)
 
 void TMario::loadAfter()
 {
+	char trash[8];
 	if (checkFlag(MARIO_FLAG_HAS_FLUDD))
 		mWaterGun->initInLoadAfter();
 
@@ -365,6 +366,7 @@ void TMario::loadAfter()
 
 void TMario::initValues()
 {
+	char trash[8];
 	mHealth     = mDeParams.mHpMax.get();
 	mDirty      = 0.0f;
 	mOilBrake   = 1.0f;

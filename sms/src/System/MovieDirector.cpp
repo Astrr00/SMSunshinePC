@@ -204,7 +204,7 @@ TMovieDirector::~TMovieDirector()
 
 u32 TMovieDirector::decideNextMode(s32* param_1)
 {
-	char trash[0x30];
+	char trash[0x28];
 
 	if (gpApplication.getMovie() != 14) {
 		if (!(gpApplication.getMovie() == 15 || gpApplication.getMovie() == 16

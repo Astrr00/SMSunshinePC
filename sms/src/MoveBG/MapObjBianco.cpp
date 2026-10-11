@@ -700,14 +700,15 @@ void TBiancoMiniWindmill::control()
 void TBiancoMiniWindmill::calc()
 {
 	TMtx34f rot;
+	MtxPtr rotP = rot;
 	rot.identity();
-	MsMtxSetRotZ(rot, unk150);
-	MTXConcat(getModel()->getAnmMtx(0), rot, rot);
+	MsMtxSetRotZ(rotP, unk150);
+	MTXConcat(getModel()->getAnmMtx(0), rotP, rotP);
 
 	MtxPtr srcMtx = getModel()->getAnmMtx(1);
 	for (int i = 0; i < 3; ++i)
 		rot.ref(i, 3) = srcMtx[i][3];
-	MTXCopy(rot, getModel()->getAnmMtx(1));
+	MTXCopy(rotP, getModel()->getAnmMtx(1));
 
 	SMSGetMSound()->startSoundActorWithInfo(
 	    MSD_SE_OBJ_BI_COINMILL, &mPosition, nullptr, fabsf(unk154), 0, 0,

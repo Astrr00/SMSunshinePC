@@ -44,7 +44,7 @@ f32 TMario::getJumpSlideControl() const
 
 bool TMario::canSquat() const
 {
-	char trash[0x1c];
+	char trash[0x24];
 	if (checkFlag(MARIO_FLAG_HAS_FLUDD) && mWaterGun
 	    && ((const TWaterGun*)mWaterGun)
 	               ->getCurrentNozzle()
@@ -1170,26 +1170,30 @@ void TMario::thinkDirty()
 		mDirty = mDirtyParams.mDirtyMax.get();
 }
 
-void TMario::thinkHeight()
+static inline void thinkHeightBody(TMario* self)
 {
-	bool jumping = checkStatusType(MARIO_STATUS_FLAG_JUMPING);
-	if (jumping) {
-		f32 height = mPosition.y - mFloorPosition.y;
-		if (unk36C < height)
-			unk36C = height;
+	if (self->checkStatusType(MARIO_STATUS_FLAG_JUMPING)) {
+		f32 height = self->mPosition.y - self->mFloorPosition.y;
+		if (self->unk36C < height)
+			self->unk36C = height;
 	} else {
-		unk36C = 0.0f;
+		self->unk36C = 0.0f;
 	}
 
 	JGeometry::TVec3<f32> point;
-	point.x = mPosition.x + unk15C * JMASSin(mFaceAngle.y);
-	point.y = mPosition.y;
-	point.z = mPosition.z + unk15C * JMASCos(mFaceAngle.y);
+	point.x = self->mPosition.x + self->unk15C * JMASSin(self->mFaceAngle.y);
+	point.y = self->mPosition.y;
+	point.z = self->mPosition.z + self->unk15C * JMASCos(self->mFaceAngle.y);
 
-	if (!checkWallPlane(&point, 80.0f, unk15C))
-		unk370 = mPosition.y - checkPlayerAround(0, 100.0f);
+	if (!self->checkWallPlane(&point, 80.0f, self->unk15C))
+		self->unk370 = self->mPosition.y - self->checkPlayerAround(0, 100.0f);
 	else
-		unk370 = 0.0f;
+		self->unk370 = 0.0f;
+}
+
+void TMario::thinkHeight()
+{
+	thinkHeightBody(this);
 }
 
 void TMario::checkSink()
@@ -2298,12 +2302,13 @@ void TMario::thinkYoshiHeadCollision()
 	headPos.x += front * JMASSin(mFaceAngle.y);
 	headPos.z += front * JMASCos(mFaceAngle.y);
 
-	TBGWallCheckRecord record(headPos.x, headPos.y + 100.0f, headPos.z,
+	f32 headZ = headPos.z;
+	TBGWallCheckRecord record(headPos.x, headPos.y + 100.0f, headZ,
 	                          mYoshiParams.mHeadRadius.get(), 4, 0);
 
 	if (gpMap->isTouchedWallsAndMoveXZ(&record) == true) {
 		f32 dx = record.mCenter.x - headPos.x;
-		f32 dz = record.mCenter.z - headPos.z;
+		f32 dz = record.mCenter.z - headZ;
 		f32 f4 = std::sqrtf(dx * dx + dz * dz);
 
 		f32 f2 = f4;
@@ -2464,7 +2469,7 @@ void TMario::playerControl(JDrama::TGraphics* param_1)
 	thinkSituation();
 	thinkWaterSurface();
 	thinkSand();
-	thinkHeight();
+	thinkHeightBody(this);
 	thinkParams();
 	checkRideReCalc();
 	checkWet();
