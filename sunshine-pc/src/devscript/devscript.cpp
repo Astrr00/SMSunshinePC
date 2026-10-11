@@ -347,7 +347,7 @@ void logBoss(const char* tag)
 	std::printf("[%s-boss] hp=%d vulnerable=%d unk154=%d dead=%d bck=0x%X pos=(%.0f,%.0f,%.0f) tick=%d\n", tag, (int)g->getHitPoints(),
 	    (int)g->mVulnerable, g->unk154, g->checkLiveFlag(LIVE_FLAG_DEAD) ? 1 : 0, bck, g->mPosition.x, g->mPosition.y, g->mPosition.z, gTick);
 	if (TBiancoGateKeeper* b = dynamic_cast<TBiancoGateKeeper*>(g)) {
-		if (b->mHead && gpMarioOriginal) {
+		if (b->mHead && gpMarioOriginal && gpCamera) {
 			const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
 			const float dz = b->mHead->mPosition.z - gpMarioOriginal->mPosition.z;
 			// bearing in the game's yaw convention (forward = (sin, cos)); face = Mario's yaw in degrees
@@ -585,6 +585,8 @@ void step()
 			}
 			PADStatus pad{};
 			pad.triggerRight = 255;
+			pad.triggerLeft  = 255; // squat
+			pad.button       = PAD_TRIGGER_L;
 			TBiancoGateKeeper* b = findBoss();
 			if (b && b->mHead && gpMarioOriginal && gpCamera) {
 				if (b->checkLiveFlag(LIVE_FLAG_DEAD)) {
@@ -600,9 +602,10 @@ void step()
 				t.pos[2]            = b->mHead->mPosition.z;
 				const float dx      = t.pos[0] - gpMarioOriginal->mPosition.x;
 				const float dz      = t.pos[2] - gpMarioOriginal->mPosition.z;
-				// The nozzle pitch follows the camera pitch (WaterGun.cpp:224); the C-stick tilts the camera. The head hangs about
-				// 400-500 units above Mario's floor in the awake phases, so tilt up while it is clearly higher than Mario.
-				if (b->mHead->mPosition.y - gpMarioOriginal->mPosition.y > 150.f) pad.substickY = 100;
+				// Squat aim (WaterGun.cpp:218-244): standing, the nozzle is flat; crouching (L trigger squats in this port, observed in
+				// c01) the angle is unk36E + stickY * mRButtonMult, clamped to +-0x2000 (45 degrees). The head hangs 400-570 units above
+				// Mario's floor in the awake phases, so pitch up while it is clearly higher; stick X then only turns toward the head.
+				const bool headHigh = b->mHead->mPosition.y - gpMarioOriginal->mPosition.y > 150.f;
 				const float bearing = std::atan2(dx, dz) * 57.29578f;
 				const float face    = static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (360.0f / 65536.0f);
 				float err           = bearing - face;
@@ -610,10 +613,11 @@ void step()
 				while (err < -180.f) err += 360.f;
 				if (std::fabs(err) > 3.f) {
 					float dist = 0.f;
-					walkStick(t, pad.stickX, pad.stickY, dist);
+					s8 sy      = 0;
+					walkStick(t, pad.stickX, sy, dist);
 					pad.stickX = static_cast<s8>(pad.stickX * 0.4f);
-					pad.stickY = static_cast<s8>(pad.stickY * 0.4f);
 				}
+				pad.stickY = headHigh ? 127 : 0;
 			}
 			PADSetVirtualStatus(0, &pad);
 			if (--gRemaining == 0) {
