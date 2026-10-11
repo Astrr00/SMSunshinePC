@@ -1,0 +1,22 @@
+# Title -> file select exploration: condition-based, screenshots after each step.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=60
+shot t0_title.png
+hold START frames=4
+wait frames=90
+log
+shot t1_after_start.png
+hold A frames=4
+wait frames=90
+log
+shot t2_after_a.png
+hold A frames=4
+wait frames=90
+log
+shot t3_after_a2.png
+hold A frames=4
+wait frames=90
+log
+shot t4_after_a3.png
+wait frames=60
+end

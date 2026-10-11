@@ -1,0 +1,34 @@
+# Option map exploration: what dismisses the card message? press A with logs.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+log
+hold A frames=3
+wait frames=45
+log
+hold A frames=3
+wait frames=45
+log
+hold A frames=3
+wait frames=45
+log
+hold A frames=3
+wait frames=45
+log
+hold A frames=3
+wait frames=45
+log
+hold A frames=3
+wait frames=45
+log
+hold A frames=3
+wait frames=45
+log
+hold A frames=3
+wait frames=45
+log
+hold stick=127,0 frames=60
+log
+wait frames=30
+log
+shot c1.png
+end

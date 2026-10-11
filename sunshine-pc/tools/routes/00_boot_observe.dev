@@ -1,0 +1,3 @@
+# observe boot: no input
+wait frames=9000
+end

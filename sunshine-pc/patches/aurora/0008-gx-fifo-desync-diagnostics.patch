@@ -1,0 +1,211 @@
+diff --git a/lib/gx/command_processor.cpp b/lib/gx/command_processor.cpp
+--- a/lib/gx/command_processor.cpp
++++ b/lib/gx/command_processor.cpp
+@@ -4,6 +4,7 @@
+ #include "../gfx/pass_dump.hpp"
+ #include "../gfx/recording.hpp"
+ #include "../internal.hpp"
++#include "fifo.hpp"
+ #include "dolphin/gd/GDGeometry.h"
+ #include "dolphin/gx/GXAurora.h"
+ #include "gx.hpp"
+@@ -15,9 +16,11 @@
+ #include <tracy/Tracy.hpp>
+ 
+ #include <algorithm>
++#include <array>
+ #include <cmath>
+ #include <cstdint>
+ #include <span>
++#include <string>
+ #include <vector>
+ 
+ namespace aurora::gx::fifo {
+@@ -335,9 +338,62 @@ ProcessResult process(const u8* data, u32 size) noexcept {
+   return {size, false};
+ }
+ 
++// Last draws seen by the FIFO parser, kept to explain a stream that goes out of sync (see handle_draw_overrun).
++struct DrawRecord {
++  u8 cmd = 0;
++  u16 vtxCount = 0;
++  u32 vtxSize = 0;
++  size_t pos = 0;
++  std::array<u8, GX_VA_MAX_ATTR> desc{};
++  std::array<u8, GX_VA_MAX_ATTR> type{};
++  std::array<u8, GX_VA_MAX_ATTR> cnt{};
++};
++static constexpr size_t kDrawRingSize = 8;
++static std::array<DrawRecord, kDrawRingSize> sDrawRing;
++static size_t sDrawRingNext = 0;
++
++static void record_draw(u8 cmd, GXVtxFmt fmt, u16 vtxCount, u32 vtxSize, size_t pos) noexcept {
++  auto& r = sDrawRing[sDrawRingNext++ % kDrawRingSize];
++  r.cmd = cmd;
++  r.vtxCount = vtxCount;
++  r.vtxSize = vtxSize;
++  r.pos = pos;
++  const auto& vtxFmt = g_gxState.vtxFmts[fmt];
++  for (int i = 0; i < GX_VA_MAX_ATTR; ++i) {
++    r.desc[i] = static_cast<u8>(g_gxState.vtxDesc[i]);
++    r.type[i] = static_cast<u8>(vtxFmt.attrs[i].type);
++    r.cnt[i] = static_cast<u8>(vtxFmt.attrs[i].cnt);
++  }
++}
++
++static void dump_draw_ring() noexcept {
++  const size_t n = std::min(sDrawRingNext, kDrawRingSize);
++  for (size_t k = n; k > 0; --k) {
++    const auto& r = sDrawRing[(sDrawRingNext - k) % kDrawRingSize];
++    std::string attrs;
++    for (int i = 0; i < GX_VA_MAX_ATTR; ++i) {
++      if (r.desc[i] != GX_NONE) {
++        attrs += fmt::format(" a{}:d{}t{}c{}", i, r.desc[i], r.type[i], r.cnt[i]);
++      }
++    }
++    Log.error("  draw[-{}] cmd=0x{:02X} vtxCount={} vtxSize={} data@{}{}", k - 1, r.cmd, r.vtxCount, r.vtxSize, r.pos,
++              attrs);
++  }
++}
++
++extern "C" void aurora_gx_dump_begin_ring(uint64_t absPos); // lib/dolphin/gx/GXVert.cpp
++#ifdef _WIN32
++extern "C" __declspec(dllimport) void* __stdcall GetModuleHandleW(const wchar_t*); // avoids <windows.h> macros
++#endif
++
+ [[noreturn]] static void handle_draw_overrun(size_t totalVtxBytes, const ByteReader& reader) noexcept {
+   // Hex dump around the draw command for debugging
+   const size_t pos = reader.offset();
++  dump_draw_ring();
++  aurora_gx_dump_begin_ring(fifo::processing_chunk_base() + (pos - 3));
++#ifdef _WIN32
++  Log.error("  module base {}", GetModuleHandleW(nullptr));
++#endif
+   const size_t size = reader.size();
+   const u8* data = reader.data();
+   size_t cmdPos = pos - 2 - 1; // opcode byte position (before vtxCount and pos++)
+@@ -533,6 +589,7 @@ static void draw_prim(GXPrimitive prim, GXVtxFmt fmt, u16 vtxCount, ByteReader&
+   const bool canMerge = lastDraw != nullptr && lastDraw->instanceCount == 1;
+ 
+   // Push raw vertex data to buffer. Merged draws must remain contiguous with the previous range.
++  record_draw(static_cast<u8>(prim) | static_cast<u8>(fmt), fmt, vtxCount, vtxSize, reader.offset());
+   const auto vertexData = reader.take(totalVtxBytes);
+   gfx::Range vertRange = gfx::push_verts(vertexData.data(), vertexData.size(), canMerge ? 0 : 4);
+ 
+diff --git a/lib/gx/fifo.hpp b/lib/gx/fifo.hpp
+--- a/lib/gx/fifo.hpp
++++ b/lib/gx/fifo.hpp
+@@ -110,6 +110,10 @@ void drain();
+ // Internal buffer inspection
+ const uint8_t* get_buffer_data();
+ uint32_t get_buffer_size();
++// Absolute stream position of the producer (bytes written since init) and of the chunk the worker is parsing; used to
++// match a parse failure to the GXBegin that wrote the bytes.
++uint64_t absolute_write_offset() noexcept;
++uint64_t processing_chunk_base() noexcept;
+ void clear_buffer();
+ 
+ } // namespace aurora::gx::fifo
+diff --git a/lib/gx/fifo.cpp b/lib/gx/fifo.cpp
+--- a/lib/gx/fifo.cpp
++++ b/lib/gx/fifo.cpp
+@@ -34,6 +34,7 @@ uint32_t sPendingDraws = 0;
+ std::atomic<uint64_t> sPublished{0};
+ std::atomic<uint64_t> sProcessed{0};
+ uint64_t sStreamBase = 0;
++std::atomic<uint64_t> sChunkBase{0};
+ std::mutex sBufferMutex;
+ std::atomic<uint32_t> sWorkerWake{0};
+ thread::Thread sWorkerThread;
+@@ -61,6 +62,7 @@ void process_to(uint64_t target, std::memory_order order) noexcept {
+                     sStreamBase + detail::sBufferSize);
+       const auto start = static_cast<uint32_t>(processed - sStreamBase);
+       const auto size = static_cast<uint32_t>(target - processed);
++      sChunkBase.store(processed, std::memory_order_relaxed);
+       result = process(detail::sBufferData + start, size);
+     }
+     AURORA_ASSERT(result.bytesProcessed > 0 && result.bytesProcessed <= target - processed,
+@@ -141,6 +143,10 @@ void init() {
+ 
+ void shutdown() { stop_worker(); }
+ 
++uint64_t absolute_write_offset() noexcept { return sStreamBase + detail::sBufferSize; }
++
++uint64_t processing_chunk_base() noexcept { return sChunkBase.load(std::memory_order_relaxed); }
++
+ void begin_frame() noexcept { sFrameActive = true; }
+ 
+ void end_frame() noexcept {
+diff --git a/lib/dolphin/gx/GXVert.cpp b/lib/dolphin/gx/GXVert.cpp
+--- a/lib/dolphin/gx/GXVert.cpp
++++ b/lib/dolphin/gx/GXVert.cpp
+@@ -2,6 +2,15 @@
+ #include "__gx.h"
+ #include "../../gx/fifo.hpp"
+ 
++#include <algorithm>
++
++#ifdef _MSC_VER
++#include <intrin.h>
++#define GX_RETURN_ADDRESS() _ReturnAddress()
++#else
++#define GX_RETURN_ADDRESS() __builtin_return_address(0)
++#endif
++
+ namespace {
+ // Track vertex count between GXBegin/GXEnd for mismatch detection
+ u16 sBeginNVerts = 0;
+@@ -11,6 +20,17 @@ bool sInBegin = false;
+ u32 sBeginSizeOffset = 0;
+ bool sBeginAuto = false;
+ 
++// Last GXBegin calls with their call site, printed by aurora_gx_dump_begin_ring() when the FIFO parser loses sync.
++struct BeginRecord {
++  u64 fifoOffset; // absolute stream position of the draw header
++  u16 nVerts;
++  u8 cmd;
++  const void* caller;
++};
++constexpr size_t kBeginRingSize = 8192;
++BeginRecord sBeginRing[kBeginRingSize];
++size_t sBeginRingNext = 0;
++
+ // Closes the open primitive (what GXEnd does). GXEnd is a no-op on the Dolphin SDK, and decomp draw
+ // paths often omit it, so GXBegin closes a still-open primitive implicitly: on hardware a primitive
+ // is complete once its vertices are written.
+@@ -61,10 +81,35 @@ extern "C" {
+ // sBeginFifoSize/sBeginSizeOffset, wrapping the byte count and patching a stale offset.
+ void __GXCloseOpenPrimitive() { end_begin(); }
+ 
++// Prints the GXBegin calls around `absPos`: the 4 before it and the 3 after it.
++void aurora_gx_dump_begin_ring(u64 absPos) {
++  const size_t n = sBeginRingNext < kBeginRingSize ? sBeginRingNext : kBeginRingSize;
++  size_t hit = n; // index (oldest = 0) of the last begin at or before absPos
++  for (size_t i = 0; i < n; ++i) {
++    const auto& r = sBeginRing[(sBeginRingNext - n + i) % kBeginRingSize];
++    if (r.fifoOffset <= absPos) {
++      hit = i;
++    }
++  }
++  Log.error("  failing position {} abs; {} GXBegin calls recorded", absPos, n);
++  if (hit == n) {
++    return;
++  }
++  const size_t from = hit >= 4 ? hit - 4 : 0;
++  const size_t to = std::min(n, hit + 4);
++  for (size_t i = from; i < to; ++i) {
++    const auto& r = sBeginRing[(sBeginRingNext - n + i) % kBeginRingSize];
++    Log.error("  begin{} cmd=0x{:02X} nVerts={} abs@{} caller={}", i == hit ? "*" : " ", r.cmd, r.nVerts, r.fifoOffset,
++              r.caller);
++  }
++}
++
+ void GXBegin(GXPrimitive primitive, GXVtxFmt vtxFmt, u16 nVerts) {
+   pre_begin();
+ 
+   const u8 drawCmd = static_cast<u8>(vtxFmt) | static_cast<u8>(primitive);
++  sBeginRing[sBeginRingNext++ % kBeginRingSize] = {aurora::gx::fifo::absolute_write_offset(), nVerts, drawCmd,
++                                                   GX_RETURN_ADDRESS()};
+   sBeginAuto = nVerts == GX_AUTO;
+   if (sBeginAuto) {
+     AURORA_ASSERT(!aurora::gx::fifo::in_display_list(), "GXBegin: GX_AUTO not supported in display lists");

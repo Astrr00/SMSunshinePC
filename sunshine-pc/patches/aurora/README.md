@@ -1,8 +1,8 @@
 # Aurora patch series
 
-`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as seven patches so the submodule can be pinned to upstream and the changes re-applied.
+`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as eight patches so the submodule can be pinned to upstream and the changes re-applied.
 
-Series base: `50e5be3`. Applying all seven to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
+Series base: `50e5be3`. Applying all eight to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
 
 ## Apply
 
@@ -21,7 +21,7 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 42 file entries over 33 distinct files, +1638 / -136.
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 46 file entries over 34 distinct files, +1750 / -136.
 
 | file | topic | files | +/- |
 |---|---|---|---|
@@ -32,14 +32,17 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0005-fsr1-render-scale.patch` | FSR1 upscale (EASU + RCAS) and sharpness API | 4 | +137 / -22 |
 | `0006-pass-dump-and-screenshot.patch` | `AURORA_DUMP_PASSES` pass dump with per-draw descriptions (`TitleRender` fields in `command_processor.cpp`); frame screenshot with `AURORA_SCREENSHOT_EVERY=<n>:<file.png>` live monitor mode and `aurora_screenshot_next(path)`; `CopySrc` usage flags on render/conv textures (topic by inference, see below) | 12 | +705 / -2 |
 | `0007-texture-side-channel.patch` | `GX_AURORA_SET_TEX_DATA` / `SET_TLUT_DATA` / `SET_TEX_TLUT`: texture host pointers and TLUT state passed from `GDTexture.cpp` to the GX command stream | 4 | +76 / -3 |
+| `0008-gx-fifo-desync-diagnostics.patch` | on a FIFO "draw vertex data overrun" the parser prints the last 8 parsed draws (vertex layout snapshot) and, from a 8192-entry ring of GXBegin calls, the GXBegin neighbours of the failing stream position with their caller address; diagnostics only, no behaviour change | 4 | +112 / -0 |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
+
+Patch 0008 was produced with `python tools/make_aurora_patch.py 0008-gx-fifo-desync-diagnostics.patch <files>` (diff of the working tree against the result of the earlier patches). To symbolise a caller address: `llvm-symbolizer --obj=build/<tree>/sunshine.exe --relative-address <address - module base>`.
 
 Each patch applies on top of the previous one. Topic boundaries are per line, so several files hold lines from more than one patch (e.g. `lib/aurora.cpp` in 0005 and 0006; `lib/gx/command_processor.cpp` in 0001, 0006, and 0007). The `CopySrc` flags in `lib/gfx/texture.cpp` are assigned to 0006 because they sit with the pass dump; their exact purpose was not traced in the code.
 
 ## Verification (run when the series was regenerated)
 
-- `git archive 50e5be3` into a scratch dir, then `git apply --check` and `git apply` of 0001..0007 in order: all seven apply cleanly.
+- `git archive 50e5be3` into a scratch dir, then `git apply --check` and `git apply` of 0001..0007 in order: all seven apply cleanly (0008 was added later and is checked by `tools/apply-aurora-patches.py --check`, "applied: 8 patches").
 - `diff -r -x .git` between that scratch tree and `extern/aurora`: no differences (exit 0).
 - Tool on a scratch clone reset to `50e5be3`: `--check` exit 2 (pristine); apply exit 0; `--check` exit 0 and reapply exit 0 (applied, 33 files match).
 - `tools/aurora-patches.txt` regexes: 15 of 15 match the worktree (same check as the `aurora-patches` step of `verify.py`; that step was not run as a whole).

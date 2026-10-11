@@ -74,6 +74,10 @@ JUTGamePad::EStickMode JUTGamePad::mStickMode = EStickMode1;
 
 u32 JUTGamePad::read()
 {
+#ifdef TARGET_PC
+	void sunshineDevScriptTick(); // sunshine-pc/src/devscript/devscript.cpp
+	sunshineDevScriptTick(); // one script step per logic pad read, before PADRead
+#endif
 	PADRead(mPadStatus);
 	PADClamp(mPadStatus);
 	u32 reset_mask = 0;

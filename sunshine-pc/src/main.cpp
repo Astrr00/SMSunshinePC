@@ -52,7 +52,6 @@ void installCrashHandler(); // crash.cpp
 void sunshineHeartbeat();   // crash.cpp: watchdog heartbeat, once per presented frame
 void sunshineWatchdogStart(); // crash.cpp
 void sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
-void sunshineDevScriptTick(bool presentFrame); // devscript/devscript.cpp
 
 // Developer switch: SUNSHINE_DEV_SKIP_MOVIES=1 ends every THP movie as soon as it starts playing (the retail game only
 // allows skipping movies that were already seen), to reach the scenes behind them quickly during boot testing.
@@ -67,13 +66,14 @@ bool sunshineDevSkipMovies()
 // This is also the single seam where a later phase decouples rendering from the 30 Hz game logic.
 void sunshinePresentFrame()
 {
-	sunshineDevScriptTick(true); // SUNSHINE_DEV_FRAME_TICK=1 only: pad scripts clock on presented frames
 	modsPresent(); // mods/mods_loader.cpp
 	aurora_end_frame();
 	for (;;) {
 		for (const AuroraEvent* e = aurora_update(); e != nullptr && e->type != AURORA_NONE; ++e) {
-			if (e->type == AURORA_EXIT)
+			if (e->type == AURORA_EXIT) {
+				std::fprintf(stderr, "[exit] AURORA_EXIT\n");
 				std::exit(0);
+			}
 		}
 		sunshineHeartbeat(); // minimized or paused windows keep pumping events: not a hang
 		if (aurora_begin_frame()) // false while minimized or paused: keep pumping events
@@ -86,7 +86,6 @@ void sunshineLogicTick()
 {
 	cheatsTick();
 	modsLogicTick();
-	sunshineDevScriptTick(false);
 }
 
 int main(int argc, char* argv[])

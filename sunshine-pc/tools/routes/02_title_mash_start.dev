@@ -1,0 +1,10 @@
+# Title: wait until the title scene runs, then press START every 30 ticks until the director leaves state 4.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=300
+mash START period=30 until dirstate=9 timeout=1200
+log
+shot fs0.png
+wait frames=120
+log
+shot fs1.png
+end

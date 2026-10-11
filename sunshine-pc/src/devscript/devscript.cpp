@@ -5,12 +5,14 @@
 #include <dolphin/pad.h>
 #include <dolphin/gx.h>
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Camera/Camera.hpp"
@@ -25,6 +27,7 @@
 #include "System/Application.hpp"
 #include "System/FlagManager.hpp"
 #include "System/MarDirector.hpp"
+#include "GC2D/CardLoad.hpp"
 #include "GC2D/ConsoleStr.hpp"
 #include "GC2D/GCConsole2.hpp"
 
@@ -33,18 +36,28 @@
 extern "C" void PADSetVirtualStatus(u32 port, const PADStatus* status);
 extern "C" void PADClearVirtualStatus(u32 port);
 extern "C" void aurora_screenshot_next(const char* path);
+extern "C" s32 THPPlayerGetState();
+
+// Logic tick count from sunshine-pc/src/framerate/framerate.cpp. Return type must be u32: MSVC mangling includes it,
+// and an `unsigned` declaration links to an undefined symbol (/FORCE:UNRESOLVED turns the call into a bogus address).
+u32 sunshineInterpStep();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo };
 
 struct Command {
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg };
 	Op op;
 	int frames = 0;
 	int line = 0;
 	std::string path;
 	PADStatus pad{};
 	float pos[3]{};
+	std::vector<std::pair<Cond, int>> conds; // waitfor/mash: ALL must hold to end the op
+	int maxTicks = 0;       // waitfor/mash/walkto: fail loudly after this many logic ticks
+	float radius = 80.f;    // walkto: arrival distance in the XZ plane
+	int period = 30;        // mash: press for 2 ticks every `period` ticks
 };
 
 struct ButtonName {
@@ -85,6 +98,24 @@ bool parsePair(const std::string& value, long lo, long hi, int& a, int& b)
 	if (x < lo || x > hi || y < lo || y > hi) return false;
 	a = static_cast<int>(x);
 	b = static_cast<int>(y);
+	return true;
+}
+
+bool parseCond(const std::string& tok, Command& c)
+{
+	Command::Cond k;
+	if (tok == "mario") k = Command::Cond::Mario;
+	else if (tok == "director") k = Command::Cond::Director;
+	else if (tok.rfind("stage=", 0) == 0) k = Command::Cond::Stage;
+	else if (tok.rfind("scen=", 0) == 0) k = Command::Cond::Scen;
+	else if (tok.rfind("dirstate=", 0) == 0 || tok.rfind("dir.state=", 0) == 0) k = Command::Cond::DirState;
+	else if (tok.rfind("flag=", 0) == 0) k = Command::Cond::Flag;
+	else if (tok.rfind("cardmode=", 0) == 0) k = Command::Cond::CardMode; // TCardLoad::unk14
+	else if (tok.rfind("cardprog=", 0) == 0) k = Command::Cond::CardProg; // TCardLoad::unk1C (TEProgress)
+	else if (tok.rfind("thp=", 0) == 0 || tok.rfind("movie=", 0) == 0) k = Command::Cond::Thp; // THP player state, 0 = no movie
+	else return false;
+	const size_t eq = tok.find('=');
+	c.conds.emplace_back(k, eq == std::string::npos ? 0 : static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0)));
 	return true;
 }
 
@@ -133,6 +164,56 @@ Command parseLine(const std::string& text, int line)
 		}
 		if (c.op == Op::Wait && c.frames <= 0) fail(line, "wait needs frames=N", text);
 		if (c.op == Op::Hold && c.frames <= 0) fail(line, "hold needs frames=N", text);
+		return c;
+	}
+	if (verb == "waitfor" || verb == "mash" || verb == "pressuntil") {
+		c.op = verb == "waitfor" ? Op::WaitFor : Op::Mash;
+		std::string tok;
+		while (in >> tok) {
+			if (tok == "until") continue;
+			if (tok.rfind("max=", 0) == 0 || tok.rfind("timeout=", 0) == 0) {
+				c.maxTicks = std::atoi(tok.c_str() + tok.find('=') + 1);
+			} else if (tok.rfind("period=", 0) == 0) {
+				c.period = std::atoi(tok.c_str() + 7);
+			} else if (parseCond(tok, c)) {
+				continue;
+			} else if (c.op == Op::WaitFor) {
+				fail(line, "unexpected token in waitfor", tok);
+			} else {
+				bool found = false;
+				for (const ButtonName& b : kButtons) {
+					if (tok == b.name) {
+						c.pad.button |= b.bit;
+						found = true;
+						break;
+					}
+				}
+				if (!found) fail(line, "unknown token", tok);
+			}
+		}
+		if (c.conds.empty()) fail(line, "needs a condition (stage=, scen=, dirstate=, flag=, thp=/movie=, mario, director)", text);
+		if (c.maxTicks <= 0) fail(line, "needs timeout=N (logic ticks)", text);
+		if (c.op == Op::Mash && c.period < 2) fail(line, "period must be >= 2", text);
+		return c;
+	}
+	if (verb == "walkto") {
+		// walkto x=<x> z=<z> [radius=R] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
+		c.op = Op::WalkTo;
+		bool gotX = false, gotZ = false;
+		std::string tok;
+		while (in >> tok) {
+			const size_t eq = tok.find('=');
+			if (eq == std::string::npos) fail(line, "unexpected token in walkto", tok);
+			const std::string key = tok.substr(0, eq);
+			const float v = static_cast<float>(std::atof(tok.c_str() + eq + 1));
+			if (key == "x") { c.pos[0] = v; gotX = true; }
+			else if (key == "z") { c.pos[2] = v; gotZ = true; }
+			else if (key == "radius") c.radius = v;
+			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
+			else fail(line, "unexpected token in walkto", tok);
+		}
+		if (!gotX || !gotZ) fail(line, "walkto needs x= and z=", text);
+		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
 		return c;
 	}
 	if (verb == "hurt") {
@@ -186,6 +267,10 @@ int shineCount()
 
 void logStatus(const char* tag)
 {
+	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
+	if (gpCardLoad)
+		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,
+		            static_cast<int>(gpCardLoad->unk1C));
 	if (!gpMarioOriginal || !gpCamera || !gpMarDirector) {
 		std::printf("[%s] tick=%d t=%.2fs (no mario/camera/director yet)\n", tag, gTick, gTick / 30.0);
 		return;
@@ -294,6 +379,44 @@ void doHurt(int damage) {
 	std::printf("[devscript] hurt %d: health %d -> %d tick=%d\n", damage, before, (int)gpMarioOriginal->mHealth, gTick);
 }
 
+bool condHolds(const Command& c)
+{
+	for (const auto& [kind, val] : c.conds) {
+		bool ok = false;
+		switch (kind) {
+		case Command::Cond::Stage: ok = static_cast<int>(gpApplication.mCurrArea.getStage()) == val; break;
+		case Command::Cond::Scen: ok = static_cast<int>(gpApplication.mCurrArea.getScenario()) == val; break;
+		case Command::Cond::Mario: ok = gpMarioOriginal != nullptr; break;
+		case Command::Cond::Director: ok = gpMarDirector != nullptr; break;
+		case Command::Cond::DirState: ok = gpMarDirector && static_cast<int>(gpMarDirector->mState) == val; break;
+		case Command::Cond::Flag: ok = TFlagManager::smInstance->getFlag(val) != 0; break;
+		case Command::Cond::Thp: ok = THPPlayerGetState() == val; break;
+		case Command::Cond::CardMode: ok = gpCardLoad && gpCardLoad->unk14 == val; break;
+		case Command::Cond::CardProg: ok = gpCardLoad && static_cast<int>(gpCardLoad->unk1C) == val; break;
+		default: break;
+		}
+		if (!ok) return false;
+	}
+	return true;
+}
+
+// Main-stick vector (-127..127) that walks Mario toward (x,z). The stick is camera-relative: up = away from the camera.
+// Sunshine world is right-handed, y up; camera forward f (XZ), right = (-fz, fx).
+void walkStick(const Command& c, s8& sx, s8& sy, float& dist)
+{
+	const float dx = c.pos[0] - gpMarioOriginal->mPosition.x;
+	const float dz = c.pos[2] - gpMarioOriginal->mPosition.z;
+	dist = std::sqrt(dx * dx + dz * dz);
+	float fx = gpCamera->mTarget.x - gpCamera->mPosition.x;
+	float fz = gpCamera->mTarget.z - gpCamera->mPosition.z;
+	const float fl = std::sqrt(fx * fx + fz * fz);
+	if (fl < 1.f || dist < 1.f) { sx = sy = 0; return; }
+	fx /= fl;
+	fz /= fl;
+	sx = static_cast<s8>(127.f * (dx * -fz + dz * fx) / dist);
+	sy = static_cast<s8>(127.f * (dx * fx + dz * fz) / dist);
+}
+
 void finish()
 {
 	if (gDone) return;
@@ -321,6 +444,59 @@ void step()
 			}
 			return;
 		}
+		if (c.op == Op::WalkTo) {
+			if (!gStarted) {
+				gStarted = true;
+				gRemaining = 0;
+				std::printf("[devscript] walkto start line=%d to=(%.0f,%.0f) radius=%.0f tick=%d\n", c.line, c.pos[0], c.pos[2], c.radius, gTick);
+			}
+			PADStatus pad{};
+			float dist = 0.f;
+			if (gpMarioOriginal && gpCamera) {
+				walkStick(c, pad.stickX, pad.stickY, dist);
+				if (dist <= c.radius) {
+					std::printf("[devscript] walkto met line=%d after=%d dist=%.0f tick=%d\n", c.line, gRemaining, dist, gTick);
+					const PADStatus neutral{};
+					PADSetVirtualStatus(0, &neutral);
+					gStarted = false;
+					++gCursor;
+					continue;
+				}
+			}
+			if (gRemaining >= c.maxTicks) {
+				std::printf("[devscript] TIMEOUT walkto line=%d: dist=%.0f after %d ticks, tick=%d\n", c.line, dist, gRemaining, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			PADSetVirtualStatus(0, &pad);
+			++gRemaining;
+			return;
+		}
+		if (c.op == Op::WaitFor || c.op == Op::Mash) {
+			const char* name = c.op == Op::WaitFor ? "waitfor" : "mash";
+			if (!gStarted) {
+				gStarted = true;
+				gRemaining = 0; // ticks spent waiting
+				std::printf("[devscript] %s start line=%d tick=%d\n", name, c.line, gTick);
+			}
+			const PADStatus neutral{};
+			if (condHolds(c)) {
+				std::printf("[devscript] %s met line=%d after=%d tick=%d\n", name, c.line, gRemaining, gTick);
+				PADSetVirtualStatus(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
+			if (gRemaining >= c.maxTicks) {
+				std::printf("[devscript] TIMEOUT %s line=%d: condition not met after %d ticks, tick=%d\n", name, c.line, gRemaining, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			const bool press = c.op == Op::Mash && gRemaining % c.period < 2;
+			PADSetVirtualStatus(0, press ? &c.pad : &neutral);
+			++gRemaining;
+			return;
+		}
 		if (c.op == Op::Shine) doShine();
 		if (c.op == Op::TpShine) doTpShine(c.pos);
 		if (c.op == Op::Hurt) doHurt(c.frames);
@@ -345,12 +521,11 @@ namespace {
 } // namespace
 
 
-// Called once per logic step from sunshineLogicTick(), or once per presented frame from sunshinePresentFrame() when
-// SUNSHINE_DEV_FRAME_TICK=1: logic steps only run in gameplay, so menus, movies and the title need the frame clock.
-void sunshineDevScriptTick(bool presentFrame)
+// Called once per logic pad read: JUTGamePad::read() (sms/src/JSystem/JUtility/JUTGamePad.cpp), before PADRead. One step
+// per read, so the script clock is the game's logic clock: independent of wall time, FPS cap and replay presents.
+// Steps apply via PADSetVirtualStatus before that read.
+void sunshineDevScriptTick()
 {
-	static const bool frameClock = std::getenv("SUNSHINE_DEV_FRAME_TICK") != nullptr;
-	if (presentFrame != frameClock) return;
 	++gTick;
 	static const char* const scriptPath = std::getenv("SUNSHINE_DEV_SCRIPT");
 	if (scriptPath && !gLoaded) {
@@ -358,6 +533,9 @@ void sunshineDevScriptTick(bool presentFrame)
 		loadScript(scriptPath);
 	}
 	if (gLoaded && !gDone) step();
-	if (std::getenv("SUNSHINE_DEV_STATUS") && gTick % 30 == 0) logStatus("status");
+	if (std::getenv("SUNSHINE_DEV_STATUS") && gTick % 30 == 0) {
+		logStatus("status");
+		std::printf("[padclock] padreads=%d logic=%u\n", gTick, sunshineInterpStep());
+	}
 	if (gLoaded || std::getenv("SUNSHINE_DEV_STATUS")) std::fflush(stdout); // harness kills the game; keep lines
 }

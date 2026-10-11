@@ -1,6 +1,6 @@
 # Handoff: Super Mario Sunshine (GMSJ01) decomp + native Windows port
 
-Everything needed to continue on another Windows PC. Read this first, then `README.md` (status table), `ROADMAP.md` (phases, working rules), `Port.md` (port design), `sunshine-pc/docs/status.md` (latest measured state, section "Latest lead update").
+Everything needed to continue on another Windows PC. Read this first, then `sunshine-pc/docs/session-2026-10-11.md` (detailed record of the last session), `README.md` (status table), `ROADMAP.md` (phases, working rules), `Port.md` (port design), `sunshine-pc/docs/status.md` (latest measured state, section "Latest lead update").
 
 ## 1. What this repo is
 
@@ -28,7 +28,7 @@ No game data and no PowerPC code are tracked in git. The disc image lives under 
 
 Run `sunshine-pc/tools/handoff-setup.ps1` from the bundle root (it clones the repo from `repo.bundle`, extracts the toolchain, installs Python wheels, copies the game data, applies the WIP patch, runs the first gates). Manual equivalent:
 
-1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 7 patches`).
+1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 8 patches`).
 2. Extract `toolchain/llvm.tar.xz`; `setx LLVM_BIN <folder>\bin`.
 3. `pip install -r sunshine-pc/tools/requirements.txt` (online).
 4. Copy the game data folder to `sms/orig/GMSJ01/` (keep the layout: `Super Mario Sunshine (Japan).rvz`, `extracted/`, `files/`, `sys/`).
@@ -50,9 +50,9 @@ ninja baseline && ninja changes_all                # per-function score drops (n
 cd ..\sunshine-pc
 set LLVM_BIN=<llvm>\bin
 python tools\locked.py cmd /c tools\_strict.cmd    # strict link: 0 unresolved symbols
-python tools\apply-aurora-patches.py --check       # "applied: 7 patches"
+python tools\apply-aurora-patches.py --check       # "applied: 8 patches"
 ```
-Expected at handoff: 11 012 / 12 881 functions byte-identical, 445 / 736 units Matching, 58.56 % code, 97.98 % fuzzy.
+Expected at handoff: 11 013 / 12 881 functions byte-identical, 445 / 736 units Matching, 58.57 % code, 97.98 % fuzzy.
 
 ## 5. Decomp workflow (what the agents did; works for people too)
 
@@ -68,22 +68,37 @@ Expected at handoff: 11 012 / 12 881 functions byte-identical, 445 / 736 units M
 - Build: `sunshine-pc\tools\build-alt.cmd <Name>` builds into `sunshine-pc\build\<Name>` (needs `LLVM_BIN`; global build lock via `tools/locked.py`). Strict link check: `tools\_strict.cmd`.
 - Run the game ONLY via `sunshine-pc/tools/watch.py` / `shot.py` (invisible, silent: `CREATE_NO_WINDOW|BELOW_NORMAL`, temp APPDATA; never touch `%APPDATA%\Sunshine\saves`). The game needs the disc: `--dvd <rvz/iso path>`.
 - `tools/reap.py --loop` (if running) kills `sunshine.exe` that is older than 6 min or older than `src/sdk/av.cpp`: rebuild after av.cpp edits, keep runs < 6 min, check `build/reap.log` when a process dies. Serialise game runs with `python sunshine-pc/tools/runlock.py acquire <name>` / `release` (owner-only release, `touch` heartbeat, log in `build/runlock.log`). Kill only your own PID.
+- Scripted runs: `python tools/route.py <tree> <script.dev> --name <n> --seconds 330` from `sunshine-pc` (wraps the rules above: invisible, muted, temp APPDATA, run lock, own PID only). Scripts live in `tools/routes/`; verbs and conditions are listed in `docs/session-2026-10-11.md` section 2.1. Run `tools\_strict.cmd` from PowerShell (Git Bash turns `cmd /c` into `cmd C:\`), and start long runs with the harness's background mode, not `( ... &)`. After a killed run release a stale lock with `python tools/runlock.py release lead`.
 - Dev switches (`SUNSHINE_DEV_START=bianco/0`, `SUNSHINE_DEV_SCRIPT`, `SUNSHINE_DEV_STATUS`, `SUNSHINE_DEV_SEED`, `SUNSHINE_DEV_MAX_SECONDS`, `SUNSHINE_CHECK_HEAP`, `AURORA_SCREENSHOT*`) are for diagnosis; the acceptance flow (B1) must run without start/skip switches.
-- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0007`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
+- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0008`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
 - Dolphin as a reference emulator is blocked (apploader stall, popups); do not run it.
 
 ## 7. State at handoff and next steps
 
-Measured state: see `README.md` table and `sunshine-pc/docs/status.md` ("Latest lead update"). Last pushed commit: see `git log -1` (docs commit `e36f87c` at handoff time, code wave `a3a6709`).
+Measured state: see `README.md` table and `sunshine-pc/docs/session-2026-10-11.md` (gates, observed vs inferred, decomp
+changes, crash analysis). Highlights (2026-10-11):
 
-Uncommitted work in progress at handoff (in `wip-uncommitted.patch`, NOT in git): the pad-clock rework — `sms/src/JSystem/JUtility/JUTGamePad.cpp` (script clock in `JUTGamePad::read()` before `PADRead`), `sunshine-pc/src/devscript/devscript.cpp` (+111 lines, `[padclock]` counter), `sunshine-pc/src/main.cpp`. It builds but airport0 is not reached with it yet (scripts are tick-timed while THP movies advance on their own clock, suspected).
+- Gates: SHA-1 ok, 11 013 / 12 881 functions, 445 / 736 units, strict link 0 unresolved, Aurora series 8 patches.
+- **The retail flow is now scripted by conditions and reproducible up to airport0**: from `sunshine-pc`, after
+  `tools\_strict.cmd`: `python tools/route.py Strict tools/routes/07_airport.dev --name <n> --seconds 330`.
+  Title (option map, stage 15) -> card prompts (`cardprog=19`) -> bump file block B -> new game -> opening movie -> airport0
+  (stage 0, scen 0). No dev start switches. The pad-clock rework (script clock = logic pad reads) is committed.
+- Open at the end: walking from the airport0 spawn (819,500,1246) to `MapObjStartDemo` (-6630,500,1600) did not arrive
+  (path wanders, Mario falls from y 500 to 300 near x -500..-960). A GX FIFO crash at ~204 s (tick 6120) was traced to two
+  decomp `GXBegin` counts (4 instead of 8) and fixed; the post-fix run was cut short at 196 s, so **the fix is not yet confirmed**.
 
 Next steps in order:
-1. B1: make the dev pad script condition-based: `waitfor stage=<n> scen=<n>`, `waitfor mario`, `waitfor dir.state=<n>`, `waitfor movie=0` with a required `timeout=N` that fails the run. Then drive: title -> file select -> new game -> opening -> airport0 -> walk to `MapObjStartDemo` (-6630,500,1600; `MapObjTown.cpp:353-364`, `fireStreamingMovie(2)` -> `setNextStage(0x101)`) -> Delfino (dolpic0) -> Bianco gate: `gateopen.sb` sets flag 0x10384 when the Bianco GateKeeper is dead (3 nozzle hits in vulnerable windows, `gatekeeper.cpp`). `bianco/0` and `dolpic/0` run stable 100 s on dev start.
-2. B2: collect a real Shine (hit-check fixes landed), Shine sequence, save `.gci` (check with `tools/gci_check.py`), reload.
-3. B3: intermittent flat red/blue wedge in Bianco frames (~1 in 6 runs at frame 600, also without widescreen/FSR; command stream differs run to run before the renderer — see `build/ArtifactHunt` notes in `status.md`), title background, audio noise after ~20 s, particles.
-4. C: verify widescreen (4:3 identity needs deterministic capture), interpolation at 60/120/144, mod overlay effect, water cheat, glyph asset (PlayStation X is a square), DLSS stays a documented blocker.
-5. Decomp: continue equivalence review (protocol v3), re-run `--branchscan/--immscan`, flip fully matching units to `Matching` one at a time with the SHA-1 check.
+1. Re-run route 07 for 330 s; confirm no `overrun` in `run.log` (patch 0008 prints the offending caller otherwise).
+2. B1: reach `MapObjStartDemo` (waypoints along the airport0 walkable path), `waitfor` Delfino (`dolpic0`), Bianco gate
+   (`gateopen.sb` sets flag 0x10384 when the GateKeeper is dead: 3 nozzle hits in vulnerable windows, `gatekeeper.cpp`),
+   then B2: collect a real Shine, save `.gci` (check with `tools/gci_check.py`), reload. Each step with log and PNG.
+3. B3: white option-map/title screenshots, intermittent flat red/blue wedge in Bianco frames (~1 in 6 runs at frame 600),
+   audio noise after ~20 s, particles.
+4. C: verify widescreen (4:3 identity needs deterministic capture; route 07 is now deterministic enough to try), interpolation
+   at 60/120/144, mod overlay effect, water cheat, glyph asset (PlayStation X is a square), DLSS stays a documented blocker.
+5. Decomp: audit a sample of the 170 new `logic-verified` rows (see the caveats in the session log), fix
+   `TBathWaterManager::throwMario`, re-check `TBossEel::perform`, continue protocol v3 on the remaining open functions,
+   flip fully matching units to `Matching` one at a time with the SHA-1 check.
 
 ## 8. Repo hygiene notes
 

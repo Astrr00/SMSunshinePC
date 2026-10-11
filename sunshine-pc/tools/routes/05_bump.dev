@@ -1,0 +1,25 @@
+# Option map: dismiss the card message, walk under file block B (x=1080), jump into it.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=600
+wait frames=30
+walkto x=1080 z=-1000 radius=20 timeout=600
+log
+shot b0.png
+hold A frames=10
+wait frames=40
+log
+hold A frames=10
+wait frames=40
+log
+hold A frames=10
+wait frames=40
+log
+hold A frames=10
+wait frames=40
+log
+shot b1.png
+wait frames=90
+log
+shot b2.png
+end

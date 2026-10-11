@@ -1,0 +1,23 @@
+# Title/option map -> new game -> airport0; then walk to MapObjStartDemo (-6630, 500, 1600).
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardprog=19 timeout=900
+walkto x=1080 z=-1000 radius=20 timeout=600
+mash A period=24 until cardprog=27 timeout=900
+mash A period=30 until stage=0 timeout=2400
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=5400
+log
+shot ap0.png
+wait frames=90
+log
+hold A frames=4
+wait frames=60
+log
+shot ap1.png
+walkto x=-6630 z=1600 radius=120 timeout=1800
+log
+shot ap2.png
+wait frames=300
+log
+shot ap3.png
+end

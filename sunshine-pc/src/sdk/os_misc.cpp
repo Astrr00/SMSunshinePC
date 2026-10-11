@@ -45,6 +45,7 @@ void OSPanic(const char* file, int line, const char* msg, ...)
 void OSResetSystem(int reset, u32 resetCode, BOOL forceMenu)
 {
 	std::fflush(nullptr);
+	std::fprintf(stderr, "[exit] OSResetSystem reset=%d\n", reset);
 	std::exit(0);
 }
 

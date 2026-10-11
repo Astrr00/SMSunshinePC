@@ -20,7 +20,7 @@ Runtime bugs keep coming from NonMatching functions (wrong masks, swapped branch
 
 | Item | State | Next |
 | --- | --- | --- |
-| Game-code functions open (not 100 % and no whole-function review) | PART (about 750 open in 124 units; ledger 1196 logic-verified + 66 matched, 614 partial; all code 11012/12881 bytegleich) | reviewers per unit list; most remaining functions are blocked by header-inline codegen (TVec3/TUtil/MsClamp/getMActor/TExPane setters): behaviour-equal own code is accepted |
+| Game-code functions open (not 100 % and no whole-function review) | PART (several hundred open in about 120 units; ledger 1366 logic-verified + 64 matched, 541 partial as of 2026-10-11, the +170 from agents not yet audited; all code 11013/12881 bytegleich) | reviewers per unit list; most remaining functions are blocked by header-inline codegen (TVec3/TUtil/MsClamp/getMActor/TExPane setters): behaviour-equal own code is accepted |
 | Empty decomp bodies with `TARGET_PC` stubs | PART (40 found and resolved: removed when no retail symbol, otherwise reconstructed) | re-scan each wave |
 | Fully matching units flipped to `Matching` in `configure.py` | PART (439 → 445 units) | lead, per-unit SHA-1 check each wave |
 | Ledger quality | PART (audit 1: 10 % wrong; audit 2: 0/25 wrong; audit 3: 30/30 sampled rows confirmed, 4 wrong source hunks found and fixed; one auditor finding (KillerManager layout) was a false positive) | `--check` + `branches mapped` gate in `decomp_queue.py ledger`; periodic sampling audits |
@@ -35,7 +35,7 @@ Scope limit (`sms/AGENTS.md`): game code is the target; shared and JSystem heade
 | Strict link, no stubs, matching SHA-1 | DONE | keep as gate |
 | Bianco Hills renders (geometry, textures, HUD), Mario controllable, camera follows | DONE (dev start) | none |
 | Title screen renders correctly | OPEN | TitleRender: copy-with-clear ordering, TEV/palette checks via pass dumps |
-| Retail flow: logo, movies, title, file select, new game, Delfino, Bianco | PART (file select + slot pick work; `airport0` reached once by pad script, not reproducible; no airport0 exit observed) | event-driven pad script (wait for stage/director/flag conditions; THP movies advance on their own clock), then walk to `MapObjStartDemo` (-6630,500,1600) -> Delfino -> GateKeeper (3 nozzle hits) -> Bianco |
+| Retail flow: logo, movies, title, file select, new game, Delfino, Bianco | PART (condition-based route reaches `airport0` reproducibly without start switches: `tools/routes/07_airport.dev`; walk to `MapObjStartDemo` not yet arrived; Delfino/Bianco not reached) | waypoints along the airport0 path to `MapObjStartDemo` (-6630,500,1600) -> Delfino -> GateKeeper (3 nozzle hits) -> Bianco; confirm the FIFO fix (`GXBegin` count in JPA cross particles) over a full 330 s run |
 | Shine collected by the real path, Shine-get sequence, save to `.gci`, reload | OPEN | needs the Bianco entry; dev-start Shine path not yet collecting |
 | Particles (EmitterViewObj null in perform lists), Mario shape packet callback | OPEN | ParticlesNull |
 | Missing decomp pieces: `ConsoleStr::processGo/startCloseWipe`, `ShapePacketCallBackFunc` | OPEN | from asm, as the flow needs them |

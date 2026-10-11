@@ -14,6 +14,29 @@ Observed by the lead with `AURORA_SCREENSHOT` and `SUNSHINE_DEV_STATUS` logs (de
 - Known decomp gaps: none empty any more; `PacketUtil::ShapePacketCallBackFunc` (75.7 %, partial review) and `TGCConsole2::perform` (69.5 %) are the largest open game functions on the gameplay path; open list in `decomp-verified.tsv` / `decomp_queue.py status`. `EmitterViewObj`/`EmitterIndirectViewObj` resolve to null in the perform lists (particles likely not drawn).
 - `probe-units`: clang-cl 624/733 clean (all 584 built units); MSVC `cl /Zs` 565/733 (66 built units fail on MWCC-specific syntax; reasons in platform-notes).
 
+### Lead update 2026-10-11 (supersedes the next section where they conflict; details in `session-2026-10-11.md`)
+
+Measured: `ninja -k 0 -j4` exit 0, DOL SHA-1 `9f5a8caf...` OK, `changes_all` no regression, strict link 0 unresolved,
+`apply-aurora-patches.py --check` "applied: 8 patches", 11 013 / 12 881 functions bytegleich (58.57 % code, 97.98 % fuzzy),
+445 / 736 units Matching, ledger 1 366 `logic-verified` / 64 `matched` / 541 `partial`.
+
+- A3 update: a condition-based route (`tools/route.py`, `tools/routes/07_airport.dev`, verbs `waitfor`/`mash`/`walkto` with
+  `timeout`, conditions `stage scen dirstate movie flag cardmode cardprog`) reaches **airport0 (stage 0, scen 0)** from the
+  logo with no start switches: stage 15 is the option map with the file blocks (x 840/1080/1320, z -1000); card prompts
+  (`TCardLoad` progress 14 -> 17 -> 19) are dismissed with A; bumping block B (progress 27) starts the new game (41);
+  the opening movie runs ~1900 ticks; airport0 is ready at tick ~5300-5490. This supersedes "not reproducible"
+  (the earlier non-determinism came from tick-timed scripts).
+- Not reached: `MapObjStartDemo` (-6630,500,1600). The straight-line `walkto` wanders and Mario falls from y 500 to y 300 near
+  x -500..-960. Delfino, Bianco gate, Shine, `.gci` save: not attempted.
+- Crash root cause (asm-proven): `JPADrawExecDirectionalCross::exec` and `JPADrawExecRotDirectionalCross::exec` called
+  `GXBegin(GX_QUADS, ..., 4)` but wrote 8 vertices; retail passes 8 (asm 0x8007C2C4 / 0x8007C864). Aurora's FIFO parser then
+  read vertex data as commands ("draw vertex data overrun", fatal). Fixed in `JPADrawVisitor.cpp`; the full-length
+  confirmation run is still open. Aurora patch 0008 adds the diagnostics that found it.
+- Decomp agents (Opus 5.5 medium directing six Haiku 5.5 xhigh workers): +170 `logic-verified`; asm-proven fixes in
+  `MarioMove.cpp` (`setStatusToRunning`, gameplay-visible), `Koopa.cpp`, `hamukuri.cpp`, `GCConsole2.cpp`, `bossManta.cpp`,
+  `bosspakkun.cpp`. Only these diffs were checked by the lead against retail asm; ledger rows are not audited.
+- Observed but unexplained: option-map and title screenshots are pure white PNGs.
+
 ### Latest lead update (end of the agent session; supersedes everything else in this file where they conflict, including the A3/R02/R03 rows)
 
 Measured by the lead: `ninja -k 0 -j4` in `sms/` exit 0, DOL SHA-1 `9f5a8caf…` OK, strict link 0 unresolved, `apply-aurora-patches.py --check` "applied: 7 patches", 11 012 / 12 881 functions bytegleich (58.56 % code, 97.98 % fuzzy), 445 / 736 units Matching. Ledger: 1 196 `logic-verified`, 66 `matched`, 614 `partial`. Last commit `a3a6709`.

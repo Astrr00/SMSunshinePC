@@ -1,0 +1,16 @@
+# Option map -> new game: dismiss the card prompts, bump file block B, start the game, wait for airport0.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardprog=19 timeout=900
+log
+walkto x=1080 z=-1000 radius=20 timeout=600
+log
+mash A period=24 until cardprog=27 timeout=900
+log
+shot slot.png
+mash A period=30 until stage=0 timeout=2400
+log
+waitfor mario timeout=1800
+log
+shot airport0.png
+end
