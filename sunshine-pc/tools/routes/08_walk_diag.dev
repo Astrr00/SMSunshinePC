@@ -1,0 +1,17 @@
+# Diagnosis only (not an acceptance route): run with SUNSHINE_DEV_START=airport/0 to test the airport0 walk quickly.
+# Waypoints stay on the y=500 plateau of airport0 map.col (bg 0x8000, +-70 units margin, checked offline). The y=300 pit
+# is goop (status OIL_*): Mario slips and loses health there, so the route avoids it.
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=3000
+wait frames=90
+hold A frames=4
+wait frames=60
+log
+walkto x=-1198 z=167 radius=150 timeout=600
+log
+walkto x=-5876 z=976 radius=150 timeout=900
+log
+walkto x=-6630 z=1600 radius=120 timeout=600
+log
+wait frames=600
+log
+end

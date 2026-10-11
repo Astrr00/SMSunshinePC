@@ -108,7 +108,10 @@ int main(int argc, char* argv[])
 	}
 	width = static_cast<int>(widescreenInit(s, static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
 	// GameCube main RAM backs the OS arena the JKR heaps are carved from; ARAM backs JKRAram.
+	// SUNSHINE_ALLOW_CPU_ADAPTER=1: accept the software adapter (WARP). Without it a GPU-less host falls back to Aurora's
+	// Null backend, which draws nothing (white screenshots, 0 presents).
 	const AuroraConfig config = { .appName = "Sunshine", .vsync = s.vsync, .startFullscreen = s.fullscreen,
+		                          .allowCpuAdapter = std::getenv("SUNSHINE_ALLOW_CPU_ADAPTER") != nullptr,
 		                          .windowPosX = posX, .windowPosY = posY,
 		                          .windowWidth = static_cast<uint32_t>(width),
 		                          .windowHeight = static_cast<uint32_t>(height), .logCallback = &log_callback,

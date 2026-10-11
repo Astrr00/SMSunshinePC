@@ -1,0 +1,8 @@
+# Diagnosis only: does `shot` produce a real image? Run with SUNSHINE_DEV_START=bianco/0 (or airport/0) for comparison.
+waitfor director mario dirstate=4 timeout=3000
+wait frames=240
+shot s0.png
+wait frames=60
+shot s1.png
+wait frames=30
+end

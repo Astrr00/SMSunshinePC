@@ -1493,10 +1493,9 @@ void TMario::checkController(JDrama::TGraphics*)
 	}
 
 	if (mIntendedMag > 0.0f) {
-		// camera angle at offset 0x258 lives inside the unk21C[..]
-		// placeholder array of CPolarSubCamera -- TODO: name & expose it
+		// asm 0x80131228: lha 0x258(gpCamera) = CPolarSubCamera::unk258; a raw byte offset breaks on x64 (pointer sizes)
 		mIntendedYaw = matan(-unk108->mStickV, unk108->mStickH)
-		               + (*(s16*)((char*)gpCamera + 0x258) + yawJitter);
+		               + (gpCamera->getUnk258() + yawJitter);
 	} else {
 		mIntendedYaw = mFaceAngle.y;
 	}

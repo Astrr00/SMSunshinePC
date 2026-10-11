@@ -14,10 +14,15 @@ hold A frames=4
 wait frames=60
 log
 shot ap1.png
-walkto x=-6630 z=1600 radius=120 timeout=1800
+# y=500 plateau waypoints from airport0 map.col (+-70 units margin); the y=300 pit is goop (OIL_SLIP, health loss).
+walkto x=-1198 z=167 radius=150 timeout=600
+walkto x=-5876 z=976 radius=150 timeout=900
+walkto x=-6630 z=1600 radius=250 timeout=600
 log
-shot ap2.png
-wait frames=300
+waitfor thp=2 timeout=600
 log
-shot ap3.png
+waitfor thp=0 timeout=6000
+wait frames=600
+log
+shot dolpic.png
 end
