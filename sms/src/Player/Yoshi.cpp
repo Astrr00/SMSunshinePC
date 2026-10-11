@@ -566,12 +566,17 @@ void TYoshi::thinkAnimation()
 				case 2:
 					newIdx = 17;
 					break;
+				default:
+					goto checkRight;
 				}
-			} else if (mMario->mGamePad->checkMeaning(
-			               TMarioGamePad::MEANING_R)) {
-				newIdx = 13;
 			} else {
-				goto walking;
+			checkRight:
+				if (mMario->mGamePad->checkMeaning(
+					TMarioGamePad::MEANING_R)) {
+					newIdx = 13;
+				} else {
+					goto walking;
+				}
 			}
 		} else {
 		walking:

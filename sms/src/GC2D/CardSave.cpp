@@ -1754,9 +1754,9 @@ void TCardSave::execMovement_()
 		} else if (bm.unk18 == 0
 		           || bm.unk8
 		                  == TFlagManager::getInstance()->getLastSaveTime()) {
-			unk310 = PROGRESS_UNK2C;
-		} else {
 			unk310 = PROGRESS_UNK16;
+		} else {
+			unk310 = PROGRESS_UNK2C;
 		}
 		break;
 	}

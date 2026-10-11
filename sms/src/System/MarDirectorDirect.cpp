@@ -812,6 +812,7 @@ void TMarDirector::nextStateInitialize(u8 next_state)
 
 u8 TMarDirector::updateGameMode()
 {
+	char trash[0x90];
 	u8 r29 = mState;
 
 	switch (unk124) {

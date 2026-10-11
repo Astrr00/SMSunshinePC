@@ -322,11 +322,10 @@ void TBathtubKiller::killBathtubKiller() { }
 
 void TBathtubKiller::breakBathtubKiller()
 {
-	bool dying = mSpine->getCurrentNerve()
-	             == &TNerveBathtubKillerExplosion::theNerve();
-	if (!dying)
-		dying = mSpine->getCurrentNerve()
-		        == &TNerveBathtubKillerBreak::theNerve();
+	bool dying = true;
+	if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
+	    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
+		dying = false;
 
 	if (!dying)
 		mSpine->pushNerve(&TNerveBathtubKillerBreak::theNerve());
@@ -628,12 +627,11 @@ void TBathtubKiller::calcRootMatrix()
 
 BOOL TBathtubKiller::receiveMessage(THitActor* sender, u32 message)
 {
-	if (message == 0 || message == 1 || message == 3) {
-		bool dying = mSpine->getCurrentNerve()
-		             == &TNerveBathtubKillerExplosion::theNerve();
-		if (!dying)
-			dying = mSpine->getCurrentNerve()
-			        == &TNerveBathtubKillerBreak::theNerve();
+	if (message == 3 || message == 0 || message == 1) {
+		bool dying = true;
+		if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
+		    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
+			dying = false;
 
 		if (!dying)
 			mSpine->pushNerve(&TNerveBathtubKillerBreak::theNerve());
@@ -682,33 +680,41 @@ void TBathtubKiller::attackToMario()
 
 bool TBathtubKiller::isCollidMove(THitActor* other)
 {
-	if (mSpine->getCurrentNerve() == &TNerveBathtubKillerExplosion::theNerve()
-	    || mSpine->getCurrentNerve() == &TNerveBathtubKillerBreak::theNerve())
+	bool dying = true;
+	if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
+	    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
+		dying = false;
+	if (dying)
 		return false;
 
 	u32 type = other->getActorType();
 	if (type == 0x08000029) {
-		if (mSpine->getCurrentNerve()
-		        != &TNerveBathtubKillerExplosion::theNerve()
-		    && mSpine->getCurrentNerve()
-		           != &TNerveBathtubKillerBreak::theNerve())
+		dying = true;
+		if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
+		    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
+			dying = false;
+		if (!dying)
 			mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
 		return true;
 	}
-	if (type == 0x08000021 || type == 0x0800002A || type == 0x0800002C) {
-		if (mSpine->getCurrentNerve()
-		        != &TNerveBathtubKillerExplosion::theNerve()
-		    && mSpine->getCurrentNerve()
-		           != &TNerveBathtubKillerBreak::theNerve())
+	bool hit = type == 0x08000021 || type == 0x0800002A || type == 0x0800002C;
+	if (hit) {
+		dying = true;
+		if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
+		    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
+			dying = false;
+		if (!dying)
 			mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
 		other->receiveMessage(this, 0xe);
 		return true;
 	}
-	if (type == 0x08000024 && unk214 <= 0) {
-		if (mSpine->getCurrentNerve()
-		        != &TNerveBathtubKillerExplosion::theNerve()
-		    && mSpine->getCurrentNerve()
-		           != &TNerveBathtubKillerBreak::theNerve())
+	hit = type == 0x08000024;
+	if (hit && unk214 <= 0) {
+		dying = true;
+		if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
+		    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
+			dying = false;
+		if (!dying)
 			mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
 	}
 	return true;
@@ -961,6 +967,7 @@ DEFINE_NERVE(TNerveBathtubKillerStraight, TLiveActor)
 	return FALSE;
 }
 
+#pragma dont_inline on
 DEFINE_NERVE(TNerveBathtubKillerBreak, TLiveActor)
 {
 	TBathtubKiller* self = (TBathtubKiller*)spine->getBody();
@@ -978,6 +985,7 @@ DEFINE_NERVE(TNerveBathtubKillerBreak, TLiveActor)
 	}
 	return FALSE;
 }
+#pragma dont_inline off
 
 DEFINE_NERVE(TNerveBathtubKillerExplosion, TLiveActor)
 {

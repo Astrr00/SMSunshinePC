@@ -42,6 +42,7 @@ namespace MSStageInfo {
 
 int MSMainProc::getMonteVillageActorArea(const Vec& param_1)
 {
+	volatile u32 padding[2];
 	int result = 4;
 	if (MSGMSound->unkCD == 8) {
 		// inline?
@@ -587,6 +588,7 @@ void MSMainProc::startStageBGM(u8, u8)
 
 MSStage* MSStage::init(u8 param_1, u8)
 {
+	volatile u32 padding[22];
 	smMSStage = nullptr;
 
 	gpMSound->unk9C->unk0 = 0.0f;

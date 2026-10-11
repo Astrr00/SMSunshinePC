@@ -768,6 +768,10 @@ void TBossGesso::changeAttackMode(int new_mode)
 	mAttackMode              = new_mode;
 	mTimeInCurrentAttackMode = 0;
 	switch (mAttackMode) {
+	case ASTATE_SINGLE:
+	case ASTATE_DOUBLE:
+	case ASTATE_SKIP_ROPE:
+		break;
 	case ASTATE_GUARD:
 		// TODO: wrong, this should only use 2 tentacles, not all
 		changeAllTentacleState(10);

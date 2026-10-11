@@ -810,7 +810,6 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 	}
 
 	case 0x80000001:
-	case 0x80000002:
 		if (!isInvincible()) {
 			switch (message) {
 			case HIT_MESSAGE_TAKE:

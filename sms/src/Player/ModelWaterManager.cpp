@@ -421,14 +421,15 @@ void TModelWaterManager::move()
 {
 	f32 fVar1 = unk5E08;
 	for (int i = 0; i < mParticleCount; ++i) {
+		bool sprayed = false;
 		if (unk2514[i] != nullptr) {
 			mStaticHitActor.mPosition = mParticlePositionSOA[i];
 			mStaticHitActor.unk68     = i;
+			sprayed = unk2514[i]->receiveMessage(&mStaticHitActor,
+			                                     HIT_MESSAGE_SPRAYED_BY_WATER);
+		}
 
-			if (!unk2514[i]->receiveMessage(&mStaticHitActor,
-			                                HIT_MESSAGE_SPRAYED_BY_WATER))
-				continue;
-
+		if (sprayed) {
 			splashSound(mParticlePositionSOA[i], mParticleSizeSOA[i]);
 
 			if (MsRandF() < unk5D88[8])

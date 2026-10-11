@@ -113,6 +113,7 @@ void TRoulette::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TRoulette::moveObject()
 {
+	char trash[0x20];
 	TLiveActor::moveObject();
 	if (unk142 != 0)
 		mRotation.y += unk13C;

@@ -796,7 +796,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 
 } // namespace
 
-void TKoopa::breathFlame()
+inline void TKoopa::breathFlame()
 {
 	int freeIdx   = -1;
 	bool anyDying = false;
@@ -813,14 +813,14 @@ void TKoopa::breathFlame()
 		MtxPtr headMtx = getHeadMtx();
 		JGeometry::TVec3<f32> dir(headMtx[0][0], 0.0f, headMtx[2][0]);
 		dir.normalize();
-		JGeometry::TVec3<f32> pos(headMtx[0][3], headMtx[1][3], headMtx[2][3]);
+		JGeometry::TVec3<f32> pos(headMtx[0][3], headMtx[1][3] - 500.0f, headMtx[2][3]);
 		mFlames[freeIdx]->fire(pos, dir, getParam()->flameVelocity.get(),
 		                       4000.0f, getParam()->flameRadius.get(),
 		                       getParam()->flameHeight.get());
 	}
 }
 
-void TKoopa::resetFlame_()
+inline void TKoopa::resetFlame_()
 {
 	for (int i = 0; i < 10; ++i)
 		mFlames[i]->resetFlame();

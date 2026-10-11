@@ -401,8 +401,8 @@ BOOL TMarioAnimeData::isPumpOK() const
 
 static int MarioHeadCtrl(J3DNode* param_1, int param_2)
 {
-	volatile u32 padding[30];
 	Mtx transform;
+	volatile u32 padding[30];
 	if (param_2 == 0) {
 		if (gpMarioForCallBack->mStatus == MARIO_STATUS_READ_BILLBOARD) {
 			if (gpMarDirector->unkA0 == nullptr)
@@ -444,6 +444,7 @@ static int MarioHeadCtrl(J3DNode* param_1, int param_2)
 		} else {
 
 			TMario* mario = gpMarioForCallBack;
+			s16* unk      = &mario->unkFC;
 			f32 headRot;
 			if (mario->fabricatedIsPumping()) {
 				headRot = mario->mBodyAngleParamsWaterGun.mHeadRot.get();
@@ -451,7 +452,7 @@ static int MarioHeadCtrl(J3DNode* param_1, int param_2)
 				headRot = mario->mBodyAngleParamsFree.mHeadRot.get();
 			}
 
-			s16 headAngle = -mario->unk100 * headRot;
+			s16 headAngle = -unk[2] * headRot;
 			MsMtxSetRotRPH(transform, 0.0f, SHORTANGLE2DEG(headAngle), 0.0f);
 			const TWaterGun* gun = gpMarioForCallBack->mWaterGun;
 			s16 gunAngle         = gun->getCurrentNozzle()->getGunAngle() / 2;
@@ -520,7 +521,7 @@ static int MarioFootPosRCtrl(J3DNode* param_1, int param_2)
 	volatile u32 padding[9];
 	if (param_2 == 0) {
 
-		BOOL check2 = FALSE;
+		BOOL check2;
 		bool check;
 
 		// Definitely some inline shenanigans
@@ -534,6 +535,8 @@ static int MarioFootPosRCtrl(J3DNode* param_1, int param_2)
 			           || gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEP)
 			             ? TRUE
 			             : FALSE;
+		} else {
+			check2 = FALSE;
 		}
 
 		if (check2) {
@@ -644,7 +647,7 @@ static int MarioFootPosLCtrl(J3DNode* param_1, int param_2)
 	volatile u32 padding[9];
 	if (param_2 == 0) {
 
-		BOOL check2 = FALSE;
+		BOOL check2;
 		bool check;
 
 		// Definitely some inline shenanigans
@@ -658,6 +661,8 @@ static int MarioFootPosLCtrl(J3DNode* param_1, int param_2)
 			           || gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEP)
 			             ? TRUE
 			             : FALSE;
+		} else {
+			check2 = FALSE;
 		}
 
 		if (check2) {
