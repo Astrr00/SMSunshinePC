@@ -1,0 +1,83 @@
+# Diagnosis only (dolpic/0 dev start, Null backend, dev verbs): kill the Delfino GateKeeper, chase and spray the shadow Mario (tpem + spray cycles), talk to him, then walk to the JellyGate 'Gate' at (0,300,4941.5)
+# in dolpic1 open, walk in and watch for stage 2 (bianco0). Mario is placed 460 units in front of the gate (facing -z).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=60
+killboss
+wait frames=240
+waitfor stage=1 scen=1 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem
+hold trig=0,255 frames=45
+wait frames=45
+log
+tpem dz=100
+waitfor talk=1 timeout=900
+log
+mash A period=30 until talk=0 timeout=2400
+log
+wait frames=300
+log
+tp x=2320 y=320 z=3200 yaw=0
+wait frames=1200
+log
+wait frames=900
+log
+tp x=350 y=320 z=5000 yaw=180
+wait frames=30
+log
+hold trig=0,255 frames=120
+log
+hold trig=0,255 frames=120
+log
+hold trig=0,255 frames=120
+log
+wait frames=300
+log
+walkto x=0 z=4800 radius=200 timeout=600
+log
+hold A stick=0,127 frames=120
+log
+waitfor stage=2 timeout=1200
+log
+wait frames=400
+hold A frames=6
+wait frames=60
+hold A frames=6
+wait frames=60
+hold A frames=6
+wait frames=60
+hold A frames=6
+wait frames=60
+log
+end

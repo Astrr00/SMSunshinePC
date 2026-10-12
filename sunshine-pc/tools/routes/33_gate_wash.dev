@@ -70,10 +70,14 @@ hold A stick=0,127 frames=120
 log
 waitfor stage=2 timeout=1200
 log
-mash A period=30 until stage=2 director mario dirstate=4 camDemo=0 timeout=4000
-wait frames=120
+wait frames=400
+mash A period=40 until stage=2 director mario dirstate=4 camDemo=0 timeout=2400
+wait frames=300
 log
 shot bianco0.png
-wait frames=60
+wait frames=300
+log
+shot bianco1.png
+hold trig=0,255 frames=60
 log
 end

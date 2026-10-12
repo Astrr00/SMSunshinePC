@@ -764,6 +764,7 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 				emitter->createEmitter(emitterPos, 8, nullptr, nullptr);
 
 				mMenuState = DISAPPEAR_MENU;
+				break; // retail jumps to the end of the switch here (asm `b` after the store); falling into MENU_ANIM_LOOP reset the state to MENU_INPUT_LOOP
 			} else if (mGamePad->checkFrameMeaning(
 			               TMarioGamePad::MEANING_MENU_LEFT)) {
 				if (getPrevIndex() != -1) {
