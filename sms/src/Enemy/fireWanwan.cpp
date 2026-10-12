@@ -1300,7 +1300,6 @@ void TFireWanwan::updateHitPoint()
 void TFireWanwan::emitEffects()
 {
 	if (0) {
-		(void)(Vec){ 1, 2, 3 };
 		(void)(GXColor){ 1, 2, 3, 4 };
 	}
 	MtxPtr mtx = getModel()->getAnmMtx(mCenterJointIdx);
@@ -1446,8 +1445,6 @@ void TFireWanwan::initEscapeNextGraphNode()
 	struct S10 { f32 a, b, c, d; };
 	struct S8 { int a, b; };
 	if (0) {
-		(void)(Vec){ 1, 2, 3 };
-		(void)(S10){ 1, 2, 3, 4 };
 		(void)(S8){ 1, 2 };
 	}
 	u32 uVar1 = unk124->unk0->findNearestNodeIndex(mPosition, -1);
