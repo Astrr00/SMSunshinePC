@@ -8,14 +8,9 @@ log
 hold L trig=255,255 frames=12
 tp x=12 y=320 z=5150 yaw=180
 wait frames=2
-hold L trig=255,255 frames=240
+hold L trig=255,255 frames=2400
 log
-hold L trig=255,0 frames=50
-log
-hold L trig=255,255 frames=500
-log
-wait frames=300
-log
+wait frames=100
 waitfor flag=0x10384 timeout=300
 log
 end
