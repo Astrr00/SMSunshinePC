@@ -872,8 +872,7 @@ void TBossPakkun::rumblePad(int type, const JGeometry::TVec3<f32>& position)
 
 	JGeometry::TVec3<f32> delta = SMS_GetMarioPos();
 	delta -= position;
-	f32 distance = delta.length();
-	f32 power    = (3000.0f - distance) / 1000.0f;
+	f32 power = (3000.0f - delta.length()) / 1000.0f;
 
 	if (power < 0.0f)
 		return;
@@ -985,29 +984,38 @@ void TBossPakkun::gotHipDropDamage()
 {
 	decHitPoints();
 	mWeakPoint = WEAK_POINT_NONE;
+	const TNerveBase<TLiveActor>* nerve;
 	if (getHitPoints() == 0) {
-		if (&TNerveBPPreDie::theNerve() != mSpine->getLatestNerve()
-		    && &TNerveBPDie::theNerve() != mSpine->getLatestNerve()) {
-			mSpine->setNext(&TNerveBPPreDie::theNerve());
-			SMSGetMSound()->startSoundActor(MSD_SE_BS_BSPAKU_DOWN, &mPosition,
-			                                0, nullptr, 0, 4);
+		nerve = &TNerveBPPreDie::theNerve();
+		if (mSpine->getLatestNerve() != nerve) {
+			nerve = &TNerveBPDie::theNerve();
+			if (mSpine->getLatestNerve() != nerve) {
+				mSpine->setNext(&TNerveBPPreDie::theNerve());
+				SMSGetMSound()->startSoundActor(MSD_SE_BS_BSPAKU_DOWN,
+				                                &mPosition, 0, nullptr, 0, 4);
+			}
 		}
-	} else if (&TNerveBPTumbleOut::theNerve() != mSpine->getLatestNerve()) {
+	} else if (nerve = &TNerveBPTumbleOut::theNerve(),
+	           mSpine->getLatestNerve() != nerve) {
 		SMSGetMSound()->startSoundActor(MSD_SE_BS_BSPAKU_DAMAGE, &mPosition, 0,
 		                                nullptr, 0, 4);
 		if (gpMarDirector->getCurrentStage() == 4) {
 			mSpine->reset();
 			mSpine->setNext(&TNerveBPTakeOff::theNerve());
-			mSpine->pushNerve(&TNerveBPGetUp::theNerve());
-			mSpine->pushNerve(&TNerveBPStompReact::theNerve());
+			nerve = &TNerveBPGetUp::theNerve();
+			mSpine->pushNerve(nerve);
+			nerve = &TNerveBPStompReact::theNerve();
+			mSpine->pushNerve(nerve);
 		} else {
 			mSpine->reset();
 			mSpine->setNext(&TNerveBPWait::theNerve());
-			mSpine->pushNerve(&TNerveBPGetUp::theNerve());
-			mSpine->pushNerve(&TNerveBPStompReact::theNerve());
+			nerve = &TNerveBPGetUp::theNerve();
+			mSpine->pushNerve(nerve);
+			nerve = &TNerveBPStompReact::theNerve();
+			mSpine->pushNerve(nerve);
 		}
 	}
-	char trash[0x18];
+	char trash[0x28];
 }
 
 void TBossPakkun::gotTrampleDamage() { }
@@ -1218,8 +1226,10 @@ void TBossPakkun::perform(u32 cue, JDrama::TGraphics* graphics)
 		}
 
 		if (mWeakPoint == WEAK_POINT_NAVEL && checkMarioRiding()) {
-			if (&TNerveBPJumpReact::theNerve() != mSpine->getLatestNerve()) {
-				mSpine->pushNerve(&TNerveBPJumpReact::theNerve());
+			const TNerveBase<TLiveActor>* nerve = &TNerveBPJumpReact::theNerve();
+			if (mSpine->getLatestNerve() != nerve) {
+				nerve = &TNerveBPJumpReact::theNerve();
+				mSpine->pushNerve(nerve);
 			}
 		}
 	}
@@ -1266,7 +1276,8 @@ void TBossPakkun::perform(u32 cue, JDrama::TGraphics* graphics)
 	}
 
 	if (static_cast<TBossPakkunManager*>(mManager)->unk54 == 0) {
-		if (&TNerveBPDie::theNerve() == mSpine->getLatestNerve()) {
+		const TNerveBase<TLiveActor>* dieNerve = &TNerveBPDie::theNerve();
+		if (mSpine->getLatestNerve() == dieNerve) {
 			MActor* origActor = mMActor;
 			mMActor           = unk180;
 			TSpineEnemy::perform(cue, graphics);
@@ -1296,8 +1307,10 @@ void TBossPakkun::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	if (static_cast<TBossPakkunManager*>(mManager)->unk54 == 0
 	    && (cue & CUE_ENTRY)) {
-		if (&TNerveBPPreDie::theNerve() == mSpine->getLatestNerve()
-		    || &TNerveBPStompReact::theNerve() == mSpine->getLatestNerve()) {
+		const TNerveBase<TLiveActor>* nerve = &TNerveBPPreDie::theNerve();
+		if (mSpine->getLatestNerve() == nerve
+		    || (nerve = &TNerveBPStompReact::theNerve(),
+		        mSpine->getLatestNerve() == nerve)) {
 			mMActor->offMakeDL();
 			SMS_AddDamageFogEffect(mMActor->getModel()->getModelData(),
 			                       mPosition, graphics);
@@ -1474,6 +1487,7 @@ DEFINE_NERVE(TNerveBPWait, TLiveActor)
 		return true;
 	}
 
+	char trash[0x50];
 	return false;
 }
 
@@ -1784,6 +1798,7 @@ DEFINE_NERVE(TNerveBPJumpReact, TLiveActor)
 
 DEFINE_NERVE(TNerveBPPreDie, TLiveActor)
 {
+	char trash[0x18];
 	TBossPakkun* boss = static_cast<TBossPakkun*>(spine->getBody());
 	MActor* actor     = boss->mMActor;
 	if (spine->getTime() == 0) {
@@ -1798,7 +1813,6 @@ DEFINE_NERVE(TNerveBPPreDie, TLiveActor)
 		spine->pushAfterCurrent(&TNerveBPDie::theNerve());
 		return true;
 	}
-	char trash[0x18];
 	return false;
 }
 
@@ -1940,6 +1954,7 @@ DEFINE_NERVE(TNerveBPFlyPivot, TLiveActor)
 
 DEFINE_NERVE(TNerveBPHover, TLiveActor)
 {
+	char trash0[0x8];
 	TBossPakkun* boss = static_cast<TBossPakkun*>(spine->getBody());
 	if (spine->getTime() == 0) {
 		boss->changeBck(16);
@@ -1966,7 +1981,7 @@ DEFINE_NERVE(TNerveBPHover, TLiveActor)
 		return true;
 	}
 
-	char trash[0x10];
+	char trash[0x8];
 	return false;
 }
 

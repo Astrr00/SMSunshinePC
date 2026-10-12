@@ -135,6 +135,7 @@ TMBindShadowBody::TMBindShadowBody(THitActor* param_1, J3DModel* param_2,
     , mPartsRadius(0.01f)
     , mBodyRadius(50.0f)
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	switch (param_1->getActorType()) {
 	case 0x80000001:
 	case 0x8000002:
@@ -1072,8 +1073,8 @@ void TMBindShadowManager::drawShadow(u32 param_1, JDrama::TGraphics* param_2)
 
 			TAlphaShadowBlendQuad* blend = mQuadArys[i].mBlendHead;
 
-			JGeometry::TVec3<f32> max;
 			JGeometry::TVec3<f32> min;
+			JGeometry::TVec3<f32> max;
 
 			min.set(blend->mMin.x, blend->mMin.y - blend->mMax.y,
 			        blend->mMin.z);
@@ -1257,7 +1258,9 @@ void TMBindShadowManager::drawShadow(u32 param_1, JDrama::TGraphics* param_2)
 void TMBindShadowManager::request(const TCircleShadowRequest& param_1,
                                   u32 param_2)
 {
+	char trash0[8];
 	JGeometry::TVec3<f32> delta = param_1.mPosition;
+	char trash[0x20];
 	delta -= gpCamera->unk124;
 	f32 dist = delta.squared();
 

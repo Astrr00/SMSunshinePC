@@ -344,6 +344,7 @@ void TSamboFlowerManager::loadAfter()
 		}
 	}
 
+	char trash[0x5c];
 	JDrama::TNameRef::loadAfter();
 }
 
@@ -642,6 +643,7 @@ void THanaSambo::load(JSUMemoryInputStream& stream)
 
 void THanaSambo::init(TLiveManager* param_1)
 {
+	char trashTop[4];
 	TSmallEnemy::init(param_1);
 	mActorType = 0x1000001A;
 	unk150     = 0x11;
@@ -668,14 +670,14 @@ void THanaSambo::init(TLiveManager* param_1)
 	    = static_cast<TIdxGroupObj*>(JDrama::TNameRefGen::search("敵グループ"));
 	group->getChildren().push_back(unk194);
 
-	unk194->initHitActor(
-	    0x1000001B, 2, -0x80000000,
-	    unk198->mSLHeadAttackRadius.get() * mBodyScale,
-	    unk198->mSLHeadAttackHeight.get() * mBodyScale,
-	    unk198->mSLHeadDamageRadius.get() * mBodyScale,
-	    unk198->mSLHeadDamageHeight.get() * mBodyScale);
+	f32 attackRadius = unk198->mSLHeadAttackRadius.get() * mBodyScale;
+	f32 attackHeight = unk198->mSLHeadAttackHeight.get() * mBodyScale;
+	f32 damageRadius = unk198->mSLHeadDamageRadius.get() * mBodyScale;
+	f32 damageHeight = unk198->mSLHeadDamageHeight.get() * mBodyScale;
+	unk194->initHitActor(0x1000001B, 2, -0x80000000, attackRadius, attackHeight,
+	                     damageRadius, damageHeight);
 	unk194->mOwner = this;
-	char trash[20];
+	char trash[8];
 }
 
 void THanaSambo::setMActorAndKeeper()
@@ -868,7 +870,7 @@ DEFINE_NERVE(TNerveHanaSamboAppear, TLiveActor)
 		return true;
 	}
 
-	self->walkToCurPathNode(0.0f, self->mTurnSpeed * 3.0f, 0.0f);
+	self->walkToCurPathNode(0.0f, 3.0f * self->mTurnSpeed, 0.0f);
 	char trash[16];
 	return false;
 }
@@ -1399,7 +1401,7 @@ DEFINE_NERVE(TNerveSamboHeadAppear, TLiveActor)
 
 	if (self->checkCurAnmEnd(0)) {
 		self->setBckAnm(0xC);
-		spine->pushAfterCurrent(&TNerveHanaSamboAttack::theNerve());
+		spine->pushAfterCurrent(&TNerveSamboHeadAttack::theNerve()); // asm: retail pushes SamboHeadAttack
 		return true;
 	}
 

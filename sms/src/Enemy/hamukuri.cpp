@@ -813,6 +813,7 @@ void THamuKuri::jumpToSearchActor()
 	(void)0; // TODO: hack, need to figure out canGoForSearchActor?
 	TLiveActor* pTVar5 = (TLiveActor*)unk1F8;
 	if (pTVar5) {
+		char trash0[8];
 		JGeometry::TVec3<f32> local_1C = mPosition;
 		char trash[0xc];
 		local_1C -= pTVar5->mPosition;
@@ -2179,8 +2180,7 @@ void TFireHamuKuri::behaveToWater(THitActor* param_1)
 	if (unk210) {
 		JGeometry::TVec3<f32> local_20(mPosition.x - gpMarioPos->x, 0.0f,
 		                               mPosition.z - gpMarioPos->z);
-		char trash[0x1c];
-
+		char trash[0x18];
 
 		if (local_20.x == 0.0f && local_20.y == 0.0f && local_20.z == 0.0f)
 			local_20.x += 1.0f;

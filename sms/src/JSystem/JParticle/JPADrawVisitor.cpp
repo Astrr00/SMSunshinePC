@@ -803,6 +803,7 @@ void JPADrawExecDirectionalCross::exec(const JPADrawContext* dc,
 	params->unk0.normalize();
 
 	Mtx local_80;
+	char trash[8];
 	local_80[0][0] = params->unk0.x;
 	local_80[0][1] = local_BC.x;
 	local_80[0][2] = f29_f30_f31.x;
@@ -860,6 +861,7 @@ void JPADrawExecRotDirectionalCross::exec(const JPADrawContext* dc,
 	f32 x1 = +params->mScaleX * (dc->pcb->unk4.x - dc->pcb->unkC.x);
 	f32 y1 = -params->mScaleY * (dc->pcb->unk4.y - dc->pcb->unkC.y);
 
+	Mtx local_180;
 	JGeometry::TVec3<f32> offs[8];
 	offs[0].set(x0, y0, 0.0f);
 	offs[1].set(x1, y0, 0.0f);
@@ -874,7 +876,6 @@ void JPADrawExecRotDirectionalCross::exec(const JPADrawContext* dc,
 	offs[7].set((offs[1].x + offs[0].x) * 0.5f, y1,
 	            (offs[1].x - offs[0].x) * 0.5f);
 
-	Mtx local_180;
 	dc->pcb->mRotTypeFunc(sin, cos, local_180);
 
 	JGeometry::TVec3<f32> local_BC;
@@ -893,6 +894,7 @@ void JPADrawExecRotDirectionalCross::exec(const JPADrawContext* dc,
 	params->unk0.normalize();
 
 	Mtx local_d8;
+	char trash[8];
 	local_d8[0][0] = params->unk0.x;
 	local_d8[0][1] = local_BC.x;
 	local_d8[0][2] = f29_f30_f31.x;
@@ -1111,6 +1113,7 @@ void JPADrawExecLine::exec(const JPADrawContext* dc, JPABaseParticle* particle)
 	if (particle->isInvisibleParticle())
 		return;
 
+	char trash[4];
 	JGeometry::TVec3<f32> local_40;
 	JGeometry::TVec3<f32> f31_f30_f39;
 	particle->getGlobalPosition(f31_f30_f39);

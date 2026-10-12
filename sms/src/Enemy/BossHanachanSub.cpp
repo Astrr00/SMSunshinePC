@@ -23,13 +23,16 @@ TSphereLink::TSphereLink(u16 count, const JGeometry::TVec3<f32>& pos,
 
 	// The chain hangs behind the head, along the direction angleY.
 	s16 angle = (s16)DEG2SHORTANGLE(mAngleY);
-	f32 dx    = linkLength * JMASSin(angle);
-	f32 dz    = linkLength * JMASCos(angle);
+	f32 sn    = JMASSin(angle);
+	f32 cs    = JMASCos(angle);
+	f32 dx    = sn * linkLength;
+	f32 dz    = cs * linkLength;
 
 	for (int i = 0; i < mNumPoints; ++i) {
 		TSpherePoint* point = &mPoints[i];
 
 		JGeometry::TVec3<f32> p;
+		char trash[0x1c];
 		if (i == 0) {
 			p = pos;
 		} else {

@@ -687,16 +687,19 @@ void TTinKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 			}
 		}
 
+		int i;
 		TTinKoopaLaunchOrderAry* orders = mLaunchOrders;
-		for (int i = 0; i < orders->mNum; ++i)
+		for (i = 0; i < orders->mNum; ++i)
 			orders->mOrders[i]->checkOrder();
 
 		checkTinKoopaKillerApproachingMessage();
 
 		if (mKoopaRail != nullptr) {
 			J3DFrameCtrl* ctrl = mKoopaRail->getFrameCtrl(0);
-			if (mWaitCycle == 0 && ctrl->checkPass(300.0f))
-				gpMarDirector->getConsole()->startAppearBalloon(0xE000A, true);
+			if (mWaitCycle == 0 && ctrl->checkPass(300.0f)) {
+				u32 messageId = 0xE000A;
+				gpMarDirector->getConsole()->startAppearBalloon(messageId, true);
+			}
 		}
 
 		checkTinKoopaFirstFlameMessage();
@@ -706,6 +709,10 @@ void TTinKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 	mFlame->perform(cue, graphics);
 	for (int i = 0; i < 6; ++i)
 		mParts[i]->perform(cue, graphics);
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 const char** TTinKoopa::getBasNameTable() const { return tinkoopa_bastable; }
@@ -728,7 +735,8 @@ void TTinKoopa::hitParts()
 	if (mState == 4)
 		return;
 
-	gpMarDirector->getConsole()->startAppearBalloon(0xE0024, true);
+	u32 messageId = 0xE0024;
+	gpMarDirector->getConsole()->startAppearBalloon(messageId, true);
 
 	mPartsHP -= 1;
 	if (mPartsHP <= 0) {
@@ -738,15 +746,20 @@ void TTinKoopa::hitParts()
 		const TNerveBase<TLiveActor>* nerve = &theNerveDamage();
 		mSpine->pushNerve(nerve);
 	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 void TTinKoopa::launchKiller(int direction)
 {
+	int jointIndex;
 	TCoasterKiller* killer = (TCoasterKiller*)mKillerManager->getDeadEnemy();
 	if (killer != nullptr) {
 		killer->reset();
 
-		int jointIndex = TTinKoopa_jointIndexTable[direction == 1
+		jointIndex = TTinKoopa_jointIndexTable[direction == 1
 		                                               ? mLaunchIndex + 11
 		                                               : 14 - mLaunchIndex];
 		getJointTransByIndex(jointIndex, &killer->mPosition);
@@ -756,6 +769,9 @@ void TTinKoopa::launchKiller(int direction)
 		    0xEF, getModel()->getAnmMtx(jointIndex), 0, this);
 		SMSGetMSound()->startSoundActor(MSD_SE_EN_KILLER_FIRE,
 		                                &killer->mPosition, 0, nullptr, 0, 4);
+	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
 	}
 }
 
@@ -803,15 +819,22 @@ void TTinKoopa::checkTinKoopaFirstFlameMessage()
 			J3DFrameCtrl* ctrl = mKoopaRail->getFrameCtrl(0);
 			if (mState == 0) {
 				if (ctrl->checkPass(2600.0f)) {
-					gpMarDirector->getConsole()->startAppearBalloon(0xE000B,
+					u32 messageId = 0xE000B;
+					gpMarDirector->getConsole()->startAppearBalloon(messageId,
 					                                                true);
 					mHasShownFirstFlame = 1;
 				}
 			} else if (ctrl->checkPass(3100.0f)) {
-				gpMarDirector->getConsole()->startAppearBalloon(0xE000B, true);
+				u32 messageId = 0xE000B;
+				gpMarDirector->getConsole()->startAppearBalloon(messageId, true);
 				mHasShownFirstFlame = 1;
 			}
 		}
+	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
 	}
 }
 
@@ -961,6 +984,32 @@ void TTinKoopa::emitTinKoopaEffects()
 
 	if (mBreakingParts != nullptr)
 		mBreakingParts->emitPartsDisappearEffects();
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 TTinKoopaManager::TTinKoopaManager(const char* name)

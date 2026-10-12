@@ -574,6 +574,20 @@ void TIgaiga::walkBehavior(int param_1, f32 param_2)
 		const_cast<TLiveActor*>(unk138->getActor())
 		    ->receiveMessage(this, HIT_MESSAGE_ATTACK);
 	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 bool TIgaiga::isReachedToGoalXZ()
@@ -1144,6 +1158,25 @@ void TGorogoro::walkBehavior(int param_1, f32 param_2)
 			kill();
 		}
 	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 void TGorogoro::flagJump()
@@ -1265,6 +1298,12 @@ void TGorogoro::generateByGateKeeper(const JGeometry::TVec3<f32>& pos,
 	}
 
 	unk1A8 = true;
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 DEFINE_NERVE(TNerveGorogoroRollOnGraph, TLiveActor)

@@ -261,7 +261,6 @@ u32 TMovieDirector::decideNextMode(s32* param_1)
 
 int TMovieDirector::direct()
 {
-	char trash[0xa8];
 	if (!unk30.check(0x1)) {
 		if (!OSIsThreadTerminated(&gSetupThread))
 			return 0;
@@ -431,6 +430,6 @@ int TMovieDirector::direct()
 		}
 		unk1C = nextState;
 	}
-
+	char trash[0xa8];
 	return desiredAppState;
 }

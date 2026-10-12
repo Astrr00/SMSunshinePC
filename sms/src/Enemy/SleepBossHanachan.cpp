@@ -25,6 +25,7 @@ DEFINE_NERVE(TNerveSBH_Fall, TLiveActor)
 
 	if (self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr)) {
 		JGeometry::TVec3<f32> pos = self->mShinePos;
+		char trash[0xc];
 		TShine* shine             = gpItemManager->makeShineAppearWithDemo(
             "シャイン（ボス用）", "ボスシャインカメラ", pos.x, pos.y, pos.z);
 		shine->onMapObjFlag(0x20000000);
@@ -44,6 +45,7 @@ DEFINE_NERVE(TNerveSBH_SleepContinue, TLiveActor) { return FALSE; }
 
 void TSleepBossHanachan::startFall(f32 x, f32 y, f32 z)
 {
+	char trash[8];
 	TFlagManager::getInstance()->setBool(true, 0x5000B);
 
 	mShinePos.set(x, y, z);

@@ -31,7 +31,6 @@ TSunMgr::TSunMgr(const char* name)
 
 void TSunMgr::load(JSUMemoryInputStream& stream)
 {
-	char trash[0x40]; // unused stack slot (present in the retail frame)
 	JDrama::TViewObj::load(stream);
 
 	u32 local_24;
@@ -41,6 +40,7 @@ void TSunMgr::load(JSUMemoryInputStream& stream)
 	u32 local_1c;
 	stream >> local_1c;
 	u32 local_18;
+	char trash[0x40]; // unused stack slot (present in the retail frame)
 	stream >> local_18;
 	stream >> unk20;
 

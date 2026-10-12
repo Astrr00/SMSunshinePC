@@ -194,21 +194,22 @@ f32 MSHandle::calcDolby(const Vec& pos, f32 dist)
 	f32 halfRad = cDol_HalfRad;
 	f32 fullRad = cDol_FullRad;
 
+	f32 v;
 	if (dVar2 < zeroRad) {
-		dVar2 = 0.0f;
+		v = 0.0f;
 	} else if (dVar2 < halfRad) {
-		dVar2 = 0.5f / (halfRad - zeroRad) * (dVar2 - zeroRad);
+		v = 0.5f / (halfRad - zeroRad) * (dVar2 - zeroRad);
 	} else if (dVar2 < fullRad) {
-		dVar2 = 0.5f / (fullRad - halfRad) * (dVar2 - halfRad) + 0.5f;
+		v = 0.5f / (fullRad - halfRad) * (dVar2 - halfRad) + 0.5f;
 	} else {
-		dVar2 = 1.0f;
+		v = 1.0f;
 	}
 
 	if (dist < cPan_HiSence_Dist) {
-		dVar2 = dist * ((dVar2 - 0.5f) / cPan_HiSence_Dist) + 0.5f;
+		v = dist * ((v - 0.5f) / cPan_HiSence_Dist) + 0.5f;
 	}
 
-	f32 r = dVar2 > 1.0f ? 1.0f : dVar2;
+	f32 r = v > 1.0f ? 1.0f : v;
 	return r < 0.0f ? 0.0f : r;
 }
 

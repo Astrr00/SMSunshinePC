@@ -559,6 +559,7 @@ static void Hxs1_Circle(f32 radius)
 	f32 radiusSquared;
 	f32 distance;
 	u32 i;
+	char trash[0xb8];
 
 	Hx_CameraInit();
 	Hx_GxInit(0, 1);
@@ -761,6 +762,7 @@ static void Hxs_FrBufferMorf2B(f32 amount)
 static void Hx_Door(void)
 {
 	s32 position;
+	char trash[8];
 
 	switch (hx.animationState) {
 	case 0:
@@ -793,8 +795,11 @@ static void Hx_Door(void)
 static void Hxs_GameOver(u8 alpha, f32 mag, f32 rot)
 {
 	GXTexObj texObj;
+	char padA[0x30];
 	Vec dir;
+	char padB[0x18];
 	Mtx rotation;
+	char padC[0x20];
 	f32 cx;
 	f32 cy;
 	f32 len;
@@ -1633,6 +1638,7 @@ static void Hx_Test4(void)
 	f32 outerRadius;
 	f32 innerRadius;
 	u32 i;
+	char trash[8];
 
 	switch (hx.animationState) {
 	case 0:
@@ -1720,6 +1726,7 @@ static void Hx_Test5(void)
 	u32 x;
 	u32 y;
 	u32 i;
+	char trash[0x10];
 
 	Hx_CameraInit();
 	Hx_GxInit(1, 0);

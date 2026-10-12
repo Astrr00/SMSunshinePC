@@ -91,7 +91,11 @@ void TMario::getCoinBlue()
 
 BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 {
-	char trash[0xa0];
+	JGeometry::TVec3<f32> diff;
+	char padA[0x44];
+	JGeometry::TVec3<f32> tmp, tmp2;
+	char trash[0x2d];
+	int padB;
 	if (checkFlag(MARIO_FLAG_GAME_OVER))
 		return FALSE;
 
@@ -332,7 +336,14 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 				wireMove(0.0f);
 				offFlag(MARIO_FLAG_UNK100);
 
-				JGeometry::TVec3<f32> diff = mWireEndPos - mWireStartPos;
+				diff = mWireEndPos - mWireStartPos;
+				if (0) {
+					(void)(GXColor){1, 2, 3, 4};
+					(void)(GXColor){1, 2, 3, 4};
+					(void)(GXColor){1, 2, 3, 4};
+					(void)(GXColor){1, 2, 3, 4};
+					(void)(GXColor){1, 2, 3, 4};
+				}
 				int dirToEnd   = (s16)(matan(diff.z, diff.x) - mFaceAngle.y);
 				mWireBounceVel = 0.2f * -mVel.y;
 				mWireSag       = 0.0f;
@@ -348,7 +359,7 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 				}
 				if (flipDir == true) {
 					if (dirToEnd > 0) {
-						JGeometry::TVec3<f32> tmp = mWireStartPos;
+						tmp = mWireStartPos;
 						mWireStartPos             = mWireEndPos;
 						mWireEndPos               = tmp;
 						mWirePosRatio             = 1.0f - mWirePosRatio;
@@ -357,9 +368,9 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 					return TRUE;
 				}
 				if (dirToEnd <= -0x4000 || dirToEnd > 0x4000) {
-					JGeometry::TVec3<f32> tmp = mWireStartPos;
-					mWireStartPos             = mWireEndPos;
-					mWireEndPos               = tmp;
+					tmp2 = mWireStartPos;
+					mWireStartPos = mWireEndPos;
+					mWireEndPos = tmp2;
 					mWirePosRatio             = 1.0f - mWirePosRatio;
 				}
 				changePlayerStatus(MARIO_STATUS_WIRE_WAIT, 0, false);
@@ -608,15 +619,6 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 			           mDmgParamsEnemyCommon.mInvincibleTime.get());
 			return TRUE;
 		}
-		if (message == HIT_MESSAGE_SUPER_HIP_DROP && !isInvincible()) {
-			onFlag(MARIO_FLAG_GROUND_POUND_SIT_UP);
-			if (!checkStatusType(MARIO_STATUS_FLAG_JUMPING)) {
-				rumbleStart(0x15, 0x0A);
-			}
-			return TRUE;
-		}
-		break;
-
 	case 0x08000001: // hinokuri-class
 		if (message == HIT_MESSAGE_ATTACK && !isInvincible()) {
 			damageExec(sender, mDmgParamsHinokuri.mDamage.get(),
@@ -763,7 +765,7 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 			           mDmgParamsHanachanBoss.mInvincibleTime.get());
 			return TRUE;
 		}
-		// fallthrough
+		break;
 
 	case 0x4000002C: { // big spinning enemy with rotation-based attack window
 		if (mInput & 0x8000) {

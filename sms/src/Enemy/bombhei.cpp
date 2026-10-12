@@ -124,6 +124,7 @@ void TBombHei::setMActorAndKeeper()
 
 void TBombHei::behaveToWater(THitActor* param_1)
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	if (isBckAnm(4) || isBckAnm(3)) {
 		if (mHitPoints == 0)
 			mSpine->pushNerve(&TNerveBombHeiWaitExplosion::theNerve());
@@ -134,6 +135,8 @@ void TBombHei::behaveToWater(THitActor* param_1)
 
 void TBombHei::changeOut()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	SMSGetMSound()->startSoundActor(MSD_SE_EN_TELSA_RECOVER, &mPosition, 0,
 	                                nullptr, 0, 4);
 
@@ -184,6 +187,7 @@ void TBombHei::genEventCoin()
 			coin->mPosition.y = mPosition.y;
 
 			JGeometry::TVec3<f32> dir = *gpMarioPos - mPosition;
+			char trash[8];
 			MsVECNormalize(&dir, &dir);
 			coin->mVelocity.set(20.0f * dir.x, 20.0f, 20.0f * dir.z);
 			coin->offLiveFlag(LIVE_FLAG_UNK10);
@@ -207,6 +211,9 @@ void TBombHei::setDeadAnm()
 
 void TBombHei::calcRootMatrix()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TSpineEnemy::calcRootMatrix();
 
 	if (gpMarDirector->checkUnk4CFlag(0xF)) {
@@ -269,6 +276,7 @@ f32 TBombHei::getGravityY() const
 
 void TBombHei::walkBehavior(int param_1, f32 param_2)
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	SMSGetMSound()->startSoundActor(MSD_SE_EN_BOMBHEI_ZENMAI, &mPosition, 0,
 	                                nullptr, 0, 4);
 	TWalkerEnemy::walkBehavior(param_1, param_2);
@@ -276,6 +284,7 @@ void TBombHei::walkBehavior(int param_1, f32 param_2)
 
 void TBombHei::moveObject()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TWalkerEnemy::moveObject();
 
 	if (mSpine->getCurrentNerve() != &TNerveBombHeiThrown::theNerve()
@@ -358,6 +367,8 @@ const char** TBombHei::getBasNameTable() const { return bombhei_bastable; }
 
 BOOL TNerveBombHeiGenerate::execute(TSpineBase<TLiveActor>* spine) const
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TBombHei* self = (TBombHei*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -403,6 +414,7 @@ BOOL TNerveBombHeiAttack::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveBombHeiWalkExplosion::execute(TSpineBase<TLiveActor>* spine) const
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TBombHei* self = (TBombHei*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -428,6 +440,9 @@ BOOL TNerveBombHeiWalkExplosion::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveBombHeiWaitExplosion::execute(TSpineBase<TLiveActor>* spine) const
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TBombHei* self = (TBombHei*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -513,8 +528,21 @@ BOOL TNerveBombHeiThrown::execute(TSpineBase<TLiveActor>* spine) const
 	return false;
 }
 
+static inline bool bombWater(const TBGCheckData* p)
+{
+	u16 t = p->mBGType;
+	if (t == BG_TYPE_WATER || t == BG_TYPE_SEA_WATER
+	    || t == BG_TYPE_DAMAGING_SEA_WATER || t == BG_TYPE_POOL
+	    || t == BG_TYPE_INDOOR_POOL || t == BG_TYPE_DAMAGING_WATER
+	    || t == BG_TYPE_SHADED_POOL)
+		return true;
+	return false;
+}
+
 BOOL TNerveBombHeiExplosion::execute(TSpineBase<TLiveActor>* spine) const
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TBombHei* self = (TBombHei*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -526,7 +554,7 @@ BOOL TNerveBombHeiExplosion::execute(TSpineBase<TLiveActor>* spine) const
 			self->sendAttackMsgToMario();
 		self->unk164 = 0;
 
-		if (self->mGroundPlane->isWaterSurface()) {
+		if (bombWater(self->mGroundPlane)) {
 			if (TEffectBombColumWater* effect
 			    = (TEffectBombColumWater*)gpConductor->makeOneEnemyAppear(
 			        self->mPosition, "エフェクト爆発水柱マネージャー", 1)) {

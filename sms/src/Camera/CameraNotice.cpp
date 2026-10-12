@@ -231,9 +231,9 @@ void CPolarSubCamera::getNozzleTopPos_(JGeometry::TVec3<f32>* out) const
 
 void CPolarSubCamera::ctrlLButtonCamera_()
 {
-	char trash[0x30];
 	f32 stickX = -unk120->mCompSPos[4];
 	f32 stickY = -unk120->mCompSPos[5];
+	char trash[0x30];
 
 	if (mTargetFreezeFrames == 0) {
 		if (!SMS_CheckMarioFlag(MARIO_FLAG_HAS_FLUDD))

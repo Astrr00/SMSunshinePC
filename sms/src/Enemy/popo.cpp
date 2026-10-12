@@ -394,6 +394,7 @@ bool TPopo::isRollJump()
 
 bool TPopo::checkTrigger()
 {
+	char trash[0x40];
 	mIsPumping = false;
 
 	if (gpMarioOriginal->onYoshi()
@@ -423,9 +424,9 @@ bool TPopo::checkTrigger()
 				actor->setFrameRate(SMSGetAnmFrameRate(), ANM_TYPE_BRK);
 			}
 		}
+		f32 maxScale = mParams->mSLWaterScaleMax.get();
 		if (mBrkFlag) {
-			f32 frame = mBrkFrameMax * mWaterScale
-			            / mParams->mSLWaterScaleMax.get();
+			f32 frame = mBrkFrameMax * mWaterScale / maxScale;
 			mMActor->getFrameCtrl(ANM_TYPE_BRK)->setFrame(frame);
 		}
 	}
@@ -507,8 +508,10 @@ f32 TPopo::getGravityY() const
 
 void TPopo::behaveToFindMario()
 {
-	char trash[0x10];
 	TPopoManager* manager = (TPopoManager*)mManager;
+	if (0) {
+		(void)TPathNode((THitActor*)gpMarioAddress);
+	}
 	if (SMS_CheckMarioFlag(MARIO_FLAG_HAS_FLUDD) && manager->mIsNozzleFree
 	    && (int)SMS_GetMarioWaterGun()->mCurrentNozzle == 0
 	    && !gpMarioOriginal->onYoshi()) {
@@ -796,7 +799,9 @@ bool TPopo::isCollidMove(THitActor* other)
 
 void TPopo::flyBehavior()
 {
-	char trash[0x18];
+	char trash0[4];
+	JGeometry::TVec3<f32> pos;
+	char trash[0x14];
 	++mFlyTimer;
 	if (mFlyTimer > mParams->mSLFlyLimitTime.get()) {
 		mFlyTimer = 0;
@@ -806,7 +811,6 @@ void TPopo::flyBehavior()
 	if (mWaterScale > 1.0f)
 		mWaterScale *= 0.999f;
 
-	JGeometry::TVec3<f32> pos;
 	if (checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
 		pos = mPosition;
 	} else {
@@ -984,11 +988,13 @@ BOOL TNervePopoFly::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNervePopoExplosion::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[0x20];
+	JGeometry::TVec3<f32> zero;
+	char trash[0x1c];
 	TPopo* self = (TPopo*)spine->getBody();
 
 	if (spine->getTime() == 0) {
-		self->setVelocity(JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f));
+		zero.set(0.0f, 0.0f, 0.0f);
+		self->setVelocity(zero);
 		self->mMActor->setFrameRate(0.0f, ANM_TYPE_BCK);
 
 		if (self->mIsPossessed) {

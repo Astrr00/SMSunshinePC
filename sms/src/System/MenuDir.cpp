@@ -173,6 +173,7 @@ int TMenuDirector::rsetup()
 
 	unk40->show();
 
+	char trash[0x58];
 	return 0;
 }
 

@@ -651,6 +651,7 @@ void TPukuPuku::reset()
 
 void TMoePuku::calcRootMatrix()
 {
+	char trash[0x20];
 	gpCurTobiPuku = this;
 	TSpineEnemy::calcRootMatrix();
 	// asm 0x802AE694: retail skips MsMtx and pichi block when eaten, still runs Fly block
@@ -1051,6 +1052,7 @@ DEFINE_NERVE(TNerveTobiPukuLand, TLiveActor)
 	} else if (TTobiPuku::mReturnLaunchSw) {
 		f32 dy                         = self->unk1E0 - self->mPosition.y;
 		JGeometry::TVec3<f32> velocity = self->unk1D0;
+		char trash[0x10];
 		velocity.y                     = self->unk1D0.y *= 0.5f;
 		velocity.z                     = self->unk1D0.z *= 0.5f;
 		// The rate below is overwritten by unk1E4 before it is read;

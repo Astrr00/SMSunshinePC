@@ -270,6 +270,13 @@ void TBGKMtxCalc::calc(u16 param_1)
 		MTXConcat(mtx, rot, mtx);
 		MTXCopy(mtx, J3DSys::mCurrentMtx);
 	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 TBGKObstacle::TBGKObstacle(TBiancoGateKeeper* owner, const char* name)
@@ -470,6 +477,9 @@ void TBiancoGateKeeper::launchNamekuri()
 			enemy->offHitFlag(HIT_FLAG_NO_COLLISION);
 			enemy->mSpine->pushNerve(&TNerveNameKuriDiffuse::theNerve());
 		}
+	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
 	}
 }
 
@@ -774,8 +784,9 @@ DEFINE_NERVE(TNerveBGKSleep, TLiveActor)
 		if (self->unk298 > 0)
 			self->unk298--;
 		if (self->unk298 == 0) {
-			int timer    = self->getSaveParams()->mSLLaunchTimerNormal.get();
-			self->unk298 = (s32)(240.0f * MsRandF()) - 120 + timer;
+			int timer = self->getSaveParams()->mSLLaunchTimerNormal.get();
+			timer += (s32)(240.0f * MsRandF()) - 120;
+			self->unk298 = timer;
 			spine->pushAfterCurrent(&TNerveBGKLaunchGoro::theNerve());
 			return true;
 		}
@@ -796,6 +807,12 @@ DEFINE_NERVE(TNerveBGKSleep, TLiveActor)
 		return true;
 	}
 
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	return false;
 }
 
@@ -960,8 +977,9 @@ DEFINE_NERVE(TNerveBGKSleepDamage, TLiveActor)
 		if (self->unk298 > 0)
 			self->unk298--;
 		if (self->unk298 == 0) {
-			int timer    = self->getSaveParams()->mSLLaunchTimerDamage.get();
-			self->unk298 = (s32)(240.0f * MsRandF()) - 120 + timer;
+			int timer = self->getSaveParams()->mSLLaunchTimerDamage.get();
+			timer += (s32)(240.0f * MsRandF()) - 120;
+			self->unk298 = timer;
 			self->launchGorogoro();
 			self->rumblePad();
 		}
@@ -972,6 +990,10 @@ DEFINE_NERVE(TNerveBGKSleepDamage, TLiveActor)
 		return true;
 	}
 
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	return false;
 }
 
@@ -1050,6 +1072,14 @@ DEFINE_NERVE(TNerveBGKDie, TLiveActor)
 		return true;
 	}
 
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	return false;
 }
 
@@ -1069,8 +1099,9 @@ DEFINE_NERVE(TNerveBGKDive, TLiveActor)
 
 	if (self->getMActor()->curAnmEndsNext(ANM_TYPE_BCK, nullptr)) {
 		if (self->mVariant == TBiancoGateKeeper::VARIANT_GENERIC) {
-			int timer    = self->getSaveParams()->mSLLaunchTimerNormal.get();
-			self->unk298 = (s32)(240.0f * MsRandF()) - 120 + timer;
+			int timer = self->getSaveParams()->mSLLaunchTimerNormal.get();
+			timer += (s32)(240.0f * MsRandF()) - 120;
+			self->unk298 = timer;
 			self->launchGorogoro();
 			self->rumblePad();
 		}
@@ -1078,6 +1109,10 @@ DEFINE_NERVE(TNerveBGKDive, TLiveActor)
 		return true;
 	}
 
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	return false;
 }
 

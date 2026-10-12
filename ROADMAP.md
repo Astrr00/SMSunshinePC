@@ -110,3 +110,7 @@ Gates: SHA-1 unchanged, 11 020 / 12 881 functions byte-identical, 445 / 736 unit
 ### Update 2026-10-12 (decomp round 3): 11 112 / 12 881 functions byte-identical (86.3 %)
 
 Measured after round 3: SHA-1 unchanged, 11 112 / 12 881 functions byte-identical (86.3 %), matched code 59.67 %, fuzzy 98.23 %, 445 / 736 units, strict link 0 unresolved, `TEMP-DEBUG` 0, route 70 smoke rc=0. Details: `sunshine-pc/docs/session-2026-10-11b.md` section 47.
+
+### Update 2026-10-12 (decomp round 4): 11 191 / 12 881 functions byte-identical (86.9 %)
+
+Measured: SHA-1 unchanged, 11 191 / 12 881 byte-identical (86.9 %), matched code 60.69 %, fuzzy 98.25 %, 445 / 736 units, strict link 0 unresolved, `TEMP-DEBUG` 0, route 70 smoke 2 of 2 rc=0. Details: session log section 49.

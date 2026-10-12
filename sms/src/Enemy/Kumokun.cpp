@@ -95,7 +95,7 @@ bool TWallAtGraph::init(const TGraphWeb* param_1,
 
 	for (int i = 0; i < sz; ++i) {
 		JGeometry::TVec3<f32> diff
-		    = param_1->indexToPoint(i + 1 - ((i + 1) / sz) * sz);
+		    = param_1->indexToPoint((i + 1) % sz);
 		diff -= param_1->indexToPoint(i);
 
 		JGeometry::TVec3<f32> local_54 = param_2;
@@ -669,6 +669,7 @@ void TKumokun::calcRootMatrix()
 	JGeometry::TVec3<f32> pos = mPosition;
 	pos += offset;
 
+	char trash[4];
 	TPosition3f mtx;
 	mtx.setQT(unk19C, pos);
 	getModel()->setBaseScale(mScaling);
@@ -1194,6 +1195,7 @@ DEFINE_NERVE(TNerveKumokunPostFreeze, TLiveActor)
 DEFINE_NERVE(TNerveKumokunFly, TLiveActor)
 {
 	char trash[0x8];
+
 	TKumokun* self = (TKumokun*)spine->getBody();
 
 	if (spine->getTime() == 0) {

@@ -39,16 +39,15 @@ bool TMapObjGeneral::isPollutedGround(const JGeometry::TVec3<f32>& v) const
 
 inline f32 distToMario(const JGeometry::TVec3<f32>& v)
 {
-	const Vec* marioPos = gpMarioPos;
-	f32 l = (v.x - marioPos->x) * (v.x - marioPos->x)
-	        + (v.y - marioPos->y) * (v.y - marioPos->y)
-	        + (v.z - marioPos->z) * (v.z - marioPos->z);
+	f32 l = (v.x - gpMarioPos->x) * (v.x - gpMarioPos->x)
+	        + (v.y - gpMarioPos->y) * (v.y - gpMarioPos->y)
+	        + (v.z - gpMarioPos->z) * (v.z - gpMarioPos->z);
 	return JGeometry::TUtil<f32>::sqrt(l);
 }
 
 void TMapObjGeneral::waitingToAppear()
 {
-	char trash[0x8];
+	char trash[0x10];
 	if (isStateTimerEngaged())
 		return;
 

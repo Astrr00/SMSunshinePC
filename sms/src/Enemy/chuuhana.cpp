@@ -142,7 +142,6 @@ TSmallEnemy* TChuuHanaManager::createEnemyInstance() { return new TChuuHana; }
 
 void TChuuHanaManager::initSetEnemies()
 {
-	char trash[0x8];
 	static const char* graphlist[] = {
 		"kohana0", "kohana1", "kohana1", "kohana2", "kohana2", "kohana2",
 	};
@@ -158,9 +157,10 @@ void TChuuHanaManager::initSetEnemies()
 		else
 			enemy->unk21C = &unk62;
 
+		TMsRange<s32> range(0, graph->getNodeNum());
 		JGeometry::TVec3<f32> pos;
-		graph->getGraphNode(TMsRange<s32>(0, graph->getNodeNum()).rand())
-		    .getPoint(&pos);
+		char trash[12];
+		graph->getGraphNode(range.rand()).getPoint(&pos);
 		enemy->mPosition = pos;
 		enemy->mPosition.y += 50.0f;
 		enemy->onLiveFlag(LIVE_FLAG_AIRBORNE);

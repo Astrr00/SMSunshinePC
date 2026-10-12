@@ -1177,9 +1177,11 @@ s8 TCardLoad::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
 				unk510->hide();
 			} else {
 				unk520->hide();
-				u16 score = unk40[unkB0].unk1C;
-				if (score > 999)
-					score = 999;
+				TCardBookmarkInfo* bm2 = &unk40[unkB0];
+				u32 sc                 = bm2->unk1C;
+				if (sc > 999)
+					sc = 999;
+				u16 score = sc;
 				if (score < 100) {
 					unk500->hide();
 					unk510->show();
@@ -1409,9 +1411,11 @@ s8 TCardLoad::waitForAnyKeyBM(TEProgress param_1)
 			} else {
 				unk500->show();
 				unk520->hide();
-				u16 score = unk40[unkB0].unk1C;
-				if (score > 999)
-					score = 999;
+				TCardBookmarkInfo* bm2 = &unk40[unkB0];
+				u32 sc = bm2->unk1C;
+				if (sc > 999)
+					sc = 999;
+				u16 score = sc;
 				if (score < 100) {
 					unk500->hide();
 					unk510->show();
@@ -2104,7 +2108,6 @@ void TCardLoad::setSelected(u8 param_1)
 
 void TCardLoad::changeScene()
 {
-	char trash[0x68];
 	TEProgress prevUnk1C = unk1C;
 	int prevUnk0         = unk10;
 	switch (prevUnk1C) {
@@ -2647,4 +2650,5 @@ void TCardLoad::changeScene()
 		if (unk10 == 4)
 			SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_2D_OUT, 0, nullptr, 0);
 	}
+	char trash[0x68];
 }

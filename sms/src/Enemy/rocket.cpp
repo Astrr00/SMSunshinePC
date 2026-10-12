@@ -327,7 +327,7 @@ DEFINE_NERVE(TNerveRocketPossessedNozzle, TLiveActor)
 		self->setBckAnm(2);
 	}
 
-	bool released = false;
+	bool released;
 	if (gpMarDirector->unk18[0]->checkFrameMeaning(TMarioGamePad::MEANING_R)) {
 		self->unk190 = 2.0f;
 		self->expandCollision();
@@ -335,6 +335,8 @@ DEFINE_NERVE(TNerveRocketPossessedNozzle, TLiveActor)
 		                          nullptr, 0, 4);
 		SMSRumbleMgr->start(21, 5, static_cast<f32*>(nullptr));
 		released = true;
+	} else {
+		released = false;
 	}
 
 	if (released) {

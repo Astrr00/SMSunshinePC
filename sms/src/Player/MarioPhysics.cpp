@@ -300,7 +300,9 @@ BOOL TMario::hangonCheck(const TBGCheckData* wall, const Vec& prev,
 	if (mVel.y > 0.0f)
 		return false;
 
-	if ((curr.x - prev.x) * mVel.x + (curr.z - prev.z) * mVel.z > 0.0f)
+	f32 dx = curr.x - prev.x;
+	f32 dz = curr.z - prev.z;
+	if (dx * mVel.x + dz * mVel.z > 0.0f)
 		return false;
 
 	const TBGCheckData* ground;

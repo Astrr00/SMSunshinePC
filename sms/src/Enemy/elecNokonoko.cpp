@@ -332,8 +332,8 @@ BOOL TNerveElecNokonokoFreeze::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveElecNokonokoTurn::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[8];
 	TElecNokonoko* self = (TElecNokonoko*)spine->getBody();
+	char trash[8];
 
 	if (spine->getTime() == 0) {
 		self->setBckAnm(16);
@@ -380,9 +380,9 @@ BOOL TNerveElecNokonokoCollect::execute(TSpineBase<TLiveActor>* spine) const
 
 	TElecCarapace* carapace = self->mCarapace;
 	bool moving = carapace->mSpine->getCurrentNerve()
-	                      != &TNerveElecCarapaceWait::theNerve()
-	                  ? true
-	                  : false;
+	                      == &TNerveElecCarapaceWait::theNerve()
+	                  ? false
+	                  : true;
 	if (moving)
 		self->getMActor()->setFrameRate(SMSGetAnmFrameRate(), ANM_TYPE_BCK);
 	else
@@ -510,7 +510,8 @@ BOOL TElecCarapace::receiveMessage(THitActor* sender, u32 message)
 
 void TElecCarapace::sendMessage()
 {
-	char trash[80]; // matching: stack padding
+	int j;
+	char trash[80];
 	for (int i = 0; i < mColCount; ++i) {
 		THitActor* hit = mCollisions[i];
 		if (hit->isActorType(0x80000001)) {
@@ -523,8 +524,9 @@ void TElecCarapace::sendMessage()
 		} else if (hit == mOwner) {
 			offHitFlag(HIT_FLAG_NO_COLLISION);
 		} else if (hit->isActorType(0x1000001)) {
+			j = 0;
 			TMsRange<s32> range(0, 360);
-			for (int j = 0; j < 5; ++j) {
+			for (; j < 5; ++j) {
 				rand();
 				rand();
 				rand();
@@ -718,7 +720,8 @@ void TElecCarapace::loadInit(TSpineEnemy* host, const char* name)
 	unk150 = 0;
 	mSpine->initWith(&TNerveElecCarapaceMove::theNerve());
 
-	if (TMsRange<s32>(0, 300).rand() < 150)
+	TMsRange<s32> range(0, 300);
+	if (range.rand() < 150)
 		unk174 = 0;
 
 	mHeadHeight = 80.0f;
@@ -801,7 +804,8 @@ void TElecNokonoko::behaveToWater(THitActor* actor)
 		return;
 
 	if (mSpine->getCurrentNerve() != &TNerveSmallEnemyDie::theNerve()) {
-		if (!(isBckAnm(0) && mCarapaceShot == 0)) {
+		if (isBckAnm(0) && mCarapaceShot == 0) {
+		} else {
 			unk165                  = 1;
 			mSprayedByWaterCooldown = 0;
 			if (mSpine->getCurrentNerve()
@@ -967,8 +971,9 @@ void TElecNokonoko::setMActorAndKeeper()
 	mMActorKeeper = new TMActorKeeper(mManager, 1);
 	mMActor       = mMActorKeeper->createMActor("dennoko_model1.bmd", 3);
 	MActor* actor = mMActor;
-	actor->getModel()->getModelData()->setMaterialTable(
-	    ((TElecNokonokoManager*)mManager)->mMatTable, J3DMatCopyFlag_All);
+	TElecNokonokoManager* mgr = (TElecNokonokoManager*)mManager;
+	actor->getModel()->getModelData()->setMaterialTable(mgr->mMatTable,
+	                                                    J3DMatCopyFlag_All);
 	actor->initDL();
 	actor->getModel()->lock();
 }
@@ -997,12 +1002,14 @@ void TElecNokonoko::init(TLiveManager* manager)
 	mCarapace->loadInit(this, "koura_model1.bmd");
 
 	MActor* actor = mCarapace->getMActor();
-	actor->getModel()->getModelData()->setMaterialTable(
-	    ((TElecNokonokoManager*)mManager)->mMatTable, J3DMatCopyFlag_All);
+	TElecNokonokoManager* mgr = (TElecNokonokoManager*)mManager;
+	actor->getModel()->getModelData()->setMaterialTable(mgr->mMatTable,
+	                                                    J3DMatCopyFlag_All);
 	actor->initDL();
 	actor->getModel()->lock();
 
-	unk19C = TMsRange<s32>(0, 300).rand();
+	TMsRange<s32> range(0, 300);
+	unk19C = range.rand();
 	offHitFlag(HIT_FLAG_NO_COLLISION);
 }
 

@@ -235,6 +235,7 @@ f32 TSpineEnemy::calcTurnSpeedToReach(f32 march_speed, f32 param_2) const
 	f32 fVar32 = -(dVar11 * dVar11 - 1.0f);
 
 	// TODO: THitActor::calcEntryRadius has same problem
+	char pad[8];
 	volatile f32 f = fVar32 * __frsqrte(fVar32);
 	f32 tmp        = matan(f, dVar11) * (360.0f / 65536.0f);
 	return 90.0f - tmp;
@@ -273,6 +274,7 @@ void TSpineEnemy::setGoalPathFromGraph()
 	JGeometry::TVec3<f32> local_48;
 	unk124->getCurrent().getPoint(&local_48);
 	TPathNode local_3c(local_48);
+	char trash[0x14];
 	unkF4  = local_3c;
 	unk104 = local_3c;
 	unk114.clear();

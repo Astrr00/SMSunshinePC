@@ -608,6 +608,7 @@ void TBaseNPC::npcWetIn()
 bool TBaseNPC::npcWetting()
 {
 	bool result = false;
+	char trash[0x60];
 
 	if (checkUnk1DA(UNK1DA_FLAG_UNK2)) {
 		offUnk1DA(UNK1DA_FLAG_UNK2);

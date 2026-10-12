@@ -1007,7 +1007,12 @@ void TModelWaterManager::drawTouchingMask()
 
 void TModelWaterManager::drawSilhouette(MtxPtr param_1)
 {
-	char trash[0x20];
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	if (!gpSilhouetteManager->isUnk48Positive())
 		return;
 

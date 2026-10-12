@@ -172,6 +172,7 @@ void TSmallEnemy::setMActorAndKeeper()
 
 void TSmallEnemy::init(TLiveManager* param_1)
 {
+	char trash[0x20];
 	mManager = param_1;
 	param_1->manageActor(this);
 
@@ -262,6 +263,7 @@ void TSmallEnemy::attackToMario()
 
 void TSmallEnemy::reset()
 {
+	char trash[8];
 	TSpineEnemy::reset();
 	unk158 = 1.0f;
 
@@ -896,6 +898,7 @@ bool TSmallEnemy::isHitWallInBound()
 	TBGWallCheckRecord local_3C(mPosition.x, mPosition.y + mHeadHeight,
 	                            mPosition.z, mWallRadius * mBodyScale * 1.1f, 1,
 	                            0);
+	char trash[0x28];
 
 	if (gpMap->isTouchedWallsAndMoveXZ(&local_3C)) {
 		f32 sVar2 = matan(local_3C.mResultWalls[0]->mNormal.z,

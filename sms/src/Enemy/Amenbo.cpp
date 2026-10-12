@@ -132,7 +132,6 @@ void TAmenbo::bind()
 	                                 &local_14.z, mWallRadius);
 
 	local_14.y -= mHeadHeight;
-
 	mLinearVelocity = local_14 - mPosition;
 }
 

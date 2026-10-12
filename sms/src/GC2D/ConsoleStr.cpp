@@ -41,6 +41,7 @@ f32 TConsoleStr::getWipeCloseTime() { return 30.0f / SMSGetVSyncTimesPerSec(); }
 void TConsoleStr::load(JSUMemoryInputStream& stream)
 {
 	JKRArchive* arch = SMSSwitch2DArchive("guide", gArBkConsole);
+	char trash[0x28];
 	JDrama::TViewObj::load(stream);
 	unk10 = new J2DSetScreen("big_tx_1.blo", arch);
 	unk10->setCullBack(GX_CULL_BACK);

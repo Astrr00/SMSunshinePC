@@ -20,6 +20,7 @@ static inline void copyFrameAll_(TBossHanachan* boss)
 
 void TBossHanachan::changeAnmRateAndFrameUpdate_()
 {
+	char trash[0x58];
 	bool applyRate = true;
 	f32 rate       = SMSGetAnmFrameRate();
 

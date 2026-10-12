@@ -2175,3 +2175,5 @@ System/MarDirectorEvent	movement_game	98.6	partial	pending review	E5 branch layo
 Enemy/bosspakkun	receiveMessage	100	matched	N6	TBossPakkun::receiveMessage: nerve compare via local temp; byte-identical
 Enemy/killer	changeOut	100	matched	N6	trash[8] pad added
 Enemy/smallEnemy	execute	100	matched	N6	TNerveSmallEnemyJump: checkLiveFlag2 inline as int ternary, byte-identical
+Enemy/enemy	setGoalPathFromGraph	100	matched	R9	trailing char trash[0x14] declared after local_3c
+Enemy/rocket	execute	100	matched	R6	else-branch released flag

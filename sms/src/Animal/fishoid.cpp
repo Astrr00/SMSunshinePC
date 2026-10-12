@@ -43,6 +43,7 @@ void TRealoidActor::perform(u32 cue, JDrama::TGraphics* graphics)
 void TRealoidActor::calcRootMatrix(TBoid* boid)
 {
 	JGeometry::TVec3<f32> trans;
+	int pad;
 	JGeometry::TVec3<f32> up;
 	JGeometry::TVec3<f32> dir;
 	JGeometry::TVec3<f32> n;

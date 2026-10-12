@@ -271,7 +271,7 @@ void TKukku::behaveToWater(THitActor*)
 #pragma dont_inline on
 void TKukku::updateRotation()
 {
-	JGeometry::TVec3<f32> diff = unkF4.getPoint();
+	JGeometry::TVec3<f32> diff(unkF4.getPoint());
 	diff -= mPosition;
 
 	f32 dist = diff.length();

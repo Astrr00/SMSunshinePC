@@ -269,6 +269,7 @@ void TPakkun::load(JSUMemoryInputStream& stream)
 	TSmallEnemy::load(stream);
 	reset();
 	TPathNode marioNode((THitActor*)gpMarioAddress);
+	char trash[4];
 	setGoalPath(marioNode);
 }
 
@@ -709,6 +710,8 @@ void TStayPakkun::setDeadAnm() { setBckAnm(PAKKUN_ANM_DOWN); }
 
 void TStayPakkun::genRandomItem()
 {
+	JGeometry::TVec3<f32> sc(1.5f);
+	char trash[0x10];
 	TPakkunManager* manager = (TPakkunManager*)mManager;
 	unk1A4                  = mPosition;
 	unk1A4.y += 100.0f;
@@ -727,15 +730,15 @@ void TStayPakkun::genRandomItem()
 	JPABaseEmitter* emitter = gpMarioParticleManager->emit(
 	    PARTICLE_MS_POPO_BOMB_A, &unk1A4, 0, nullptr);
 	if (emitter) {
-		emitter->setGlobalDynamicsScale(JGeometry::TVec3<f32>(1.5f));
-		emitter->setGlobalParticleScale(JGeometry::TVec3<f32>(1.5f));
+		emitter->setGlobalDynamicsScale(sc);
+		emitter->setGlobalParticleScale(sc);
 	}
 
 	emitter = gpMarioParticleManager->emit(PARTICLE_MS_POPO_BOMB_B, &unk1A4, 0,
 	                                       nullptr);
 	if (emitter) {
-		emitter->setGlobalDynamicsScale(JGeometry::TVec3<f32>(1.5f));
-		emitter->setGlobalParticleScale(JGeometry::TVec3<f32>(1.5f));
+		emitter->setGlobalDynamicsScale(sc);
+		emitter->setGlobalParticleScale(sc);
 	}
 }
 
@@ -766,6 +769,7 @@ void TStayPakkun::setBehavior()
 
 bool TStayPakkun::isHitValid(u32 message)
 {
+	char trash[8];
 	if (message == HIT_MESSAGE_UNKB) {
 		onLiveFlag(LIVE_FLAG_DEAD);
 		onLiveFlag(LIVE_FLAG_UNK20000);
@@ -827,6 +831,7 @@ TPakkunSaveLoadParams* TStayPakkun::getSaveParam() const
 DEFINE_NERVE(TNervePakkunGenerate, TLiveActor)
 {
 	TPakkun* self = (TPakkun*)spine->getBody();
+	char trash[0x10];
 	if (spine->getTime() == 0) {
 		self->onHitFlag(HIT_FLAG_NO_COLLISION);
 		self->onLiveFlag(LIVE_FLAG_HIDDEN);
@@ -836,10 +841,8 @@ DEFINE_NERVE(TNervePakkunGenerate, TLiveActor)
 	if (self->mHolder != nullptr)
 		return false;
 
-	TPakkunSeed* seed = self->unk194;
-
-	if (seed->isState(PAKKUN_SEED_STATE_APPEAR)) {
-		seed->seedSet();
+	if (self->unk194->isState(PAKKUN_SEED_STATE_APPEAR)) {
+		self->unk194->seedSet();
 
 		if (spine->getTime() % 5 == 0) {
 			self->updateSquareToMario();

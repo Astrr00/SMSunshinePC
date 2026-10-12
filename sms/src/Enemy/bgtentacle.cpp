@@ -237,6 +237,11 @@ static inline JGeometry::TVec3<f32> fromPolar(f32 theta, f32 radius)
 BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 {
 	JGeometry::TVec3<f32> local_EC = where_to;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	gpMap->isTouchedOneWallAndMoveXZ(&local_EC.x, local_EC.y, &local_EC.z,
 	                                 150.0f);
 
@@ -1182,11 +1187,16 @@ void TBGTentacle::calcAtkParticleAndSE()
 	}
 
 	f32 fVar2 = mOwner->getSaveParam()->mSLBlurScale.value;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	int iVar5 = unk80->checkCurBckFromIndex(23)
 	                ? 7
 	                : mOwner->getSaveParam()->mSLBlurJoint.get();
 
-	unk80->getModel()->setAnmMtx(3, unk50);
+	MTXCopy(unk80->getModel()->getAnmMtx(3), unk50); // asm 0x80312864: model mtx 3 -> unk50
 	MTXScaleApply(unk50, unk50, fVar2, fVar2, fVar2);
 
 	MtxPtr mtx  = unk2C->getModel()->getAnmMtx(iVar5);

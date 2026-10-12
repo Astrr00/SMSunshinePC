@@ -400,6 +400,7 @@ void TBWLeash::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	for (int i = 0; i < mRope->mNumPoints; ++i)
 		mNodes[i]->testPerform(cue, graphics);
+	char trash[0x80];
 }
 
 BOOL TBWPicket::receiveMessage(THitActor* sender, u32 message)

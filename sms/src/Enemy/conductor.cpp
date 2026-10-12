@@ -216,13 +216,15 @@ TSpineEnemy*
 TConductor::makeOneEnemyAppear(const JGeometry::TVec3<f32>& param_1,
                                const char* param_2, int param_3)
 {
-	char trash[0x10];
+	char trash[0x8];
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TEnemyManager* mgr = (TEnemyManager*)getManagerByName(param_2);
+	TSpineEnemy* actor;
 
 	if (!mgr)
 		return nullptr;
 
-	if (TSpineEnemy* actor = (TSpineEnemy*)mgr->getActorByFlag(0x1)) {
+	if ((actor = (TSpineEnemy*)mgr->getActorByFlag(0x1))) {
 		actor->resetToPosition(param_1);
 		return actor;
 	}
@@ -230,7 +232,7 @@ TConductor::makeOneEnemyAppear(const JGeometry::TVec3<f32>& param_1,
 	if (param_3 == 0)
 		return nullptr;
 
-	if (TSpineEnemy* actor = (TSpineEnemy*)mgr->getActorByFlag(0x804)) {
+	if ((actor = (TSpineEnemy*)mgr->getActorByFlag(0x804))) {
 		actor->resetToPosition(param_1);
 		return actor;
 	}
@@ -247,7 +249,9 @@ void TConductor::killEnemiesWithin(const JGeometry::TVec3<f32>& param_1,
                                    f32 param_2)
 {
 	JGadget::TList<TEnemyManager*>::iterator it, e;
-	char trash[0x10];
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	for (it = unk20.begin(), e = unk20.end(); it != e; ++it) {
 		if ((*it)->search("ボスワンワンマネージャー") == nullptr)
 			(*it)->killChildrenWithin(param_1, param_2);
@@ -276,8 +280,9 @@ void TConductor::genEnemyFromPollution()
 		return;
 
 	JGeometry::TVec3<f32> targetPos = *gpMarioPos;
-	f32 r                           = MsRandF(unk84.mGenerateRadiusMin.get(),
-	                                          unk84.mGenerateRadiusMax.get());
+	f32 rMin = unk84.mGenerateRadiusMin.get();
+	f32 rMax = unk84.mGenerateRadiusMax.get();
+	f32 r    = MsRandF(rMin, rMax);
 
 	f32 theta = MsRandF() * 360 * (65536.0f / 360.0f);
 	targetPos.x += r * JMASSin(theta);
@@ -313,6 +318,12 @@ void TConductor::genEnemyFromPollution()
 	enemy->calcRootMatrix();
 	if (enemy->getModel())
 		enemy->getModel()->calc();
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TConductor::clipAloneActors(JDrama::TGraphics* param_1)
@@ -371,6 +382,11 @@ JDrama::TNameRef* TConductor::searchF(u16 key, const char* name)
 
 void TConductor::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	if ((cue & CUE_MOVE) && gpMarDirector->unk124 == 0)
 		genEnemyFromPollution();
 
@@ -431,4 +447,9 @@ void TConductor::perform(u32 cue, JDrama::TGraphics* graphics)
 	}
 
 	unk80->perform(cue, graphics);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }

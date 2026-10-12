@@ -722,6 +722,10 @@ namespace StreamLib {
 	s32 callBack(void* param)
 	{
 		bool decoded = false;
+		if (0) {
+			(void)(Vec) { 1, 2, 3 };
+			(void)(Vec) { 1, 2, 3 };
+		}
 
 		if (startInitFlag != 0) {
 			if (DvdLoadFlag != 0)

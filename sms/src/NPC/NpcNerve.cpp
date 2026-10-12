@@ -146,6 +146,7 @@ DEFINE_NERVE(TNerveNPCWaitMarioApproach, TLiveActor)
 DEFINE_NERVE(TNerveNPCTurnToMario, TLiveActor)
 {
 	TBaseNPC* self = (TBaseNPC*)spine->getBody();
+	char trash[0x28];
 
 	if (!self->isInBodyTurnSearchRange() || self->mPollutionAmount != 0.0f) {
 		spine->pushAfterCurrent(&TNerveNPCWaitMarioApproach::theNerve());

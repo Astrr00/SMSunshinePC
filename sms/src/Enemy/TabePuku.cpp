@@ -145,7 +145,7 @@ void TTabePuku::init(TLiveManager* manager)
 
 	mQuat.set(SMS_Eular2Quat(mRotation));
 	mMouthJointIdx
-	    = getModel()->getModelData()->getJointName()->getIndex("jnt_mouth_up");
+	    = (u16)getModel()->getModelData()->getJointName()->getIndex("jnt_mouth_up");
 	initAnmSound();
 }
 
@@ -177,7 +177,8 @@ void TTabePuku::bind()
 
 	mLinearVelocity = mHitActor->mLinearVelocity;
 	mIsTouchedWall  = mHitActor->mIsTouchedWall;
-	if (mHitActor->mIsAirborne)
+	int airborne = mHitActor->mIsAirborne;
+	if (airborne)
 		onLiveFlag(LIVE_FLAG_AIRBORNE);
 	else
 		offLiveFlag(LIVE_FLAG_AIRBORNE);
@@ -352,9 +353,9 @@ DEFINE_NERVE(TNerveTabePukuGraphWander, TLiveActor)
 		return true;
 	}
 
+	JGeometry::TVec3<f32> offset(0.0f, 0.0f, 0.0f);
 	JGeometry::TVec3<f32> diff = self->getUnk104().getPoint();
 	diff -= self->mPosition;
-	JGeometry::TVec3<f32> offset(0.0f, 0.0f, 0.0f);
 	diff += offset;
 	self->swimTo(diff);
 	return false;

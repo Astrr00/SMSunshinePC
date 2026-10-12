@@ -83,8 +83,8 @@ void TSplineRail::getPosAndRot(f32 t, JGeometry::TVec3<f32>* out_pos,
 
 	JGeometry::TVec3<f32> point;
 	JGeometry::TVec3<f32> dir;
-
 	char trash2[0xC];
+
 	for (;;) {
 		if (t + dt > 1.0f)
 			t = 1.0f - dt;
@@ -791,9 +791,10 @@ TGraphWeb::getNearestPosOnGraphLink(const JGeometry::TVec3<f32>& param_1) const
 int TGraphWeb::getNeighborNodeIndexByFlag(int param_1, int param_2,
                                           u32 param_3) const
 {
-	char trash[0x10];
+	char trash[0x8];
 	int goodConnectionNum = 0;
 	int goodConnections[8];
+	char trash2[0x8];
 
 	const TRailNode* railNode = getGraphNode(param_1).getRailNode();
 	for (int i = 0; i < railNode->mConnectionNum; ++i) {

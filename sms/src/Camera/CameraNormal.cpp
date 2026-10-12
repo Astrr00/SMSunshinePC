@@ -27,6 +27,7 @@ void CPolarSubCamera::ctrlNormalOrTowerCamera_()
 	char trash[0xc];
 	f32 fVar2 = unk120->mCompSPos[6];
 	f32 fVar3 = unk120->mCompSPos[7];
+	f32 f29;
 
 	unk250 = 0.0f;
 
@@ -94,14 +95,13 @@ void CPolarSubCamera::ctrlNormalOrTowerCamera_()
 						                      *gpMarioAngleY - 0x8000, uVar9);
 					}
 				} else {
-					f32 f29;
 					f32 f30;
 
 					int sVar9 = *gpMarioAngleY - 0x8000;
 					switch (mMode) {
 					case CAMERA_MODE_DIVING:
 					case CAMERA_MODE_HOVERING:
-						f30 = CLBAbs<int>((s16)(sVar9 - unk258)) * (2.0f / 65536.0f);
+						f30 = CLBAbs<int>((s16)((s16)sVar9 - (int)unk258)) * (2.0f / 65536.0f);
 						break;
 					default:
 						f30 = (1.0f

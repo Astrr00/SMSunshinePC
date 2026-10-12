@@ -48,12 +48,12 @@ void TYumboSeed::init()
 
 void TYumboSeed::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	Mtx mtx;
 	char trash[0x10];
 	if (mFlags & SEED_FLAG_INACTIVE)
 		return;
 
 	if (cue & CUE_CALC_ANIM) {
-		Mtx mtx;
 		mtx[0][0] = 1.0f;
 		mtx[1][0] = 0.0f;
 		mtx[2][0] = 0.0f;
@@ -78,7 +78,8 @@ void TYumboSeed::perform(u32 cue, JDrama::TGraphics* graphics)
 		mVelocity.scale(mOwner->getSaveParam2()->mSeedAirFric.get());
 
 		THitActor** end = mCollisions + mColCount;
-		for (THitActor** it = mCollisions; it != end; ++it) {
+		THitActor** it;
+		for (it = mCollisions; it != end; ++it) {
 			switch ((*it)->mActorType) {
 			case 0x80000001:
 				SMS_SendMessageToMario(this, HIT_MESSAGE_ATTACK);

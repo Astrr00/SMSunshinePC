@@ -197,7 +197,7 @@ void TTamaNokoManager::initSetEnemies()
 	for (int i = 0; i < mObjNum; ++i) {
 		TTamaNoko* enemy = (TTamaNoko*)unk18[i];
 		enemy->unk19C
-		    = new TTamaNokoFlower(enemy, 0, modelData, 0x3, "TamaNokoFlower");
+		    = new TTamaNokoFlower(enemy, 0, modelData, 0x3, "タマノコフラワー");
 	}
 }
 
@@ -311,7 +311,7 @@ void TTamaNoko::walkBehavior(int param_1, f32 param_2)
 	mTurnSpeed  = getSaveParams2()->mSLTurnSpeedLow.get();
 	mMarchSpeed = getSaveParams2()->mSLMarchSpeedLow.get();
 
-	JGeometry::TVec3<f32> local_34 = unkF4.getPoint();
+	JGeometry::TVec3<f32> local_34 = getUnkF4().getPoint();
 	local_34 -= mPosition;
 	VECMag(&local_34);
 
@@ -460,15 +460,14 @@ void TTamaNoko::calcRootMatrix()
 				gpCameraShake->startShake(CAM_SHAKE_MODE_UNK7, 1.0f);
 				SMSRumbleMgr->start(8, 1, (float*)nullptr);
 
+				JGeometry::TVec3<f32> scale2(2.0f, 2.0f, 2.0f);
 				if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
 				        PARTICLE_MS_SMB_AP_ROCK, &mPosition, 0, nullptr)) {
-					emitter->setGlobalScale(
-					    JGeometry::TVec3<f32>(2.0f, 2.0f, 2.0f));
+					emitter->setGlobalScale(scale2);
 				}
 				if (JPABaseEmitter* emitter = gpMarioParticleManager->emit(
 				        PARTICLE_MS_SMB_AP_SMOKE, &mPosition, 0, nullptr)) {
-					emitter->setGlobalScale(
-					    JGeometry::TVec3<f32>(2.0f, 2.0f, 2.0f));
+					emitter->setGlobalScale(scale2);
 				}
 			}
 		}
@@ -728,7 +727,8 @@ DEFINE_NERVE(TNerveTamaNokoAttack, TLiveActor)
 			} else if (self->isBckAnm(9)) {
 				self->updateSquareToMario();
 				f32 searchLen = self->getSaveParams2()->mSLSearchLength.get();
-				if (searchLen * searchLen < self->getDistToMarioSquared()) {
+				searchLen *= searchLen;
+				if (self->getDistToMarioSquared() > searchLen) {
 					self->unk1B8 = true;
 					self->setBckAnm(8);
 				} else {

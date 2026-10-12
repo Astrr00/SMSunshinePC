@@ -687,6 +687,7 @@ BOOL TFireWanwanTailHit::moveRequest(const JGeometry::TVec3<f32>& param_1)
 	JGeometry::TVec3<f32> next = param_1;
 
 	const TBGCheckData* checkData;
+	char trash[8];
 	f32 fVar1 = gpMap->checkGround(next.x, next.y + 100.0f, next.z, &checkData);
 	if (next.y <= 0.05f + fVar1) {
 		next.y = fVar1 + 1.0f;
@@ -697,7 +698,7 @@ BOOL TFireWanwanTailHit::moveRequest(const JGeometry::TVec3<f32>& param_1)
 	gpMap->isTouchedOneWallAndMoveXZ(&next.x, next.y, &next.z, 70.0f);
 	unkA4->unk0.back().mPos = next;
 	mPosition               = next;
-	unk74.translation(next);
+	unk74.translation(mPosition);
 	return true;
 }
 
@@ -1296,6 +1297,10 @@ void TFireWanwan::updateHitPoint()
 
 void TFireWanwan::emitEffects()
 {
+	if (0) {
+		(void)(Vec){ 1, 2, 3 };
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
 	MtxPtr mtx = getModel()->getAnmMtx(mCenterJointIdx);
 	unk1F0.set(mtx[0][3], mtx[1][3], mtx[2][3]);
 
@@ -1422,7 +1427,13 @@ void TFireWanwan::emitTailHitEffect() { }
 // correct but popCurr is incorrect
 void TFireWanwan::initTurnNextGraphNode()
 {
-	unk124->mCurrIdx = unk124->popCurr();
+	int result = unk124->mPrevIdx;
+	int curr   = unk124->mCurrIdx;
+	int* prevPtr = &unk124->mPrevIdx;
+	if (result == -1)
+		result = curr;
+	*prevPtr = curr;
+	unk124->mCurrIdx = result;
 	setGoalPathFromGraph();
 	unk128 = 0;
 	unk12C = 0.0f;
@@ -1430,13 +1441,20 @@ void TFireWanwan::initTurnNextGraphNode()
 
 void TFireWanwan::initEscapeNextGraphNode()
 {
+	struct S10 { f32 a, b, c, d; };
+	struct S8 { int a, b; };
+	if (0) {
+		(void)(Vec){ 1, 2, 3 };
+		(void)(S10){ 1, 2, 3, 4 };
+		(void)(S8){ 1, 2 };
+	}
 	u32 uVar1 = unk124->unk0->findNearestNodeIndex(mPosition, -1);
 	u32 uVar2 = unk124->unk0->getEscapeFromMarioIndex(uVar1, -1, mPosition, -1);
 
-	JGeometry::TVec3<f32> p1 = SMS_GetMarioPos();
 	JGeometry::TVec3<f32> p2;
-	unk124->getGraph()->getGraphNode(uVar1).getPoint(&p2);
 	JGeometry::TVec3<f32> p3;
+	JGeometry::TVec3<f32> p1 = SMS_GetMarioPos();
+	unk124->getGraph()->getGraphNode(uVar1).getPoint(&p2);
 	unk124->getGraph()->getGraphNode(uVar2).getPoint(&p3);
 
 	p2 -= mPosition;
@@ -1786,6 +1804,7 @@ bool TFireWanwan::checkWalls(JGeometry::TVec3<f32>* point,
 {
 	TBGWallCheckRecord local_58(point->x, point->y + radius, point->z, radius,
 	                            4, 0);
+	char trash[0xC];
 
 	bool cVar6  = gpMap->isTouchedWallsAndMoveXZ(&local_58);
 	*out_record = local_58;
@@ -1798,8 +1817,9 @@ bool TFireWanwan::checkWalls(JGeometry::TVec3<f32>* point,
 		return true;
 	}
 
+	int e      = local_58.mResultWallsNum;
 	bool bVar1 = false;
-	for (int i = 0, e = local_58.mResultWallsNum; i < e; ++i)
+	for (int i = 0; i < e; ++i)
 		bVar1 |= behaveHitWallOnFlying(local_58.mResultWalls[i]);
 
 	if (bVar1) {
@@ -1881,6 +1901,7 @@ DEFINE_NERVE(TNerveFireWanwanGraphWander, TLiveActor)
 DEFINE_NERVE(TNerveFireWanwanTurn, TLiveActor)
 {
 	TFireWanwan* self = (TFireWanwan*)spine->getBody();
+	char trash[0x1C];
 	if (spine->getTime() == 0) {
 		self->prepareTurn();
 		self->setBckAnm(5);
@@ -1924,7 +1945,8 @@ DEFINE_NERVE(TNerveFireWanwanAttack, TLiveActor)
 
 	if (spine->getTime() == 0) {
 		self->setBckAnm(3);
-		self->setGoalPath(TPathNode((THitActor*)gpMarioAddress));
+		TPathNode node((THitActor*)gpMarioAddress);
+		self->setGoalPath(node);
 	}
 	char trash[0x4];
 
@@ -2060,6 +2082,7 @@ DEFINE_NERVE(TNerveFireWanwanDie, TLiveActor)
 	}
 
 	JGeometry::TVec3<f32> vel = self->mVelocity;
+	char trash[0x28];
 	vel.x *= 0.9f;
 	vel.z *= 0.9f;
 	self->mVelocity = vel;
@@ -2150,8 +2173,9 @@ DEFINE_NERVE(TNerveFireWanwanFreeze, TLiveActor)
 		                                &self->mPosition, 0, nullptr, 0, 4);
 	}
 
+	JGeometry::TVec3<f32> zeroVel(0.0f, 0.0f, 0.0f);
 	char trash[0x8];
-	self->setVelocity(JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f));
+	self->setVelocity(zeroVel);
 
 	if (self->getFreezeTime() < spine->getTime()) {
 		spine->pushAfterCurrent(&TNerveFireWanwanRecover::theNerve());

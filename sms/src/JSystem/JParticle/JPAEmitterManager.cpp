@@ -75,6 +75,9 @@ JPAEmitterManager::JPAEmitterManager(JPAResourceManager* param_1, s32 param_2,
 		unkC8[i][14] = 0;
 		unkC8[i][15] = 0;
 	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 u32 JPAEmitterManager::getEmitterNumber()
@@ -269,6 +272,10 @@ JPABaseEmitter* JPAEmitterManager::createEmitterBase(
 	}
 
 	return nullptr;
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 JPABaseEmitter* JPAEmitterManager::createSimpleEmitterID(

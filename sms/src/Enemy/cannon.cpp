@@ -509,6 +509,9 @@ void TCannon::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TCannon::calcRootMatrix()
 {
+	char trash1[0x10];
+	JGeometry::TVec3<f32> base;
+	char trash[0x1c];
 	if (mSpine->getCurrentNerve() != &TNerveCannonObject::theNerve()) {
 		static const f32 xzTable[4][2] = {
 			{ 1.0f, -1.0f },
@@ -519,7 +522,7 @@ void TCannon::calcRootMatrix()
 
 		mHeadHeight = 50.0f;
 
-		JGeometry::TVec3<f32> base = mPosition;
+		base = mPosition;
 		base.y = getMActor()->getModel()->getAnmMtx(4)[1][3];
 
 		for (int i = 0; i < 4; i++) {
@@ -581,11 +584,12 @@ MtxPtr TCannon::getTakingMtx()
 		return mChorobei->mSharedParts->getMActor()->getModel()->getBaseTRMtx();
 	}
 
-	f32 x = mChorobei->mPosition.x;
-	f32 y = mChorobei->mSharedParts->getMActor()
+	f32 x, y, z;
+	z = mChorobei->mPosition.z;
+	y = mChorobei->mSharedParts->getMActor()
 	            ->getModel()
 	            ->getAnmMtx(mChorobeiHandJntIdx)[1][3];
-	f32 z = mChorobei->mPosition.z;
+	x = mChorobei->mPosition.x;
 	mTakingMtx.translation(x, y, z);
 	return mTakingMtx;
 }
@@ -948,9 +952,10 @@ BOOL TNerveCannonShoot::execute(TSpineBase<TLiveActor>* spine) const
 			        ->getFrame()
 			    > 26.0f) {
 				if (self->unk1A4 != nullptr) {
+					f32 scale    = self->unk1A4->mScaling.x;
 					f32 maxScale = self->unk220;
 					f32 step     = 0.2f * maxScale;
-					f32 scale    = self->unk1A4->mScaling.x + step;
+					scale += step;
 					if (scale > maxScale)
 						scale = maxScale;
 					else if (scale < 0.0f)
@@ -1013,9 +1018,10 @@ BOOL TNerveCannonForceBombShoot::execute(TSpineBase<TLiveActor>* spine) const
 		        ->getFrame()
 		    > 26.0f) {
 			if (self->unk1A4 != nullptr) {
+				f32 scale    = self->unk1A4->mScaling.x;
 				f32 maxScale = self->unk220;
 				f32 step     = 0.2f * maxScale;
-				f32 scale    = self->unk1A4->mScaling.x + step;
+				scale += step;
 				if (scale > maxScale)
 					scale = maxScale;
 				else if (scale < 0.0f)
@@ -1168,7 +1174,9 @@ BOOL TNerveCannonDamage::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveCannonDamageDemo::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[0x20];
+	int pad4;
+	JGeometry::TVec3<f32> scale;
+	char trash[0x1c];
 	TCannon* self = (TCannon*)spine->getBody();
 
 	if (spine->getTime() == 0)
@@ -1185,7 +1193,7 @@ BOOL TNerveCannonDamageDemo::execute(TSpineBase<TLiveActor>* spine) const
 		    = (TEffectExplosion*)gpConductor->makeOneEnemyAppear(
 		        self->mPosition, "エフェクト爆発マネージャー", 1);
 		if (effect != nullptr) {
-			JGeometry::TVec3<f32> scale(2.5f, 2.5f, 2.5f);
+			scale.set(2.5f, 2.5f, 2.5f);
 			effect->generate(self->mPosition, scale);
 		}
 

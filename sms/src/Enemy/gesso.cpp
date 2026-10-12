@@ -951,7 +951,6 @@ void TGessoPolluteObj::set()
 		if (JGeometry::TVec3<f32>(local_C).x != 0.0f
 		    || JGeometry::TVec3<f32>(local_C).z != 0.0f)
 			MsVECNormalize(&local_54, &local_54);
-
 		mPosition.x = local_54.x * 100.0f + mtx[0][3];
 		mPosition.y = mtx[1][3];
 		mPosition.z = local_54.z * 100.0f + mtx[2][3];

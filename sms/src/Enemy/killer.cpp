@@ -132,6 +132,7 @@ bool TKiller::isFindMario(f32 scale)
 
 void TKiller::calcRootMatrix()
 {
+	char trash[0x28];
 	if (gpMarDirector->unk4C & 0xF) {
 		onLiveFlag(LIVE_FLAG_DEAD);
 		onHitFlag(HIT_FLAG_NO_COLLISION);
@@ -368,6 +369,7 @@ const char** TKiller::getBasNameTable() const { return killer_bastable; }
 
 void TKiller::attackToMario()
 {
+	char trash[8];
 	if (gpMarioPos->y < mPosition.y) {
 		if (mSpine->getCurrentNerve() != &TNerveKillerExplosion::theNerve()) {
 			mSpine->pushNerve(&TNerveKillerExplosion::theNerve());
@@ -675,6 +677,7 @@ BOOL TNerveFlyEnemyChaseFly::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveFlyEnemyNormalFly::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x28];
 	TFlyEnemy* self = (TFlyEnemy*)spine->getBody();
 
 	if (spine->getTime() == 0)
@@ -809,6 +812,7 @@ void TFlyEnemy::reset()
 
 f32 TFlyEnemy::getGravityY() const
 {
+	char trash[8];
 	if (mSpine->getCurrentNerve() == &TNerveFlyEnemyChaseFly::theNerve())
 		return mFlyGravityY;
 	return mFlyParams->mSLNormalFlyGravityY.get();

@@ -261,8 +261,8 @@ static void evIsNearActors(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGetTalkNPC(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	SLICE_SLOT;
 	char trash[0x4];
+	SLICE_SLOT;
 	interp->verifyArgNum(0, &arg_num);
 
 	TBaseNPC* npc = SMSGetMarDirector()->getTalkingNPC();
@@ -270,7 +270,7 @@ static void evGetTalkNPC(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 #ifdef TARGET_PC
 	SPC_PUSH_PTR(interp, npc);
 #else
-	SLICE_PUSH(interp, !npc ? 0 : (int)npc);
+	SLICE_PUSH(interp, npc ? (int)npc : 0);
 #endif
 }
 
@@ -319,8 +319,9 @@ static void evSetTalkMsgID(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGetTalkMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char pre[4];
 	SLICE_SLOT;
-	char trash[0x8];
+	char trash[0x4];
 	interp->verifyArgNum(0, &arg_num);
 	SLICE_PUSH(interp, (int)gpTalk2D->getTalkMode());
 }
@@ -328,8 +329,9 @@ static void evGetTalkMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evGetTalkSelectedValue(TSpcTypedInterp<TEventWatcher>* interp,
                                    u32 arg_num)
 {
+	char pre[8];
 	SLICE_SLOT;
-	char trash[0xc];
+	char trash[0x4];
 	interp->verifyArgNum(0, &arg_num);
 	SLICE_PUSH(interp, (int)gpTalk2D->getSelectedValue());
 }
@@ -348,9 +350,11 @@ static void evSetValue2TalkVariable(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evIsTalkModeNow(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	int value;
+	SLICE_SLOT;
 	interp->verifyArgNum(0, &arg_num);
-	int value = SMSGetMarDirector()->isTalkModeNow() ? 1 : 0;
-	interp->push(value);
+	value = SMSGetMarDirector()->isTalkModeNow() ? 1 : 0;
+	SLICE_PUSH(interp, value);
 }
 
 static void evSetFlagNPCCanTaken(TSpcTypedInterp<TEventWatcher>* interp,
@@ -689,7 +693,7 @@ static void evInsertTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evStartTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	char trash[8];
+
 	interp->verifyArgNum(1, &arg_num);
 
 	int time = interp->pop().getDataInt();
@@ -698,6 +702,10 @@ static void evStartTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 	SMSGetMarDirector()->getConsole()->startMoveTimer(time);
 
 	interp->push();
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 }
 
 static void evStartMonteman(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
@@ -1243,23 +1251,26 @@ static void evSetEventForWaterMelon(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evAppearReadyGo(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	char trash[0x10];
+	SLICE_SLOT;
+	char trash[0xc];
 	interp->verifyArgNum(0, &arg_num);
 	TConsoleStr* str = SMSGetMarDirector()->getConsole()->unk94;
 	str->startAppearReady();
-	interp->push(TSpcSlice());
+	SLICE_PUSH(interp, 0);
 }
 
 static void evAppear8RedCoinsAndTimer(TSpcTypedInterp<TEventWatcher>* interp,
                                       u32 arg_num)
 {
+	char pre[0x10];
+	SLICE_SLOT;
 	interp->verifyArgNum(0, &arg_num);
 	const char* name = "赤コイン用スイッチ";
 	TRedCoinSwitch* swtch = static_cast<TRedCoinSwitch*>(
 	    JDrama::TNameRefGen::search(name));
 
 	int iVar9 = swtch->unk138;
-	char trash[0x18];
+	char trash[0x8];
 	for (int i = 0; i < 8; ++i) {
 		TCoinRed* coin = (TCoinRed*)gpItemManager->makeObjAppeared(0x2000000f);
 		coin->killByTimer(iVar9 - coin->unk150);
@@ -1276,7 +1287,7 @@ static void evAppear8RedCoinsAndTimer(TSpcTypedInterp<TEventWatcher>* interp,
 	                                                    iVar9 * 0.008333334f);
 	SMSGetMarDirector()->startTimer();
 	SMSGetMarDirector()->getConsole()->startMoveTimer(10);
-	interp->push();
+	SLICE_PUSH(interp, 0);
 }
 
 JGeometry::TVec3<f32> rotateY(JGeometry::TVec3<f32> vec, s16 angleY)
@@ -1314,13 +1325,16 @@ static void evOnNeutralMarioKey(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evInvalidatePad(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	int frames = interp->pop().getDataInt();
 
 	SMSGetMarDirector()->getGamePad()->mDisabledFrames = frames;
 
 	interp->push();
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 }
 
 static void evIsWaterMelonIsReached(TSpcTypedInterp<TEventWatcher>* interp,

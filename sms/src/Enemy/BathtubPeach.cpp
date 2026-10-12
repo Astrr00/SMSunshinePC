@@ -52,12 +52,6 @@ static inline TBathtubPeachParams* getPeachParams(TBathtubPeach* peach)
 	    static_cast<TEnemyManager*>(peach->mManager)->unk38);
 }
 
-void TBathtubPeachManager::load(JSUMemoryInputStream& stream)
-{
-	TEnemyManager::load(stream);
-	unk38 = new TBathtubPeachParams("/enemy/bathtubpeach.prm");
-}
-
 void TBathtubPeachManager::createModelData()
 {
 	static const TModelDataLoadEntry entry[] = {
@@ -271,3 +265,9 @@ BOOL TNervePeachStagger::execute(TSpineBase<TLiveActor>* spine) const
 	return peach->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? TRUE
 	                                                             : FALSE;
 }
+void TBathtubPeachManager::load(JSUMemoryInputStream& stream)
+{
+	TEnemyManager::load(stream);
+	unk38 = new TBathtubPeachParams("/enemy/bathtubpeach.prm");
+}
+

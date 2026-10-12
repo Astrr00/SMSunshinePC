@@ -40,6 +40,9 @@
 #include <MSound/MSoundBGM.hpp>
 #include <M3DUtil/InfectiousStrings.hpp>
 
+static const Vec koopa_zero = { 0.0f, 0.0f, 0.0f };
+static const Vec koopa_one  = { 1.0f, 1.0f, 1.0f };
+
 static const char* koopa_bastable[] = {
 	"/scene/koopa/bas/koopa_down.bas",
 	nullptr,
@@ -1155,9 +1158,11 @@ void TKoopa::getDown()
 
 bool TKoopa::effectsTumble() const
 {
-	if (&TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve()
-	    && mSpine->getTime() < 900 && mSpine->getTime() > 190)
-		return true;
+	if (&TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve()) {
+		int t = mSpine->getTime();
+		if (t < 900 && t > 190)
+			return true;
+	}
 	return false;
 }
 
@@ -1471,7 +1476,7 @@ TSpineEnemy* TKoopaManager::createEnemyInstance() { return nullptr; }
 
 void TKoopaManager::createModelData()
 {
-	static TModelDataLoadEntry entry[] = {
+	static const TModelDataLoadEntry entry[] = {
 		{ "koopa_model.bmd", 0x14240000, 0 },
 		{ nullptr, 0, 0 },
 	};

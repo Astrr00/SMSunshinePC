@@ -98,13 +98,13 @@ void TKazekun::init(TLiveManager* live_manager)
 
 void TKazekun::reset()
 {
-	char trash[8];
 	mQuat.x = 0.0f;
 	mQuat.y = 0.0f;
 	mQuat.z = 0.0f;
 	mQuat.w = 1.0f;
 
 	mPosition.set(JGeometry::TVec3<f32>(mInitPos));
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	onLiveFlag(LIVE_FLAG_HIDDEN | LIVE_FLAG_UNK8);
 	setAnmSound(nullptr);
 }
@@ -385,6 +385,7 @@ DEFINE_NERVE(TNerveKazekunTurn, TLiveActor)
 DEFINE_NERVE(TNerveKazekunPreAttack, TLiveActor)
 {
 	TKazekun* self = (TKazekun*)spine->getBody();
+	char trash[8];
 
 	if (spine->getTime() == 0) {
 		self->doAttackPose(true);
@@ -393,8 +394,8 @@ DEFINE_NERVE(TNerveKazekunPreAttack, TLiveActor)
 		self->setAnmSound(nullptr);
 	}
 
-	if (self->getSaveParam2()->mDicideTiming.get()
-	        * self->getSaveParam2()->mPoseTime.get()
+	if (self->getSaveParam2()->mPoseTime.get()
+	        * self->getSaveParam2()->mDicideTiming.get()
 	    < spine->getTime())
 		self->setGoalPath(TPathNode(JGeometry::TVec3<f32>(*gpMarioPos)));
 

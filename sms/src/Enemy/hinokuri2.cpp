@@ -1015,7 +1015,6 @@ void THinokuri2::perform(u32 cue, JDrama::TGraphics* graphics)
 		if (cue & CUE_CALC_VIEW) {
 			unk150->entryDrawShadow();
 			gpQuestionManager->request(mPosition, mScaledBodyRadius);
-			char trash[8];
 		}
 	}
 }
@@ -1396,9 +1395,10 @@ DEFINE_NERVE(TNerveHino2Die, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
 	char trash2[8];
+	JGeometry::TVec3<f32> local_1C;
 	if (spine->getTime() == 0) {
 		self->changeBck(0xD);
-		JGeometry::TVec3<f32> local_1C = self->mPosition;
+		local_1C = self->mPosition;
 		gpItemManager->makeObjAppear(local_1C.x, local_1C.y, local_1C.z,
 		                             0x2000000E, false);
 		self->invalidateCollisionAll();

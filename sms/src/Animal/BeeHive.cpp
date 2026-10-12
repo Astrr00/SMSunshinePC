@@ -352,6 +352,7 @@ void TBeeHive::controlCollision()
 
 void TBeeHive::controlSound()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	if (mNumBees == 0)
 		return;
 
@@ -371,9 +372,12 @@ void TBeeHive::controlSound()
 
 	if (count != 0) {
 		f32 inv       = 1.0f / count;
-		mBeesCenter.x = x * inv;
-		mBeesCenter.y = y * inv;
-		mBeesCenter.z = z * inv;
+		x *= inv;
+		y *= inv;
+		z *= inv;
+		mBeesCenter.x = x;
+		mBeesCenter.y = y;
+		mBeesCenter.z = z;
 		SMSGetMSound()->startBeeSe(&mBeesCenter, count);
 	}
 }
@@ -527,6 +531,7 @@ BOOL TNerveBeeHiveWait::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveBeeHiveFall::execute(TSpineBase<TLiveActor>* spine) const
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TBeeHive* self = (TBeeHive*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->offLiveFlag(LIVE_FLAG_UNK10);
@@ -535,14 +540,15 @@ BOOL TNerveBeeHiveFall::execute(TSpineBase<TLiveActor>* spine) const
 		                                &self->mPosition, 0, nullptr, 0, 4);
 
 		JGeometry::TVec3<f32> dir;
+		int pad4;
 		self->unk168.getZDir(dir);
 		dir.scale(1.0f);
 
 		self->mAngularVel = self->getSaveParam2()->mFallAngularVel.get();
 		self->mVelocity   = dir;
 
-		TMapObjBase* item = self->mItem;
-		if (item != nullptr) {
+		TMapObjBase* item;
+		if ((item = self->mItem) != nullptr) {
 			if (item->isActorType(0x2000000E))
 				item = gpItemManager->makeObjAppear(0x2000000E);
 

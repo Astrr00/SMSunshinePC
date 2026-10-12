@@ -144,6 +144,7 @@ namespace Driver {
 
 	static void __UpdateJcToDSP(TChannel* channel)
 	{
+		char trash[0x10];
 		DSPInterface::DSPBuffer* buf = channel->unk20->mDSPHandle;
 		if (channel->unkD0) {
 			for (u8 i = 0; i < 6; ++i)
@@ -170,6 +171,7 @@ namespace Driver {
 
 	static void __UpdateJcToDSPInit(TChannel* channel)
 	{
+		char trash[0x10];
 		DSPInterface::DSPBuffer* buf = channel->unk20->mDSPHandle;
 
 		if (channel->isDolbyMode()) {
@@ -788,6 +790,7 @@ BOOL TChannel::forceStopLogicalChannel()
 
 BOOL TChannel::stopLogicalChannel()
 {
+	char trash[8];
 	if (!unk20)
 		return FALSE;
 

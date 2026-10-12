@@ -121,7 +121,7 @@ void TRideCloud::control()
 
 	unk160        = MsClamp<f32>(unk160 + fVar8, 1.0f, 3.0f);
 	unk168        = MsClamp<f32>(unk168 + fVar8, 1.0f, 3.0f);
-	mDamageRadius = mScaling.x * 300.0f * unk160;
+	mDamageRadius = unk160 * (mScaling.x * 300.0f);
 	mDamageHeight = 50.0f;
 	calcEntryRadius();
 	if (!calcRecycle() && !checkRailFlag(0x2)) {

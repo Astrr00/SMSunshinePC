@@ -112,6 +112,7 @@ void TButterfloid::load(JSUMemoryInputStream& stream)
 {
 	loadDefault(stream, cButterflyMdlNames[mType], 0);
 	loadItem(stream);
+	char trash[0x88];
 
 	// Making these all setters doesn't yield NEARLY enough stack frame padding
 	// for this to match

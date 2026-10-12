@@ -811,6 +811,11 @@ void TBossEelTooth::changeToothAlpha(u8 alpha) { mColor.a = alpha; }
 
 BOOL TBossEelTooth::receiveMessage(THitActor* sender, u32 message)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	BOOL result = false;
 	if (message == HIT_MESSAGE_SPRAYED_BY_WATER) {
 		if (mDamageCooldown == 0 && !mOwner->mToothBroken && mHitPoints > 1) {
@@ -829,7 +834,8 @@ BOOL TBossEelTooth::receiveMessage(THitActor* sender, u32 message)
 
 			if (mHitPoints == 1) {
 				mColor.a = 0;
-				MTXCopy(mSharedParts->getConnectedMtx(), mDetachedMtx);
+				MtxPtr detached = mDetachedMtx;
+				MTXCopy(mSharedParts->getConnectedMtx(), detached);
 				if (mToothType == 1) {
 					SMSGetMSound()->startSoundActor(MSD_SE_BS_UNG_TEATH_COMEOFF,
 					                                &mPosition, 0, nullptr, 0,
@@ -1115,9 +1121,10 @@ void TBossEelEye::perform(u32 cue, JDrama::TGraphics* graphics)
 		Mtx eyeMtx;
 		char trash[0x28];
 		MTXCopy(getConnectedMtx(), eyeMtx);
-		getMActor()->getModel()->setBaseTRMtx(eyeMtx);
+		MtxPtr eyeMtxPtr = eyeMtx;
+		getMActor()->getModel()->setBaseTRMtx(eyeMtxPtr);
 		if (mCopyConnectedMtx == 0)
-			MTXCopy(eyeMtx, mBlendMtx);
+			MTXCopy(eyeMtxPtr, mBlendMtx);
 
 		mBlendRatio = MsClamp(mBlendRatio - 0.01f, 0.0f, 1.0f);
 		getMActor()->setMotionBlendRatioForBck(mBlendRatio);
@@ -2083,6 +2090,12 @@ void ExecSpinNerve_Sub(TBossEel* eel)
 
 DEFINE_NERVE(TNerveBossEelFirstSpin, TLiveActor)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	TBossEel* eel = static_cast<TBossEel*>(spine->getBody());
 	if (spine->getTime() == 0) {
 		eel->mTurnSpeed = 0.0f;
@@ -2107,6 +2120,13 @@ DEFINE_NERVE(TNerveBossEelFirstSpin, TLiveActor)
 
 DEFINE_NERVE(TNerveBossEelSecondSpin, TLiveActor)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	TBossEel* eel = static_cast<TBossEel*>(spine->getBody());
 	if (spine->getTime() == 0) {
 		eel->setBckAnm(10);
@@ -2385,8 +2405,14 @@ DEFINE_NERVE(TNerveBossEelDie, TLiveActor)
 
 DEFINE_NERVE(TNerveBossEelMouthOpenWait, TLiveActor)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	TBossEel* eel = static_cast<TBossEel*>(spine->getBody());
-	char trash[0x28];
+	char trash[8];
 	if (spine->getTime() == 0) {
 		if (eel->mToothBroken)
 			eel->mToothBroken = false;

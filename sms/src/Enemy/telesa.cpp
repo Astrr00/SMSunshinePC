@@ -366,6 +366,7 @@ void TTelesa::attackToMario()
 
 void TTelesa::behaveToWater(THitActor* param_1)
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	unk165 = 1;
 	if (mSpine->getCurrentNerve() != &TNerveTelesaFreeze::theNerve()
 	    && mSpine->getCurrentNerve() != &TNerveTelesaImitate::theNerve()) {
@@ -437,6 +438,7 @@ void TTelesa::walkBehavior(int param_1, f32 param_2)
 
 void TTelesa::calcRootMatrix()
 {
+	char trash[0x1c];
 	if (mSpine->getCurrentNerve() != &TNerveTelesaDie::theNerve()) {
 		for (u16 i = 0;
 		     i < mMActor->getModel()->getModelData()->getMaterialNum(); ++i) {
@@ -503,6 +505,7 @@ void TTelesa::bind()
 		    && mSpine->getCurrentNerve() != &TNerveTelesaDie::theNerve()) {
 			if (unk124->getGraph() && !unk124->getGraph()->isDummy()) {
 				JGeometry::TVec3<f32> VStack_24;
+				char trash[0x24];
 				unk124->getCurrent().getPoint(&VStack_24);
 				mGroundHeight = VStack_24.y;
 			}
@@ -1055,6 +1058,8 @@ void TMarioModokiTelesa::imitateAnm()
 DEFINE_NERVE(TNerveTelesaImitate, TLiveActor)
 {
 	TSharedParts* imitatedItem = ((TTelesa*)spine->getBody())->mImitatedBmd;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f); }
 	TTelesa* self = (TTelesa*)spine->getBody();
 
 	if (gpApplication.mCurrArea.unk0 != 7
@@ -1167,7 +1172,7 @@ DEFINE_NERVE(TNerveTelesaDie, TLiveActor)
 
 DEFINE_NERVE(TNerveTelesaFreeze, TLiveActor)
 {
-
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TTelesa* self = (TTelesa*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -1271,6 +1276,8 @@ void TKageMarioModoki::init(TLiveManager* manager)
 DEFINE_NERVE(TNerveKageMarioModokiWait, TLiveActor)
 {
 	TKageMarioModoki* self = (TKageMarioModoki*)spine->getBody();
+	if (0) { (void)TPathNode(SMS_GetMarioPos()); }
+	if (0) { (void)JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f); }
 
 	if (spine->getTime() == 0) {
 		self->getMActor()->setBck("ma_wait");

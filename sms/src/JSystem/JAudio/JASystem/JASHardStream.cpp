@@ -352,6 +352,7 @@ namespace HardStream {
 
 	BOOL TControl::startFirst(u16 param_1, DVDFileInfo* param_2, u32* param_3)
 	{
+		char trash[0x18];
 		if (!fileOpen(param_1, param_2 + *param_3))
 			return false;
 
@@ -364,6 +365,7 @@ namespace HardStream {
 
 	BOOL TControl::startSecond(u16 param_1, DVDFileInfo* param_2, u32* param_3)
 	{
+		char trash[0x18];
 		if (!fileOpen(param_1, param_2 + *param_3))
 			return false;
 
@@ -476,6 +478,7 @@ namespace HardStream {
 
 	u8 TControl::volFloatToU8(f32 param_1)
 	{
+		char trash[8];
 		if (param_1 > 1.0f)
 			param_1 = 1.0f;
 

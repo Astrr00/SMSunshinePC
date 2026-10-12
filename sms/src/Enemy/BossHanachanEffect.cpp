@@ -72,12 +72,13 @@ void TBossHanachan::emitCamShake_()
 			    mCommonSaveParams->mSLCamShakeMaxDist.get(), dist));
 		}
 
+		int j;
 		for (int i = 0; i < 2; ++i) {
 			if (frameCtrl->checkPass(sEmitSandFrameFoot[i])) {
 				gpCameraShake->startShake(static_cast<EnumCamShakeMode>(0xb),
 				                          shakeScale);
 				if (onGround) {
-					for (int j = 0; j < 8; ++j)
+					for (j = 0; j < 8; ++j)
 						SMSRumbleMgr->start(8, &mBodyParts[j]->mJointPos);
 				}
 			}

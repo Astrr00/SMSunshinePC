@@ -391,6 +391,7 @@ JPARandomField::JPARandomField() { unk50 = 5; }
 JPARandomField::~JPARandomField() { }
 void JPARandomField::affect(JPAParticle* particle)
 {
+	char trash[0x10];
 	bool bVar3 = false;
 	if (particle->getAge() == 0) {
 		bVar3 = true;

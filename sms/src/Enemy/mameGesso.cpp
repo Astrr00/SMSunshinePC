@@ -283,13 +283,14 @@ bool TMameGesso::isCollidMove(THitActor*)
 
 void TMameGesso::calcObjCollision()
 {
-	char trash[0x18];
 	mHeadHeight = 50.0f;
 
-	f32 scale = unk194->mSLCollisionScale.get() * mAttackRadius * mBodyScale;
+	f32 scale = unk194->mSLCollisionScale.get();
+	scale *= mAttackRadius * mBodyScale;
 
 	MtxPtr mtx = mMActor->getModel()->getAnmMtx(1);
 	JGeometry::TVec3<f32> pos;
+	char trash[0x1c];
 	pos.x = mtx[0][3];
 	pos.y = mtx[1][3];
 	pos.z = mtx[2][3];

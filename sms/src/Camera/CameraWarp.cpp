@@ -32,8 +32,8 @@ void CPolarSubCamera::warpPosAndAt(f32 ratio, s16 yAngle)
 		mCurrentParams->copySaveParam(*mSaveKindParam[mMode]);
 
 		Vec pos;
-		char trash[0x8];
 		JGeometry::TVec3<f32> usualLookat;
+		char trash[0x4];
 		usualLookat.set(getUsualLookat());
 
 		if (isLButtonCameraSpecifyMode(mMode))

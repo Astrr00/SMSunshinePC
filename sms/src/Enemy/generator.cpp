@@ -27,14 +27,18 @@ void TGenerator::load(JSUMemoryInputStream& stream)
 	stream >> mPos.x >> mPos.y >> mPos.z;
 	stream >> mRot.x >> mRot.y >> mRot.z;
 
-	f32 unused;
-	stream >> unused >> unused >> unused;
+	f32 unused3;
+	f32 unused2;
+	f32 unused1;
+	f32 pad1;
+	f32 pad2;
+	f32 pad3;
+	stream >> unused1 >> unused2 >> unused3;
 	stream.readString();
 
 	s32 count = stream.readS32();
 	for (int i = 0; i < count; ++i) {
-		s32 dummy;
-		stream >> dummy;
+		stream.readS32();
 		stream.readString();
 	}
 

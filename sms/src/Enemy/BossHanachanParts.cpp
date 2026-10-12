@@ -119,6 +119,7 @@ void TBossHanachanPartsBase::initMapCollisionAndHitActor_(TIdxGroupObj* group)
 		hitOffsetY   = params->mSLHeadHitOffsetY.get();
 		break;
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 
 	u16 jointIndex = mMActor->getModel()
 	                     ->getModelData()
@@ -130,7 +131,8 @@ void TBossHanachanPartsBase::initMapCollisionAndHitActor_(TIdxGroupObj* group)
 	mMapCollision->init(colFile, 0x8000, this);
 
 	mHitActor = new TWaterHitActor("ボスハナチャンのパーツ");
-	mHitActor->initHitActor(mActorType, 1, 0x80000000, attackRadius,
+	u32 type  = mActorType;
+	mHitActor->initHitActor(type, 1, 0x80000000, attackRadius,
 	                        attackHeight, damageRadius, damageHeight);
 	group->getChildren().push_back(mHitActor);
 	mHitActor->offHitFlag(HIT_FLAG_NO_COLLISION);
@@ -287,6 +289,14 @@ void TBossHanachanPartsBase::calcRotateZWhenGetUp_()
 
 void TBossHanachanPartsBase::considerSetAnm_(EnumBossHanachanNerveAnm nerveAnm)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(Vec) { 1, 2, 3 };
+		(void)(Vec) { 1, 2, 3 };
+		(void)(Vec) { 1, 2, 3 };
+		(void)(Vec) { 1, 2, 3 };
+		(void)(Vec) { 1, 2, 3 };
+	}
 	if (nerveAnm == BOSSHANACHAN_NERVE_ANM_TUMBLE) {
 		switch (mAnmKind) {
 		case BOSSHANACHAN_ANM_KIND_JUMP_REACTION:

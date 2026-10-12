@@ -134,7 +134,7 @@ void TLimitKoopaJr::bind() { }
 
 void TLimitKoopaJr::calcRootMatrix()
 {
-	f32 halfAngle = mFaceDir.mDirection * 0.5f;
+	f32 halfAngle = 0.5f * mFaceDir.mDirection;
 	f32 s         = sinf(halfAngle);
 	f32 c         = cosf(halfAngle);
 

@@ -273,7 +273,7 @@ BOOL TEnemyMario::canJumpToNode() const
 
 // UNUSED in retail (inlined away), size 0x8 = 2 PPC instructions. A plain
 // bit-test compiles to 7 (MWCC's neg/subic/subfe bool normalization). 2 instrs
-// is just a load + blr, i.e. no room to mask — the real body must return a
+// is just a load + blr, i.e. no room to mask - the real body must return a
 // non-normalized value. Exact form is TODO (dead code, no callsite to anchor).
 bool TEnemyMario::isDispPencil() const { return false; }
 
@@ -608,8 +608,8 @@ void TEnemyMario::setStickAgainstMario() { }
 
 void TEnemyMario::setStickToAngle(s16 angle, f32 power)
 {
-	unk108->mStickHS16 = (JMASSin(angle) * 64.0f) * power;
-	unk108->mStickVS16 = (-JMASCos(angle) * 64.0f) * power;
+	unk108->mStickHS16 = (64.0f * JMASSin(angle)) * power;
+	unk108->mStickVS16 = (64.0f * -JMASCos(angle)) * power;
 }
 
 void TEnemyMario::resetReplayStatus()
@@ -671,7 +671,7 @@ bool TEnemyMario::tryTake()
 
 	for (int i = 0; i < mEMario->getColNum(); ++i) {
 		THitActor* actor = mEMario->getCollision(i);
-		u32 actorType    = actor->getActorType();
+		u32 actorType = actor->getActorType();
 		if (actorType == 0x04000018 || actorType == 0x2000002A
 		    || actorType == 0x20000022 || actorType == 0x20000009) {
 			if (actorType == 0x04000018) {
@@ -1130,6 +1130,7 @@ void TEnemyMario::startRunAway()
 
 void TEnemyMario::findRunAwayNearestNode()
 {
+	JGeometry::TVec3<f32> point;
 	int nearestIndex    = 0;
 	int secondIndex     = 0;
 	f32 nearestDistance = 100000.0f;
@@ -1139,7 +1140,6 @@ void TEnemyMario::findRunAwayNearestNode()
 	char trash[0x18];
 
 	for (int i = 0; i < mEMario->getTracer()->getGraph()->getNodeNum(); ++i) {
-		JGeometry::TVec3<f32> point;
 		mEMario->getTracer()->getGraph()->getGraphNode(i).getPoint(&point);
 		f32 distance = JGeometry::TVec3<f32>(point - mPosition).length();
 		if (distance < nearestDistance) {
@@ -1227,8 +1227,9 @@ void TEnemyMario::emRunAwayToNearestNode()
 			char trash[0x28];
 			mEMario->getTracer()->getGraph()->getGraphNode(7).getPoint(
 			    &waitingPoint);
-			mFaceAngle.y    = matan(waitingPoint.z - targetPoint.z,
-			                        waitingPoint.x - targetPoint.x);
+			f32 dx          = waitingPoint.x - targetPoint.x;
+			f32 dz          = waitingPoint.z - targetPoint.z;
+			mFaceAngle.y    = matan(dz, dx);
 			mModelFaceAngle = mFaceAngle.y;
 			mPosition       = targetPoint;
 			mPosition.y += 5.0f;
@@ -1651,6 +1652,12 @@ void TEnemyMario::checkController(JDrama::TGraphics*)
 
 	if (unk108->isBHit())
 		mInput |= 0x8000;
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 }
 
 void TEnemyMario::playerControl(JDrama::TGraphics* graphics)
@@ -1680,6 +1687,7 @@ void TEnemyMario::drawHPMeter(MtxPtr viewMtx)
 	MTXMultVec(viewMtx, &worldPosition, &screenPosition);
 
 	TPosition3f identity;
+	char trash[0x10];
 	MTXIdentity(identity);
 	GXSetCurrentMtx(GX_PNMTX0);
 	GXLoadPosMtxImm(identity, GX_PNMTX0);
@@ -1726,8 +1734,8 @@ void TEnemyMario::drawHPMeter(MtxPtr viewMtx)
 
 void TEnemyMario::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	MActor* emarioActor   = nullptr;
 	J3DModel* emarioModel = nullptr;
+	MActor* emarioActor   = nullptr;
 
 	if (mSpecialModel == nullptr) {
 		emarioActor = mEMario->getMActor();
@@ -1871,5 +1879,10 @@ void TEnemyMario::perform(u32 cue, JDrama::TGraphics* graphics)
 		if ((mEMFlags & EM_FLAG_DISP_HP_METER) && mWaterHitTimer > 0) {
 			drawHPMeter(graphics->getViewMtx());
 		}
+	}
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
 	}
 }

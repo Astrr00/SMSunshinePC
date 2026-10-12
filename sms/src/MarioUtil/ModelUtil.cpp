@@ -50,6 +50,7 @@ void SMS_RideMoveByGroundActor(TRidingInfo* riding_info,
                                JGeometry::TVec3<f32>* pos, f32* arg2)
 {
 	const TBGCheckData* checkData;
+	TMtx34f mtx;
 	f32 temp_f1
 	    = gpMap->checkGround(pos->x, 100.0f + pos->y, pos->z, &checkData);
 
@@ -59,8 +60,6 @@ void SMS_RideMoveByGroundActor(TRidingInfo* riding_info,
 			riding_info->unk0 = checkData->mActor;
 			SMS_RideMoveCalcLocalPos(riding_info, *pos);
 		} else {
-			TMtx34f mtx;
-			char trash[8];
 			if (!riding_info->unk0->getRootJointMtx()) {
 				SMS_GetActorMtx(*riding_info->unk0, mtx.mMtx);
 			} else {
@@ -74,6 +73,7 @@ void SMS_RideMoveByGroundActor(TRidingInfo* riding_info,
 		riding_info->unk0 = nullptr;
 	}
 	char trash[0xC];
+	char trash8[8];
 }
 
 void SMS_RideMoveCalcLocalPos(TRidingInfo* riding_info,

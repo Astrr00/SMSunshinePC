@@ -224,6 +224,9 @@ void J3DDeformer::deform(J3DModel* model, u16 idx, f32* weightList)
 			}
 		}
 	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 void J3DDeformer::base(J3DModel*) { }

@@ -337,6 +337,7 @@ void TSelectMenu::initData(u8 stage, JKRArchive* pArch,
 		scShineTableMonteEtc,  scShineTableMareEtc,
 		nullptr,
 	};
+	char trash[0x24];
 
 	s32 numCoins = TFlagManager::getInstance()->getFlag(SMS_getShineStage(stage)
 	                                                    + 0x20005);

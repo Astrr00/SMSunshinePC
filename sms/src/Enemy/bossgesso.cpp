@@ -153,7 +153,7 @@ BOOL TBGBeakHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 	                      * params->mSLBeakStretch.get());
 
 	JGeometry::TVec3<f32> delta = mOwner->mPosition;
-	char trash[12];
+	if (0) { (void)fromPolar(0.0f, 0.0f); }
 	delta -= where_to;
 	delta.scale(0.001f);
 	unkA4 += delta;
