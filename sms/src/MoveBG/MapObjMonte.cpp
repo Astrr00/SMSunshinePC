@@ -529,7 +529,9 @@ void TSwingBoard::initDraw() const
 	                  GX_FALSE, GX_PTIDENTITY);
 	JUTTexture texture(gpMapObjManager->unkCC);
 	texture.load(GX_TEXMAP0);
-	char trash[8]; // unused stack slot (present in the retail frame)
+	// dead temp below the live ones + 4-byte pad above them (see decomp-worker-protocol Recipes)
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	int pad4;
 	GXSetNumTevStages(1);
 	GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
 	GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO,

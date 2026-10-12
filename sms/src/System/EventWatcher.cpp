@@ -29,6 +29,18 @@
 #include <Player/WaterGun.hpp>
 #include <Camera/CubeManagerBase.hpp>
 
+// Retail keeps the pushed slice in a frame slot ABOVE the unused pad (named
+// locals are placed top-down in declaration order, inline temps below all of
+// them). Declare the slot first, then the pad, and push through the slot.
+#ifdef TARGET_PC
+#define SLICE_SLOT
+#define SLICE_PUSH(interp, v) (interp)->push(v)
+#else
+#define SLICE_SLOT int slot[2]
+#define SLICE_PUSH(interp, v) \
+	(slot[0] = 0, slot[1] = (v), (interp)->push(*(TSpcSlice*)slot))
+#endif
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
@@ -249,6 +261,8 @@ static void evIsNearActors(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGetTalkNPC(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	SLICE_SLOT;
+	char trash[0x4];
 	interp->verifyArgNum(0, &arg_num);
 
 	TBaseNPC* npc = SMSGetMarDirector()->getTalkingNPC();
@@ -256,7 +270,7 @@ static void evGetTalkNPC(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 #ifdef TARGET_PC
 	SPC_PUSH_PTR(interp, npc);
 #else
-	interp->push(!npc ? 0 : (int)npc);
+	SLICE_PUSH(interp, !npc ? 0 : (int)npc);
 #endif
 }
 
@@ -305,17 +319,19 @@ static void evSetTalkMsgID(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGetTalkMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	char trash[8];
+	SLICE_SLOT;
+	char trash[0x8];
 	interp->verifyArgNum(0, &arg_num);
-	interp->push((int)gpTalk2D->getTalkMode());
+	SLICE_PUSH(interp, (int)gpTalk2D->getTalkMode());
 }
 
 static void evGetTalkSelectedValue(TSpcTypedInterp<TEventWatcher>* interp,
                                    u32 arg_num)
 {
-	char trash[8];
+	SLICE_SLOT;
+	char trash[0xc];
 	interp->verifyArgNum(0, &arg_num);
-	interp->push((int)gpTalk2D->getSelectedValue());
+	SLICE_PUSH(interp, (int)gpTalk2D->getSelectedValue());
 }
 
 static void evSetValue2TalkVariable(TSpcTypedInterp<TEventWatcher>* interp,
@@ -513,10 +529,11 @@ static void evRegisterMovie(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGameOver(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	char trash[0x10];
+	SLICE_SLOT;
+	char trash[0xc];
 	interp->verifyArgNum(0, &arg_num);
 	SMSGetMarDirector()->onUnk4CFlag(0x1);
-	interp->push();
+	SLICE_PUSH(interp, 0);
 }
 
 static void evIsGraffitoCoverage0(TSpcTypedInterp<TEventWatcher>* interp,
@@ -529,6 +546,7 @@ static void evIsGraffitoCoverage0(TSpcTypedInterp<TEventWatcher>* interp,
 static void evSetGraffitoMultiplied(TSpcTypedInterp<TEventWatcher>* interp,
                                     u32 arg_num)
 {
+	SLICE_SLOT;
 	interp->verifyArgNum(1, &arg_num);
 	int enable = TSpcSlice(interp->pop()).getDataInt();
 
@@ -542,7 +560,7 @@ static void evSetGraffitoMultiplied(TSpcTypedInterp<TEventWatcher>* interp,
 			pollution->getLayer(i)->stopSpread();
 	}
 
-	interp->push();
+	SLICE_PUSH(interp, 0);
 }
 
 static void evIsBossDefeated(TSpcTypedInterp<TEventWatcher>* interp,
@@ -555,11 +573,13 @@ static void evIsBossDefeated(TSpcTypedInterp<TEventWatcher>* interp,
 static void evLaunchEventClearDemo(TSpcTypedInterp<TEventWatcher>* interp,
                                    u32 arg_num)
 {
+	SLICE_SLOT;
+	char trash[0x4];
 	interp->verifyArgNum(0, &arg_num);
 	TGCConsole2* console = SMSGetMarDirector()->getConsole();
 	console->unk94->startAppearShineGet();
 	console->unk47 = 1;
-	interp->push();
+	SLICE_PUSH(interp, 0);
 }
 
 static void evIsEMarioReachedToGoal(TSpcTypedInterp<TEventWatcher>* interp,
@@ -640,12 +660,13 @@ static void evRaiseBuilding(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evForceCloseTalk(TSpcTypedInterp<TEventWatcher>* interp,
                              u32 arg_num)
 {
-	char trash[8];
+	SLICE_SLOT;
+	char trash[0x4];
 	interp->verifyArgNum(0, &arg_num);
 
 	gpTalk2D->forceCloseTalk();
 
-	interp->push();
+	SLICE_PUSH(interp, 0);
 }
 
 static void evInsertTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
@@ -1305,6 +1326,8 @@ static void evInvalidatePad(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evIsWaterMelonIsReached(TSpcTypedInterp<TEventWatcher>* interp,
                                     u32 arg_num)
 {
+	SLICE_SLOT;
+	char trash[0x8];
 	interp->verifyArgNum(1, &arg_num);
 	TBigWatermelon* melon = SPC_GET_PTR(TBigWatermelon*, interp->pop());
 
@@ -1316,7 +1339,7 @@ static void evIsWaterMelonIsReached(TSpcTypedInterp<TEventWatcher>* interp,
 	if (delta.squared() <= 90000.0f)
 		result = 1;
 
-	interp->push(result);
+	SLICE_PUSH(interp, result);
 }
 
 template <> void TSpcTypedBinary<TEventWatcher>::initUserBuiltin()

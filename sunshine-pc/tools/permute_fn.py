@@ -1,11 +1,14 @@
 """Run decomp-permuter on one function of an sms unit (GC mwcc 1.2.5, Windows).
 
-usage: python permute_fn.py <unit> <mangled_sym> [--seconds 900] [--jobs 4]
+usage (from sunshine-pc): python tools/permute_fn.py <unit> <mangled_sym> [--seconds 900] [--jobs 4]
+                          [--scope prefix|unit|includes] [--nth N] [--regen] [--prepare-only]
 
-Needs <permuter>/nonmatchings/<sym>/base.c (hand-written C-syntax function, see
-platform-notes.md) and optional defs.h (#define aliases for typedef stubs).
-Member functions: base.c is a free function whose first argument is the class pointer.
-Writes prelude.h, compile.sh, settings.toml, target.o; then runs permuter.py.
+base.c is generated automatically from the unit's .cpp (permute_extract.py): the function body is
+extracted, `Cls::f(args)` becomes the free function `f(Cls* this_, args)`, C++ names (`A::B`, `T<..>`)
+become #define aliases (defs.h). compile.sh wraps every candidate back into C++ (`Cls::f`, `this`) and
+compiles it with the unit's real mwcc flags. A hand-edited base.c is kept unless --regen is given.
+--scope: prefix = unit source above the function (default, keeps earlier inline candidates),
+unit = whole unit with the function replaced (slowest, most faithful), includes = only the #includes.
 Windowless + BELOW_NORMAL priority; the tree is killed after --seconds.
 """
 
@@ -19,9 +22,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import permute_extract as px
+
 ROOT = Path(__file__).resolve().parents[2]
 SMS = ROOT / "sms"
-PERMUTER = ROOT.parent / "decomp-permuter"
+PERMUTER = next(
+    (p for p in (ROOT.parent / "decomp-permuter", ROOT.parent / "SunshineHandoff/extra-repos/decomp-permuter")
+     if p.is_dir()),
+    ROOT.parent / "decomp-permuter",
+)
 FLAGS = 0x08000000 | 0x4000  # CREATE_NO_WINDOW | BELOW_NORMAL_PRIORITY_CLASS
 GIT_DIRS = ["C:/Program Files/Git/bin", "C:/Program Files/Git/usr/bin"]
 
@@ -52,17 +62,16 @@ def mwcc_command(base_path):
     return wrapper, compiler, flags
 
 
-def write_compile_sh(d, wrapper, compiler, flags):
+def write_compile_sh(d, wrapper, compiler, flags, py, me):
     q = " ".join(shlex.quote(f) for f in flags)
     (d / "compile.sh").write_text(
         f"""#!/usr/bin/env bash
-# permuter compile step: compile.sh <candidate.c> -o <out.o>
-# drops `typedef int X;` stubs (names come from defs.h), prepends the unit's includes.
+# permuter compile step: python permute_fn.py wraps the candidate (typedef stubs dropped, C -> C++ member) 
 set -e
 D="$(cd "$(dirname "$0")" && pwd)"
 FULL="$(mktemp --suffix=.cpp "$D/_full.XXXXXX")"  # per-process: permuter runs -j workers in parallel
 trap 'rm -f "$FULL"' EXIT
-{{ cat "$D/prelude.h" "$D/defs.h"; sed -E '/^typedef int [A-Za-z_0-9]+;$/d' "$(cygpath -u "$1")"; }} > "$FULL"
+"{py}" "{me}" --wrap "$(cygpath -w "$D")" "$(cygpath -w "$1")" > "$FULL"
 OUT="$(cygpath -wa "$3")"
 FULL_W="$(cygpath -w "$FULL")"
 cd "{SMS.as_posix()}"
@@ -81,11 +90,13 @@ def objdump_fn(args):
     base, is_target = sym.split("__")[0], Path(rest[-1]).name == "target.o"
     out = subprocess.run([objdump, *rest], capture_output=True, text=True, encoding="utf-8",
                          errors="replace", check=True, creationflags=FLAGS).stdout
+    names = re.findall(r"(?m)^[0-9a-f]+ <(.*)>:$", out)
+    want = (lambda n: n == sym) if sym in names else (lambda n: n.startswith(base + "__"))
     keep, on = [], False
     for line in out.splitlines():
         m = re.match(r"^[0-9a-f]+ <(.*)>:$", line)
         if m:
-            on = m.group(1) == sym if is_target else m.group(1).startswith(base + "__")
+            on = want(m.group(1))
         if on:
             keep.append(line)
     print("\n".join(keep))
@@ -98,25 +109,36 @@ def main():
     ap.add_argument("--seconds", type=int, default=900)
     ap.add_argument("--jobs", type=int, default=4)
     ap.add_argument("--prepare-only", action="store_true")
+    ap.add_argument("--scope", choices=["prefix", "unit", "includes"], default="prefix")
+    ap.add_argument("--nth", type=int, default=0, help="which definition if the name is overloaded")
+    ap.add_argument("--regen", action="store_true", help="regenerate base.c (overwrites hand edits)")
     a = ap.parse_args()
 
-    d = PERMUTER / "nonmatchings" / a.sym.split("__")[0]  # folder = readable name; func_name stays mangled
-    if not (d / "base.c").is_file():
-        sys.exit(f"missing {d / 'base.c'}")
+    name = a.sym.split("__")[0]
+    d = PERMUTER / "nonmatchings" / re.sub(r"\W+", "_", a.sym)[:80]
+    d.mkdir(parents=True, exist_ok=True)
     u = unit_entry(a.unit)
+    srcpath = SMS / u["metadata"]["source_path"]
+    src = srcpath.read_text(encoding="utf-8", errors="replace")
 
-    src = (SMS / u["metadata"]["source_path"]).read_text(encoding="utf-8", errors="replace")
-    (d / "prelude.h").write_text(
-        "\n".join(l for l in src.splitlines() if l.startswith("#include")) + "\n",
-        encoding="utf-8",
-    )
-    if not (d / "defs.h").is_file():
-        (d / "defs.h").write_text("", encoding="utf-8")
+    cls, const, hit = px.find_function(src, a.sym, a.nth)
+    if a.regen or not (d / "base.c").is_file():
+        defs = px.make_base_c(src, cls, const, hit, name, d, PERMUTER)
+        (d / "defs.h").write_text("".join(f"#define {k} {v}\n" for k, v in defs.items()), encoding="utf-8")
+    (d / "meta.json").write_text(json.dumps({"name": name, "cls": cls, "const": const}), encoding="utf-8")
+    _, o, c = hit
+    hstart = px.header_start(src, o)
+    if a.scope == "includes":
+        head, tail = "\n".join(l for l in src.splitlines() if l.startswith("#include")) + "\n", ""
+    else:
+        head, tail = src[:hstart], (src[c:] if a.scope == "unit" else "")
+    (d / "head.h").write_text(head, encoding="utf-8")
+    (d / "tail.h").write_text(tail, encoding="utf-8")
     shutil.copyfile(SMS / u["target_path"], d / "target.o")
-    wrapper, compiler, flags = mwcc_command(u["base_path"])
-    write_compile_sh(d, wrapper, compiler, flags)
-    objdump = (SMS / "build/binutils/powerpc-eabi-objdump.exe").as_posix()
     py, me = Path(sys.executable).as_posix(), Path(__file__).resolve().as_posix()
+    wrapper, compiler, flags = mwcc_command(u["base_path"])
+    write_compile_sh(d, wrapper, compiler, flags + ["-i", srcpath.parent.relative_to(SMS).as_posix()], py, me)
+    objdump = (SMS / "build/binutils/powerpc-eabi-objdump.exe").as_posix()
     (d / "settings.toml").write_text(
         f'name = "{a.sym}"\n'
         f'func_name = "{a.sym.split("__")[0]}"\n'  # C name in base.c
@@ -149,11 +171,15 @@ def main():
                 creationflags=FLAGS,
             )
             p.wait()
+    for f in d.glob("_full.*"):  # temp files of workers killed mid-compile
+        f.unlink(missing_ok=True)
     print(f"log: {log}")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--objdump":
         objdump_fn(sys.argv[2:])
+    elif len(sys.argv) > 1 and sys.argv[1] == "--wrap":
+        px.wrap(Path(sys.argv[2]), sys.argv[3])
     else:
         main()
