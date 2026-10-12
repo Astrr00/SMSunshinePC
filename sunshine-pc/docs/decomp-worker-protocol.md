@@ -31,3 +31,13 @@ Every non-100 % GAME function (sms/, mwcc decomp; also PC-valid with clang-cl, k
 ## Rules
 - Hold a unit before editing it; edit only held units' files (+headers as above). No plain `ninja` runs (the lead runs the gates), no configure.py edits, no git writes (read-only `git show/diff/log` ok), no game runs (decomp agents), no files in sms/ root, delete your scratch files. Ledger key = bare function name (no class prefix).
 - Final report: units, functions before->after %, bugs fixed (asm addr), rewritten functions, ledger rows (counts), still-unproven items with reason.
+
+## Recipes found in rounds 2-3 (observed, 2026-10-12)
+- `char trash[N]` pad: a function-level pad must be declared AFTER the local that has to sit higher in the same scope. A pad at the top of the function only grows the frame; a pad declared after a local places it lower. Nested-block pads often have no effect.
+- String-pool / immediate-only diffs (`addi rX,r31,0x...`, 99.9x % loadAfter/__ct): `-inline deferred` emits functions and the string pool in REVERSE source order, retail's pool is forward. Reverse the top-level function order of the .cpp (keep `#pragma dont_inline on/off` pairs around their function), then check every function of the unit; revert if anything else drops (cannon.cpp: loadAfter and SaveLoadParams::__ct to 100 %).
+- A static table that is const in our source but in `.data` in retail must be non-const (popo createModelData).
+- A local `const TNerveBase<TLiveActor>*` for the `theNerve()` compare fixes the operand order (bosspakkun receiveMessage).
+- `(mLiveFlag & X ? 1 : 0)` inline instead of `checkLiveFlag2` removes a `clrlwi.` vs `cmpwi` row.
+- Split a float product into separate statements to avoid `fmadds` fusion; merge to get fusion.
+- Known limits (do not spend builds): header-defined inline callees ignore `#pragma dont_inline` / `inline_depth` per function under `-inline deferred` (a file-wide `inline_depth` pragma at the end of the .cpp works but changes every function of the unit); TVec3/TUtil out-of-line vs inline per call site; out-of-line `TNerveBase` ctor in inlined `theNerve()`.
+- `scaleAdd(scale, b, c)` is `this = b + c*scale`; the one-argument `TMtx34::concat(b)` is not `this*b`: check call sites against the retail operand order.
