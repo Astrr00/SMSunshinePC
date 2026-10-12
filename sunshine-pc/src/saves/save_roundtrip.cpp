@@ -120,6 +120,5 @@ void sunshineBootAfterHook()
 		return;
 	done         = true;
 	const int rc = savesRoundTripTest();
-	aurora_shutdown();
 	std::exit(rc);
 }

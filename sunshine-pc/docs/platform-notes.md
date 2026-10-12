@@ -787,9 +787,9 @@ Mechanism search for out-of-line header helpers (HeaderLab, ~38 probes in a temp
 
 ## Exit after a devscript TIMEOUT (rc 0xC0000409)
 
-- Observed (fact sheet, 2026-10-12 chase runs): after a devscript TIMEOUT the process exits with rc=3221226505 (0xC0000409) instead of 3. A TIMEOUT is a failure regardless of rc; do not count it as a game crash.
-- `devscript.cpp` calls `std::exit(3)` from the game thread. [INFERENCE] Teardown (atexit and static destructors with the audio and Aurora threads still alive) fast-fails, which gives 0xC0000409.
-- `OSResetSystem` also ends with `std::exit(0)` (`sunshine-pc/src/sdk/os_misc.cpp:49`). Possibly a real shutdown bug; not investigated.
+- Observed (2026-10-12 chase runs): after a devscript TIMEOUT the process exited with rc=3221226505 (0xC0000409) instead of 3.
+- Cause (static analysis `docs/exit-teardown-analysis.md`, confirmed by a run): `devscript.cpp` calls `std::exit(3)` from the game thread; the exit paths (`std::exit` in the devscript, `OSResetSystem`, `AURORA_EXIT`) never ran `aurora_shutdown()`, and Aurora's `static std::thread g_pipelineThread` (`extern/aurora/lib/gfx/pipeline_cache.cpp:83`) is only joined there, so the static destructors found a joinable thread (`std::terminate`, `__fastfail`).
+- Fix 2026-10-12: `main.cpp` registers `std::atexit([] { aurora_shutdown(); })` right after `aurora_initialize` and the explicit calls were removed (also in `saves/save_roundtrip.cpp`). Measured: a script with a never-true `waitfor ... timeout=60` now exits with rc=3 (was 0xC0000409); a script with a normal `end` exits with rc=0. Not run: window close (`AURORA_EXIT`), `OSResetSystem`, launcher quit.
 
 ## Baseline for `changes_all`: worktree and junction pitfall
 

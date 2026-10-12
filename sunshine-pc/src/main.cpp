@@ -118,18 +118,20 @@ int main(int argc, char* argv[])
 		                          .windowHeight = static_cast<uint32_t>(height), .logCallback = &log_callback,
 		                          .mem1Size = kSunshineMem1Size, .mem2Size = kSunshineMem2Size };
 	aurora_initialize(argc, argv, &config);
+	// One ordered teardown for every way out (return from main, std::exit from the devscript, OSResetSystem, AURORA_EXIT):
+	// Aurora's pipeline worker is a static std::thread that only aurora_shutdown() joins. A std::exit without it runs the
+	// static destructors with the thread still joinable: std::terminate, exit code 0xC0000409.
+	std::atexit([] { aurora_shutdown(); });
 	sunshineApplyRenderSettings();
 
 	const char* disc = findDvdArg(argc, argv);
 	if (disc == nullptr) {
 		// No --dvd: the launcher chooses and validates the disc. Quit or closing the window exits.
 		if (!launcher::run(settingsFile)) {
-			aurora_shutdown();
 			return 0;
 		}
 	} else if (!aurora_dvd_open(disc)) {
 		std::fprintf(stderr, "usage: sunshine --dvd <path to disc image (iso/rvz/wia/...)>\n");
-		aurora_shutdown();
 		return 1;
 	}
 
@@ -153,6 +155,5 @@ int main(int argc, char* argv[])
 	gpApplication.finalize();
 	modsShutdown(); // mods/mods_loader.cpp: calls sunshine_mod_shutdown and frees the DLLs
 
-	aurora_shutdown();
 	return 0;
 }
