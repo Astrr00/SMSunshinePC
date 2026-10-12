@@ -87,3 +87,7 @@ Bug found and fixed on the way: `JAIData::initSeqParameter` left `mSeqHandle` 0 
 - [`sunshine-pc/patches/aurora/README.md`](sunshine-pc/patches/aurora/README.md): Aurora patch series
 - [`sunshine-pc/docs/publishing.md`](sunshine-pc/docs/publishing.md): publishing runbook
 - [`Port.md`](Port.md), [`Goal-Port.md`](Goal-Port.md): work orders
+
+### Update 2026-10-12 (later): route 70, fewer dev crutches
+
+`sunshine-pc/tools/routes/70_boss_until.dev` run twice in a row (`u01` 153 s, `u02` 193 s wall, rc=0, no `overrun`, no crash, 13 PNGs, `gci_check.py` PASS, reload `stage=1 scen=5 shines=2`). Remaining dev: `cheat infinite_health`, `chase` (position read, real input), `shine 2`, env `SUNSHINE_DEV_STEP_RETRACE`/`SKIP_MOVIES`/`AIM_ASSIST`. Gone: `tp`, `tpem`, `killboss`. Not met: a real Bianco Shine without `shine 2` (no measured floor path to any of the three Shines), 330 s at real 30 Hz, no dev switches. Details: `sunshine-pc/docs/session-2026-10-11b.md` section 42.

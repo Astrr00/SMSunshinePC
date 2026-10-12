@@ -11,7 +11,9 @@
 #include <cstring>
 #include <fstream>
 #include <sstream>
+#include <deque>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -628,6 +630,80 @@ void walkStick(const Command& c, s8& sx, s8& sy, float& dist)
 	sy = static_cast<s8>(127.f * (dx * fx + dz * fz) / dist);
 }
 
+// Dev aid for `chase`: floor cells (40 units, cx/cz/y as int16) cut from the stage's map.col by tools/nav (SUNSHINE_DEV_NAV=<file>).
+// The chase steers along the shortest cell path to the target so Mario does not run off the plaza edge into the water.
+constexpr float kNavCell = 40.f;
+std::unordered_map<long long, short> gNav;
+bool gNavLoaded = false;
+
+long long navKey(int cx, int cz) { return static_cast<long long>(cx + 100000) * 200000LL + (cz + 100000); }
+
+void navLoad()
+{
+	gNavLoaded = true;
+	const char* path = std::getenv("SUNSHINE_DEV_NAV");
+	if (!path) {
+		std::printf("[devscript] nav: SUNSHINE_DEV_NAV unset\n");
+		return;
+	}
+	FILE* f = std::fopen(path, "rb");
+	if (!f) {
+		std::printf("[devscript] nav: could not open %s\n", path);
+		return;
+	}
+	short r[3];
+	while (std::fread(r, sizeof(short), 3, f) == 3) gNav[navKey(r[0], r[1])] = r[2];
+	std::fclose(f);
+	std::printf("[devscript] nav: %zu floor cells from %s\n", gNav.size(), path);
+}
+
+bool navNearest(float x, float z, int& cx, int& cz)
+{
+	const int bx = static_cast<int>(std::floor(x / kNavCell)), bz = static_cast<int>(std::floor(z / kNavCell));
+	for (int r = 0; r <= 12; ++r)
+		for (int dx = -r; dx <= r; ++dx)
+			for (int dz = -r; dz <= r; ++dz)
+				if (gNav.count(navKey(bx + dx, bz + dz))) { cx = bx + dx; cz = bz + dz; return true; }
+	return false;
+}
+
+// Point `look` cells ahead of (mx,mz) on the shortest floor path to (tx,tz); false when either end is off the grid or unreachable.
+bool navAhead(float mx, float mz, float tx, float tz, int look, float& ox, float& oz)
+{
+	int mcx, mcz, tcx, tcz;
+	if (!navNearest(mx, mz, mcx, mcz) || !navNearest(tx, tz, tcx, tcz)) return false;
+	std::unordered_map<long long, long long> toward; // cell -> next cell toward the target
+	std::deque<std::pair<int, int>> q;
+	toward[navKey(tcx, tcz)] = -1;
+	q.emplace_back(tcx, tcz);
+	while (!q.empty()) {
+		const auto [cx, cz] = q.front();
+		q.pop_front();
+		if (cx == mcx && cz == mcz) break;
+		const short y = gNav[navKey(cx, cz)];
+		for (int dx = -1; dx <= 1; ++dx)
+			for (int dz = -1; dz <= 1; ++dz) {
+				const long long k = navKey(cx + dx, cz + dz);
+				auto it = gNav.find(k);
+				if ((dx || dz) && it != gNav.end() && !toward.count(k) && std::abs(it->second - y) < 45) {
+					toward[k] = navKey(cx, cz);
+					q.emplace_back(cx + dx, cz + dz);
+				}
+			}
+	}
+	if (!toward.count(navKey(mcx, mcz))) return false;
+	int cx = mcx, cz = mcz;
+	for (int i = 0; i < look; ++i) {
+		const long long n = toward[navKey(cx, cz)];
+		if (n < 0) break;
+		cx = static_cast<int>(n / 200000LL) - 100000;
+		cz = static_cast<int>(n % 200000LL) - 100000;
+	}
+	ox = (cx + 0.5f) * kNavCell;
+	oz = (cz + 0.5f) * kNavCell;
+	return true;
+}
+
 THitActor* findEMario()
 {
 	static const char kEMarioName[] = "\x83\x7d\x83\x8a\x83\x49\x83\x82\x83\x68\x83\x4c\x5f\x30";
@@ -807,7 +883,16 @@ void step()
 				t.pos[0] = e->mPosition.x;
 				t.pos[2] = e->mPosition.z;
 				float dist = 0.f;
+				const float dx = e->mPosition.x - gpMarioOriginal->mPosition.x, dz = e->mPosition.z - gpMarioOriginal->mPosition.z;
+				const float direct = std::sqrt(dx * dx + dz * dz);
+				if (!gNavLoaded) navLoad();
+				float wx, wz;
+				if (direct > 150.f && !gNav.empty() && navAhead(gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.z, e->mPosition.x, e->mPosition.z, 4, wx, wz)) {
+					t.pos[0] = wx;
+					t.pos[2] = wz;
+				}
 				walkStick(t, pad.stickX, pad.stickY, dist);
+				dist = direct;
 				if (dist < c.radius) pad.triggerRight = 255;
 				if (gRemaining % 60 == 0)
 					std::printf("[devscript] chase em=(%.0f,%.0f,%.0f) mario=(%.0f,%.0f,%.0f) dist=%.0f tick=%d\n", e->mPosition.x, e->mPosition.y, e->mPosition.z, gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.y, gpMarioOriginal->mPosition.z, dist, gTick);
@@ -936,7 +1021,7 @@ void aimAssist()
 {
 	static const bool enabled = std::getenv("SUNSHINE_DEV_AIM_ASSIST") != nullptr;
 	gAssistNoSpray = false;
-	if (!enabled || !gpMarioOriginal || !gpMarioOriginal->mWaterGun) return;
+	if (!enabled || !gpMarioOriginal || !gpMarioOriginal->mWaterGun || !gpMarDirector) return; // the director is gone while a stage is torn down
 	// The slippery goop floor turns every crouch into OIL_RUN again; while L is held and Mario stands still on it, keep him crouching.
 	const u32 st = gpMarioOriginal->mStatus;
 	const TMarioGamePad* pad = gpApplication.mGamePads[0];
@@ -974,6 +1059,7 @@ void sunshineDevScriptTick()
 	if (scriptPath && !gLoaded) {
 		gLoaded = true;
 		loadScript(scriptPath);
+		navLoad(); // eager: routes without `chase` never reached the lazy call
 	}
 	if (gLoaded && !gDone) step();
 	if (std::getenv("SUNSHINE_DEV_STATUS") && gTick % 30 == 0) {
