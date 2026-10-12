@@ -874,10 +874,6 @@ void aimAssist()
 	if (gpMarioOriginal->mStatus != MARIO_STATUS_SQUAT) return;
 	TBiancoGateKeeper* b = findBoss();
 	if (!b || !b->mHead) return;
-	// Hits in bck 0xB/7/0xD never hurt the boss and in 7 they keep it there (gatekeeper.cpp:845-868): cut the water in those animations.
-	if (MActor* m = b->getMActor())
-		if (m->checkCurBckFromIndex(0xB) || m->checkCurBckFromIndex(7) || m->checkCurBckFromIndex(0xD))
-			gpMarioOriginal->mWaterGun->mCurrentWater = 0;
 	const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
 	const float dz = b->mHead->mPosition.z - gpMarioOriginal->mPosition.z;
 	const float dy = b->mHead->mPosition.y - (gpMarioOriginal->mPosition.y + 60.0f);
