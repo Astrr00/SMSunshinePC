@@ -1,0 +1,17 @@
+# Diagnosis (dolpic/0 dev start, Null backend): does spraying the floor clean a standing spot (OIL_RUN -> normal)?
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=60
+tp x=12 y=320 z=5150 yaw=180
+wait frames=40
+log
+hold L trig=255,255 frames=10
+log
+hold trig=0,255 stick=0,127 frames=150
+log
+wait frames=60
+log
+hold L trig=255,255 frames=10
+log
+end
