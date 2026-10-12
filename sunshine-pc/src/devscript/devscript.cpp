@@ -42,6 +42,18 @@
 // Aurora's virtual pad API. <dolphin/pad.h> resolves to the decomp copy (sms/include/dolphin, earlier on the
 // include path), which lacks these two; same signatures as extern/aurora/include/dolphin/pad.h.
 extern "C" void PADSetVirtualStatus(u32 port, const PADStatus* status);
+
+// SUNSHINE_DEV_AIM_ASSIST: while set the R trigger (spray) is removed from every virtual pad status (see aimAssist()).
+static bool gAssistNoSpray = false;
+static void setVirtualPad(u32 port, const PADStatus* status)
+{
+	PADStatus copy = *status;
+	if (gAssistNoSpray) {
+		copy.triggerRight = 0;
+		copy.button &= ~PAD_TRIGGER_R;
+	}
+	PADSetVirtualStatus(port, &copy);
+}
 extern "C" void PADClearVirtualStatus(u32 port);
 extern "C" void aurora_screenshot_next(const char* path);
 extern "C" s32 THPPlayerGetState();
@@ -626,7 +638,7 @@ void step()
 			if (condHolds(c)) {
 				std::printf("[devscript] hold-until met line=%d after=%d tick=%d\n", c.line, gRemaining, gTick);
 				const PADStatus neutral{};
-				PADSetVirtualStatus(0, &neutral);
+				setVirtualPad(0, &neutral);
 				gStarted = false;
 				++gCursor;
 				continue;
@@ -636,7 +648,7 @@ void step()
 				std::fflush(stdout);
 				std::exit(3);
 			}
-			PADSetVirtualStatus(0, &c.pad);
+			setVirtualPad(0, &c.pad);
 			++gRemaining;
 			return;
 		}
@@ -657,7 +669,7 @@ void step()
 					}
 				}
 			}
-			PADSetVirtualStatus(0, c.op == Op::Hold ? &c.pad : &neutral);
+			setVirtualPad(0, c.op == Op::Hold ? &c.pad : &neutral);
 			if (--gRemaining == 0) {
 				gStarted = false;
 				++gCursor;
@@ -679,7 +691,7 @@ void step()
 				if (b->checkLiveFlag(LIVE_FLAG_DEAD)) {
 					std::printf("[devscript] aimboss boss dead line=%d left=%d tick=%d\n", c.line, gRemaining, gTick);
 					const PADStatus neutral{};
-					PADSetVirtualStatus(0, &neutral);
+					setVirtualPad(0, &neutral);
 					gStarted = false;
 					++gCursor;
 					continue;
@@ -706,7 +718,7 @@ void step()
 				}
 				pad.stickY = headHigh ? 127 : 0;
 			}
-			PADSetVirtualStatus(0, &pad);
+			setVirtualPad(0, &pad);
 			if (--gRemaining == 0) {
 				gStarted = false;
 				++gCursor;
@@ -731,7 +743,7 @@ void step()
 				if (std::fabs(err) <= c.tol) {
 					std::printf("[devscript] faceto met line=%d after=%d err=%.1f tick=%d\n", c.line, gRemaining, err, gTick);
 					const PADStatus neutral{};
-					PADSetVirtualStatus(0, &neutral);
+					setVirtualPad(0, &neutral);
 					gStarted = false;
 					++gCursor;
 					continue;
@@ -746,7 +758,7 @@ void step()
 				std::fflush(stdout);
 				std::exit(3);
 			}
-			PADSetVirtualStatus(0, &pad);
+			setVirtualPad(0, &pad);
 			++gRemaining;
 			return;
 		}
@@ -764,7 +776,7 @@ void step()
 				if (dist <= c.radius) {
 					std::printf("[devscript] walkto met line=%d after=%d dist=%.0f tick=%d\n", c.line, gRemaining, dist, gTick);
 					const PADStatus neutral{};
-					PADSetVirtualStatus(0, &neutral);
+					setVirtualPad(0, &neutral);
 					gStarted = false;
 					++gCursor;
 					continue;
@@ -775,7 +787,7 @@ void step()
 				std::fflush(stdout);
 				std::exit(3);
 			}
-			PADSetVirtualStatus(0, &pad);
+			setVirtualPad(0, &pad);
 			++gRemaining;
 			return;
 		}
@@ -789,7 +801,7 @@ void step()
 			const PADStatus neutral{};
 			if (condHolds(c)) {
 				std::printf("[devscript] %s met line=%d after=%d tick=%d\n", name, c.line, gRemaining, gTick);
-				PADSetVirtualStatus(0, &neutral);
+				setVirtualPad(0, &neutral);
 				gStarted = false;
 				++gCursor;
 				continue;
@@ -801,7 +813,7 @@ void step()
 			}
 			const bool press = c.op == Op::Mash && gRemaining % c.period < 2;
 			if (press) std::printf("[devscript] mash press line=%d tick=%d button=0x%04x\n", c.line, gTick, c.pad.button);
-			PADSetVirtualStatus(0, press ? &c.pad : &neutral);
+			setVirtualPad(0, press ? &c.pad : &neutral);
 			++gRemaining;
 			return;
 		}
@@ -864,6 +876,7 @@ namespace {
 void aimAssist()
 {
 	static const bool enabled = std::getenv("SUNSHINE_DEV_AIM_ASSIST") != nullptr;
+	gAssistNoSpray = false;
 	if (!enabled || !gpMarioOriginal || !gpMarioOriginal->mWaterGun) return;
 	// The slippery goop floor turns every crouch into OIL_RUN again; while L is held and Mario stands still on it, keep him crouching.
 	const u32 st = gpMarioOriginal->mStatus;
@@ -874,6 +887,15 @@ void aimAssist()
 	if (gpMarioOriginal->mStatus != MARIO_STATUS_SQUAT) return;
 	TBiancoGateKeeper* b = findBoss();
 	if (!b || !b->mHead) return;
+	// Damage needs a hit while bck 0x12 is between frames 50 and 160 (TBiancoGateKeeper::isHeadHitActive, same in the retail asm); a hit
+	// earlier in 0x12 or in 0xB/7/0xD only sends the boss to bck 7. Water is allowed while it sleeps (bck A/4: body hits wake it) and
+	// in 0x12 frames 35..145 (an earlier emit window than 50..160 because the drops need time to arrive); cut everywhere else.
+	if (MActor* m = b->getMActor()) {
+		const bool sleeping = m->checkCurBckFromIndex(0xA) || m->checkCurBckFromIndex(4);
+		const float fr = m->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+		const bool window = m->checkCurBckFromIndex(0x12) && fr > 35.0f && fr < 145.0f;
+		gAssistNoSpray = !sleeping && !window;
+	}
 	const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
 	const float dz = b->mHead->mPosition.z - gpMarioOriginal->mPosition.z;
 	const float dy = b->mHead->mPosition.y - (gpMarioOriginal->mPosition.y + 60.0f);
