@@ -110,7 +110,7 @@ Next steps in order:
 
 ## Phase-1 acceptance status (2026-10-11, measured)
 
-Reached with dev switches (diagnosis only): Delfino gate opens and warps, select menu works, Bianco Ep.1 `stage=2 scen=0` with a controllable Mario (`sunshine-pc/tools/routes/33_gate_wash.dev`, `docs/img/bianco0_ep1.png`). Not reached: the no-switch route to Bianco (< 330 s), real GateKeeper kill, real Shine in Bianco, save/load in Bianco, two clean full runs. Details and what was tried: `sunshine-pc/docs/session-2026-10-11b.md` sections 10-16. Next: hit the airport boss head without `killboss`; real shadow-Mario chase; Bianco Shine (try the ramp / 100-coin shines, `tpshine` takes positional floats `tpshine x y z` (a `key=value` form parses as 0 0 0; not tried with real offsets)).
+Reached with dev switches (diagnosis only): Delfino gate opens and warps, select menu works, Bianco Ep.1 `stage=2 scen=0` with a controllable Mario (`sunshine-pc/tools/routes/33_gate_wash.dev`, `docs/img/bianco0_ep1.png`). Also reached: a real Shine collect path (dev verb `shine 2` on the Bianco 100-coin shine) -> `shines=1`, `.gci` written and `gci_check.py` PASS (`s08`), and a switch-free reload of that save to `stage=1 scen=5 shines=1 dirstate=4` (`s15`, `tools/routes/38_reload_probe.dev`). Not reached: the no-switch route to Bianco (< 330 s), real GateKeeper kill, real Shine in Bianco, save/load in Bianco, two clean full runs. Details and what was tried: `sunshine-pc/docs/session-2026-10-11b.md` sections 10-16. Next: hit the airport boss head without `killboss`; real shadow-Mario chase; Bianco Shine (try the ramp / 100-coin shines, `tpshine` takes positional floats `tpshine x y z` (a `key=value` form parses as 0 0 0; not tried with real offsets)).
 
 ## 9. Legal
 

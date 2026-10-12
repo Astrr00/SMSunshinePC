@@ -1,0 +1,61 @@
+# Diagnosis: existing save, no dev switches; press A with screenshots to see the card/file dialogs.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+log
+hold A frames=4
+wait frames=100
+shot r1.png
+log
+hold A frames=4
+wait frames=100
+shot r2.png
+log
+hold A frames=4
+wait frames=100
+shot r3.png
+log
+hold A frames=4
+wait frames=100
+shot r4.png
+log
+hold A frames=4
+wait frames=100
+shot r5.png
+log
+hold A frames=4
+wait frames=100
+shot r6.png
+log
+hold A frames=4
+wait frames=100
+shot r7.png
+log
+hold A frames=4
+wait frames=100
+shot r8.png
+log
+hold A frames=4
+wait frames=100
+shot r9.png
+log
+hold A frames=4
+wait frames=100
+shot r10.png
+log
+hold A frames=4
+wait frames=100
+shot r11.png
+log
+hold A frames=4
+wait frames=100
+shot r12.png
+log
+hold A frames=4
+wait frames=100
+shot r13.png
+log
+hold A frames=4
+wait frames=100
+shot r14.png
+log
+end
