@@ -858,9 +858,33 @@ namespace {
 // Called once per logic pad read: JUTGamePad::read() (sms/src/JSystem/JUtility/JUTGamePad.cpp), before PADRead. One step
 // per read, so the script clock is the game's logic clock: independent of wall time, FPS cap and replay presents.
 // Steps apply via PADSetVirtualStatus before that read.
+// SUNSHINE_DEV_AIM_ASSIST=1 (dev-only, never on by default): while Mario crouches (MARIO_STATUS_SQUAT) and a GateKeeper boss exists,
+// face its head and set the nozzle pitch so the jet should reach it. The pitch uses the measured jet (apex 221 at 45 degrees, i.e.
+// range v^2/g ~ 884, section 25 of the session doc): y(D) = D tan(a) - D^2 / (2 * 884 * cos(a)^2), clamped to the squat range.
+void aimAssist()
+{
+	static const bool enabled = std::getenv("SUNSHINE_DEV_AIM_ASSIST") != nullptr;
+	if (!enabled || !gpMarioOriginal || !gpMarioOriginal->mWaterGun || gpMarioOriginal->mStatus != MARIO_STATUS_SQUAT) return;
+	TBiancoGateKeeper* b = findBoss();
+	if (!b || !b->mHead) return;
+	const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
+	const float dz = b->mHead->mPosition.z - gpMarioOriginal->mPosition.z;
+	const float dy = b->mHead->mPosition.y - (gpMarioOriginal->mPosition.y + 60.0f);
+	const float dist = std::sqrt(dx * dx + dz * dz);
+	gpMarioOriginal->mFaceAngle.y = static_cast<s16>(std::atan2(dx, dz) * (32768.0f / 3.14159265f));
+	float best = 0.0f, bestErr = 1e9f;
+	for (float deg = 0.0f; deg <= 64.0f; deg += 0.5f) {
+		const float a = deg * 3.14159265f / 180.0f, c = std::cos(a);
+		const float err = std::fabs(dist * std::tan(a) - dist * dist / (2.0f * 884.0f * c * c) - dy);
+		if (err < bestErr) { bestErr = err; best = deg; }
+	}
+	gpMarioOriginal->mWaterGun->mNozzleList[gpMarioOriginal->mWaterGun->mCurrentNozzle]->unk36E = static_cast<s16>(-best * (65536.0f / 360.0f));
+}
+
 void sunshineDevScriptTick()
 {
 	++gTick;
+	aimAssist();
 	static const char* const scriptPath = std::getenv("SUNSHINE_DEV_SCRIPT");
 	if (scriptPath && !gLoaded) {
 		gLoaded = true;
