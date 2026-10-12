@@ -75,7 +75,7 @@ mash A period=40 until stage=2 director mario dirstate=4 camDemo=0 timeout=2400
 waitfor stage=2 scen=0 director mario dirstate=4 camDemo=0 timeout=600
 wait frames=120
 log
-shine
+shine 1
 wait frames=300
 log
 mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=2400

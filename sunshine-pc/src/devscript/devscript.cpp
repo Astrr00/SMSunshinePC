@@ -291,7 +291,11 @@ Command parseLine(const std::string& text, int line)
 		if (in >> tok) c.frames = tok == "off" ? 0 : 1;
 		return c;
 	}
-	if (verb == "shine") { c.op = Op::Shine; return c; }
+	if (verb == "shine") { // shine [N]: N-th TShine of the scene (default 0)
+		c.op = Op::Shine;
+		in >> c.frames;
+		return c;
+	}
 	if (verb == "tpshine") {
 		// Dev-assisted: moves Mario onto the runtime TShine (+ optional x y z offset); the game's own overlap test then runs.
 		c.op = Op::TpShine;
@@ -483,7 +487,7 @@ TObjManager* shineManager()
 	    "\x83\x56\x83\x83\x83\x43\x83\x93\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"));
 }
 
-TShine* findShine(int& seen)
+TShine* findShine(int& seen, int index = 0)
 {
 	TObjManager* mgrs[] = {shineManager(), gpItemManager, gpMapObjManager};
 	TShine* shine = nullptr;
@@ -491,22 +495,25 @@ TShine* findShine(int& seen)
 	for (TObjManager* mgr : mgrs) {
 		if (!mgr) continue;
 		seen += mgr->getObjNum();
-		for (int i = 0; !shine && i < mgr->getObjNum(); ++i) shine = dynamic_cast<TShine*>(mgr->getObj(i));
+		for (int i = 0; !shine && i < mgr->getObjNum(); ++i) {
+			TShine* t = dynamic_cast<TShine*>(mgr->getObj(i));
+			if (t && index-- == 0) shine = t;
+		}
 	}
 	return shine;
 }
 
 // Dev trigger: runs the game's own collect path (TShine::touchPlayer -> TMario::receiveMessage
 // -> WIN_DEMO -> fireGetStar -> setShineFlag). Only the overlap test is skipped.
-void doShine()
+void doShine(int index)
 {
 	int seen = 0;
-	TShine* shine = findShine(seen);
+	TShine* shine = findShine(seen, index);
 	if (!shine || !gpMarioOriginal) {
 		std::printf("[devscript] shine: no TShine among %d managed objects (tick=%d)\n", seen, gTick);
 		return;
 	}
-	std::printf("[devscript] shine: eventId=%u shines_before=%d tick=%d\n", shine->getEventId(), shineCount(), gTick);
+	std::printf("[devscript] shine[%d]: eventId=%u pos=(%.0f,%.0f,%.0f) shines_before=%d tick=%d\n", index, shine->getEventId(), shine->mPosition.x, shine->mPosition.y, shine->mPosition.z, shineCount(), gTick);
 	shine->touchPlayer(gpMarioOriginal);
 }
 
@@ -786,7 +793,7 @@ void step()
 			++gRemaining;
 			return;
 		}
-		if (c.op == Op::Shine) doShine();
+		if (c.op == Op::Shine) doShine(c.frames);
 		if (c.op == Op::TpShine) doTpShine(c.pos);
 		if (c.op == Op::Hurt) doHurt(c.frames);
 		if (c.op == Op::TpEm && gpMarioOriginal && JDrama::TNameRefGen::getInstance() && JDrama::TNameRefGen::getInstance()->getRootNameRef()) {
