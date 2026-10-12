@@ -108,6 +108,10 @@ Next steps in order:
 - Untracked scratch at the repo root (`artifact_*.txt`, `_mr.json`, `crash.log`, `$env`, `sms/_e*.py`, `sms/_*.py`) is leftover and can be deleted.
 - Stateroot (`.stateroot/`, `AGENTS.md` StateRoot block) is optional project memory. `stateroot handoff write` failed on the old PC (CLI error 'system cannot find the path'), so no CLI-written handoff exists; `state/stateroot/` is a raw reference copy (never edit `.stateroot` by hand). Continue from this file, `status.md` and the git log instead.
 
+## Phase-1 acceptance status (2026-10-11, measured)
+
+Reached with dev switches (diagnosis only): Delfino gate opens and warps, select menu works, Bianco Ep.1 `stage=2 scen=0` with a controllable Mario (`sunshine-pc/tools/routes/33_gate_wash.dev`, `docs/img/bianco0_ep1.png`). Not reached: the no-switch route to Bianco (< 330 s), real GateKeeper kill, real Shine in Bianco, save/load in Bianco, two clean full runs. Details and what was tried: `sunshine-pc/docs/session-2026-10-11b.md` sections 10-16. Next: hit the airport boss head without `killboss`; real shadow-Mario chase; Bianco Shine (try the ramp / 100-coin shines, `tpshine` offsets are ignored).
+
 ## 9. Legal
 
 The disc image and extracted game files are the owner's own copy and must never be committed or published. The handoff bundle contains them only for local transfer; delete the `game-data/` folder from any shared medium.
