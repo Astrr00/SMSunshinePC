@@ -899,7 +899,7 @@ void TKoopaJrSubmarine::calcRootMatrix()
 		trans.add(mPosition);
 		mtx.setTrans(trans);
 
-		mtx.concat(centerMtx);
+		mtx.concat(mtx, centerMtx); // asm 0x8032A7C4-D0: standard mtx * centerMtx
 		getModel()->setBaseTRMtx(mtx);
 	}
 

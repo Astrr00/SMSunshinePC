@@ -458,7 +458,14 @@ void TTalk2D2::makeBoxLine(s8 line, char* text)
 	f32 t = 0.0f;
 	f32 prevX;
 	f32 prevY;
-	makeLineBox(&prevX, &prevY, t, p0, p1, p2);
+	{
+		f32 u  = 1.0f - t;
+		f32 b0 = u * u;
+		f32 b1 = 2.0f * t * u;
+		f32 b2 = t * t;
+		prevX  = p2.x * b2 + (p0.x * b0 + p1.x * b1);
+		prevY  = p2.y * b2 + (p0.y * b0 + p1.y * b1);
+	}
 
 	do {
 		int idx = col + line * 30;
@@ -502,8 +509,10 @@ void TTalk2D2::makeBoxLine(s8 line, char* text)
 		f32 cy   = -0.5f * sumY;
 		f32 c    = cosf(angle);
 		f32 s    = sinf(angle);
-		f32 posX = (cx + (prevX * c + prevY * -s)) + 0.5f * sumX;
-		f32 posY = (cy + (prevX * s + prevY * c)) + 0.5f * sumY;
+		f32 hx   = 0.5f * sumX;
+		f32 hy   = 0.5f * sumY;
+		f32 posX = (cx + (prevX * c + prevY * -s)) + hx;
+		f32 posY = (cy + (prevX * s + prevY * c)) + hy;
 
 		int xi = (int)(posX + (posX > 0.0f ? 0.5f : -0.5f));
 		int yi = (int)(posY + (posY > 0.0f ? 0.5f : -0.5f));

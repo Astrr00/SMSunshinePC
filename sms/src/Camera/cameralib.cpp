@@ -18,6 +18,13 @@ static void normalizeInner2(JGeometry::TVec3<f32>& vec)
 	normalizeInner1(vec);
 }
 
+// retail keeps setRotate out of line here; one extra inline level reproduces that
+static inline void clbSetRotate(JGeometry::TRotation3<TMtx33f>& mtx,
+                                const JGeometry::TVec3<f32>& axis, f32 angle)
+{
+	mtx.setRotate(axis, angle);
+}
+
 static inline void CLBMultTranspose33(const JGeometry::TRotation3<TMtx33f>& mtx,
                                       JGeometry::TVec3<f32>& vec)
 {
@@ -393,14 +400,15 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 		// [ cosY, 0, sinY]   [1,   0,     0 ]
 		// [   0,  1,   0 ] * [0, cosX, -sinX]
 		// [-sinY, 0, cosY]   [0, sinX,  cosX]
-		local_68.set(local_68.x * cosY
-		                 + (local_68.y * sinX + local_68.z * cosX) * sinY,
-		             local_68.y * cosX - local_68.z * sinX,
-		             -local_68.x * sinY
-		                 + (local_68.y * sinX + local_68.z * cosX) * cosY);
+		f32 oldY = local_68.y;
+		local_68.y    = oldY * cosX - local_68.z * sinX;
+		local_68.z    = oldY * sinX + local_68.z * cosX;
+		f32 negX = -local_68.x;
+		local_68.x    = local_68.x * cosY + local_68.z * sinY;
+		local_68.z    = negX * sinY + local_68.z * cosY;
 
 		local_e4.identity33();
-		local_e4.setRotate(local_80, fVar16.z);
+		clbSetRotate(local_e4, local_80, fVar16.z);
 
 		CLBMultTranspose33(local_e4, local_68);
 	}
@@ -411,14 +419,15 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 		f32 sinY = JMASSin(out_euler->y);
 		f32 cosY = JMASCos(out_euler->y);
 
-		local_74.set(local_74.x * cosY
-		                 + (local_74.y * sinX + local_74.z * cosX) * sinY,
-		             local_74.y * cosX - local_74.z * sinX,
-		             -local_74.x * sinY
-		                 + (local_74.y * sinX + local_74.z * cosX) * cosY);
+		f32 oldY = local_74.y;
+		local_74.y    = oldY * cosX - local_74.z * sinX;
+		local_74.z    = oldY * sinX + local_74.z * cosX;
+		f32 negX = -local_74.x;
+		local_74.x    = local_74.x * cosY + local_74.z * sinY;
+		local_74.z    = negX * sinY + local_74.z * cosY;
 
 		local_118.identity33();
-		local_118.setRotate(local_80, fVar16.z);
+		clbSetRotate(local_118, local_80, fVar16.z);
 
 		CLBMultTranspose33(local_118, local_74);
 	}

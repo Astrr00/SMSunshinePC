@@ -117,8 +117,12 @@ static inline u32 getPressureFlashColor(u8& frame)
 // fabricated
 static inline bool isMountedYoshi(TMario* mario)
 {
+	// asm 0x80204790: retail loads mYoshi->mState without a null check
 	TYoshi* yoshi = mario->mYoshi;
-	return yoshi != nullptr && yoshi->mState == TYoshi::STATE_MOUNTED;
+#ifdef TARGET_PC
+	if (!yoshi) return false; // retail has no check; keep the port safe if Yoshi is not created yet
+#endif
+	return yoshi->mState == TYoshi::STATE_MOUNTED;
 }
 
 // fabricated
@@ -167,7 +171,7 @@ static inline void updateWaterGaugeFill(TGCConsole2* console)
 
 	if (isMountedYoshi(mario)) {
 		TYoshi* yoshi = mario->mYoshi;
-		fill          = (f32)yoshi->unkD4 / (f32)yoshi->unkD8;
+		fill          = (f32)yoshi->unkC / (f32)yoshi->unk8; // asm 0x802047B4 lwz 0xc / 0x8
 	} else {
 		fill = (f32)currentWater / (f32)maxWater;
 	}
@@ -688,40 +692,40 @@ static inline void updateMarioLifeCounter(TGCConsole2* console)
 	((J2DPicture*)(pane)->getPane())->changeTexture((textures)[(digit)]->getTexInfo(), 0)
 
 // fabricated
-static inline void setCounterDigits(TBlendPane** panes, JUTTexture** textures,
-                                    int value)
-{
-	if (value < 100) {
-		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.1f));
-		SET_DIGIT_PANE(panes[1], textures, value % 10);
-	} else {
-		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.01f));
-
-		int remainder = value - (int)(value * 0.01f) * 100;
-		SET_DIGIT_PANE(panes[1], textures, (int)(remainder * 0.1f));
-		SET_DIGIT_PANE(panes[2], textures, remainder % 10);
-	}
-}
+// macros instead of static inline: retail has these expanded at every call site
+// (mwcc leaves the static inline versions out of line)
+#define setCounterDigits(panes_, textures_, value_)                          \
+	do {                                                                     \
+		int cdValue = (value_);                                              \
+		if (cdValue < 100) {                                                 \
+			SET_DIGIT_PANE((panes_)[0], textures_, (int)(cdValue * 0.1f));   \
+			SET_DIGIT_PANE((panes_)[1], textures_, cdValue % 10);            \
+		} else {                                                             \
+			SET_DIGIT_PANE((panes_)[0], textures_, (int)(cdValue * 0.01f));  \
+			int cdRemainder = cdValue - (int)(cdValue * 0.01f) * 100;        \
+			SET_DIGIT_PANE((panes_)[1], textures_, (int)(cdRemainder * 0.1f)); \
+			SET_DIGIT_PANE((panes_)[2], textures_, cdRemainder % 10);        \
+		}                                                                    \
+	} while (0)
 
 // fabricated
-static inline void setBlueCoinDigits(TBoundPane** panes, JUTTexture** textures,
-                                     int value)
-{
-	if (value < 100) {
-		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.1f));
-		SET_DIGIT_PANE(panes[1], textures, value % 10);
-		if (panes[2]->getPane()->isVisible())
-			panes[2]->getPane()->hide();
-	} else {
-		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.01f));
-
-		int remainder = value - (int)(value * 0.01f) * 100;
-		SET_DIGIT_PANE(panes[1], textures, (int)(remainder * 0.1f));
-		SET_DIGIT_PANE(panes[2], textures, remainder % 10);
-		if (!panes[2]->getPane()->isVisible())
-			panes[2]->getPane()->show();
-	}
-}
+#define setBlueCoinDigits(panes_, textures_, value_)                         \
+	do {                                                                     \
+		int bcValue = (value_);                                              \
+		if (bcValue < 100) {                                                 \
+			SET_DIGIT_PANE((panes_)[0], textures_, (int)(bcValue * 0.1f));   \
+			SET_DIGIT_PANE((panes_)[1], textures_, bcValue % 10);            \
+			if ((panes_)[2]->getPane()->isVisible())                         \
+				(panes_)[2]->getPane()->hide();                              \
+		} else {                                                             \
+			SET_DIGIT_PANE((panes_)[0], textures_, (int)(bcValue * 0.01f));  \
+			int bcRemainder = bcValue - (int)(bcValue * 0.01f) * 100;        \
+			SET_DIGIT_PANE((panes_)[1], textures_, (int)(bcRemainder * 0.1f)); \
+			SET_DIGIT_PANE((panes_)[2], textures_, bcRemainder % 10);        \
+			if (!(panes_)[2]->getPane()->isVisible())                        \
+				(panes_)[2]->getPane()->show();                              \
+		}                                                                    \
+	} while (0)
 
 // fabricated
 static inline void setShineDigits(TBlendPane** panes, JUTTexture** textures,
@@ -1452,8 +1456,13 @@ static inline bool updateBalloonAppearState(TGCConsole2* console)
 		return false;
 
 	console->unk10 = 2;
-	memset(console->unk3B8->getStringPtr(), 0, 0x400);
-	memset(console->unk3B4->getStringPtr(), 0, 0x400);
+	// asm 0x802055D0: retail clears both strings with an unrolled byte loop, no memset call
+	char* text = console->unk3B8->getStringPtr();
+	for (int i = 0x400; i != 0; i--)
+		*text++ = 0;
+	char* text2 = console->unk3B4->getStringPtr();
+	for (int i = 0x400; i != 0; i--)
+		*text2++ = 0;
 	console->unk3B8->show();
 	return true;
 }

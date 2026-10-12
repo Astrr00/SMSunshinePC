@@ -352,14 +352,17 @@ bool TAnimalBird::doLanding(bool start)
 		JGeometry::TQuat4<f32> quat = SMS_Eular2Quat(mRotation);
 		JGeometry::TVec3<f32> vel(0.0f, 0.0f, speed);
 		quat.rotate(vel, vel);
-		mVelocity.set(vel.x, 0.0f, vel.z);
+		JGeometry::TVec3<f32> horiz(vel.x, 0.0f, vel.z);
+		mVelocity = horiz;
 	}
 
 	JGeometry::TVec3<f32> fall(0.0f, 0.0f, 0.0f);
 	bool landed = false;
-	if (mWireBinder != nullptr)
-		mWireBinder->getPoint(&fall, mHomePos);
-	else
+	if (mWireBinder != nullptr) {
+		// asm 0x8036A32C: retail passes an unused temp, not &fall
+		JGeometry::TVec3<f32> wirePos;
+		mWireBinder->getPoint(&wirePos, mHomePos);
+	} else
 		gpMap->checkGround(mPosition, &mGroundPlane);
 
 	if (checkLiveFlag(LIVE_FLAG_AIRBORNE))

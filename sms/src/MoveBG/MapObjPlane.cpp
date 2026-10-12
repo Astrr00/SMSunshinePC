@@ -180,9 +180,10 @@ void TMapObjPlane::calcNrm(int x, int z)
 	}
 
 	JGeometry::TVec3<f32> local_c0;
-	local_c0.x = (h0P - hP0) * 0.0f - h0N * (hP0 - h00);
-	local_c0.y = h0N * h0N - (0.0f - fVar1) * 0.0f;
-	local_c0.z = (0.0f - fVar1) * (hP0 - h00) - (h0P - hP0) * h0N;
+	// asm 0x801B696C: 4th edge vector uses fVar1 (not h0N); retail fsubs f4=f26-0.0
+	local_c0.x = (h0P - hP0) * 0.0f - (fVar1 - 0.0f) * (hP0 - h00);
+	local_c0.y = (fVar1 - 0.0f) * (fVar1 - 0.0f) - (0.0f - fVar1) * 0.0f;
+	local_c0.z = (0.0f - fVar1) * (hP0 - h00) - (h0P - hP0) * (fVar1 - 0.0f);
 	char trashB[0xe0];
 	{
 		f32 lsq = dotNoInline(local_c0, local_c0);

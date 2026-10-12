@@ -196,8 +196,10 @@ void TEMario::perform(u32 cue, JDrama::TGraphics* graphics)
 		return;
 	}
 
-	// retail: only the attack loop depends on the cue and canControl(); the body perform and the copy always run
-	for (s32 i = 0; (cue & CUE_MOVE) && mEnemyMario->canControl() && i < mColCount; ++i) {
+	// asm 0x8024CE78: cue&MOVE and canControl() are tested once before the loop
+	u32 move = cue & CUE_MOVE;
+	if (move && mEnemyMario->canControl()) {
+	for (s32 i = 0; i < mColCount; ++i) {
 		switch (mCollisions[i]->mActorType) {
 		case 0x80000001: {
 			if (mPosition.distance(mCollisions[i]->getPosition())
@@ -219,10 +221,11 @@ void TEMario::perform(u32 cue, JDrama::TGraphics* graphics)
 		} break;
 		}
 	}
+	}
 
 	mEnemyMario->perform(cue, graphics);
 
-	if (cue & CUE_MOVE) {
+	if (move) {
 		mPosition = mEnemyMario->getPosition();
 		mRotation = mEnemyMario->getRotation();
 		mScaling  = mEnemyMario->getScaling();

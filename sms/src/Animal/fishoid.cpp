@@ -149,6 +149,26 @@ void TRealoid::loadDefault(JSUMemoryInputStream& stream, const char* name,
 	}
 }
 
+// Retail inlines this into TRealoid::perform but calls TRealoid::clipBoids from
+// TFishoid::perform, so TRealoid::perform uses this copy of the body.
+static inline void clipBoidsBody(TRealoid* self, JDrama::TGraphics* graphics)
+{
+	f32 nearPlane = graphics->getNearPlane();
+	SetViewFrustumClipCheckPerspective(gpCamera->getFovy(),
+	                                   gpCamera->getAspect(), nearPlane,
+	                                   10000.0f);
+
+	for (int i = 0; i < self->unk150->getBoidNum(); ++i) {
+		TBoid* boid               = self->unk150->getBoid(i);
+		JGeometry::TVec3<f32> pos = boid->mPosition;
+		if (ViewFrustumClipCheck(graphics, &pos, 100.0f))
+			self->unk154[i]->offFlag(TRealoidActor::FLAG_CLIPPED_OUT);
+		else
+			self->unk154[i]->onFlag(TRealoidActor::FLAG_CLIPPED_OUT);
+	}
+}
+
+#pragma dont_inline on
 void TRealoid::clipBoids(JDrama::TGraphics* graphics)
 {
 	f32 nearPlane = graphics->getNearPlane();
@@ -165,13 +185,14 @@ void TRealoid::clipBoids(JDrama::TGraphics* graphics)
 			unk154[i]->onFlag(TRealoidActor::FLAG_CLIPPED_OUT);
 	}
 }
+#pragma dont_inline off
 
 void TRealoid::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	unk150->perform(cue, graphics);
 
 	if (cue & CUE_CALC_ANIM) {
-		clipBoids(graphics);
+		clipBoidsBody(this, graphics);
 		for (int i = 0; i < unk150->getBoidNum(); ++i) {
 			TBoid* boid = unk150->getBoid(i);
 			unk154[i]->calcRootMatrix(boid);
@@ -195,6 +216,7 @@ TFishoid::TFishoid(int type, const char* name)
 
 void TFishoid::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x20];
 	// retail inlines TRealoid::perform here
 	unk150->perform(cue, graphics);
 

@@ -478,10 +478,10 @@ const TBGCheckData* TMapCollisionData::intersectLine(
 				JGeometry::TVec2<f32> lineA(start.x, start.z);
 				JGeometry::TVec2<f32> lineB(end.x, end.z);
 
-				if (!LineInLineXZ(lineA, lineB, p10, p00)
-				    && !LineInLineXZ(lineA, lineB, p01, p00)
-				    && !LineInLineXZ(lineA, lineB, p11, p10)
-				    && !LineInLineXZ(lineA, lineB, p11, p01))
+				if (!LineInLineXZ(lineA, lineB, p00, p10)
+				    && !LineInLineXZ(lineA, lineB, p00, p01)
+				    && !LineInLineXZ(lineA, lineB, p10, p11)
+				    && !LineInLineXZ(lineA, lineB, p01, p11))
 					continue;
 			}
 

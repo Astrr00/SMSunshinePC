@@ -913,7 +913,7 @@ void TFireWanwan::decideTarget(const JGeometry::TVec3<f32>& param_1)
 		                 1.0f);
 	}
 
-	unk1BC.setEulerY(DEG_TO_RAD(mRotation.y));
+	unk1BC.setEulerY(0.017453294f * mRotation.y); // asm 0x8029A7F4 pool 0x3C8EFA36
 }
 
 void TFireWanwan::doAdjustTarget()

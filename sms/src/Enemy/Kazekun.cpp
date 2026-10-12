@@ -258,7 +258,7 @@ void TKazekun::doAttackPose(bool init)
 	mQuat = q;
 
 	JGeometry::TVec3<f32> cur = mVelocity;
-	JGeometry::TVec3<f32> vel(0.0f, 0.0f, cur.length());
+	JGeometry::TVec3<f32> vel(0.0f, 0.0f, calcDistXZ(cur));
 	mQuat.rotate(vel, vel);
 	mVelocity = vel;
 }

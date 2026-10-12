@@ -79,8 +79,12 @@ void TMarDirector::movement_game()
 {
 	char trash[40];
 	unk84->associateNPC(nullptr);
-	if ((int)unk124 != 0)
+	switch ((int)unk124) {
+	case 0:
+		break;
+	default:
 		return;
+	}
 
 	unk18[0]->offFlag(TMarioGamePad::PAD_FLAG_TALK_NPC);
 	if (gpMarioOriginal->isHolding())
@@ -214,9 +218,11 @@ void TMarDirector::setNextStage(u16 param_1, JDrama::TActor* param_2)
 			unk4C |= 0x2;
 	}
 
-	if ((int)local.getStage() == 0x37) {
+	switch ((int)local.getStage()) {
+	case 0x37:
 		unk4C |= 0x100;
 		gpApplication.setMovie(6);
+		break;
 	}
 }
 #pragma dont_inline off

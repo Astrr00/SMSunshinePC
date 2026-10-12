@@ -751,7 +751,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 		jointMtx->concat(rot, *jointMtx);
 
 		rot.setEularZ(downAngle);
-		jointMtx->concat(rot);
+		jointMtx->concat(*jointMtx, rot); // asm 0x80336F00-CC: jm * rotZ
 	}
 
 	f32 focus = koopa->getNeckFocus();
@@ -772,7 +772,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 	f32 proj = aimNorm.x * jointMtx->at(0, 0) + aimNorm.y * jointMtx->at(1, 0)
 	           + aimNorm.z * jointMtx->at(2, 0);
 	if (proj < 0.5)
-		focus *= (0.0f + proj) / 1.5f;
+		focus *= (1.0f + proj) / 1.5f; // asm 0x803370DC (1.0f, not 0.0f)
 
 	JGeometry::TQuat4<f32> quat;
 	JGeometry::TVec3<f32> axis(jointMtx->at(1, 0) * aimNorm.z
@@ -783,19 +783,13 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 	                               - jointMtx->at(1, 0) * aimNorm.x);
 
 	f32 axisLenSq = axis.squared();
-	f32 axisLen;
-	if (axisLenSq <= 0.0f) {
-		axisLen = axisLenSq;
-	} else {
-		f32 root  = JGeometry::TUtil<f32>::inv_sqrt(axisLenSq);
-		axisLen   = axisLenSq * root;
-	}
+	f32 axisLen = JGeometry::TUtil<f32>::sqrt(axisLenSq);
 
-	if (axisLenSq <= JGeometry::TUtil<f32>::epsilon()) {
-		quat.x = 1.0f;
-		quat.y = 1.0f;
-		quat.z = 1.0f;
-		quat.w = 0.0f;
+	if (axisLen <= JGeometry::TUtil<f32>::epsilon()) { // asm 0x8033714C compares sqrt'd length
+		quat.x = 0.0f;
+		quat.y = 0.0f;
+		quat.z = 0.0f;
+		quat.w = 1.0f; // asm 0x80337160-70
 	} else {
 		f32 angle = atan2f(axisLen,
 		                   jointMtx->at(0, 0) * aimNorm.x
@@ -813,9 +807,9 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 	f32 lenSq = quat.x * quat.x + quat.y * quat.y + quat.z * quat.z
 	            + quat.w * quat.w;
 	if (lenSq <= JGeometry::TUtil<f32>::epsilon()) {
-		quat.x = 1.0f;
-		quat.y = 1.0f;
-		quat.z = 1.0f;
+		quat.x = 0.0f; // asm 0x80337204: all four zeroed
+		quat.y = 0.0f;
+		quat.z = 0.0f;
 		quat.w = 0.0f;
 	} else {
 		f32 inv = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(lenSq);
@@ -826,13 +820,14 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 	}
 
 	if (!koopa->isFlaming()) {
-		JGeometry::TVec3<f32> cross(quat.y * marioPos.z - quat.z * marioPos.y,
-		                            quat.z * marioPos.x - quat.x * marioPos.z,
-		                            quat.x * marioPos.y - quat.y * marioPos.x);
+		// asm 0x8033728C: aimNorm x marioPos (not quat)
+		JGeometry::TVec3<f32> cross(aimNorm.y * marioPos.z - aimNorm.z * marioPos.y,
+		                            aimNorm.z * marioPos.x - aimNorm.x * marioPos.z,
+		                            aimNorm.x * marioPos.y - aimNorm.y * marioPos.x);
 
 		f32 angle2 = atan2f(JGeometry::TUtil<f32>::sqrt(cross.squared()),
-		                    quat.x * marioPos.x + quat.y * marioPos.y
-		                        + quat.z * marioPos.z);
+		                    aimNorm.x * marioPos.x + aimNorm.y * marioPos.y
+		                        + aimNorm.z * marioPos.z);
 		f32 dot2 = marioPos.x * jointMtx->at(0, 1)
 		           + marioPos.y * jointMtx->at(1, 1)
 		           + marioPos.z * jointMtx->at(2, 1);
@@ -845,7 +840,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 		JGeometry::TQuat4<f32> quat2;
 		f32 sinHalf2 = sinf(halfAngle2);
 		quat2.x      = 2.0f * (quat.x * quat.z + quat.w * quat.y) * sinHalf2;
-		quat2.y      = 2.0f * (quat.w * quat.x - quat.y * quat.z) * sinHalf2;
+		quat2.y      = 2.0f * (quat.y * quat.z - quat.w * quat.x) * sinHalf2; // asm 0x80337354 yz - wx
 		quat2.z = (1.0f - 2.0f * quat.x * quat.x - 2.0f * quat.y * quat.y)
 		          * sinHalf2;
 		quat2.w = cosf(halfAngle2);
@@ -853,9 +848,9 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 		f32 lenSq2 = quat2.x * quat2.x + quat2.y * quat2.y
 		             + quat2.z * quat2.z + quat2.w * quat2.w;
 		if (lenSq2 <= JGeometry::TUtil<f32>::epsilon()) {
-			quat2.x = 1.0f;
-			quat2.y = 1.0f;
-			quat2.z = 1.0f;
+			quat2.x = 0.0f; // asm 0x803373BC: all four zeroed
+			quat2.y = 0.0f;
+			quat2.z = 0.0f;
 			quat2.w = 0.0f;
 		} else {
 			f32 inv = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(lenSq2);
@@ -865,19 +860,24 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 			quat2.w *= inv;
 		}
 
-		quat.x = quat2.w * quat.x - quat2.z * quat.y + quat2.y * quat.z
+		// asm 0x80337410-7C: all four results computed from the old quat before any store
+		f32 nx = quat2.w * quat.x - quat2.z * quat.y + quat2.y * quat.z
 		         + quat2.x * quat.w;
-		quat.y = quat2.w * quat.y + quat2.z * quat.x - quat2.x * quat.z
+		f32 ny = quat2.w * quat.y + quat2.z * quat.x - quat2.x * quat.z
 		         + quat2.y * quat.w;
-		quat.z = quat2.w * quat.z + quat2.x * quat.y - quat2.y * quat.x
+		f32 nz = quat2.w * quat.z + quat2.x * quat.y - quat2.y * quat.x
 		         + quat2.z * quat.w;
-		quat.w = quat2.w * quat.w - quat2.x * quat.x - quat2.y * quat.y
+		f32 nw = quat2.w * quat.w - quat2.x * quat.x - quat2.y * quat.y
 		         - quat2.z * quat.z;
+		quat.x = nx;
+		quat.y = ny;
+		quat.z = nz;
+		quat.w = nw;
 	}
 
 	TRotation3f rot2;
 	rot2.setQuat(quat);
-	jointMtx->concat(rot2, *jointMtx);
+	jointMtx->concat(*jointMtx, rot2); // asm 0x803374B0-DC: jm * rot2
 	PSMTXCopy(*jointMtx, j3dSys.mCurrentMtx);
 
 	return 1;
@@ -899,8 +899,17 @@ inline void TKoopa::breathFlame()
 	if (!anyDying && freeIdx >= 0) {
 		MtxPtr headMtx = getHeadMtx();
 		JGeometry::TVec3<f32> dir(headMtx[0][0], 0.0f, headMtx[2][0]);
-		dir.normalize();
 		JGeometry::TVec3<f32> pos(headMtx[0][3], headMtx[1][3] - 500.0f, headMtx[2][3]);
+		// asm 0x80336A10-70: retail inlines setLength(); written out because the header pragma blocks that
+		f32 lsq = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
+		if (lsq <= JGeometry::TUtil<f32>::epsilon()) {
+			dir.x = dir.y = dir.z = 0.0f;
+		} else {
+			f32 inv = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(lsq);
+			dir.x *= inv;
+			dir.y *= inv;
+			dir.z *= inv;
+		}
 		mFlames[freeIdx]->fire(pos, dir, getParam()->flameVelocity.get(),
 		                       4000.0f, getParam()->flameRadius.get(),
 		                       getParam()->flameHeight.get());

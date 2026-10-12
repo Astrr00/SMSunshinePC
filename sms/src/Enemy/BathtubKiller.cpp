@@ -1036,6 +1036,8 @@ void TBathtubKillerManager::loadAfter()
 	unk68 = 0;
 	unk69 = 0;
 
+	char trash[0x18];
+
 	// TODO: the original reads unk38 here and drops the result.
 	static const char* loopFilenames[1] = {
 		"/scene/map/map/ms_kp_kill_smoke.jpa",

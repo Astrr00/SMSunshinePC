@@ -25,16 +25,17 @@ inline void TMirrorCamera::makeMirrorViewMtx()
 	f32 negD = -unk90;
 
 	// reflect the eye point, the target and the up point across the plane
-	unk98.scaleAdd((normal.dot(gpCamera->unk124) - negD) * -2.0f, normal,
-	               gpCamera->unk124);
+	// asm 0x801E4E88-0x801E4F84 / 0x801E5090-C4: p' = p + n * (-2 * (n.p - negD))
+	unk98.scaleAdd((normal.dot(gpCamera->unk124) - negD) * -2.0f,
+	               gpCamera->unk124, normal);
 
 	JGeometry::TVec3<f32> target;
-	target.scaleAdd((normal.dot(gpCamera->unk148) - negD) * -2.0f, normal,
-	                gpCamera->unk148);
+	target.scaleAdd((normal.dot(gpCamera->unk148) - negD) * -2.0f,
+	                gpCamera->unk148, normal);
 
 	JGeometry::TVec3<f32> up;
-	up.scaleAdd((normal.dot(gpCamera->mUp) - negD) * -2.0f, normal,
-	            gpCamera->mUp);
+	up.scaleAdd((normal.dot(gpCamera->mUp) - negD) * -2.0f, gpCamera->mUp,
+	            normal);
 
 	C_MTXLookAt(unk30, &unk98, &up, &target);
 }

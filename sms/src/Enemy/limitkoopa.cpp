@@ -557,3 +557,5 @@ BOOL TNerveLimitKoopaHipDropJump::execute(TSpineBase<TLiveActor>* spine) const
 
 	return false;
 }
+
+#pragma inline_depth(4)

@@ -877,6 +877,7 @@ void TModelWaterManager::calcVMMtxGround(MtxPtr m, f32 scale,
 		out[0][2] = b * nz + c * sy;
 		out[0][3] = d + (c * cz + (a * cx + b * cy));
 	}
+
 	{
 		f32 b = m[1][1];
 		f32 c = m[1][2];
@@ -887,6 +888,7 @@ void TModelWaterManager::calcVMMtxGround(MtxPtr m, f32 scale,
 		out[1][2] = b * nz + c * sy;
 		out[1][3] = d + (c * cz + (a * cx + b * cy));
 	}
+
 	{
 		f32 b = m[2][1];
 		f32 c = m[2][2];

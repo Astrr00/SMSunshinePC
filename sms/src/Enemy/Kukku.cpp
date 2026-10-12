@@ -308,9 +308,7 @@ void TKukku::dropCoins()
 		mDropCount += 1;
 		mMushroom->appear();
 		mMushroom->JSGSetTranslation(mPosition);
-		mMushroom->mVelocity.x = 0.0f;
-		mMushroom->mVelocity.y = 0.0f;
-		mMushroom->mVelocity.z = 0.0f;
+		mMushroom->mVelocity.zero();
 		mMushroom->offLiveFlag(LIVE_FLAG_UNK10);
 		return;
 	}
@@ -331,8 +329,8 @@ void TKukku::dropCoins()
 
 	f32 dropSpeed = getSaveParam2()->mDropSpeed.get();
 	s16 angle     = DEG2SHORTANGLE(mRotation.y);
-	JGeometry::TVec3<f32> velocity(dropSpeed * JMASSin(angle), 0.0f,
-	                               dropSpeed * JMASCos(angle));
+	JGeometry::TVec3<f32> velocity;
+	velocity.set(dropSpeed * JMASSin(angle), 0.0f, dropSpeed * JMASCos(angle));
 
 	JGeometry::TVec3<f32> dir = velocity;
 	pitch.rotate(dir, dir);

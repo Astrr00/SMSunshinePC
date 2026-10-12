@@ -49,28 +49,39 @@ void CPolarSubCamera::setNoticeInfo()
 
 TLiveActor* CPolarSubCamera::getNoticeActor_()
 {
-	char trash[0x30];
+	char trash[0x28];
 	if (mNoticeActor != nullptr && !mNoticeActor->checkLiveFlag(LIVE_FLAG_DEAD)
 	    && !mNoticeActor->checkLiveFlag(LIVE_FLAG_HIDDEN)) {
 
-		f32 dist2 = mNoticeActor->mPosition.squared(*gpMarioPos);
+		f32 dxA = mNoticeActor->mPosition.x - gpMarioPos->x;
+		f32 dyA = mNoticeActor->mPosition.y - gpMarioPos->y;
+		f32 dzA = mNoticeActor->mPosition.z - gpMarioPos->z;
+		f32 sxA = dxA * dxA;
+		f32 syA = dyA * dyA;
+		f32 szA = dzA * dzA;
+		f32 dist2 = sxA + syA + szA;
 		if (dist2 < CLBSquared<f32>(mSaveNotice->mOffDist.get())) {
 			f32 clipMax = mSaveNotice->mOffClipRatio.get();
 			JGeometry::TVec2<f32> clipPos;
 			CLBCalc2DFPos(&clipPos, unk16C, unk1EC, mNoticeActor->mPosition,
 			              nullptr, false);
 
-			// TODO: inline
-			f32 clipMin  = -clipMax;
-			bool inClipX = false;
-			bool inClipY = false;
+			// asm 0x80359438: retail keeps three bools plus a ternary result
+			f32 clipMin   = -clipMax;
+			bool inClipY2 = false;
+			bool inClipY1 = false;
+			bool inClipX  = false;
 			if (clipMin <= clipPos.x && clipPos.x <= clipMax)
 				inClipX = true;
 
-			if (inClipX && clipMin <= clipPos.y && clipPos.y <= clipMax)
-				inClipY = true;
+			if (inClipX && clipMin <= clipPos.y)
+				inClipY1 = true;
 
-			if (inClipY)
+			if (inClipY1 && clipPos.y <= clipMax)
+				inClipY2 = true;
+
+			bool inClip = inClipY2 ? true : false;
+			if (inClip)
 				return mNoticeActor;
 		}
 	}
@@ -83,11 +94,17 @@ TLiveActor* CPolarSubCamera::getNoticeActor_()
 		    || unk2A0[i]->checkLiveFlag(LIVE_FLAG_HIDDEN))
 			continue;
 
-		if (mNoticeActor != nullptr && unk2A0[i] == mNoticeActor)
+		if (mNoticeActor != nullptr && mNoticeActor == unk2A0[i])
 			continue;
 
-		f32 dist2 = unk2A0[i]->mPosition.squared(*gpMarioPos);
-		if (dist2 >= closestDist2)
+		f32 dxB = unk2A0[i]->mPosition.x - gpMarioPos->x;
+		f32 dyB = unk2A0[i]->mPosition.y - gpMarioPos->y;
+		f32 dzB = unk2A0[i]->mPosition.z - gpMarioPos->z;
+		f32 sxB = dxB * dxB;
+		f32 syB = dyB * dyB;
+		f32 szB = dzB * dzB;
+		f32 dist2 = sxB + syB + szB;
+		if (!(dist2 < closestDist2))
 			continue;
 
 		f32 clipMax = mSaveNotice->mOnClipRatio.get();
@@ -95,17 +112,22 @@ TLiveActor* CPolarSubCamera::getNoticeActor_()
 		CLBCalc2DFPos(&clipPos, unk16C, unk1EC, unk2A0[i]->mPosition, nullptr,
 		              false);
 
-		// TODO: inline
-		f32 clipMin  = -clipMax;
-		bool inClipX = false;
-		bool inClipY = false;
+		// asm 0x803595E0: retail keeps three bools plus a ternary result
+		f32 clipMin   = -clipMax;
+		bool inClipX  = false;
+		bool inClipY1 = false;
+		bool inClipY2 = false;
 		if (clipMin <= clipPos.x && clipPos.x <= clipMax) {
 			inClipX = true;
 		}
-		if (inClipX && clipMin <= clipPos.y && clipPos.y <= clipMax) {
-			inClipY = true;
+		if (inClipX && clipMin <= clipPos.y) {
+			inClipY1 = true;
 		}
-		if (!inClipY)
+		if (inClipY1 && clipPos.y <= clipMax) {
+			inClipY2 = true;
+		}
+		bool inClip = inClipY2 ? true : false;
+		if (!inClip)
 			continue;
 
 		if (!MsIsInSight(*gpMarioPos, SHORTANGLE2DEG(*gpMarioAngleY),

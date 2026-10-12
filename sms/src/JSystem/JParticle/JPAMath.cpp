@@ -127,10 +127,10 @@ void JPAVecToRotaMtx(MtxPtr dst, JGeometry::TVec3<f32> a,
 	f32 cos = a.dot(b);
 	f32 sin = JGeometry::TUtil<f32>::sqrt(sq);
 
-	if (sin > JGeometry::TUtil<f32>::epsilon()) {
-		axis.scale(__fres(sin));
-	} else {
+	if (sin <= JGeometry::TUtil<f32>::epsilon()) {
 		axis.zero();
+	} else {
+		axis.scale(__fres(sin));
 	}
 
 	f32 oneMinusCos = 1.0f - cos;
