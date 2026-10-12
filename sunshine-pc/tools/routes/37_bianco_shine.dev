@@ -72,11 +72,13 @@ waitfor stage=2 timeout=1200
 log
 wait frames=400
 mash A period=40 until stage=2 director mario dirstate=4 camDemo=0 timeout=2400
+waitfor stage=2 scen=0 director mario dirstate=4 camDemo=0 timeout=600
 wait frames=120
 log
-tpshine x=200 y=0 z=0
+shine
 wait frames=300
 log
-wait frames=900
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=2400
+wait frames=60
 log
 end
