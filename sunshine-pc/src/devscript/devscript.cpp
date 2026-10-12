@@ -64,7 +64,7 @@ u32 sunshineInterpStep();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase };
 
 struct Command {
 	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk };
@@ -266,6 +266,24 @@ Command parseLine(const std::string& text, int line)
 		// Test-only: applies damage through TMario::decHP, so the cheat health guard can be checked. frames = damage.
 		c.op = Op::Hurt;
 		if (!(in >> c.frames) || c.frames <= 0) fail(line, "hurt needs a positive damage amount", text);
+		return c;
+	}
+	if (verb == "chase") {
+		// chase timeout=N [spray=R]: dev aid, reads the shadow Mario's position and steers Mario toward him with the real stick, holding the
+		// analog R trigger within `radius` (default 900) units; ends when a talk window opens. Input stays real, only the target is read.
+		c.op = Op::Chase;
+		c.radius = 900.f;
+		std::string tok;
+		while (in >> tok) {
+			const size_t eq = tok.find('=');
+			if (eq == std::string::npos) fail(line, "unexpected token in chase", tok);
+			const std::string key = tok.substr(0, eq);
+			const float v = static_cast<float>(std::atof(tok.c_str() + eq + 1));
+			if (key == "timeout") c.maxTicks = static_cast<int>(v);
+			else if (key == "radius") c.radius = v;
+			else fail(line, "unexpected token in chase", tok);
+		}
+		if (c.maxTicks <= 0) fail(line, "chase needs timeout=N (logic ticks)", text);
 		return c;
 	}
 	if (verb == "killboss") { c.op = Op::KillBoss; return c; } // dev-only: marks the airport GateKeeper dead (diagnosis, never acceptance)
@@ -610,6 +628,13 @@ void walkStick(const Command& c, s8& sx, s8& sy, float& dist)
 	sy = static_cast<s8>(127.f * (dx * fx + dz * fz) / dist);
 }
 
+THitActor* findEMario()
+{
+	static const char kEMarioName[] = "\x83\x7d\x83\x8a\x83\x49\x83\x82\x83\x68\x83\x4c\x5f\x30";
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
+	return dynamic_cast<THitActor*>(JDrama::TNameRefGen::search(kEMarioName));
+}
+
 void finish()
 {
 	if (gDone) return;
@@ -755,6 +780,40 @@ void step()
 			}
 			if (gRemaining >= c.maxTicks) {
 				std::printf("[devscript] TIMEOUT faceto line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			setVirtualPad(0, &pad);
+			++gRemaining;
+			return;
+		}
+		if (c.op == Op::Chase) {
+			if (!gStarted) {
+				gStarted = true;
+				gRemaining = 0;
+				std::printf("[devscript] chase start line=%d tick=%d\n", c.line, gTick);
+			}
+			if (gpMarDirector && gpMarDirector->isTalkModeNow()) {
+				std::printf("[devscript] chase met line=%d after=%d tick=%d\n", c.line, gRemaining, gTick);
+				const PADStatus neutral{};
+				setVirtualPad(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
+			PADStatus pad{};
+			if (THitActor* e = findEMario(); e && gpMarioOriginal && gpCamera) {
+				Command t = c;
+				t.pos[0] = e->mPosition.x;
+				t.pos[2] = e->mPosition.z;
+				float dist = 0.f;
+				walkStick(t, pad.stickX, pad.stickY, dist);
+				if (dist < c.radius) pad.triggerRight = 255;
+				if (gRemaining % 60 == 0)
+					std::printf("[devscript] chase em=(%.0f,%.0f,%.0f) mario=(%.0f,%.0f,%.0f) dist=%.0f tick=%d\n", e->mPosition.x, e->mPosition.y, e->mPosition.z, gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.y, gpMarioOriginal->mPosition.z, dist, gTick);
+			}
+			if (gRemaining >= c.maxTicks) {
+				std::printf("[devscript] TIMEOUT chase line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
 				std::fflush(stdout);
 				std::exit(3);
 			}
