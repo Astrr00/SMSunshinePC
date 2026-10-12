@@ -80,7 +80,6 @@ TShine* TItemManager::makeShineAppearWithDemoOffset(const char* shine_name,
 
 TCoin* TItemManager::newAndRegisterCoin(u32 event_id)
 {
-	char trash[8];
 	TCoin* result;
 	if (event_id < 0x32) {
 		result = (TCoin*)newAndRegisterObj(
@@ -99,6 +98,9 @@ TCoin* TItemManager::newAndRegisterCoin(u32 event_id)
 	}
 	result->mEventId = event_id;
 	return result;
+	if (0) {
+		(void)(Vec) { 1.0f, 2.0f, 3.0f };
+	}
 }
 
 void TItemManager::perform(u32 cue, JDrama::TGraphics* graphics)

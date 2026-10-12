@@ -181,6 +181,7 @@ void TFluffManager::loadAfter()
 
 void TFluffManager::control()
 {
+	char trash[0x38];
 	switch (mState) {
 	case 1:
 		if (mNextFluff == nullptr) {
@@ -197,7 +198,7 @@ void TFluffManager::control()
 		break;
 	case 2:
 		gpMapObjManager->unkD0.set(gpMapObjManager->unkD0.x + mWind.x,
-		                           gpMapObjManager->unkD0.y + mWind.y,
+		                           mWind.y + gpMapObjManager->unkD0.y,
 		                           gpMapObjManager->unkD0.z + mWind.z);
 		if (!isStateTimerEngaged())
 			mState = 3;
@@ -430,10 +431,11 @@ void TSwingBoard::load(JSUMemoryInputStream& stream)
 
 void TSwingBoard::control()
 {
+	TMtx34f swingMtx;
 	TMapObjBase::control();
 
 	if (marioIsOn() && marioIsOn()
-	    && SMS_GetMarioWaterGun()->mIsEmitWater != 0) {
+	    && (s32)SMS_GetMarioWaterGun()->mIsEmitWater != 0) {
 		MtxPtr emit = SMS_GetMarioWaterGun()->getEmitMtx(0);
 		f32 dirX    = -emit[0][0];
 		f32 dirZ    = -emit[2][0];
@@ -468,7 +470,6 @@ void TSwingBoard::control()
 	mRotation.x = -mSwingAngle;
 	f32 s       = sinf(3.14f * (mRotation.x / 180.0f));
 	f32 c       = cosf(3.14f * (mRotation.x / 180.0f));
-	TMtx34f swingMtx;
 	char trash[0x88]; // unused stack slot (present in the retail frame)
 	swingMtx.set(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, c, -s, 0.0f, 0.0f, s, c, 0.0f);
 	MtxPtr mtx = getModel()->getAnmMtx(0);
@@ -751,7 +752,10 @@ void THangingBridge::initDraw() const
 		JUTTexture texture(gpMapObjManager->unkCC);
 		texture.load(GX_TEXMAP0);
 	}
-	char trash[0x20]; // unused stack slot (present in the retail frame)
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
 	GXSetNumTevStages(1);
 	GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
 	GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO,
@@ -978,7 +982,6 @@ void THangingBridgeBoard::calcDefaultMtx()
 {
 	Mtx rotX;
 	Mtx rotY;
-	char trash[4]; // unused stack slot (present in the retail frame)
 	makeRootMtxRotX(rotX);
 	makeRootMtxRotY(rotY);
 	PSMTXConcat(rotY, rotX, rotY);

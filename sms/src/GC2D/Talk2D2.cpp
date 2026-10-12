@@ -196,9 +196,9 @@ void TTalk2D2::loadAfter()
 {
 	JDrama::TViewObj::loadAfter();
 
-	JUTPoint p0(unk48[1]->mBounds.x1, unk48[1]->mBounds.y1);
-	JUTPoint p1(0, unk54[1]->mBounds.y1 - unk220);
-	JUTPoint p2(unk60[1]->mBounds.x2 - 10, unk60[1]->mBounds.y1);
+	JUTPoint p0(unk48[1]->getBounds().x1, unk48[1]->getBounds().y1);
+	JUTPoint p1(0, unk54[1]->getBounds().y1 - unk220);
+	JUTPoint p2(unk60[1]->getBounds().x2 - 10, unk60[1]->getBounds().y1);
 
 	f32 length = 0.0f;
 	f32 prevX;
@@ -451,9 +451,9 @@ void TTalk2D2::makeBoxLine(s8 line, char* text)
 	int col       = 0;
 	int textIndex = 0;
 
-	JUTPoint p0(unk48[line]->mBounds.x1, unk48[line]->mBounds.y1);
-	JUTPoint p1(0, unk54[line]->mBounds.y1 - unk220);
-	JUTPoint p2(unk60[line]->mBounds.x2 - 10, unk60[line]->mBounds.y1);
+	JUTPoint p0(unk48[line]->getBounds().x1, unk48[line]->getBounds().y1);
+	JUTPoint p1(0, unk54[line]->getBounds().y1 - unk220);
+	JUTPoint p2(unk60[line]->getBounds().x2 - 10, unk60[line]->getBounds().y1);
 
 	f32 t = 0.0f;
 	f32 prevX;
@@ -505,14 +505,14 @@ void TTalk2D2::makeBoxLine(s8 line, char* text)
 
 		f32 sumX = prevX + x;
 		f32 sumY = prevY + y;
-		f32 cx   = -0.5f * sumX;
-		f32 cy   = -0.5f * sumY;
-		f32 c    = cosf(angle);
-		f32 s    = sinf(angle);
 		f32 hx   = 0.5f * sumX;
 		f32 hy   = 0.5f * sumY;
-		f32 posX = (cx + (prevX * c + prevY * -s)) + hx;
-		f32 posY = (cy + (prevX * s + prevY * c)) + hy;
+		f32 c    = cosf(angle);
+		f32 s    = sinf(angle);
+		f32 cx   = -0.5f * sumX;
+		f32 cy   = -0.5f * sumY;
+		f32 posX = (hx + (prevX * c + prevY * -s)) + cx;
+		f32 posY = (hy + (prevX * s + prevY * c)) + cy;
 
 		int xi = (int)(posX + (posX > 0.0f ? 0.5f : -0.5f));
 		int yi = (int)(posY + (posY > 0.0f ? 0.5f : -0.5f));
@@ -1171,8 +1171,8 @@ void TTalk2D2::setupTextBox(const void* data, JMSMesgEntry* entry)
 		return;
 	}
 
-	JSUMemoryInputStream stream((const u8*)data + (entry->unk0 + unk278),
-	                            0x400);
+	u32 off = entry->unk0 + unk278;
+	JSUMemoryInputStream stream((const u8*)data + off, 0x400);
 	unk254  = entry;
 	int col  = 0;
 	int line = 0;
@@ -1215,14 +1215,15 @@ void TTalk2D2::setupTextBox(const void* data, JMSMesgEntry* entry)
 				text[1] = 0;
 			}
 
-			J2DTextBox* box = unk9C[col + line * 30];
+			int idx         = col + line * 30;
+			J2DTextBox* box = unk9C[idx];
 			box->mCharColor  = unk27C.get();
 			box->mGradColor  = unk27C.get();
-			box->setBlackWhite(
+			unk9C[idx]->setBlackWhite(
 			    JUtility::TColor((u32)unk27C & 0xffffff00),
 			    JUtility::TColor((u32)unk27C));
 			unk281[unk2DE] = unk280;
-			unk2DE         = col + line * 30;
+			unk2DE         = idx;
 			++col;
 			break;
 		}

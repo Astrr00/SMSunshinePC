@@ -467,7 +467,7 @@ void TTobiPuku::swimEffect()
 
 bool TTobiPuku::isReachedToGoalXZ()
 {
-	JGeometry::TVec3<f32> tmp = getUnk104().getPoint();
+	JGeometry::TVec3<f32> tmp(getUnk104().getPoint());
 	tmp -= mPosition;
 	tmp.y = 0.0f;
 

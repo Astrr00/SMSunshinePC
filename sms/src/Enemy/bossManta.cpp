@@ -60,10 +60,21 @@ void AttackMario(THitActor* attacker)
 
 } // namespace
 
+// unused: its presence shifts mwcc's inline-temp stack layout in TNerveMantaMove::execute
 static inline void lerp_hack(f32& value, f32 target, f32 progress)
 {
 	f32 step = progress * (target - value);
 	value += step;
+}
+
+static inline void lerp3(JGeometry::TVec3<f32>& v, const JGeometry::TVec3<f32>& t, f32 p)
+{
+	f32 sx = p * (t.x - v.x);
+	v.x += sx;
+	f32 sy = p * (t.y - v.y);
+	v.y += sy;
+	sx = p * (t.z - v.z);
+	v.z += sx;
 }
 
 DEFINE_NERVE(TNerveMantaMove, TLiveActor)
@@ -75,11 +86,10 @@ DEFINE_NERVE(TNerveMantaMove, TLiveActor)
 	if (time == 0) {
 		self->startWalkAnim();
 
+		s32 nn = graph->getNodeNum();
 		JGeometry::TVec3<f32> pt
-		    = graph->indexToPoint((int)(MsRandF() * graph->getNodeNum()));
-		lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-		lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-		lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+		    = graph->indexToPoint((int)(nn * MsRandF()));
+		lerp3(pt, *gpMarioPos, 1.0f);
 		self->unk158 = pt;
 	}
 
@@ -92,73 +102,50 @@ DEFINE_NERVE(TNerveMantaMove, TLiveActor)
 		                              0, 0.0f, 0, 0, 4);
 
 	if (self->mPosition.distance(self->unk158) < 500.0f || time % 150 == 0) {
+		s32 nn = graph->getNodeNum();
 		JGeometry::TVec3<f32> pt
-		    = graph->indexToPoint((int)(MsRandF() * graph->getNodeNum()));
+		    = graph->indexToPoint((int)(nn * MsRandF()));
 
 		if (self->unk1A4) {
 			switch (self->mGeneration) {
 			case 0:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			case 1:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			case 2:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			case 3:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			case 4:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			case 5:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			}
 		} else {
 			switch (self->mGeneration) {
 			case 0:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			case 1:
-				lerp_hack(pt.x, gpMarioPos->x, 0.8f);
-				lerp_hack(pt.y, gpMarioPos->y, 0.8f);
-				lerp_hack(pt.z, gpMarioPos->z, 0.8f);
+				lerp3(pt, *gpMarioPos, 0.8f);
 				break;
 			case 2:
-				lerp_hack(pt.x, gpMarioPos->x, 0.8f);
-				lerp_hack(pt.y, gpMarioPos->y, 0.8f);
-				lerp_hack(pt.z, gpMarioPos->z, 0.8f);
+				lerp3(pt, *gpMarioPos, 0.8f);
 				break;
 			case 3:
-				lerp_hack(pt.x, gpMarioPos->x, 0.6f);
-				lerp_hack(pt.y, gpMarioPos->y, 0.6f);
-				lerp_hack(pt.z, gpMarioPos->z, 0.6f);
+				lerp3(pt, *gpMarioPos, 0.6f);
 				break;
 			case 4:
-				lerp_hack(pt.x, gpMarioPos->x, 0.8f);
-				lerp_hack(pt.y, gpMarioPos->y, 0.8f);
-				lerp_hack(pt.z, gpMarioPos->z, 0.8f);
+				lerp3(pt, *gpMarioPos, 0.8f);
 				break;
 			case 5:
-				lerp_hack(pt.x, gpMarioPos->x, 1.0f);
-				lerp_hack(pt.y, gpMarioPos->y, 1.0f);
-				lerp_hack(pt.z, gpMarioPos->z, 1.0f);
+				lerp3(pt, *gpMarioPos, 1.0f);
 				break;
 			}
 		}
@@ -519,7 +506,7 @@ bool TBossManta::collidedWithWater()
 			}
 			unk19C++;
 
-			char trash2[8];
+			char trash2[4];
 			const int hitCounts2[6] = { 16, 8, 4, 2, 1, 1 };
 			if (unk19C == hitCounts2[mGeneration]) {
 				if (mGeneration >= 4)
@@ -892,6 +879,7 @@ void TBossMantaManager::TMantaMessageState::update()
 
 TBossMantaAdditionalCollisionSet::TBossMantaAdditionalCollisionSet()
 {
+	char trash[8];
 	unkC = nullptr;
 	for (int i = 0; i < 3; ++i)
 		unk0[i] = new TBossMantaAdditionalCollision("マンタ追加コリジョン");
@@ -923,6 +911,7 @@ bool TBossMantaAdditionalCollisionSet::isUsed()
 void TBossMantaAdditionalCollisionSet::update(u32 cue,
                                               JDrama::TGraphics* graphics)
 {
+	char trash[0x58];
 	if (unkC != nullptr) {
 		if (unkC->checkLiveFlag(LIVE_FLAG_DEAD)) {
 			unkC = nullptr;
@@ -978,7 +967,7 @@ TBossMantaAdditionalCollision::TBossMantaAdditionalCollision(const char* name)
 
 	static_cast<TIdxGroupObj*>(
 	    JDrama::TNameRefGen::search("オブジェクトグループ"))
-	    ->insert(this);
+	    ->add(this);
 }
 
 BOOL TBossMantaAdditionalCollision::receiveMessage(THitActor* sender,
@@ -1145,6 +1134,7 @@ void TBossMantaManager::drawMantaShadow(JDrama::TGraphics* graphics)
 	GXCopyTex(unk7C, GX_FALSE);
 	GXPixModeSync();
 
+	GXTexObj texObj;
 	Mtx44 proj;
 	C_MTXOrtho(proj, (f32)SMSGetGameRenderHeight(), 0.0f, 0.0f,
 	           (f32)SMSGetGameRenderWidth(), 0.0f, 1000.0f);
@@ -1154,7 +1144,6 @@ void TBossMantaManager::drawMantaShadow(JDrama::TGraphics* graphics)
 	GXSetNumTexGens(1);
 	GXSetZCompLoc(GX_FALSE);
 
-	GXTexObj texObj;
 	GXInitTexObj(&texObj, unk7C, (u16)SMSGetGameRenderWidth(),
 	             (u16)SMSGetGameRenderHeight(), GX_TF_I8, GX_CLAMP, GX_CLAMP,
 	             GX_FALSE);
@@ -1186,6 +1175,7 @@ void TBossMantaManager::drawMantaShadow(JDrama::TGraphics* graphics)
 	GXSetAlphaUpdate(GX_FALSE);
 	GXSetColorUpdate(GX_TRUE);
 
+	char trash[0x78];
 	Mtx m;
 	MTXIdentity(m);
 	GXLoadPosMtxImm(m, GX_PNMTX0);

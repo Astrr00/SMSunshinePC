@@ -209,8 +209,9 @@ void TRollEnemy::walkBehavior(int param_1, f32 param_2)
 void TRollEnemy::behaveToWater(THitActor*)
 {
 	mSprayedByWaterCooldown = 0;
-	if (unk158 < unk1A4->getSLExpandMax()) {
-		f32 rate = unk1A4->getSLExpandRate();
+	TRollEnemySaveLoadParams* params = unk1A4;
+	if (unk158 < params->getSLExpandMax()) {
+		f32 rate = params->getSLExpandRate();
 		mBodyScale *= rate;
 		unk158 *= rate;
 		mScaledBodyRadius *= rate;
@@ -263,8 +264,7 @@ bool TRollEnemy::isCollidMove(THitActor* param_1)
 
 bool TRollEnemy::isReachedToGoalXZ()
 {
-	JGeometry::TVec3<f32> tmp;
-	tmp = getUnk104().getPoint();
+	JGeometry::TVec3<f32> tmp = getUnk104().getPoint();
 	tmp -= mPosition;
 	if (!unk1A8)
 		tmp.y = 0.0f;
@@ -608,8 +608,10 @@ void TIgaiga::setWalkAnm() { setBckAnm(3); }
 
 void TIgaiga::setDeadAnm()
 {
+	char trash0[8];
+	JGeometry::TVec3<f32> scale;
 	// stack padding to match the retail frame size
-	char trash[0x18];
+	char trash[0x10];
 	if (checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
 		unk1C0 = mPosition;
 	} else {
@@ -625,8 +627,8 @@ void TIgaiga::setDeadAnm()
 		setBckAnm(1);
 
 	TIgaigaManager* manager = (TIgaigaManager*)mManager;
-	JGeometry::TVec3<f32> scale = mScaling;
-	f32 factor                  = unk1CC * unk1E4;
+	scale      = mScaling;
+	f32 factor = unk1CC * unk1E4;
 	scale.x *= factor;
 	scale.y *= factor;
 	scale.z *= factor;
@@ -1063,11 +1065,10 @@ void TGorogoro::behaveToWater(THitActor*)
 		f32 damageRadius = getSaveParams()->getSLDamageRadius();
 		f32 damageHeight = getSaveParams()->getSLDamageHeight();
 
-		f32 ratio = mBodyScale / unk154;
-		attackRadius *= ratio;
-		attackHeight *= ratio;
-		damageRadius *= ratio;
-		damageHeight *= ratio;
+		attackRadius *= mBodyScale / unk154;
+		attackHeight *= mBodyScale / unk154;
+		damageRadius *= mBodyScale / unk154;
+		damageHeight *= mBodyScale / unk154;
 
 		setHitParams(attackRadius, attackHeight, damageRadius, damageHeight);
 	}

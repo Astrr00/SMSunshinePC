@@ -128,29 +128,4 @@ public:
 	/* 0x230 */ JGeometry::TVec3<f32> mNozzleScale;
 	/* 0x23C */ TPopoCollision* mCollision;
 };
-
-class TLiveActor;
-
-// The Popo nerves are only used inside popo.cpp and their theNerve() is
-// defined inline (the retail object has no out-of-line theNerve() symbols).
-#define POPO_INLINE_NERVE(Name)                                                \
-	class Name : public TNerveBase<TLiveActor> {                               \
-	public:                                                                    \
-		virtual BOOL execute(TSpineBase<TLiveActor>*) const;                   \
-		static const Name& theNerve()                                          \
-		{                                                                      \
-			static Name instance;                                              \
-			return instance;                                                   \
-		}                                                                      \
-	};
-
-POPO_INLINE_NERVE(TNervePopoPossessedNozzle)
-POPO_INLINE_NERVE(TNervePopoAttack)
-POPO_INLINE_NERVE(TNervePopoFly)
-POPO_INLINE_NERVE(TNervePopoExplosion)
-POPO_INLINE_NERVE(TNervePopoWait)
-POPO_INLINE_NERVE(TNervePopoThrown)
-
-#undef POPO_INLINE_NERVE
-
 #endif

@@ -144,6 +144,11 @@ static THinokuri2* gpCurHinokuri;
 
 void THino2MtxCalc::calc(u16 param_1)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	j3dSys.setCurrentMtxCalc(this);
 
 	if (gpCurHinokuri->mLevel == 2 && (param_1 == 0x13 || param_1 == 0x17)) {
@@ -1186,6 +1191,10 @@ DEFINE_NERVE(TNerveHino2Turn, TLiveActor)
 
 DEFINE_NERVE(TNerveHino2PrePol, TLiveActor)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	THinokuri2* self = (THinokuri2*)spine->getBody();
 
 	if (spine->getTime() == 0)
@@ -1197,7 +1206,7 @@ DEFINE_NERVE(TNerveHino2PrePol, TLiveActor)
 			uVar5 += 1;
 
 			int wait = self->getSaveParam()->mSLPrePolWait.get();
-			if (wait > uVar5) {
+			if (uVar5 > wait) { // asm: cmpw uVar5, wait; ble (was inverted)
 				f32 prob = self->getSaveParam()->mSLStampProb.get();
 				if (rand() * (1.0f / (RAND_MAX + 1)) < prob) {
 					spine->pushAfterCurrent(&TNerveHino2Stamp::theNerve());

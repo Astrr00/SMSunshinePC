@@ -242,6 +242,7 @@ BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	gpMap->isTouchedOneWallAndMoveXZ(&local_EC.x, local_EC.y, &local_EC.z,
 	                                 150.0f);
 
@@ -257,11 +258,12 @@ BOOL TBGTakeHit::moveRequest(const JGeometry::TVec3<f32>& where_to)
 		    gpMarioOriginal->getIntendedMag()
 		        * mOwner->mOwner->getSaveParam()->getSLTentacleStretch());
 
-		JGeometry::TVec3<f32> local_44 = mOwner->getOwner()->getPosition();
+		TBGTentacle* ten2              = mOwner;
+		JGeometry::TVec3<f32> local_44 = ten2->getOwner()->getPosition();
 		local_44 -= local_EC;
 
 		if (local_44.dot(unk74) < 0.0f)
-			mOwner->incDamage();
+			ten2->incDamage();
 
 		mOwner->getLastNode()->setPosition(local_EC);
 		return false;

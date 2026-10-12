@@ -78,7 +78,7 @@ TDoor::TDoor(const char* name)
 
 void TManhole::touchPlayer(THitActor*)
 {
-	char trash[0x48];
+	char trash[0x40];
 	mState = STATE_NORMAL;
 	if (!animationFinished()) {
 		mPosition.y = mInitialPosition.y;
@@ -124,12 +124,12 @@ void TManhole::touchPlayer(THitActor*)
 			SMSGetMSound()->startSoundActor(MSD_SE_OBJ_MANHOLE_DOWN, &mPosition,
 			                                0, nullptr, 0, 4);
 		}
-		if (mPosition.y > mInitialPosition.y - mDownHeight)
+		if (mPosition.y > getInitialPosition().y - mDownHeight)
 			mPosition.y = mPosition.y - mDownSpeed;
 		else
-			mPosition.y = mInitialPosition.y - mDownHeight;
+			mPosition.y = getInitialPosition().y - mDownHeight;
 		unk148 = 1.0f;
-		unk14C = mInitialPosition.y - mPosition.y;
+		unk14C = getInitialPosition().y - mPosition.y;
 		offMapObjFlag(MAP_OBJ_FLAG_UNK100);
 		return;
 	}
@@ -296,11 +296,11 @@ void TMapObjBillboard::touchActor(THitActor* param_1) {
 
 u32 TMapObjBillboard::touchWater(THitActor* param_1)
 {
-	char trash[0x10];
 	swing(param_1);
 	if (mHiddenObj && mAllowReveal) {
 		JGeometry::TVec3<f32> rot = mRotation;
 		JGeometry::TVec3<f32> pos = mPosition;
+		char trash[0x10];
 		rot.y -= 90.0f;
 		pos.y += mYOffset;
 		TMapObjBase* obj = mHiddenObj;

@@ -83,15 +83,16 @@ void JPABaseEmitter::deleteAllParticle()
 	list = &mChildParticleList;
 	it   = list->getFirst();
 	while (it) {
-		JPABaseParticle* particle = it->getObject();
-		it                        = it->getNext();
-		deleteBaseParticle(particle, list);
+		JSULink<JPABaseParticle>* next = it->getNext();
+		deleteBaseParticle(it->getObject(), list);
+		it = next;
 	}
 }
 
 void JPABaseEmitter::createChildParticle(JPABaseParticle* parent)
 {
 	JGeometry::TVec3<f32> local_c0(0.0f, 0.0f, 0.0f);
+
 
 	JPASweepShape* sweepShape = mEmitterDataBlockInfo->getSweepShape();
 	int count                 = sweepShape->getRate();
@@ -104,6 +105,7 @@ void JPABaseEmitter::createChildParticle(JPABaseParticle* parent)
 	bool ignoreFields = false;
 	if (!JPAEmitterInfoObj.mChildrenAffectedByFields)
 		ignoreFields = true;
+
 
 	for (int i = 0; i < count; ++i) {
 		if (mManager->unk0.getNumLinks() == 0)
@@ -175,6 +177,7 @@ void JPABaseEmitter::createChildParticle(JPABaseParticle* parent)
 		}
 
 		mDraw.initChild(parent, baseParticle);
+		char trash[0x20];
 		particle->unk54 = parent->unk54;
 	}
 }

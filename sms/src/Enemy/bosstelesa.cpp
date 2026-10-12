@@ -521,6 +521,7 @@ static inline void randomResetDrums(TTelesaSlot* slot)
 
 void TTelesaSlot::initMapObj()
 {
+	char trash[8];
 	TSlotDrum::initMapObj();
 	onLiveFlag(LIVE_FLAG_UNK10);
 	unk14C = 160.0f;
@@ -535,7 +536,6 @@ void TTelesaSlot::initMapObj()
 	unk144 = mDamageHeight;
 	mMapCollisionMove = new TMapCollisionMove;
 	mMapCollisionMove->init(2, 0, 0, nullptr);
-	char trash[8];
 	randomResetDrums(this);
 }
 

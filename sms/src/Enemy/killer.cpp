@@ -28,6 +28,24 @@
 #include <JSystem/J3D/J3DGraphAnimator/J3DModel.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DSys.hpp>
 
+#define KILLER_NERVE(Name)                                                     \
+	class Name : public TNerveBase<TLiveActor> {                               \
+	public:                                                                    \
+		virtual BOOL execute(TSpineBase<TLiveActor>*) const;                   \
+		static const Name& theNerve();                                         \
+	};                                                                         \
+	const Name& Name::theNerve()                                               \
+	{                                                                          \
+		static Name instance;                                                  \
+		return instance;                                                       \
+	}
+
+KILLER_NERVE(TNerveFlyEnemyNormalFly)
+KILLER_NERVE(TNerveFlyEnemyChaseFly)
+KILLER_NERVE(TNerveKillerExplosion)
+
+#undef KILLER_NERVE
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>

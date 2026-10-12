@@ -167,6 +167,7 @@ void TLimitKoopa::setUpHitActors()
 
 void TLimitKoopa::calcRootMatrix()
 {
+	char trash[8];
 	mScaling.setAll(getParam()->bodyScale.get());
 	mRotation.y = TDirectionCalc::r2d(mDirection.mDirection);
 	TSpineEnemy::calcRootMatrix();
@@ -284,6 +285,7 @@ void TLimitKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TLimitKoopa::reset()
 {
+	char trash[0x18];
 	TSpineEnemy::reset();
 	changeAnm(0xC, getParam()->waitSpeed.get());
 	mSpine->reset();
@@ -441,6 +443,7 @@ void TLimitKoopaParts::perform(u32 cue, JDrama::TGraphics* graphics)
 BOOL TNerveLimitKoopaGetDown::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TLimitKoopa* koopa = (TLimitKoopa*)spine->getBody();
+	char trash[0x38];
 
 	switch (koopa->mMActor->getCurAnmIdx(ANM_TYPE_BCK)) {
 	case 0:
@@ -525,6 +528,7 @@ BOOL TNerveLimitKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 BOOL TNerveLimitKoopaHipDropStart::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TLimitKoopa* koopa = (TLimitKoopa*)spine->getBody();
+	char trash[8];
 
 	if (spine->getTime() == 0) {
 		koopa->changeAnm(5, 2.0f);
@@ -545,10 +549,8 @@ BOOL TNerveLimitKoopaHipDropJump::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TLimitKoopa* koopa = (TLimitKoopa*)spine->getBody();
 
-	f32 gravity = koopa->getGravityY();
-	koopa->mAcceleration.x = 0.0f;
-	koopa->mAcceleration.y = -gravity;
-	koopa->mAcceleration.z = 0.0f;
+	f32 gravity = -koopa->getGravityY();
+	koopa->mAcceleration.set(0.0f, gravity, 0.0f);
 
 	if (koopa->mLanded) {
 		spine->pushAfterCurrent(&TNerveLimitKoopaWait::theNerve());

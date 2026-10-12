@@ -499,19 +499,20 @@ TShellCup::TShellCup(const char* name)
 
 void TMerrygoround::control()
 {
+	MtxPtr mtx;
 	TMapObjBase::control();
 	mRotation.y += mRotSpeed;
 	if (mRotation.y > 360.0f)
 		mRotation.y -= 360.0f;
 
 	for (int i = 0; i < 2; ++i) {
-		MtxPtr mtx = getModel()->getAnmMtx(unk140[i]);
+		mtx = getModel()->getAnmMtx(unk140[i]);
 		unk138[i]->setModelMtx(mtx);
 		unk138[i]->mPosition.set(mtx[0][3], mtx[1][3], mtx[2][3]);
 	}
 
 	for (int i = 0; i < 9; ++i) {
-		MtxPtr mtx = getModel()->getAnmMtx(unk18C[i]);
+		mtx = getModel()->getAnmMtx(unk18C[i]);
 		unk144[i]->unk138.set(mtx);
 		unk144[i]->mPosition.set(mtx[0][3], mtx[1][3] - 600.0f, mtx[2][3]);
 	}
@@ -521,7 +522,7 @@ void TMerrygoround::control()
 	else
 		unk1A0->onHitFlag(HIT_FLAG_NO_COLLISION);
 
-	MtxPtr mtx = getModel()->getAnmMtx(unk1A4);
+	mtx = getModel()->getAnmMtx(unk1A4);
 	unk1A0->mPosition.set(mtx[0][3], mtx[1][3] - 600.0f, mtx[2][3]);
 }
 

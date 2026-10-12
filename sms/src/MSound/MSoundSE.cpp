@@ -63,8 +63,10 @@ f32 MSRandVol::getRandVol(u32 param_1)
 	u32 amp = param_1 >> MSSeSwBit_RandomVolumeAmplitudeShift & 3;
 	u32 ps  = param_1 >> MSSeSwBit_RandomVolumePSlopeShift & 3;
 	u32 cs  = param_1 >> MSSeSwBit_RandomVolumeCSlopeShift & 3;
-	f32 d = JALCalc::getRandom(mAmplitudes[amp] * mAmplitude, mCSlopes[cs],
-	                           mPSlopes[ps])
+	f32 a   = mAmplitudes[amp] * mAmplitude;
+	f32 p   = mPSlopes[ps];
+	f32 c   = mCSlopes[cs];
+	f32 d   = JALCalc::getRandom(a, c, p)
 	        + 1.0f;
 
 	f32 x = d < 0.0f ? 0.0f : d;

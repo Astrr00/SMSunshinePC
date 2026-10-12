@@ -101,7 +101,7 @@ void TTailRubber::reset(const JGeometry::TVec3<f32>& param_1,
 
 		Node& node = unk0[i];
 		node.mPos.set(pos);
-		node.mVel.set(0.0f, 0.0f, 0.0f);
+		node.mVel.zero();
 	}
 }
 
@@ -109,14 +109,14 @@ void TTailRubber::setHeadPos(const JGeometry::TVec3<f32>& param_1)
 {
 	Node& node = unk0.front();
 	node.mPos  = param_1;
-	node.mVel.set(0.0f, 0.0f, 0.0f);
+	node.mVel.zero();
 }
 
 void TTailRubber::setTailPos(const JGeometry::TVec3<f32>& param_1)
 {
 	Node& node = *(unk0.end() - 1);
 	node.mPos  = param_1;
-	node.mVel.set(0.0f, 0.0f, 0.0f);
+	node.mVel.zero();
 }
 
 void TTailRubber::movement()
@@ -204,10 +204,11 @@ void TTailRubber::restrict()
 		for (Node *e = unk0.begin() - 1, *it = unk0.end() - 2; it != e; --it) {
 			JGeometry::TVec3<f32> diff = (it + 1)->mPos;
 			diff -= it->mPos;
-			diff.y = 0.0f;
+			// asm 0x802A0E08: retail keeps the full 3D diff here (no y=0 store)
 			f32 len = diff.length();
 			if (avgHorLen < len) {
-				diff.setLength(len - avgHorLen);
+				f32 excess = len - avgHorLen;
+				diff.setLength(excess);
 				it->mPos += diff;
 			}
 		}
@@ -218,7 +219,8 @@ void TTailRubber::restrict()
 			diff.y = 0.0f;
 			f32 len = diff.length();
 			if (avgHorLen < len) {
-				diff.setLength(len - avgHorLen);
+				f32 excess = len - avgHorLen;
+				diff.setLength(excess);
 				it->mPos += diff;
 			}
 		}

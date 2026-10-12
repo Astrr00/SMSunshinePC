@@ -707,11 +707,11 @@ void TGraphWeb::isOnePath() const { }
 BOOL TGraphWeb::startIsEnd() const
 {
 	if (getFirstGraphNode().unk0->mConnectionNum > 2
-	    || (getFirstGraphNode().unk0->mConnections[0] != getNodeNum() - 1
+	    || ((0, getFirstGraphNode().unk0)->mConnections[0] != getNodeNum() - 1
 	        && getFirstGraphNode().unk0->mConnections[1] != getNodeNum() - 1))
 		return false;
 
-	if (getLastGraphNode().unk0->mConnectionNum > 2
+	if (2 < getLastGraphNode().unk0->mConnectionNum
 	    || (getLastGraphNode().unk0->mConnections[0] != 0
 	        && getLastGraphNode().unk0->mConnections[1] != 0))
 		return false;

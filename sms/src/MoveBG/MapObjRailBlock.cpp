@@ -303,6 +303,7 @@ void TNormalLift::initMapObj() { TRailMapObj::initMapObj(); }
 
 void TNormalLift::control()
 {
+	char trash[0xc];
 	TMapObjBase::control();
 	checkMarioRiding();
 	if (unk158 != 0 && unk152 != 0) {

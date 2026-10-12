@@ -308,6 +308,7 @@ static inline JGeometry::TVec3<f32> fromPolar(f32 theta, f32 radius)
 
 void TTamaNoko::walkBehavior(int param_1, f32 param_2)
 {
+	char trash[0x18];
 	mTurnSpeed  = getSaveParams2()->mSLTurnSpeedLow.get();
 	mMarchSpeed = getSaveParams2()->mSLMarchSpeedLow.get();
 

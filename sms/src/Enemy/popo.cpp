@@ -27,6 +27,29 @@
 #include <JSystem/J3D/J3DGraphAnimator/J3DJoint.hpp>
 #include <JSystem/J3D/J3DGraphAnimator/J3DNode.hpp>
 
+// The nerves are only used in this file. theNerve() is a plain out-of-line
+// member (retail names its statics instance$NNNN, not ...$localstatic0$...).
+#define POPO_NERVE(Name)                                                       \
+	class Name : public TNerveBase<TLiveActor> {                               \
+	public:                                                                    \
+		virtual BOOL execute(TSpineBase<TLiveActor>*) const;                   \
+		static const Name& theNerve();                                         \
+	};                                                                         \
+	const Name& Name::theNerve()                                               \
+	{                                                                          \
+		static Name instance;                                                  \
+		return instance;                                                       \
+	}
+
+POPO_NERVE(TNervePopoPossessedNozzle)
+POPO_NERVE(TNervePopoAttack)
+POPO_NERVE(TNervePopoFly)
+POPO_NERVE(TNervePopoExplosion)
+POPO_NERVE(TNervePopoWait)
+POPO_NERVE(TNervePopoThrown)
+
+#undef POPO_NERVE
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>

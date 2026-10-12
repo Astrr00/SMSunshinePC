@@ -336,9 +336,9 @@ BOOL TMario::hangonCheck(const TBGCheckData* wall, const Vec& prev,
 
 int TMario::checkGroundAtJumping(const Vec& target, int param_2)
 {
-	char trash2[4];
+
 	Vec pos             = target;
-	char trash[4];
+	char trash[8];
 	TBGCheckData* wall1 = checkWallPlane(&pos, 150.0f, unk15C);
 	TBGCheckData* wall2 = checkWallPlane(&pos, 30.0f, unk15C);
 
@@ -497,6 +497,7 @@ void TMario::fallProcess()
 int TMario::jumpProcess(int param_1)
 {
 	int result = 0;
+	if (0) { (void)(Vec){1, 2, 3}; }
 	f32 speed  = std::sqrtf(mVel.x * mVel.x + mVel.z * mVel.z);
 
 	if (speed > mJumpParams.mJumpingMax.get()) {
@@ -505,7 +506,6 @@ int TMario::jumpProcess(int param_1)
 	}
 
 	Vec next;
-	char trash[16];
 	next.x  = mPosition.x + 0.25f * mVel.x;
 	next.y  = mPosition.y + 0.25f * mVel.y;
 	next.z  = mPosition.z + 0.25f * mVel.z;

@@ -200,7 +200,7 @@ bool TMarDirector::setupObjects()
 		break;
 	}
 	case 5:
-		if (gpApplication.mCurrArea.unk1 != 3)
+		if ((s32)gpApplication.mCurrArea.unk1 != 3)
 			(void)gpApplication.mCurrArea.unk1;
 		else
 			TFlagManager::getInstance()->setBool(true, 0x50003);

@@ -96,6 +96,7 @@ void J3DDeformer::deform(J3DModel* model, u16 idx, f32* weightList)
 		}
 
 		f32 sign[2] = { 1.0f, -1.0f };
+
 		for (u16 i = 0; i < posNum; i++) {
 			for (u16 j = 0; j < keyNum; j++) {
 				J3DClusterKey* clusterKey = &keys[j];

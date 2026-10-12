@@ -30,6 +30,27 @@
 #include <MSound/MSoundSE.hpp>
 #include <Player/MarioAccess.hpp>
 
+#define CANNON_NERVE(Name)                                                     \
+	class Name : public TNerveBase<TLiveActor> {                               \
+	public:                                                                    \
+		virtual BOOL execute(TSpineBase<TLiveActor>*) const;                   \
+		static const Name& theNerve();                                         \
+	};                                                                         \
+	const Name& Name::theNerve()                                               \
+	{                                                                          \
+		static Name instance;                                                  \
+		return instance;                                                       \
+	}
+
+CANNON_NERVE(TNerveCannonObject)
+CANNON_NERVE(TNerveCannonDamageDemo)
+CANNON_NERVE(TNerveCannonDamage)
+CANNON_NERVE(TNerveCannonClose)
+CANNON_NERVE(TNerveCannonForceBombShoot)
+CANNON_NERVE(TNerveCannonShoot)
+CANNON_NERVE(TNerveCannonSearch)
+CANNON_NERVE(TNerveCannonOpen)
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
@@ -799,8 +820,8 @@ void TCannon::setKillerGoalPoint()
 	if (unk239) {
 		TMsRange<f32> range(0.0f, 360000.0f);
 		f32 angle = range.rand();
-		JGeometry::TVec3<f32> target = *gpMarioPos;
 		char trash[8];
+		JGeometry::TVec3<f32> target = *gpMarioPos;
 		target.x += 500.0f * JMASCos(angle);
 		target.z += 500.0f * JMASSin(angle);
 		setGoalPath(TPathNode(target));

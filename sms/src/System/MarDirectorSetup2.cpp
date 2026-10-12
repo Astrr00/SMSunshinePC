@@ -39,6 +39,11 @@ class JPAEmitterManager;
 
 extern JPAEmitterManager* gpEmitterManager4D2;
 
+struct BigTemp {
+	char c[0xF4];
+};
+BigTemp MakeBigTemp();
+
 void TMarDirector::setup2()
 {
 	unkBC = static_cast<TNameRefAryT<TStageEventInfo>*>(
@@ -79,6 +84,10 @@ void TMarDirector::setup2()
 
 	unkDC->mRate = 120.0f;
 	unkDC->setColor(JUtility::TColor(0xD2, 0xD2, 0xD2, 0xFF));
+	if (0) {
+		(void)MakeBigTemp();
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 
 	unkE0 = static_cast<TSunGlass*>(
 	    JDrama::TNameRefGen::search("サングラスフェーダ"));
@@ -124,7 +133,6 @@ void TMarDirector::setup2()
 	GXSetDrawDone();
 	GXWaitDrawDone();
 
-	char trash[0xF8];
 	TMapEventSinkInPollution* sinkInPollutionEvent;
 
 	sinkInPollutionEvent = static_cast<TMapEventSinkInPollution*>(

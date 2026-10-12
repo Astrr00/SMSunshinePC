@@ -79,13 +79,13 @@ TTinKoopaParams::TTinKoopaParams(const char* path)
 	mSLKillerApproachingDistance.set(2000.0f);
 }
 
+
 static const char* TTinKoopa_jointNameTable[] = {
 	"jnt_head",  "jnt_breast",   "jnt_stomach",  "jnt_rarm",
 	"jnt_larm",  "jnt_leg",      "jnt_leye",     "jnt_reye",
 	"fire_null", "fire_col_null", "jnt_femur",   "killer_null1",
 	"killer_null2", "killer_null3", "killer_null4",
 };
-
 static int TTinKoopa_jointIndexTable[15];
 
 static const TNerveTinKoopaWait& theNerveWait()
@@ -376,23 +376,27 @@ void TTinKoopaFlame::emitFlameEffects()
 		if (mOwner->mTimers[TTinKoopa::TIMER_FLAME_REVIVAL] > 0)
 			scaleY *= 0.5f;
 
+		char trash[0x20];
 		JPABaseEmitter* emitter
 		    = gpMarioParticleManager->emitAndBindToMtxPtr(0x1BB, mtx, 1, this);
-		if (emitter)
-			emitter->setGlobalScale(
-			    JGeometry::TVec3<f32>(scaleXZ, scaleY, scaleXZ));
+		if (emitter) {
+			emitter->mGlobalDynamicsScale.set(scaleXZ, scaleY, scaleXZ);
+			emitter->mGlobalParticleScale.set(scaleXZ, scaleY, scaleXZ);
+		}
 
 		emitter
 		    = gpMarioParticleManager->emitAndBindToMtxPtr(0x1BC, mtx, 1, this);
-		if (emitter)
-			emitter->setGlobalScale(
-			    JGeometry::TVec3<f32>(scaleXZ, scaleY, scaleXZ));
+		if (emitter) {
+			emitter->mGlobalDynamicsScale.set(scaleXZ, scaleY, scaleXZ);
+			emitter->mGlobalParticleScale.set(scaleXZ, scaleY, scaleXZ);
+		}
 
 		emitter
 		    = gpMarioParticleManager->emitAndBindToMtxPtr(0x1F2, mtx, 3, this);
-		if (emitter)
-			emitter->setGlobalScale(
-			    JGeometry::TVec3<f32>(scaleXZ, scaleY, scaleXZ));
+		if (emitter) {
+			emitter->mGlobalDynamicsScale.set(scaleXZ, scaleY, scaleXZ);
+			emitter->mGlobalParticleScale.set(scaleXZ, scaleY, scaleXZ);
+		}
 
 		SMSGetMSound()->startSoundActorWithInfo(MSD_SE_BS_MKP_FIRE, &mPosition,
 		                                        nullptr, scaleXZ, 0, 0, nullptr,
@@ -563,6 +567,7 @@ BOOL TTinKoopaPartsBase::receiveMessage(THitActor* sender, u32 message)
 
 void TTinKoopaPartsBase::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x8];
 	TLiveActor::perform(cue, graphics);
 
 	if (cue & CUE_MOVE) {
@@ -1097,6 +1102,7 @@ BOOL TNerveTinKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveTinKoopaDamage::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x8];
 	TTinKoopa* self = (TTinKoopa*)spine->getBody();
 	if (spine->getTime() == 0) {
 		int bck = getDamageBck(self->mState);
@@ -1124,6 +1130,7 @@ BOOL TNerveTinKoopaDamage::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveTinKoopaBreak::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x28];
 	TTinKoopa* self = (TTinKoopa*)spine->getBody();
 	if (spine->getTime() == 0) {
 		int bck = getBreakBck(self->mState);

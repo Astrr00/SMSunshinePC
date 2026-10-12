@@ -90,6 +90,7 @@ static bool loadWaveBackword(JASystem::WaveArcLoader::TObject* obj)
 		return false;
 
 	char filePath[256];
+	char trash[12];
 	strcpy(filePath, JASystem::WaveArcLoader::getCurrentDir());
 	strcat(filePath, obj->getWaveArcFileName());
 	u32 extent = JASystem::Dvd::checkFileExtend(filePath);
@@ -132,6 +133,7 @@ u16 MSSeCallBack::setParameterSeqSync(JASystem::TTrack* param_1, u16 param_2)
 	u16 local_28;
 	u16 local_2a;
 	u16 local_2c;
+	char trash[0x28];
 
 	switch (param_2) {
 	case 15:
@@ -345,6 +347,7 @@ void MSound::enterStage(MS_SCENE_WAVE wave, u8 param_2, u8 param3)
 
 void MSound::exitStage()
 {
+	char trash[8];
 	for (u8 cat = 0; cat < JAIGlobalParameter::getParamSeCategoryMax(); ++cat)
 		if (unk0->mSeTable.mSoundMax[cat])
 			stopAllSe(cat);
@@ -729,6 +732,7 @@ void MSound::setCategoryVOLsDefault(u16 mask)
 
 void MSound::setCategoryVOLs(u16 param_1, f32 param_2)
 {
+	char trash[8];
 #ifdef TARGET_PC
 	// float -> u8 of an out-of-range value is undefined on the host: clamp in the float domain
 	f32 scaled = param_2 * 127.0f;
@@ -1054,6 +1058,7 @@ u32 MSound::startMarioVoice(u32 param_1, s16 param_2, u8 param_3)
 
 	JAIActor local_48(unkAC[iVar3].mPosition, unkAC[iVar3].mPosition,
 	                  unkAC[iVar3].mPosition, 0);
+	char trash[0x30];
 	MSoundSESystem::MSoundSE::startSoundActorInner(param_1, unk8C + iVar6,
 	                                               &local_48, 1, 4);
 	if (unk8C[iVar6] != nullptr) {
@@ -1162,13 +1167,16 @@ void MSound::startSoundActorSpecial(u32 id, const Vec* position, f32 param_3,
 	if (gateCheck(id) && !JALSystem::gateCheckFunc(id, param_3)
 	    && !JALSystem::gateCheckFunc(id, param_4)) {
 		JAIActor actor(position, position, position, ground_no);
+		f32 local_40;
+		f32 local_44;
+		char trash[8];
 		JAISound* sound = MSoundSESystem::MSoundSE::startSoundActorInner(
 		    id, out_handle, &actor, fade, camera_idx);
 		if (sound != nullptr) {
 			switch (id) {
 			case MSD_SE_EN_IGAIGA_ROLL:
-				f32 local_40 = 1.0f;
-				f32 local_44 = 1.0f;
+				local_40 = 1.0f;
+				local_44 = 1.0f;
 				if (JALSeModData<JALSeModVolFunk>::calc(id, param_3, &local_40))
 					sound->setVolume(local_40, 0, 0);
 				if (JALSeModDataGrp<JALSeModPitFGrp>::calcGrp(id, param_4,

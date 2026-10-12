@@ -448,10 +448,12 @@ bool TApplication::checkAdditionalMovie()
 	}
 #endif
 	bool result = false;
+	char trash[0x38];
 
 	const TGameSequence& currArea = gpApplication.mCurrArea;
 
-	u8 uVar1 = SMS_getShineIDofExStage(currArea.unk0);
+	u8 stg = currArea.unk0;
+	u8 uVar1 = SMS_getShineIDofExStage(stg);
 	if (uVar1 != 0xFF) {
 		if (!TFlagManager::getInstance()->getShineFlag(uVar1)) {
 			if (!TFlagManager::getInstance()->getBool(0x3000D)) {
@@ -819,8 +821,9 @@ int TApplication::drawDVDErr()
 		SMS_DrawInit();
 		JDrama::TVideo* video = mDisplay->unk60;
 
+		GXRenderModeObj* rm = &video->mNextRenderMode;
 		GXSetViewport(0.0f, 0.0f, video->mNextRenderMode.fbWidth,
-		              video->mNextRenderMode.efbHeight, 0.0f, 1.0f);
+		              rm->efbHeight, 0.0f, 1.0f);
 		Mtx afStack_260;
 		C_MTXOrtho(afStack_260, 16.0f, 464.0f, 0.0f, 600.0f, -1.0f, 1.0f);
 		GXSetProjection(afStack_260, GX_ORTHOGRAPHIC);

@@ -79,9 +79,9 @@ void TKazekun::init(TLiveManager* live_manager)
 
 	mHeadHeight       = 40.0f;
 	mScaledBodyRadius = mBodyRadius = 50.0f;
-	initHitActor(0x10000029, 1, 0x80000000, mBodyScale * mBodyRadius,
-	             mBodyScale * mHeadHeight, mBodyScale * mBodyRadius,
-	             mBodyScale * mHeadHeight);
+	f32 r = mBodyScale * mBodyRadius;
+	f32 h = mBodyScale * mHeadHeight;
+	initHitActor(0x10000029, 1, 0x80000000, r, h, r, h);
 	onHitFlag(HIT_FLAG_NO_COLLISION);
 
 	SMS_LoadParticle("/scene/kazekun/jpa/ms_kaze_appear.jpa",
@@ -352,6 +352,7 @@ DEFINE_NERVE(TNerveKazekunAppear, TLiveActor)
 
 DEFINE_NERVE(TNerveKazekunTurn, TLiveActor)
 {
+	bool lost;
 	TKazekun* self = (TKazekun*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -362,8 +363,8 @@ DEFINE_NERVE(TNerveKazekunTurn, TLiveActor)
 
 	self->flyAroundMario();
 
-	bool lost = true;
-	f32 dy    = gpMarioPos->y - self->mInitPos.y;
+	lost = true;
+	f32 dy = gpMarioPos->y - self->mInitPos.y;
 	if (!(dy < -self->getSaveParam2()->mLostOffsetYDown.get())
 	    && !(self->getSaveParam2()->mLostOffsetYUp.get() < dy))
 		lost = false;

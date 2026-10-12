@@ -75,6 +75,7 @@ TGCLogoDir::TGCLogoDir()
 
 void TGCLogoDir::setup(JDrama::TDisplay* param_1, TMarioGamePad* param_2)
 {
+	char trash[0x28];
 	unk14            = new JDrama::TDStageGroup(param_1);
 	mGamePad         = param_2;
 	mGamePad->mFlags = TMarioGamePad::PAD_FLAG_MENU_INPUT;

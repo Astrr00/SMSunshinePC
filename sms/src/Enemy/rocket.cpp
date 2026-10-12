@@ -219,13 +219,13 @@ void TRocket::behaveToWater(THitActor*) { attackToMario(); }
 
 void TRocket::bind()
 {
-	char trash[0x20];
 	if (!checkLiveFlag(LIVE_FLAG_UNK10)) {
 		if (mSpine->getCurrentNerve()
 		        == &TNerveRocketPossessedNozzle::theNerve()
 		    || mSpine->getCurrentNerve() == &TNerveRocketFly::theNerve()) {
 			TBGWallCheckRecord record(mPosition.x, mPosition.y, mPosition.z,
 			                          getWallRadius(), 1, 0);
+			char trash[0x20];
 			if (gpMap->isTouchedWallsAndMoveXZ(&record)) {
 				THitActor* wallActor = const_cast<TLiveActor*>(
 				    record.mResultWalls[0]->getActor());
@@ -251,11 +251,12 @@ void TRocket::bind()
 
 void TRocket::setDeadAnm()
 {
-	char trash[0x38];
 	TRocketManager* manager = static_cast<TRocketManager*>(mManager);
 	JGeometry::TVec3<f32> position = mPosition;
+	char trash[0x28];
 	// the original reads the emit direction here and drops the result
-	JGeometry::TVec3<f32> direction = manager->mExplodeEmitInfo->mDir.value;
+	JGeometry::TVec3<f32> direction;
+	direction.set(manager->mExplodeEmitInfo->mDir.value);
 	manager->mExplodeEmitInfo->mPos.value = position;
 	gpModelWaterManager->emitRequest(*manager->mExplodeEmitInfo);
 

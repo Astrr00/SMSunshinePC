@@ -432,6 +432,7 @@ void TKoopaJr::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TKoopaJr::calcRootMatrix()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	J3DModel* model = getModel();
 
 	if (mBathtub->unk29A) {
@@ -525,7 +526,8 @@ void TKoopaJr::checkNerveKillerHit()
 	for (int i = 0; i < mKillerManager->getActiveObjNum(); ++i) {
 		TBathtubKiller* killer = (TBathtubKiller*)mKillerManager->getObj(i);
 		if (killer->unk21C == 1) {
-			mSpine->pushNerve(&TNerveKoopaJrYahoo::theNerve());
+			const TNerveBase<TLiveActor>* nerve = &TNerveKoopaJrYahoo::theNerve();
+			mSpine->pushNerve(nerve);
 			break;
 		}
 	}
@@ -533,6 +535,7 @@ void TKoopaJr::checkNerveKillerHit()
 
 BOOL TNerveKoopaJrWait::execute(TSpineBase<TLiveActor>* spine) const
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TKoopaJr* self = (TKoopaJr*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -735,6 +738,7 @@ void TKoopaJrSubmarine::resetKoopaJrSubmarine()
 
 void TKoopaJrSubmarine::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	if (cue & CUE_CALC_ANIM) {
 		if (mSpine->getCurrentNerve()
 		        == &TNerveKoopaJrSubmarineLaunchKiller::theNerve()
@@ -768,6 +772,7 @@ void TKoopaJrSubmarine::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TKoopaJrSubmarine::makeCollisionPositions()
 {
+	char trash[0x38];
 	f32 x = 0.0f;
 	f32 y = 0.0f;
 	f32 z = 0.0f;
@@ -1200,6 +1205,7 @@ BOOL TNerveKoopaJrSubmarineCannonOpenClose::execute(
 BOOL TNerveKoopaJrSubmarineLaunchKiller::execute(
     TSpineBase<TLiveActor>* spine) const
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	TKoopaJrSubmarine* self = (TKoopaJrSubmarine*)spine->getBody();
 
 	if (self->mKillerIndex == self->mKillerNum && self->unk150 <= 0) {

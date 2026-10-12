@@ -170,8 +170,8 @@ BOOL TBGBeakHit::receiveMessage(THitActor* sender, u32 message)
 
 		mOwner->gotEyeDamage();
 
-		gpMarioParticleManager->emit(PARTICLE_MS_ENM_WATHIT, &mPosition, 0,
-		                             nullptr);
+		gpMarioParticleManager->emit(PARTICLE_MS_ENM_WATHIT, &sender->mPosition,
+		                             0, nullptr);
 		return true;
 	}
 
@@ -182,7 +182,8 @@ BOOL TBGBeakHit::receiveMessage(THitActor* sender, u32 message)
 	    || mOwner->getLatestNerve() == &TNerveBGPolDrop::theNerve()
 	    || mOwner->getLatestNerve() == &TNerveBGBeakDamage::theNerve())
 		return false;
-	char trash[64];
+	JGeometry::TVec3<f32> delta;
+	char trash[76];
 
 	if (sender->getActorType() == 0x80000001) {
 		if (message == HIT_MESSAGE_TAKE) {
@@ -193,10 +194,11 @@ BOOL TBGBeakHit::receiveMessage(THitActor* sender, u32 message)
 			mHolder = actor;
 
 			// retail inlines showMessage(0xE0028) here (flag 1 << 3 folded)
-			if (mOwner->unk190.color.a != 0) {
-				if ((mOwner->unk198 & 8) == 0)
+			TBossGesso* owner = mOwner;
+			if (owner->unk190.color.a != 0) {
+				if ((owner->unk198 & 8) == 0)
 					gpMarDirector->getConsole()->startAppearBalloon(0xE0028, true);
-				mOwner->unk198 |= 8;
+				owner->unk198 |= 8;
 			}
 
 			return true;
@@ -204,7 +206,7 @@ BOOL TBGBeakHit::receiveMessage(THitActor* sender, u32 message)
 
 		if (message == HIT_MESSAGE_THROWN || message == HIT_MESSAGE_UNK8) {
 			// TODO: inlined from TBossGesso?
-			JGeometry::TVec3<f32> delta = mPosition;
+			delta = mPosition;
 			TBossGesso* gesso           = mOwner;
 			delta -= gesso->mPosition;
 			f32 length = gesso->getSaveParam()->mSLBeakLengthDamage.get();
@@ -237,17 +239,17 @@ void TBGBeakHit::perform(u32 cue, JDrama::TGraphics* graphics)
 
 		if (mHolder != nullptr) {
 			JGeometry::TVec3<f32> us2mario = SMS_GetMarioPos();
-			us2mario -= mPosition;
+			us2mario -= mOwner->mPosition;
 			if (!us2mario.isZero())
 				VECNormalize(&us2mario, &us2mario);
 			else
 				us2mario.set(0.0f, 0.0f, 1.0f);
 
+			// asm: perp = up x offset with up = (0,1,0)
+			JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
 			JGeometry::TVec3<f32> offset = us2mario;
 			JGeometry::TVec3<f32> perp;
-			// TODO: cross is incorrect?
-			JGeometry::TVec3<f32> up(0.0f, 1.0f, 1.0f);
-			perp.cross(offset, up);
+			perp.cross(up, us2mario);
 			if (!perp.isZero())
 				VECNormalize(&perp, &perp);
 			else
@@ -270,6 +272,7 @@ void TBGBeakHit::perform(u32 cue, JDrama::TGraphics* graphics)
 			unk74.mMtx[2][3] = offset.z;
 
 			JGeometry::TVec3<f32> ownerToUs = mPosition;
+			char trash[100];
 			ownerToUs -= mOwner->mPosition;
 			f32 beakPullDist = ownerToUs.length();
 

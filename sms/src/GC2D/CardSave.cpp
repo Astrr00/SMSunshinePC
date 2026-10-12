@@ -416,7 +416,7 @@ void TCardSave::endWaitForChoice()
 
 s8 TCardSave::waitForChoice(TEProgress param_1, TEProgress param_2, s8 param_3)
 {
-	char trash[0xc0];
+
 	s8 result = -1;
 
 	switch (unk10) {
@@ -593,7 +593,32 @@ s8 TCardSave::waitForChoice(TEProgress param_1, TEProgress param_2, s8 param_3)
 		result = unk2E9;
 		break;
 	}
-
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	return result;
 }
 
@@ -815,7 +840,6 @@ s8 TCardSave::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
 		result = unk2E9;
 		break;
 	}
-
 	return result;
 }
 
@@ -1375,8 +1399,8 @@ s8 TCardSave::waitForSelect3(TEProgress param_1, TEProgress param_2,
 
 s8 TCardSave::waitForAnyKeyBM(TEProgress param_1)
 {
-	char trash[8];
 	s8 result = -1;
+	char trash[8];
 
 	switch (unk10) {
 	case 0:

@@ -399,6 +399,12 @@ void TBathtub::calcRootMatrix()
 
 bool TBathtub::allowsTumble() const
 {
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	JGeometry::TVec3<f32> pos = *gpMarioPos;
 	f32 angle;
 	if (getNearGrip(pos, 18.0f, &angle)) {

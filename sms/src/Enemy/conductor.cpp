@@ -94,7 +94,12 @@ void TConductor::registerEnemyInfoTable(TStageEnemyInfoTable* param_1)
 
 void TConductor::init()
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	JGadget::TList<TEnemyManager*>::iterator it, e;
+	char trash_p[16];
 	for (it = unk20.begin(), e = unk20.end(); it != e; ++it)
 		if (!(*it)->search("ヒノクリ２マネージャー")
 		    && !(*it)->search("ボスゲッソーマネージャー"))

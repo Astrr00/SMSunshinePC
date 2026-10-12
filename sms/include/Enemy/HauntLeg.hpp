@@ -15,11 +15,7 @@ class TNerveHauntLegHaunt : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
 
-	static const TNerveHauntLegHaunt& theNerve()
-	{
-		static TNerveHauntLegHaunt instance;
-		return instance;
-	}
+	static const TNerveHauntLegHaunt& theNerve();
 };
 
 // A collision-only proxy that hangs off THauntLeg. Stomping or hip-dropping on

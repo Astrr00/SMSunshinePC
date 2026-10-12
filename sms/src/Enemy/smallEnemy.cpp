@@ -356,7 +356,7 @@ void TSmallEnemy::genEventCoin()
 
 	if (mCoin) {
 		TCoin* coin;
-		if (isActorType(0x2000000E)) {
+		if (mCoin->isActorType(0x2000000E)) { // retail tests mCoin's actor type (lwz 0x4c(r4=mCoin)), not this
 			coin = (TCoin*)gpItemManager->makeObjAppear(0x2000000E);
 		} else {
 			coin = mCoin;

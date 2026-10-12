@@ -249,6 +249,7 @@ TBGCheckData* TMario::checkWallPlane(Vec* pos, f32 yOff, f32 radius)
 	f32 bestDist         = radius;
 
 	TBGWallCheckRecord record(pos->x, pos->y + yOff, pos->z, radius, 4, 0);
+	char trash[4];
 
 	if (gpMap->isTouchedWallsAndMoveXZ(&record) == true) {
 		for (int i = 0; i < record.mResultWallsNum; i++) {
@@ -258,7 +259,7 @@ TBGCheckData* TMario::checkWallPlane(Vec* pos, f32 yOff, f32 radius)
 				break;
 			}
 
-			f32 dist = wall->getNormal().dot(*pos) + wall->getPlaneDistance();
+			f32 dist = wall->getNormal().dot(*(const JGeometry::TVec3<f32>*)pos) + wall->getPlaneDistance();
 			if (dist < 0.0f)
 				dist = -dist;
 			if (dist < bestDist) {
@@ -432,13 +433,17 @@ void TMario::setPlayerJumpSpeed(f32 speed_mult, f32 force)
 u32 TMario::setStatusToJumping(u32 status, u32 arg)
 {
 	u32 nextStatus = status;
-	char trash[0x34];
+	char trash2[4];
 	const TBGCheckData* landingPlane;
+	char trash[0x30];
 
 	unk2BC = mPosition.y;
 	if (mFootPrintTimer > mDeParams.mFootPrintTimerMax.get() / 2) {
 		f32 size = mDirtyParams.mPolSizeJump.get();
-		gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, size);
+		f32 z    = mPosition.z;
+		f32 y    = mPosition.y;
+		f32 x    = mPosition.x;
+		gpPollution->stamp(1, x, y, z, size);
 	}
 
 	switch (status) {
@@ -600,6 +605,7 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 
 	case MARIO_STATUS_TRAMPLE:
 		switch (mAnimationId) {
+		case ANIM_STEP1:
 		default:
 			startVoice(MSD_SE_MV21_JUMP_SMALL_01);
 			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep1.get());
@@ -1746,6 +1752,7 @@ void TMario::checkRideMovement()
 
 	JGeometry::TVec3<f32> pos = mPosition;
 	char trash[0x20];
+
 
 	pos.x += 0.8f * (50.0f * JMASSin(mFaceAngle.y));
 	pos.z += 0.8f * (50.0f * JMASCos(mFaceAngle.y));

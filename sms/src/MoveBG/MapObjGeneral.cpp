@@ -539,7 +539,7 @@ void TMapObjGeneral::bind()
 		return;
 	}
 
-	if (!checkLiveFlag2(LIVE_FLAG_AIRBORNE)) {
+	if (!(mLiveFlag & LIVE_FLAG_AIRBORNE ? 1 : 0)) {
 		JGeometry::TVec3<f32> vel     = mVelocity;
 		JGeometry::TVec3<f32> velCopy = vel;
 		if (velCopy.x == 0.0f) {

@@ -308,7 +308,7 @@ void TKukku::dropCoins()
 		mDropCount += 1;
 		mMushroom->appear();
 		mMushroom->JSGSetTranslation(mPosition);
-		mMushroom->mVelocity.zero();
+		mMushroom->mVelocity.set(0.0f, 0.0f, 0.0f);
 		mMushroom->offLiveFlag(LIVE_FLAG_UNK10);
 		return;
 	}

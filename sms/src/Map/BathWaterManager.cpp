@@ -480,7 +480,18 @@ public:
 	/* 0x8C */ TBathWaterParams* unk8C;
 };
 
-static void initScreen2D(s16, s16) { }
+static inline void initScreen2D(s16 w, s16 h)
+{
+	TPosition3f mtx;
+	Mtx44 ortho;
+	mtx.identity();
+	C_MTXOrtho(ortho, 0.0f, (f32)h, 0.0f, (f32)w, -1.0f, 1.0f);
+	GXSetProjection(ortho, GX_ORTHOGRAPHIC);
+	GXSetViewport(0.0f, 0.0f, (f32)w, (f32)h, 0.0f, 1.0f);
+	GXSetScissor(0, 0, w, h);
+	GXLoadPosMtxImm(mtx, GX_PNMTX0);
+	GXSetCurrentMtx(GX_PNMTX0);
+}
 
 static void drawCap(const JGeometry::TVec3<f32>& pos, f32 radius)
 {
@@ -516,10 +527,11 @@ void clearEFB_alpha(s16 x, s16 y, s16 wd, s16 ht, u8 alpha)
 	if (ht <= 0)
 		ht = SMSGetGameRenderHeight();
 
-	f32 fx      = x;
-	f32 fwd     = wd;
-	f32 fy      = y;
-	f32 fht     = ht;
+	f32 fx, fy, fwd, fht;
+	fx  = x;
+	fwd = wd;
+	fy  = y;
+	fht = ht;
 	f32 fright  = fx + fwd;
 	f32 fbottom = fy + fht;
 
@@ -586,10 +598,11 @@ static void draw_mist(u16 x, u16 y, u16 wd, u16 ht, void* buffer)
 	GXColor tev_color = { 0x03, 0x03, 0x03, 0x00 };
 	u8 vFilter[7]     = { 0x15, 0x00, 0x00, 0x16, 0x00, 0x00, 0x15 };
 
-	f32 f_left   = x;
-	f32 f_wd     = wd;
-	f32 f_top    = y;
-	f32 f_ht     = ht;
+	f32 f_left, f_top, f_wd, f_ht;
+	f_left = x;
+	f_wd   = wd;
+	f_top  = y;
+	f_ht   = ht;
 	f32 f_right  = f_left + f_wd;
 	f32 f_bottom = f_top + f_ht;
 	f32 offset_x = (4.0f / f_wd);
@@ -942,15 +955,7 @@ public:
 
 		s16 w2 = SMSGetGameRenderWidth();
 		s16 h2 = SMSGetGameRenderHeight();
-		TPosition3f mtx;
-		mtx.identity();
-		Mtx44 ortho;
-		C_MTXOrtho(ortho, 0.0f, (f32)h2, 0.0f, (f32)w2, -1.0f, 1.0f);
-		GXSetProjection(ortho, GX_ORTHOGRAPHIC);
-		GXSetViewport(0.0f, 0.0f, (f32)w2, (f32)h2, 0.0f, 1.0f);
-		GXSetScissor(0, 0, w2, h2);
-		GXLoadPosMtxImm(mtx, GX_PNMTX0);
-		GXSetCurrentMtx(GX_PNMTX0);
+		initScreen2D(w2, h2);
 		GXSetCullMode(GX_CULL_BACK);
 		GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
 		GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA,
@@ -1003,9 +1008,8 @@ public:
 		    J3DMLF_UseUniqueMaterials | (4 << J3DMLF_TevStageNumShift));
 		unk8013C = new JUTTexture(
 		    (const ResTIMG*)JKRGetResource("/scene/map/map/water_ball.bti"));
-		JUTTexture* warpTex = new JUTTexture(
+		unk80140 = new JUTTexture(
 		    (const ResTIMG*)JKRGetResource("/scene/map/map/water_warp.bti"));
-		unk80140 = warpTex;
 		init_tobj_resource(&unk800B4,
 		                   JKRGetResource("/scene/map/map/ball.bti"));
 		init_tobj_resource(&unk800F4,

@@ -80,12 +80,12 @@ void TMario::stateMachineUpper()
 			mUpperState   = UPPER_STATE_HOLDING_PUMP;
 			mPumpCooldown = mUpperBodyParams.mPumpWaitTime.get();
 		}
-		if (!checkFlag(MARIO_FLAG_IN_ANY_WATER) && mWaterGun != nullptr) {
+		TWaterGun const* waterGun;
+		if (!checkFlag(MARIO_FLAG_IN_ANY_WATER) && (waterGun = mWaterGun) != nullptr) {
 			bool flag;
-			if (mWaterGun->mCurrentWater == 0) {
+			if (waterGun->mCurrentWater == 0) {
 				flag = 0;
 			} else {
-				TWaterGun const* waterGun = mWaterGun;
 				if (waterGun->checkCurrentNozzleKind(1)) {
 					if (waterGun->checkCurrentNozzleTriggerSprayState(1)) {
 						flag = 1;

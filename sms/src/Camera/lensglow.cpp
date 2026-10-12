@@ -95,12 +95,15 @@ TLensGlow::TLensGlow(bool param_1, const char* name)
 
 void TLensGlow::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	char trash[0x60];
+	char trash[0x50];
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	bool inBounds = false;
 	if (gpCameraMario->isMarioIndoor()) {
 		inBounds = false;
 	} else {
-		inBounds = gpSunModel->isInBounds(unk94);
+		inBounds = gpSunModel->isInBoundsRef(unk94);
 	}
 
 	if (cue & CUE_MOVE) {

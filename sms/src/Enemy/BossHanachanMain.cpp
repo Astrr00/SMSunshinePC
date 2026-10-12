@@ -145,6 +145,7 @@ void TBossHanachan::execSlip()
 
 	if (mMarchSpeed > 0.001f) {
 		JGeometry::TVec3<f32> velocity = mLastLinearVelocity;
+		char trash[0xc];
 
 		if (mMarchSpeed > 4.0f) {
 			// Push along the boss' own Z axis (towards the side it is leaning
@@ -170,7 +171,8 @@ void TBossHanachan::execSlip()
 			velocity.add(push);
 		}
 
-		if (!velocity.isZero()) {
+		bool isZero = velocity.isZero();
+		if (!isZero) {
 			MsVECNormalize(&velocity, &velocity);
 			velocity.scale(500.0f);
 
@@ -205,7 +207,10 @@ void TBossHanachan::execWalk(bool run)
 		JGeometry::TVec3<f32> pathNode = goal;
 		JGeometry::TVec3<f32> diff;
 		diff.set(pathNode.x - mPosition.x, 0.0f, pathNode.z - mPosition.z);
-		if (diff.squared() < CLBSquared<f32>(10.0f))
+		f32 xx = diff.x * diff.x;
+		f32 yy = diff.y * diff.y;
+		f32 zz = diff.z * diff.z;
+		if (zz + (xx + yy) < CLBSquared<f32>(10.0f))
 			shouldWalk = false;
 	}
 
@@ -217,7 +222,10 @@ void TBossHanachan::execWalk(bool run)
 	JGeometry::TVec3<f32> pathNode = goal;
 	JGeometry::TVec3<f32> diff(pathNode.x - mPosition.x, 0.0f,
 	                           pathNode.z - mPosition.z);
-	if (diff.squared() < CLBSquared<f32>(100.0f)) {
+	f32 xx = diff.x * diff.x;
+	f32 yy = diff.y * diff.y;
+	f32 zz = diff.z * diff.z;
+	if (zz + (xx + yy) < CLBSquared<f32>(100.0f)) {
 		if (!unk114.empty())
 			switchNextGoalPath();
 		else
@@ -245,13 +253,12 @@ bool TBossHanachan::checkFallDecideAndSetup()
 			else
 				mTumbleTargetAngleZ = -179.0f;
 
+			f32 fallDelta = CLBAbs<f32>(body->mLastRotZ - body->mRotation.z);
 			mTumbleAngularSpeedZ
-			    = mChangeSaveParams->mSLWaveFallDownSpeed.get()
-			      * CLBAbs<f32>(body->mLastRotZ - body->mRotation.z);
-			if (mTumbleAngularSpeedZ
-			    < mChangeSaveParams->mSLFallDecideMinSpeed.get())
-				mTumbleAngularSpeedZ
-				    = mChangeSaveParams->mSLFallDecideMinSpeed.get();
+			    = mChangeSaveParams->mSLWaveFallDownSpeed.get() * fallDelta;
+			f32 minSpeed = mChangeSaveParams->mSLFallDecideMinSpeed.get();
+			if (mTumbleAngularSpeedZ < minSpeed)
+				mTumbleAngularSpeedZ = minSpeed;
 			result = true;
 			break;
 		}
@@ -435,7 +442,7 @@ void TBossHanachan::perform(u32 cue, JDrama::TGraphics* graphics)
 					if (sand != nullptr) {
 						JGeometry::TVec3<f32> toSand = sand->mPosition - mPosition;
 						JGeometry::TVec3<f32> diff = toSand;
-						if (diff.x * diff.x + diff.z * diff.z
+						if (diff.z * diff.z + diff.x * diff.x
 						    <= CLBSquared<f32>(50.0f)) {
 							body->mSandTiltRotZ = 0.0f;
 						} else {
@@ -460,8 +467,10 @@ void TBossHanachan::perform(u32 cue, JDrama::TGraphics* graphics)
 						    = CLBRoundf<s16>(DEG2SHORTANGLE(body->mRotation.y));
 						f32 sinY    = JMASSin(angle);
 						f32 cosY    = JMASCos(angle);
-						f32 offsetZ = -200.0f * sinY + 0.0f * cosY;
-						f32 offsetX = 200.0f * cosY + 0.0f * sinY;
+						f32 radius  = 200.0f;
+						f32 zero    = 0.0f;
+						f32 offsetZ = -radius * sinY + zero * cosY;
+						f32 offsetX = radius * cosY + zero * sinY;
 						const TBGCheckData* plane;
 						f32 heightA = gpMap->checkGroundIgnoreWaterSurface(
 						    offsetX + body->mPosition.x,
@@ -473,9 +482,11 @@ void TBossHanachan::perform(u32 cue, JDrama::TGraphics* graphics)
 						    -offsetZ + body->mPosition.z, &plane);
 						f32 diffA = heightA - groundY;
 						f32 diffB = heightB - groundY;
-						if (fabsf(diffA) < 0.001f && fabsf(diffB) < 0.001f) {
+						f32 absA  = fabsf(diffA);
+						f32 absB  = fabsf(diffB);
+						if (absA < 0.001f && absB < 0.001f) {
 							body->mSandTiltRotZ = 0.0f;
-						} else if (fabsf(diffA) > fabsf(diffB)) {
+						} else if (absA > absB) {
 							body->mSandTiltRotZ
 							    = (360.0f / 65536.0f) * matan(200.0f, diffA);
 						} else {
@@ -921,7 +932,8 @@ void TBossHanachan::throwMario_(THitActor* thrower)
 		int absAngleDiff = CLBAbs<int>(angleDiff);
 
 		f32 power = mMarchSpeed * mChangeSaveParams->mSLThrowTotalPower.get();
-		f32 ratio = 1.0f - (1.0f / 32768.0f) * absAngleDiff;
+		f32 angleRatio = (1.0f / 32768.0f) * absAngleDiff;
+		f32 ratio      = 1.0f - angleRatio;
 		JGeometry::TVec3<f32> push = mLastLinearVelocity;
 		f32 pushScale = ratio * mChangeSaveParams->mSLThrowMoveDirPower.get();
 		speed         = ratio * power;
@@ -986,10 +998,9 @@ void TBossHanachan::init(TLiveManager* manager)
 	mHeadPos = mPosition;
 
 	JGeometry::TVec3<f32> linkPos = mHeadPos;
-	linkPos.x -= JMASSin(DEG2SHORTANGLE(mRotation.y))
-	             * mCommonSaveParams->mSLHeadLength.get();
-	linkPos.z -= JMASCos(DEG2SHORTANGLE(mRotation.y))
-	             * mCommonSaveParams->mSLHeadLength.get();
+	s16 linkAngle                 = DEG2SHORTANGLE(mRotation.y);
+	linkPos.x -= JMASSin(linkAngle) * mCommonSaveParams->mSLHeadLength.get();
+	linkPos.z -= JMASCos(linkAngle) * mCommonSaveParams->mSLHeadLength.get();
 	mSphereLink = new TSphereLink(
 	    8, JGeometry::TVec3<f32>(linkPos.x, linkPos.y, linkPos.z),
 	    mCommonSaveParams->mSLBodyLength.get(),

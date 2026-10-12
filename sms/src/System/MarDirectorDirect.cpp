@@ -1049,19 +1049,26 @@ u8 TMarDirector::updateGameMode()
 	return r29;
 }
 
+struct BigTemp24 {
+	char c[0x24];
+};
+BigTemp24 MakeBigTemp24();
+
 void TMarDirector::moveStage()
 {
 	unkB4 = TApplication::APP_STATE_GAMEPLAY;
 	unkE4 = 15;
 	gpApplication.mFader->setColor(JUtility::TColor(0, 0, 0, 0xff));
-	char trash[0x24];
+	if (0) {
+		(void)MakeBigTemp24();
+	}
 
 	u8 sVar4 = SMS_getShineStage(gpApplication.mNextArea.getStage());
 	u8 sVar5 = SMS_getShineStage(gpApplication.mCurrArea.getStage());
 	if (sVar4 != sVar5)
 		TFlagManager::smInstance->setFlag(0x40002, 0);
-
 	TGameSequence& nextArea = gpApplication.mNextArea;
+
 
 	if (nextArea.unk1 == 0xff)
 		switch (nextArea.unk0) {

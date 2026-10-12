@@ -35,6 +35,23 @@
 #include <JSystem/JGeometry.hpp>
 #include <math.h>
 
+#define KOOPA_NERVE(Name, Base) \
+	class Name : public Base { public: virtual BOOL execute(TSpineBase<TLiveActor>*) const; static const Name& theNerve(); }; \
+	const Name& Name::theNerve() { static Name instance; return instance; }
+
+class TNerveKoopaTurn : public TNerveBase<TLiveActor> { };
+
+KOOPA_NERVE(TNerveKoopaTurnR, TNerveKoopaTurn)
+KOOPA_NERVE(TNerveKoopaTurnL, TNerveKoopaTurn)
+KOOPA_NERVE(TNerveKoopaTumble, TNerveKoopaTurn)
+KOOPA_NERVE(TNerveKoopaProvoke, TNerveBase<TLiveActor>)
+KOOPA_NERVE(TNerveKoopaWait, TNerveKoopaTurn)
+KOOPA_NERVE(TNerveKoopaFlame, TNerveKoopaTurn)
+KOOPA_NERVE(TNerveKoopaGetDown, TNerveBase<TLiveActor>)
+KOOPA_NERVE(TNerveKoopaStagger, TNerveBase<TLiveActor>)
+KOOPA_NERVE(TNerveKoopaFall, TNerveBase<TLiveActor>)
+KOOPA_NERVE(TNerveKoopaGetShowered, TNerveBase<TLiveActor>)
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
@@ -244,6 +261,7 @@ BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveKoopaTumble::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TKoopa* self = (TKoopa*)spine->getBody();
 
 	self->changeAnm(0x8, 0, self->getParam()->tumbleSpeed.get());
@@ -262,7 +280,7 @@ BOOL TNerveKoopaTumble::execute(TSpineBase<TLiveActor>* spine) const
 			SMSRumbleMgr->start(1, static_cast<f32*>(nullptr));
 	}
 
-	return self->endsAnm();
+	return self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? TRUE : FALSE;
 }
 
 BOOL TNerveKoopaFall::execute(TSpineBase<TLiveActor>* spine) const
@@ -279,7 +297,7 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 
 	switch (self->getAnmIndex()) {
 	case 5:
-		if (self->endsAnm()) {
+		if (self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr)) {
 			self->changeAnm(0x4, 0, 2.0f); // asm 0x80336208: constant, not fireSpeed
 			spine->setNext(&TNerveKoopaFlame::theNerve());
 		} else {
@@ -288,7 +306,7 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 		break;
 
 	case 3:
-		if (self->endsAnm()) {
+		if (self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr)) {
 			if (self->unk155) {
 				self->laugh();
 				self->unk155 = 0;
@@ -400,7 +418,7 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 
 				if (grip || side != 0)
 					self->changeAnm(0x3, 0, KOOPA_PARAMS(self)->fireSpeed.get());
-			} else if (self->endsAnm()
+			} else if (self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr)
 			           && spine->getTime() >= KOOPA_PARAMS(self)->flameFocusEndStep.get()) {
 				self->changeAnm(0x3, 0, KOOPA_PARAMS(self)->fireSpeed.get());
 			}
@@ -420,7 +438,7 @@ BOOL TNerveKoopaProvoke::execute(TSpineBase<TLiveActor>* spine) const
 	TKoopa* self = (TKoopa*)spine->getBody();
 
 	self->changeAnm(0x6, 0, 2.0f);
-	if (self->endsAnm())
+	if (self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr))
 		spine->setNext(&TNerveKoopaWait::theNerve());
 
 	return false;
@@ -428,16 +446,18 @@ BOOL TNerveKoopaProvoke::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveKoopaStagger::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x8];
 	TKoopa* self = (TKoopa*)spine->getBody();
 	self->changeAnm(0x9, 0, self->getParam()->staggerSpeed.get());
-	return self->endsAnm();
+	return self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? TRUE : FALSE;
 }
 
 BOOL TNerveKoopaGetShowered::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x8];
 	TKoopa* self = (TKoopa*)spine->getBody();
 	self->changeAnm(0xE, 0, self->getParam()->waterhitSpeed.get());
-	return self->endsAnm();
+	return self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr) ? TRUE : FALSE;
 }
 
 BOOL TNerveKoopaGetDown::execute(TSpineBase<TLiveActor>* spine) const
@@ -446,20 +466,20 @@ BOOL TNerveKoopaGetDown::execute(TSpineBase<TLiveActor>* spine) const
 
 	switch (self->getAnmIndex()) {
 	case 0:
-		if (self->endsAnm())
+		if (self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr))
 			self->changeAnm(0x1, 0, self->getParam()->downSpeed.get());
 		break;
 	case 1: {
 		TBathtub* bathtub
 		    = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
-		if (spine->getTime() * (bathtub->getNumGripsDead() + 2)
-		        >= self->getParam()->downStep.get()
-		    && self->endsAnm())
+		f32 downStep = self->getParam()->downStep.get();
+		if (!(spine->getTime() * (bathtub->getNumGripsDead() + 2) < downStep)
+		    && self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr))
 			self->changeAnm(0x7, 0, self->getParam()->downSpeed.get());
 		break;
 	}
 	case 7:
-		if (self->endsAnm())
+		if (self->mMActor->curAnmEndsNext(ANM_TYPE_BCK, nullptr))
 			return true;
 		break;
 	default: {
@@ -648,7 +668,7 @@ BOOL TKoopaHead::receiveMessage(THitActor* sender, u32 message)
 		}
 		break;
 	case HIT_MESSAGE_ATTACK:
-		if (!sender->isActorType(0x08000024))
+		if (sender->getActorType() != 0x08000024)
 			break;
 
 		TKoopa* koopa = mOwner;
@@ -689,13 +709,13 @@ BOOL TKoopaBody::receiveMessage(THitActor* sender, u32 message)
 	case HIT_MESSAGE_SPRAYED_BY_WATER:
 		break;
 	case HIT_MESSAGE_ATTACK:
-		if (!sender->isActorType(0x08000024))
+		if (sender->getActorType() != 0x08000024)
 			break;
 
 		TKoopa* koopa = mOwner;
 		if (&TNerveKoopaFall::theNerve() != koopa->mSpine->getCurrentNerve()
 		    && &TNerveKoopaProvoke::theNerve() != koopa->mSpine->getCurrentNerve()
-		    && &TNerveKoopaFlame::theNerve() != koopa->mSpine->getCurrentNerve()
+		    && koopa->mSpine->getCurrentNerve() != &TNerveKoopaFlame::theNerve()
 		    && &TNerveKoopaTumble::theNerve() != koopa->mSpine->getCurrentNerve()
 		    && &TNerveKoopaGetDown::theNerve() != koopa->mSpine->getCurrentNerve()
 		    && &TNerveKoopaGetShowered::theNerve()
@@ -808,21 +828,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 		quat.w        = cosf(halfAngle);
 	}
 
-	// normalize the quaternion
-	f32 lenSq = quat.x * quat.x + quat.y * quat.y + quat.z * quat.z
-	            + quat.w * quat.w;
-	if (lenSq <= JGeometry::TUtil<f32>::epsilon()) {
-		quat.x = 0.0f; // asm 0x80337204: all four zeroed
-		quat.y = 0.0f;
-		quat.z = 0.0f;
-		quat.w = 0.0f;
-	} else {
-		f32 inv = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(lenSq);
-		quat.x *= inv;
-		quat.y *= inv;
-		quat.z *= inv;
-		quat.w *= inv;
-	}
+	quat.normalize(); // asm 0x80337178 zero-all / inv_sqrt out of line
 
 	if (!koopa->isFlaming()) {
 		// asm 0x8033728C: aimNorm x marioPos (not quat)
@@ -830,7 +836,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 		                            aimNorm.z * marioPos.x - aimNorm.x * marioPos.z,
 		                            aimNorm.x * marioPos.y - aimNorm.y * marioPos.x);
 
-		f32 angle2 = atan2f(JGeometry::TUtil<f32>::sqrt(cross.squared()),
+		f32 angle2 = atan2f(cross.length(),
 		                    aimNorm.x * marioPos.x + aimNorm.y * marioPos.y
 		                        + aimNorm.z * marioPos.z);
 		f32 dot2 = marioPos.x * jointMtx->at(0, 1)
@@ -850,34 +856,10 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 		          * sinHalf2;
 		quat2.w = cosf(halfAngle2);
 
-		f32 lenSq2 = quat2.x * quat2.x + quat2.y * quat2.y
-		             + quat2.z * quat2.z + quat2.w * quat2.w;
-		if (lenSq2 <= JGeometry::TUtil<f32>::epsilon()) {
-			quat2.x = 0.0f; // asm 0x803373BC: all four zeroed
-			quat2.y = 0.0f;
-			quat2.z = 0.0f;
-			quat2.w = 0.0f;
-		} else {
-			f32 inv = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(lenSq2);
-			quat2.x *= inv;
-			quat2.y *= inv;
-			quat2.z *= inv;
-			quat2.w *= inv;
-		}
+		quat2.normalize();
 
 		// asm 0x80337410-7C: all four results computed from the old quat before any store
-		f32 nx = quat2.w * quat.x - quat2.z * quat.y + quat2.y * quat.z
-		         + quat2.x * quat.w;
-		f32 ny = quat2.w * quat.y + quat2.z * quat.x - quat2.x * quat.z
-		         + quat2.y * quat.w;
-		f32 nz = quat2.w * quat.z + quat2.x * quat.y - quat2.y * quat.x
-		         + quat2.z * quat.w;
-		f32 nw = quat2.w * quat.w - quat2.x * quat.x - quat2.y * quat.y
-		         - quat2.z * quat.z;
-		quat.x = nx;
-		quat.y = ny;
-		quat.z = nz;
-		quat.w = nw;
+		quat.mul(quat2, quat);
 	}
 
 	TRotation3f rot2;
@@ -1000,7 +982,8 @@ f32 TKoopa::getFlameDirRate() const
 	s32 time           = mSpine->getTime();
 
 	f32 rate;
-	switch (mMActor->getCurAnmIdx(ANM_TYPE_BCK)) {
+	int anmIdx = mMActor->getCurAnmIdx(ANM_TYPE_BCK);
+	switch (anmIdx) {
 	case 5:
 		rate = -(frame * overStart / end);
 		break;
@@ -1013,7 +996,7 @@ f32 TKoopa::getFlameDirRate() const
 			       / (focusEnd - focusStart) - overStart;
 		else
 			rate = 1.0f;
-		if (mMActor->getCurAnmIdx(ANM_TYPE_BCK) == 3)
+		if (anmIdx == 3)
 			rate *= 1.0f - frame / end;
 		break;
 	default:
@@ -1320,13 +1303,13 @@ void TKoopa::init(TLiveManager* manager)
 		TBathtub* bathtub
 		    = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
 		MtxPtr bathMtx = *bathtub->getRootJointMtx();
-		JGeometry::TVec3<f32> col0(bathMtx[0][0], bathMtx[1][0],
-		                           bathMtx[2][0]);
-		JGeometry::TVec3<f32> col2(bathMtx[0][2], bathMtx[1][2],
-		                           bathMtx[2][2]);
-		JGeometry::TVec3<f32> trans(bathMtx[0][3], bathMtx[1][3],
-		                            bathMtx[2][3]);
+		JGeometry::TVec3<f32> col2;
+		JGeometry::TVec3<f32> col0;
 		JGeometry::TVec3<f32> diff;
+		JGeometry::TVec3<f32> trans;
+		trans.set(bathMtx[0][3], bathMtx[1][3], bathMtx[2][3]);
+		col0.set(bathMtx[0][0], bathMtx[1][0], bathMtx[2][0]);
+		col2.set(bathMtx[0][2], bathMtx[1][2], bathMtx[2][2]);
 		diff.sub(*marioPos, trans);
 		mTargetDir = matan(col2.dot(diff), col0.dot(diff)) * (360.0f / 65536.0f);
 	}
@@ -1347,7 +1330,7 @@ void TKoopa::init(TLiveManager* manager)
 	headJoint->setCallBack(KoopaNeckCallBack);
 	headJoint->setCallBackUserData(this);
 
-	unk1B8 = 0.0f;
+	unk1B8 = 1.0f; // asm 0x80334ED4 (pool @3570 = 1.0f, was 0.0f)
 	unk155 = 0;
 }
 
@@ -1386,9 +1369,14 @@ void TKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	if (cue & CUE_MOVE) {
 		f32 frame = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+		bool inTumble = false;
 		if (mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve()
-		    && frame >= getParam()->tumbleStartFrame.get()
-		    && frame <= getParam()->tumbleEndFrame.get()) {
+		    && frame >= getParam()->tumbleStartFrame.get())
+			inTumble = true;
+		bool inRange = false;
+		if (inTumble && frame <= getParam()->tumbleEndFrame.get())
+			inRange = true;
+		if (inRange) {
 			TBathtub* bathtub
 			    = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
 			bathtub->tumble(mRotation.y, getParam()->tumbleWeight.get());
@@ -1397,9 +1385,13 @@ void TKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 	}
 
 	if (cue & CUE_CALC_ANIM) {
-		if (isBreathing()
-		    || (getAnmIndex() == 6 && getAnmFrame() >= 68.0f
-		        && getAnmFrame() <= 164.0f)) {
+		bool show = isBreathing();
+		if (!show && getAnmIndex() == 6) {
+			f32 f = getAnmFrame();
+			if (68.0f <= f && f <= 164.0f)
+				show = true;
+		}
+		if (show) {
 			mMActor->calc();
 			f32 flameScale = getParam()->flameScale.get();
 			JGeometry::TVec3<f32> scale(flameScale, flameScale, flameScale);
@@ -1454,9 +1446,8 @@ void TKoopa::calcRootMatrix()
 	mPosition += offset;
 	mtx.setTrans(mPosition);
 
-	J3DModel* model = getModel();
-	PSMTXCopy(mtx, model->getBaseTRMtx());
-	model->setBaseScale(JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f));
+	PSMTXCopy(mtx, getModel()->getBaseTRMtx());
+	getModel()->setBaseScale(JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f));
 	mScaling.set(1.0f, 1.0f, 1.0f);
 }
 

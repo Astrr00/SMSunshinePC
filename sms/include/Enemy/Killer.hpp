@@ -143,37 +143,4 @@ public:
 	/* 0x20C */ f32 mBombScale;
 };
 
-class TNerveFlyEnemyNormalFly : public TNerveBase<TLiveActor> {
-public:
-	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
-	static const TNerveFlyEnemyNormalFly& theNerve()
-	{
-		static TNerveFlyEnemyNormalFly instance;
-		return instance;
-	}
-};
-
-class TNerveFlyEnemyChaseFly : public TNerveBase<TLiveActor> {
-public:
-	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
-	static const TNerveFlyEnemyChaseFly& theNerve()
-	{
-		static TNerveFlyEnemyChaseFly instance;
-		return instance;
-	}
-};
-
-class TNerveKillerExplosion : public TNerveBase<TLiveActor> {
-public:
-	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
-	static const TNerveKillerExplosion& theNerve()
-	{
-		static TNerveKillerExplosion instance;
-		return instance;
-	}
-};
-
 #endif

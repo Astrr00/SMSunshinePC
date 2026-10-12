@@ -186,7 +186,7 @@ TSelectShine::TSelectShine(J3DModelData* pModelData, J3DAnmColor* pAnm,
     , mKind(0)
     , mEmitterMgr(nullptr)
 {
-	char trash[0x30];
+
 	mEmitters[0] = nullptr;
 	mEmitters[1] = nullptr;
 	mEmitters[2] = nullptr;
@@ -214,6 +214,7 @@ TSelectShine::TSelectShine(J3DModelData* pModelData, J3DAnmColor* pAnm,
 	mKind = kind;
 	if (mKind != 2) {
 		JGeometry::TVec3<f32> emitPos = mPos + mOffset;
+		char trash[0x30];
 		if (mKind == 0) {
 			mEmitterMgr->createEmitter(emitPos, 0, nullptr, nullptr);
 			mEmitters[0] = mEmitterMgr->unkC8[0][0];

@@ -279,7 +279,6 @@ void TModelWaterManager::makeEmit(const TWaterEmitInfo& param_1)
 		mParticleVelocitySOA[mParticleCount].y = local_3c.y;
 		mParticleVelocitySOA[mParticleCount].z = local_3c.z;
 	}
-
 	mParticleSizeSOA[mParticleCount]
 	    = rand11() * param_1.mSizeTremble.get() + param_1.mSize.get();
 
@@ -1090,9 +1089,12 @@ void TModelWaterManager::drawSilhouette(MtxPtr param_1)
 
 void TModelWaterManager::drawWaterVolume(MtxPtr param_1)
 {
-	char trash[8];
 	SMS_FillScreenAlpha(0);
 	Mtx afStack_48;
+	int pad4;
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	MTXIdentity(afStack_48);
 	GXSetCurrentMtx(GX_PNMTX0);
 	GXLoadPosMtxImm(afStack_48, GX_PNMTX0);

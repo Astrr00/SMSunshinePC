@@ -9,8 +9,7 @@ bool TWireBinder::init(const JGeometry::TVec3<f32>& param_1)
 
 bool TWireBinder::reset(const JGeometry::TVec3<f32>& param_1)
 {
-	JGeometry::TVec3<f32> local24;
-	JGeometry::TVec3<f32> local30;
+
 
 	mWireNumber = gpMapWireManager->getWireNo(param_1);
 	if (mWireNumber == -1)
@@ -18,8 +17,8 @@ bool TWireBinder::reset(const JGeometry::TVec3<f32>& param_1)
 
 	TMapWire* wire = gpMapWireManager->getWire(mWireNumber);
 
-	local24 = wire->getStartPoint();
-	local30 = wire->getEndPoint();
+	JGeometry::TVec3<f32> local24 = wire->getStartPoint();
+	JGeometry::TVec3<f32> local30 = wire->getEndPoint();
 	local30 -= local24;
 
 	mDir.normalize(local30);

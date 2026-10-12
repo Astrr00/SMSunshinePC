@@ -80,6 +80,7 @@ TRiccoHook::TRiccoHook(const char* name)
 // @non-matching - stack issues, maybe caused by THookTake ctor?
 void TRiccoHook::init(TLiveManager* manager)
 {
+	char trash[8];
 	TSpineEnemy::init(manager);
 	mSpine->initWith(&TNerveRHGraphWander::theNerve());
 	onHitFlag(HIT_FLAG_NO_COLLISION);

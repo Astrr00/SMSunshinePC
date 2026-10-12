@@ -72,6 +72,7 @@ void TMenuDirector::setup(JDrama::TDisplay* param_1, TMarioGamePad* param_2)
 	OSCreateThread(&gSetupThread, &setupThreadFunc, this,
 	               gpSetupThreadStack + 0x10000, 0x10000, 0x11, 0);
 	OSResumeThread(&gSetupThread);
+	char trash[0x18];
 }
 
 int TMenuDirector::rsetup()

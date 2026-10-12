@@ -30,6 +30,10 @@ void TMovieRumble::init(const char* param_1)
 
 	readCurInfo();
 	unk28 = false;
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 }
 
 void TMovieRumble::perform(u32 cue, JDrama::TGraphics*)
@@ -71,8 +75,8 @@ void TMovieRumble::checkRumbleOff()
 
 void TMovieRumble::readCurInfo()
 {
-	Koga::ToolData* toolData = unk14;
 	int group = unk18;
+	Koga::ToolData* toolData = unk14;
 
 	if (isValid() && toolData->isIndexValid(group)) {
 		toolData->GetValue(group, "start_frame", unk1C);

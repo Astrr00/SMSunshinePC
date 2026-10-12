@@ -763,10 +763,12 @@ static void evKillShine(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evKillMushroom1up(TSpcTypedInterp<TEventWatcher>* interp,
                               u32 arg_num)
 {
-	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	((TMushroom1up*)getNameRefPtr(interp->pop()))->kill();
 	interp->push();
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 }
 
 static void evAppearMushroom1up(TSpcTypedInterp<TEventWatcher>* interp,
@@ -1251,8 +1253,9 @@ static void evSetEventForWaterMelon(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evAppearReadyGo(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char pre[8];
 	SLICE_SLOT;
-	char trash[0xc];
+	char trash[4];
 	interp->verifyArgNum(0, &arg_num);
 	TConsoleStr* str = SMSGetMarDirector()->getConsole()->unk94;
 	str->startAppearReady();

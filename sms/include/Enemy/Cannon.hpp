@@ -17,26 +17,6 @@ class SDLModelData;
 class TMapCollisionMove;
 class TMapObjBase;
 
-#define CANNON_NERVE(Name)                                                     \
-	class Name : public TNerveBase<TLiveActor> {                               \
-	public:                                                                    \
-		virtual BOOL execute(TSpineBase<TLiveActor>*) const;                   \
-		static const Name& theNerve()                                          \
-		{                                                                      \
-			static Name instance;                                              \
-			return instance;                                                   \
-		}                                                                      \
-	};
-
-CANNON_NERVE(TNerveCannonObject)
-CANNON_NERVE(TNerveCannonDamageDemo)
-CANNON_NERVE(TNerveCannonDamage)
-CANNON_NERVE(TNerveCannonClose)
-CANNON_NERVE(TNerveCannonForceBombShoot)
-CANNON_NERVE(TNerveCannonShoot)
-CANNON_NERVE(TNerveCannonSearch)
-CANNON_NERVE(TNerveCannonOpen)
-
 class TCannonSaveLoadParams : public TSmallEnemyParams {
 public:
 	TCannonSaveLoadParams(const char*);

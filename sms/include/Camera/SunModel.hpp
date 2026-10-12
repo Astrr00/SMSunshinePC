@@ -49,6 +49,15 @@ public:
 		           ? true
 		           : false;
 	}
+	// same test through a reference local (retail codegen of lensglow/lensflare callers)
+	bool isInBoundsRef(f32 bounds)
+	{
+		const JGeometry::TVec2<f32>& p = unkF8[0];
+		return -bounds <= p.x && p.x <= bounds && -bounds <= p.y
+		               && p.y <= bounds
+		           ? true
+		           : false;
+	}
 	f32 getUnkAC() { return unkAC; }
 
 private:

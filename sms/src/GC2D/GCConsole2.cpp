@@ -2118,16 +2118,12 @@ void TGCConsole2::resetMoveTank() { }
 
 void TGCConsole2::endCameraDemo()
 {
-	char trash[0x20];
-	if (unk39)
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (unk39 || !unk50)
 		return;
-
-	if (!unk50)
-		return;
-
-	// TODO: the ROM has one extra branch here, as if the whole body
-	// were nested in the unk50 test rather than an early return.
-
 	if (unkB6 < 3) {
 		++unkB6;
 		return;
@@ -2424,6 +2420,7 @@ void TGCConsole2::startAppearTelop(bool param_1)
 		snprintf(unk52C->getStringPtr(), 0x3ff, "%s", messageText);
 
 		J2DPrint print(gpSystemFont, 0);
+		char trash[0x30];
 		mTelopTextWidth = print.getWidth(unk528->getStringPtr());
 
 		SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_NEWS, 0, nullptr, 0);
@@ -2887,7 +2884,22 @@ void TGCConsole2::startAppearMario(bool param_1)
 
 void TGCConsole2::processMoveNozzle()
 {
-	char trash[0x48];
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
 
 	if (!unk274->update())
 		return;

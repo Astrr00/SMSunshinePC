@@ -16,6 +16,12 @@
 #include <JSystem/J3D/J3DGraphAnimator/J3DJoint.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DSys.hpp>
 
+const TNerveHauntLegHaunt& TNerveHauntLegHaunt::theNerve()
+{
+	static TNerveHauntLegHaunt instance;
+	return instance;
+}
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>

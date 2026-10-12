@@ -128,6 +128,7 @@ void MSMainProc::setBossNotDamagedFlag(bool param_1)
 
 void MSMainProc::setMSoundEnterStage(u8 param_1, u8 param_2)
 {
+	char trash[0x20];
 
 	MSStageInfo::msStg                     = MSBgm::getSceneNo(0xfffffff0);
 	MSStageInfo::stageBgm                  = 0xfffffff0;
@@ -781,6 +782,7 @@ void MSStageDistFadeMonte::proc()
 		// TODO: inline?
 		u32 uVar8 = unk4;
 		u32 uVar4 = unk14;
+		volatile u32 pad7[7];
 
 		Vec local_88 = gpMSound->mAudioCameras->toCamSpace(*unk10);
 		f32 dVar10   = MSHandle::calcPan(local_88, fVar12, 10000.0f);
@@ -794,6 +796,7 @@ void MSStageDistFadeMonte::proc()
 	}
 	unk20 = unk1C;
 	unk4 += 1;
+	volatile u32 trash[19];
 }
 
 MSStageCubeFade::MSStageCubeFade()

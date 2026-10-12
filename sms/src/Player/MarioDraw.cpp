@@ -944,11 +944,12 @@ void TMario::changeHand(int idx)
 	flagOnAllShapes(mRHand4ndModel->getModelData(), J3DShpFlag_Visible);
 }
 
-f32 TMario::setAnimation(int anm_id, f32 rate)
+f32 TMario::setAnimation(int param_id, f32 rate)
 {
 	volatile u32 padding[30];
+	int anm_id = param_id;
 	if (onYoshi()) {
-		if (anm_id == ANIM_LOST) {
+		if (param_id == ANIM_LOST) {
 			mYoshi->changeAnimation(0x12);
 		}
 

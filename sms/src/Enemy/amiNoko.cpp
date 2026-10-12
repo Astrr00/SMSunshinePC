@@ -14,6 +14,26 @@
 #include <MSound/SoundEffects.hpp>
 #include <JSystem/J3D/J3DGraphLoader/J3DModelLoaderFlags.hpp>
 
+// theNerve() is a plain out-of-line member (retail: instance$NNNN statics).
+#define AMINOKO_NERVE(Name)                                                    \
+	class Name : public TNerveBase<TLiveActor> {                               \
+	public:                                                                    \
+		virtual BOOL execute(TSpineBase<TLiveActor>*) const;                   \
+		static const Name& theNerve();                                         \
+	};                                                                         \
+	const Name& Name::theNerve()                                               \
+	{                                                                          \
+		static Name instance;                                                  \
+		return instance;                                                       \
+	}
+
+AMINOKO_NERVE(TNerveAmiNokoFreeze)
+AMINOKO_NERVE(TNerveAmiNokoDie)
+AMINOKO_NERVE(TNerveAmiNokoTurn)
+AMINOKO_NERVE(TNerveAmiNokoWalkOnFence)
+
+#undef AMINOKO_NERVE
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>

@@ -27,7 +27,6 @@ f32 TMapWireActor::getPosInWire() const
 	end.y   = 0.0f;
 
 	JGeometry::TVec3<f32> foot = MsPerpendicFootToLineR(start, end, mPosition);
-
 	return JGeometry::TVec3<f32>(foot - start).length()
 	       / JGeometry::TVec3<f32>(end - start).length();
 }
@@ -100,6 +99,7 @@ static void initDraw()
 void TMapWireActorManager::doActorToWire()
 {
 	char trash[0x30];
+	THitActor* col;
 	TMapWire* previousWire = unk7C;
 	int cubeNo             = gpCubeWire->getInCubeNo(unk0->mPosition);
 	if (cubeNo != -1)
@@ -114,7 +114,7 @@ void TMapWireActorManager::doActorToWire()
 
 	if (unk4.unk74->unk7C != nullptr) {
 		for (int i = 0; i < unk4.mColCount; ++i) {
-			THitActor* col = unk4.mCollisions[i];
+			col = unk4.mCollisions[i];
 			if (col->isActorType(0x80000001)
 			    && col->receiveMessage(&unk4, HIT_MESSAGE_TAKE))
 				unk4.mHeldObject = (TTakeActor*)unk4.mCollisions[i];
