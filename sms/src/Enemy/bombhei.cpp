@@ -410,6 +410,7 @@ BOOL TNerveBombHeiAttack::execute(TSpineBase<TLiveActor>* spine) const
 
 	self->walkBehavior(2, 1.0f);
 	return false;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 BOOL TNerveBombHeiWalkExplosion::execute(TSpineBase<TLiveActor>* spine) const

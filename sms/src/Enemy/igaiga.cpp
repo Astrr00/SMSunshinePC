@@ -298,10 +298,9 @@ void TRollEnemy::setBehavior()
 				size      = mBodyScale * ((f32)(rMax - rMin) * s) + (f32)rMin;
 			}
 		}
+		f32 z = mPosition.z + unk1AC * mLinearVelocity.z;
 		gpPollution->stampGround(1, mPosition.x + unk1AC * mLinearVelocity.x,
-		                         mPosition.y,
-		                         mPosition.z + unk1AC * mLinearVelocity.z,
-		                         32.0f * size);
+		                         mPosition.y, z, 32.0f * size);
 	}
 }
 

@@ -103,7 +103,7 @@ void TBGTentacleMtxCalc::calc(u16 param_1)
 		MtxPtr mtx2 = mOwner->getUnk2C()->getModel()->getAnmMtx(param_1 - 1);
 		JGeometry::TVec3<f32> vec2(mtx2[0][3], mtx2[1][3], mtx2[2][3]);
 
-		vec1 -= vec2;
+		vec1 = vec1 - vec2;
 
 		if (!vec1.isZero()) {
 			VECNormalize(&vec1, &local_68);
@@ -182,7 +182,7 @@ void TBGTentacleMtxCalc::calc(u16 param_1)
 
 	if (mOwner->getState() == 5 && (param_1 == iVar8 || param_1 == uVar9 - 2)) {
 		local_74.set(0.0f, 0.3f, 0.0f);
-		local_68.cross(local_80, JGeometry::TVec3<f32>(0.0f, 0.3f, 0.0f));
+		local_68.cross(local_80, local_74);
 		VECNormalize(&local_68, &local_68);
 		local_80.cross(local_68, local_74);
 		VECNormalize(&local_80, &local_80);
@@ -227,6 +227,15 @@ void TBGTakeHit::disableAttackCheck() { }
 MtxPtr TBGTakeHit::getTakingMtx() { return unk80; }
 
 // TODO: fake
+// retail copies the operand into a local before the call; the header's by-value
+// operator* elides that copy for chained products
+static JGeometry::TVec3<f32> vmul(const JGeometry::TVec3<f32>& a, f32 s)
+{
+	JGeometry::TVec3<f32> r = a;
+	r *= s;
+	return r;
+}
+
 static inline JGeometry::TVec3<f32> fromPolar(f32 theta, f32 radius)
 {
 	return JGeometry::TVec3<f32>(radius * JMASSin(theta * (65536.0f / 360.0f)),
@@ -314,6 +323,15 @@ BOOL TBGTakeHit::receiveMessage(THitActor* sender, u32 message)
 	return false;
 }
 
+// retail calls TVec3::add out of line for the last node velocity
+#pragma dont_inline on
+static void addVecOutOfLine(JGeometry::TVec3<f32>& a,
+                            const JGeometry::TVec3<f32>& b)
+{
+	a.add(b);
+}
+#pragma dont_inline off
+
 void TBGTakeHit::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	if (cue & CUE_MOVE) {
@@ -365,7 +383,7 @@ void TBGTakeHit::perform(u32 cue, JDrama::TGraphics* graphics)
 
 			if (!unk74.isZero()) {
 				// TODO: one more inlining layer?!
-				mOwner->getLastNode()->addVelocity(unk74);
+				addVecOutOfLine(const_cast<JGeometry::TVec3<f32>&>(mOwner->getLastNode()->getVelocity()), unk74);
 				local_8c += unk74;
 			}
 
@@ -413,15 +431,28 @@ TBGAttackHit::TBGAttackHit(TBGTentacle* owner, f32 pos_on_spline,
 	offHitFlag(HIT_FLAG_NO_COLLISION);
 }
 
+// asm 0x8031527C: retail returns one bool for the whole chain
+static inline bool canAttackMario(TBGTentacle* t)
+{
+	if (t->mTakeHit->checkHitFlag(HIT_FLAG_CANNOT_ATTACK))
+		return false;
+	if (t->mState == 10)
+		return false;
+	if (t->mState == 4)
+		return false;
+	if (t->mState == 6)
+		return false;
+	if (t->mState == 1 || t->mOwner->getAttackMode() == 7)
+		return true;
+	return false;
+}
+
 void TBGAttackHit::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	if (cue & CUE_MOVE) {
 		mPosition = mOwner->mSpline->getPoint(mPosOnSpline);
 
-		if (mOwner->mTakeHit->checkHitFlag(HIT_FLAG_CANNOT_ATTACK)
-		        && mOwner->isThing3()
-		    || mOwner->getState() == 1
-		    || mOwner->mOwner->getAttackMode() == 7) {
+		if (canAttackMario(mOwner)) {
 			for (int i = 0; i < mColCount; ++i) {
 				THitActor* col = mCollisions[i];
 				if (gpMarioOriginal->isRoofing())
@@ -640,7 +671,7 @@ void TBGTentacle::throwMario(THitActor* param_1, THitActor* param_2)
 	SMS_SendMessageToMario(param_2, HIT_MESSAGE_ATTACK);
 	SMS_SendMessageToMario(param_2, 0x7);
 
-	SMS_ThrowMario(local_e0, 3.21875f);
+	SMS_ThrowMario(local_e0, 60.0f); // asm 0x8031542C: retail pool @5129 = 60.0f
 	mOwner->showMessage(0xE0005);
 	mOwner->stopIfRoll();
 }
@@ -741,12 +772,8 @@ void TBGTentacle::setAttackTarget()
 		JGeometry::TVec3<f32> local_3c;
 		local_3c.cross(JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f), local_148);
 		local_3c.normalize();
-		local_3c.scale(iVar9);
-
-		JGeometry::TVec3<f32> local_ac = local_3c;
-		char trash[152];
-		local_ac.scale(80.0f);
-		unk84 += local_ac;
+		char trash[0x7c];
+		unk84 += vmul(vmul(local_3c, iVar9), 80.0f);
 	}
 
 	if (mOwner->is2ndFightNow() && unk84.y < mOwner->mPosition.y + 20.0f)
@@ -899,12 +926,12 @@ void TBGTentacle::moveNode()
 		break;
 	case 3:
 		local_88.x = MsSin(unk40) * 1.0f * fVar2;
-		local_88.y = MsSin(unk40) * 0.8f * fVar2;
+		local_88.y = MsSin(unk44) * 0.8f * fVar2;
 		local_88.z = MsCos(unk44) * 1.1f * fVar2;
 		break;
 	default:
 		local_88.x = MsSin(unk40) * 1.9f * fVar2;
-		local_88.y = MsSin(unk44) * 1.0f * fVar2;
+		local_88.y = MsSin(unk40) * 1.0f * fVar2;
 		local_88.z = MsCos(unk44) * 1.8f * fVar2;
 		break;
 	}

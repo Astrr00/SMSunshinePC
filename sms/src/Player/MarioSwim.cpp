@@ -35,7 +35,7 @@ void TMario::doSwimming()
 		rotMaxF = (f32)mSwimParams.mSwimmingRotSpMax.get();
 	}
 
-	s16 rotSp    = mForwardVel * (rotMaxF - rotMinF) / 32.0f + rotMinF;
+	s16 rotSp    = 0.03125f * (mForwardVel * (rotMaxF - rotMinF)) + rotMinF;
 	s16 diff     = mIntendedYaw - mFaceAngle.y;
 	mFaceAngle.y = mIntendedYaw - IConverge(diff, 0, rotSp, rotSp);
 

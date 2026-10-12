@@ -313,6 +313,7 @@ void THino2Mask::startDamageMotion() { }
 
 void THino2Mask::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[8];
 	if (unk4 == 0)
 		return;
 
@@ -460,6 +461,7 @@ THinokuri2::THinokuri2(const char* name)
 
 void THinokuri2::init(TLiveManager* param_1)
 {
+	char trash[0x50];
 	mManager = param_1;
 	mManager->manageActor(this);
 	mMActorKeeper = new TMActorKeeper(mManager, 4);
@@ -891,6 +893,7 @@ template <class T> static inline T symmetric_clamp(T v, T r)
 
 void THinokuri2::moveObject()
 {
+	char trash[0xb0];
 	if (checkLiveFlag(LIVE_FLAG_DEAD))
 		return;
 
@@ -976,6 +979,7 @@ void THinokuri2::moveObject()
 
 void THinokuri2::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[8];
 	gpCurHinokuri = this;
 
 	mHead->perform(cue, graphics);
@@ -1043,6 +1047,7 @@ DEFINE_NERVE(TNerveHino2Appear, TLiveActor)
 DEFINE_NERVE(TNerveHino2GraphWander, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash[0x68];
 
 	self->unk188 = 1;
 
@@ -1125,6 +1130,7 @@ DEFINE_NERVE(TNerveHino2Fly, TLiveActor)
 DEFINE_NERVE(TNerveHino2JumpIn, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash[0x10];
 
 	if (spine->getTime() == 0)
 		self->changeBck(0x9);
@@ -1145,6 +1151,7 @@ DEFINE_NERVE(TNerveHino2JumpIn, TLiveActor)
 DEFINE_NERVE(TNerveHino2Landing, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash[0x20];
 
 	if (spine->getTime() == 0) {
 		self->changeBck(0xE);
@@ -1153,9 +1160,9 @@ DEFINE_NERVE(TNerveHino2Landing, TLiveActor)
 			gpCameraShake->startShake(CAM_SHAKE_MODE_UNK4, 0.8f);
 	}
 
-	// TODO: asserts or something? Hard to match
-	self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-	self->checkLiveFlag(LIVE_FLAG_HIDDEN);
+	f32 fr = self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+	if ((int)fr != 0 || self->checkLiveFlag(LIVE_FLAG_HIDDEN)) {
+	}
 
 	if (self->getMActor()->curAnmEndsNext())
 		return true;
@@ -1166,6 +1173,7 @@ DEFINE_NERVE(TNerveHino2Landing, TLiveActor)
 DEFINE_NERVE(TNerveHino2Turn, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash[0x18];
 
 	JGeometry::TVec3<f32> posDiff = self->unk104.getPoint();
 
@@ -1387,6 +1395,7 @@ DEFINE_NERVE(TNerveHino2Burst, TLiveActor)
 	}
 
 	char trash[0x24];
+
 	if (self->getMActor()->curAnmEndsNext()) {
 		self->setLevel(self->mLevel - 1);
 		self->mHitPoints = self->calcHitPoints();

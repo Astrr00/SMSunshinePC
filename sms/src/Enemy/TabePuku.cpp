@@ -22,6 +22,18 @@
 #include <MSound/MSoundBGM.hpp>
 #include <M3DUtil/InfectiousStrings.hpp>
 
+// retail calls TVec3::sub / dot out of line in the drag nerve
+#pragma dont_inline on
+static void vecSubCall(JGeometry::TVec3<f32>& a, const JGeometry::TVec3<f32>& b)
+{
+	a -= b;
+}
+static f32 vecDotCall(const JGeometry::TVec3<f32>& a)
+{
+	return a.squared();
+}
+#pragma dont_inline off
+
 static const char* tabepuku_bastable[] = {
 	"/scene/tabepuku/bas/pukupuku_chase.bas",
 	"/scene/tabepuku/bas/pukupuku_search.bas",
@@ -214,6 +226,7 @@ void TTabePuku::calcRootMatrix()
 		if (isAttack())
 			emitter->mChildSpawnRate = 0.1f;
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 BOOL TTabePuku::receiveMessage(THitActor* sender, u32 message)
@@ -512,8 +525,9 @@ DEFINE_NERVE(TNerveTabePukuDrag, TLiveActor)
 
 	bool done = true;
 	if (!self->mIsTouchedWall && self->isAirborne()) {
-		f32 dist
-		    = (self->getUnk104().getPoint() - self->mPosition).length();
+		JGeometry::TVec3<f32> d = self->getUnk104().getPoint();
+		vecSubCall(d, self->mPosition);
+		f32 dist = JGeometry::TUtil<f32>::sqrt(vecDotCall(d));
 		if (!(self->getSaveParam2()->mDragLength.get() < dist))
 			done = false;
 	}

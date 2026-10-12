@@ -817,6 +817,9 @@ void TBaseNPC::perform(u32 cue, JDrama::TGraphics* graphics)
 	TSpineEnemy::perform(cue, graphics);
 	if (unk168 != nullptr)
 		unk168->partsPerform(cue, graphics);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TBaseNPC::setDummyConnectActor(const JDrama::TActor* param_1)

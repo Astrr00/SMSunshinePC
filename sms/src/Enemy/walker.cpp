@@ -71,18 +71,18 @@ void TWalker::reset()
 
 void TWalker::bind(TLiveActor* param_1)
 {
-	TSpineEnemy* enemy = (TSpineEnemy*)param_1;
-
 	if (unk28 == 1 && unk2C != nullptr) {
-		unk2C->bind(enemy);
+		unk2C->bind(param_1);
 		return;
 	}
+
+	TSpineEnemy* enemy = (TSpineEnemy*)param_1;
 
 	JGeometry::TVec3<f32> lv       = enemy->mLinearVelocity;
 	JGeometry::TVec3<f32> local_30 = enemy->mPosition;
 	local_30 += lv;
 	unk1C = 0;
-	if (enemy->checkLiveFlag2(LIVE_FLAG_AIRBORNE)) {
+	if (enemy->mLiveFlag & LIVE_FLAG_AIRBORNE ? 1 : 0) {
 		JGeometry::TVec3<f32> local_3c = enemy->mVelocity;
 		local_30 += local_3c;
 		local_3c.y -= enemy->getGravityY();
@@ -175,7 +175,7 @@ void TWalker::bind(TLiveActor* param_1)
 			unk24 += 1;
 		} else {
 			enemy->unk138 = pTVar14;
-			if (!enemy->checkLiveFlag2(LIVE_FLAG_AIRBORNE)
+			if (!(enemy->mLiveFlag & LIVE_FLAG_AIRBORNE ? 1 : 0)
 			    && pTVar14->mMaxY - f31 <= unk18 && pTVar14->isPool()) {
 				unk1C = 1;
 			}
@@ -187,8 +187,8 @@ void TWalker::bind(TLiveActor* param_1)
 			local_94.cross(normal, JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f));
 			local_94.normalize();
 			if (unk14 == 0) {
-				JGeometry::TVec3<f32> lv = enemy->mLinearVelocity;
-				if (lv.dot(local_94) > 0.0f) {
+				JGeometry::TVec3<f32> lv2 = lv;
+				if (lv2.dot(local_94) > 0.0f) {
 					unk14 = 2;
 				} else {
 					local_94.negate();

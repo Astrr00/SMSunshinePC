@@ -171,16 +171,15 @@ void CPolarSubCamera::execNoticeOnOffProc_(EnumNoticeOnOffMode mode)
 void CPolarSubCamera::calcNoticeTargetYrot_(const Vec& target)
 {
 	Vec mPos     = gpCameraMario->unk0;
-	char trash[0x20];
+	JGeometry::TVec3<f32> diff;
+	char trash[0x24];
 	f32 dz2      = CLBSquared<f32>(mPos.z - target.z);
-	f32 dx2      = CLBSquared<f32>(mPos.x - target.x);
-	f32 dist2    = dx2 + dz2;
+	f32 dist2    = dz2 + CLBSquared<f32>(mPos.x - target.x);
 	f32 farClip2 = CLBSquared<f32>(mSaveNotice->mRotateMinDistXZ.get());
 	f32 near2    = CLBSquared<f32>(mSaveNotice->mRotateFastMinDistXZ.get());
 
 	if (dist2 > farClip2) {
-		JGeometry::TVec3<f32> diff(mPos.x - target.x, mPos.y - target.y,
-		                           mPos.z - target.z);
+		diff.set(mPos.x - target.x, mPos.y - target.y, mPos.z - target.z);
 		MsVECNormalize(&diff, &diff);
 		// TODO: many inlines from cameralib maybe?
 		f32 dx       = diff.x * 500.0f + mPos.x;
@@ -233,7 +232,6 @@ void CPolarSubCamera::ctrlLButtonCamera_()
 {
 	f32 stickX = -unk120->mCompSPos[4];
 	f32 stickY = -unk120->mCompSPos[5];
-	char trash[0x30];
 
 	if (mTargetFreezeFrames == 0) {
 		if (!SMS_CheckMarioFlag(MARIO_FLAG_HAS_FLUDD))
@@ -241,6 +239,7 @@ void CPolarSubCamera::ctrlLButtonCamera_()
 		else
 			getNozzleTopPos_(&mCurrentTarget.mTarget);
 	}
+	char trash[0x30];
 
 	if (mPosFreezeFrames == 0) {
 		if (unk64 & CAMERA_FLAG_NOTICE_ACTIVE) {

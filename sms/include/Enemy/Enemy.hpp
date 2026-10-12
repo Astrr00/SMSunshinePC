@@ -44,10 +44,14 @@ public:
 	                       const JGeometry::TVec3<f32>& velocity);
 	virtual TSpineEnemyParams* getSaveParam() const;
 	virtual f32 getPhaseShift() const { return 0.0f; }
-	virtual BOOL isReachedToGoal() const
+	// fabricated: extra inline level keeps TUtil::sqrt out of line like retail
+	bool isNearGoal() const
 	{
-		return unk104.getPoint().distance(mPosition) < 100.0f ? TRUE : FALSE;
+		JGeometry::TVec3<f32> d(unk104.getPoint());
+		d -= mPosition;
+		return d.length() < 100.0f;
 	}
+	virtual BOOL isReachedToGoal() const { return isNearGoal() ? TRUE : FALSE; }
 
 	void calcEnemyRootMatrix();
 	f32 calcMinimumTurnRadius(f32, f32) const;

@@ -90,6 +90,7 @@ static void unitVecTo(const JGeometry::TVec3<f32>& from,
 
 void CPolarSubCamera::ctrlJetCoasterCamera_()
 {
+	char trash[0xc8];
 	if (gpMarDirector->getCurrentMap() == 0x3A
 	    && gpMarDirector->getCurrentStage() == 0)
 		drawJetCoasterBalloonMessage_();

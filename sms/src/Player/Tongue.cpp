@@ -150,7 +150,6 @@ BOOL TYoshiTongue::canGo()
 
 THitActor* TYoshiTongue::findTarget(bool allowExtra, bool checkForward)
 {
-	char trash[0x28]; // unused stack slot (present in the retail frame)
 	THitActor* best = nullptr;
 	f32 bestDist    = 10000.0f;
 
@@ -199,8 +198,10 @@ THitActor* TYoshiTongue::findTarget(bool allowExtra, bool checkForward)
 		JGeometry::TVec3<f32> targetPos = actor->mPosition;
 		targetPos.y += 0.5f * actor->mDamageHeight;
 		JGeometry::TVec3<f32> delta = targetPos - mTipPos;
+		char trash2[0x24];
 
-		if (delta.isZero())
+		bool isZero = delta.isZero();
+		if (isZero)
 			continue;
 
 		f32 dist = delta.length();

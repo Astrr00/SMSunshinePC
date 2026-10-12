@@ -176,8 +176,8 @@ bool TWalkerEnemy::isResignationAttack()
 
 bool TWalkerEnemy::isReachedToGoalXZ()
 {
-	JGeometry::TVec3<f32> tmp = getUnk104().getPoint();
-	tmp -= mPosition;
+	JGeometry::TVec3<f32> tmp(getUnk104().getPoint());
+	tmp.sub(mPosition);
 	tmp.y = 0.0f;
 
 	if (tmp.x == 0.0f && tmp.z == 0.0f)

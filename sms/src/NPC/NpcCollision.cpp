@@ -66,7 +66,7 @@ void TBaseNPC::execNpcObjCollision_()
 				local_4C.z = 0.0f;
 			} else {
 				local_4C.x = 0.0f;
-				local_4C.y = y;
+				local_4C.y = diffY; // asm: retail stores signed diffY, not |diffY|
 				local_4C.z = 0.0f;
 			}
 		} else {

@@ -145,6 +145,7 @@ BOOL TAnimalBase::receiveMessage(THitActor* sender, u32 msg) { return FALSE; }
 
 void TAnimalBase::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[48];
 	if (cue & CUE_MOVE) {
 		if (graphics->unk0 & 2) {
 			mLinearVelocity.zero();
@@ -222,11 +223,13 @@ void TAnimalBase::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TAnimalBase::resetRandomCurPathNode()
 {
-	TPathNode curNode = unkF4;
-	if (curNode.unk0 != nullptr)
-		return;
-
-	JGeometry::TVec3<f32> pos = curNode.getPoint();
+	JGeometry::TVec3<f32> pos;
+	{
+		TPathNode curNode = unkF4;
+		if (curNode.unk0 != nullptr)
+			return;
+		pos = curNode.getPoint();
+	}
 	pos.x += 1000.0f * (MsRandF() - 0.5f);
 	pos.z += 1000.0f * (MsRandF() - 0.5f);
 
@@ -237,6 +240,8 @@ void TAnimalBase::resetRandomCurPathNode()
 	}
 
 	setGoalPath(pos);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TAnimalBase::getRotationFlyToDir(JGeometry::TVec3<f32>* current_rot,
@@ -305,10 +310,9 @@ void TAnimalBase::execWalk(bool moving)
 	getRotationFlyToDir(&mRotation, diff, marchSpeed, turnSpeed);
 
 	JGeometry::TQuat4<f32> quat = SMS_Eular2Quat(mRotation);
-	JGeometry::TVec3<f32> tmp;
-	// TODO: quaternions are still wrong
-	quat.rotate(JGeometry::TVec3<f32>(0.0f, 0.0f, marchSpeed), tmp);
-	mLinearVelocity = tmp;
+	JGeometry::TVec3<f32> vel(0.0f, 0.0f, marchSpeed);
+	quat.rotate(vel, vel);
+	mLinearVelocity = vel;
 }
 
 // UNUSED (Size: 0x5c in MAP)

@@ -167,38 +167,45 @@ void TModelGate::perform(u32 param_1, JDrama::TGraphics* param_2)
 			J3DTevStageInfo* stage2 = &mat->unk3C[2];
 			J3DTevStageInfo* stage3 = &mat->unk3C[3];
 			J3DTevStageInfo* stage5 = &mat->unk3C[5];
-			mat->unk3C[0].field_0x5 = 0;
-			stage2->field_0x5       = 0;
-			stage3->field_0x5       = 0;
-			stage3->field_0x6       = 0;
-			stage3->field_0x7       = 0;
-			stage3->field_0x8       = 1;
-			stage5->field_0x11      = 1;
+			u8& s0f5  = mat->unk3C[0].field_0x5;
+			u8& s2f5  = stage2->field_0x5;
+			u8& s3f5  = stage3->field_0x5;
+			u8& s3f6  = stage3->field_0x6;
+			u8& s3f7  = stage3->field_0x7;
+			u8& s3f8  = stage3->field_0x8;
+			u8& s5f11 = stage5->field_0x11;
+			mat->unk3C[0].field_0x5  = 0;
+			mat->unk3C[2].field_0x5  = 0;
+			mat->unk3C[3].field_0x5  = 0;
+			mat->unk3C[3].field_0x6  = 0;
+			mat->unk3C[3].field_0x7  = 0;
+			mat->unk3C[3].field_0x8  = 1;
+			mat->unk3C[5].field_0x11 = 1;
 
 			switch (mTevAnimStep) {
 			case 1:
-				stage3->field_0x5 = 1;
-				stage3->field_0x8 = 0;
+				s3f5 = 1;
+				s3f8 = 0;
 				break;
 			case 2:
-				mat->unk3C[0].field_0x5 = 8;
+				s0f5 = 8;
 				break;
 			case 3:
-				stage3->field_0x5 = 8;
+				s3f5 = 8;
 				break;
 			case 4:
-				stage3->field_0x7 = 1;
+				s3f7 = 1;
 				break;
 			case 5:
-				stage5->field_0x11 = 0;
+				s5f11 = 0;
 				break;
 			case 6:
-				stage2->field_0x5 = 1;
+				s2f5 = 1;
 				break;
 			case 7:
-				stage3->field_0x5 = 0;
-				stage3->field_0x6 = 1;
-				stage3->field_0x8 = 0;
+				s3f5 = 0;
+				s3f6 = 1;
+				s3f8 = 0;
 				break;
 			}
 
@@ -295,12 +302,13 @@ void TModelGate::screenBlur(JDrama::TGraphics* graphics)
 	mBlurAlpha += mBlurAlphaRate * (alpha - mBlurAlpha);
 
 	u8 blur = (u8)(mBlurAlpha * (1.0f - gpCamera->unk270));
+	f32 strength = mBlurStrength;
 	JGeometry::TVec3<f32> offset(viewDir.x, viewDir.y, viewDir.z);
 	char trash[16];
 	TAfterEffect* effect                    = gpAfterEffect;
 	effect->unk15                           = 2;
 	effect->unk1C                           = blur;
-	effect->unk50                           = mBlurStrength;
+	effect->unk50                           = strength;
 	*(JGeometry::TVec3<f32>*)&effect->unk5C = offset;
 }
 

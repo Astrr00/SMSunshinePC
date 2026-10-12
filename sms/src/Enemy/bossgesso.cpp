@@ -367,10 +367,18 @@ TBossGessoMtxCalc::TBossGessoMtxCalc(TBossGesso* owner)
 	mMotionBlendRatio = 0.0f;
 }
 
+// retail calls TMActorKeeper::getMActorAnmData out of line
+#pragma dont_inline on
+static MActorAnmData* getAnmDataOutOfLine(TMActorKeeper* keeper)
+{
+	return keeper->getMActorAnmData();
+}
+#pragma dont_inline off
+
 void TBossGessoMtxCalc::joinAnm(int param_1)
 {
 	M3UMtxCalcSIAnmBlendQuat::joinAnm(
-	    mOwner->getActorKeeper()->getMActorAnmData()->getUnk2C()->getAnmPtr(
+	    getAnmDataOutOfLine(mOwner->getActorKeeper())->getUnk2C()->getAnmPtr(
 	        param_1));
 }
 

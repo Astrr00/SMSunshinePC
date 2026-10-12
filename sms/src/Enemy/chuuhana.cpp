@@ -172,11 +172,9 @@ void TChuuHanaManager::initSetEnemies()
 static inline f32 projectOntoAxis(const JGeometry::TVec3<f32>& cross,
                                   const JGeometry::TVec3<f32>& axis)
 {
-	f32 proj = 0.0f;
 	if (axis.squared() == 0.0f)
-		return proj;
-	proj = cross.dot(axis) / axis.squared();
-	return proj;
+		return 0.0f;
+	return cross.dot(axis) / axis.squared();
 }
 
 static inline bool isRollNerve(TLiveActor* self)
@@ -219,6 +217,7 @@ static BOOL ChuuHanaBodyCallback(J3DNode* node, BOOL calcTiming)
 		JGeometry::TVec3<f32> cross;
 		JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
 		VECCrossProduct(&up, &rollDir, &cross);
+		f32 roll = gpCurChuuHana->unk210;
 
 		// express the rotation axis in the joint's local frame
 		JGeometry::TVec3<f32> axisX(mtx[0][0], mtx[1][0], mtx[2][0]);
@@ -232,7 +231,7 @@ static BOOL ChuuHanaBodyCallback(J3DNode* node, BOOL calcTiming)
 		JGeometry::TVec3<f32> axis(projX, projY, projZ);
 
 		// rot declared earlier (retail frame order)
-		MTXRotAxisRad(rot, &axis, (JGeometry::TUtil<f32>::PI() / 180.0f) * gpCurChuuHana->unk210);
+		MTXRotAxisRad(rot, &axis, (JGeometry::TUtil<f32>::PI() / 180.0f) * roll);
 		MTXConcat(mtx, rot, mtx);
 		MTXConcat(mtx, identity, mtx);
 		MTXConcat(J3DSys::mCurrentMtx, rot, J3DSys::mCurrentMtx);
@@ -443,12 +442,10 @@ void TChuuHana::attackToMario()
 				return;
 
 			SMS_SendMessageToMario(this, 7);
-
 			JGeometry::TVec3<f32> diff = mPosition - *gpMarioPos;
-			f32 yaw                    = MsGetRotFromZaxisY(diff);
 
 			Mtx mtx;
-			MsMtxSetRotRPH(mtx, 0.0f, yaw, 0.0f);
+			MsMtxSetRotRPH(mtx, 0.0f, MsGetRotFromZaxisY(diff), 0.0f);
 			JGeometry::TVec3<f32> dir(0.0f, 1.0f, -1.0f);
 			MTXMultVec(mtx, (Vec*)&dir, (Vec*)&dir);
 			SMS_ThrowMario(dir, unk1B4->mSLTacklePow.get());
@@ -745,13 +742,14 @@ void TChuuHana::setGoal()
 	goal.x = mPosition.x;
 	goal.y = mPosition.y;
 	goal.z = mPosition.z;
+	char trash1[4];
 
 	TMsRange<f32> range(-30.0f, 30.0f);
 	f32 yaw = mRotation.y + range.rand();
 	JGeometry::TVec3<f32> dir(0.0f, 0.0f, 1.0f);
 
 	Mtx mtx;
-	char trash2[0x10];
+	char trash2[0xc];
 	MsMtxSetRotRPH(mtx, mRotation.x, yaw, mRotation.z);
 	MTXMultVec(mtx, (Vec*)&dir, (Vec*)&dir);
 	goal.x += 1000.0f * dir.x;
@@ -765,14 +763,16 @@ void TChuuHana::setGoal()
 
 void TChuuHana::checkStretchType()
 {
+	char trash[0x20];
 	unk1A0 = 0;
 	f32 stretch = unk1A8;
 
 	if (mSpine->getCurrentNerve() == &TNerveChuuHanaKeepBalance::theNerve()) {
+		int idx = mInstanceIndex;
 		f32 limit = unk1B4->mSLReverseHeightS.get();
-		if (mInstanceIndex > 0)
+		if (idx > 0)
 			limit = unk1B4->mSLReverseHeightM.get();
-		if (mInstanceIndex > 2)
+		if (idx > 2)
 			limit = unk1B4->mSLReverseHeightL.get();
 
 		if (stretch > limit) {
@@ -782,10 +782,11 @@ void TChuuHana::checkStretchType()
 			mSpine->pushNerve(&TNerveChuuHanaJumpPrepare::theNerve());
 		}
 	} else {
+		int idx = mInstanceIndex;
 		f32 limit = unk1B4->mSLStretchHeightS.get();
-		if (mInstanceIndex > 0)
+		if (idx > 0)
 			limit = unk1B4->mSLStretchHeightM.get();
-		if (mInstanceIndex > 2)
+		if (idx > 2)
 			limit = unk1B4->mSLStretchHeightL.get();
 
 		if (stretch > limit) {
@@ -795,9 +796,9 @@ void TChuuHana::checkStretchType()
 			mSpine->pushNerve(&TNerveChuuHanaForceJumped::theNerve());
 		} else {
 			limit = unk1B4->mSLMediumStretchHeightS.get();
-			if (mInstanceIndex > 0)
+			if (idx > 0)
 				limit = unk1B4->mSLMediumStretchHeightM.get();
-			if (mInstanceIndex > 2)
+			if (idx > 2)
 				limit = unk1B4->mSLMediumStretchHeightL.get();
 
 			if (stretch > limit) {
@@ -807,9 +808,9 @@ void TChuuHana::checkStretchType()
 				mSpine->pushNerve(&TNerveChuuHanaForceJumped::theNerve());
 			} else {
 				limit = unk1B4->mSLSmallStretchHeightS.get();
-				if (mInstanceIndex > 0)
+				if (idx > 0)
 					limit = unk1B4->mSLSmallStretchHeightM.get();
-				if (mInstanceIndex > 2)
+				if (idx > 2)
 					limit = unk1B4->mSLSmallStretchHeightL.get();
 
 				if (stretch > limit) {
@@ -827,6 +828,7 @@ const char** TChuuHana::getBasNameTable() const { return tyuhana_bastable; }
 
 BOOL TNerveChuuHanaWalkOnPanel::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x38];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->setWalkAnm();
@@ -1040,7 +1042,7 @@ BOOL TNerveChuuHanaObject::execute(TSpineBase<TLiveActor>* spine) const { return
 
 BOOL TNerveChuuHanaAttack::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[0x30];
+	char trash[0x8];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->setBckAnm(12);
@@ -1073,6 +1075,13 @@ BOOL TNerveChuuHanaAttack::execute(TSpineBase<TLiveActor>* spine) const
 		self->setGoalPath(TPathNode((THitActor*)gpMarioAddress));
 
 	self->walkBehavior(2, self->unk1B4->mSLDashRate.get());
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	return false;
 }
 

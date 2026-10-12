@@ -147,10 +147,12 @@ void TBossHanachan::emitParticle_()
 		return;
 
 	f32 waterHeight = gpSunMgr->unk20;
+	JGeometry::TVec3<f32> pos;
+	char trash[0x38];
 
 	// nose steam
 	if (nerve != &TNerveBossHanachanSnort::theNerve()
-	    && mHeadPart->mHitActor->mWaterHitCounter > 0) {
+	    && (s16)(mHeadPart->mHitActor->mWaterHitCounter + 0) > 0) {
 		gpMarioParticleManager->emitAndBindToMtxPtr(
 		    0x169, mHeadPart->mNoseHallMtx[1], 1, mHeadPart);
 		gpMarioParticleManager->emitAndBindToMtxPtr(
@@ -166,13 +168,13 @@ void TBossHanachan::emitParticle_()
 	    || (nerve == &TNerveBossHanachanDamage::theNerve()
 	        && mMarchSpeed > 0.001f)) {
 		for (int i = 0; i < 8; ++i) {
-			JGeometry::TVec3<f32> pos = mSphereLink->mPoints[i].mPos;
+			pos = mSphereLink->mPoints[i].mPos;
 			if (pos.y > waterHeight)
 				gpMarioParticleManager->emitAndBindToPosPtr(
 				    0x16e, &mBodyParts[i]->mJointPos, 1, mBodyParts[i]);
 		}
 		for (int i = 0; i < 8; ++i) {
-			JGeometry::TVec3<f32> pos = mSphereLink->mPoints[i].mPos;
+			pos = mSphereLink->mPoints[i].mPos;
 			if (pos.y > waterHeight)
 				gpMarioParticleManager->emitAndBindToPosPtr(
 				    0x16d, &mBodyParts[i]->mJointPos, 1, mBodyParts[i]);
@@ -193,13 +195,11 @@ void TBossHanachan::emitParticle_()
 				    < mChangeSaveParams->mSLParticleProbability.get()) {
 					if (footMtx[1][3] < waterHeight) {
 						MtxPtr legMtx = mBodyParts[i]->mLegMtx[j];
-						JGeometry::TVec3<f32> pos(legMtx[0][3], waterHeight,
-						                          legMtx[2][3]);
+						pos.set(legMtx[0][3], waterHeight, legMtx[2][3]);
 						gpMarioParticleManager->emit(0x7c, &pos, 0, nullptr);
 						gpMarioParticleManager->emit(0x7d, &pos, 0, nullptr);
 					} else {
-						JGeometry::TVec3<f32> pos(footMtx[0][3], footMtx[1][3],
-						                          footMtx[2][3]);
+						pos.set(footMtx[0][3], footMtx[1][3], footMtx[2][3]);
 						gpMarioParticleManager->emit(0x77, &pos, 0, nullptr);
 						gpMarioParticleManager->emit(0x76, &pos, 0, nullptr);
 					}

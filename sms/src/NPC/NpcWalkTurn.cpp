@@ -16,6 +16,13 @@ bool TBaseNPC::isCanWalk() const
 	return result;
 }
 
+#pragma dont_inline on
+static void Vec3SetOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
+#pragma dont_inline off
+
 void TBaseNPC::execWalk(bool param_1)
 {
 	if (mWalkForbidCount != 0 || gpMarDirector->isThing() || !isClean()
@@ -32,11 +39,15 @@ void TBaseNPC::execWalk(bool param_1)
 
 		SMS_GoRotate(mPosition, unkF4.getPoint(), fVar1, &mRotation.y);
 
-		// TODO: vector math is borked
+		char pad8[8];
+		JGeometry::TVec3<f32> copy;
+		char pad4[4];
+		JGeometry::TVec3<f32> copy2;
+		char trash[0x14];
 		JGeometry::TVec3<f32> local_54 = unkF4.getPoint();
 		local_54 -= mPosition;
-		JGeometry::TVec3<f32> copy;
-		copy.set(local_54);
+		copy2 = local_54;
+		copy  = copy2;
 
 		f32 angle = MsGetRotFromZaxisY(copy);
 		if (MsWrap(abs(mRotation.y - angle), 0.0f, 360.0f) < 0.001f)
@@ -78,7 +89,13 @@ void TBaseNPC::execWalk(bool param_1)
 	else
 		mTurnSpeed = mIndividualParams->mWalkTurnSpeed.get();
 
-	if (isCanWalk())
+	bool canWalk = true;
+	JGeometry::TVec3<f32> pos = unkF4.getPoint();
+	JGeometry::TVec3<f32> diff;
+	Vec3SetOutOfLine(diff, pos.x - mPosition.x, 0.0f, pos.z - mPosition.z);
+	if (diff.squared() < CLBSquared(10.0f))
+		canWalk = false;
+	if (canWalk)
 		walkToCurPathNode(mMarchSpeed, mTurnSpeed, 0.0f);
 }
 

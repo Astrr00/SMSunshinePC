@@ -53,6 +53,25 @@
 // emits them in reverse definition order (-inline deferred).
 #pragma auto_inline off
 
+#pragma auto_inline on
+#define DEFINE_THE_NERVE(Name)                                                 \
+	const Name& Name::theNerve()                                               \
+	{                                                                          \
+		static Name instance;                                                  \
+		return instance;                                                       \
+	}
+
+DEFINE_THE_NERVE(TNerveKoopaJrWait)
+DEFINE_THE_NERVE(TNerveKoopaJrDemo)
+DEFINE_THE_NERVE(TNerveKoopaJrLaunch)
+DEFINE_THE_NERVE(TNerveKoopaJrYahoo)
+DEFINE_THE_NERVE(TNerveKoopaJrSubmarineWait)
+DEFINE_THE_NERVE(TNerveKoopaJrSubmarineCannonOpenClose)
+DEFINE_THE_NERVE(TNerveKoopaJrSubmarineLaunchKiller)
+
+#undef DEFINE_THE_NERVE
+#pragma auto_inline off
+
 static const char* koopajr_bastable[] = {
 	"/scene/koopajr/bas/koopajr_damage.bas",
 	"/scene/koopajr/bas/koopajr_shoot.bas",
@@ -94,12 +113,34 @@ static f32 fmodfOutOfLine(f32 value, f32 modulus)
 {
 	return std::fmodf(value, modulus);
 }
+// Retail calls TRotation3::setQuat out of line.
+static void setQuatOutOfLine(TPosition3f& mtx, const JGeometry::TQuat4<f32>& q)
+{
+	mtx.setQuat(q);
+}
+static void identity33OutOfLine(TPosition3f& mtx) { mtx.identity33(); }
+// Retail calls TVec3::dot and TVec3::scale(f32, TVec3) out of line.
+static f32 dotOutOfLine(const JGeometry::TVec3<f32>& a,
+                        const JGeometry::TVec3<f32>& b)
+{
+	return a.dot(b);
+}
+static void scaleOutOfLine(JGeometry::TVec3<f32>& dst, f32 scale,
+                           const JGeometry::TVec3<f32>& src)
+{
+	dst.scale(scale, src);
+}
+static void setOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
 #pragma dont_inline off
 
 f32 TDirectionCalc::calcNearerDirection(f32 target)
 {
-	mDirection = 0.0f
-	             + fmodfOutOfLine(6.2831855f + (mDirection - 0.0f), 6.2831855f);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
+	f32 lo = 0.0f;
+	mDirection = lo + fmodfOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -116,9 +157,9 @@ f32 TDirectionCalc::calcNearerDirection(f32 target)
 
 f32 TDirectionCalc::sub(f32 target)
 {
-	mDirection = 0.0f
-	             + modOutOfLine(
-	                 6.2831855f + (mDirection - 0.0f), 6.2831855f);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
+	f32 lo = 0.0f;
+	mDirection = lo + modOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -135,11 +176,10 @@ f32 TDirectionCalc::sub(f32 target)
 
 f32 TDirectionCalc::calcTurnDirection(f32 target, f32 step)
 {
-	mDirection = 0.0f
-	             + fmodfOutOfLine(6.2831855f + (mDirection - 0.0f), 6.2831855f);
-	mDirection = 0.0f
-	             + modOutOfLine(
-	                 6.2831855f + (mDirection - 0.0f), 6.2831855f);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
+	f32 lo = 0.0f;
+	mDirection = lo + fmodfOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
+	mDirection = lo + modOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -180,9 +220,9 @@ JGeometry::TVec3<f32> TDirectionCalc::calcDirectionVector()
 
 f32 TDirectionCalc::absDirection(f32 target)
 {
-	mDirection = 0.0f
-	             + modOutOfLine(
-	                 6.2831855f + (mDirection - 0.0f), 6.2831855f);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
+	f32 lo = 0.0f;
+	mDirection = lo + modOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -316,9 +356,9 @@ void TKoopaJr::init(TLiveManager* manager)
 	mMActor->setLightType(1);
 	initAnmSound();
 
-	f32 height = ((TKoopaJrParams*)getSaveParam())->mSLDamageHeight.get();
+	f32 height = ((TKoopaJrParams*)getSaveParam())->mSLDamageHeight.value;
 	initHitActor(0x8000028, 1, 0, 0.0f, 0.0f,
-	             ((TKoopaJrParams*)getSaveParam())->mSLDamageRadius.get(),
+	             ((TKoopaJrParams*)getSaveParam())->mSLDamageRadius.value,
 	             height);
 	offHitFlag(HIT_FLAG_NO_COLLISION);
 
@@ -337,26 +377,27 @@ void TKoopaJr::init(TLiveManager* manager)
 		(void)(*(volatile u32*)&mSubmarineManager->unk38 == 0);
 	}
 
-	f32 scale = ((TKoopaJrParams*)getSaveParam())->mSLKoopaJrScale.get();
+	f32 scale = ((TKoopaJrParams*)getSaveParam())->mSLKoopaJrScale.value;
 	mScaling.set(scale, scale, scale);
 
 	mSpine->reset();
 	unk150 = 0;
 	unk154 = 0;
 	unk158 = 0;
-	unk154 = ((TKoopaJrParams*)getSaveParam())->mSLLaunchKillerPeriod.get();
+	unk154 = ((TKoopaJrParams*)getSaveParam())->mSLLaunchKillerPeriod.value;
 	unk158 = 0;
 }
 
 void TKoopaJr::reset()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	TSpineEnemy::reset();
 
 	mSpine->reset();
 	unk150 = 0;
 	unk154 = 0;
 	unk158 = 0;
-	unk154 = ((TKoopaJrParams*)getSaveParam())->mSLLaunchKillerPeriod.get();
+	unk154 = ((TKoopaJrParams*)getSaveParam())->mSLLaunchKillerPeriod.value;
 	unk158 = 0;
 }
 
@@ -377,13 +418,12 @@ void TKoopaJr::perform(u32 cue, JDrama::TGraphics* graphics)
 		mBathtub = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
 
 	if (cue & CUE_CALC_ANIM) {
-		f32 half
-		    = 0.5f
-		      * ((TKoopaJrSubmarineParams*)mSubmarine->getSaveParam())
-		            ->mSLSwingAmplitudeMax.get();
-		if (!(mSubmarine->mSwingAmplitude < half)) {
+		TKoopaJrSubmarineParams* subParams
+		    = (TKoopaJrSubmarineParams*)mSubmarine->getSaveParam();
+		if (!(mSubmarine->mSwingAmplitude
+		      < 0.5f * subParams->mSLSwingAmplitudeMax.value)) {
 			unk150
-			    = ((TKoopaJrParams*)getSaveParam())->mSLDamagePeriod.get();
+			    = ((TKoopaJrParams*)getSaveParam())->mSLDamagePeriod.value;
 
 			if (mSpine->getCurrentNerve() == &TNerveKoopaJrWait::theNerve())
 				mSpine->pushNerve(&TNerveKoopaJrDamage::theNerve());
@@ -422,8 +462,9 @@ void TKoopaJr::perform(u32 cue, JDrama::TGraphics* graphics)
 			toMario.y = gpMarioPos->y - mPosition.y;
 			toMario.z = gpMarioPos->z - mPosition.z;
 			toMario.y = 0.0f;
-			mRotation.y
-			    = TDirectionCalc::r2d(TDirectionCalc(toMario).mDirection);
+			TDirectionCalc dir;
+			dir.makeDirection(toMario);
+			mRotation.y = TDirectionCalc::r2d(dir.mDirection);
 		}
 	}
 
@@ -661,21 +702,21 @@ void TKoopaJrSubmarine::init(TLiveManager* manager)
 	initAnmSound();
 
 	f32 damageHeight
-	    = ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageHeight.get();
+	    = ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageHeight.value;
 	initHitActor(
 	    0x8000020, 0, 0, 0.0f, 0.0f,
-	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageRadius.get(),
+	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageRadius.value,
 	    damageHeight);
 	onHitFlag(HIT_FLAG_NO_COLLISION);
 
 	mRearBodyHit = new TCallbackHitActor(
 	    "サブマリンリアボディ", this,
-	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageRadius.get(),
-	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageHeight.get());
+	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageRadius.value,
+	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageHeight.value);
 	mFrontBodyHit = new TCallbackHitActor(
 	    "サブマリンフロントボディ", this,
-	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageRadius.get(),
-	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageHeight.get());
+	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageRadius.value,
+	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLDamageHeight.value);
 
 	mMActorKeeper = new TMActorKeeper(mManager, 1);
 	mMActor       = mMActorKeeper->createMActor("LastKoopaJrSubmarine.bmd", 0);
@@ -690,7 +731,7 @@ void TKoopaJrSubmarine::init(TLiveManager* manager)
 	}
 
 	f32 scale = ((TKoopaJrSubmarineParams*)getSaveParam())
-	                ->mSLKoopaJrSubmarineScale.get();
+	                ->mSLKoopaJrSubmarineScale.value;
 	mScaling.set(scale, scale, scale);
 
 	mBathtubBinder = new TBathtubBinder;
@@ -707,6 +748,7 @@ void TKoopaJrSubmarine::reset()
 
 void TKoopaJrSubmarine::resetKoopaJrSubmarine()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	mSpine->reset();
 	unk150 = 0;
 
@@ -733,7 +775,7 @@ void TKoopaJrSubmarine::resetKoopaJrSubmarine()
 
 	mBathtubBinder->init(
 	    150.0f, 100.0f, 150.0f, 100.0f,
-	    ((TKoopaJrSubmarineParams*)getSaveParam())->bottomHeight.get());
+	    ((TKoopaJrSubmarineParams*)getSaveParam())->bottomHeight.value);
 }
 
 void TKoopaJrSubmarine::perform(u32 cue, JDrama::TGraphics* graphics)
@@ -811,14 +853,15 @@ void TKoopaJrSubmarine::moveSwing()
 	if (mSwingAmplitude <= 0.0f)
 		mSwingPhase = 0.0f;
 
+	f32 lo = 0.0f;
 	mSwingPhase
-	    = 0.0f
+	    = lo
 	      + fmodfOutOfLine(
 	          6.2831855f
 	              + (mSwingPhase
 	                 + ((TKoopaJrSubmarineParams*)getSaveParam())
 	                       ->mSLSwingPhaseVelocity.get()
-	                 - 0.0f),
+	                 - lo),
 	          6.2831855f);
 
 	f32 speedRate = mVelocity.length()
@@ -852,13 +895,13 @@ void TKoopaJrSubmarine::moveSwing()
 		mWavePhase = 0.0f;
 
 	mWavePhase
-	    = 0.0f
+	    = lo
 	      + fmodfOutOfLine(
 	          6.2831855f
 	              + (mWavePhase
 	                 + ((TKoopaJrSubmarineParams*)getSaveParam())
 	                       ->mSLWavePhaseVelocity.get()
-	                 - 0.0f),
+	                 - lo),
 	          6.2831855f);
 }
 
@@ -890,18 +933,18 @@ void TKoopaJrSubmarine::calcRootMatrix()
 
 		JGeometry::TVec3<f32> center;
 		center.set(0.0f, 0.0f,
-		           ((TKoopaJrSubmarineParams*)getSaveParam())->centerZ.get());
+		           ((TKoopaJrSubmarineParams*)getSaveParam())->centerZ.value);
 
 		TPosition3f centerMtx;
-		centerMtx.identity33();
+		identity33OutOfLine(centerMtx);
 		centerMtx.setTrans(center);
-
-		TPosition3f mtx;
-		mtx.setQuat(rotation);
 
 		JGeometry::TVec3<f32> trans = center;
 		trans.negate();
 		trans.add(mPosition);
+
+		TPosition3f mtx;
+		setQuatOutOfLine(mtx, rotation);
 		mtx.setTrans(trans);
 
 		mtx.concat(mtx, centerMtx); // asm 0x8032A7C4-D0: standard mtx * centerMtx
@@ -934,13 +977,14 @@ bool TKoopaJrSubmarine::appearShineKiller(int)
 		probability = 0.5f;
 	} else {
 		s32 maxWater
-		    = SMS_GetMarioWaterGun()->getCurrentNozzle()->mEmitParams.mAmountMax
-		          .get();
+		    = ((const TWaterGun*)SMS_GetMarioWaterGun())
+		          ->getCurrentNozzle()
+		          ->mEmitParams.mAmountMax.value;
 		s32 water = SMS_GetMarioWaterGun()->mCurrentWater;
 		f32 p0    = ((TKoopaJrSubmarineParams*)getSaveParam())
-		              ->shineKillerProbability0.get();
+		              ->shineKillerProbability0.value;
 		f32 p1 = ((TKoopaJrSubmarineParams*)getSaveParam())
-		             ->shineKillerProbability1.get();
+		             ->shineKillerProbability1.value;
 		probability = p0 + (f32)water / (f32)maxWater * (p1 - p0);
 	}
 
@@ -952,6 +996,7 @@ bool TKoopaJrSubmarine::appearShineKiller(int)
 
 void TKoopaJrSubmarine::launchKiller()
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	int index = mKillerIndex % 4;
 
 	TBathtubKiller* killer
@@ -960,7 +1005,8 @@ void TKoopaJrSubmarine::launchKiller()
 		killer->unk194 = mKillerKinds[mKillerIndex];
 		killer->reset();
 
-		MtxPtr mtx = getModel()->getAnmMtx(TKoopaJr_jointIndexTable[index + 1]);
+		int jointIndex = index + 1;
+		MtxPtr mtx = getModel()->getAnmMtx(TKoopaJr_jointIndexTable[jointIndex]);
 		killer->mPosition.set(mtx[0][3], mtx[1][3], mtx[2][3]);
 
 		JGeometry::TVec3<f32> velocity(mtx[0][2], mtx[1][2], mtx[2][2]);
@@ -1023,9 +1069,9 @@ void TKoopaJrSubmarine::makeKillerVelocity(TBathtubKiller* killer,
 
 		f32 distance = toMario.length()
 		               - ((TKoopaJrSubmarineParams*)getSaveParam())
-		                     ->killerTargetDistance.get();
+		                     ->killerTargetDistance.value;
 		f32 minDistance = ((TKoopaJrSubmarineParams*)getSaveParam())
-		                      ->killerTargetDistanceMin.get();
+		                      ->killerTargetDistanceMin.value;
 		if (distance >= minDistance)
 			minDistance = distance;
 
@@ -1038,7 +1084,7 @@ void TKoopaJrSubmarine::makeKillerVelocity(TBathtubKiller* killer,
 
 		velocity = calcVelocityToJumpToY(
 		    target, velocity.y,
-		    killer->getSaveParam2()->mSLFlyingGravityY.get());
+		    killer->getSaveParam2()->mSLFlyingGravityY.value);
 	}
 
 	killer->makeInitialVelocity(velocity);
@@ -1057,12 +1103,15 @@ void TKoopaJrSubmarine::makeRelativeAngle()
 	f32 flameDiff   = fabsf(mRoundAngle.mDirection - flameNearer);
 
 	JGeometry::TVec3<f32> toMario;
-	toMario.x = gpMarioPos->x - mKoopaJr->mBathtub->mPosition.x;
-	toMario.y = gpMarioPos->y - mKoopaJr->mBathtub->mPosition.y;
-	toMario.z = gpMarioPos->z - mKoopaJr->mBathtub->mPosition.z;
+	const JGeometry::TVec3<f32>& tubPos = mKoopaJr->mBathtub->mPosition;
+	toMario.x = gpMarioPos->x - tubPos.x;
+	toMario.y = gpMarioPos->y - tubPos.y;
+	toMario.z = gpMarioPos->z - tubPos.z;
 	toMario.y = 0.0f;
 
-	f32 marioDirection = TDirectionCalc(toMario).mDirection;
+	TDirectionCalc marioDir;
+	marioDir.makeDirection(toMario);
+	f32 marioDirection = marioDir.mDirection;
 	f32 marioNearer    = mRoundAngle.calcNearerDirection(marioDirection);
 	f32 target         = mRoundAngle.mDirection;
 	f32 marioDiff      = fabsf(target - marioNearer);
@@ -1102,8 +1151,10 @@ void TKoopaJrSubmarine::makeRelativeAngle()
 
 void TKoopaJrSubmarine::makeRoundVelocity()
 {
-	JGeometry::TVec3<f32> offset = JGeometry::TVec3<f32>(
-	    sinf(mRoundAngle.mDirection), 0.0f, cosf(mRoundAngle.mDirection));
+	JGeometry::TVec3<f32> offsetTmp;
+	setOutOfLine(offsetTmp, sinf(mRoundAngle.mDirection), 0.0f,
+	             cosf(mRoundAngle.mDirection));
+	JGeometry::TVec3<f32> offset = offsetTmp;
 	offset.scale(mRoundDistance);
 
 	JGeometry::TVec3<f32> toTarget(
@@ -1118,12 +1169,12 @@ void TKoopaJrSubmarine::makeRoundVelocity()
 	unk170 = 0;
 	toTarget.normalize();
 	toTarget.scale(
-	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLAcceleration.get());
+	    ((TKoopaJrSubmarineParams*)getSaveParam())->mSLAcceleration.value);
 	mVelocity.add(toTarget);
 
 	f32 speed    = mVelocity.length();
 	f32 speedMax = ((TKoopaJrSubmarineParams*)getSaveParam())
-	                   ->mSLSpeedMax.get();
+	                   ->mSLSpeedMax.value;
 	if (speed > speedMax) {
 		mVelocity.normalize();
 		mVelocity.scale(speedMax);
@@ -1136,7 +1187,7 @@ void TKoopaJrSubmarine::checkNerve()
 	    == &TNerveKoopaJrWait::theNerve()) {
 		makeRelativeAngle();
 		mRoundDistance = ((TKoopaJrSubmarineParams*)getSaveParam())
-		                     ->mSLRoundDistance.get();
+		                     ->mSLRoundDistance.value;
 		makeRoundVelocity();
 	}
 
@@ -1146,12 +1197,21 @@ void TKoopaJrSubmarine::checkNerve()
 
 	if (!unk170) {
 		JGeometry::TVec3<f32> direction = mVelocity;
-		direction.normalize();
-		f32 target = TDirectionCalc(direction).mDirection;
+		f32 lsq = dotOutOfLine(direction, direction);
+		if (lsq <= JGeometry::TUtil<f32>::epsilon())
+			direction.zero();
+		else
+			scaleOutOfLine(direction,
+			               JGeometry::TUtil<f32>::one()
+			                   * JGeometry::TUtil<f32>::inv_sqrt(lsq),
+			               direction);
+		TDirectionCalc dirCalc;
+		dirCalc.makeDirection(direction);
+		f32 target = dirCalc.mDirection;
 		mHeading.mDirection = mHeading.calcTurnDirection(
 		    target,
 		    TDirectionCalc::d2r(((TKoopaJrSubmarineParams*)getSaveParam())
-		                            ->mSLRotationSpeed.get()));
+		                            ->mSLRotationSpeed.value));
 	}
 
 	if (mSpine->getCurrentNerve()
@@ -1234,6 +1294,12 @@ void TKoopaJrSubmarineManager::createModelData()
 // result; volatile reads keep those loads (the dead compares fold away).
 void TKoopaJrSubmarineManager::load(JSUMemoryInputStream& stream)
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 };
+	}
 	(void)(*(volatile u32*)&unk38 == 0);
 	TEnemyManager::load(stream);
 	unk38 = new TKoopaJrSubmarineParams("/enemy/koopajrsubmarine.prm");
@@ -1242,6 +1308,10 @@ void TKoopaJrSubmarineManager::load(JSUMemoryInputStream& stream)
 
 void TKoopaJrSubmarineManager::loadAfter()
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 };
+	}
 	TEnemyManager::loadAfter();
 	(void)(*(volatile u32*)&unk38 == 0);
 }

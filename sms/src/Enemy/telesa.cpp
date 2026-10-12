@@ -529,8 +529,7 @@ void TTelesa::bind()
 
 BOOL TTelesa::isReachedToGoal() const
 {
-	const TPathNode& node = unk104;
-	JGeometry::TVec3<f32> local_c = node.getPoint();
+	JGeometry::TVec3<f32> local_c = getUnk104().getPoint();
 	local_c -= mPosition;
 	local_c.y = 0.0f;
 

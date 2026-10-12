@@ -299,6 +299,13 @@ JGeometry::TVec3<f32> TKukku::calcMomentum(f32 speed)
 }
 #pragma dont_inline off
 
+#pragma dont_inline on
+static void setVecOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
+#pragma dont_inline off
+
 void TKukku::dropCoins()
 {
 	if (mDropCount > 10)
@@ -308,8 +315,11 @@ void TKukku::dropCoins()
 		mDropCount += 1;
 		mMushroom->appear();
 		mMushroom->JSGSetTranslation(mPosition);
-		mMushroom->mVelocity.set(0.0f, 0.0f, 0.0f);
-		mMushroom->offLiveFlag(LIVE_FLAG_UNK10);
+		TMapObjBase* mush = mMushroom;
+		mush->mVelocity.x = 0.0f;
+		mush->mVelocity.y = 0.0f;
+		mush->mVelocity.z = 0.0f;
+		mush->offLiveFlag(LIVE_FLAG_UNK10);
 		return;
 	}
 
@@ -330,7 +340,8 @@ void TKukku::dropCoins()
 	f32 dropSpeed = getSaveParam2()->mDropSpeed.get();
 	s16 angle     = DEG2SHORTANGLE(mRotation.y);
 	JGeometry::TVec3<f32> velocity;
-	velocity.set(dropSpeed * JMASSin(angle), 0.0f, dropSpeed * JMASCos(angle));
+	setVecOutOfLine(velocity, dropSpeed * JMASSin(angle), 0.0f,
+	                dropSpeed * JMASCos(angle));
 
 	JGeometry::TVec3<f32> dir = velocity;
 	pitch.rotate(dir, dir);
@@ -410,6 +421,31 @@ static TKukkuBall* findIdleBall(TKukkuBall** begin, TKukkuBall** end)
 	return nullptr;
 }
 
+#pragma dont_inline on
+static void copyQuatOutOfLine(JGeometry::TQuat4<f32>& dst,
+                              const JGeometry::TQuat4<f32>& src)
+{
+	dst = src;
+}
+
+static f32 invSqrtOutOfLine(f32 x)
+{
+	return JGeometry::TUtil<f32>::inv_sqrt(x);
+}
+
+static f32 dotOutOfLine(const JGeometry::TVec3<f32>& a,
+                        const JGeometry::TVec3<f32>& b)
+{
+	return a.dot(b);
+}
+
+static void scaleOutOfLine(JGeometry::TVec3<f32>& v, f32 s,
+                           const JGeometry::TVec3<f32>& b)
+{
+	v.scale(s, b);
+}
+#pragma dont_inline off
+
 DEFINE_NERVE(TNerveKukkuGraphWander, TLiveActor)
 {
 	TKukku* self = (TKukku*)spine->getBody();
@@ -447,7 +483,14 @@ DEFINE_NERVE(TNerveKukkuGraphWander, TLiveActor)
 		} else if (TKukkuBall* ball
 		           = findIdleBall(&self->mBalls[0], &self->mBalls[3])) {
 			JGeometry::TVec3<f32> dir(0.0f, 1.0f, 0.0f);
-			dir.setLength(self->getSaveParam2()->mShootSpeed.get());
+			f32 shootSpeed = self->getSaveParam2()->mShootSpeed.get();
+			f32 lsq        = dotOutOfLine(dir, dir);
+			if (lsq <= JGeometry::TUtil<f32>::epsilon())
+				dir.zero();
+			else
+				scaleOutOfLine(
+				    dir, shootSpeed * invSqrtOutOfLine(lsq),
+				    dir);
 
 			self->getModel()->getModelData()->getJointName()->getIndex(
 			    "null_osen");
@@ -468,9 +511,11 @@ DEFINE_NERVE(TNerveKukkuGraphWander, TLiveActor)
 	self->updateRotation();
 
 	f32 marchSpeed              = self->getSaveParam2()->mMarchSpeed.get();
-	JGeometry::TQuat4<f32> quat = SMS_Eular2Quat(self->mRotation);
+	JGeometry::TQuat4<f32> tmp = SMS_Eular2Quat(self->mRotation);
+	JGeometry::TQuat4<f32> quat;
+	copyQuatOutOfLine(quat, tmp);
 	JGeometry::TVec3<f32> v;
-	v.set(0.0f, 0.0f, marchSpeed);
+	setVecOutOfLine(v, 0.0f, 0.0f, marchSpeed);
 	quat.rotate(v);
 	self->mLinearVelocity = v;
 	return FALSE;

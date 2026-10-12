@@ -87,25 +87,30 @@ void TLensFlare::perform(u32 cue, JDrama::TGraphics*)
 
 		JGeometry::TVec3<f32> near9grid[9];
 		S16Vec euler;
-		CLBCalcNearNinePos(near9grid, &euler, gpCamera->unk124,
-		                   gpCamera->unk148, gpCamera->getFinalAngleZ(),
+		CLBCalcNearNinePos(near9grid, &euler,
+		                   JGeometry::TVec3<f32>((const Vec&)gpCamera->unk124),
+		                   JGeometry::TVec3<f32>((const Vec&)gpCamera->unk148),
+		                   gpCamera->getFinalAngleZ(),
 		                   gpCamera->getNear(), gpCamera->getFovy(),
 		                   gpCamera->getAspect());
 
 		f32 tx = unk3C * -gpSunModel->unkF8[0].x;
 		f32 ty = unk3C * -gpSunModel->unkF8[0].y;
-		f32 lx = near9grid[4].x;
-		lx += (near9grid[5].x - near9grid[4].x) * tx;
-		lx += (near9grid[1].x - near9grid[4].x) * ty;
-		f32 ly = near9grid[4].y;
-		ly += (near9grid[5].y - near9grid[4].y) * tx;
-		ly += (near9grid[1].y - near9grid[4].y) * ty;
-		f32 lz = near9grid[4].z;
-		lz += (near9grid[5].z - near9grid[4].z) * tx;
-		lz += (near9grid[1].z - near9grid[4].z) * ty;
+		f32 lx  = near9grid[4].x;
+		f32 lxa = (near9grid[5].x - near9grid[4].x) * tx;
+		f32 lxb = (near9grid[1].x - near9grid[4].x) * ty;
+		lx      = lx + lxa + lxb;
+		f32 ly  = near9grid[4].y;
+		f32 lya = (near9grid[5].y - near9grid[4].y) * tx;
+		f32 lyb = (near9grid[1].y - near9grid[4].y) * ty;
+		ly      = ly + lya + lyb;
+		f32 lz  = near9grid[4].z;
+		f32 lza = (near9grid[5].z - near9grid[4].z) * tx;
+		f32 lzb = (near9grid[1].z - near9grid[4].z) * ty;
+		lz      = lz + lza + lzb;
 
 		JGeometry::TVec3<f32> finalPos;
-		finalPos.set(sunWorldPos);
+		finalPos.set((const Vec&)sunWorldPos);
 
 		JGeometry::TVec3<f32> dir(lx - finalPos.x, ly - finalPos.y,
 		                          lz - finalPos.z);

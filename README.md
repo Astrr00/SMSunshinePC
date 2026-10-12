@@ -6,7 +6,7 @@ A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The gam
 
 Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. % is the lead's estimate of how much of the item works, not a measurement. Updated with every milestone. Last measured: 2026-10-12.
 
-**Decompilation progress (measured 2026-10-12, `sms/` full `ninja` + `changes_all`):** 11 115 of 12 881 functions byte-identical = **86.3 %**; matched code **59.69 %** (by bytes); fuzzy match **98.23 %**; units complete **445 of 736 = 60.5 %**; data 85.6 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. About 1 634 functions are still not byte-identical (most of them between 98.5 % and 100 %). The numbers are measured from `report.json`; they are refreshed after every decomp round.
+**Decompilation progress (measured 2026-10-12, `sms/` full `ninja` + `changes_all`):** 11 115 of 12 881 functions byte-identical = **86.3 %**; matched code **59.69 %** (by bytes); fuzzy match **98.23 %**; units complete **445 of 736 = 60.5 %**; data 85.6 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. About 1 600 functions are still not byte-identical (most of them between 98.5 % and 100 %). The numbers are measured from `report.json`; they are refreshed after every decomp round.
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
@@ -93,6 +93,10 @@ Bug found and fixed on the way: `JAIData::initSeqParameter` left `mSeqHandle` 0 
 ### Update 2026-10-12 (later): route 70, fewer dev crutches
 
 `sunshine-pc/tools/routes/70_boss_until.dev` run twice in a row (`u01` 153 s, `u02` 193 s wall, rc=0, no `overrun`, no crash, 13 PNGs, `gci_check.py` PASS, reload `stage=1 scen=5 shines=2`). Remaining dev: `cheat infinite_health`, `chase` (position read, real input), `shine 2`, env `SUNSHINE_DEV_STEP_RETRACE`/`SKIP_MOVIES`/`AIM_ASSIST`. Gone: `tp`, `tpem`, `killboss`. Not met: a real Bianco Shine without `shine 2` (no measured floor path to any of the three Shines), 330 s at real 30 Hz, no dev switches. Details: `sunshine-pc/docs/session-2026-10-11b.md` section 42.
+
+### Update 2026-10-12 (decomp round 6): 11 282 / 12 881 functions byte-identical (87.6 %)
+
+Measured after round 6: SHA-1 unchanged, 11 282 / 12 881 byte-identical (87.6 %), matched code 61.98 %, fuzzy 98.60 %, 445 / 736 units, strict link 0 unresolved, Aurora 11 patches, `TEMP-DEBUG` 0, route 70 smoke 1 of 2 complete (`p01` chase fall, the known flake). Details: `sunshine-pc/docs/session-2026-10-11b.md` section 52.
 
 ### Update 2026-10-12 (decomp round 5): 11 247 / 12 881 functions byte-identical (87.3 %)
 

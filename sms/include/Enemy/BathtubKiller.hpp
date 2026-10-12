@@ -135,6 +135,7 @@ public:
 	/* 0x220 */ TPosition3f unk220;
 };
 
+
 DECLARE_NERVE(TNerveBathtubKillerWander, TLiveActor);
 DECLARE_NERVE(TNerveBathtubKillerChase, TLiveActor);
 DECLARE_NERVE(TNerveBathtubKillerChaseStraight, TLiveActor);

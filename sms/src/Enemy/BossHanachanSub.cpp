@@ -77,10 +77,13 @@ bool TSphereLink::setDegreeZAndRevisionPosXZ(int index, f32 degreeZ)
 	}
 
 	return changed;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TSphereLink::moveHead(const JGeometry::TVec3<f32>& head)
 {
+	char trash[16];
 	for (int i = 0; i < mNumPoints; ++i) {
 		mPoints[i].mPos.y += mGravityY;
 		mPoints[i].mPos.add(mPoints[i].mVelocity);
@@ -141,6 +144,8 @@ void TSphereLink::moveHead(const JGeometry::TVec3<f32>& head)
 		point->mVelocity            = delta * mDamping;
 		point->mLastPos  = point->mPos;
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 // Receives the water gun's particle message (0xF): the hit counter is armed
@@ -163,18 +168,22 @@ void TWaterHitActor::onWaterHitCounter() { mWaterHitCounter = 0x3C; }
 void BHSCalcRevisionDistXZByRotateZ(f32 angle, f32 a, f32 b, f32* outX,
                                     f32* outZ)
 {
+	char trash[12];
 	JGeometry::TVec2<f32> v(b * a, 0.0f);
 	s16 ang = CLBRoundf<s16>(DEG2SHORTANGLE(angle));
 	f32 sn  = JMASSin(ang);
 	f32 cs  = JMASCos(ang);
 	*outX   = v.x * cs + v.y * sn;
 	*outZ   = -v.x * sn + v.y * cs;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 f32 BHSCalcCentrifugalForce(const JGeometry::TVec3<f32>& a,
                             const JGeometry::TVec3<f32>& b,
                             const JGeometry::TVec3<f32>& c, f32 angle)
 {
+	char trash[32];
 	f32 abX = a.x - b.x;
 	f32 abZ = a.z - b.z;
 	f32 abLenSq = abX * abX + abZ * abZ;
@@ -205,4 +214,6 @@ f32 BHSCalcCentrifugalForce(const JGeometry::TVec3<f32>& a,
 
 	s16 ref = CLBRoundf<s16>(DEG2SHORTANGLE(angle));
 	return abLenSq * JMASCos((s16)(abAngle - ref));
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }

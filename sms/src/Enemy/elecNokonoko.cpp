@@ -688,8 +688,9 @@ void TElecCarapace::perform(u32 cue, JDrama::TGraphics* graphics)
 	}
 
 	if (cue & CUE_ENTRY) {
-		if (!(isState(0) || mOwner->checkLiveFlag(LIVE_FLAG_DEAD)
-		      || checkLiveFlag(LIVE_FLAG_DEAD | LIVE_FLAG_HIDDEN))) {
+		if (isState(0) || mOwner->checkLiveFlag(LIVE_FLAG_DEAD)
+		    || checkLiveFlag(LIVE_FLAG_DEAD | LIVE_FLAG_HIDDEN)) {
+		} else {
 			TCircleShadowRequest request;
 			char trash[12]; // matching: stack padding
 			request.mPosition = mPosition;

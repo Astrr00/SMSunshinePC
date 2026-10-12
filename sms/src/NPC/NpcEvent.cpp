@@ -20,6 +20,21 @@ extern const TNerveBase<TLiveActor>* NerveGetByIndex(int index);
 
 int TNpcEvent::mDownSunflowerNum = 0;
 
+#pragma dont_inline on
+static void PushSliceOutOfLine(TSpcStack<TSpcSlice>& stack, const TSpcSlice& slice)
+{
+	stack.push(slice);
+}
+#pragma dont_inline off
+
+#pragma dont_inline on
+static const TNerveBase<TLiveActor>*
+GetLatestNerveOutOfLine(const TSpineBase<TLiveActor>* spine)
+{
+	return spine->getLatestNerve();
+}
+#pragma dont_inline off
+
 static void IsNpcFlagOn_(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num,
                          u32 flag)
 {
@@ -28,7 +43,7 @@ static void IsNpcFlagOn_(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num,
 	int result    = 0;
 	if (npc->checkLiveFlag(flag))
 		result = 1;
-	interp->push(result);
+	PushSliceOutOfLine(interp->mProcessStack, TSpcSlice(result));
 }
 
 static void CheckNerve4Npc_(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num,
@@ -37,15 +52,15 @@ static void CheckNerve4Npc_(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num,
 	interp->verifyArgNum(2, &arg_num);
 	int nerveId   = interp->pop().getDataInt();
 	TBaseNPC* npc = SPC_GET_PTR(TBaseNPC*, interp->pop());
+	int result = 0;
 	const TNerveBase<TLiveActor>* expected = NerveGetByIndex(nerveId);
 	const TNerveBase<TLiveActor>* actual   = param_3
-	                                             ? npc->mSpine->getLatestNerve()
+	                                             ? GetLatestNerveOutOfLine(npc->mSpine)
 	                                             : npc->mSpine->getCurrentNerve();
 
-	int result = 0;
 	if (actual == expected)
 		result = 1;
-	interp->push(result);
+	PushSliceOutOfLine(interp->mProcessStack, TSpcSlice(result));
 }
 
 static void evGetAddressFromViewObjName(TSpcTypedInterp<TEventWatcher>* interp,
@@ -67,7 +82,7 @@ static void evCheckCurNerve4Npc(TSpcTypedInterp<TEventWatcher>* interp,
 static void evCheckLatestNerve4Npc(TSpcTypedInterp<TEventWatcher>* interp,
                                    u32 arg_num)
 {
-	char trash[0x18];
+	char trash[0x1c];
 	CheckNerve4Npc_(interp, arg_num, true);
 }
 
@@ -304,11 +319,11 @@ static void evIsDemoMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evCheckMonteClear(TSpcTypedInterp<TEventWatcher>* interp,
                               u32 arg_num)
 {
-	char trash[0x4];
 	interp->verifyArgNum(1, &arg_num);
 	int fVar1 = interp->pop().getDataInt();
 
 	char buffer[32];
+	char trash[0x4];
 	snprintf(buffer, 32, "モンテ%d", fVar1);
 	TBaseNPC* npc = static_cast<TBaseNPC*>(JDrama::TNameRefGen::search(buffer));
 
@@ -374,7 +389,6 @@ static s32 ReviveSunflowerCallBack(TMarDirector::DemoCallbackArg param_1,
 
 void TNpcEvent::reviveOneSunflower()
 {
-	char trash[0x8];
 	if (mDownSunflowerNum > 0) {
 		static const char* sViewObjName = "ひまわり";
 
@@ -404,4 +418,5 @@ void TNpcEvent::reviveOneSunflower()
 			TFlagManager::getInstance()->setBool(false, 0x50003);
 		}
 	}
+	char trash[0xc];
 }

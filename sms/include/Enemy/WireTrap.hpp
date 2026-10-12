@@ -65,7 +65,8 @@ public:
 	// fabricated
 	JGeometry::TVec3<f32> getVelocityAlongWireDir() const
 	{
-		JGeometry::TVec3<f32> vel = getWireDir();
+		JGeometry::TVec3<f32> vel;
+		vel = getWireDir();
 		scaleByWireSpeed(vel);
 		return vel;
 	}

@@ -62,6 +62,18 @@ static inline void calcLookQuat(TPosition3f& mtx, JGeometry::TQuat4<f32>& q,
 	mtx.getQuat(q);
 }
 
+static inline void calcLookQuatAxis(JGeometry::TQuat4<f32>& q,
+                                    JGeometry::TVec3<f32>& axis,
+                                    const JGeometry::TVec3<f32>& dir)
+{
+	TPosition3f mtx;
+	SMS_CalcToDirMatrix(mtx, dir, JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f));
+	mtx.getQuat(q);
+	axis.x = mtx.at(0, 1);
+	axis.y = mtx.at(1, 1);
+	axis.z = mtx.at(2, 1);
+}
+
 TKazekun::TKazekun(const char* name)
     : TSmallEnemy(name)
     , mWaitTime(0)
@@ -189,6 +201,16 @@ static inline f32 calcLength(const JGeometry::TVec3<f32>& v)
 	return v.length();
 }
 
+static inline f32 calcSqrt0(f32 x)
+{
+	return JGeometry::TUtil<f32>::sqrt(x);
+}
+
+static inline f32 calcSqrt(f32 x)
+{
+	return calcSqrt0(x);
+}
+
 static inline f32 calcDistXZ(const JGeometry::TVec3<f32>& v)
 {
 	return calcLength(v);
@@ -209,11 +231,9 @@ void TKazekun::flyAroundMario()
 	f32 ratio = JGeometry::TUtil<f32>::clamp(dist / params->mAroundDist.get(),
 	                                         0.0f, 2.0f);
 
-	TPosition3f mtx;
 	JGeometry::TQuat4<f32> q;
-	calcLookQuat(mtx, q, toMario);
-
-	JGeometry::TVec3<f32> axis(mtx.at(0, 1), mtx.at(1, 1), mtx.at(2, 1));
+	JGeometry::TVec3<f32> axis;
+	calcLookQuatAxis(q, axis, toMario);
 	JGeometry::TQuat4<f32> rot;
 	rot.setRotate(axis, (2.0f - ratio) * 1.5707964f);
 	q.mul(q, rot);
@@ -233,34 +253,32 @@ void TKazekun::doAttackPose(bool init)
 	toMario -= mPosition;
 	toMario.y = 0.0f;
 
+	JGeometry::TQuat4<f32> q;
+	JGeometry::TVec3<f32> axis;
+	JGeometry::TQuat4<f32> rot;
 	if (init) {
-		TPosition3f mtx;
-		JGeometry::TQuat4<f32> q;
-		calcLookQuat(mtx, q, toMario);
 
-		JGeometry::TVec3<f32> axis(mtx.at(0, 1), mtx.at(1, 1), mtx.at(2, 1));
-		JGeometry::TQuat4<f32> rot;
+		calcLookQuatAxis(q, axis, toMario);
+
 		rot.setRotate(axis, 1.5707964f);
 		q.mul(q, rot);
 		mQuat = q;
 
 		JGeometry::TVec3<f32> vel(0.0f, 0.0f, getSaveParam2()->mPoseSpeed.get());
-		mQuat.rotate(vel, vel);
+		q.rotate(vel, vel);
 		mVelocity = vel;
 	}
 
-	JGeometry::TVec3<f32> axis;
 	mQuat.rotate(JGeometry::TVec3<f32>(-1.0f, 0.0f, 0.0f), axis);
-	JGeometry::TQuat4<f32> rot;
 	rot.setRotate(axis, JGeometry::TUtil<f32>::PI()
 	                        * getSaveParam2()->mPoseOmegaRate.get());
-	JGeometry::TQuat4<f32> q;
+
 	q.mul(rot, mQuat);
 	mQuat = q;
 
 	JGeometry::TVec3<f32> cur = mVelocity;
-	JGeometry::TVec3<f32> vel(0.0f, 0.0f, calcDistXZ(cur));
-	mQuat.rotate(vel, vel);
+	JGeometry::TVec3<f32> vel(0.0f, 0.0f, calcSqrt(cur.squared()));
+	q.rotate(vel, vel);
 	mVelocity = vel;
 }
 

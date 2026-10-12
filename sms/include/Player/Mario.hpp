@@ -1190,12 +1190,16 @@ public:
 	void animSound();
 	void soundMovement();
 	void startVoiceYoshi(u32);
+#ifdef SMS_CHECKSTATUSTYPE_OUT_OF_LINE
+	bool checkStatusType(s32 flag) const;
+#else
 #pragma dont_inline on
 	bool checkStatusType(s32 flag) const
 	{
 		return mStatus & flag ? true : false;
 	}
 #pragma dont_inline off
+#endif
 
 	// fabricated
 	f32 getIntendedMag() const { return mIntendedMag; }

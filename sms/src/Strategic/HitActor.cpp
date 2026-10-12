@@ -3,6 +3,9 @@
 
 f32 THitActor::calcEntryRadius()
 {
+	char trash0[0xC];
+	volatile f32 f;
+	char trash[0x24];
 	f32 rad;
 	if (mAttackRadius > mDamageRadius)
 		rad = mAttackRadius;
@@ -20,9 +23,9 @@ f32 THitActor::calcEntryRadius()
 
 	if (rad2 > 0.0f) {
 		// TODO: some kind of a fast sqrt function?
-		volatile f32 f = rad2 * __frsqrte(rad2);
-		char trash[0x30];
-		mEntryRadius   = 1.4142135f * f;
+		f = rad2 * __frsqrte(rad2);
+		float new_var;
+		mEntryRadius   = (new_var = 1.4142135f) * f;
 	} else {
 		mEntryRadius = 0.0f;
 	}

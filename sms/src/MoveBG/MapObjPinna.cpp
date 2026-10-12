@@ -419,10 +419,10 @@ void TShellCup::perform(u32 cue, JDrama::TGraphics* graphics)
 	if (cue & 2) {
 		if (!gpMarDirector->isTalkModeNow() || gpMarDirector->isDemoModeNow()) {
 			for (int i = 0; i < 6; ++i) {
+				TPinnaShell& shell = unk138[i];
 				Mtx rotMtx;
-				setShellRotX(rotMtx, unk138[i].unk6C);
-				concatOnlyRotFromRight(unk138[i].unk74, rotMtx,
-				                       unk138[i].unk74);
+				setShellRotX(rotMtx, shell.unk6C);
+				concatOnlyRotFromRight(shell.unk74, rotMtx, shell.unk74);
 			}
 			if (!unk498->checkLiveFlag(LIVE_FLAG_DEAD))
 				unk498->mPosition.set(unk138[0].mPosition);
@@ -675,7 +675,21 @@ void TAmiKing::initMapObj()
 
 void TAmiKing::moveObject()
 {
-	char trash[0x70];
+	char trash[0x10];
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 2, 2, 3, 4 };
+		(void)(GXColor) { 3, 2, 3, 4 };
+		(void)(GXColor) { 4, 2, 3, 4 };
+		(void)(GXColor) { 5, 2, 3, 4 };
+		(void)(GXColor) { 6, 2, 3, 4 };
+		(void)(GXColor) { 7, 2, 3, 4 };
+		(void)(GXColor) { 8, 2, 3, 4 };
+		(void)(GXColor) { 9, 2, 3, 4 };
+		(void)(GXColor) { 10, 2, 3, 4 };
+		(void)(GXColor) { 11, 2, 3, 4 };
+		(void)(GXColor) { 12, 2, 3, 4 };
+	}
 	TLiveActor::moveObject();
 	if (unk138) {
 		if (mMActor->checkCurAnm("amiking_flying1_start", 0)) {

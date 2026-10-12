@@ -118,6 +118,7 @@ void TEnemyManager::createEnemy() { }
 
 void TEnemyManager::createEnemies(int count)
 {
+	char trash[8];
 	if (count + getObjNum() > getCapacity())
 		count = getCapacity() - getObjNum();
 
@@ -263,7 +264,10 @@ void TEnemyManager::copyFromShared()
 
 void TEnemyManager::performShared(u32 param_1, JDrama::TGraphics* param_2)
 {
-	TTimeRec::startTimer();
+	char trash[0x20];
+	// asm 0x80251DE4: timer only runs when unk30 & 1
+	if (unk30 & 1)
+		TTimeRec::startTimer();
 
 	int num2     = getActiveObjNum();
 	int aliveNum = 0;
@@ -478,6 +482,7 @@ void TEnemyManager::createCopyAnmMtx(int) { }
 
 bool TEnemyManager::copyAnmMtx(TSpineEnemy* enemy)
 {
+	Mtx afStack_5C;
 	if (unk4C != enemy->getMActor()->getCurAnmIdx(ANM_TYPE_BCK))
 		return false;
 
@@ -486,8 +491,7 @@ bool TEnemyManager::copyAnmMtx(TSpineEnemy* enemy)
 	enemy->updateAnmSound();
 	enemy->getMActor()->frameUpdate();
 
-	Mtx afStack_5C;
-	MtxPtr wtf = afStack_5C;
+	char trash[0x14];
 	MtxPtr mtx = enemy->getMActor()->getModel()->getBaseTRMtx();
 
 	const JGeometry::TVec3<f32>& v = enemy->mScaling;
@@ -503,7 +507,7 @@ bool TEnemyManager::copyAnmMtx(TSpineEnemy* enemy)
 
 	for (int i = 0; i < unk50; ++i) {
 		MTXConcat(mtx, unk48[f][i], afStack_5C);
-		enemy->getMActor()->getModel()->setAnmMtx(i, wtf);
+		enemy->getMActor()->getModel()->setAnmMtx(i, afStack_5C);
 	}
 
 	if (enemy->getMActor()->getModel()->getModelData()->getWEvlpMtxNum())

@@ -318,7 +318,8 @@ public:
 	/* 0x1C8D */ u8 mPreviousPressure;
 	/* 0x1C8E */ u8 unk1C8E;
 	/* 0x1C8F */ u8 unk1C8F;
-	/* 0x1C90 */ JGeometry::TVec3<f32> mEmitPos[4];
+	/* 0x1C90 */ JGeometry::TVec3<f32> mEmitPos[3];
+	/* 0x1CB4 */ JGeometry::TVec3<f32> unk1CB4; // not part of the array: retail constructs only 3
 	/* 0x1CC0 */ s16 unk1CC0;
 	/* 0x1CC2 */ s16 unk1CC2;
 	/* 0x1CC4 */ s16 unk1CC4;

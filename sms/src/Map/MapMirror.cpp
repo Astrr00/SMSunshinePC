@@ -18,24 +18,52 @@
 #include <MSound/MSoundBGM.hpp>
 #include <M3DUtil/InfectiousStrings.hpp>
 
+// retail calls TVec3::set/dot out of line from the inlined makeMirrorViewMtx;
+// scaleAdd is inlined there
+#pragma dont_inline on
+static void Vec3SetOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
+
+static f32 Vec3DotOutOfLine(const JGeometry::TVec3<f32>& a,
+                            const JGeometry::TVec3<f32>& b)
+{
+	return a.dot(b);
+}
+
+static void ScaleAddOutOfLine(JGeometry::TVec3<f32>& dst, f32 s,
+                              const JGeometry::TVec3<f32>& a,
+                              const JGeometry::TVec3<f32>& b)
+{
+	dst.scaleAdd(s, a, b);
+}
+#pragma dont_inline off
+
+struct TMirrorPlane {
+	JGeometry::TVec3<f32> n;
+	f32 d;
+};
+
 inline void TMirrorCamera::makeMirrorViewMtx()
 {
-	JGeometry::TVec3<f32> normal;
-	normal.set(unk84.x, unk84.y, unk84.z);
+	TMirrorPlane plane;
 	f32 negD = -unk90;
+	Vec3SetOutOfLine(plane.n, unk84.x, unk84.y, unk84.z);
+	plane.d = negD;
 
 	// reflect the eye point, the target and the up point across the plane
-	// asm 0x801E4E88-0x801E4F84 / 0x801E5090-C4: p' = p + n * (-2 * (n.p - negD))
-	unk98.scaleAdd((normal.dot(gpCamera->unk124) - negD) * -2.0f,
-	               gpCamera->unk124, normal);
+	// asm 0x801E4E88-0x801E4F84 / 0x801E5090-C4: p' = p + n * (-2 * (n.p - d))
+	unk98.scaleAdd((Vec3DotOutOfLine(plane.n, gpCamera->unk124) - plane.d) * -2.0f,
+	               gpCamera->unk124, plane.n);
 
 	JGeometry::TVec3<f32> target;
-	target.scaleAdd((normal.dot(gpCamera->unk148) - negD) * -2.0f,
-	                gpCamera->unk148, normal);
+	target.scaleAdd((Vec3DotOutOfLine(plane.n, gpCamera->unk148) - plane.d) * -2.0f,
+	                gpCamera->unk148, plane.n);
 
 	JGeometry::TVec3<f32> up;
-	up.scaleAdd((normal.dot(gpCamera->mUp) - negD) * -2.0f, gpCamera->mUp,
-	            normal);
+	up.scaleAdd((Vec3DotOutOfLine(plane.n, gpCamera->mUp) - plane.d) * -2.0f,
+	            gpCamera->mUp, plane.n);
 
 	C_MTXLookAt(unk30, &unk98, &up, &target);
 }
@@ -184,7 +212,29 @@ void TMirrorModel::initPlaneInfo()
 
 inline void TMirrorModel::entry()
 {
-	unk8->makeMirrorViewMtx();
+	TMirrorCamera* cam = unk8;
+	{
+		f32 negD = -cam->unk90;
+		TMirrorPlane plane;
+		Vec3SetOutOfLine(plane.n, cam->unk84.x, cam->unk84.y, cam->unk84.z);
+		plane.d = negD;
+
+		ScaleAddOutOfLine(cam->unk98,
+		                  (Vec3DotOutOfLine(plane.n, gpCamera->unk124) - plane.d) * -2.0f,
+		                  gpCamera->unk124, plane.n);
+
+		JGeometry::TVec3<f32> target;
+		ScaleAddOutOfLine(target,
+		                  (Vec3DotOutOfLine(plane.n, gpCamera->unk148) - plane.d) * -2.0f,
+		                  gpCamera->unk148, plane.n);
+
+		JGeometry::TVec3<f32> up;
+		ScaleAddOutOfLine(up,
+		                  (Vec3DotOutOfLine(plane.n, gpCamera->mUp) - plane.d) * -2.0f,
+		                  gpCamera->mUp, plane.n);
+
+		C_MTXLookAt(cam->unk30, &cam->unk98, &up, &target);
+	}
 
 	Mtx effectMtx;
 	unk8->calcEffectMtx(effectMtx);
@@ -304,8 +354,10 @@ void TMirrorModelManager::perform(u32 cue, JDrama::TGraphics* graphics)
 		unk18 = gpCubeMirror->getDataNo(gpCubeMirror->getInCubeNo(local_44));
 		if (!(unk18 != -1 ? true : false)
 		    && !gpMarioGroundPlane[0]->checkFlag(BG_CHECK_FLAG_ILLEGAL)) {
-			unk24->unk84 = gpMarioGroundPlane[0]->mNormal;
-			unk24->unk90 = gpMarioGroundPlane[0]->mPlaneDistance;
+			unk24->setUnk84AndUnk90(gpMarioGroundPlane[0]->mNormal.x,
+			                        gpMarioGroundPlane[0]->mNormal.y,
+			                        gpMarioGroundPlane[0]->mNormal.z,
+			                        gpMarioGroundPlane[0]->mPlaneDistance);
 			unk24->makeMirrorViewMtx();
 		}
 	}

@@ -8,6 +8,28 @@
 #include <Player/MarioAccess.hpp>
 #include <NPC/NpcBase.hpp>
 
+// retail calls getCurGraphIndex/getGraph out of line from the inlined
+// hasOnlyOneNext; the header pragma is inert for header-defined inlines
+#pragma dont_inline on
+static int curGraphIndexOutOfLine(const TGraphTracer* t)
+{
+	return t->getCurGraphIndex();
+}
+
+static const TGraphWeb* graphOutOfLine(const TGraphTracer* t)
+{
+	return t->getGraph();
+}
+#pragma dont_inline off
+
+static bool hasOnlyOneNextOutOfLine(const TGraphTracer* t)
+{
+	int idx = curGraphIndexOutOfLine(t);
+	if (graphOutOfLine(t)->getGraphNode(idx).getRailNode()->mConnectionNum == 1)
+		return true;
+	return false;
+}
+
 DEFINE_NERVE(TNerveNPCGraphWander, TLiveActor)
 {
 	TBaseNPC* self = (TBaseNPC*)spine->getBody();
@@ -34,7 +56,7 @@ DEFINE_NERVE(TNerveNPCGraphWander, TLiveActor)
 	} else {
 		bool bVar6 = false;
 		bool bVar5 = false;
-		if (self->getTracer()->hasOnlyOneNext()) {
+		if (hasOnlyOneNextOutOfLine(self->getTracer())) {
 			bVar6 = true;
 			if (self->getTracer()->currPitchIsZero())
 				bVar5 = true;

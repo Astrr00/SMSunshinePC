@@ -1,3 +1,4 @@
+#define SMS_CHECKSTATUSTYPE_OUT_OF_LINE
 #include <Camera/Camera.hpp>
 #include <MarioUtil/MathUtil.hpp>
 #include <System/StageUtil.hpp>
@@ -18,6 +19,43 @@
 #include <Map/MapData.hpp>
 #include <macros.h>
 #include <stdio.h>
+
+#pragma dont_inline on
+bool TMario::checkStatusType(s32 flag) const
+{
+	return mStatus & flag ? true : false;
+}
+#pragma dont_inline off
+
+// Retail calls these out of line from calcExternalData_ (inline depth limit).
+#pragma dont_inline on
+static f32 sqrtOOL(f32 x) { return MsSqrtf(x); }
+static f32 clampOOL(f32 v, f32 lo, f32 hi) { return MsClamp(v, lo, hi); }
+static void setOOL(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
+static f32 oneOOL() { return JGeometry::TUtil<f32>::one(); }
+static void setLenOOL(JGeometry::TVec3<f32>& v, f32 len)
+{
+	v.setLength(v, len);
+}
+#pragma dont_inline off
+
+inline void CPolarSubCamera::calcExternalData_()
+{
+	f32 dx = mPosition.x - mTarget.x;
+	f32 dz = mPosition.z - mTarget.z;
+	unk256 = matan(sqrtOOL(dx * dx + dz * dz), mPosition.y - mTarget.y);
+	unk258 = matan(mPosition.z - mTarget.z, mPosition.x - mTarget.x);
+
+	setOOL(unk25C, unk148.x - unk124.x, unk148.y - unk124.y,
+	       unk148.z - unk124.z);
+	setLenOOL(unk25C, oneOOL());
+	unk270 = clampOOL(CLBCalcRatio(mCurrentParams->mXAngleMin,
+	                               mCurrentParams->mXAngleMax, unk256),
+	                  0.0f, 1.0f);
+}
 
 static const char* dummyMactorStringValue1 = "\0\0\0\0\0\0\0\0\0\0\0";
 static const char* SMS_NO_MEMORY_MESSAGE   = "メモリが足りません\n";
@@ -257,7 +295,19 @@ void CPolarSubCamera::loadAfter()
 
 	MTXCopy(unk1EC, unk21C);
 
-	calcExternalData_();
+	{
+		f32 dx = mPosition.x - mTarget.x;
+		f32 dz = mPosition.z - mTarget.z;
+		unk256 = matan(sqrtOOL(dx * dx + dz * dz), mPosition.y - mTarget.y);
+		unk258 = matan(mPosition.z - mTarget.z, mPosition.x - mTarget.x);
+
+		unk25C.set(unk148.x - unk124.x, unk148.y - unk124.y,
+		           unk148.z - unk124.z);
+		setLenOOL(unk25C, 1.0f);
+		unk270 = MsClamp(CLBCalcRatio(mCurrentParams->mXAngleMin,
+		                              mCurrentParams->mXAngleMax, unk256),
+		                 0.0f, 1.0f);
+	}
 
 	if ((unk64 & CAMERA_FLAG_JET_COASTER_SCENE) && gpMarDirector->unk7D == 1) {
 		gpMarDirector->fireStartDemoCamera(
@@ -378,14 +428,18 @@ bool CPolarSubCamera::isMarioReadyGun_() const
 
 bool CPolarSubCamera::isMarioAimWithGun_() const
 {
-	return isMarioReadyGun_()
-	       && unk120->checkMeaning(TMarioGamePad::MEANING_R);
+	bool r = isMarioReadyGun_()
+	         && unk120->checkMeaning(TMarioGamePad::MEANING_R);
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	return r;
 }
 
 bool CPolarSubCamera::isMarioCrabWalk_() const
 {
-	return isMarioReadyGun_()
-	       && unk120->checkMeaning(TMarioGamePad::MEANING_CAM_L);
+	bool r = isMarioReadyGun_()
+	         && unk120->checkMeaning(TMarioGamePad::MEANING_CAM_L);
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
+	return r;
 }
 
 void CPolarSubCamera::execInvalidAutoChase_()
@@ -746,9 +800,14 @@ void CPolarSubCamera::calcPosAndAt_()
 				Vec posCpy;
 				posCpy = mPosition;
 				if (isNeedWallCheck_() && execWallCheck_(&posCpy)) {
-					CLBCrossToPolar(mCurrentTarget.mTarget, mPosition,
-					                &mCurrentTarget.mPitch,
-					                &mCurrentTarget.mYaw);
+					f32 dxw = mPosition.x - mCurrentTarget.mTarget.x;
+					f32 dzw = mPosition.z - mCurrentTarget.mTarget.z;
+					mCurrentTarget.mPitch
+					    = matan(sqrtOOL(dxw * dxw + dzw * dzw),
+					            mPosition.y - mCurrentTarget.mTarget.y);
+					mCurrentTarget.mYaw
+					    = matan(mPosition.z - mCurrentTarget.mTarget.z,
+					            mPosition.x - mCurrentTarget.mTarget.x);
 					mCurrentTarget.unk28 = mCurrentTarget.unk30;
 				}
 				if (isNeedRoofCheck_()) {

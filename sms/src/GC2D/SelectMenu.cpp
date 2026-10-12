@@ -177,9 +177,9 @@ void TSelectGrad::perform(u32 flags, JDrama::TGraphics* gfx)
 		GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
 		GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
 
-		u8 midR = (mTopLeftCol.r + mBottomRightCol.r) >> 1;
-		u8 midG = (mTopLeftCol.g + mBottomRightCol.g) >> 1;
-		u8 midB = (mTopLeftCol.b + mBottomRightCol.b) >> 1;
+		u8 midR = (mBottomRightCol.r + mTopLeftCol.r) >> 1;
+		u8 midG = (mBottomRightCol.g + mTopLeftCol.g) >> 1;
+		u8 midB = (mBottomRightCol.b + mTopLeftCol.b) >> 1;
 
 		GXBegin(GX_QUADS, GX_VTXFMT0, 4);
 		GXPosition3f32(0.0f, 16.0f, -100.0f);

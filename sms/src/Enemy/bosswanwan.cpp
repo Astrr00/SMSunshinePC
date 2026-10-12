@@ -59,10 +59,34 @@ static const char* bwanwan_bastable[] = {
 	nullptr,
 };
 
+#pragma dont_inline on
+static const TNerveBase<TLiveActor>*
+latestNerveOutOfLine(TSpineBase<TLiveActor>* s)
+{
+	return s->getLatestNerve();
+}
+#pragma dont_inline off
+
+// retail calls getMActorAnmData out of line; the header pragma is inert here
+#pragma dont_inline on
+static MActorAnmData* getAnmDataOutOfLine(TMActorKeeper* k)
+{
+	return k->getMActorAnmData();
+}
+#pragma dont_inline off
+
+// retail calls TMapCollisionBase::setMtx out of line from the setUpMtx inline
+#pragma dont_inline on
+static void setMtxOutOfLine(TMapCollisionBase* c, MtxPtr m)
+{
+	c->setMtx(m);
+}
+#pragma dont_inline off
+
 // inline helpers shared by the nerves (no standalone symbol in the original)
 inline void TBossWanwanMtxCalc::joinAnm(int i)
 {
-	M3UMtxCalcSIAnmBlendQuat::joinAnm(mOwner->getActorKeeper()->getMActorAnmData()->getUnk2C()->getAnmPtr(i));
+	M3UMtxCalcSIAnmBlendQuat::joinAnm(getAnmDataOutOfLine(mOwner->getActorKeeper())->getUnk2C()->getAnmPtr(i));
 }
 
 inline void TBossWanwan::changeBck(int i)
@@ -438,9 +462,9 @@ BOOL TBWPicket::receiveMessage(THitActor* sender, u32 message)
 
 BOOL TBWPicket::moveRequest(const JGeometry::TVec3<f32>& target)
 {
-	char trash[0x30]; // stack padding to match the retail frame size
-	if (&TNerveBWJumpToBath::theNerve() == mOwner->mSpine->getLatestNerve()
-	    || &TNerveBWDie::theNerve() == mOwner->mSpine->getLatestNerve())
+	char trash[0x28]; // stack padding to match the retail frame size
+	if (&TNerveBWJumpToBath::theNerve() == latestNerveOutOfLine(mOwner->mSpine)
+	    || &TNerveBWDie::theNerve() == latestNerveOutOfLine(mOwner->mSpine))
 		return false;
 
 	if (mOwner->mHitPoints != 0)
@@ -804,6 +828,7 @@ void TBossWanwan::init(TLiveManager* manager)
 	mMActor       = mMActorKeeper->createMActor("bwanwan_body.bmd", 0);
 
 	TGraphWeb* graph = gpConductor->getGraphByName("bwanwan");
+	char trash[8];
 	graph->initGoalIndex(BW_BATH_POS);
 	unk124->setGraph(graph);
 
@@ -1405,6 +1430,7 @@ DEFINE_NERVE(TNerveBWRoll, TLiveActor)
 DEFINE_NERVE(TNerveBWBark, TLiveActor)
 {
 	TBossWanwan* boss = static_cast<TBossWanwan*>(spine->getBody());
+	char trash[0x30];
 
 	if (spine->getTime() == 0) {
 		boss->changeBck(0);
@@ -1566,6 +1592,7 @@ DEFINE_NERVE(TNerveBWDie, TLiveActor)
 {
 	TBossWanwan* boss = static_cast<TBossWanwan*>(spine->getBody());
 	MActor* actor     = boss->mMActor;
+	char trash[0x30];
 	if (spine->getTime() == 0) {
 		JGeometry::TVec3<f32> zero;
 		zero.zero();
@@ -1598,7 +1625,14 @@ DEFINE_NERVE(TNerveBWDie, TLiveActor)
 		pos.y += 500.0f;
 		JGeometry::TVec3<f32> scale = boss->mScaling;
 		scale.scale(1.1f);
-		boss->mMapCollisionManager->setUpUnk8TRS(pos, boss->mRotation, scale);
+		TMapCollisionManager* collMgr = boss->mMapCollisionManager;
+		Mtx collMtx;
+		MsMtxSetTRS(collMtx, pos.x, pos.y, pos.z, boss->mRotation.x,
+		            boss->mRotation.y, boss->mRotation.z, scale.x, scale.y,
+		            scale.z);
+		TMapCollisionBase* coll = collMgr->getUnk8();
+		setMtxOutOfLine(coll, collMtx);
+		coll->setUp();
 
 		boss->mHit[0]->onHitFlag(HIT_FLAG_NO_COLLISION);
 		boss->mHit[1]->onHitFlag(HIT_FLAG_NO_COLLISION);
@@ -1665,6 +1699,7 @@ DEFINE_NERVE(TNerveBWShake, TLiveActor)
 {
 	TBossWanwan* boss = static_cast<TBossWanwan*>(spine->getBody());
 	MActor* actor     = boss->mMActor;
+	char trash[0x10];
 
 	if (spine->getTime() == 0)
 		boss->changeBck(2);

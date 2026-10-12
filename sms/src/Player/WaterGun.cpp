@@ -1252,7 +1252,7 @@ void TWaterGun::init()
 	// TODO: wrong
 	MtxPtr r24 = mMario->mModel->unk8->getAnmMtx(mMario->mJointIdChnChest);
 
-	mEmitPos[3] = mMario->mPosition;
+	unk1CB4 = mMario->mPosition;
 
 	unk1CC0 = 0;
 	unk1CC2 = 0;

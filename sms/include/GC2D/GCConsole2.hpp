@@ -103,8 +103,8 @@ public:
 	/* 0x1C */ s16 unk1C;
 	/* 0x20 */ s32 unk20;
 	/* 0x24 */ s32 unk24;
-	/* 0x28 */ u32 unk28;
-	/* 0x2C */ u32 unk2C;
+	/* 0x28 */ s32 unk28;
+	/* 0x2C */ s32 unk2C;
 	/* 0x30 */ u32 unk30;
 	/* 0x34 */ u8 unk34;
 	/* 0x35 */ u8 unk35;
@@ -227,7 +227,7 @@ public:
 	/* 0x2F8 */ TExPane* unk2F8;
 	/* 0x2FC */ JUTRect unk2FC;
 	/* 0x30C */ u8 unk30C;
-	/* 0x310 */ u32 unk310;
+	/* 0x310 */ s32 unk310;
 	/* 0x314 */ J2DPane* unk314[4];
 	/* 0x324 */ J2DPane* unk324;
 	/* 0x328 */ J2DPicture* unk328;
@@ -303,8 +303,8 @@ public:
 	/* 0x554 */ s32 mTelopTextWidth;
 	/* 0x558 */ u8 unk558;
 	/* 0x55C */ u32 unk55C;
-	/* 0x560 */ u16 unk560;
-	/* 0x562 */ u16 unk562;
+	/* 0x560 */ s16 unk560;
+	/* 0x562 */ s16 unk562;
 	/* 0x564 */ f32 unk564;
 	/* 0x568 */ f32 unk568;
 	/* 0x56C */ u8 unk56C;

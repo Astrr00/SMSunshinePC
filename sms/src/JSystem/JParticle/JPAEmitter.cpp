@@ -260,6 +260,7 @@ void JPABaseEmitter::loadBaseEmitterBlock(JPADataBlock* block)
 	                             JPA_U32((u8*)block->mRawData + 4));
 
 	JSUInputStream& stream = stream2;
+	char trash[0x8];
 	stream.skip(0xC);
 #ifdef TARGET_PC
 	// BEM1 stays big-endian in the block copy: the vectors are read as typed scalars (the console reads them raw)
@@ -645,6 +646,7 @@ JPABaseParticle* JPABaseEmitter::createParticle()
 		return particle;
 	}
 
+	char trash[0x20];
 	return nullptr;
 }
 
@@ -659,6 +661,7 @@ void JPABaseEmitter::calcCurrentRateTimerStep()
 
 int JPABaseEmitter::calcCreateParticle()
 {
+	char trash[0x8];
 	int numToCreate = 0;
 
 	JPAEmitterInfo& eio = JPAEmitterInfoObj;
@@ -843,6 +846,7 @@ f32 JPABaseEmitter::getKeyValue(f32 time, u16 frame_num, f32* frames)
 
 void JPABaseEmitter::calcKeyFrameAnime()
 {
+	char trash[0xc];
 	u32 keyNum = mEmitterDataBlockInfo->getKeyNum();
 	if (!keyNum)
 		return;

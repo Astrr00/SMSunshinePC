@@ -634,6 +634,8 @@ int TSmallEnemy::getChangeBlockTime()
 
 bool TSmallEnemy::changeMove()
 {
+	const TBGCheckData* local_2C;
+	char trash[0x18];
 	if (mSpine->getTime() <= TSmallEnemyManager::mBlockWaitTime * 0.2f) {
 		f32 time = TSmallEnemyManager::mBlockWaitTime * 0.2f;
 
@@ -676,7 +678,6 @@ bool TSmallEnemy::changeMove()
 				local_74.x += local_38.x * 300.0f;
 				local_74.z += local_38.z * 300.0f;
 
-				const TBGCheckData* local_2C;
 				f32 d = gpMap->checkGround(local_74.x, local_74.y + mHeadHeight,
 				                           local_74.z, &local_2C);
 				if (d > mJuiceBlock->mPosition.y)
@@ -686,7 +687,6 @@ bool TSmallEnemy::changeMove()
 
 			case 3: {
 				mJuiceBlock->mPosition.y += TSmallEnemyManager::mBlockMoveSpeed;
-				const TBGCheckData* local_2C;
 				f32 d = gpMap->checkRoof(mJuiceBlock->mPosition.x,
 				                         mJuiceBlock->mPosition.y + mHeadHeight,
 				                         mJuiceBlock->mPosition.z, &local_2C);

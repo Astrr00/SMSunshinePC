@@ -193,6 +193,7 @@ void TSandBomb::makeObjAppeared()
 
 u32 TSandBomb::touchWater(THitActor*)
 {
+	char trash[0x30];
 	f32 speed = TSandBombBase::mFiringFrameSpeed;
 	f32 frame = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
@@ -243,6 +244,7 @@ void TSandBombBase::expanded()
 
 void TSandBombBase::exploding()
 {
+	char trash[0x14];
 	f32 speed = mExplodeFrameSpeed;
 	f32 frame = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
@@ -300,6 +302,7 @@ void TSandBombBase::grow() { mState = STATE_FIRING; }
 
 void TSandBombBase::control()
 {
+	char trash[0x28];
 	TMapObjBase::control();
 
 	TSandBomb* bomb = (TSandBomb*)mLeaf;
@@ -411,6 +414,7 @@ TSandBombBase::TSandBombBase(const char* name)
 
 bool TSandCastle::withering()
 {
+	char trash[0x28];
 	f32 speed = mWitherSpeed;
 	f32 frame = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
@@ -633,6 +637,7 @@ static inline f32 getAngleBetween(const JGeometry::TVec3<f32>& axis,
 
 void TLeanMirror::release()
 {
+	char trash[0x30];
 	MtxPtr nodeMtx = getModel()->getAnmMtx(0);
 	JGeometry::TVec3<f32> up;
 	up.x = nodeMtx[0][1];
@@ -761,6 +766,7 @@ void TLeanMirror::controlShake()
 			MTXCopy(src, dst);
 		}
 	}
+	char trash[0x8];
 }
 
 void TLeanMirror::control()
@@ -860,6 +866,7 @@ void TLeanMirror::load(JSUMemoryInputStream& stream)
 
 	TMirrorModelObj* mirror = new TMirrorModelObj;
 	char path[0x40];
+	char trash[0x30];
 	snprintf(path, 0x40, "/scene/mapObj/%sTop.bmd", getUnkF4());
 	mirror->init(path);
 	mirror->unk28 = getModel();
@@ -1020,7 +1027,6 @@ u32 TMammaBlockRotate::touchWater(THitActor*)
 
 void TMammaBlockRotate::control()
 {
-	char trash[0x28];
 	TMapObjBase::control();
 
 	switch (mState) {
@@ -1064,6 +1070,7 @@ void TMammaBlockRotate::control()
 		break;
 	}
 	}
+	char trash[0x28];
 }
 
 void TMammaBlockRotate::initMapObj()
@@ -1227,6 +1234,7 @@ void TGoalWatermelon::touchActor(THitActor* actor)
 		    nullptr, 0, nullptr, JDrama::TFlagT<u16>(0));
 		mState = 2;
 	}
+	char trash[0xc];
 }
 
 void TGoalWatermelon::control()
@@ -1287,6 +1295,7 @@ TGoalWatermelon::TGoalWatermelon(const char* name)
 
 void TMammaMirrorMapOperator::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x20];
 	if (!(cue & CUE_CALC_ANIM))
 		return;
 

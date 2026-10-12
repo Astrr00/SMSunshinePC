@@ -189,17 +189,12 @@ public:
 
 // ============= nerves =============
 
-// All theNerve() but TNerveKoopaJrDamage's are defined in the class bodies.
-// Declaration order is relevant for the order of the function statics.
+// theNerve() of every nerve is defined in koopajr.cpp.
 
 class TNerveKoopaJrWait : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-	static const TNerveKoopaJrWait& theNerve()
-	{
-		static TNerveKoopaJrWait instance;
-		return instance;
-	}
+	static const TNerveKoopaJrWait& theNerve();
 };
 
 class TNerveKoopaJrDamage : public TNerveBase<TLiveActor> {
@@ -211,61 +206,37 @@ public:
 class TNerveKoopaJrDemo : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-	static const TNerveKoopaJrDemo& theNerve()
-	{
-		static TNerveKoopaJrDemo instance;
-		return instance;
-	}
+	static const TNerveKoopaJrDemo& theNerve();
 };
 
 class TNerveKoopaJrLaunch : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-	static const TNerveKoopaJrLaunch& theNerve()
-	{
-		static TNerveKoopaJrLaunch instance;
-		return instance;
-	}
+	static const TNerveKoopaJrLaunch& theNerve();
 };
 
 class TNerveKoopaJrYahoo : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-	static const TNerveKoopaJrYahoo& theNerve()
-	{
-		static TNerveKoopaJrYahoo instance;
-		return instance;
-	}
+	static const TNerveKoopaJrYahoo& theNerve();
 };
 
 class TNerveKoopaJrSubmarineWait : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-	static const TNerveKoopaJrSubmarineWait& theNerve()
-	{
-		static TNerveKoopaJrSubmarineWait instance;
-		return instance;
-	}
+	static const TNerveKoopaJrSubmarineWait& theNerve();
 };
 
 class TNerveKoopaJrSubmarineCannonOpenClose : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-	static const TNerveKoopaJrSubmarineCannonOpenClose& theNerve()
-	{
-		static TNerveKoopaJrSubmarineCannonOpenClose instance;
-		return instance;
-	}
+	static const TNerveKoopaJrSubmarineCannonOpenClose& theNerve();
 };
 
 class TNerveKoopaJrSubmarineLaunchKiller : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-	static const TNerveKoopaJrSubmarineLaunchKiller& theNerve()
-	{
-		static TNerveKoopaJrSubmarineLaunchKiller instance;
-		return instance;
-	}
+	static const TNerveKoopaJrSubmarineLaunchKiller& theNerve();
 };
 
 #endif

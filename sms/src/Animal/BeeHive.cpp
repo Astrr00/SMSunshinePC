@@ -228,6 +228,29 @@ TBee* TBeeHive::createRealoidActor(MActor* actor)
 	return new TBee(actor, this);
 }
 
+// Retail calls TVec3::dot/scale out of line from the inlined normalize().
+#pragma dont_inline on
+static f32 dotOutOfLine(const JGeometry::TVec3<f32>& a,
+                        const JGeometry::TVec3<f32>& b)
+{
+	return a.dot(b);
+}
+
+static void scaleOutOfLine(JGeometry::TVec3<f32>& dst, f32 s,
+                           const JGeometry::TVec3<f32>& src)
+{
+	dst.scale(s, src);
+}
+
+static f32 invSqrtOutOfLine(f32 x) { return JGeometry::TUtil<f32>::inv_sqrt(x); }
+
+static void subOutOfLine(JGeometry::TVec3<f32>& dst,
+                         const JGeometry::TVec3<f32>& src)
+{
+	dst.sub(src);
+}
+#pragma dont_inline off
+
 BOOL TBeeHive::receiveMessage(THitActor* sender, u32 message)
 {
 	switch (message) {
@@ -238,7 +261,13 @@ BOOL TBeeHive::receiveMessage(THitActor* sender, u32 message)
 		if (mSpine->getLatestNerve() != &TNerveBeeHiveFall::theNerve()) {
 			JGeometry::TVec3<f32> flat = dir;
 			flat.y                     = 0.0f;
-			flat.normalize();
+			f32 lsq = dotOutOfLine(flat, flat);
+			if (lsq <= JGeometry::TUtil<f32>::epsilon())
+				flat.zero();
+			else
+				scaleOutOfLine(flat,
+				               1.0f * invSqrtOutOfLine(lsq),
+				               flat);
 
 			f32 sign;
 			if (fabsf(mAngularVel) < 0.0001f) {
@@ -325,7 +354,7 @@ void TBeeHive::bind()
 	                                 mBodyRadius);
 
 	JGeometry::TVec3<f32> delta = pos;
-	delta.sub(mPosition);
+	subOutOfLine(delta, mPosition);
 	mLinearVelocity = delta;
 }
 
@@ -337,7 +366,6 @@ void TBeeHive::controlCollision()
 	TRealoidActor* bee = unk154[idx];
 	bee->checkHitActors();
 	bee->onHitFlag(HIT_FLAG_CANNOT_ATTACK);
-
 	if (num <= ++mCollisionIdx)
 		mCollisionIdx = 0;
 
@@ -466,8 +494,10 @@ JGeometry::TVec3<f32> TBeeHive::getCenterOfGravity() const
 		return JGeometry::TVec3<f32>(0.0f);
 
 	JGeometry::TVec3<f32> sum(0.0f);
+	char trash[0x20];
+	TBoidLeader* boids = unk150;
 	for (int i = 0; i < num; ++i)
-		sum += unk150->getBoid(i)->mPosition;
+		sum += boids->getBoid(i)->mPosition;
 	sum /= (f32)num;
 	return sum;
 }

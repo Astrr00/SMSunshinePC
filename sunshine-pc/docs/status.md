@@ -187,3 +187,7 @@ Measured: SHA-1 unchanged, 11 191 / 12 881 byte-identical (86.9 %), matched code
 ### Update 2026-10-12 (decomp round 5): 11 247 / 12 881 functions byte-identical (87.3 %)
 
 Measured: SHA-1 unchanged, 11 247 / 12 881 byte-identical (87.3 %), matched code 61.48 %, fuzzy 98.27 %, 445 / 736 units, strict link 0 unresolved, `TEMP-DEBUG` 0, route 70 smoke 2 of 2 rc=0. Details: session log section 50.
+
+### Update 2026-10-12 (decomp round 6): 11 282 / 12 881 functions byte-identical (87.6 %)
+
+Measured: SHA-1 unchanged, 11 282 / 12 881 byte-identical (87.6 %), matched code 61.98 %, fuzzy 98.60 %, 445 / 736 units, strict link 0 unresolved, `TEMP-DEBUG` 0; route 70 smoke 1 of 2 complete (chase flake). Details: session log section 52.

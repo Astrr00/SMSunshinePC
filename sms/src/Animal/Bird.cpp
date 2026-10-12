@@ -151,6 +151,13 @@ void TAnimalBird::loadAfter()
 	                                          &mPosition);
 }
 
+#pragma dont_inline on
+static const TNerveBase<TLiveActor>* getLatestNerveOutOfLine(TSpineBase<TLiveActor>* spine)
+{
+	return spine->getLatestNerve();
+}
+#pragma dont_inline off
+
 BOOL TAnimalBird::receiveMessage(THitActor* sender, u32 message)
 {
 	char trash[8];
@@ -247,7 +254,7 @@ void TAnimalBird::moveObject()
 	}
 
 	bool isCoin
-	    = &TNerveAnimalBirdChangeToCoin::theNerve() == mSpine->getLatestNerve();
+	    = &TNerveAnimalBirdChangeToCoin::theNerve() == getLatestNerveOutOfLine(mSpine);
 	if (!isCoin && mHitPoints == 0) {
 		mSpine->reset();
 		mSpine->setNext(&TNerveAnimalBirdChangeToCoin::theNerve());
@@ -343,6 +350,10 @@ void TAnimalBird::doFlyToCurPathNode()
 	mLinearVelocity = vel;
 }
 
+#pragma dont_inline on
+static f32 sqrtOutOfLine(f32 x) { return JGeometry::TUtil<f32>::sqrt(x); }
+#pragma dont_inline off
+
 bool TAnimalBird::doLanding(bool start)
 {
 	if (start) {
@@ -382,12 +393,11 @@ bool TAnimalBird::doLanding(bool start)
 	mLinearVelocity = fall;
 
 	JGeometry::TVec3<f32> velocity = mVelocity;
-	f32 speed = JGeometry::TUtil<f32>::sqrt(velocity.squared());
+	f32 speed = sqrtOutOfLine(velocity.squared());
 	JGeometry::TVec3<f32> vel(0.0f, 0.0f, speed);
 	vel.scale(getBirdParams()->mLandingFric.get());
 
-	JGeometry::TQuat4<f32> quat = SMS_Eular2Quat(mRotation);
-	quat.rotate(vel, vel);
+	SMS_Eular2Quat(mRotation).rotate(vel, vel);
 	mVelocity = vel;
 
 	return landed && fabsf(turn) < 0.01f;
@@ -516,6 +526,10 @@ DEFINE_NERVE(TNerveAnimalBirdActionOnGround, TLiveActor)
 	return FALSE;
 }
 
+#pragma dont_inline on
+static f32 msWrapOutOfLine(f32 v, f32 lo, f32 hi) { return MsWrap<f32>(v, lo, hi); }
+#pragma dont_inline off
+
 DEFINE_NERVE(TNerveAnimalBirdWalkOnGround, TLiveActor)
 {
 	TAnimalBird* bird = (TAnimalBird*)spine->getBody();
@@ -537,9 +551,9 @@ DEFINE_NERVE(TNerveAnimalBirdWalkOnGround, TLiveActor)
 
 	f32 walkTorque = bird->getBirdParams()->mWalkingTorqueY.get();
 	bird->mRotation.y
-	    = MsWrap<f32>(bird->mWalkDir * (walkTorque * SMSGetAnmFrameRate())
-	                      + bird->mRotation.y,
-	                  0.0f, 360.0f);
+	    = msWrapOutOfLine(bird->mWalkDir * (walkTorque * SMSGetAnmFrameRate())
+	                          + bird->mRotation.y,
+	                      0.0f, 360.0f);
 
 	JGeometry::TQuat4<f32> quat = SMS_Eular2Quat(bird->mRotation);
 	JGeometry::TVec3<f32> vel(0.0f, 0.0f,

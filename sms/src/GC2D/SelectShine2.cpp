@@ -51,6 +51,30 @@ static inline s16 getShineYaw(const JGeometry::TVec3<f32>& pos,
 	return yaw;
 }
 
+// retail's perform calls the one-argument TVec2::sub out of line
+#pragma dont_inline on
+static void subOutOfLine(JGeometry::TVec2<f32>& a, const JGeometry::TVec2<f32>& b)
+{
+	a.sub(b);
+}
+#pragma dont_inline off
+
+static inline s16 getShineYawOOL(const JGeometry::TVec3<f32>& pos,
+                                 const JGeometry::TVec3<f32>& shinePos)
+{
+	JGeometry::TVec2<f32> diff(300.0f, 1300.0f);
+	subOutOfLine(diff, JGeometry::TVec2<f32>(shinePos.x, shinePos.z));
+
+	f32 cs  = 1.0f;
+	f32 sn  = 0.0f;
+	f32 rx  = diff.x * cs - diff.y * sn;
+	f32 ry  = diff.x * sn + diff.y * cs;
+	s16 yaw = 57.295776f * fabsf(atan2f(rx, ry));
+	if (pos.x > TSelectShineManager::cCenter.x)
+		yaw *= -1;
+	return yaw;
+}
+
 // Quadratic bezier curve through (a, b, c) at t in [0, 1]
 static inline f32 bezier(f32 t, f32 a, f32 b, f32 c)
 {
@@ -231,7 +255,7 @@ TSelectShine::TSelectShine(J3DModelData* pModelData, J3DAnmColor* pAnm,
 
 void TSelectShineManager::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	char trash[0x88];
+	char trash[0xa0];
 	if (cue & CUE_MOVE) {
 		for (int i = 0; i < mNumShines; ++i)
 			mShines[i]->move();
@@ -254,7 +278,7 @@ void TSelectShineManager::perform(u32 cue, JDrama::TGraphics* graphics)
 				JGeometry::TVec3<f32> shinePos
 				    = mShines[i]->mPos + mShines[i]->mOffset;
 
-				s16 yaw = getShineYaw(pos, shinePos);
+				s16 yaw = getShineYawOOL(pos, shinePos);
 
 				TSelectShine* shine = mShines[i];
 				MtxPtr base         = shine->mModel->getBaseTRMtx();

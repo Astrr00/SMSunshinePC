@@ -572,6 +572,7 @@ void TItemSlotDrum::generateItem()
 		SMSGetMSound()->startSoundActor(MSD_SE_SY_NOT_COLLECT, &mPosition, 0,
 		                                nullptr, 0, 4);
 	}
+	char trash[0x14];
 }
 
 int TItemSlotDrum::getSlotResult()

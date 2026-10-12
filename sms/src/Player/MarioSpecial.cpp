@@ -687,6 +687,7 @@ void TMario::getOnWirePosAngle(JGeometry::TVec3<f32>* outPos, s16* outAngle)
 BOOL TMario::wireMove(f32 param_1)
 {
 	JGeometry::TVec3<f32> start = mWireStartPos;
+	char trash[0xc];
 	JGeometry::TVec3<f32> dir   = mWireEndPos - start;
 	f32 len                     = dir.length();
 	f32 delta                   = param_1 / len;
@@ -1007,6 +1008,7 @@ BOOL TMario::wireHanging()
 
 BOOL TMario::wireRolling()
 {
+	char trash[0x8];
 	s16 initialAngle = mFaceAngle.x;
 
 	s16 wireAngle;

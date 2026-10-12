@@ -83,6 +83,7 @@ TBossHanachanPartsBody::TBossHanachanPartsBody(TBossHanachan* owner,
 	JUTNameTab* jointNames = model->getModelData()->getJointName();
 	mLegMtx[0] = model->getAnmMtx((u16)jointNames->getIndex(cLegJointName_L3));
 	mLegMtx[1] = model->getAnmMtx((u16)jointNames->getIndex(cLegJointName_R3));
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 TBossHanachanPartsHead::TBossHanachanPartsHead(TBossHanachan* owner,
@@ -148,6 +149,7 @@ void TBossHanachanPartsBody::initFootHitActor_(TIdxGroupObj* group)
 	TBossHanachanCommonSaveParams* params = mOwner->mCommonSaveParams;
 
 	int jointIndex[2];
+	char trash[0xc];
 	for (int i = 0; i < 2; ++i) {
 		jointIndex[i]    = jointNames->getIndex(sFootJointName[i]);
 		mFootHitActors[i] = new TFootHitActor("ボスハナチャンの足");
@@ -208,6 +210,15 @@ void TBossHanachanPartsBase::entryCircleShadow_()
 	}
 }
 
+// Retail calls TSpineBase::getLatestNerve out of line here; the header pragma is inert.
+#pragma dont_inline on
+static const TNerveBase<TLiveActor>*
+latestNerveOutOfLine(TSpineBase<TLiveActor>* spine)
+{
+	return spine->getLatestNerve();
+}
+#pragma dont_inline off
+
 void TBossHanachanPartsBase::setDamageFog_(JDrama::TGraphics* graphics)
 {
 	char trash[0x10]; // unused stack slot (present in the retail frame)
@@ -216,12 +227,12 @@ void TBossHanachanPartsBase::setDamageFog_(JDrama::TGraphics* graphics)
 		notHead = false;
 
 	J3DModelData* modelData = mMActor->getModel()->getModelData();
+	u16 materialNum = modelData->getMaterialNum();
 	JGeometry::TVec3<f32> pos(mJointMtx[0][3], mJointMtx[1][3],
 	                          mJointMtx[2][3]);
-	u16 materialNum = modelData->getMaterialNum();
 
-	if (mOwner->mSpine->getLatestNerve()
-	    == &TNerveBossHanachanDamage::theNerve()) {
+	const TNerveBase<TLiveActor>* nerve = latestNerveOutOfLine(mOwner->mSpine);
+	if (nerve == &TNerveBossHanachanDamage::theNerve()) {
 		SMS_AddDamageFogEffect(modelData, pos, graphics);
 		if (notHead) {
 			for (u16 i = 0; i < materialNum; ++i)
@@ -424,6 +435,7 @@ bool TBossHanachanPartsBody::setAnm_(
 	};
 
 	bool changed = false;
+	char trash[0x10];
 	if (mAnmKind != kind) {
 		mPrevAnmKind = mAnmKind;
 		mAnmKind     = kind;
@@ -517,7 +529,7 @@ static inline bool isReceivable(const TBossHanachanPartsBase* self)
 {
 	bool enabled = false;
 	const TNerveBase<TLiveActor>* nerve
-	    = self->mOwner->mSpine->getLatestNerve();
+	    = latestNerveOutOfLine(self->mOwner->mSpine);
 	if (nerve == &TNerveBossHanachanTumble::theNerve()
 	    || nerve == &TNerveBossHanachanDown::theNerve()) {
 		if (self->mActorType == 0x8000015) {

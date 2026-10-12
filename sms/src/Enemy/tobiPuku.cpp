@@ -228,7 +228,8 @@ void TTobiPukuLaunchPad::forceLaunch(TTobiPuku* param_1)
 		direction.scale(unk19C);
 		s16 pitch = mRotation.x * 16384.0f / 90.0f;
 		f32 cosX  = JMASCos(pitch);
-		velocity.set(direction.x * cosX, direction.y * JMASSin(pitch), direction.z * cosX);
+		f32 sinX  = JMASSin(pitch);
+		velocity.set(direction.x * cosX, direction.y * sinX, direction.z * cosX);
 	}
 
 	param_1->reset();
@@ -239,6 +240,11 @@ void TTobiPukuLaunchPad::forceLaunch(TTobiPuku* param_1)
 	param_1->unk1DC                   = this;
 	JGeometry::TVec3<f32> padVelocity = mVelocity;
 	param_1->unk1B4                   = MsGetRotFromZaxis(padVelocity).x;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TMoePukuLaunchPad::launch()
@@ -326,6 +332,14 @@ void TTobiPuku::hitWall()
 				mVelocity.y = 0.0f;
 		}
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TTobiPuku::bound() { }
@@ -1166,8 +1180,9 @@ DEFINE_NERVE(TNerveTobiPukuReturnLaunch, TLiveActor)
 	MsVECNormalize(&dir, &dir);
 	self->unk1D0.x *= 0.99f;
 	self->unk1D0.z *= 0.99f;
-	self->mPosition.x += dir.x * self->mMarchSpeed - self->unk1D0.x;
-	self->mPosition.z += dir.z * self->mMarchSpeed - self->unk1D0.z;
+	f32 speed = self->mMarchSpeed;
+	self->mPosition.x += dir.x * speed - self->unk1D0.x;
+	self->mPosition.z += dir.z * speed - self->unk1D0.z;
 	self->unk1EC = MsClamp(self->unk1EC + 1.0f, 0.0f, 180.0f);
 	return false;
 }

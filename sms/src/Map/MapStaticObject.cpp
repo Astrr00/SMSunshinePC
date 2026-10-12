@@ -48,8 +48,9 @@ MsPerpendicFootToLineR(const JGeometry::TVec3<f32>& param_1,
 	// TODO: floats are the worst, doesn't match at all...
 	JGeometry::TVec3<f32> diff = param_2;
 	diff -= param_1;
-	f32 dot1 = param_1.dot(diff);
-	f32 fVar1 = (param_3.dot(diff) - dot1) / diff.squared();
+	f32 dot3  = param_3.dot(diff);
+	f32 dot1  = param_1.dot(diff);
+	f32 fVar1 = (dot3 - dot1) / diff.squared();
 
 	if (fVar1 < 0.0f)
 		fVar1 = 0.0f;

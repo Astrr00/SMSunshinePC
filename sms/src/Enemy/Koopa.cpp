@@ -88,6 +88,10 @@ static TKoopaSaveLoadParams* saveParamCall(TEnemyManager* mgr)
 {
 	return (TKoopaSaveLoadParams*)mgr->getSaveParam();
 }
+static void pushNerveCall(TSpineBase<TLiveActor>* spine, const TNerveBase<TLiveActor>* n)
+{
+	spine->pushNerve(n);
+}
 static void changeAnmCall(TKoopa* self, int bck, int btp, f32 rate)
 {
 	self->changeAnm(bck, btp, rate);
@@ -589,13 +593,14 @@ void TKoopaFlame::control()
 	}
 
 	mCurLength += mSpeed;
+	f32 radius = mRadius;
 	f32 x = mDirection.x * mCurLength + mBase.x;
 	f32 y = mDirection.y * mCurLength + mBase.y;
 	f32 z = mDirection.z * mCurLength + mBase.z;
 
 	f32 height = mHeight;
 	if (height <= 0.0f)
-		height = 2.0f * mRadius;
+		height = 2.0f * radius;
 
 	mPosition.x = x;
 	mPosition.y = y;
@@ -603,9 +608,9 @@ void TKoopaFlame::control()
 	offHitFlag(HIT_FLAG_CANNOT_ATTACK);
 	offHitFlag(HIT_FLAG_CANNOT_GET_HIT);
 	offHitFlag(HIT_FLAG_NO_COLLISION);
-	mAttackRadius = mRadius;
+	mAttackRadius = radius;
 	mAttackHeight = height;
-	mDamageRadius = mRadius;
+	mDamageRadius = radius;
 	mDamageHeight = height;
 	calcEntryRadius();
 }
@@ -624,9 +629,10 @@ void TKoopaFlame::attack_(THitActor* other)
 {
 	if (other->receiveMessage(this, HIT_MESSAGE_UNKA)
 	    && other == gpMarioAddress) {
-		char trash[0x18];
+		f32 jump = mOwner->getParam()->flameJump.get();
 		JGeometry::TVec3<f32> dir(0.0f, 1.0f, 0.0f);
-		SMS_ThrowMario(dir, mOwner->getParam()->flameJump.get());
+		char trash[0x10];
+		SMS_ThrowMario(dir, jump);
 		mOwner->unk155 = 1;
 		changeAnmCall(mOwner, 0x3, 0, mOwner->getParam()->fireSpeed.get());
 		mOwner->unk19C = 0xF0;
@@ -679,7 +685,7 @@ BOOL TKoopaHead::receiveMessage(THitActor* sender, u32 message)
 		    && &TNerveKoopaGetDown::theNerve() != koopa->mSpine->getCurrentNerve()
 		    && &TNerveKoopaGetShowered::theNerve()
 		           != koopa->mSpine->getCurrentNerve())
-			koopa->mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
+			pushNerveCall(koopa->mSpine, &TNerveKoopaStagger::theNerve());
 		break;
 	}
 	return true;
@@ -720,7 +726,7 @@ BOOL TKoopaBody::receiveMessage(THitActor* sender, u32 message)
 		    && &TNerveKoopaGetDown::theNerve() != koopa->mSpine->getCurrentNerve()
 		    && &TNerveKoopaGetShowered::theNerve()
 		           != koopa->mSpine->getCurrentNerve())
-			koopa->mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
+			pushNerveCall(koopa->mSpine, &TNerveKoopaStagger::theNerve());
 		break;
 	}
 	return true;
@@ -758,6 +764,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 
 	JGeometry::TVec3<f32> marioPos = *gpMarioPos;
 	marioPos.y += 85.0f;
+	char trash[0x50];
 	marioPos.x -= jointMtx->at(0, 3);
 	marioPos.y -= jointMtx->at(1, 3);
 	marioPos.z -= jointMtx->at(2, 3);
@@ -974,6 +981,8 @@ void TKoopa::setIgnoreMario(bool ignore) { mIgnoreMario = ignore; }
 
 f32 TKoopa::getFlameDirRate() const
 {
+	char trash[0x38];
+	(void)trash;
 	f32 frame          = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 	f32 end            = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getEnd();
 	f32 overStart      = getParam()->flameOverStart.get();
@@ -1136,7 +1145,8 @@ void TKoopa::getDown()
 		mSpine->setNext(&TNerveKoopaGetDown::theNerve());
 	if (&TNerveKoopaGetShowered::theNerve() == mSpine->getCurrentNerve())
 		mSpine->setNext(&TNerveKoopaGetDown::theNerve());
-	mSpine->pushNerve(&TNerveKoopaGetDown::theNerve());
+	const TNerveBase<TLiveActor>* next = &TNerveKoopaGetDown::theNerve();
+	mSpine->pushNerve(next);
 }
 
 bool TKoopa::effectsTumble() const
@@ -1170,7 +1180,8 @@ bool TKoopa::getShowered()
 		mSpine->setNext(&TNerveKoopaWait::theNerve());
 		return false;
 	}
-	mSpine->pushNerve(&TNerveKoopaGetShowered::theNerve());
+	const TNerveBase<TLiveActor>* next = &TNerveKoopaGetShowered::theNerve();
+	mSpine->pushNerve(next);
 	return true;
 }
 
@@ -1189,7 +1200,8 @@ void TKoopa::stagger(bool force)
 		return;
 	if (&TNerveKoopaGetShowered::theNerve() == mSpine->getCurrentNerve())
 		return;
-	mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
+	const TNerveBase<TLiveActor>* next = &TNerveKoopaStagger::theNerve();
+	mSpine->pushNerve(next);
 }
 
 #pragma dont_inline on

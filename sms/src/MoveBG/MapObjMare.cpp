@@ -292,6 +292,14 @@ void TMuddyBoat::control()
 	char trash[0x20];
 }
 
+// Retail calls getObjCollisionHeightOffset out of line here; the header pragma is inert.
+#pragma dont_inline on
+static f32 collisionHeightOffsetOutOfLine(const TMapObjBase* obj)
+{
+	return obj->getObjCollisionHeightOffset();
+}
+#pragma dont_inline off
+
 void TMuddyBoat::bind()
 {
 	if (checkLiveFlag(LIVE_FLAG_UNK10))
@@ -360,7 +368,7 @@ inline void TMuddyBoat::touchWall(JGeometry::TVec3<f32>* pos,
 {
 	const TBGCheckData* wall = record.mResultWalls[0];
 	unk170.set(record.mCenter.x - wall->mNormal.x * (50.0f + record.mRadius),
-	           100.0f + (mPosition.y - getObjCollisionHeightOffset()),
+	           100.0f + (mPosition.y - collisionHeightOffsetOutOfLine(this)),
 	           record.mCenter.z - wall->mNormal.z * (50.0f + record.mRadius));
 	*pos = mPosition;
 	kill();
@@ -634,6 +642,14 @@ void TMapObjGrowTree::control()
 	char trash[0x60];
 }
 
+// Retail calls TLiveActor::getMActor out of line in updateHeight; the header pragma is inert.
+#pragma dont_inline on
+static MActor* getMActorOutOfLine(const TLiveActor* actor)
+{
+	return actor->getMActor();
+}
+#pragma dont_inline off
+
 inline f32 TMapObjGrowTree::getGrowHeightFromRate(f32 rate) const
 {
 	if (mGrowStartFrame < mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
@@ -651,7 +667,7 @@ inline void TMapObjGrowTree::updateHeight()
 			setDamageHeight(
 			    unk148
 			    + (unk138 - unk148)
-			          * (getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
+			          * (getMActorOutOfLine(this)->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
 			             - mGrowStartFrame)
 			          / (mGrowEndFrame - mGrowStartFrame));
 		}
@@ -721,6 +737,7 @@ void TMapObjElasticCode::control()
 	JGeometry::TVec3<f32> vel = mVelocity;
 	mPosition.y += vel.y;
 	char trash[0x18];
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TMapObjElasticCode::draw() const

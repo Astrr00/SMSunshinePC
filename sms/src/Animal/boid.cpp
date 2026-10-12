@@ -3,6 +3,22 @@
 #include <MarioUtil/RandomUtil.hpp>
 #include <dolphin/mtx.h>
 
+// retail copies the operand into a local before the call (const-ref style); the
+// header's by-value operators elide that copy for chained products
+static JGeometry::TVec3<f32> vmul(const JGeometry::TVec3<f32>& a, f32 s)
+{
+	JGeometry::TVec3<f32> r = a;
+	r *= s;
+	return r;
+}
+
+static JGeometry::TVec3<f32> vdiv(const JGeometry::TVec3<f32>& a, f32 s)
+{
+	JGeometry::TVec3<f32> r = a;
+	r /= s;
+	return r;
+}
+
 TBoid::TBoid()
 {
 	mNeighbors = 0;
@@ -57,14 +73,15 @@ void TBoidLeader::calcBoids()
 			for (j = i + 1; j != end; ++j) {
 				JGeometry::TVec3<f32> d = i->mPosition;
 				d -= j->mPosition;
+				f32 radius;
 				f32 d2 = d.squared();
 				if (d2 < 0.001f)
 					continue;
 
-				f32 radius = mNeighborRadius;
+				radius = mNeighborRadius;
 				if (d2 < radius * radius) {
-					i->mSeparationForce += d / d2 * radius;
-					j->mSeparationForce -= d / d2 * mNeighborRadius;
+					i->mSeparationForce += vmul(vdiv(d, d2), radius);
+					j->mSeparationForce -= vmul(vdiv(d, d2), mNeighborRadius);
 
 					i->mAlignmentForce += j->mHeading;
 					j->mAlignmentForce += i->mHeading;
@@ -127,7 +144,7 @@ void TBoidLeader::calcBoids()
 			VECNormalize(&b->mHeading, &b->mHeading);
 
 			b->mPosition
-			    += b->mHeading * (mBaseSpeed + b->mSpeed) * force.length();
+			    += vmul(vmul(b->mHeading, mBaseSpeed + b->mSpeed), force.length());
 		}
 	}
 }

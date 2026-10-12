@@ -570,7 +570,8 @@ void TFireWanwanTailHit::perform(u32 cue, JDrama::TGraphics* graphics)
 		unkBC->update();
 
 	if (mHolder != nullptr) {
-		JGeometry::TVec3<f32> local_3c = unkA4->getNode(4)->mPos;
+		int n4 = 4;
+		JGeometry::TVec3<f32> local_3c = unkA4->getNode(n4)->mPos;
 		local_3c -= mOwner->mPosition;
 		SMS_CalcToDirMatrix(unk74, local_3c,
 		                    JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f));

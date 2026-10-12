@@ -228,7 +228,6 @@ void TBEelTearsManager::createEnemies(int count)
 
 void TBEelTearsManager::splitTears(JGeometry::TVec3<f32>& position)
 {
-	char trash[0x18];
 	int tearsLeft = getSaveParam()->mSLTearsSplitNum.get();
 	position.y += 600.0f;
 	TMsRange<f32> positionRange(-250.0f, 250.0f);
@@ -256,6 +255,7 @@ void TBEelTearsManager::splitTears(JGeometry::TVec3<f32>& position)
 		rand();
 
 		f32 scale = drop->mOwner->mTearsParams->mTearsDropScaleRange.rand();
+		char trash[0x20];
 		drop->mScaling.set(scale, scale, scale);
 
 		if (tearsLeft < 0)
@@ -309,6 +309,7 @@ void TBEelTears::init(TLiveManager* manager)
 	mRecoverCollision->initCollision();
 
 	enemyGroup->getChildren().push_back(mRecoverCollision);
+	char trash[0x10];
 	mRecoverCollision->onHitFlag(HIT_FLAG_NO_COLLISION);
 }
 
@@ -382,7 +383,6 @@ void TBEelTears::calcRootMatrix()
 			transform.ref(2, 3)
 			    = transform.at(2, 3)
 			      + (mSpawnMtx[2][3] - transform.at(2, 3)) * 0.1f;
-
 			mScaling.setAll(mTearsParams->mSLBodyScaleLow.get());
 			mMActor->getModel()->setBaseScale(mScaling);
 			mMActor->getModel()->setBaseTRMtx(transform);
@@ -984,6 +984,7 @@ void TBossEelTooth::perform(u32 cue, JDrama::TGraphics* graphics)
 		mSharedParts->getMActor()->getModel()->setBaseTRMtx(toothMtx);
 	}
 
+	char trash[0x38];
 	THitActor::perform(cue, graphics);
 	mSharedParts->getMActor()->perform(cue, graphics);
 }
@@ -1070,6 +1071,7 @@ void TBossEelVortex::perform(u32 cue, JDrama::TGraphics* graphics)
 		mPosition.z = mOwner->mMActor->getModel()->getAnmMtx(
 		    mOwner->mMapCollisionJointIndices[2])[2][3];
 	}
+	char trash[0xa8];
 	THitActor::perform(cue, graphics);
 }
 
@@ -1123,8 +1125,10 @@ void TBossEelEye::perform(u32 cue, JDrama::TGraphics* graphics)
 		MTXCopy(getConnectedMtx(), eyeMtx);
 		MtxPtr eyeMtxPtr = eyeMtx;
 		getMActor()->getModel()->setBaseTRMtx(eyeMtxPtr);
-		if (mCopyConnectedMtx == 0)
-			MTXCopy(eyeMtxPtr, mBlendMtx);
+		if (mCopyConnectedMtx == 0) {
+			MtxPtr blend = mBlendMtx;
+			MTXCopy(eyeMtxPtr, blend);
+		}
 
 		mBlendRatio = MsClamp(mBlendRatio - 0.01f, 0.0f, 1.0f);
 		getMActor()->setMotionBlendRatioForBck(mBlendRatio);
@@ -1463,6 +1467,7 @@ void TBossEel::init(TLiveManager* manager)
 	mBarrierCollision->offHitFlag(HIT_FLAG_NO_COLLISION);
 
 	JUTNameTab* jntNames = mMActor->getModel()->getModelData()->getJointName();
+	char trash[0x10];
 
 	{
 		static const char* sEyePartsJointTable[]
@@ -1471,8 +1476,8 @@ void TBossEel::init(TLiveManager* manager)
 		void* eyeResource = JKRGetResource("/scene/bosseel/eye.bmd");
 		SDLModelData* eyeModelData
 		    = new SDLModelData(J3DModelLoaderDataBase::load(
-		        eyeResource, J3DMLF_MaterialPEFull | J3DMLF_MaterialTexGenFull
-		                         | (2 << J3DMLF_TevStageNumShift)));
+		        eyeResource, J3DMLF_MaterialPEFull | J3DMLF_UseUniqueMaterials
+		                         | (4 << J3DMLF_TevStageNumShift)));
 		for (s32 i = 0; i < 4; ++i) {
 			s32 jointIndex = jntNames->getIndex(sEyePartsJointTable[i]);
 			mEyes[i]       = new TBossEelEye(this, jointIndex, eyeModelData, 3,
@@ -1494,11 +1499,11 @@ void TBossEel::init(TLiveManager* manager)
 		    resource1,
 		    J3DMLF_MaterialPEFull | (16 << J3DMLF_TevStageNumShift)));
 		void* resource2   = JKRGetResource("/scene/bosseel/bad_tooth.bmd");
-		toothModelData[0] = new SDLModelData(J3DModelLoaderDataBase::load(
+		toothModelData[1] = new SDLModelData(J3DModelLoaderDataBase::load(
 		    resource2,
 		    J3DMLF_MaterialPEFull | (16 << J3DMLF_TevStageNumShift)));
 		void* resource3   = JKRGetResource("/scene/bosseel/gold_tooth.bmd");
-		toothModelData[0] = new SDLModelData(J3DModelLoaderDataBase::load(
+		toothModelData[2] = new SDLModelData(J3DModelLoaderDataBase::load(
 		    resource3,
 		    J3DMLF_MaterialPEFull | (16 << J3DMLF_TevStageNumShift)));
 
@@ -1524,8 +1529,9 @@ void TBossEel::init(TLiveManager* manager)
 		    = JKRGetResource("/scene/bosseel/meoto_heartcoin.bmd");
 		SDLModelData* heartModelData
 		    = new SDLModelData(J3DModelLoaderDataBase::load(
-		        heartResource, J3DMLF_MaterialPEFull | J3DMLF_MaterialTexGenFull
-		                           | (2 << J3DMLF_TevStageNumShift)));
+		        heartResource, J3DMLF_MaterialPEFull | J3DMLF_MaterialUseIndirect
+		                           | J3DMLF_UseUniqueMaterials
+		                           | (4 << J3DMLF_TevStageNumShift)));
 		mHeartCoin = new TBossEelHeartCoin(this, 0, heartModelData, 3,
 		                                   "めおとウナギハートコイン");
 	}
@@ -1768,7 +1774,6 @@ void TBossEel::collideToMario()
 
 void TBossEel::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	char trash[0x28];
 	if ((cue & CUE_CALC_ANIM)
 	    && mSpine->getCurrentNerve() == &TNerveBossEelDie::theNerve()) {
 		mDeathEffectPosition.set(0.0f, -14000.0f, 0.0f);
@@ -1800,6 +1805,7 @@ void TBossEel::perform(u32 cue, JDrama::TGraphics* graphics)
 		calcRootMatrix();
 		collideToMario();
 
+		int pre;
 		TPosition3f collisionMtx;
 		// asm 0x802E5900: retail pairs mMapCollisions[2] with joint index [2]
 		collisionMtx.set(
@@ -1814,6 +1820,7 @@ void TBossEel::perform(u32 cue, JDrama::TGraphics* graphics)
 				mMapCollisions[i]->moveMtx(collisionMtx);
 			}
 		}
+		char trash[0x24];
 
 		if (mUseObjCollision
 		    && mSpine->getCurrentNerve() != &TNerveBossEelDie::theNerve())
@@ -2399,6 +2406,17 @@ DEFINE_NERVE(TNerveBossEelDie, TLiveActor)
 			eel->mTeeth[6]->onHitFlag(HIT_FLAG_NO_COLLISION);
 			eel->setBckAnm(4);
 		}
+	}
+	int pad4;
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
 	}
 	return false;
 }

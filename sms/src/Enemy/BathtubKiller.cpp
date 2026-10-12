@@ -141,6 +141,13 @@ TBathtubKillerParams::TBathtubKillerParams(const char* prm)
 	mushroomProbability.set(0.3f);
 }
 
+// nested wrappers keep TUtil::sqrt out of line like retail
+static inline f32 calcSqrt0(f32 x) { return JGeometry::TUtil<f32>::sqrt(x); }
+static inline f32 calcSqrt1(f32 x) { return calcSqrt0(x); }
+static inline f32 calcSqrt(f32 x) { return calcSqrt1(x); }
+
+static inline void calcNormalize(JGeometry::TVec3<f32>& v) { v.normalize(); }
+
 TBathtubKiller::TBathtubKiller(const char* name)
     : TSmallEnemy(name)
     , unk1CC(0)
@@ -359,7 +366,9 @@ void TBathtubKiller::bind()
 				        == &TNerveBathtubKillerBreak::theNerve();
 			if (!dying)
 				mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
-			unk1BC.zero();
+			unk1BC.x = 0.0f;
+			unk1BC.y = 0.0f;
+			unk1BC.z = 0.0f;
 			mVelocity.set(unk1BC);
 			pos.y = mGroundHeight;
 		}
@@ -454,8 +463,7 @@ void TBathtubKiller::perform(u32 cue, JDrama::TGraphics* graphics)
 			f32 dy = mPosition.y - gpMarioPos->y;
 			f32 dx = mPosition.x - gpMarioPos->x;
 			f32 dz = mPosition.z - gpMarioPos->z;
-			f32 dist
-			    = JGeometry::TUtil<f32>::sqrt(dy * dy + dx * dx + dz * dz);
+			f32 dist = calcSqrt(dy * dy + dx * dx + dz * dz);
 			if (gpMSound->gateCheck(MSD_SE_EN_KILLER_FLY)) {
 				MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 				    MSD_SE_EN_KILLER_FLY, &mPosition, nullptr, dist, 0, 0,
@@ -786,18 +794,23 @@ DEFINE_NERVE(TNerveBathtubKillerWander, TLiveActor)
 		f32 dxMB = marioFlat.x - bathFlat.x;
 		f32 dyMB = marioFlat.y - bathFlat.y;
 		f32 dzMB = marioFlat.z - bathFlat.z;
-		f32 distMB = dzMB * dzMB + (dxMB * dxMB + dyMB * dyMB);
-		if (distMB > 0.0f)
-			distMB = JGeometry::TUtil<f32>::sqrt(distMB);
+		f32 sqxMB = dxMB * dxMB;
+		f32 sqyMB = dyMB * dyMB;
+		f32 sqzMB = dzMB * dzMB;
+		f32 distMB = JGeometry::TUtil<f32>::sqrt(sqzMB + (sqxMB + sqyMB));
 
 		f32 dxSB = selfFlat.x - bathFlat.x;
 		f32 dySB = selfFlat.y - bathFlat.y;
 		f32 dzSB = selfFlat.z - bathFlat.z;
-		f32 distSB = dzSB * dzSB + (dxSB * dxSB + dySB * dySB);
-		if (distSB > 0.0f)
-			distSB = JGeometry::TUtil<f32>::sqrt(distSB);
+		f32 sqxSB = dxSB * dxSB;
+		f32 sqySB = dySB * dySB;
+		f32 sqzSB = dzSB * dzSB;
+		f32 distSB = JGeometry::TUtil<f32>::sqrt(sqzSB + (sqxSB + sqySB));
 
-		cond = distSB <= distMB + 100.0f;
+		if (distSB > distMB + 100.0f)
+			cond = false;
+		else
+			cond = true;
 	} else {
 		cond = true;
 	}
@@ -813,14 +826,17 @@ DEFINE_NERVE(TNerveBathtubKillerWander, TLiveActor)
 	} else {
 		f32 chaseDistY = self->getSaveParam2()->mSLChaseDistanceY.get();
 		f32 bathtubY = (*self->unk1CC->getRootJointMtx())[1][3];
-		chase = self->mPosition.y <= self->unk200 + bathtubY + chaseDistY;
+		if (self->mPosition.y > self->unk200 + bathtubY + chaseDistY)
+			chase = false;
+		else
+			chase = true;
 	}
 	if (chase) {
 		spine->pushAfterCurrent(&TNerveBathtubKillerChase::theNerve());
 		return TRUE;
 	}
 
-	self->unk1BC = JGeometry::TVec3<f32>(0.0f, -self->getGravityY(), 0.0f);
+	self->unk1BC.set(0.0f, -self->getGravityY(), 0.0f);
 	self->makeQuat(self->mVelocity, 1.0f, 0.1f);
 	return FALSE;
 }
@@ -849,18 +865,23 @@ DEFINE_NERVE(TNerveBathtubKillerChase, TLiveActor)
 		f32 dxMB = marioFlat.x - bathFlat.x;
 		f32 dyMB = marioFlat.y - bathFlat.y;
 		f32 dzMB = marioFlat.z - bathFlat.z;
-		f32 distMB = dzMB * dzMB + (dxMB * dxMB + dyMB * dyMB);
-		if (distMB > 0.0f)
-			distMB = JGeometry::TUtil<f32>::sqrt(distMB);
+		f32 sqxMB = dxMB * dxMB;
+		f32 sqyMB = dyMB * dyMB;
+		f32 sqzMB = dzMB * dzMB;
+		f32 distMB = JGeometry::TUtil<f32>::sqrt(sqzMB + (sqxMB + sqyMB));
 
 		f32 dxSB = selfFlat.x - bathFlat.x;
 		f32 dySB = selfFlat.y - bathFlat.y;
 		f32 dzSB = selfFlat.z - bathFlat.z;
-		f32 distSB = dzSB * dzSB + (dxSB * dxSB + dySB * dySB);
-		if (distSB > 0.0f)
-			distSB = JGeometry::TUtil<f32>::sqrt(distSB);
+		f32 sqxSB = dxSB * dxSB;
+		f32 sqySB = dySB * dySB;
+		f32 sqzSB = dzSB * dzSB;
+		f32 distSB = JGeometry::TUtil<f32>::sqrt(sqzSB + (sqxSB + sqySB));
 
-		cond = distSB <= distMB + 100.0f;
+		if (distSB > distMB + 100.0f)
+			cond = false;
+		else
+			cond = true;
 	} else {
 		cond = true;
 	}
@@ -906,18 +927,23 @@ DEFINE_NERVE(TNerveBathtubKillerChaseStraight, TLiveActor)
 		f32 dxMB = marioFlat.x - bathFlat.x;
 		f32 dyMB = marioFlat.y - bathFlat.y;
 		f32 dzMB = marioFlat.z - bathFlat.z;
-		f32 distMB = dzMB * dzMB + (dxMB * dxMB + dyMB * dyMB);
-		if (distMB > 0.0f)
-			distMB = JGeometry::TUtil<f32>::sqrt(distMB);
+		f32 sqxMB = dxMB * dxMB;
+		f32 sqyMB = dyMB * dyMB;
+		f32 sqzMB = dzMB * dzMB;
+		f32 distMB = JGeometry::TUtil<f32>::sqrt(sqzMB + (sqxMB + sqyMB));
 
 		f32 dxSB = selfFlat.x - bathFlat.x;
 		f32 dySB = selfFlat.y - bathFlat.y;
 		f32 dzSB = selfFlat.z - bathFlat.z;
-		f32 distSB = dzSB * dzSB + (dxSB * dxSB + dySB * dySB);
-		if (distSB > 0.0f)
-			distSB = JGeometry::TUtil<f32>::sqrt(distSB);
+		f32 sqxSB = dxSB * dxSB;
+		f32 sqySB = dySB * dySB;
+		f32 sqzSB = dzSB * dzSB;
+		f32 distSB = JGeometry::TUtil<f32>::sqrt(sqzSB + (sqxSB + sqySB));
 
-		cond = distSB <= distMB + 100.0f;
+		if (distSB > distMB + 100.0f)
+			cond = false;
+		else
+			cond = true;
 	} else {
 		cond = true;
 	}
@@ -936,12 +962,7 @@ DEFINE_NERVE(TNerveBathtubKillerChaseStraight, TLiveActor)
 	JGeometry::TVec3<f32> vec;
 	self->mQuat.getZDir(vec);
 	vec.y = 0.0f;
-	f32 lsq = vec.squared();
-	if (lsq <= JGeometry::TUtil<f32>::epsilon()) {
-		vec.zero();
-	} else {
-		vec.scale(1.0f * JGeometry::TUtil<f32>::inv_sqrt(lsq), vec);
-	}
+	calcNormalize(vec);
 	vec.scale(self->unk198.unk8);
 	self->mVelocity.set(vec);
 	self->makeQuat(self->mVelocity, self->unk198.unk0, 0.1f);
@@ -962,7 +983,7 @@ DEFINE_NERVE(TNerveBathtubKillerStraight, TLiveActor)
 	JGeometry::TVec3<f32> vec;
 	self->mQuat.getZDir(vec);
 	vec.y = 0.0f; // asm 0x8034120C: horizontal flight
-	vec.normalize();
+	calcNormalize(vec);
 	vec.scale(self->unk198.unk8);
 	self->mVelocity.set(vec);
 	self->makeQuat(self->mVelocity, self->unk198.unk0, 0.1f);
@@ -1020,8 +1041,36 @@ TBathtubKillerManager::TBathtubKillerManager(const char* name)
 
 void TBathtubKillerManager::load(JSUMemoryInputStream& stream)
 {
+	(void)(unk38 ? unk38 : unk38); // @hack to force cmplwi
 	TSmallEnemyManager::load(stream);
 	unk38 = new TBathtubKillerParams("/enemy/bathtubkiller.prm");
+	(void)(unk38 ? unk38 : unk38); // @hack to force cmplwi
+
+	// dead temps: reserve 0x40 bytes of frame like retail
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
 }
 
 void TBathtubKillerManager::loadAfter()
@@ -1036,14 +1085,26 @@ void TBathtubKillerManager::loadAfter()
 	unk68 = 0;
 	unk69 = 0;
 
-	char trash[0x18];
-
-	// TODO: the original reads unk38 here and drops the result.
+	(void)(unk38 ? unk38 : unk38); // @hack to force lwz+cmplwi like retail
 	static const char* loopFilenames[1] = {
 		"/scene/map/map/ms_kp_kill_smoke.jpa",
 	};
 	for (int i = 0; i < 1; ++i)
 		SMS_LoadParticle(loopFilenames[i], 0x1BD + i);
+
+	// dead temps: reserve 0x20 bytes of expression-temp stack below the live temps
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
 }
 
 void TBathtubKillerManager::generateMushroom(JGeometry::TVec3<f32>) { }

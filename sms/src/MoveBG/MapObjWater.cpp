@@ -64,11 +64,12 @@ void TMapObjWaterFilter::perform(u32 cue, JDrama::TGraphics* graphics)
 		return;
 
 	if (cue & CUE_CALC_ANIM) {
+		MtxPtr view = graphics->mViewMtx;
 		Mtx afStack_48;
 		Mtx afStack_78;
 		Mtx afStack_a8;
 		J3DTransformInfo info;
-		char trash[0x34];
+		char trash[0x30];
 		info.mScale.x     = 1.0f;
 		info.mScale.y     = 1.0f;
 		info.mScale.z     = 1.0f;
@@ -80,7 +81,7 @@ void TMapObjWaterFilter::perform(u32 cue, JDrama::TGraphics* graphics)
 		info.mTranslate.z = mPosition.z;
 		J3DGetTranslateRotateMtx(info, afStack_78);
 		PSMTXScale(afStack_a8, mScaling.x, mScaling.y, mScaling.z);
-		MTXInverse(graphics->mViewMtx, afStack_48);
+		MTXInverse(view, afStack_48);
 		MTXConcat(afStack_48, afStack_78, afStack_48);
 		MTXConcat(afStack_48, afStack_a8, afStack_48);
 		unk44->getModel()->setBaseTRMtx(afStack_48);

@@ -283,9 +283,11 @@ void TBubble::appendEnemy()
 {
 	mAppended = nullptr;
 
+	char pad4[4];
+	TMsRange<f32> range(0.0f, 100.0f);
 	TSmallEnemy* enemy;
-	char trash[0x10];
-	f32 r = TMsRange<f32>(0.0f, 100.0f).rand();
+	char trash[0xc];
+	f32 r = range.rand();
 	if (r < 50.0f) {
 		enemy = (TSmallEnemy*)gpConductor->makeOneEnemyAppear(
 		    mPosition, "ポポマネージャー", 1);
@@ -326,7 +328,6 @@ void TBubble::appendEnemy()
 DEFINE_NERVE(TNerveBubbleLive, TLiveActor)
 {
 	TBubble* self = static_cast<TBubble*>(spine->getBody());
-	char trash[0x20];
 
 	if (spine->getTime() == 0) {
 		self->offHitFlag(HIT_FLAG_NO_COLLISION);
@@ -338,7 +339,9 @@ DEFINE_NERVE(TNerveBubbleLive, TLiveActor)
 		}
 
 		J3DFrameCtrl* frameCtrl = self->mMActor->getFrameCtrl(ANM_TYPE_BCK);
-		frameCtrl->setFrame(TMsRange<f32>(0.0f, 20.0f).rand());
+		TMsRange<f32> range(0.0f, 20.0f);
+		char trash[0x20];
+		frameCtrl->setFrame(range.rand());
 		self->onLiveFlag(LIVE_FLAG_UNK8);
 	} else if (self->checkCurAnmEnd(0)) {
 		self->offHitFlag(HIT_FLAG_NO_COLLISION);
@@ -490,7 +493,8 @@ BOOL TBossTelesaTongue::receiveMessage(THitActor* sender, u32 message)
 
 void TBossTelesaKillSmallEnemy::checkHit()
 {
-	char trash[8];
+	JGeometry::TVec3<f32> diff;
+	char trash[4];
 	unk6C = 0;
 	for (int i = 0; i < mColCount; ++i) {
 		THitActor* hit = mCollisions[i];
@@ -502,7 +506,7 @@ void TBossTelesaKillSmallEnemy::checkHit()
 		}
 	}
 
-	JGeometry::TVec3<f32> diff = *gpMarioPos;
+	diff = *gpMarioPos;
 	diff -= mPosition;
 	diff.y = 0.0f;
 	if (MsVECMag2(&diff) < 300.0f) {
@@ -570,7 +574,6 @@ void TTelesaSlot::calcRootMatrix()
 
 void TTelesaSlot::moveObject()
 {
-	char trash[0x2c];
 	TLiveActor::moveObject();
 	for (int i = 0; i < unk148; ++i) {
 		if (unk1A8[i] && unk1A4 == getForcastResult(i)) {
@@ -607,6 +610,7 @@ void TTelesaSlot::moveObject()
 					for (int j = 0; j < unk148; ++j) {
 						if (unk198[j]) {
 							TMsRange<f32> range(0.0f, 1.0f);
+							char trash[0x2c];
 							f32 rate = mBoss->mBossParams->mSLSlotHitCollectRate.get();
 							if (range.rand() <= rate)
 								unk1A8[j] = true;
@@ -1064,12 +1068,13 @@ static inline JGeometry::TVec3<f32> telesaVecCopy(const Vec& v)
 
 void TBossTelesa::moveObject()
 {
+	JGeometry::TVec3<f32> toCamera;
+	JGeometry::TVec3<f32> toCamera2;
 	char trash[0x60];
 	if (checkLiveFlag(LIVE_FLAG_DEAD))
 		return;
 
-	JGeometry::TVec3<f32> toCamera
-	    = *gpMarioPos - telesaVecCopy(gpCamera->unk124);
+	toCamera = *gpMarioPos - telesaVecCopy(gpCamera->unk124);
 	if (toCamera.length() < mCameraMoveLimit) {
 		mCameraMove += mCameraMoveSp * (gpMarioPos->y - gpCamera->unk148.y);
 		gpCamera->unk290 = mCameraMove;
@@ -1110,8 +1115,7 @@ void TBossTelesa::moveObject()
 		}
 	}
 
-	JGeometry::TVec3<f32> toCamera2
-	    = *gpMarioPos - telesaVecCopy(gpCamera->unk124);
+	toCamera2 = *gpMarioPos - telesaVecCopy(gpCamera->unk124);
 	mRoulettePos = mRoulettes[0]->mPosition;
 	mRoulettePos.x += 0.67f * toCamera2.x;
 	mRoulettePos.z += 0.67f * toCamera2.z;
@@ -1213,17 +1217,18 @@ MtxPtr TBossTelesa::getTakingMtx()
 
 void TBossTelesa::calcRootMatrix()
 {
-	char trash[0x50];
 	mMActor->getModel()->setBaseScale(mScaling);
 
 	f32 x = mPosition.x;
+	f32 y;
 	f32 z = mPosition.z;
-	f32 y = mPosition.y + mBossParams->mSLTransYOffset.get()
+	y = mPosition.y + mBossParams->mSLTransYOffset.get()
 	        + clampBossTelesa<f32>(mHoseiPosY, mBaseHoseiPosY, 0.0f);
 
 	TPosition3f mtx(x, y, z);
 
 	Mtx rot;
+	char trash[0x10];
 	MsMtxSetRotRPH(rot, mRotation.x, mRotation.y, mRotation.z);
 	MTXConcat(mtx, rot, mtx);
 	mMActor->getModel()->setBaseTRMtx(mtx);
@@ -1251,6 +1256,7 @@ void TBossTelesa::calcRootMatrix()
 	for (u16 i = 0; i < mMActor->getModel()->getModelData()->getMaterialNum();
 	     ++i) {
 		Mtx effectMtx;
+		char trash2[0x40];
 		SMS_GetLightPerspectiveForEffectMtx(effectMtx);
 		mMActor->getModel()
 		    ->getModelData()
@@ -1399,7 +1405,8 @@ void TBossTelesa::checkHitObject(THitActor* hit)
 		                                0, nullptr, 0, 4);
 	}
 
-	static_cast<TMapObjBase*>(hit)->makeObjDead();
+	TMapObjBase* hitObj = static_cast<TMapObjBase*>(hit);
+	hitObj->makeObjDead();
 }
 
 #pragma dont_inline on
@@ -1663,8 +1670,9 @@ void TBossTelesa::generateSlotItem()
 	mSlotTimer = 0;
 	mItemNum   = 0;
 
+	int result;
 	TTelesaSlot* slot = mSlot;
-	int result        = slot->getResultFromAng(slot->unk13C[0]);
+	result            = slot->getResultFromAng(slot->unk13C[0]);
 	for (int i = 1; i < 3; ++i) {
 		if (result != slot->getResultFromAng(slot->unk13C[i])) {
 			result = -1;

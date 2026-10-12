@@ -74,34 +74,31 @@ void CPolarSubCamera::updateDemoCamera_(bool param_1)
 					origin = *mCameraDemo->unk0;
 				f32 originY = origin.y;
 				f32 originZ = origin.z;
+				char trash[0x30];
 
-				{
-					JGeometry::TVec3<f32> delta(unk124.x - origin.x, unk124.y - originY,
-					                            unk124.z - originZ);
-					f32 sn = JMASSin(angle);
-					f32 cs = JMASCos(angle);
-					f32 dx = delta.x;
-					f32 dz = delta.z;
-					delta.x = dx * cs + dz * sn;
-					delta.z = -dx * sn + dz * cs;
-					JGeometry::TVec3<f32> result = origin;
-					addOutOfLine(result, delta);
-					unk124 = result;
-				}
+				JGeometry::TVec3<f32> delta(unk124.x - origin.x,
+				                            unk124.y - originY,
+				                            unk124.z - originZ);
+				f32 sn  = JMASSin(angle);
+				f32 cs  = JMASCos(angle);
+				f32 dx  = delta.x;
+				delta.x = dx * cs + delta.z * sn;
+				delta.z = -dx * sn + delta.z * cs;
+				JGeometry::TVec3<f32> result = origin;
+				addOutOfLine(result, delta);
+				unk124 = result;
 
-				{
-					JGeometry::TVec3<f32> delta(unk148.x - origin.x, unk148.y - originY,
-					                            unk148.z - originZ);
-					f32 sn = JMASSin(angle);
-					f32 cs = JMASCos(angle);
-					f32 dx = delta.x;
-					f32 dz = delta.z;
-					delta.x = dx * cs + dz * sn;
-					delta.z = -dx * sn + dz * cs;
-					JGeometry::TVec3<f32> result = origin;
-					addOutOfLine(result, delta);
-					unk148 = result;
-				}
+				JGeometry::TVec3<f32> delta2(unk148.x - origin.x,
+				                             unk148.y - originY,
+				                             unk148.z - originZ);
+				f32 sn2  = JMASSin(angle);
+				f32 cs2  = JMASCos(angle);
+				f32 dx2  = delta2.x;
+				delta2.x = dx2 * cs2 + delta2.z * sn2;
+				delta2.z = -dx2 * sn2 + delta2.z * cs2;
+				JGeometry::TVec3<f32> result2 = origin;
+				addOutOfLine(result2, delta2);
+				unk148 = result2;
 
 				f32 ux = mUp.x;
 				f32 uz = mUp.z;

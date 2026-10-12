@@ -68,7 +68,6 @@ f32 TFlyEnemy::mTestMarioSpMax = 12.0f;
 
 BOOL TNerveKillerExplosion::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[8];
 	TKiller* self = (TKiller*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -121,6 +120,9 @@ BOOL TNerveKillerExplosion::execute(TSpineBase<TLiveActor>* spine) const
 	}
 
 	self->expandCollision();
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	return false;
 }
 
@@ -436,14 +438,16 @@ void TKiller::genEventCoin()
 	char trash[4];
 	Vec offset;
 	Mtx rotMtx;
+	MtxPtr mtxp = rotMtx;
 	char trash2[8];
+
 	for (int i = 0; i < coinNum; ++i) {
 		offset.x = 0.0f;
 		offset.y = 0.0f;
 		offset.z = 30.0f;
 
-		MsMtxSetRotY(rotMtx, 360.0f * (1.0f / coinNum) * (i + 1));
-		MTXMultVec(rotMtx, &offset, &offset);
+		MsMtxSetRotY(mtxp, 360.0f * (1.0f / coinNum) * (i + 1));
+		MTXMultVec(mtxp, &offset, &offset);
 
 		TCoin* coin = (TCoin*)gpItemManager->makeObjAppear(
 		    mPosition.x + offset.x, mPosition.y, mPosition.z + offset.z,
@@ -605,6 +609,12 @@ TKillerManager::TKillerManager(const char* name)
 	gpCurKiller = nullptr;
 }
 
+// Retail calls MsSin/MsCos out of line from the chase nerve.
+#pragma dont_inline on
+static f32 msSinOOL(f32 v) { return MsSin(v); }
+static f32 msCosOOL(f32 v) { return MsCos(v); }
+#pragma dont_inline off
+
 BOOL TNerveFlyEnemyChaseFly::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TFlyEnemy* self = (TFlyEnemy*)spine->getBody();
@@ -653,11 +663,9 @@ BOOL TNerveFlyEnemyChaseFly::execute(TSpineBase<TLiveActor>* spine) const
 		f32 diff   = MsAngleDiff(target, self->mRotation.y);
 
 		if (diff > 0.0f) {
-			if (diff > self->mTurnSpeed)
-				diff = self->mTurnSpeed;
+			diff = (diff > self->mTurnSpeed) ? self->mTurnSpeed : diff;
 		} else {
-			if (!(diff > -self->mTurnSpeed))
-				diff = -self->mTurnSpeed;
+			diff = (diff > -self->mTurnSpeed) ? diff : -self->mTurnSpeed;
 		}
 
 		self->mRotation.y = MsAngleWrap(self->mRotation.y + diff);
@@ -665,8 +673,10 @@ BOOL TNerveFlyEnemyChaseFly::execute(TSpineBase<TLiveActor>* spine) const
 		JGeometry::TVec3<f32> linVel = self->mLinearVelocity;
 		f32 rotYNow                  = self->mRotation.y;
 		f32 spd                      = self->mMarchSpeed;
-		JGeometry::TVec3<f32> delta(spd * MsSin(rotYNow), 0.0f,
-		                            spd * MsCos(rotYNow));
+		f32 dz                       = spd * msCosOOL(rotYNow);
+		f32 dx                       = spd * msSinOOL(rotYNow);
+		JGeometry::TVec3<f32> delta;
+		delta.set(dx, 0.0f, dz);
 		linVel.add(delta);
 		self->mLinearVelocity = linVel;
 		break;
@@ -690,6 +700,7 @@ BOOL TNerveFlyEnemyChaseFly::execute(TSpineBase<TLiveActor>* spine) const
 
 	f32 s = MsClamp(1.1f * self->mScaling.x, 0.0f, self->mBodyScale);
 	self->mScaling.x = self->mScaling.y = self->mScaling.z = s;
+
 	return false;
 }
 

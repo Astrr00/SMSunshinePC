@@ -119,8 +119,9 @@ void TLiveActor::calcRideMomentum()
 			mLinearVelocity += rideVelocity;
 
 			if (unkE8 >= 2) {
-				mAngularVelocity.y
-				    += MsAngleDiff(mGroundActor->mRotation.y, mGroundActorYaw);
+				f32 yawDiff
+				    = MsAngleDiff(mGroundActor->mRotation.y, mGroundActorYaw);
+				mAngularVelocity.y = yawDiff + mAngularVelocity.y;
 				mGroundActorYaw = mGroundActor->mRotation.y;
 			}
 		}
@@ -164,6 +165,12 @@ void TLiveActor::init(TLiveManager* manager)
 
 	if (!mAnmSound)
 		initAnmSound();
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){5, 6, 7, 8};
+		(void)(GXColor){9, 10, 11, 12};
+		(void)(GXColor){13, 14, 15, 16};
+	}
 }
 
 void TLiveActor::load(JSUMemoryInputStream& stream)

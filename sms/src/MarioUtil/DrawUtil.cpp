@@ -186,6 +186,7 @@ void TSilhouette::perform(u32 cue, JDrama::TGraphics* graphics)
 		GXSetZCompLoc(GX_TRUE);
 		GXSetZMode(GX_TRUE, GX_GEQUAL, GX_FALSE);
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TSilhouette::calcSilhouetteBorder() { }
@@ -321,6 +322,8 @@ void TTrembleModelEffect::clash(f32 magnitude)
 		break;
 	}
 	unk8 |= 4;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TTrembleModelEffect::movement()
@@ -419,6 +422,7 @@ void SMS_AddDamageFogEffect(J3DModelData* param_1,
                             const JGeometry::TVec3<f32>& param_2,
                             JDrama::TGraphics* param_3)
 {
+	char trash[32];
 	Vec local_80;
 	MTXMultVec(param_3->getViewMtx(), param_2, &local_80);
 
@@ -436,6 +440,8 @@ void SMS_AddDamageFogEffect(J3DModelData* param_1,
 		fog->mNearZ  = gpCamera->getNear();
 		fog->mFarZ   = gpCamera->getFar();
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void SMS_ResetDamageFogEffect(J3DModelData* param_1)

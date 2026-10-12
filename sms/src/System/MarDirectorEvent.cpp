@@ -33,6 +33,7 @@ void TMarDirector::updateFlag(TBaseNPC*, u32, u32) { }
 
 TBaseNPC* TMarDirector::findNearestTalkNPC()
 {
+	char trash[0x4];
 	TBaseNPC* result = nullptr;
 	if (gpMarioOriginal->mStatus == MARIO_STATUS_WAIT) {
 		f32 bestDist                   = 5000000.0f;
@@ -259,13 +260,14 @@ void TMarDirector::fireStartDemoCamera(const char* param_1,
 
 void TMarDirector::fireEndDemoCamera() { unk4C |= 0x80; }
 
+// asm: retail reloads unk4C after the flag test (no CSE); the volatile read reproduces that.
 void TMarDirector::fireStreamingMovie(u8 param_1)
 {
 	char trash[40];
 	switch (param_1) {
 	case 0:
-		if (!checkUnk4CFlag(0x100)) {
-			onUnk4CFlag(0x100);
+		if (!(*(volatile u16*)&unk4C & 0x100)) {
+			unk4C |= 0x100;
 			setNextStage(0x1, nullptr);
 			TFlagManager::smInstance->setBool(true, 0x10389);
 			TFlagManager::smInstance->setBool(true, 0x30004);
@@ -274,7 +276,7 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 		break;
 
 	case 10:
-		if (!checkUnk4CFlag(0x100)) {
+		if (!(*(volatile u16*)&unk4C & 0x100)) {
 			onUnk4CFlag(0x100);
 			setNextStage(0x3B, nullptr);
 			gpApplication.mMovie = param_1;
@@ -282,7 +284,7 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 		break;
 
 	case 7:
-		if (!checkUnk4CFlag(0x100)) {
+		if (!(*(volatile u16*)&unk4C & 0x100)) {
 			onUnk4CFlag(0x100);
 			setNextStage(0xE06, nullptr);
 			gpApplication.mMovie = param_1;
@@ -290,7 +292,7 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 		break;
 
 	case 8:
-		if (!checkUnk4CFlag(0x100)) {
+		if (!(*(volatile u16*)&unk4C & 0x100)) {
 			onUnk4CFlag(0x100);
 			setNextStage(0xE07, nullptr);
 			gpApplication.mMovie = param_1;
@@ -298,7 +300,7 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 		break;
 
 	case 11:
-		if (!checkUnk4CFlag(0x100)) {
+		if (!(*(volatile u16*)&unk4C & 0x100)) {
 			onUnk4CFlag(0x100);
 			setNextStage(0x3C, nullptr);
 			gpApplication.mMovie = param_1;
@@ -306,7 +308,7 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 		break;
 
 	case 2:
-		if (!checkUnk4CFlag(0x100)) {
+		if (!(*(volatile u16*)&unk4C & 0x100)) {
 			onUnk4CFlag(0x100);
 			setNextStage(0x101, nullptr);
 			gpApplication.mMovie = param_1;
@@ -315,7 +317,7 @@ void TMarDirector::fireStreamingMovie(u8 param_1)
 
 	case 12:
 	default:
-		if (!checkUnk4CFlag(0x100)) {
+		if (!(*(volatile u16*)&unk4C & 0x100)) {
 			onUnk4CFlag(0x100);
 			setNextStage(0xF, nullptr);
 			gpApplication.mMovie = (u8)param_1;

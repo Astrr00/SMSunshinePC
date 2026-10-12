@@ -162,7 +162,7 @@ void TGessoManager::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TGessoManager::initSetEnemies()
 {
-	unk60 = new TGessoPolluteModelManager;
+	unk60 = new TGessoPolluteModelManager("ゲッソーモデル汚染");
 	unk60->init((TLiveActor*)unk18[0]);
 }
 
@@ -208,15 +208,16 @@ static int GessoBodyCallback(J3DNode* param_1, int param_2)
 		local_44[2][3] = 0.0f;
 
 		f32 maxAngle = gpCurGesso->getSaveParams()->mSLBodyAngMax.get();
-		f32 angle = MsClamp(gpCurGesso->mBodyTrackingAngle - 90.0f, -maxAngle,
-		                    maxAngle);
+		f32 angle = gpCurGesso->mBodyTrackingAngle - 90.0f;
+		angle     = MsClamp(angle, -maxAngle, maxAngle);
 
 		Mtx local_74;
-		MsMtxSetRotX(local_74, angle);
+		MtxPtr rot = local_74;
+		MsMtxSetRotX(rot, angle);
 
-		MTXConcat(anmMtx, local_74, anmMtx);
+		MTXConcat(anmMtx, rot, anmMtx);
 		MTXConcat(anmMtx, local_44, anmMtx);
-		MTXConcat(J3DSys::mCurrentMtx, local_74, J3DSys::mCurrentMtx);
+		MTXConcat(J3DSys::mCurrentMtx, rot, J3DSys::mCurrentMtx);
 		MTXConcat(J3DSys::mCurrentMtx, local_44, J3DSys::mCurrentMtx);
 	}
 	return true;
@@ -379,8 +380,19 @@ void TGesso::walkBehavior(int param_1, float param_2)
 	if (getCurAnmFrameNo(0) > 20.0f)
 		TWalkerEnemy::walkBehavior(param_1, param_2);
 
-	if (param_1 == 2)
-		polluteBehavior();
+	if (param_1 == 2) {
+		mPollutionTimer += 1;
+		if (checkCurAnmEnd(0)
+		    && mSpine->getCurrentNerve() != &TNerveGessoPollute::theNerve()
+		    && mPollutionTimer > unk1E8->mSLPollutionInterval.get()
+		    && MsIsInSight(mPosition, getSightDirection(), SMS_GetMarioPos(),
+		                   unk1E8->mSLPollutionLength.get(),
+		                   unk1E8->mSLSearchAngleOnObj.get(), 0.0f)) {
+			mPollutionTimer = 0;
+			mPolluteObj->kill();
+			mSpine->pushNerve(&TNerveGessoPollute::theNerve());
+		}
+	}
 
 	if (0 < unk1B4 && unk1B4 < 300)
 		unk1B4 += 1;
@@ -778,7 +790,8 @@ void TGesso::turnIn()
 
 bool TGesso::turning()
 {
-	if (mTurnAngle + 7.2f <= 180.0f) {
+	f32 next = 7.2f + mTurnAngle;
+	if (next <= 180.0f) {
 		mBodyTrackingAngle = 90.0f;
 		mRotation.y += 7.2f;
 		mTurnAngle += 7.2f;
@@ -989,7 +1002,20 @@ DEFINE_NERVE(TNerveGessoStay, TLiveActor)
 		self->setWaitAnm();
 
 	self->rollCheck();
-	self->polluteBehavior();
+	{
+		self->mPollutionTimer += 1;
+		if (self->checkCurAnmEnd(0)
+		    && self->mSpine->getCurrentNerve() != &TNerveGessoPollute::theNerve()
+		    && self->mPollutionTimer > self->unk1E8->mSLPollutionInterval.get()
+		    && MsIsInSight(self->mPosition, self->getSightDirection(),
+		                   SMS_GetMarioPos(),
+		                   self->unk1E8->mSLPollutionLength.get(),
+		                   self->unk1E8->mSLSearchAngleOnObj.get(), 0.0f)) {
+			self->mPollutionTimer = 0;
+			self->mPolluteObj->kill();
+			self->mSpine->pushNerve(&TNerveGessoPollute::theNerve());
+		}
+	}
 
 	return false;
 }
@@ -1022,7 +1048,6 @@ DEFINE_NERVE(TNerveGessoFreeze, TLiveActor)
 		if (self->isBckAnm(10)) {
 			self->setBckAnm(9);
 		} else if (self->isBckAnm(9)) {
-			bool wentToAnm8 = false;
 			if (spine->getTime() > self->unk1E8->mSLFreezeWait.get()) {
 				u8 tmp = self->unk165;
 				if (tmp != 0)
@@ -1030,12 +1055,12 @@ DEFINE_NERVE(TNerveGessoFreeze, TLiveActor)
 
 				if (tmp == 0) {
 					self->setBckAnm(8);
-					wentToAnm8 = true;
+					goto anm8;
 				}
 			}
 
-			if (!wentToAnm8)
-				self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(0.0f);
+			self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(0.0f);
+		anm8:;
 		} else if (self->isBckAnm(8)) {
 			return true;
 		}

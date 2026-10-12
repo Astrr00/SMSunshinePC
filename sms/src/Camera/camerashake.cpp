@@ -173,12 +173,13 @@ void TCameraShake::execShake(const JGeometry::TVec3<f32>& origin,
 	}
 
 	JGeometry::TVec3<f32> dir;
+	JGeometry::TVec3<f32> oldUp;
 	unitVecTo(origin, origPos, &dir);
 
 	JGeometry::TRotation3<TMtx33f> rot(
 	    dir, -(0.017453294f * (0.005493164f * (f32)mRollAccum)));
 
-	JGeometry::TVec3<f32> oldUp = *up;
+	oldUp = *up;
 	char trash[56];
 
 	up->x = oldUp.x * rot.at(0, 0) + oldUp.y * rot.at(1, 0)

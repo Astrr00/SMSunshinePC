@@ -81,10 +81,10 @@ BOOL TRailMapObj::moveToNextNode(float param_1)
 		return result;
 	}
 
-	JGeometry::TVec3<f32> local_40
+	JGeometry::TVec3<f32> local_34
 	    = unk138->unk0->indexToPoint(unk138->mCurrIdx);
-	JGeometry::TVec3<f32> local_34;
-	local_34.sub(local_40, mPosition);
+	local_34.sub(mPosition);
+	char trash[0x28];
 	if (local_34.squared() < param_1 * param_1 * 2.0f || unk13C == 0) {
 		readRailFlag();
 		unk138->unk0->getGraphNode(unk138->mCurrIdx).getPoint(mPosition);
@@ -388,84 +388,97 @@ void TRailBlock::control()
 	calcEntryRadius();
 
 	checkMarioRiding();
-	if (calcRecycle() || checkRailFlag(2))
-		return;
+	if (!calcRecycle() && !checkRailFlag(2)) {
+		if (moveToNextNode(unk144)) {
+			TGraphWeb* graph = unk138->unk0;
+			TGraphNode& node = graph->getGraphNode(unk138->mCurrIdx);
+			if (node.getRailNode()->mFlags & 0x1000) {
+				unk14A = 180;
+				unk148 = 2;
+			}
 
-	if (moveToNextNode(unk144)) {
-		TGraphNode& node = unk138->getCurrent();
-		if (node.getRailNode()->mFlags & 0x1000) {
-			unk14A = 180;
-			unk148 = 2;
-		}
+			unk138->moveToShortestNext();
 
-		unk138->moveToShortestNext();
+			TRailNode* nextNode = unk138->getCurrent().getRailNode();
+			u16 speed           = nextNode->mSpeed;
+			if (speed != 0xffff)
+				unk144 = speed * 0.01f;
 
-		TRailNode* nextNode = unk138->getCurrent().getRailNode();
-		u16 speed           = nextNode->mSpeed;
-		if (speed != 0xffff)
-			unk144 = speed * 0.01f;
+			f32 spd = unk144;
+			JGeometry::TVec3<f32> nextPoint
+			    = unk138->unk0->indexToPoint(unk138->mCurrIdx);
+			f32 step = VECDistance(&nextPoint, &mPosition) / spd;
+			unk13C   = step;
 
-		JGeometry::TVec3<f32> nextPoint
-		    = unk138->unk0->indexToPoint(unk138->mCurrIdx);
-		f32 step = VECDistance(&nextPoint, &mPosition) / unk144;
-		unk13C   = step;
-
-		if (checkRailFlag(2)) {
-			MTXIdentity(unk174);
-			unk168.x = 0.0f;
-			unk168.y = 0.0f;
-			unk168.z = 0.0f;
-		} else {
-			unk168 = unk15C;
-
-			Mtx rotMtx;
-			MsMtxSetRotRPH(rotMtx, unk168.x, unk168.y, unk168.z);
-			MTXConcat(rotMtx, unk174, unk174);
-
-			unk168.x = 0.0f;
-			unk168.y = 0.0f;
-			unk168.z = 0.0f;
-
-			JGeometry::TVec3<f32> xAxis(unk174[0][0], unk174[1][0], unk174[2][0]);
-			JGeometry::TVec3<f32> yAxis(unk174[0][1], unk174[1][1], unk174[2][1]);
-			JGeometry::TVec3<f32> zAxis(unk174[0][2], unk174[1][2], unk174[2][2]);
-			PSVECNormalize(&xAxis, &xAxis);
-			PSVECNormalize(&yAxis, &yAxis);
-			PSVECNormalize(&zAxis, &zAxis);
-
-			xAxis.x -= 1.0f;
-			yAxis.y -= 1.0f;
-			zAxis.z -= 1.0f;
-			if (fabsf(xAxis.x) < 0.02f && fabsf(xAxis.y) < 0.02f
-			    && fabsf(xAxis.z) < 0.02f && fabsf(yAxis.x) < 0.02f
-			    && fabsf(yAxis.y) < 0.02f && fabsf(yAxis.z) < 0.02f
-			    && fabsf(zAxis.x) < 0.02f && fabsf(zAxis.y) < 0.02f
-			    && fabsf(zAxis.z) < 0.02f)
+			if (checkRailFlag(2)) {
 				MTXIdentity(unk174);
+				unk168.x = 0.0f;
+				unk168.y = 0.0f;
+				unk168.z = 0.0f;
+			} else {
+				unk168 = unk15C;
+
+				Mtx rotMtx;
+				MsMtxSetRotRPH(rotMtx, unk168.x, unk168.y, unk168.z);
+				MTXConcat(rotMtx, unk174, unk174);
+
+				unk168.x = 0.0f;
+				unk168.y = 0.0f;
+				unk168.z = 0.0f;
+
+				JGeometry::TVec3<f32> xAxis;
+				xAxis.x = unk174[0][0];
+				xAxis.y = unk174[1][0];
+				xAxis.z = unk174[2][0];
+				JGeometry::TVec3<f32> yAxis;
+				yAxis.x = unk174[0][1];
+				yAxis.y = unk174[1][1];
+				yAxis.z = unk174[2][1];
+				JGeometry::TVec3<f32> zAxis;
+				zAxis.x = unk174[0][2];
+				zAxis.y = unk174[1][2];
+				zAxis.z = unk174[2][2];
+				PSVECNormalize(&xAxis, &xAxis);
+				PSVECNormalize(&yAxis, &yAxis);
+				PSVECNormalize(&zAxis, &zAxis);
+
+				xAxis.x -= 1.0f;
+				yAxis.y -= 1.0f;
+				zAxis.z -= 1.0f;
+				if (fabsf(xAxis.x) < 0.02f && fabsf(xAxis.y) < 0.02f
+				    && fabsf(xAxis.z) < 0.02f && fabsf(yAxis.x) < 0.02f
+				    && fabsf(yAxis.y) < 0.02f && fabsf(yAxis.z) < 0.02f
+				    && fabsf(zAxis.x) < 0.02f && fabsf(zAxis.y) < 0.02f
+				    && fabsf(zAxis.z) < 0.02f)
+					MTXIdentity(unk174);
+			}
+
+			JGeometry::TVec3<f32> point;
+			TGraphNode& rotateNode = graph->getGraphNode(unk138->mCurrIdx);
+			rotateNode.getPoint(&point);
+			f32 rotateStep      = VECDistance(&mPosition, &point) / unk144;
+			TRailNode* railNode = rotateNode.getRailNode();
+			f32 pitch           = railNode->mPitch;
+			f32 yaw             = railNode->mYaw;
+			f32 roll            = railNode->mRoll;
+			unk15C.x            = pitch;
+			unk15C.y            = yaw;
+			unk15C.z            = roll;
+			unk150              = MsAngleDiff(unk15C.x, unk168.x) / rotateStep;
+			unk154              = MsAngleDiff(unk15C.y, unk168.y) / rotateStep;
+			unk158              = MsAngleDiff(unk15C.z, unk168.z) / rotateStep;
+		} else {
+			mRotation.x += unk150;
+			mRotation.y += unk154;
+			mRotation.z += unk158;
+			unk168.x += unk150;
+			unk168.y += unk154;
+			unk168.z += unk158;
+
+			mRotation.x = MsWrap<f32>(mRotation.x, 0.0f, 360.0f);
+			mRotation.y = MsWrap<f32>(mRotation.y, 0.0f, 360.0f);
+			mRotation.z = MsWrap<f32>(mRotation.z, 0.0f, 360.0f);
 		}
-
-		JGeometry::TVec3<f32> point;
-		TGraphNode& rotateNode = unk138->getCurrent();
-		rotateNode.getPoint(&point);
-		f32 rotateStep      = VECDistance(&mPosition, &point) / unk144;
-		TRailNode* railNode = rotateNode.getRailNode();
-		unk15C.x            = railNode->mPitch;
-		unk15C.y            = railNode->mYaw;
-		unk15C.z            = railNode->mRoll;
-		unk150              = MsAngleDiff(unk15C.x, unk168.x) / rotateStep;
-		unk154              = MsAngleDiff(unk15C.y, unk168.y) / rotateStep;
-		unk158              = MsAngleDiff(unk15C.z, unk168.z) / rotateStep;
-	} else {
-		mRotation.x += unk150;
-		mRotation.y += unk154;
-		mRotation.z += unk158;
-		unk168.x += unk150;
-		unk168.y += unk154;
-		unk168.z += unk158;
-
-		mRotation.x = MsWrap<f32>(mRotation.x, 0.0f, 360.0f);
-		mRotation.y = MsWrap<f32>(mRotation.y, 0.0f, 360.0f);
-		mRotation.z = MsWrap<f32>(mRotation.z, 0.0f, 360.0f);
 	}
 }
 
@@ -515,6 +528,7 @@ void TRollBlock::calcRootMatrix()
 
 	Mtx rot;
 	MsMtxSetRotZ(rot, unk138);
+	char trash[4];
 	MTXConcat(mtx, rot, mtx);
 }
 
@@ -587,9 +601,20 @@ BOOL TWoodBlock::calcRecycle()
 	return 0;
 }
 
+#pragma dont_inline on
+static void railMapObjLoad(TRailMapObj* obj, JSUMemoryInputStream& stream) { obj->TRailMapObj::load(stream); }
+#pragma dont_inline off
+
 void TWoodBlock::load(JSUMemoryInputStream& stream)
 {
-	TNormalLift::load(stream);
+	railMapObjLoad(this, stream);
+	stream >> unk154;
+	if (unk154 > 0.0f && mMapCollisionManager) {
+		TMapCollisionBase* col = mMapCollisionManager->getUnk8();
+		col->setAllBGType(7);
+		col->setAllActor(this);
+		col->setAllData(unk154);
+	}
 
 	s32 local_20, local_24, local_28, local_2C;
 	stream >> local_20 >> local_24 >> local_28 >> local_2C;

@@ -33,6 +33,23 @@ static u32 scNormalStageTable[] = {
 	0, 1, 2, 3, 4, 0xD, 6, 8, 9, 0xA,
 };
 
+// retail calls these TExPane inlines out of line from perform
+#pragma dont_inline on
+static void exPaneAlphaOutOfLine(TExPane* p, s32 t, s16 a, s16 b)
+{
+	p->setPaneAlpha(t, a, b);
+}
+static void exPaneSizeOutOfLine(TExPane* p, s32 t, s32 a, s32 b, s32 c, s32 d)
+{
+	p->setPaneSize(t, a, b, c, d);
+}
+static void exPaneOffsetOutOfLine(TExPane* p, s32 t, s32 a, s32 b, s32 c,
+                                  s32 d)
+{
+	p->setPaneOffset(t, a, b, c, d);
+}
+#pragma dont_inline off
+
 void TGuide::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 	if (setup_wait) {
@@ -106,21 +123,31 @@ void TGuide::perform(u32 cue, JDrama::TGraphics* graphics)
 			if (unkC0->checkFrameMeaning(TMarioGamePad::MEANING_MENU_A
 			                             | TMarioGamePad::MEANING_MENU_B)) {
 				s16 stage = mStage;
-				unk428->setPaneAlpha(20, 0, 255);
+				exPaneAlphaOutOfLine(unk428, 20, 0, 255);
 				JUTRect from = unk218[stage];
 				JUTRect to   = mStagePane[stage]->getBounds();
 				SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_TALK_MODE_OUT, 0,
 				                                   nullptr, 0);
 
-				unk424->setCenteredSize(20, 0, 0, from.getWidth(),
-				                        from.getHeight());
+				exPaneSizeOutOfLine(unk424, 20, 0, 0, from.getWidth(),
+				                    from.getHeight());
+				exPaneOffsetOutOfLine(
+				    unk424, 20,
+				    (unk424->mInitialBounds.x2 - unk424->mInitialBounds.x1) * 0.5f,
+				    (unk424->mInitialBounds.y2 - unk424->mInitialBounds.y1) * 0.5f,
+				    (unk424->mInitialBounds.x2 - unk424->mInitialBounds.x1
+				     - from.getWidth())
+				        * 0.5f,
+				    (unk424->mInitialBounds.y2 - unk424->mInitialBounds.y1
+				     - from.getHeight())
+				        * 0.5f);
 
 				// NOTE: retail uses from.x1 for both axes
 				unk424->setPaneOffset(20, to.x1 - from.x1, to.y1 - from.x1 - 40,
 				                      0, 0);
 
-				mCursor[0]->setPaneAlpha(20, 255, 0);
-				mCursor[1]->setPaneAlpha(20, 80, 0);
+				exPaneAlphaOutOfLine(mCursor[0], 20, 255, 0);
+				exPaneAlphaOutOfLine(mCursor[1], 20, 80, 0);
 				mState = 3;
 			} else if (unkC0->testTrigger(JUTGamePad::Z)) {
 				mState = 7;
@@ -205,6 +232,7 @@ void TGuide::placeMario()
 	}
 
 	JGeometry::TVec3<f32> pos = *gpMarioPos;
+	char trash[0x78];
 	int mapWidth              = unk434.getWidth();
 	int mapHeight             = unk434.getHeight();
 	pos.set(pos.x * mapWidth / 25000.0f, 0.0f, pos.z * mapHeight / 21200.0f);

@@ -1103,6 +1103,7 @@ BOOL TMario::fireDashing()
 
 void TMario::slippingBasic(int statusOnStop, int statusOnFall, int slipAnim)
 {
+	char trash[0x28];
 	isForceSlip();
 	if ((mInput & 0x2) && canSlipJump() == 1) {
 		changePlayerStatus(MARIO_STATUS_JUMP, 0, false);

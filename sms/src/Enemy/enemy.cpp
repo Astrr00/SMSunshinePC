@@ -153,7 +153,8 @@ void TSpineEnemy::calcEnemyRootMatrix()
 void TSpineEnemy::calcRootMatrix()
 {
 	if (mHolder && mHolder->getHeldObject() == this) {
-		MtxPtr src = getTakingMtx();
+		MtxPtr src = mHolder->getTakingMtx(); // the holder's matrix, not our own
+		char trash[8];
 		if (src) {
 			getModel()->setBaseTRMtx(src);
 			mPosition.set(src[0][3], src[1][3], src[2][3]);

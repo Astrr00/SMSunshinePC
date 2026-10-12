@@ -396,8 +396,11 @@ DEFINE_NERVE(TNerveMameGessoGraphJumpWander, TLiveActor)
 	}
 
 	if (self->unk1EC != 0) {
-		// retail reads the ground BG type after reaching the goal, but no path acts on it
-		if (!self->isReachedToGoal()) {
+		if (self->isReachedToGoal()) {
+			// retail reads the ground BG type after reaching the goal, but no path acts on it
+			if (self->isAirborne())
+				self->getGroundPlane()->isWaterSurface();
+		} else {
 			if (!self->isAirborne())
 				self->walkBehavior(2, 1.0f);
 			else
@@ -545,7 +548,6 @@ DEFINE_NERVE(TNerveMameGessoThrown, TLiveActor)
 
 	if (spine->getTime() == 0) {
 		TMameGessoSaveLoadParams* params = self->getSaveLoadParam();
-
 		f32 power = *gpMarioThrowPower;
 		f32 rate  = params->mSLThrownRateXZ.get();
 		JGeometry::TVec3<f32> vel;

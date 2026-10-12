@@ -6,7 +6,7 @@
 #include <MSound/MSound.hpp>
 #include <MSound/MSoundSE.hpp>
 #include <System/Application.hpp>
-#include <System/StageUtil.hpp>
+u8 SMS_getShineStage(u8);
 #include <System/FlagManager.hpp>
 #include <System/MarDirector.hpp>
 #include <System/EmitterViewObj.hpp>
@@ -827,13 +827,14 @@ void TShine::loadBeforeInit(JSUMemoryInputStream& stream)
 		unk154 = 1;
 
 	s32 eventId;
-	char trash[8];
+	char trash[4];
 	stream >> eventId;
 	if (eventId == -1)
 		eventId = 120;
 	setEventId(eventId);
 
 	s32 v;
+	char trash2[4];
 	stream >> v;
 	eventId = v;
 	if (v + 1 >= 2)
@@ -932,7 +933,8 @@ void TEggYoshi::touchFruit(THitActor* fruit)
 		unk148->getFrameCtrl(ANM_TYPE_BTP)->setFrame(11.0f);
 		f32 dx = fruit->mPosition.x - mPosition.x;
 		f32 dz = fruit->mPosition.z - mPosition.z;
-		mRotation.y = (360.0f / 65536.0f) * matan(dz, dx);
+		s16 ang = matan(dz, dx);
+		mRotation.y = (360.0f / 65536.0f) * ang;
 		mState = 0xB;
 		unk150 = fruit;
 		SMSGetMSound()->startSoundSystemSE(MSD_SE_SY_COLLECT_PRETTY, 0, nullptr,

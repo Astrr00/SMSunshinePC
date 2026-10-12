@@ -472,7 +472,7 @@ void CPolarSubCamera::doLButtonCameraOn_()
 {
 	if (!isLButtonCameraSpecifyMode(mMode) && !isLButtonCameraInbetween()) {
 		unk282 = 60;
-		SMSGetMSound()->startSoundSystemSE(0x4824, 0, nullptr, 0);
+		gpMSound->startSoundSystemSE(0x4824, 0, nullptr, 0);
 		changeCamMode_(CAMERA_MODE_L_NORMAL);
 	}
 }
@@ -567,8 +567,10 @@ bool CPolarSubCamera::isChangeToParallelCameraCByMoveBG_() const
 
 // TODO: inlining is NOT working out in a bunch of places in this function,
 // hence the hacks above...
+#pragma inline_depth(2)
 void CPolarSubCamera::execCameraModeChangeProc_(int param_1)
 {
+	char trash[0x50];
 	if (SMS_isMultiPlayerMap()) {
 		changeCamMode_(CAMERA_MODE_MULTI_PLAYER);
 		return;
@@ -615,23 +617,20 @@ void CPolarSubCamera::execCameraModeChangeProc_(int param_1)
 			} else if (unk120->checkFrameMeaning(
 			               TMarioGamePad::MEANING_Y
 			               | TMarioGamePad::MEANING_CAM_L)) {
-				bool doCheck = true;
 				if (unk120->checkFrameMeaning(TMarioGamePad::MEANING_Y)) {
 					if (unk282 != 0)
-						doCheck = false;
-					else
-						execNoticeOnOffProc_((EnumNoticeOnOffMode)2);
+						goto skip;
+					execNoticeOnOffProc_((EnumNoticeOnOffMode)2);
 				}
-				if (doCheck) {
-					if (unk64 & CAMERA_FLAG_NOTICE_ACTIVE) {
-						doLButtonCameraOn_();
-					} else if (!isLButtonCameraInbetween()) {
-						execFrontRotate_();
-					}
+				if (unk64 & CAMERA_FLAG_NOTICE_ACTIVE) {
+					doLButtonCameraOn_();
+				} else if (!isLButtonCameraInbetween()) {
+					execFrontRotate_();
 				}
 			}
 		}
 	}
+skip:
 
 	if (prevMode != mMode)
 		return;

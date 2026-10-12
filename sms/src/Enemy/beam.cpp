@@ -113,8 +113,13 @@ void TConeBeam::calcVertices(int count)
 			mVtx[i] = local_11c;
 		}
 	} else {
-		JGeometry::TPartition3<f32> partition(mBGCheckData->getNormal(),
-		                                      mBGCheckData->getPlaneDistance());
+		const JGeometry::TVec3<f32>& pn = mBGCheckData->getNormal();
+		f32 pd = mBGCheckData->getPlaneDistance();
+		JGeometry::TPartition3<f32> partition;
+		partition.mNormal.x = pn.x;
+		partition.mNormal.y = pn.y;
+		partition.mNormal.z = pn.z;
+		partition.mDist     = pd;
 		f32 local_128Len = PSVECMag(&local_128);
 		f32 angle        = matan(local_128Len, mScale)
 		            * (360.0f / 65536.0f); // this is SHORT2DEGANGLE constant
@@ -136,6 +141,9 @@ void TConeBeam::calcVertices(int count)
 			            &local_f8);
 			mVtx[i] = local_f8;
 		}
+	}
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
 	}
 }
 

@@ -214,17 +214,29 @@ static inline void MsGetRotFromZaxisX2(const JGeometry::TVec3<f32>& axis,
 JGeometry::TVec3<f32> MsGetRotFromZaxis(const JGeometry::TVec3<f32>& param_1)
 {
 	char trash[0x4];
+
 	JGeometry::TVec3<f32> result;
+
 	result.zero();
 
+
+
 	JGeometry::TVec3<f32> axis = param_1;
+
 	char trash2[0xc];
+
 	axis.normalize();
 
+
+
 	MsGetRotFromZaxisX2(axis, &result.x);
+
 	MsGetRotFromZaxisY2(axis, &result.y);
 
+
+
 	return result;
+
 }
 
 void MsMtxSetRotRPH(MtxPtr param_1, f32 r, f32 p, f32 h)

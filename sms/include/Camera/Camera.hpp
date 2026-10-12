@@ -161,18 +161,8 @@ public:
 	}
 
 private:
-	// In-class so mwcc inlines it at both call sites (retail has no symbol).
-	void calcExternalData_()
-	{
-		CLBCrossToPolar(mTarget, mPosition, &unk256, &unk258);
-
-		unk25C.set(unk148.x - unk124.x, unk148.y - unk124.y,
-		           unk148.z - unk124.z);
-		unk25C.normalize();
-		unk270 = MsClamp(CLBCalcRatio(mCurrentParams->mXAngleMin,
-		                              mCurrentParams->mXAngleMax, unk256),
-		                 0.0f, 1.0f);
-	}
+	// Defined inline in cameragc.cpp (retail has no symbol).
+	void calcExternalData_();
 
 	void calcSecureViewTarget_(s16, f32*, f32*);
 	void execSecureView_(s16, Vec*);

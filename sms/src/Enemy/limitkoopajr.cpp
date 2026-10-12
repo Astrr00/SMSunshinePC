@@ -160,6 +160,19 @@ BOOL TLimitKoopaJr::receiveMessage(THitActor*, u32 message)
 	return false;
 }
 
+#pragma dont_inline on
+static f32 dotV(const JGeometry::TVec3<f32>& a, const JGeometry::TVec3<f32>& b)
+{
+	return a.dot(b);
+}
+static void scaleV(JGeometry::TVec3<f32>& d, f32 s,
+                   const JGeometry::TVec3<f32>& b)
+{
+	d.scale(s, b);
+}
+static f32 invSqrtV(f32 x) { return JGeometry::TUtil<f32>::inv_sqrt(x); }
+#pragma dont_inline off
+
 void TLimitKoopaJr::moveRun()
 {
 	char trash[0x38]; // unused stack slot (present in the retail frame)
@@ -191,7 +204,14 @@ void TLimitKoopaJr::moveRun()
 		tangent.negate();
 
 	JGeometry::TVec3<f32> tangent2 = tangent;
-	tangent2.normalize();
+	{
+		f32 lsq = dotV(tangent2, tangent2);
+		if (lsq <= JGeometry::TUtil<f32>::epsilon())
+			tangent2.zero();
+		else
+			scaleV(tangent2, 1.0f * invSqrtV(lsq),
+			       tangent2);
+	}
 	TDirectionCalc faceDir(tangent2);
 	mFaceDir.mDirection = mFaceDir.calcTurnDirection(
 	    faceDir.mDirection,

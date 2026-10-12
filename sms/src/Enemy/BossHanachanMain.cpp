@@ -79,6 +79,7 @@ void TBossHanachan::removeAllMapCollision()
 
 void TBossHanachan::execDamage()
 {
+	char trash[0x28];
 	mSpine->reset();
 	decHitPoints();
 
@@ -188,6 +189,13 @@ void TBossHanachan::execSlip()
 	}
 }
 
+#pragma dont_inline on
+static void Vec3SetOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
+#pragma dont_inline off
+
 void TBossHanachan::execWalk(bool run)
 {
 	if (run) {
@@ -206,11 +214,13 @@ void TBossHanachan::execWalk(bool run)
 		    = unkF4.unk0 ? unkF4.unk0->mPosition : unkF4.unk4;
 		JGeometry::TVec3<f32> pathNode = goal;
 		JGeometry::TVec3<f32> diff;
-		diff.set(pathNode.x - mPosition.x, 0.0f, pathNode.z - mPosition.z);
+		Vec3SetOutOfLine(diff, pathNode.x - mPosition.x, 0.0f,
+		                 pathNode.z - mPosition.z);
 		f32 xx = diff.x * diff.x;
 		f32 yy = diff.y * diff.y;
 		f32 zz = diff.z * diff.z;
-		if (zz + (xx + yy) < CLBSquared<f32>(10.0f))
+		f32 distSq = zz + (xx + yy);
+		if (distSq < CLBSquared<f32>(10.0f))
 			shouldWalk = false;
 	}
 
@@ -220,12 +230,14 @@ void TBossHanachan::execWalk(bool run)
 	const JGeometry::TVec3<f32>& goal
 	    = unkF4.unk0 ? unkF4.unk0->mPosition : unkF4.unk4;
 	JGeometry::TVec3<f32> pathNode = goal;
-	JGeometry::TVec3<f32> diff(pathNode.x - mPosition.x, 0.0f,
-	                           pathNode.z - mPosition.z);
+	JGeometry::TVec3<f32> diff;
+	diff = JGeometry::TVec3<f32>(pathNode.x - mPosition.x, 0.0f,
+	                             pathNode.z - mPosition.z);
 	f32 xx = diff.x * diff.x;
 	f32 yy = diff.y * diff.y;
 	f32 zz = diff.z * diff.z;
-	if (zz + (xx + yy) < CLBSquared<f32>(100.0f)) {
+	f32 distSq = zz + (xx + yy);
+	if (distSq < CLBSquared<f32>(100.0f)) {
 		if (!unk114.empty())
 			switchNextGoalPath();
 		else
@@ -847,6 +859,7 @@ void TBossHanachan::bind()
 		return;
 	}
 
+	char trash[4];
 	JGeometry::TVec3<f32> nextPos = mPosition;
 	nextPos.add(mLinearVelocity);
 	nextPos.add(mVelocity);
@@ -885,6 +898,7 @@ void TBossHanachan::bind()
 	gpMap->isTouchedOneWallAndMoveXZ(&mHeadPos.x, mHeadPos.y + mHeadHeight,
 	                                 &mHeadPos.z, mBodyRadius);
 
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
 	JGeometry::TVec3<f32> wallPush = mHeadPos - before;
 	JGeometry::TVec3<f32> toNext   = nextPos - mPosition;
 	mLinearVelocity                = toNext + wallPush;
@@ -896,6 +910,7 @@ void TBossHanachan::kill() { }
 static void CalcRevisionPosByRotateZ(const JGeometry::TVec3<f32>& rotation,
                                      f32 plusYRate, Vec* position)
 {
+	char trash[0x18];
 	f32 absRotateZ = fabsf(rotation.z);
 	position->y += plusYRate * absRotateZ;
 	if (absRotateZ > 90.0f) {
@@ -903,22 +918,32 @@ static void CalcRevisionPosByRotateZ(const JGeometry::TVec3<f32>& rotation,
 		if (rotation.z > 0.0f)
 			shift = -shift;
 
-		s16 angle = CLBRoundf<s16>(DEG2SHORTANGLE(rotation.y));
-		f32 sinY  = JMASSin(angle);
+		f32 ry = rotation.y;
+		s16 angle = CLBRoundf<s16>(ry * (65536.0f / 360.0f));
 		f32 cosY  = JMASCos(angle);
+		f32 sinY  = JMASSin(angle);
 		f32 x     = shift;
 		f32 z     = 0.0f;
 		position->x += x * cosY + z * sinY;
 		position->z += -x * sinY + z * cosY;
 	}
 }
+
+static void Vec3SubOutOfLine(JGeometry::TVec3<f32>& a,
+                             const JGeometry::TVec3<f32>& b)
+{
+	a.sub(b);
+}
 #pragma dont_inline off
 
 void TBossHanachan::throwMario_(THitActor* thrower)
 {
+	JGeometry::TVec3<f32> dir;
+	JGeometry::TVec3<f32> push;
+	char trash[0x28];
 	JGeometry::TVec3<f32> toMario = *gpMarioPos;
-	toMario -= thrower->mPosition;
-	JGeometry::TVec3<f32> dir = toMario;
+	Vec3SubOutOfLine(toMario, thrower->mPosition);
+	dir = toMario;
 
 	f32 speed;
 	if (dir.squared() <= 0.0000038146973f) {
@@ -934,7 +959,7 @@ void TBossHanachan::throwMario_(THitActor* thrower)
 		f32 power = mMarchSpeed * mChangeSaveParams->mSLThrowTotalPower.get();
 		f32 angleRatio = (1.0f / 32768.0f) * absAngleDiff;
 		f32 ratio      = 1.0f - angleRatio;
-		JGeometry::TVec3<f32> push = mLastLinearVelocity;
+		push = mLastLinearVelocity;
 		f32 pushScale = ratio * mChangeSaveParams->mSLThrowMoveDirPower.get();
 		speed         = ratio * power;
 		push.x *= pushScale;

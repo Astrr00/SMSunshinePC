@@ -52,6 +52,7 @@ void CLBCalc2DFPos(JGeometry::TVec2<f32>* out_ndc_pos, const f32 (*proj_mtx)[4],
                    u32* out_depth, bool disable_z_clip)
 {
 	Vec camSpacePos;
+	char trash[0x14];
 
 	MTXMultVec((MtxPtr)view_mtx, (Vec*)&world_pos, &camSpacePos);
 
@@ -167,6 +168,7 @@ void CLBRotatePosAndUp(s16 sAngle1, s16 sAngle2,
                        JGeometry::TVec3<f32>* param_7)
 
 {
+	char trash[0x18];
 	f32 angle1 = sAngle1 * SHORTANGLE_TO_DEGREES * DEGREES_TO_RADIANS;
 	f32 angle2 = sAngle2 * SHORTANGLE_TO_DEGREES * DEGREES_TO_RADIANS;
 
@@ -191,6 +193,7 @@ bool CLBIsPointInCube(const Vec& param_1, const Vec& param_2,
 	f32 dz = param_1.z - param_2.z;
 
 	bool result = false;
+	char trash[0x40];
 
 	if (param_3.y != 0.0f || param_3.x != 0.0f || param_3.z != 0.0f) {
 		if (param_3.z != 0.0f) {
@@ -243,6 +246,7 @@ void CLBCalcPointInCubeRatio(const Vec& param_1, const Vec& param_2,
 	f32 dx = param_1.x - param_2.x;
 	f32 dy = param_1.y - param_2.y;
 	f32 dz = param_1.z - param_2.z;
+	char trash[0x40];
 
 	if (param_3.z != 0) {
 		s16 zAngle = CLBRoundf<s16>(DEG2SHORTANGLE(-param_3.z));
@@ -372,8 +376,9 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 	// Center point
 	out_grid[4].scaleAdd(near_dist, origin, local_a8);
 
-	f32 xzDistance = clbSqrtOutOfLine(((origin.x - lookat.x) * (origin.x - lookat.x)
-	                                   + (origin.z - lookat.z) * (origin.z - lookat.z)));
+	f32 dz         = origin.z - lookat.z;
+	f32 dx         = origin.x - lookat.x;
+	f32 xzDistance = clbSqrtOutOfLine(dx * dx + dz * dz);
 	out_euler->x   = -matan(xzDistance, origin.y - lookat.y);
 	out_euler->y   = matan(origin.z - lookat.z, origin.x - lookat.x);
 	out_euler->z   = roll;
@@ -437,19 +442,31 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 	f32 fVar6 = -fVar3;
 	f32 fVar7 = -fVar5;
 
-	out_grid[1].scaleAdd(fVar3, out_grid[4], local_68);
+	fVar19.scale(fVar3, local_68);
+	out_grid[1].x = out_grid[4].x + fVar19.x;
+	out_grid[1].y = out_grid[4].y + fVar19.y;
+	out_grid[1].z = out_grid[4].z + fVar19.z;
 	out_grid[7].scaleAdd(fVar6, out_grid[4], local_68);
-	out_grid[3].scaleAdd(fVar7, out_grid[4], local_74);
-	out_grid[5].scaleAdd(fVar5, out_grid[4], local_74);
+
+	// local_74 * -half width, shared by out_grid[3] and the diagonal (retail CSEs it, so no fused madd)
+	JGeometry::TVec3<f32> leftOffset;
+	leftOffset.scale(fVar7, local_74);
+	out_grid[3].x = out_grid[4].x + leftOffset.x;
+	out_grid[3].y = out_grid[4].y + leftOffset.y;
+	out_grid[3].z = out_grid[4].z + leftOffset.z;
+
+	fVar16.scale(fVar5, local_74);
+	out_grid[5].x = out_grid[4].x + fVar16.x;
+	out_grid[5].y = out_grid[4].y + fVar16.y;
+	out_grid[5].z = out_grid[4].z + fVar16.z;
 
 	// Anything below here could be part of CLBCalcNearFourPos?
 
-	fVar16.scale(fVar5, local_74);
-	fVar19.scale(fVar3, local_68);
+	f32 halfPlaneDiagonal = MsSqrtf(fVar5 * fVar5 + fVar3 * fVar3);
 
-	f32 halfPlaneDiagonal = MsSqrtf(fVar3 * fVar3 + fVar5 * fVar5);
-
-	local_90.scaleAdd(fVar7, fVar19, local_74);
+	local_90.x = leftOffset.x + fVar19.x;
+	local_90.y = leftOffset.y + fVar19.y;
+	local_90.z = leftOffset.z + fVar19.z;
 	MsVECNormalize(&local_90, &local_90);
 
 	out_grid[0].scaleAdd(halfPlaneDiagonal, out_grid[4], local_90);

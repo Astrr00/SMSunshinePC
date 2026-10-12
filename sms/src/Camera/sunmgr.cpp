@@ -33,14 +33,15 @@ void TSunMgr::load(JSUMemoryInputStream& stream)
 {
 	JDrama::TViewObj::load(stream);
 
+	char top[4];
+	u32 local_18;
+	u32 local_1c;
+	u32 local_20;
 	u32 local_24;
 	stream >> local_24;
-	u32 local_20;
 	stream >> local_20;
-	u32 local_1c;
 	stream >> local_1c;
-	u32 local_18;
-	char trash[0x40]; // unused stack slot (present in the retail frame)
+	char trash[0x3c]; // unused stack slot (present in the retail frame)
 	stream >> local_18;
 	stream >> unk20;
 

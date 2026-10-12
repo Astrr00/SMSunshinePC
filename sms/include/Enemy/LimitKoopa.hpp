@@ -197,7 +197,6 @@ public:
 class TNerveLimitKoopaHipDropJump : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
 	static const TNerveLimitKoopaHipDropJump& theNerve()
 	{
 		static TNerveLimitKoopaHipDropJump nerve;
@@ -208,7 +207,6 @@ public:
 class TNerveLimitKoopaHipDropStart : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
 	static const TNerveLimitKoopaHipDropStart& theNerve()
 	{
 		static TNerveLimitKoopaHipDropStart nerve;
@@ -221,7 +219,6 @@ class TNerveLimitKoopaTurn : public TNerveBase<TLiveActor> { };
 class TNerveLimitKoopaTumble : public TNerveLimitKoopaTurn {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
 	static const TNerveLimitKoopaTumble& theNerve()
 	{
 		static TNerveLimitKoopaTumble nerve;
@@ -232,7 +229,6 @@ public:
 class TNerveLimitKoopaWait : public TNerveLimitKoopaTurn {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
 	static const TNerveLimitKoopaWait& theNerve()
 	{
 		static TNerveLimitKoopaWait nerve;
@@ -243,7 +239,6 @@ public:
 class TNerveLimitKoopaGetDown : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
 	static const TNerveLimitKoopaGetDown& theNerve()
 	{
 		static TNerveLimitKoopaGetDown nerve;
@@ -254,7 +249,6 @@ public:
 class TNerveLimitKoopaStagger : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
 	static const TNerveLimitKoopaStagger& theNerve()
 	{
 		static TNerveLimitKoopaStagger nerve;
@@ -265,12 +259,10 @@ public:
 class TNerveLimitKoopaGetShowered : public TNerveBase<TLiveActor> {
 public:
 	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
 	static const TNerveLimitKoopaGetShowered& theNerve()
 	{
 		static TNerveLimitKoopaGetShowered nerve;
 		return nerve;
 	}
 };
-
 #endif

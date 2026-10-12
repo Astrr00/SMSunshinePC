@@ -68,6 +68,7 @@ bool TBaseNPC::isNerveMaybeDontCalcAnim1() const
 #pragma dont_inline on
 bool TBaseNPC::isNerveCanGoToTalk() const
 {
+	char trash[8];
 	bool result                         = false;
 	const TNerveBase<TLiveActor>* nerve = mSpine->getLatestNerve();
 	if (nerve == &TNerveNPCGraphWander::theNerve()
@@ -215,6 +216,7 @@ void TBaseNPC::changeNerveToMad_()
 
 void TBaseNPC::releaseTaken_()
 {
+	char trash[8];
 	f32 fVar1 = mPtrSaveNormal->mThrowSpeedXZ.get();
 	s16 uVar4 = CLBDegToShortAngle(unk158->mRotation.y);
 	f32 fVar2 = mPtrSaveNormal->mThrowSpeedY.get();
@@ -259,6 +261,7 @@ void TBaseNPC::behaveToBeTaken_(THitActor* param_1)
 
 void TBaseNPC::behaveToBeTrampled_()
 {
+	char trash[0x10];
 	bool cVar7 = isChild();
 
 	u32 uVar10 = MSD_SE_NPC_COMMON_PRESS;
@@ -341,6 +344,7 @@ void TBaseNPC::behaveToBeTrampled_()
 void TBaseNPC::behaveToHitObject_(THitActor* param_1,
                                   EnumHitNpcObjectKind param_2)
 {
+	char trash[0x30];
 	if (checkActionFlag(NPC_ACTION_BURNING)) {
 		if (param_2 != HIT_NPC_OBJECT_KIND_WATER_SPRAY)
 			return;
@@ -402,6 +406,7 @@ void TBaseNPC::behaveToHitObject_(THitActor* param_1,
 
 void TBaseNPC::behaveToSandBomb_(const TLiveActor* param_1)
 {
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	f32 fVar1 = unk1C8;
 	unk1C8    = SMS_GetSandRiseUpRatio(param_1);
 	if (unk1C8 > fVar1 && unk1C8 > 0.05f && fVar1 > 0.001f
@@ -447,6 +452,7 @@ bool TBaseNPC::isNowCanTaken() const
 
 void TBaseNPC::changeNerveProc_()
 {
+	bool bVar5                                = false;
 	bool bVar4                                = false;
 	const TNerveBase<TLiveActor>* latestNerve = mSpine->getLatestNerve();
 	if (latestNerve == &TNerveNPCTalk::theNerve()) {
@@ -454,7 +460,7 @@ void TBaseNPC::changeNerveProc_()
 		onLiveFlag(LIVE_FLAG_UNK20000);
 		offLiveFlag(LIVE_FLAG_UNK40000);
 	} else {
-		bool bVar5 = false;
+		bVar5 = false;
 		if (checkLiveFlag(LIVE_FLAG_UNK40000)) {
 			bVar5 = true;
 		} else if (mTalkForbidCount == 0 && !isJellyFishMare()
@@ -473,7 +479,7 @@ void TBaseNPC::changeNerveProc_()
 				if (gpMarDirector->mMap == 7) {
 					char trash[0x18];
 					JGeometry::TVec3<f32> local_58 = mPosition;
-					char trash2[0x28];
+					char trash2[0x34];
 					local_58.y += 75.0f;
 					bInCube = SMS_IsInSameCameraCube(local_58);
 				}
@@ -482,8 +488,8 @@ void TBaseNPC::changeNerveProc_()
 					f32 fVar1;
 					f32 fVar2;
 					if (mThrowCtrl != nullptr) {
-						fVar1 = mPtrSaveNormal->mSLThrowTalkAcceptHeight.get();
 						fVar2 = mPtrSaveNormal->mSLThrowTalkAcceptDist.get();
+						fVar1 = mPtrSaveNormal->mSLThrowTalkAcceptHeight.get();
 					} else {
 						if (mActorType == 0x400001A) {
 							fVar2 = mPtrSaveNormal->mSLSunflowerLTalkDist.get();

@@ -416,6 +416,16 @@ void TModelWaterManager::garbageCollect()
 	mParticleCount = nextFreeSlot;
 }
 
+// retail calls TVec3::scale out of line from move()
+#pragma dont_inline on
+static void scaleOutOfLine(JGeometry::TVec3<f32>& v, f32 s) { v.scale(s); }
+static void addOutOfLine(JGeometry::TVec3<f32>& v,
+                         const JGeometry::TVec3<f32>& o)
+{
+	v.add(o);
+}
+#pragma dont_inline off
+
 void TModelWaterManager::move()
 {
 	f32 fVar1 = unk5E08;
@@ -591,19 +601,20 @@ void TModelWaterManager::move()
 						}
 
 						JGeometry::TVec3<f32> local_194 = r27->getNormal();
-						local_194.scale(
-						    r27->mPlaneDistance
-						    + mParticlePositionSOA[i].dot(r27->getNormal()));
+						scaleOutOfLine(
+						    local_194, r27->mPlaneDistance
+						                   + mParticlePositionSOA[i].dot(
+						                       r27->getNormal()));
 
 						mParticlePositionSOA[i] -= local_194;
 
 						if (getFlagBottom4Bits(i) == 1) {
 							JGeometry::TVec3<f32> local_1d4 = r27->getNormal();
-							local_1d4.scale(mParticleSizeSOA[i]);
+							scaleOutOfLine(local_1d4, mParticleSizeSOA[i]);
 
 							JGeometry::TVec3<f32> local_1A4
 							    = mParticlePositionSOA[i];
-							local_1A4 += local_1d4;
+							addOutOfLine(local_1A4, local_1d4);
 							if (MsRandF() < unk5D88[10])
 								gpSplashManager->newSplash(local_1A4, 5.0f);
 
@@ -862,26 +873,24 @@ void TModelWaterManager::calcVMMtxGround(MtxPtr m, f32 scale,
 	f32 cy = p4.y * 2.0f + p3.y;
 	f32 nx = -sx;
 	f32 cx = p4.x * 2.0f + p3.x;
+
+	f32 b = m[0][1];
+	f32 a = m[0][0];
 	f32 sz = scale * p4.z;
 	f32 cz = p4.z * 2.0f + p3.z;
 	f32 nz = -sz;
-
-	{
-		f32 b = m[0][1];
-		f32 c = m[0][2];
-		f32 d = m[0][3];
-		f32 a = m[0][0];
-		out[0][0] = a * sy + b * nx;
-		out[0][1] = c * sz + (a * sx + b * sy);
-		out[0][2] = b * nz + c * sy;
-		out[0][3] = d + (c * cz + (a * cx + b * cy));
-	}
+	f32 c = m[0][2];
+	f32 d = m[0][3];
+	out[0][0] = a * sy + b * nx;
+	out[0][1] = c * sz + (a * sx + b * sy);
+	out[0][2] = b * nz + c * sy;
+	out[0][3] = d + (c * cz + (a * cx + b * cy));
 
 	{
 		f32 b = m[1][1];
+		f32 a = m[1][0];
 		f32 c = m[1][2];
 		f32 d = m[1][3];
-		f32 a = m[1][0];
 		out[1][0] = a * sy + b * nx;
 		out[1][1] = c * sz + (a * sx + b * sy);
 		out[1][2] = b * nz + c * sy;
@@ -890,9 +899,9 @@ void TModelWaterManager::calcVMMtxGround(MtxPtr m, f32 scale,
 
 	{
 		f32 b = m[2][1];
+		f32 a = m[2][0];
 		f32 c = m[2][2];
 		f32 d = m[2][3];
-		f32 a = m[2][0];
 		out[2][0] = a * sy + b * nx;
 		out[2][1] = c * sz + (a * sx + b * sy);
 		out[2][2] = b * nz + c * sy;
@@ -1484,7 +1493,7 @@ void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 		GXColor local_28;
 		local_28.a = f32(0xff - r27) / r31 + 0.5f;
 		GXSetTevColor(GX_TEVREG0, local_28);
-		GXSetZMode(GX_TRUE, GX_GREATER, GX_TRUE);
+		GXSetZMode(GX_TRUE, GX_GREATER, GX_FALSE); // asm: retail update_enable = 0
 		GXClearVtxDesc();
 		GXSetVtxDesc(GX_VA_POS, GX_INDEX16);
 		GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_CLR_RGBA, GX_RGBA4, 15);

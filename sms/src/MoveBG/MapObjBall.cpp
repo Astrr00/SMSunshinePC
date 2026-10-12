@@ -191,6 +191,7 @@ void TMapObjBall::hold(TTakeActor* actor)
 		TMapObjGeneral::hold(actor);
 		mVelocity.x = mVelocity.y = mVelocity.z = 0.0f;
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TMapObjBall::kicked()
@@ -783,6 +784,7 @@ u32 TResetFruit::touchWater(THitActor* water)
 	TMapObjBall::touchWater(water);
 	makeObjLiving();
 	return 1;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TResetFruit::touchActor(THitActor* other)
@@ -875,7 +877,7 @@ void TResetFruit::breaking()
 	mtx[1][3] = mBodyRadius * mScaling.y + mPosition.y;
 
 	if (mScaling.y < 0.2f) {
-		mPosition.y += 0.5f * mBodyRadius;
+		mPosition.y += mBodyRadius * 0.5f;
 		mScaling.set(mInitialScaling);
 		emitAndScale(0xE5, 0, &mPosition);
 		SMSGetMSound()->startSoundActor(0x387D, &mPosition, 0, nullptr, 0, 4);

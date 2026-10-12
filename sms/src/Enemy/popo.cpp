@@ -194,7 +194,9 @@ static BOOL PopoRollCallback(J3DNode* node, int param_2)
 		scaleMtx[2][2] = bodyScale;
 
 		Mtx rotMtx;
-		if (popo->mSpine->getCurrentNerve() != &TNervePopoFly::theNerve()) {
+		if ((popo->mSpine->getCurrentNerve() == &TNervePopoFly::theNerve())
+		        ? false
+		        : true) {
 			MsMtxSetRotX(rotMtx, gpCurPopo->mRollAngle);
 		} else {
 			MsMtxSetRotY(rotMtx, 180.0f);
@@ -216,7 +218,7 @@ static BOOL PopoPossessedCallback(J3DNode* node, int param_2)
 		    || !(popo->mSpine->getCurrentNerve() == &TNervePopoFly::theNerve()
 		         || popo->mSpine->getCurrentNerve()
 		                == &TNervePopoExplosion::theNerve()
-		         || popo->mIsPossessed))
+		         || (popo->mIsPossessed ? true : false)))
 			return true;
 
 		f32 scale = gpCurPopo->mWaterScale;
@@ -284,7 +286,7 @@ static BOOL PopoNonScaleCallback(J3DNode* node, int param_2)
 		    || !(popo->mSpine->getCurrentNerve() == &TNervePopoFly::theNerve()
 		         || popo->mSpine->getCurrentNerve()
 		                == &TNervePopoExplosion::theNerve()
-		         || popo->mIsPossessed))
+		         || (popo->mIsPossessed ? true : false)))
 			return true;
 
 		u16 jntNo  = ((J3DJoint*)node)->getJntNo();
@@ -533,7 +535,7 @@ void TPopo::behaveToFindMario()
 {
 	TPopoManager* manager = (TPopoManager*)mManager;
 	if (0) {
-		(void)TPathNode((THitActor*)gpMarioAddress);
+		(void)(GXColor){1, 2, 3, 4};
 	}
 	if (SMS_CheckMarioFlag(MARIO_FLAG_HAS_FLUDD) && manager->mIsNozzleFree
 	    && (int)SMS_GetMarioWaterGun()->mCurrentNozzle == 0
@@ -543,6 +545,9 @@ void TPopo::behaveToFindMario()
 		mSpine->pushAfterCurrent(&TNervePopoAttack::theNerve());
 	} else {
 		mSpine->pushAfterCurrent(&TNerveWalkerGraphWander::theNerve());
+	}
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
 	}
 }
 
@@ -853,6 +858,15 @@ void TPopo::flyBehavior()
 
 void TPopo::explosion()
 {
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+		(void)(GXColor) { 1, 2, 3, 4 };
+	}
 	if (mWaterScale > 1.0f)
 		mWaterScale *= 0.9f;
 

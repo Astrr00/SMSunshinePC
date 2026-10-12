@@ -268,6 +268,15 @@ void THauntLeg::calcRootMatrix()
 		mHauntedObject->mPosition.z = jointMtx[2][3];
 	}
 
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	checkHit(mHauntedObject);
 }
 

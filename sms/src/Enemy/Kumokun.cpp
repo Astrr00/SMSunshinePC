@@ -173,15 +173,24 @@ void TKumokun::initCollision()
 	initAttachPlane();
 }
 
+#pragma dont_inline on
+static void setVecOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
+{
+	v.set(x, y, z);
+}
+#pragma dont_inline off
+
 void TKumokun::initAttachPlane()
 {
 	// asm 0x80332D9C: center.y includes mHeadHeight
-	TBGWallCheckRecord record(mPosition.x, mPosition.y + mHeadHeight,
-	                          mPosition.z, 100.0f, 1, 0);
+	TBGWallCheckRecord record;
+	setVecOutOfLine(record.mCenter, mPosition.x, mPosition.y + mHeadHeight, mPosition.z);
+	record.mRadius     = 100.0f;
+	record.mMaxResults = 1;
+	record.mFlags      = 0;
 
-	const TBGCheckData* wall = gpMap->isTouchedWallsAndMoveXZ(&record)
-	                               ? record.mResultWalls[0]
-	                               : nullptr;
+	int touched              = gpMap->isTouchedWallsAndMoveXZ(&record);
+	const TBGCheckData* wall = touched > 0 ? record.mResultWalls[0] : nullptr;
 	if (wall) {
 		unk198 = wall;
 		JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
@@ -234,8 +243,7 @@ void TKumokun::bind()
 	}
 
 	JGeometry::TVec3<f32> local_168 = mLinearVelocity;
-	JGeometry::TVec3<f32> local_104 = mVelocity;
-	local_168 += local_104;
+	local_168 += JGeometry::TVec3<f32>(mVelocity);
 
 	bool bVar7;
 
@@ -351,8 +359,7 @@ bool TKumokun::checkOnMovingFloor(JGeometry::TVec3<f32>* param_1,
 {
 	bool uVar7 = false;
 
-	JGeometry::TVec3<f32> local_1C = param_3;
-	JGeometry::TVec3<f32> local_98 = local_1C;
+	JGeometry::TVec3<f32> local_98 = JGeometry::TVec3<f32>(param_3);
 	JGeometry::TVec3<f32> local_8C = local_98;
 
 	local_8C += param_4;
@@ -497,8 +504,9 @@ void TKumokun::bindOnFlying()
 
 void TKumokun::moveObject()
 {
+	char trash[8];
 	if (unk1D0 > 0)
-		unk1D0 -= 1;
+		unk1D0--;
 
 	updateAnimation();
 
@@ -750,10 +758,9 @@ void TKumokun::decideTargetAtDir(const JGeometry::TVec3<f32>& param_1)
 
 	local_C4.y = 0.0f;
 	local_C4.normalize();
-
-	JGeometry::TVec3<f32> forward(0.0f, 0.0f, 1.0f);
-
 	JGeometry::TQuat4<f32> local_A4;
+	char trash[0x1c];
+	JGeometry::TVec3<f32> forward(0.0f, 0.0f, 1.0f);
 	if (is_antiparallel(local_C4, forward)) {
 		local_A4.setEulerY(JGeometry::TUtil<f32>::PI());
 	} else {
@@ -797,10 +804,9 @@ TKumokun::rotateGoalDirToLocal(const JGeometry::TVec3<f32>& param_1) const
 	JGeometry::TQuat4<f32> inv = getQuat();
 	inv.conjugate();
 
-	JGeometry::TVec3<f32> result;
-	inv.rotate(diff, result);
+	inv.rotate(diff, diff);
 
-	return result;
+	return diff;
 }
 
 bool TKumokun::doAdjustTarget()
@@ -946,7 +952,8 @@ const TBGCheckData* TKumokun::checkWallPlane(JGeometry::TVec3<f32>* param_1,
 	                          param_3, 1, 0);
 
 	const TBGCheckData* wall = nullptr;
-	if (gpMap->isTouchedWallsAndMoveXZ(&record))
+	int touched              = gpMap->isTouchedWallsAndMoveXZ(&record);
+	if (touched > 0)
 		wall = record.mResultWalls[0];
 
 	param_1->x = record.mCenter.x;
@@ -1131,6 +1138,7 @@ DEFINE_NERVE(TNerveKumokunSearch, TLiveActor)
 
 DEFINE_NERVE(TNerveKumokunWait, TLiveActor)
 {
+	char trash[8];
 	TKumokun* self = (TKumokun*)spine->getBody();
 
 	if (spine->getTime() == 0) {

@@ -25,6 +25,8 @@ int KoopaNeckCallBack(J3DNode*, int);
 
 } // namespace
 
+
+
 // ============= params =============
 
 inline TLimitKoopaParams::TLimitKoopaParams(const char* path)
@@ -128,6 +130,7 @@ TLimitKoopaManager::TLimitKoopaManager(const char* name)
 
 void TLimitKoopa::setUpHitActors()
 {
+	char trash[0x14];
 	MtxPtr headMtx = mMActor->getModel()->getAnmMtx(mHeadJntIdx);
 
 	if (isBreathing()) {
@@ -183,6 +186,13 @@ f32 TLimitKoopa::getGravityY() const
 	return getParam()->hipDropGravityY.get();
 }
 
+#pragma dont_inline on
+static f32 InvSqrtOutOfLine(f32 mag)
+{
+	return JGeometry::TUtil<f32>::inv_sqrt(mag);
+}
+#pragma dont_inline off
+
 void TLimitKoopa::startHipDrop()
 {
 	JGeometry::TVec3<f32> velocity;
@@ -194,6 +204,7 @@ void TLimitKoopa::startHipDrop()
 	JGeometry::TVec3<f32> target = *gpMarioPos;
 	target.y                     = mGroundHeight;
 	JGeometry::TVec3<f32> goal;
+	char trash[0x28];
 	goal.x = mPosition.x + (target.x - mPosition.x);
 	goal.y = mPosition.y + (target.y - mPosition.y);
 	goal.z = mPosition.z + (target.z - mPosition.z);
@@ -201,8 +212,13 @@ void TLimitKoopa::startHipDrop()
 	velocity = calcVelocityToJumpToY(goal, velocity.y,
 	                                 getParam()->hipDropGravityY.get());
 
-	if (velocity.length() > 200.0f) {
-		velocity.normalize();
+	f32 lsq = velocity.squared();
+	if (JGeometry::TUtil<f32>::sqrt(lsq) > 200.0f) {
+		// normalize() with retail's out-of-line inv_sqrt
+		if (lsq <= JGeometry::TUtil<f32>::epsilon())
+			velocity.zero();
+		else
+			velocity.scale(1.0f * InvSqrtOutOfLine(lsq), velocity);
 		velocity.scale(200.0f);
 	}
 
@@ -211,9 +227,29 @@ void TLimitKoopa::startHipDrop()
 	mVelocity.z = velocity.z;
 }
 
+#pragma dont_inline on
+static void Vec3Sub3OutOfLine(JGeometry::TVec3<f32>& dst,
+                              const JGeometry::TVec3<f32>& a,
+                              const JGeometry::TVec3<f32>& b)
+{
+	dst.sub(a, b);
+}
+
+static TSpineEnemyParams* GetSaveParamOutOfLine(const TEnemyManager* manager)
+{
+	return manager->getSaveParam();
+}
+
+static void Vec3SubOutOfLine(JGeometry::TVec3<f32>& a, const JGeometry::TVec3<f32>& b)
+{
+	a.sub(b);
+}
+#pragma dont_inline off
+
 void TLimitKoopa::bind()
 {
 	JGeometry::TVec3<f32> pos = mPosition;
+	char trash[0x10];
 	pos += mLinearVelocity;
 	pos += mVelocity;
 
@@ -225,12 +261,26 @@ void TLimitKoopa::bind()
 	if (pos.y <= 0.05f + mGroundHeight) {
 		pos.y   = mGroundHeight;
 		mLanded = 1;
-		mAcceleration.zero();
-		mVelocity.zero();
+		mAcceleration.x = 0.0f;
+		mAcceleration.y = 0.0f;
+		mAcceleration.z = 0.0f;
+		mVelocity.x = 0.0f;
+		mVelocity.y = 0.0f;
+		mVelocity.z = 0.0f;
 	}
 
-	mLinearVelocity = pos - mPosition;
+	JGeometry::TVec3<f32> d = pos;
+	Vec3SubOutOfLine(d, mPosition);
+	mLinearVelocity = d;
 }
+
+#pragma dont_inline on
+static void Vec3SetOutOfLine(JGeometry::TVec3<f32>& dst,
+                             const JGeometry::TVec3<f32>& src)
+{
+	dst.set(src);
+}
+#pragma dont_inline off
 
 void TLimitKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 {
@@ -266,19 +316,31 @@ void TLimitKoopa::perform(u32 cue, JDrama::TGraphics* graphics)
 			emitter = gpMarioParticleManager->emitAndBindToMtxPtr(
 			    0x1C3, mMActor->getModel()->getAnmMtx(mHeadJntIdx), 1, this);
 			if (emitter != nullptr)
-				emitter->setGlobalScale(scale);
+				{
+				Vec3SetOutOfLine(emitter->mGlobalDynamicsScale, scale);
+				Vec3SetOutOfLine(emitter->mGlobalParticleScale, scale);
+			}
 			emitter = gpMarioParticleManager->emitAndBindToMtxPtr(
 			    0x1C2, mMActor->getModel()->getAnmMtx(mHeadJntIdx), 1, this);
 			if (emitter != nullptr)
-				emitter->setGlobalScale(scale);
+				{
+				Vec3SetOutOfLine(emitter->mGlobalDynamicsScale, scale);
+				Vec3SetOutOfLine(emitter->mGlobalParticleScale, scale);
+			}
 			emitter = gpMarioParticleManager->emitAndBindToMtxPtr(
 			    0x1C1, mMActor->getModel()->getAnmMtx(mHeadJntIdx), 1, this);
 			if (emitter != nullptr)
-				emitter->setGlobalScale(scale);
+				{
+				Vec3SetOutOfLine(emitter->mGlobalDynamicsScale, scale);
+				Vec3SetOutOfLine(emitter->mGlobalParticleScale, scale);
+			}
 			emitter = gpMarioParticleManager->emitAndBindToMtxPtr(
 			    0x1C0, mMActor->getModel()->getAnmMtx(mHeadJntIdx), 1, this);
 			if (emitter != nullptr)
-				emitter->setGlobalScale(scale);
+				{
+				Vec3SetOutOfLine(emitter->mGlobalDynamicsScale, scale);
+				Vec3SetOutOfLine(emitter->mGlobalParticleScale, scale);
+			}
 		}
 	}
 }
@@ -298,6 +360,7 @@ void TLimitKoopa::reset()
 
 void TLimitKoopa::init(TLiveManager* manager)
 {
+	char trash[0xc];
 	mBodyRadius = 800.0f;
 	mHeadHeight = 2000.0f;
 
@@ -380,6 +443,14 @@ void TLimitKoopaHead::attack_(THitActor* other)
 	other->receiveMessage(this, HIT_MESSAGE_ATTACK);
 }
 
+// Retail calls TSpineBase::pushNerve out of line here; the header pragma is inert.
+#pragma dont_inline on
+static void pushNerveOutOfLine(TSpineBase<TLiveActor>* spine, const TNerveBase<TLiveActor>* nerve)
+{
+	spine->pushNerve(nerve);
+}
+#pragma dont_inline off
+
 BOOL TLimitKoopaHead::receiveMessage(THitActor* sender, u32 message)
 {
 	switch (message) {
@@ -394,7 +465,7 @@ BOOL TLimitKoopaHead::receiveMessage(THitActor* sender, u32 message)
 		if (koopa->mSpine->getCurrentNerve()
 		    == &TNerveLimitKoopaStagger::theNerve())
 			koopa->mSpine->setNext(&TNerveLimitKoopaGetShowered::theNerve());
-		koopa->mSpine->pushNerve(&TNerveLimitKoopaGetShowered::theNerve());
+		pushNerveOutOfLine(koopa->mSpine, &TNerveLimitKoopaGetShowered::theNerve());
 		break;
 	}
 	}
@@ -410,12 +481,15 @@ BOOL TLimitKoopaHand::receiveMessage(THitActor* sender, u32 message)
 {
 	return true;
 }
-
 void TLimitKoopaFlame::attack_(THitActor* other)
 {
+	char trash[0x14];
 	if (other->receiveMessage(this, HIT_MESSAGE_UNKA)) {
 		TLimitKoopa* koopa = mOwner;
-		koopa->changeAnm(3, koopa->getParam()->fireSpeed.get());
+		f32 rate = ((TLimitKoopaParams*)GetSaveParamOutOfLine(
+		                (TEnemyManager*)koopa->mManager))
+		               ->fireSpeed.get();
+		koopa->changeAnm(3, rate);
 	}
 }
 
@@ -501,12 +575,16 @@ BOOL TNerveLimitKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 
 	TDirectionCalc target;
 	JGeometry::TVec3<f32> toMario;
-	toMario.sub(*gpMarioPos, koopa->mPosition);
+	char trash[0x8];
+	Vec3Sub3OutOfLine(toMario, *gpMarioPos, koopa->mPosition);
 	toMario.y = 0.0f;
 	target.makeDirection(toMario);
 	f32 targetDir = target.mDirection;
 	koopa->mDirection.mDirection = koopa->mDirection.calcTurnDirection(
-	    targetDir, TDirectionCalc::d2r(koopa->getParam()->rotationSpeed.get()));
+	    targetDir,
+	    TDirectionCalc::d2r(((TLimitKoopaParams*)GetSaveParamOutOfLine(
+	                             (TEnemyManager*)koopa->mManager))
+	                            ->rotationSpeed.get()));
 
 	TDirectionCalc facing;
 	JGeometry::TVec3<f32> toMario2;
@@ -516,7 +594,8 @@ BOOL TNerveLimitKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 	toMario2.y = 0.0f;
 	facing.makeDirection(toMario2);
 
-	BOOL facingMario = koopa->mDirection.absDirection(facing.mDirection) <= 0.31415927f;
+	BOOL facingMario
+	    = (koopa->mDirection.absDirection(facing.mDirection) > 0.31415927f) ? 0 : 1;
 	if (facingMario && koopa->mMActor->isCurAnmAlreadyEnd(ANM_TYPE_BCK)) {
 		spine->pushAfterCurrent(&TNerveLimitKoopaHipDropStart::theNerve());
 		return true;

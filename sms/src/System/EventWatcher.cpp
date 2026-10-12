@@ -261,8 +261,8 @@ static void evIsNearActors(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGetTalkNPC(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	char trash[0x4];
 	SLICE_SLOT;
+	char trash[0x4];
 	interp->verifyArgNum(0, &arg_num);
 
 	TBaseNPC* npc = SMSGetMarDirector()->getTalkingNPC();
@@ -270,7 +270,7 @@ static void evGetTalkNPC(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 #ifdef TARGET_PC
 	SPC_PUSH_PTR(interp, npc);
 #else
-	SLICE_PUSH(interp, npc ? (int)npc : 0);
+	SLICE_PUSH(interp, !npc ? 0 : (int)npc);
 #endif
 }
 

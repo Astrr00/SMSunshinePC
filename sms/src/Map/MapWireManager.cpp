@@ -19,14 +19,15 @@ void TMapWireActor::checkTakingActor() { }
 
 f32 TMapWireActor::getPosInWire() const
 {
-	char trash[0x10];
+	JGeometry::TVec3<f32> foot;
 	JGeometry::TVec3<f32> start;
 	JGeometry::TVec3<f32> end;
+	char trash[0x14];
 	getTipPoints(&start, &end);
 	start.y = 0.0f;
 	end.y   = 0.0f;
 
-	JGeometry::TVec3<f32> foot = MsPerpendicFootToLineR(start, end, mPosition);
+	foot = MsPerpendicFootToLineR(start, end, mPosition);
 	return JGeometry::TVec3<f32>(foot - start).length()
 	       / JGeometry::TVec3<f32>(end - start).length();
 }

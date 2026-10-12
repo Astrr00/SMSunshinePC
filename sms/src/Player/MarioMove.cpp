@@ -983,8 +983,9 @@ void TMario::checkGraffito()
 	if (onYoshi())
 		return;
 
-	if (mPlayerType == PLAYER_TYPE_SHADOW_MARIO
-	    || mPlayerType == PLAYER_TYPE_MONTE_MAN)
+	if (mPlayerType == PLAYER_TYPE_SHADOW_MARIO)
+		return;
+	if (mPlayerType == PLAYER_TYPE_MONTE_MAN)
 		return;
 
 	int isDirty = 0;
@@ -1684,9 +1685,11 @@ void TMario::checkCurrentPlane()
 		           < -0.9f) {
 
 			JGeometry::TVec3<f32> pos = mPosition;
-			f32 dist1 = record.mResultWalls[0]->getNormal().dot(pos)
+			JGeometry::TVec3<f32> pos1 = pos;
+			f32 dist1 = record.mResultWalls[0]->getNormal().dot(pos1)
 			            + record.mResultWalls[0]->getPlaneDistance();
-			f32 dist2 = record.mResultWalls[1]->getNormal().dot(pos)
+			JGeometry::TVec3<f32> pos2 = pos;
+			f32 dist2 = record.mResultWalls[1]->getNormal().dot(pos2)
 			            + record.mResultWalls[1]->getPlaneDistance();
 
 			if ((record.mResultWalls[0]->getActor() != nullptr

@@ -184,6 +184,7 @@ void TMapWire::initPointAtJustReleased(f32 pos, TMapWirePoint* point)
 // TODO: Needs work, but otherwise mathematically equivalent
 void TMapWire::release()
 {
+	char trash[40];
 	if (mState == TMapWire::RELEASED)
 		return;
 
@@ -233,6 +234,7 @@ void TMapWire::release()
 	mBounceDecayRate      = mDownRateMax * stretchRatio;
 	mBounceRemainingPower = 1.0f;
 	mMoveTimer            = 1.0f;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TMapWire::getPointPosAtHanged(f32 pos, JGeometry::TVec3<f32>* out) const
@@ -305,6 +307,7 @@ void TMapWire::calcViewAndDBEntry()
 
 void TMapWire::move()
 {
+	char trash[40];
 	bool bounceFinished;
 
 	switch (mState) {
@@ -346,6 +349,8 @@ void TMapWire::move()
 			}
 		}
 	}
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 f32 TMapWire::getPosInWire(const JGeometry::TVec3<f32>& point) const
@@ -438,6 +443,7 @@ void TMapWire::initTipPoints(const TCubeGeneralInfo* cubeInfo)
 // TODO: Needs work, but otherwise mathematically equivalent
 void TMapWire::init(const TCubeGeneralInfo* cubeInfo)
 {
+	char trash[32];
 	mNumMapWirePoints = (s32)((cubeInfo->getUnk24().z / 50.0f + 1.0f) - 2.0f);
 	mNumActiveMapWirePoints = mNumMapWirePoints;
 
@@ -509,6 +515,8 @@ void TMapWire::init(const TCubeGeneralInfo* cubeInfo)
 	TMapCollisionStatic* collision2 = new TMapCollisionStatic;
 	collision2->init("/common/map/WireFitting.col", 2, nullptr);
 	collision2->setUpMtx(mEndFittingModel->getAnmMtx(0));
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 TMapWire::TMapWire()

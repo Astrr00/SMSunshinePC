@@ -518,32 +518,24 @@ static int MarioWaistCtrl(J3DNode* param_1, int param_2)
 
 static int MarioFootPosRCtrl(J3DNode* param_1, int param_2)
 {
-	volatile u32 padding[9];
+	const TBGCheckData* checkData;
+	volatile u32 padding[11];
 	if (param_2 == 0) {
 
 		BOOL check2;
-		bool check;
-
-		// Definitely some inline shenanigans
-		// And this is wrong
 		if ((gpMarioForCallBack->mStatus & MARIO_STATUS_TYPE_MASK)
 		        == MARIO_STATUS_TYPE_WAITING
 		    && gpMarioForCallBack->mStatus != MARIO_STATUS_BRAKE_END
-		    && gpMarioForCallBack->onYoshi() == 0) {
-
-			check2 = !(gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEPY
-			           || gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEP)
-			             ? TRUE
-			             : FALSE;
-		} else {
+		    && gpMarioForCallBack->onYoshi() == 0
+		    && !gpMarioForCallBack->isSleeping())
+			check2 = TRUE;
+		else
 			check2 = FALSE;
-		}
 
 		if (check2) {
 
 			MtxPtr footMtx = gpMarioForCallBack->mModel->getModel()->getAnmMtx(
 			    gpMarioForCallBack->mJointIdChnFootR);
-			const TBGCheckData* checkData;
 			f32 dist = gpMap->checkGround(footMtx[0][3], footMtx[1][3],
 			                              footMtx[2][3], &checkData);
 
@@ -644,32 +636,24 @@ static int MarioFootDirRCtrl(J3DNode* param_1, int param_2)
 
 static int MarioFootPosLCtrl(J3DNode* param_1, int param_2)
 {
-	volatile u32 padding[9];
+	const TBGCheckData* checkData;
+	volatile u32 padding[11];
 	if (param_2 == 0) {
 
 		BOOL check2;
-		bool check;
-
-		// Definitely some inline shenanigans
-		// And this is wrong
 		if ((gpMarioForCallBack->mStatus & MARIO_STATUS_TYPE_MASK)
 		        == MARIO_STATUS_TYPE_WAITING
 		    && gpMarioForCallBack->mStatus != MARIO_STATUS_BRAKE_END
-		    && gpMarioForCallBack->onYoshi() == 0) {
-
-			check2 = !(gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEPY
-			           || gpMarioForCallBack->mStatus == MARIO_STATUS_SLEEP)
-			             ? TRUE
-			             : FALSE;
-		} else {
+		    && gpMarioForCallBack->onYoshi() == 0
+		    && !gpMarioForCallBack->isSleeping())
+			check2 = TRUE;
+		else
 			check2 = FALSE;
-		}
 
 		if (check2) {
 
 			MtxPtr footMtx = gpMarioForCallBack->mModel->getModel()->getAnmMtx(
 			    gpMarioForCallBack->mJointIdChnFootL);
-			const TBGCheckData* checkData;
 			f32 dist = gpMap->checkGround(footMtx[0][3], footMtx[1][3],
 			                              footMtx[2][3], &checkData);
 
@@ -1287,7 +1271,7 @@ void TMario::initModel()
 	transformInfo.mScale.y     = 1.0f;
 	transformInfo.mScale.z     = 1.0f;
 	transformInfo.mRotation.x  = mFaceAngle.x;
-	transformInfo.mRotation.y  = mFaceAngle.y;
+	transformInfo.mRotation.y  = mModelFaceAngle; // asm: lha 0x9a, not mFaceAngle.y (0x96)
 	transformInfo.mRotation.z  = mFaceAngle.z;
 	transformInfo.mTranslate.x = mPosition.x;
 	transformInfo.mTranslate.y = mPosition.y;
@@ -1663,7 +1647,7 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 
 		JGeometry::TVec3<f32> bin;
 		bin.cross(axis, ncross);
-		MsVECNormalize(&bin, &bin);
+		MsVECNormalize(&ncross, &ncross); // asm: second normalize hits ncross, bin stays raw
 
 		mtx[0][0] = axis.x;
 		mtx[0][1] = ncross.x;

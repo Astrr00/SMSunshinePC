@@ -380,7 +380,33 @@ void TCoasterKillerManager::load(JSUMemoryInputStream& stream)
 	(void)(unk38 ? unk38 : unk38); // @hack to force cmplwi
 	TSmallEnemyManager::load(stream);
 	unk38 = new TCoasterKillerSaveLoadParams("/enemy/coasterkiller.prm");
-	unk38 = unk38 ? unk38 : unk38; // @hack to force cmplwi
+	(void)(unk38 ? unk38 : unk38); // @hack to force cmplwi
+
+	// dead temps: reserve 0x40 bytes of frame like retail
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
+	if (0) {
+		(void)(GXColor){ 1, 2, 3, 4 };
+	}
 }
 
 void TCoasterKillerManager::loadAfter()

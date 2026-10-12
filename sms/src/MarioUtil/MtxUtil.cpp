@@ -385,9 +385,10 @@ void SMS_MakeJointsToArc(J3DModel* model, const JGeometry::TVec3<f32>& start,
 
 		MtxPtr jm = model->getAnmMtx(i);
 
-		JGeometry::TVec3<f32> zAxis(jm[0][2], jm[1][2], jm[2][2]);
 		JGeometry::TVec3<f32> side;
-		side.cross(zAxis, c);
+		side.set(jm[1][2] * c.z - jm[2][2] * c.y,
+		         jm[2][2] * c.x - jm[0][2] * c.z,
+		         jm[0][2] * c.y - jm[1][2] * c.x);
 		f32 dist = (f32)i * (mag / (f32)(jointNum - 1));
 		JGeometry::TVec3<f32> fwd;
 		fwd.cross(c, side);
@@ -516,8 +517,8 @@ void TRope::constraintTail(const JGeometry::TVec3<f32>& param)
 	char trash[24];
 	mPoints[mNumPoints - 1].unkC = param;
 	for (int i = mNumPoints - 1; i > 0; --i) {
-		TRopePoint& cur  = mPoints[i];
 		TRopePoint& prev = mPoints[i - 1];
+		TRopePoint& cur  = mPoints[i];
 
 		if (!cur.unkC.epsilonEquals(prev.unkC)) {
 			JGeometry::TVec3<f32> delta = prev.unkC;

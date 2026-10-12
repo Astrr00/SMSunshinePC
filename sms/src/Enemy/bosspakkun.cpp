@@ -472,20 +472,30 @@ TBPHeadHit::TBPHeadHit(TBossPakkun* owner, const char* name)
 	offHitFlag(HIT_FLAG_NO_COLLISION);
 }
 
+#pragma dont_inline on
+static const TNerveBase<TLiveActor>*
+getLatestNerveOutOfLine(TSpineBase<TLiveActor>* spine)
+{
+	return spine->getLatestNerve();
+}
+#pragma dont_inline off
+
 BOOL TBPHeadHit::receiveMessage(THitActor* sender, u32 message)
 {
-	if (&TNerveBPSleep::theNerve() == mOwner->mSpine->getLatestNerve())
+	const TNerveBase<TLiveActor>* sleepNerve = &TNerveBPSleep::theNerve();
+	if (getLatestNerveOutOfLine(mOwner->mSpine) == sleepNerve)
 		return mOwner->receiveMessage(sender, message);
 	TBossPakkun* boss = mOwner;
+	s8 weakPoint      = boss->mWeakPoint;
 
-	if (boss->mWeakPoint == TBossPakkun::WEAK_POINT_FLY
+	if (weakPoint == TBossPakkun::WEAK_POINT_FLY
 	    && (sender->getActorType() == 0x1000000d
 	        || sender->getActorType() == 0x1000001)) {
 		boss->gotFlyingDamage();
 		return true;
 	}
 
-	if (boss->mWeakPoint != TBossPakkun::WEAK_POINT_MOUTH) {
+	if (weakPoint != TBossPakkun::WEAK_POINT_MOUTH) {
 		if (boss->is2ndFightNow()
 		    && &TNerveBPFly::theNerve() == boss->mSpine->getLatestNerve())
 			boss->showMessage(0xe0002);
@@ -508,7 +518,7 @@ BOOL TBPHeadHit::receiveMessage(THitActor* sender, u32 message)
 		return true;
 	}
 
-	char trash[0x60];
+	char trash[0x58];
 	return true;
 }
 
@@ -570,8 +580,9 @@ TBPNavel::TBPNavel(TBossPakkun* owner, const char* name)
 
 BOOL TBPNavel::receiveMessage(THitActor* sender, u32 message)
 {
-	char trash[0x10];
-	if (&TNerveBPSleep::theNerve() == mOwner->mSpine->getLatestNerve())
+	char trash[8];
+	const TNerveBase<TLiveActor>* sleepNerve = &TNerveBPSleep::theNerve();
+	if (getLatestNerveOutOfLine(mOwner->mSpine) == sleepNerve)
 		return mOwner->receiveMessage(sender, message);
 
 	if (sender->getActorType() == 0x1000001)
@@ -1068,8 +1079,8 @@ void TBossPakkun::changeBck(int index)
 	mMActor->setFrameCtrlForBck(index);
 
 	if (index == 21) {
-		mMActor->getFrameCtrl(ANM_TYPE_BCK)
-		    ->setRate(getBossPakkunParams()->mSLVomitAnmRate.get());
+		f32 rate = getBossPakkunParams()->mSLVomitAnmRate.get();
+		mMActor->getFrameCtrl(ANM_TYPE_BCK)->setRate(rate);
 	}
 
 	f32 blendTime = -1.0f;

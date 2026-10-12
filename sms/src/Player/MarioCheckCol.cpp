@@ -45,11 +45,11 @@ void TMario::hitNormal(THitActor* actor)
 
 	TWaterGun* wg = mWaterGun;
 	if ((int)wg->mCurrentNozzle == 0 && wg->mIsEmitWater != 0) {
-		TModelWaterManager::mStaticHitActor.mPosition   = mPosition;
-		TModelWaterManager::mStaticHitActor.mPosition.y += 80.0f;
-		TModelWaterManager::mStaticHitActor.unk68       = 0;
-		actor->receiveMessage(&TModelWaterManager::mStaticHitActor,
-		                      HIT_MESSAGE_SPRAYED_BY_WATER);
+		TWaterHitActor* sa = &TModelWaterManager::mStaticHitActor;
+		sa->mPosition   = mPosition;
+		sa->mPosition.y += 80.0f;
+		sa->unk68       = 0;
+		actor->receiveMessage(sa, HIT_MESSAGE_SPRAYED_BY_WATER);
 	}
 }
 
@@ -172,8 +172,8 @@ void TMario::hangPole(THitActor* actor)
 
 		if (inHangStatus == 1) {
 			f32 dx, dz;
-			dz = actor->mPosition.z - mPosition.z;
 			dx = actor->mPosition.x - mPosition.x;
+			dz = actor->mPosition.z - mPosition.z;
 			f32 dist = std::sqrtf(dx * dx + dz * dz);
 			if (dist == 0.0f)
 				dist = 1.0f;

@@ -81,21 +81,19 @@ void TEnemyAttachment::bind()
 		mGroundHeight += 1.0f;
 	}
 
-	if (local_1C.y + mVelocity.y <= mGroundHeight)
+	f32 y = local_1C.y;
+	if (y + mVelocity.y <= mGroundHeight)
 		behaveToHitGround();
 	else
 		onLiveFlag(LIVE_FLAG_AIRBORNE);
 
-	JGeometry::TVec3<f32> p = local_1C;
-	p.y += mHeadHeight;
-	TBGWallCheckRecord local_48(p, mBodyRadius * 2.0f, 1, 0);
+	TBGWallCheckRecord local_48(local_1C.x, y + mHeadHeight,
+	                            local_1C.z, mBodyRadius * 2.0f, 1, 0);
 	if (gpMap->isTouchedWallsAndMoveXZ(&local_48))
 		behaveToHitWall(local_48.mResultWalls[0]);
 
 	mPosition                      = local_1C;
-	JGeometry::TVec3<f32> local_68 = local_1C;
-	local_68 -= mPosition;
-	mLinearVelocity = local_68;
+	mLinearVelocity = local_1C - mPosition;
 
 	setBehavior();
 	forceKill();
@@ -145,7 +143,7 @@ void TEnemyAttachment::sendMessage()
 		}
 
 		if (mCollisions[i] != unk160) {
-			((TLiveActor*)mCollisions[i])->kill();
+			kill(); // retail: mr r3,r29 before the vcall (kills the attachment itself)
 		}
 	}
 }
@@ -266,6 +264,8 @@ TEnemyPolluteModel::TEnemyPolluteModel(TLiveActor* param_1, int param_2,
 
 void TEnemyPolluteModel::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x38];
+	(void)trash;
 	if (!unk5D || unk5C)
 		return;
 

@@ -61,6 +61,10 @@ void AttackMario(THitActor* attacker)
 } // namespace
 
 // unused: its presence shifts mwcc's inline-temp stack layout in TNerveMantaMove::execute
+// nested wrapper keeps TUtil::inv_sqrt out of line like retail
+static inline f32 calcInvSqrt0(f32 x) { return JGeometry::TUtil<f32>::inv_sqrt(x); }
+static inline f32 calcInvSqrt(f32 x) { return calcInvSqrt0(x); }
+
 static inline void lerp_hack(f32& value, f32 target, f32 progress)
 {
 	f32 step = progress * (target - value);
@@ -744,7 +748,10 @@ void TBossManta::updateAttractor()
 		f32 sq = delta.squared();
 		if (0.1f < JGeometry::TUtil<f32>::sqrt(sq)
 		    && JGeometry::TUtil<f32>::sqrt(sq) < getSaveParams()->mSLEscapeRegion.get()) {
-			delta.normalize();
+			if (sq <= JGeometry::TUtil<f32>::epsilon())
+				delta.zero();
+			else
+				delta.scale(1.0f * calcInvSqrt(sq), delta);
 			delta *= getSaveParams()->mSLPusherPower.get() / delta.length();
 			local_108 += delta;
 		}

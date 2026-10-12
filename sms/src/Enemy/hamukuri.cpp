@@ -815,11 +815,11 @@ void THamuKuri::jumpToSearchActor()
 	if (pTVar5) {
 		char trash0[8];
 		JGeometry::TVec3<f32> local_1C = mPosition;
-		char trash[0xc];
 		local_1C -= pTVar5->mPosition;
 
 		if (local_1C.squared() > 40000.0f) {
 			JGeometry::TVec3<f32> tgt = pTVar5->mPosition;
+			char trash[0xc];
 			tgt.y                     = pTVar5->getGroundHeight();
 
 			setGoalPath(tgt);
@@ -1151,6 +1151,7 @@ MtxPtr THamuKuri::getTakingMtx()
 	mat.translation(mPosition.x, dVar4, mPosition.z);
 
 	Mtx afStack_84;
+	char trash[0x4c];
 	MsMtxSetRotRPH(afStack_84, 0.0f, 0.0f, 0.0f);
 	MTXConcat(mat, afStack_84, mat);
 
@@ -1167,9 +1168,10 @@ MtxPtr THamuKuri::getTakingMtx()
 	unk1B0[2][1] = 0.0f;
 	unk1B0[2][2] = 1.0f;
 
-	MTXConcat(mat, unk1B0, unk1B0);
+	MtxPtr out = unk1B0;
+	MTXConcat(mat, out, out);
 
-	return unk1B0;
+	return out;
 }
 
 bool THamuKuri::isResignationAttack()
@@ -1226,7 +1228,7 @@ bool THamuKuri::isCollidMove(THitActor* param_1)
 	    || param_1->isActorType(0x10000013)
 	    || param_1->isActorType(0x10000011)) {
 		THamuKuri* hamu = (THamuKuri*)param_1;
-		if (hamu->mSpine->getCurrentNerve() == &TNerveHamuKuriBoundFreeze::theNerve()
+		if ((hamu->mSpine->getCurrentNerve() == &TNerveHamuKuriBoundFreeze::theNerve() ? true : false)
 		    && mSpine->getCurrentNerve() != &TNerveSmallEnemyDie::theNerve()
 		    && mSpine->getCurrentNerve() != &TNerveHamuKuriBoundFreeze::theNerve()
 		    && mSpine->getCurrentNerve() != &TNerveHamuKuriWallDie::theNerve()
@@ -1496,7 +1498,8 @@ void THaneHamuKuri::bind()
 
 BOOL THaneHamuKuri::isReachedToGoal() const
 {
-	JGeometry::TVec3<f32> local_c = unk104.getPoint();
+	const JGeometry::TVec3<f32>& pt = getUnk104().getPoint();
+	JGeometry::TVec3<f32> local_c = pt;
 	local_c -= mPosition;
 	local_c.y = 0.0f;
 	if (MsVECMag2(&local_c) < 100.0f)
@@ -1730,7 +1733,8 @@ void THaneHamuKuri2::walkBehavior(int param_1, f32 param_2)
 
 BOOL THaneHamuKuri2::isReachedToGoal() const
 {
-	JGeometry::TVec3<f32> local_c = unk104.getPoint();
+	const JGeometry::TVec3<f32>& pt = getUnk104().getPoint();
+	JGeometry::TVec3<f32> local_c = pt;
 	local_c -= mPosition;
 	local_c.y = 0.0f;
 	if (MsVECMag2(&local_c) < 20.0f)
@@ -2447,7 +2451,7 @@ bool TDoroHamuKuri::isCollidMove(THitActor* param_1)
 			other->onLiveFlag(LIVE_FLAG_AIRBORNE);
 
 			if (!isAirborne()) {
-				JGeometry::TVec3<f32> local_4c = param_1->mPosition; // asm 0x80262E08 (lwz 0x10/0x14(r31); r31=other==param_1)
+				JGeometry::TVec3<f32> local_4c = other->mPosition; // asm 0x80262E08 (lwz 0x10/0x14(r31); r31=other==param_1)
 				mVelocity
 				    = calcVelocityToJumpToY(local_4c, 6.0f, getGravityY());
 				mPosition.y += 2.0f;
@@ -2455,7 +2459,7 @@ bool TDoroHamuKuri::isCollidMove(THitActor* param_1)
 			}
 
 			if (!unk198 && isAirborne()
-			    && mPosition.y > param_1->mPosition.y + 10.0f) {
+			    && mPosition.y > other->mPosition.y + 10.0f) {
 				TTakeActor* pTVar1 = other->mHeldObject;
 				if (pTVar1 == nullptr) {
 					other->unk198      = 0;
@@ -2463,8 +2467,8 @@ bool TDoroHamuKuri::isCollidMove(THitActor* param_1)
 					return true;
 				}
 
-				if (pTVar1->receiveMessage(param_1, HIT_MESSAGE_PUT)) { // asm 0x80262F00 (blrl on r28=pTVar1); beq 0x80262F08
-					pTVar1->mPosition = param_1->mPosition;
+				if (pTVar1->receiveMessage(other, HIT_MESSAGE_PUT)) { // asm 0x80262F00 (blrl on r28=pTVar1); beq 0x80262F08
+					pTVar1->mPosition = other->mPosition;
 					if (pTVar1->receiveMessage(this, HIT_MESSAGE_TAKE)) {
 						other->unk198      = 0;
 						other->mHeldObject = nullptr;
