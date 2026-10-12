@@ -1,0 +1,307 @@
+# Diagnosis only (airport/1 + Null backend, uses dev cheats and teleports): L+R squat spray, aimed only with faceto (no aimhead): stick back raises the nozzle.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=30
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=30
+faceto x=-1500 z=1500 tol=3 timeout=120
+hold L trig=255,255 stick=0,-127 frames=60
+log
+end
