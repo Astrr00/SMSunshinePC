@@ -784,3 +784,15 @@ Mechanism search for out-of-line header helpers (HeaderLab, ~38 probes in a temp
 - Scoring: `objdump_command` is `permute_fn.py --objdump <sym>`. For `target.o` it keeps only `<sym>`'s block; for candidates it keeps every block named `<base>__`. Without it the whole unit `.o` (about 126 KB) is compared and every score is about 1e6.
 - Priority: permuter and its workers run windowless and `BELOW_NORMAL`; the tree is killed after `--seconds` (`taskkill /T /F`).
 - Limits: one function per run. The base must score low to start (members began at 5, the free test at 10). About 40 % of candidates fail in the randomizer on undeclared globals or types (`KeyError`/`AssertionError`, in `run.log`); they are skipped, not fatal. A score-0 result can rely on artificial constructs (`(0, expr)`, or a temp local that only sets the frame size); check `output-*/source.c` before applying.
+
+## Exit after a devscript TIMEOUT (rc 0xC0000409)
+
+- Observed (fact sheet, 2026-10-12 chase runs): after a devscript TIMEOUT the process exits with rc=3221226505 (0xC0000409) instead of 3. A TIMEOUT is a failure regardless of rc; do not count it as a game crash.
+- `devscript.cpp` calls `std::exit(3)` from the game thread. [INFERENCE] Teardown (atexit and static destructors with the audio and Aurora threads still alive) fast-fails, which gives 0xC0000409.
+- `OSResetSystem` also ends with `std::exit(0)` (`sunshine-pc/src/sdk/os_misc.cpp:49`). Possibly a real shutdown bug; not investigated.
+
+## Baseline for `changes_all`: worktree and junction pitfall
+
+- `ninja baseline` rewrites `build\GMSJ01\baseline.json` from the current tree on every run (target `always` in `sms/build.ninja`), so `ninja baseline && ninja changes_all` never shows a change. Build the baseline in a clean worktree instead; the full procedure is in `HANDOFF.md` section 4.
+- Use relative tool paths in the worktree's `configure.py` (`--dtk build/tools/dtk.exe` and so on). An absolute path containing a space ("Sunshine Decomp") lands unquoted in `build.ninja` and breaks argparse.
+- Remove the junctions with `cmd /c rmdir` (no `/S`) before `git worktree remove`.

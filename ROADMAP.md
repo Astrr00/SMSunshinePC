@@ -35,8 +35,8 @@ Scope limit (`sms/AGENTS.md`): game code is the target; shared and JSystem heade
 | Strict link, no stubs, matching SHA-1 | DONE | keep as gate |
 | Bianco Hills renders (geometry, textures, HUD), Mario controllable, camera follows | DONE (dev start) | none |
 | Title screen renders correctly | OPEN | TitleRender: copy-with-clear ordering, TEV/palette checks via pass dumps |
-| Retail flow: logo, movies, title, file select, new game, Delfino, Bianco | PART (condition-based route reaches `airport0` reproducibly without start switches: `tools/routes/07_airport.dev`; walk to `MapObjStartDemo` not yet arrived; Delfino/Bianco not reached) | waypoints along the airport0 path to `MapObjStartDemo` (-6630,500,1600) -> Delfino -> GateKeeper (3 nozzle hits) -> Bianco; confirm the FIFO fix (`GXBegin` count in JPA cross particles) over a full 330 s run |
-| Shine collected by the real path, Shine-get sequence, save to `.gci`, reload | PART (dev verb `shine 2` on the Bianco 100-coin shine: `shines=1`, `.gci` PASS, switch-free reload `shines=1`; not from a switch-free flow) | boss kills need the dev aim assist; route without dev switches from the logos not built (sessions 2026-10-11b sections 22-35) |
+| Retail flow: logo, movies, title, file select, new game, Delfino, Bianco | PART (condition-based route reaches `airport0` reproducibly without start switches: `tools/routes/07_airport.dev`; route 70 with dev aids (`SUNSHINE_ALLOW_CPU_ADAPTER=0`) reaches stage 1/0 at logic t=284 s and stage 2/0 at t=590 s (u01) / t=715 s (u02); stage names not checked here; walk to `MapObjStartDemo` status unclear against this timeline) | waypoints along the airport0 path to `MapObjStartDemo` (-6630,500,1600) -> Delfino -> GateKeeper (3 nozzle hits) -> Bianco; confirm the FIFO fix (`GXBegin` count in JPA cross particles) over a full 330 s run |
+| Shine collected by the real path, Shine-get sequence, save to `.gci`, reload | PART (dev verb `shine 2` on the Bianco 100-coin shine: `shines=1`, `.gci` PASS, switch-free reload `shines=1`; not from a switch-free flow) | boss kills need the dev aim assist; route without dev switches from the logos not built (sessions 2026-10-11b sections 22-35); Bianco floor model (`tools/bianco_path.py`, not verified in game) finds no Shine reachable on foot, jumps and nozzle not modelled |
 | Particles (EmitterViewObj null in perform lists), Mario shape packet callback | OPEN | ParticlesNull |
 | Missing decomp pieces: `ConsoleStr::processGo/startCloseWipe`, `ShapePacketCallBackFunc` | OPEN | from asm, as the flow needs them |
 
@@ -122,3 +122,17 @@ Measured: SHA-1 unchanged, 11 247 / 12 881 byte-identical (87.3 %), matched code
 ### Update 2026-10-12 (decomp round 6): 11 282 / 12 881 functions byte-identical (87.6 %)
 
 Measured: SHA-1 unchanged, 11 282 / 12 881 byte-identical (87.6 %), matched code 61.98 %, fuzzy 98.60 %, 445 / 736 units, strict link 0 unresolved, `TEMP-DEBUG` 0; route 70 smoke 1 of 2 complete (chase flake). Details: session log section 52.
+
+### Update 2026-10-12 (decomp round 7 committed): 11 317 / 12 881 functions byte-identical (87.9 %)
+
+Measured: SHA-1 unchanged, 11 317 / 12 881 byte-identical (87.858 %), matched code 62.56 %, fuzzy 98.64 %, matched data 87.47 %, 445 / 736 units, `ninja -k 0 -j4` rc 0, strict link 0 unresolved, Aurora `applied: 11 patches`, `TEMP-DEBUG` 0. Commits 513e37a (round 7) and d66592c (docs) are on origin/main. Against the clean d414ba0 baseline: 225 changes, 200 improved, 3 worse (`TKumokun::checkOnMovingWall`, `TBathWaterManager::perform`, one not named).
+
+Route 70 needs `SUNSHINE_ALLOW_CPU_ADAPTER=0`: about 70 logic ticks/s instead of about 21 on the CPU adapter. `[status]` `t` is logic time. A devscript TIMEOUT exits with rc 0xC0000409 instead of 3; that is a failure, not a game crash.
+
+Chase (Delfino shadow Mario): 9 of 9 distinct decided runs on the round-7 tree end in the same stuck TIMEOUT (Mario and shadow both waiting). Clean d414ba0 tree, 7 runs: 2 PASS, 3 fell into water, 2 cut by the wall clock, 0 stuck. Cause not found; `graph.cpp` and `walkToCurPathNode` ruled out as single-hunk causes. ChaseBisect result pending.
+
+Bianco Shines, floor model (`tools/bianco_path.py`, not verified in game): no Shine reachable on foot in any variant tested. Jumps, nozzle and enemies are not modelled.
+
+Open: exit teardown (0xC0000409), null-rail guard hypothesis (`enemyMario.cpp`), ChaseBisect result, several hunk audits still unverified.
+
+Details: session log section 53.
