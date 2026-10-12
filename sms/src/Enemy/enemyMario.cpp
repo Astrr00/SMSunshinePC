@@ -1,3 +1,6 @@
+#ifdef TARGET_PC
+#include <cstdio>
+#endif
 #include <Enemy/EnemyMario.hpp>
 #include <Enemy/Conductor.hpp>
 #include <Enemy/Emario.hpp>
@@ -969,6 +972,14 @@ void TEnemyMario::emReplayJumpToNearestNode()
 	    = mEMario->getTracer()->getGraph()->findNearestNodeIndex(mPosition, -1);
 	TGraphNode* currentNode
 	    = &mEMario->getTracer()->getGraph()->getGraphNode(nodeIndex);
+#ifdef TARGET_PC
+	// Seen once in a route run: getPoint() read a null rail node here. Retail would read low memory; log the state and skip the tick.
+	if (!currentNode->getRailNode()) {
+		TGraphWeb* web = mEMario->getTracer()->getGraph();
+		fprintf(stderr, "[emreplay] null rail node: nodeIndex=%d nodes=%d dummy=%d tick-skip\n", nodeIndex, (int)web->unk8, (int)web->isDummy());
+		return;
+	}
+#endif
 	JGeometry::TVec3<f32> currentPoint;
 	currentNode->getPoint(&currentPoint);
 	mPosition.x += 0.05f * (currentPoint.x - mPosition.x);

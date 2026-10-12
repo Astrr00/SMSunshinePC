@@ -895,7 +895,7 @@ void step()
 				float dist = 0.f;
 				const float dx = e->mPosition.x - gpMarioOriginal->mPosition.x, dz = e->mPosition.z - gpMarioOriginal->mPosition.z;
 				const float direct = std::sqrt(dx * dx + dz * dz);
-				if (gpMarioOriginal->mPosition.y < 0.f) {
+				if (gpMarioOriginal->mPosition.y < -500.f) { // shallow water near y=0 is walkable; the seabed fall reaches -1300
 					std::printf("[devscript] TIMEOUT chase fell line=%d mario=(%.0f,%.0f,%.0f) tick=%d\n", c.line, gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.y, gpMarioOriginal->mPosition.z, gTick);
 					std::fflush(stdout);
 					std::exit(3);
