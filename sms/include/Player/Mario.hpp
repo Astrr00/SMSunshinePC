@@ -887,7 +887,7 @@ public:
 	void checkThrowObject();
 	void getDizzyAngle();
 	void getDizzyPower();
-	void getLRLevel(u8);
+	f32 getLRLevel(u8);
 	int checkStickRotate(int*);
 	void checkStickSmash();
 	void makeHistory();

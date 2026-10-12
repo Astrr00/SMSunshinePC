@@ -234,46 +234,7 @@ class TNerveKoopaTurn : public TNerveBase<TLiveActor> { };
 
 class TNerveKoopaTurnR : public TNerveKoopaTurn {
 public:
-	virtual BOOL execute(TSpineBase<TLiveActor>* spine) const
-	{
-		TKoopa* self = (TKoopa*)spine->getBody();
-		bool turning;
-
-		f32 diff = self->mTargetDir - self->mRotation.y;
-		diff = -180.0f + std::fmodf(360.0f + (diff + 180.0f), 360.0f);
-
-		TKoopaSaveLoadParams* params
-		    = (TKoopaSaveLoadParams*)((TEnemyManager*)self->mManager)
-		          ->getSaveParam();
-
-		if (diff > params->turnSpeed.get()) {
-			f32 turnSpeed = params->turnSpeed.get();
-			if (turnSpeed > 0.0f)
-				self->changeAnm(0xB, 0, turnSpeed * params->turnAnim.get());
-			else
-				self->changeAnm(0xA, 0, -turnSpeed * params->turnAnim.get());
-			self->mRotation.y = -180.0f
-			                    + JGeometry::TUtil<f32>::mod(
-			                          360.0f + (self->mRotation.y + turnSpeed
-			                                    + 180.0f),
-			                          360.0f);
-			turning = true;
-		} else if (diff <= 0.0f) {
-			turning = false;
-		} else {
-			if (diff > 0.0f)
-				self->changeAnm(0xB, 0, diff * params->turnAnim.get());
-			else
-				self->changeAnm(0xA, 0, -diff * params->turnAnim.get());
-			self->mRotation.y = -180.0f
-			                    + JGeometry::TUtil<f32>::mod(
-			                          360.0f + (self->mRotation.y + diff + 180.0f),
-			                          360.0f);
-			turning = true;
-		}
-
-		return turning ? false : true;
-	}
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
 
 	static const TNerveKoopaTurnR& theNerve()
 	{
@@ -284,46 +245,7 @@ public:
 
 class TNerveKoopaTurnL : public TNerveKoopaTurn {
 public:
-	virtual BOOL execute(TSpineBase<TLiveActor>* spine) const
-	{
-		TKoopa* self = (TKoopa*)spine->getBody();
-		bool turning;
-
-		f32 diff = self->mTargetDir - self->mRotation.y;
-		diff = -180.0f + std::fmodf(360.0f + (diff + 180.0f), 360.0f);
-
-		TKoopaSaveLoadParams* params
-		    = (TKoopaSaveLoadParams*)((TEnemyManager*)self->mManager)
-		          ->getSaveParam();
-
-		if (diff < -params->turnSpeed.get()) {
-			f32 turnSpeed = -params->turnSpeed.get();
-			if (turnSpeed > 0.0f)
-				self->changeAnm(0xB, 0, turnSpeed * params->turnAnim.get());
-			else
-				self->changeAnm(0xA, 0, -turnSpeed * params->turnAnim.get());
-			self->mRotation.y = -180.0f
-			                    + JGeometry::TUtil<f32>::mod(
-			                          360.0f + (self->mRotation.y + turnSpeed
-			                                    + 180.0f),
-			                          360.0f);
-			turning = true;
-		} else if (diff >= 0.0f) {
-			turning = false;
-		} else {
-			if (diff > 0.0f)
-				self->changeAnm(0xB, 0, diff * params->turnAnim.get());
-			else
-				self->changeAnm(0xA, 0, -diff * params->turnAnim.get());
-			self->mRotation.y = -180.0f
-			                    + JGeometry::TUtil<f32>::mod(
-			                          360.0f + (self->mRotation.y + diff + 180.0f),
-			                          360.0f);
-			turning = true;
-		}
-
-		return turning ? false : true;
-	}
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
 
 	static const TNerveKoopaTurnL& theNerve()
 	{

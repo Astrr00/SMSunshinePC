@@ -158,6 +158,18 @@ public:
 		return hasFlag;
 	}
 
+	// Fabricated: retail nozzle code tests this flag through an int-typed inline (cmpwi, no clrlwi)
+	inline BOOL hasFlagInt(u16 flag)
+	{
+		BOOL r;
+		if ((mFlags & flag) != 0) {
+			r = TRUE;
+		} else {
+			r = FALSE;
+		}
+		return r;
+	}
+
 	// Fabricated
 	void onFlag(u16 flag) { mFlags |= flag; }
 	void offFlag(u16 flag) { mFlags &= ~flag; }
@@ -211,12 +223,12 @@ public:
 		mIsEmitWater = emittedWater;
 		// TODO: one more inline for getting emit params
 		// rather than separate getMaxWater, getDecRate, etc. functions?
+		const s32& amountMax = mNozzleList[0]->mEmitParams.mAmountMax.get();
 		s16 decRate = (((const TWaterGun*)this)->getCurrentNozzle())
 		                  ->mEmitParams.mDecRate.get();
 
 		unk1C88 += 10.0f
-		           * ((f32)emittedWater * (f32)decRate
-		              / mNozzleList[0]->mEmitParams.mAmountMax.get());
+		           * ((f32)emittedWater * (f32)decRate / amountMax);
 	}
 
 	// Fabricated

@@ -43,6 +43,7 @@ public:
 
 	void onFlag(int flag) { mFlags |= flag; }
 	void offFlag(int flag) { mFlags &= ~flag; }
+	bool checkFlag(int flag) const { return mFlags & flag; }
 
 public:
 	enum {
