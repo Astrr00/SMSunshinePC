@@ -427,10 +427,11 @@ void logBoss(const char* tag)
 			    (int)b->mHead->mVulnerable, b->mHead->mPosition.x, b->mHead->mPosition.y, b->mHead->mPosition.z,
 			    std::sqrt(dx * dx + dz * dz), std::atan2(dx, dz) * 57.29578f, gpMarioOriginal->mFaceAngle.y * (360.0f / 65536.0f));
 			// nozzle pitch follows the camera pitch only in the L-button camera (WaterGun.cpp:218-232)
-			std::printf("[%s-boss]   cam pitch=%d yaw258=%d lcam=%d nozzle36E=%d marioStatus=0x%08X\n", tag,
+			std::printf("[%s-boss]   cam pitch=%d yaw258=%d lcam=%d nozzle36E=%d marioStatus=0x%08X nozzle=%d hasFludd=%d input=0x%X\n", tag,
 			    (int)gpCamera->mCurrentTarget.mPitch, (int)gpCamera->getUnk258(), gpCamera->isLButtonCamera() ? 1 : 0,
 			    gpMarioOriginal->mWaterGun ? (int)gpMarioOriginal->mWaterGun->mNozzleList[gpMarioOriginal->mWaterGun->mCurrentNozzle]->unk36E : -1,
-			    (unsigned)gpMarioOriginal->mStatus);
+			    (unsigned)gpMarioOriginal->mStatus, gpMarioOriginal->mWaterGun ? (int)gpMarioOriginal->mWaterGun->mCurrentNozzle : -1,
+			    (int)gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD), (unsigned)gpMarioOriginal->mInput);
 		}
 	}
 }

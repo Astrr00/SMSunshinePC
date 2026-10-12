@@ -1,0 +1,45 @@
+# Diagnosis only (dolpic/0 dev start, Null backend, dev cheats, tp and the dev-only hold token `aimhead`): kill the Delfino GateKeeper (boss at (12,300,4631)) with the water jet only; flag 0x10384 is the goal.
+# Squat (L) + stick BACK raises the nozzle; sweep over distance and stick strength.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_health
+cheat infinite_water
+cheat unlock_nozzles
+wait frames=60
+log
+tp x=12 y=320 z=5400 yaw=180
+wait frames=60
+log
+tp x=12 y=320 z=5550 yaw=180
+wait frames=60
+log
+tp x=300 y=320 z=5300 yaw=180
+wait frames=60
+log
+tp x=-300 y=320 z=5300 yaw=180
+wait frames=60
+log
+tp x=600 y=320 z=5100 yaw=180
+wait frames=60
+log
+tp x=-600 y=320 z=5100 yaw=180
+wait frames=60
+log
+tp x=1000 y=320 z=4900 yaw=180
+wait frames=60
+log
+tp x=-1000 y=320 z=4900 yaw=180
+wait frames=60
+log
+tp x=500 y=320 z=5500 yaw=180
+wait frames=60
+log
+tp x=-500 y=320 z=5500 yaw=180
+wait frames=60
+log
+tp x=800 y=320 z=5400 yaw=180
+wait frames=60
+log
+tp x=-800 y=320 z=5400 yaw=180
+wait frames=60
+log
+end
