@@ -1,4 +1,4 @@
-# Diagnosis only (airport/1 + Null backend, dev cheats and tp): squat at ~640 units and follow the swinging head with aimboss.
+# Diagnosis only (airport/1 + Null backend, uses dev cheats and teleports): squat-spray at 45 degrees from about 320 units.
 waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
 cheat infinite_health
 cheat infinite_water
@@ -6,6 +6,82 @@ wait frames=30
 log
 tp x=-997 y=320 z=1034 yaw=-47
 wait frames=6
-aimboss frames=1800
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 stick=0,127 frames=60
 log
 end
