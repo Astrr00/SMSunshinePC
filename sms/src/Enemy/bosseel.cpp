@@ -1097,9 +1097,8 @@ TBossEelEye::TBossEelEye(const TLiveActor* owner, int jointIndex,
 
 void TBossEelEye::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	char trash[0x28];
-	const TBossEel* owner = getOwner();
-	if (owner->mLiveFlag
+
+	if (getOwner()->mLiveFlag
 	    & (LIVE_FLAG_DEAD | LIVE_FLAG_HIDDEN | LIVE_FLAG_CLIPPED_OUT))
 		return;
 
@@ -1109,9 +1108,10 @@ void TBossEelEye::perform(u32 cue, JDrama::TGraphics* graphics)
 		JPABaseEmitter* emitter = gpMarioParticleManager->emitAndBindToPosPtr(
 		    BOSSEEL_JPA_MS_MEO_EYEBLUR, &mBlurPosition, 1, this);
 		if (emitter)
-			emitter->setGlobalScale(owner->mScaling);
+			emitter->setGlobalScale(getOwner()->mScaling);
 
 		Mtx eyeMtx;
+		char trash[0x28];
 		MTXCopy(getConnectedMtx(), eyeMtx);
 		getMActor()->getModel()->setBaseTRMtx(eyeMtx);
 		if (mCopyConnectedMtx == 0)
@@ -1741,6 +1741,7 @@ void TBossEel::collideToMario()
 			continue;
 
 		JGeometry::TVec3<f32> push;
+		char trash[0x14];
 		if (-axialDistance < penetration) {
 			push = axis;
 			push.scale(-axialDistance);
@@ -1758,6 +1759,7 @@ void TBossEel::collideToMario()
 
 void TBossEel::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x28];
 	if ((cue & CUE_CALC_ANIM)
 	    && mSpine->getCurrentNerve() == &TNerveBossEelDie::theNerve()) {
 		mDeathEffectPosition.set(0.0f, -14000.0f, 0.0f);
@@ -1831,7 +1833,7 @@ void TBossEel::perform(u32 cue, JDrama::TGraphics* graphics)
 		if (mHitPoints != 0) {
 			mForceEat = false;
 			for (s32 i = 0; i < mHeadCollision->getColNum(); ++i) {
-				if (mHeadCollision->getCollision(i)->isActorType(0x80000001))
+				if (mHeadCollision->getCollision(i)->getActorType() == 0x80000001)
 					mForceEat = true;
 			}
 

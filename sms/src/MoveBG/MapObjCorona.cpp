@@ -176,10 +176,8 @@ void TBathtub::load(JSUMemoryInputStream& stream)
 	mBathtubData.unk3C = 3000.0f;
 	mBathtubData.unk40 = 3600.0f;
 	mBathtubData.unk44 = mBathtubData.unk3C * sinf(0.27925268f);
+	mBathtubData.unk4C = mBathtubData.unk50 = mBathtubData.unk54 = 0.0f;
 	mBathtubData.unk58.zero();
-	mBathtubData.unk4C = 0.0f;
-	mBathtubData.unk50 = 0.0f;
-	mBathtubData.unk54 = 0.0f;
 	mBathtubData.unk48 = 100.0f;
 	mBathtubData.unk64 = 0;
 	mBathtubData.unk0C.set(0.0f, 1.0f, 0.0f);
@@ -403,43 +401,43 @@ bool TBathtub::allowsTumble() const
 {
 	JGeometry::TVec3<f32> pos = *gpMarioPos;
 	f32 angle;
-	if (!getNearGrip(pos, 18.0f, &angle))
-		return false;
+	if (getNearGrip(pos, 18.0f, &angle)) {
+		JGeometry::TVec3<f32> flat = mBathtubData.toLocal(
+		    pos.x - mBathtubData.mPos.x, pos.y - mBathtubData.mPos.y,
+		    pos.z - mBathtubData.mPos.z);
+		flat.y = 0.0f;
+		f32 dist = flat.length();
+		if (dist < 4200.0f)
+			return false;
+		if (4700.0f < dist) {
+			if (mBathtubData.unk18.at(1, 1) > 0.99f) {
+				TBathtubKillerManager* killers
+				    = (TBathtubKillerManager*)JDrama::TNameRefGen::search(
+				        "バスタブキラーマネージャー");
+				u32 status = SMS_GetMarioStatus();
+				if (status == MARIO_STATUS_HIP_DROP)
+					return false;
+				if (status == MARIO_STATUS_ROCKET)
+					return false;
+				if (status == MARIO_STATUS_ROCKET_LANDING)
+					return false;
 
-	JGeometry::TVec3<f32> local = mBathtubData.toLocal(
-	    pos.x - mBathtubData.mPos.x, pos.y - mBathtubData.mPos.y,
-	    pos.z - mBathtubData.mPos.z);
-	JGeometry::TVec3<f32> flat = local;
-	flat.y                     = 0.0f;
-	f32 dist                   = flat.length();
-	if (dist < 4200.0f)
-		return false;
-	if (!(4700.0f < dist))
-		return true;
-	if (!(mBathtubData.unk18.at(1, 1) > 0.99f))
-		return false;
-
-	TBathtubKillerManager* killers
-	    = (TBathtubKillerManager*)JDrama::TNameRefGen::search(
-	        "バスタブキラーマネージャー");
-	u32 status = SMS_GetMarioStatus();
-	if (status == MARIO_STATUS_HIP_DROP)
-		return false;
-	if (status == MARIO_STATUS_ROCKET)
-		return false;
-	if (status == MARIO_STATUS_ROCKET_LANDING)
-		return false;
-
-	const TWaterGun* gun = gpMarioOriginal->mWaterGun;
-	if (gun) {
-		TNozzleBase* nozzle = gun->getCurrentNozzle();
-		if (nozzle) {
-			if (nozzle->getNozzleKind() == 1
-			    && ((TNozzleTrigger*)nozzle)->unk388 > 0.0f)
-				return false;
+				const TWaterGun* gun = gpMarioOriginal->mWaterGun;
+				if (gun) {
+					TNozzleBase* nozzle = gun->getCurrentNozzle();
+					if (nozzle) {
+						if (nozzle->getNozzleKind() == 1
+						    && ((TNozzleTrigger*)nozzle)->unk388 > 0.0f)
+							return false;
+					}
+				}
+				return killers->countActiveKillers() == 0;
+			}
+			return false;
 		}
+		return true;
 	}
-	return killers->countActiveKillers() == 0;
+	return false;
 }
 
 void TBathtub::startDemo()
@@ -506,19 +504,25 @@ void TBathtub::startDemo()
 
 void TBathtub::setupCollisions_()
 {
-	JGeometry::TVec3<f32> local = mBathtubData.toLocal(
-	    gpMarioPos->x - mBathtubData.mPos.x, gpMarioPos->y - mBathtubData.mPos.y,
-	    gpMarioPos->z - mBathtubData.mPos.z);
+	f32 dx = gpMarioPos->x - mBathtubData.mPos.x;
+	f32 dy = gpMarioPos->y - mBathtubData.mPos.y;
+	f32 dz = gpMarioPos->z - mBathtubData.mPos.z;
+	// asm 0x801D2014: only the x and z rows of the bathtub basis are evaluated
+	f32 localX = mBathtubData.unk18.mMtx[0][0] * dx
+	           + mBathtubData.unk18.mMtx[0][1] * dy
+	           + mBathtubData.unk18.mMtx[0][2] * dz;
+	f32 localZ = mBathtubData.unk18.mMtx[2][0] * dx
+	           + mBathtubData.unk18.mMtx[2][1] * dy
+	           + mBathtubData.unk18.mMtx[2][2] * dz;
 
-	if (gpMarioPos->y < 300.0f
-	    || local.x * local.x + local.z * local.z < 0.01f) {
+	if (gpMarioPos->y < 300.0f || localX * localX + localZ * localZ < 0.01f) {
 		removeCollisions_();
 		for (int i = 0; i < 5; ++i)
 			unk168[i]->unk24B = 0;
 		return;
 	}
 
-	f32 angle = atan2f(local.x, local.z);
+	f32 angle = atan2f(localX, localZ);
 	if (angle < 0.0f)
 		angle += 6.2831855f;
 

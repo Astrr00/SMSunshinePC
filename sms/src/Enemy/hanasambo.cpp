@@ -101,7 +101,7 @@ void TSamboFlowerCoinUnit::checkGenCoin()
 
 	bool bloomed = true;
 	for (int i = 0; i < mNumFlowers; i++) {
-		bool fwait = mFlowers[i]->mMActor->checkCurAnm("flower_fwait", 0);
+		bool fwait = mFlowers[i]->mMActor->checkCurAnm("flower_fwait", 0) ? true : false;
 		if (!fwait)
 			bloomed = false;
 	}
@@ -122,31 +122,28 @@ void TSamboFlowerCoinUnit::checkGenCoin()
 		Mtx mtx;
 		int spawned = 0;
 		for (int i = 0; i < mNumFlowers; i++) {
-			TSamboFlower* flower = mFlowers[i];
-			if (flower->unk168 == nullptr)
+			if (mFlowers[i]->unk168 == nullptr)
 				continue;
 
 			f32 rate = (f32)spawned / (f32)total;
 
 			JGeometry::TVec3<f32> offset(0.0f, 0.0f,
-			                             flower->unk16C->mSLCoinCircleR.get());
+			                             mFlowers[i]->unk16C->mSLCoinCircleR.get());
 			MsMtxSetRotY(mtx, 360.0f * rate);
 			MTXMultVec(mtx, &offset, &offset);
 
-			TCoin* coin = flower->unk168;
+			TCoin* coin = mFlowers[i]->unk168;
 			if (coin->isActorType(0x2000000E))
 				coin = (TCoin*)gpItemManager->makeObjAppear(0x2000000E);
 
 			if (coin) {
 				coin->appear();
 
-				JGeometry::TVec3<f32> pos = mCoinPos;
-				pos += offset;
-				coin->mPosition = pos;
+				coin->mPosition = mCoinPos + offset;
 
 				MsVECNormalize(&offset, &offset);
 
-				TSamboFlowerSaveLoadParams* prm = flower->unk16C;
+				TSamboFlowerSaveLoadParams* prm = mFlowers[i]->unk16C;
 				coin->mVelocity.set(offset.x * prm->mSLCoinVelocityXZ.get(),
 				                    8.0f * rate + prm->mSLCoinVelocityY.get(),
 				                    offset.z * prm->mSLCoinVelocityXZ.get());

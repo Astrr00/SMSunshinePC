@@ -192,8 +192,12 @@ BOOL TBGBeakHit::receiveMessage(THitActor* sender, u32 message)
 
 			mHolder = actor;
 
-			if (mOwner->unk190.color.a != 0)
-				mOwner->showMessage(0xE0028);
+			// retail inlines showMessage(0xE0028) here (flag 1 << 3 folded)
+			if (mOwner->unk190.color.a != 0) {
+				if ((mOwner->unk198 & 8) == 0)
+					gpMarDirector->getConsole()->startAppearBalloon(0xE0028, true);
+				mOwner->unk198 |= 8;
+			}
 
 			return true;
 		}
@@ -1808,11 +1812,11 @@ DEFINE_NERVE(TNerveBGTug, TLiveActor)
 	}
 
 	gpMarioParticleManager->emitAndBindToMtxPtr(
-	    BGESO_JPA_MS_BOGE_ASE, self->getModel()->getAnmMtx(47), 0, nullptr);
+	    BGESO_JPA_MS_BOGE_ASE, self->getModel()->getAnmMtx(47), 1, self);
 	gpMarioParticleManager->emitAndBindToMtxPtr(
-	    BGESO_JPA_MS_BOGE_NAMIDA, self->getModel()->getAnmMtx(7), 0, nullptr);
+	    BGESO_JPA_MS_BOGE_NAMIDA, self->getModel()->getAnmMtx(7), 1, self);
 	gpMarioParticleManager->emitAndBindToMtxPtr(
-	    BGESO_JPA_MS_BOGE_NAMIDA, self->getModel()->getAnmMtx(4), 0, nullptr);
+	    BGESO_JPA_MS_BOGE_NAMIDA, self->getModel()->getAnmMtx(4), 1, self);
 
 	if (self->mBeak->mHolder != nullptr) {
 		JGeometry::TVec3<f32> delta = SMS_GetMarioPos();
@@ -1871,7 +1875,7 @@ DEFINE_NERVE(TNerveBGDie, TLiveActor)
 			gpMarDirector->fireStartDemoCamera("bgeso_fall_camera3", nullptr,
 			                                   -1, 0.0f, true, nullptr, 0,
 			                                   nullptr, JDrama::TFlagT<u16>(0));
-		} else if (gpMarDirector->unk7D == 4) {
+		} else if (gpMarDirector->unk7D == 4 ? 1 : 0) {
 			gpMarDirector->fireStartDemoCamera("bgeso_fall_camera2", nullptr,
 			                                   -1, 0.0f, true, nullptr, 0,
 			                                   nullptr, JDrama::TFlagT<u16>(0));
@@ -1928,7 +1932,7 @@ DEFINE_NERVE(TNerveBGDie, TLiveActor)
 		self->unk114.clear();
 
 		self->mVelocity
-		    = self->calcVelocityToJumpToY(local_24, 0.0f, self->getGravityY());
+		    = self->calcVelocityToJumpToY(local_24, 50.0f, self->getGravityY());
 		self->onLiveFlag(LIVE_FLAG_AIRBORNE);
 		return false;
 	}

@@ -374,6 +374,10 @@ void THino2Mask::perform(u32 cue, JDrama::TGraphics* graphics)
 
 static int Hino2HeadCallback(J3DNode* param_1, int param_2)
 {
+	Mtx local_44;
+	Mtx local_74;
+	Mtx local_a4;
+	char trash[0x28]; // stack padding to match the retail frame size
 	if (param_2 == 0) {
 		MtxPtr mA = gpCurHinokuri->getModel()->getAnmMtx(
 		    ((J3DJoint*)param_1)->getJntNo());
@@ -381,7 +385,6 @@ static int Hino2HeadCallback(J3DNode* param_1, int param_2)
 		if (gpCurHinokuri->mLevel == 1) {
 			f32 scale = gpCurHinokuri->unk194;
 
-			Mtx local_44;
 			local_44[0][0] = scale;
 			local_44[0][1] = 0.0;
 			local_44[0][2] = 0.0;
@@ -397,19 +400,19 @@ static int Hino2HeadCallback(J3DNode* param_1, int param_2)
 			local_44[2][2] = scale;
 			local_44[2][3] = 0.0;
 
-			Mtx local_74;
-			MsMtxSetRotY(local_74, gpCurHinokuri->unk198);
+			MtxPtr rot = local_74;
+			MsMtxSetRotY(rot, gpCurHinokuri->unk198);
 
-			MTXConcat(mA, local_74, mA);
+			MTXConcat(mA, rot, mA);
 			MTXConcat(mA, local_44, mA);
-			MTXConcat(J3DSys::mCurrentMtx, local_74, J3DSys::mCurrentMtx);
+			MTXConcat(J3DSys::mCurrentMtx, rot, J3DSys::mCurrentMtx);
 			MTXConcat(J3DSys::mCurrentMtx, local_44, J3DSys::mCurrentMtx);
 		} else {
-			Mtx local_a4;
-			MsMtxSetRotY(local_a4, gpCurHinokuri->unk198);
+			MtxPtr rot = local_a4;
+			MsMtxSetRotY(rot, gpCurHinokuri->unk198);
 
-			MTXConcat(mA, local_a4, mA);
-			MTXConcat(J3DSys::mCurrentMtx, local_a4, J3DSys::mCurrentMtx);
+			MTXConcat(mA, rot, mA);
+			MTXConcat(J3DSys::mCurrentMtx, rot, J3DSys::mCurrentMtx);
 		}
 	}
 

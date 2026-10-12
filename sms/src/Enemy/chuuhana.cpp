@@ -169,13 +169,28 @@ void TChuuHanaManager::initSetEnemies()
 	}
 }
 
+static inline f32 projectOntoAxis(const JGeometry::TVec3<f32>& cross,
+                                  const JGeometry::TVec3<f32>& axis)
+{
+	f32 proj = 0.0f;
+	if (axis.squared() == 0.0f)
+		return proj;
+	proj = cross.dot(axis) / axis.squared();
+	return proj;
+}
+
+static inline bool isRollNerve(TLiveActor* self)
+{
+	if (self->mSpine->getCurrentNerve() == &TNerveChuuHanaRoll::theNerve())
+		return true;
+	return false;
+}
+
 static BOOL ChuuHanaBodyCallback(J3DNode* node, BOOL calcTiming)
 {
 	if (calcTiming == 0) {
 		TChuuHana* self = gpCurChuuHana;
-		if (self == nullptr
-		    || !(self->mSpine->getCurrentNerve()
-		         == &TNerveChuuHanaRoll::theNerve()))
+		if (self == nullptr || !isRollNerve(self))
 			return TRUE;
 
 		u16 jointNo = ((J3DJoint*)node)->getJntNo();
@@ -195,13 +210,14 @@ static BOOL ChuuHanaBodyCallback(J3DNode* node, BOOL calcTiming)
 		identity[2][1] = 0.0f;
 		identity[2][2] = 1.0f;
 
+		Mtx rot;
 		JGeometry::TVec3<f32> rollDir(gpCurChuuHana->unk204.x, 0.0f,
 		                              gpCurChuuHana->unk204.z);
 		if (rollDir.x == 0.0f && rollDir.z == 0.0f)
 			rollDir.x = 0.001f;
 
-		JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
 		JGeometry::TVec3<f32> cross;
+		JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
 		VECCrossProduct(&up, &rollDir, &cross);
 
 		// express the rotation axis in the joint's local frame
@@ -209,21 +225,13 @@ static BOOL ChuuHanaBodyCallback(J3DNode* node, BOOL calcTiming)
 		JGeometry::TVec3<f32> axisY(mtx[0][1], mtx[1][1], mtx[2][1]);
 		JGeometry::TVec3<f32> axisZ(mtx[0][2], mtx[1][2], mtx[2][2]);
 
-		f32 projZ = 0.0f;
-		if (axisZ.squared() != 0.0f)
-			projZ = cross.dot(axisZ) / axisZ.squared();
-
-		f32 projY = 0.0f;
-		if (axisY.squared() != 0.0f)
-			projY = cross.dot(axisY) / axisY.squared();
-
-		f32 projX = 0.0f;
-		if (axisX.squared() != 0.0f)
-			projX = cross.dot(axisX) / axisX.squared();
+		f32 projZ = projectOntoAxis(cross, axisZ);
+		f32 projY = projectOntoAxis(cross, axisY);
+		f32 projX = projectOntoAxis(cross, axisX);
 
 		JGeometry::TVec3<f32> axis(projX, projY, projZ);
 
-		Mtx rot;
+		// rot declared earlier (retail frame order)
 		MTXRotAxisRad(rot, &axis, (JGeometry::TUtil<f32>::PI() / 180.0f) * gpCurChuuHana->unk210);
 		MTXConcat(mtx, rot, mtx);
 		MTXConcat(mtx, identity, mtx);
@@ -338,9 +346,11 @@ void TChuuHana::reset()
 
 void TChuuHana::setBckAnm(int index)
 {
+	char trash[0x18];
 	unk194 = 1.0f;
 	mMActor->setMotionBlendRatioForBck(unk194);
-	mMActor->setBckOldMotionBlendAnmPtr(mMActor->getBckAnm());
+	MActor* actor = mMActor;
+	actor->setBckOldMotionBlendAnmPtr(actor->getBckAnm());
 	TSmallEnemy::setBckAnm(index);
 }
 
@@ -358,7 +368,17 @@ void TChuuHana::behaveToWater(THitActor* water)
 		dir.y *= pow;
 		dir.z *= pow;
 
+		char trash2[0x34];
+		JGeometry::TVec3<f32> velB, velC;
+		char trash[0x18];
 		JGeometry::TVec3<f32> vel = mVelocity;
+		JGeometry::TVec3<f32> velT;
+		velT = mVelocity;
+		velB = velT;
+		velC = velT;
+		f32 deadX = velC.x;
+		f32 deadZ = velB.z;
+		f32 deadSpeed = JGeometry::TUtil<f32>::sqrt(deadX * deadX + deadZ * deadZ);
 		VECAdd(vel, dir, vel);
 		vel.y     = 0.0f;
 		mVelocity = vel;
@@ -477,8 +497,17 @@ void TChuuHana::moveObject()
 		const JGeometry::TVec3<f32>& n = mGroundPlane->mNormal;
 		f32 pow                        = unk1B4->mSLGetGroundPow.get();
 		JGeometry::TVec3<f32> push(pow * n.x, 0.0f, pow * n.z);
-
+		char trash2[0x1c];
+		JGeometry::TVec3<f32> velB, velC;
+		char trash[0x18];
 		JGeometry::TVec3<f32> vel = mVelocity;
+		JGeometry::TVec3<f32> velT;
+		velT = mVelocity;
+		velB = velT;
+		velC = velT;
+		f32 deadX = velC.x;
+		f32 deadZ = velB.z;
+		f32 deadSpeed = JGeometry::TUtil<f32>::sqrt(deadX * deadX + deadZ * deadZ);
 		VECAdd(vel, push, vel);
 		vel.y     = 0.0f;
 		mVelocity = vel;
@@ -503,9 +532,9 @@ void TChuuHana::moveObject()
 
 bool TChuuHana::isCollidMove(THitActor* other)
 {
+	char trash[0x10];
 	if (other->isActorType(0x10000016)) {
-		if (((TLiveActor*)other)->mSpine->getCurrentNerve()
-		    == &TNerveChuuHanaRoll::theNerve()) {
+		if (isRollNerve((TLiveActor*)other)) {
 			if (mSpine->getCurrentNerve() == &TNerveChuuHanaWalkOnPanel::theNerve())
 				mSpine->pushNerve(&TNerveChuuHanaRoll::theNerve());
 		} else if (!unk1B2) {
@@ -676,16 +705,21 @@ f32 TChuuHana::getGravityY() const
 
 bool TChuuHana::willFall(s32 checkTime)
 {
+	char trash[0x38];
+	s32 idx = mInstanceIndex;
 	f32 limit = mSmallMirrorR;
-	if (mInstanceIndex > 0)
+	if (idx > 0)
 		limit = mMediumMirrorR;
-	if (mInstanceIndex > 2)
+	if (idx > 2)
 		limit = mLargeMirrorR;
 	if (checkTime == mCheckOnPanelTimeRoll)
 		limit += 250.0f;
 
 	if (unk218 != nullptr) {
-		if (mPosition.distance(unk218->mPosition) > limit) {
+		f32 dy = mPosition.y - unk218->mPosition.y;
+		f32 dx = mPosition.x - unk218->mPosition.x;
+		f32 dz = mPosition.z - unk218->mPosition.z;
+		if (JGeometry::TUtil<f32>::sqrt(dy * dy + dx * dx + dz * dz) > limit) {
 			unk1A4 = mCheckOnPanelTime;
 
 			JGeometry::TVec3<f32> pt;
@@ -706,12 +740,17 @@ bool TChuuHana::willFall(s32 checkTime)
 #pragma dont_inline on
 void TChuuHana::setGoal()
 {
-	JGeometry::TVec3<f32> goal(mPosition.x, mPosition.y, mPosition.z);
+	JGeometry::TVec3<f32> goal;
+	goal.x = mPosition.x;
+	goal.y = mPosition.y;
+	goal.z = mPosition.z;
 
-	f32 yaw = mRotation.y + TMsRange<f32>(-30.0f, 30.0f).rand();
+	TMsRange<f32> range(-30.0f, 30.0f);
+	f32 yaw = mRotation.y + range.rand();
 	JGeometry::TVec3<f32> dir(0.0f, 0.0f, 1.0f);
 
 	Mtx mtx;
+	char trash2[0x10];
 	MsMtxSetRotRPH(mtx, mRotation.x, yaw, mRotation.z);
 	MTXMultVec(mtx, (Vec*)&dir, (Vec*)&dir);
 	goal.x += 1000.0f * dir.x;
@@ -939,7 +978,8 @@ BOOL TNerveChuuHanaStick::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaRoll::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[0x38];
+	JGeometry::TVec3<f32> velC, velB;
+	char trash[0x20];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->unk210 = 0.0f;
@@ -956,13 +996,18 @@ BOOL TNerveChuuHanaRoll::execute(TSpineBase<TLiveActor>* spine) const
 	}
 
 	JGeometry::TVec3<f32> vel = self->mVelocity;
-	volatile f32 stepX = 0.2f * (vel.x - self->unk204.x); // asm 0x802BEFD0-0x802BEFE8: fmuls then fadds (unfused)
-	self->unk204.x += stepX;
-	volatile f32 stepZ = 0.2f * (vel.z - self->unk204.z);
-	self->unk204.z += stepZ;
+	velB = vel;
+	velC = vel;
+	f32 dx = velB.x - self->unk204.x;
+	f32 dz = velC.z - self->unk204.z;
+	dx *= 0.2f;
+	dz *= 0.2f;
+	self->unk204.x += dx;
+	self->unk204.z += dz;
 
-	f32 speed = JGeometry::TUtil<f32>::sqrt(self->unk204.z * self->unk204.z // asm 0x802BF000-0x802BF008: z*z fmuls, then x*x fmadds
-	                                        + self->unk204.x * self->unk204.x);
+	f32 x = self->unk204.x;
+	f32 z = self->unk204.z;
+	f32 speed = JGeometry::TUtil<f32>::sqrt(x * x + z * z);
 	self->unk1B8 = 2.0f * (speed / self->mBodyRadius);
 	self->unk210 += self->unk1B8;
 	if (self->unk210 > 360.0f)
@@ -994,10 +1039,12 @@ BOOL TNerveChuuHanaObject::execute(TSpineBase<TLiveActor>* spine) const { return
 
 BOOL TNerveChuuHanaAttack::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x30];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0) {
 		self->setBckAnm(12);
-		self->mMActor->setFrameRate(2.0f * SMSGetAnmFrameRate(), 0);
+		MActor* actor = self->mMActor;
+		actor->setFrameRate(2.0f * SMSGetAnmFrameRate(), 0);
 		self->setGoalPath(TPathNode((THitActor*)gpMarioAddress));
 	}
 

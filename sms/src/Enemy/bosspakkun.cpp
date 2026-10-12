@@ -184,6 +184,7 @@ void TBPPolDrop::move()
 	} else if (unk80 == 2 && unk7C->curAnmEndsNext(ANM_TYPE_BCK, nullptr)) {
 		unk80 = 0;
 	}
+	char trash[0x34];
 
 	mPosition = nextPosition;
 }
@@ -473,11 +474,10 @@ TBPHeadHit::TBPHeadHit(TBossPakkun* owner, const char* name)
 
 BOOL TBPHeadHit::receiveMessage(THitActor* sender, u32 message)
 {
-	const TNerveBase<TLiveActor>* nerve = mOwner->mSpine->getLatestNerve();
-	if (&TNerveBPSleep::theNerve() == nerve)
+	if (&TNerveBPSleep::theNerve() == mOwner->mSpine->getLatestNerve())
 		return mOwner->receiveMessage(sender, message);
-
 	TBossPakkun* boss = mOwner;
+
 	if (boss->mWeakPoint == TBossPakkun::WEAK_POINT_FLY
 	    && (sender->getActorType() == 0x1000000d
 	        || sender->getActorType() == 0x1000001)) {
@@ -487,7 +487,7 @@ BOOL TBPHeadHit::receiveMessage(THitActor* sender, u32 message)
 
 	if (boss->mWeakPoint != TBossPakkun::WEAK_POINT_MOUTH) {
 		if (boss->is2ndFightNow()
-		    && &TNerveBPFly::theNerve() == nerve)
+		    && &TNerveBPFly::theNerve() == boss->mSpine->getLatestNerve())
 			boss->showMessage(0xe0002);
 		if (sender->getActorType() == 0x1000001)
 			return true;
@@ -538,6 +538,7 @@ void TBPHeadHit::throwActor(THitActor* actor)
 	perpendicular += up;
 	SMS_SendMessageToMario(this, HIT_MESSAGE_ATTACK);
 	SMS_SendMessageToMario(this, HIT_MESSAGE_THROWN);
+	char trash[8];
 	SMS_ThrowMario(perpendicular, 100.0f);
 }
 
@@ -1006,6 +1007,7 @@ void TBossPakkun::gotHipDropDamage()
 			mSpine->pushNerve(&TNerveBPStompReact::theNerve());
 		}
 	}
+	char trash[0x18];
 }
 
 void TBossPakkun::gotTrampleDamage() { }
@@ -1158,6 +1160,7 @@ BOOL TBossPakkun::receiveMessage(THitActor* sender, u32)
 		gotFlyingDamage();
 		return true;
 	}
+	char trash[0x10];
 	return false;
 }
 
@@ -1301,6 +1304,7 @@ void TBossPakkun::perform(u32 cue, JDrama::TGraphics* graphics)
 		}
 	}
 
+	char trash[0x70];
 	TSpineEnemy::perform(cue, graphics);
 }
 

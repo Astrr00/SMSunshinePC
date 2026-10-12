@@ -22,6 +22,9 @@
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
 
+// Fake inline: mwcc folds a literal `x * 1.0f`, retail keeps the fmuls
+static inline f32 mulFake(f32 a, f32 b) { return a * b; }
+
 f32 TMario::getJumpAccelControl() const
 {
 	if (mStatus == MARIO_STATUS_WIRE_JUMP)
@@ -127,23 +130,25 @@ BOOL TMario::moveRequest(const JGeometry::TVec3<f32>& pos)
 	mPosition                    = pos;
 
 	unk160 += offset;
+	f32 oy = offset.y;
+	f32 oz = offset.z;
 	mPrevPosition += offset;
 	mWireStartPos += offset;
 	mWireEndPos += offset;
 	unk2A8 += offset;
-	unk2BC += offset.y;
+	unk2BC += oy;
 	mHeadMtx[0][3] += offset.x;
-	mHeadMtx[1][3] += offset.y;
-	mHeadMtx[2][3] += offset.z;
+	mHeadMtx[1][3] += oy;
+	mHeadMtx[2][3] += oz;
 	unk1F0[0][3] += offset.x;
-	unk1F0[1][3] += offset.y;
-	unk1F0[2][3] += offset.z;
+	unk1F0[1][3] += oy;
+	unk1F0[2][3] += oz;
 	unk220[0][3] += offset.x;
-	unk220[1][3] += offset.y;
-	unk220[2][3] += offset.z;
+	unk220[1][3] += oy;
+	unk220[2][3] += oz;
 	unk318[0][3] += offset.x;
-	unk318[1][3] += offset.y;
-	unk318[2][3] += offset.z;
+	unk318[1][3] += oy;
+	unk318[2][3] += oz;
 
 	checkRideReCalc();
 
@@ -427,11 +432,14 @@ void TMario::setPlayerJumpSpeed(f32 speed_mult, f32 force)
 u32 TMario::setStatusToJumping(u32 status, u32 arg)
 {
 	u32 nextStatus = status;
+	char trash[0x34];
+	const TBGCheckData* landingPlane;
 
 	unk2BC = mPosition.y;
-	if (mFootPrintTimer > mDeParams.mFootPrintTimerMax.get() / 2)
-		gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z,
-		                   mDirtyParams.mPolSizeJump.get());
+	if (mFootPrintTimer > mDeParams.mFootPrintTimerMax.get() / 2) {
+		f32 size = mDirtyParams.mPolSizeJump.get();
+		gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, size);
+	}
 
 	switch (status) {
 	case MARIO_STATUS_JUMP:
@@ -501,7 +509,6 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 	case 0x281089A: {
 		startVoice(MSD_SE_MV21_JUMP_SMALL_01);
 
-		const TBGCheckData* landingPlane;
 		gpMap->checkGround(mPosition.x, mPosition.y, mPosition.z,
 		                   &landingPlane);
 		if (landingPlane->isWaterSurface()) {
@@ -593,6 +600,10 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 
 	case MARIO_STATUS_TRAMPLE:
 		switch (mAnimationId) {
+		default:
+			startVoice(MSD_SE_MV21_JUMP_SMALL_01);
+			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep1.get());
+			break;
 		case ANIM_STEP2:
 			startVoice(MSD_SE_MV22_JUMP_MID_01);
 			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep2.get());
@@ -600,10 +611,6 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 		case ANIM_STEP3:
 			startVoice(MSD_SE_MV23_JUMP_LARGE_01);
 			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep3.get());
-			break;
-		default:
-			startVoice(MSD_SE_MV21_JUMP_SMALL_01);
-			setPlayerJumpSpeed(0.25f, mDeParams.mTramplePowStep1.get());
 			break;
 		}
 		mForwardVel *= 0.8f;
@@ -623,7 +630,7 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 
 	case MARIO_STATUS_WIRE_ROLL_JUMP: {
 		if (arg == 0) {
-			f32 jumpPower = (f32)unkF6 * (mWireParams.mJumpRate.get() * 1.0f);
+			f32 jumpPower = mulFake((f32)unkF6 * mWireParams.mJumpRate.get(), 1.0f);
 			mVel.y        = jumpPower * JMASSin(0xE000);
 
 			mForwardVel = jumpPower * -JMASCos(0xE000);
@@ -632,7 +639,7 @@ u32 TMario::setStatusToJumping(u32 status, u32 arg)
 			mVel.x      = mSlideVelX;
 			mVel.z      = mSlideVelZ;
 		} else {
-			f32 jumpPower = (f32)unkF6 * (mWireParams.mJumpRate.get() * 1.0f);
+			f32 jumpPower = mulFake((f32)unkF6 * mWireParams.mJumpRate.get(), 1.0f);
 			mVel.y        = jumpPower * JMASSin(0x6000);
 
 			mForwardVel = jumpPower * -JMASCos(0x6000);
@@ -1316,10 +1323,25 @@ void TMario::getDizzyAngle() { }
 
 void TMario::getDizzyPower() { }
 
-void TMario::getLRLevel(u8) { }
+inline f32 TMario::getLRLevel(u8 v)
+{
+	u8 zero    = mControllerParams.mAnalogLRToZeroVal.get();
+	u8 middle  = mControllerParams.mAnalogLRToMiddleVal.get();
+	u8 max     = mControllerParams.mAnalogLRToMaxVal.get();
+	f32 midLvl = mControllerParams.mAnalogLRMiddleLevel.get();
+	if (v < zero)
+		return 0.0f;
+	if (v < middle)
+		return (midLvl * (f32)(v - zero)) / (f32)(middle - zero);
+	if (v < max)
+		return midLvl
+		       + (((1.0f - midLvl) * (f32)(v - middle)) / (f32)(max - middle));
+	return 1.0f;
+}
 
 void TMario::checkController(JDrama::TGraphics*)
 {
+	char trash[0xb8];
 	unk108->mStickHS16 = (s16)(128.0f * mGamePad->mCompSPos[0]);
 	unk108->mStickVS16 = (s16)(128.0f * mGamePad->mCompSPos[1]);
 
@@ -1364,82 +1386,10 @@ void TMario::checkController(JDrama::TGraphics*)
 	// for unk108->mAnalogR (R trigger), unk108->mAnalogL (L trigger),
 	// then again for unk10C (L) and unk110 (R) Mario-side copies.
 	// Op sequence matches retail; remaining diffs are register/stack allocation.
-	{
-		u8 zero    = mControllerParams.mAnalogLRToZeroVal.get();
-		u8 middle  = mControllerParams.mAnalogLRToMiddleVal.get();
-		u8 max     = mControllerParams.mAnalogLRToMaxVal.get();
-		f32 midLvl = mControllerParams.mAnalogLRMiddleLevel.get();
-		u8 v       = (u8)(s32)mGamePad->mCompSPos[3];
-		f32 out;
-		if (v < zero)
-			out = 0.0f;
-		else if (v < middle)
-			out = (midLvl * (f32)(v - zero)) / (f32)(middle - zero);
-		else if (v < max)
-			out = midLvl
-			      + (((1.0f - midLvl) * (f32)(v - middle))
-			         / (f32)(max - middle));
-		else
-			out = 1.0f;
-		unk108->mAnalogR = out;
-	}
-	{
-		u8 zero    = mControllerParams.mAnalogLRToZeroVal.get();
-		u8 middle  = mControllerParams.mAnalogLRToMiddleVal.get();
-		u8 max     = mControllerParams.mAnalogLRToMaxVal.get();
-		f32 midLvl = mControllerParams.mAnalogLRMiddleLevel.get();
-		u8 v       = (u8)(s32)mGamePad->mCompSPos[2];
-		f32 out;
-		if (v < zero)
-			out = 0.0f;
-		else if (v < middle)
-			out = (midLvl * (f32)(v - zero)) / (f32)(middle - zero);
-		else if (v < max)
-			out = midLvl
-			      + (((1.0f - midLvl) * (f32)(v - middle))
-			         / (f32)(max - middle));
-		else
-			out = 1.0f;
-		unk108->mAnalogL = out;
-	}
-	{
-		u8 zero    = mControllerParams.mAnalogLRToZeroVal.get();
-		u8 middle  = mControllerParams.mAnalogLRToMiddleVal.get();
-		u8 max     = mControllerParams.mAnalogLRToMaxVal.get();
-		f32 midLvl = mControllerParams.mAnalogLRMiddleLevel.get();
-		u8 v       = (u8)(s32)mGamePad->mCompSPos[2];
-		f32 out;
-		if (v < zero)
-			out = 0.0f;
-		else if (v < middle)
-			out = (midLvl * (f32)(v - zero)) / (f32)(middle - zero);
-		else if (v < max)
-			out = midLvl
-			      + (((1.0f - midLvl) * (f32)(v - middle))
-			         / (f32)(max - middle));
-		else
-			out = 1.0f;
-		unk10C = out;
-	}
-	{
-		u8 zero    = mControllerParams.mAnalogLRToZeroVal.get();
-		u8 middle  = mControllerParams.mAnalogLRToMiddleVal.get();
-		u8 max     = mControllerParams.mAnalogLRToMaxVal.get();
-		f32 midLvl = mControllerParams.mAnalogLRMiddleLevel.get();
-		u8 v       = (u8)(s32)mGamePad->mCompSPos[3];
-		f32 out;
-		if (v < zero)
-			out = 0.0f;
-		else if (v < middle)
-			out = (midLvl * (f32)(v - zero)) / (f32)(middle - zero);
-		else if (v < max)
-			out = midLvl
-			      + (((1.0f - midLvl) * (f32)(v - middle))
-			         / (f32)(max - middle));
-		else
-			out = 1.0f;
-		unk110 = out;
-	}
+	unk108->mAnalogR = getLRLevel((u8)(s32)mGamePad->mCompSPos[3]);
+	unk108->mAnalogL = getLRLevel((u8)(s32)mGamePad->mCompSPos[2]);
+	unk10C           = getLRLevel((u8)(s32)mGamePad->mCompSPos[2]);
+	unk110           = getLRLevel((u8)(s32)mGamePad->mCompSPos[3]);
 
 	// Stick deadzone: subtract 6 if outside +/- 7
 	unk108->mStickH = 0.0f;
@@ -1464,8 +1414,8 @@ void TMario::checkController(JDrama::TGraphics*)
 	unk108->mStickDist = dist;
 
 	if (unk108->mStickDist > 64.0f) {
-		unk108->mStickH    = unk108->mStickH * (64.0f / unk108->mStickDist);
-		unk108->mStickV    = unk108->mStickV * (64.0f / unk108->mStickDist);
+		unk108->mStickH *= (64.0f / unk108->mStickDist);
+		unk108->mStickV *= (64.0f / unk108->mStickDist);
 		unk108->mStickDist = 64.0f;
 	}
 
@@ -2438,9 +2388,10 @@ void TMario::gunExec()
 	if ((int)mWaterGun->mCurrentNozzle == TWaterGun::Spray
 	    && mWaterGun->mIsEmitWater != 0) {
 		JGeometry::TVec3<f32> local_34;
-		local_34.x = JMASSin(mFaceAngle.y);
-		local_34.y = 0.0f;
-		local_34.z = JMASCos(mFaceAngle.y);
+		s16 faceAngle = mFaceAngle.y;
+		local_34.x    = JMASSin(faceAngle);
+		local_34.y    = 0.0f;
+		local_34.z    = JMASCos(faceAngle);
 
 		for (int i = 0; i < mGraffitoParams.mFootEraseTimes.get(); ++i) {
 			f32 fVar1 = mGraffitoParams.mFootEraseSize.get();

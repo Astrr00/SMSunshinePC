@@ -1361,10 +1361,11 @@ DEFINE_NERVE(TNerveBWGraphWander, TLiveActor)
 		toBoss -= gpMarioOriginal->mPosition;
 		VECNormalize(&toBoss, &toBoss);
 		f32 along = gpMarioOriginal->mIntendedMag * 0.03125f * 0.75;
-		f32 scale = 1.0f - along * -toBoss.dot(dir);
+		f32 pulled = along * -toBoss.dot(dir);
+		f32 scale  = 1.0f - pulled;
 		if (scale < 0.0f)
 			scale = 0.0f;
-		else if (scale > 1.5f)
+		else if (1.5f < scale)
 			scale = 1.5f;
 		boss->slideToCurPathNode(scale * (ratio * boss->getMarchSpeed()),
 		                         boss->getTurnSpeed());

@@ -91,10 +91,7 @@ DEFINE_NERVE(TNerveMantaMove, TLiveActor)
 		SMSGetMSound()->startSoundSet(MSD_SE_BS_MANTA_ATTACK, &self->mPosition,
 		                              0, 0.0f, 0, 0, 4);
 
-	JGeometry::TVec3<f32> toTarget;
-	toTarget.sub(self->mPosition, self->unk158);
-
-	if (toTarget.length() < 500.0f || time % 150 == 0) {
+	if (self->mPosition.distance(self->unk158) < 500.0f || time % 150 == 0) {
 		JGeometry::TVec3<f32> pt
 		    = graph->indexToPoint((int)(MsRandF() * graph->getNodeNum()));
 
@@ -737,18 +734,19 @@ void TBossManta::updateAttractor()
 		    || other->getInstanceIndex() == getInstanceIndex())
 			continue;
 
+		JGeometry::TVec3<f32> delta = selfPos;
 		JGeometry::TVec3<f32> otherFacing = other->unk170;
 		otherFacing *= getSaveParams()->mSLEscapeLookedPoint.get();
 
 		JGeometry::TVec3<f32> otherPos = other->mPosition;
 		otherPos += otherFacing;
 
-		JGeometry::TVec3<f32> delta = selfPos;
 		delta -= otherPos;
 		delta.y = 0.0f;
 
-		if (0.1f < delta.length()
-		    && delta.length() < getSaveParams()->mSLEscapeRegion.get()) {
+		f32 sq = delta.squared();
+		if (0.1f < JGeometry::TUtil<f32>::sqrt(sq)
+		    && JGeometry::TUtil<f32>::sqrt(sq) < getSaveParams()->mSLEscapeRegion.get()) {
 			delta.normalize();
 			delta *= getSaveParams()->mSLPusherPower.get() / delta.length();
 			local_108 += delta;

@@ -351,9 +351,16 @@ void TBathtubKiller::bind()
 		                                   &mGroundPlane);
 		mGroundHeight += 1.0f;
 		if (pos.y <= mGroundHeight + 0.05f) {
-			mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
+			// asm 0x80343E70: retail re-checks the dying state before pushing
+			dying = mSpine->getCurrentNerve()
+			        == &TNerveBathtubKillerExplosion::theNerve();
+			if (!dying)
+				dying = mSpine->getCurrentNerve()
+				        == &TNerveBathtubKillerBreak::theNerve();
+			if (!dying)
+				mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
 			unk1BC.zero();
-			mVelocity = unk1BC;
+			mVelocity.set(unk1BC);
 			pos.y = mGroundHeight;
 		}
 
@@ -464,109 +471,56 @@ f32 TBathtubKiller::getBathtubY() { return 0.0f; }
 
 void TBathtubKiller::makeInitialVelocity(JGeometry::TVec3<f32> v)
 {
-	f32 lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
-	f32 len = JGeometry::TUtil<f32>::sqrt(lenSq);
+	// asm 0x8034357C
+	f32 len = v.length();
 	f32 maxSpeed = getSaveParam2()->mSLFlyingSpeedMax.get();
 
 	if (len > maxSpeed) {
-		if (lenSq > JGeometry::TUtil<f32>::epsilon())
-			v.scale(JGeometry::TUtil<f32>::inv_sqrt(lenSq));
-		else
-			v.zero();
+		v.normalize();
 		v.scale(maxSpeed);
 	}
 
-	mVelocity = v;
+	mVelocity.set(v);
+	v.normalize();
 
-	f32 vLenSq = v.x * v.x + v.y * v.y + v.z * v.z;
-	if (vLenSq <= JGeometry::TUtil<f32>::epsilon())
-		v.zero();
-	else
-		v.scale(JGeometry::TUtil<f32>::inv_sqrt(vLenSq));
+	JGeometry::TVec3<f32> forward;
+	mQuat.getZDir(forward);
 
-	// zDir of mQuat, written out (retail inlines getZDir)
-	f32 ox = mQuat.x;
-	f32 oy = mQuat.y;
-	f32 oz = mQuat.z;
-	f32 ow = mQuat.w;
-	f32 cx = 2.0f * (ox * oz + ow * oy);
-	f32 cy = 2.0f * (oy * oz - ow * ox);
-	f32 cz = 1.0f - 2.0f * (ox * ox + oy * oy);
-
-	f32 ax = cy * v.z - cz * v.y;
-	f32 ay = cz * v.x - cx * v.z;
-	f32 az = cx * v.y - cy * v.x;
-	f32 axisLenSq = ax * ax + ay * ay + az * az;
-
-	f32 qx = 0.0f;
-	f32 qy = 0.0f;
-	f32 qz = 0.0f;
-	f32 qw = 1.0f;
-	if (axisLenSq > JGeometry::TUtil<f32>::epsilon()) {
-		f32 axisLen = JGeometry::TUtil<f32>::sqrt(axisLenSq);
-		f32 dot = cx * v.x + cy * v.y + cz * v.z;
-		f32 halfAngle = 0.5f * atan2f(axisLen, dot);
-		f32 s = sinf(halfAngle);
-		qx = ax * s / axisLen;
-		qy = ay * s / axisLen;
-		qz = az * s / axisLen;
-		qw = cosf(halfAngle);
-	}
-
-	// mQuat = q * mQuat
-	mQuat.x = qw * ox + qx * ow + qy * oz - qz * oy;
-	mQuat.y = qw * oy + qy * ow + qz * ox - qx * oz;
-	mQuat.z = qw * oz + qz * ow + qx * oy - qy * ox;
-	mQuat.w = qw * ow - qx * ox - qy * oy - qz * oz;
+	JGeometry::TQuat4<f32> steer;
+	steer.setRotate(forward, v, 1.0f);
+	mQuat.mul(steer);
 }
 
 void TBathtubKiller::moveParabolic() { }
 
 void TBathtubKiller::moveChasing()
 {
-    JGeometry::TVec3<f32> target = *gpMarioPos;
-    f32 minY = unk200 + (*unk1CC->getRootJointMtx())[1][3];
-    f32 maxY = unk204 + (*unk1CC->getRootJointMtx())[1][3];
-    target.y = 0.5f * (minY + maxY);
+	// asm 0x80343320
+	JGeometry::TVec3<f32> target = *gpMarioPos;
+	f32 minY = unk200 + (*unk1CC->getRootJointMtx())[1][3];
+	f32 maxY = unk204 + (*unk1CC->getRootJointMtx())[1][3];
+	target.y = 0.5f * (minY + maxY);
 
-    f32 dx    = target.x - mPosition.x;
-    f32 dy    = target.y - mPosition.y;
-    f32 dz    = target.z - mPosition.z;
-    f32 lenSq = dx * dx + dy * dy + dz * dz;
-    f32 x     = 0.0f;
-    f32 y     = 0.0f;
-    f32 z     = 0.0f;
-    if (lenSq > JGeometry::TUtil<f32>::epsilon()) {
-        f32 s = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(lenSq);
-        x     = dx * s;
-        y     = dy * s;
-        z     = dz * s;
-    }
-    unk1BC.x = x * unk198.unk4;
-    unk1BC.y = y * unk198.unk4;
-    unk1BC.z = z * unk198.unk4;
-    makeQuat(unk1BC, unk198.unk0, 0.1f);
+	JGeometry::TVec3<f32> dir(target.x - mPosition.x, target.y - mPosition.y,
+	                          target.z - mPosition.z);
+	dir.normalize();
+	f32 accel = unk198.unk4;
+	unk1BC.x = dir.x * accel;
+	unk1BC.y = dir.y * accel;
+	unk1BC.z = dir.z * accel;
+	makeQuat(unk1BC, unk198.unk0, 0.1f);
 
-    JGeometry::TVec3<f32> fwd;
-    mQuat.getZDir(fwd);
-    f32 fwdLenSq = fwd.x * fwd.x + fwd.y * fwd.y + fwd.z * fwd.z;
-    f32 fx       = 0.0f;
-    f32 fy       = 0.0f;
-    f32 fz       = 0.0f;
-    if (fwdLenSq > JGeometry::TUtil<f32>::epsilon()) {
-        f32 s = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(fwdLenSq);
-        fx    = fwd.x * s;
-        fy    = fwd.y * s;
-        fz    = fwd.z * s;
-    }
-    if (mPosition.y > maxY && fy > 0.0f)
-        fy = 0.0f;
-    if (mPosition.y < minY && fy <= 0.0f)
-        fy = 0.0f;
+	JGeometry::TVec3<f32> fwd;
+	mQuat.getZDir(fwd);
+	fwd.normalize();
+	if (mPosition.y > maxY && fwd.y > 0.0f)
+		fwd.y = 0.0f;
+	if (mPosition.y < minY && fwd.y <= 0.0f)
+		fwd.y = 0.0f;
 
-    mVelocity.x = fx * unk198.unk8;
-    mVelocity.y = fy * unk198.unk8;
-    mVelocity.z = fz * unk198.unk8;
+	mVelocity.x = fwd.x * unk198.unk8;
+	mVelocity.y = fwd.y * unk198.unk8;
+	mVelocity.z = fwd.z * unk198.unk8;
 }
 
 void TBathtubKiller::moveStraight() { }
@@ -665,21 +619,23 @@ BOOL TBathtubKiller::receiveMessage(THitActor* sender, u32 message)
 
 void TBathtubKiller::attackToMario()
 {
-	if (mSpine->getCurrentNerve() == &TNerveBathtubKillerExplosion::theNerve()
-	    || mSpine->getCurrentNerve() == &TNerveBathtubKillerBreak::theNerve())
-		return;
-	if (gpMarioPos->y >= mPosition.y)
-		return;
-
-	mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
-	SMS_SendMessageToMario(this, 0xe);
-	JGeometry::TVec3<f32> dir(0.0f, 1.0f, 0.0f);
-	SMS_ThrowMario(dir, 60.0f);
-	unk21C = 1;
+	// asm 0x80342864
+	bool dying = mSpine->getCurrentNerve()
+	                 == &TNerveBathtubKillerExplosion::theNerve()
+	             || mSpine->getCurrentNerve()
+	                    == &TNerveBathtubKillerBreak::theNerve();
+	if (!dying && gpMarioPos->y < mPosition.y) {
+		mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
+		SMS_SendMessageToMario(this, 0xe);
+		JGeometry::TVec3<f32> dir(0.0f, 1.0f, 0.0f);
+		SMS_ThrowMario(dir, 60.0f);
+		unk21C = 1;
+	}
 }
 
 bool TBathtubKiller::isCollidMove(THitActor* other)
 {
+	// asm 0x803424C4
 	bool dying = true;
 	if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
 	    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
@@ -687,8 +643,7 @@ bool TBathtubKiller::isCollidMove(THitActor* other)
 	if (dying)
 		return false;
 
-	u32 type = other->getActorType();
-	if (type == 0x08000029) {
+	if (other->isActorType(0x08000029)) {
 		dying = true;
 		if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
 		    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
@@ -697,8 +652,8 @@ bool TBathtubKiller::isCollidMove(THitActor* other)
 			mSpine->pushNerve(&TNerveBathtubKillerExplosion::theNerve());
 		return true;
 	}
-	bool hit = type == 0x08000021 || type == 0x0800002A || type == 0x0800002C;
-	if (hit) {
+	if (other->isActorType(0x08000021) || other->isActorType(0x0800002A)
+	    || other->isActorType(0x0800002C)) {
 		dying = true;
 		if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
 		    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
@@ -708,8 +663,7 @@ bool TBathtubKiller::isCollidMove(THitActor* other)
 		other->receiveMessage(this, 0xe);
 		return true;
 	}
-	hit = type == 0x08000024;
-	if (hit && unk214 <= 0) {
+	if (other->isActorType(0x08000024) && unk214 <= 0) {
 		dying = true;
 		if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
 		    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
@@ -720,7 +674,17 @@ bool TBathtubKiller::isCollidMove(THitActor* other)
 	return true;
 }
 
-void TBathtubKiller::behaveToWater(THitActor*) { breakBathtubKiller(); }
+void TBathtubKiller::behaveToWater(THitActor*)
+{
+	// asm 0x80342320
+	bool dying = true;
+	if (mSpine->getCurrentNerve() != &TNerveBathtubKillerExplosion::theNerve()
+	    && mSpine->getCurrentNerve() != &TNerveBathtubKillerBreak::theNerve())
+		dying = false;
+
+	if (!dying)
+		mSpine->pushNerve(&TNerveBathtubKillerBreak::theNerve());
+}
 
 const char** TBathtubKiller::getBasNameTable() const
 {
@@ -755,11 +719,16 @@ bool TBathtubKiller::isAboided()
     if (mPosition.y > unk204 + rootY + 5.0f)
         return false;
 
-    f32 dx = gpMarioPos->x - mPosition.x;
-    f32 dz = gpMarioPos->z - mPosition.z;
-    f32 dy = fabsf(gpMarioPos->y - mPosition.y);
-    f32 lenSq = dx * dx + dz * dz;
-    f32 dist = JGeometry::TUtil<f32>::sqrt(lenSq);
+    JGeometry::TVec3<f32> marioPos = *gpMarioPos;
+    JGeometry::TVec3<f32> selfPos = mPosition;
+    f32 dy = fabsf(marioPos.y - selfPos.y);
+    marioPos.y = 0.0f;
+    selfPos.y = 0.0f;
+    f32 dx = marioPos.x - selfPos.x;
+    f32 dyFlat = marioPos.y - selfPos.y;
+    f32 dz = marioPos.z - selfPos.z;
+    JGeometry::TVec3<f32> flat(dx, dyFlat, dz);
+    f32 dist = flat.length();
 
     if (dy > getSaveParam2()->mSLAboidDistanceY.get()
         && dist <= getSaveParam2()->mSLAboidDistance.get())
@@ -775,25 +744,18 @@ bool TBathtubKiller::isAboided()
 
     JGeometry::TVec3<f32> toMarioVec;
     toMarioVec.x = dx;
-    toMarioVec.y = 0.0f;
+    toMarioVec.y = dyFlat;
     toMarioVec.z = dz;
-    if (lenSq > JGeometry::TUtil<f32>::epsilon()) {
-        f32 inv = 1.0f * JGeometry::TUtil<f32>::inv_sqrt(lenSq);
-        toMarioVec.x = toMarioVec.x * inv;
-        toMarioVec.y = toMarioVec.y * inv;
-        toMarioVec.z = toMarioVec.z * inv;
-    } else {
-        toMarioVec.x = 0.0f;
-        toMarioVec.y = 0.0f;
-        toMarioVec.z = 0.0f;
-    }
+    toMarioVec.normalize();
 
     TDirectionCalc toMario(toMarioVec);
     JGeometry::TVec3<f32> fwd;
     mQuat.getZDir(fwd);
     TDirectionCalc facing(fwd);
     f32 diff = facing.absDirection(toMario.mDirection);
-    return diff <= TDirectionCalc::d2r(getSaveParam2()->aboidAngle.get());
+    if (diff > TDirectionCalc::d2r(getSaveParam2()->aboidAngle.get()))
+        return false;
+    return true;
 }
 
 bool TBathtubKiller::canChase() { return false; }
@@ -841,7 +803,7 @@ DEFINE_NERVE(TNerveBathtubKillerWander, TLiveActor)
 	}
 
 	if (!cond) {
-		spine->pushNerve(&TNerveBathtubKillerStraight::theNerve());
+		spine->pushAfterCurrent(&TNerveBathtubKillerStraight::theNerve());
 		return TRUE;
 	}
 
@@ -854,7 +816,7 @@ DEFINE_NERVE(TNerveBathtubKillerWander, TLiveActor)
 		chase = self->mPosition.y <= self->unk200 + bathtubY + chaseDistY;
 	}
 	if (chase) {
-		spine->pushNerve(&TNerveBathtubKillerChase::theNerve());
+		spine->pushAfterCurrent(&TNerveBathtubKillerChase::theNerve());
 		return TRUE;
 	}
 
@@ -904,14 +866,14 @@ DEFINE_NERVE(TNerveBathtubKillerChase, TLiveActor)
 	}
 
 	if (!cond) {
-		spine->pushNerve(&TNerveBathtubKillerStraight::theNerve());
+		spine->pushAfterCurrent(&TNerveBathtubKillerStraight::theNerve());
 		return TRUE;
 	}
 	if (self->isAboided()) {
 		if (self->unk194 == 1)
-			spine->pushNerve(&TNerveBathtubKillerChaseStraight::theNerve());
+			spine->pushAfterCurrent(&TNerveBathtubKillerChaseStraight::theNerve());
 		else
-			spine->pushNerve(&TNerveBathtubKillerStraight::theNerve());
+			spine->pushAfterCurrent(&TNerveBathtubKillerStraight::theNerve());
 		return TRUE;
 	}
 	self->moveChasing();
@@ -960,14 +922,14 @@ DEFINE_NERVE(TNerveBathtubKillerChaseStraight, TLiveActor)
 		cond = true;
 	}
 	if (!cond) {
-		spine->pushNerve(&TNerveBathtubKillerStraight::theNerve());
+		spine->pushAfterCurrent(&TNerveBathtubKillerStraight::theNerve());
 		return TRUE;
 	}
 
 	if (self->unk218 <= 0)
 		self->offHitFlag(HIT_FLAG_NO_COLLISION);
 	if (self->unk210 <= 0) {
-		spine->pushNerve(&TNerveBathtubKillerChase::theNerve());
+		spine->pushAfterCurrent(&TNerveBathtubKillerChase::theNerve());
 		return TRUE;
 	}
 
@@ -999,6 +961,7 @@ DEFINE_NERVE(TNerveBathtubKillerStraight, TLiveActor)
 
 	JGeometry::TVec3<f32> vec;
 	self->mQuat.getZDir(vec);
+	vec.y = 0.0f; // asm 0x8034120C: horizontal flight
 	vec.normalize();
 	vec.scale(self->unk198.unk8);
 	self->mVelocity.set(vec);

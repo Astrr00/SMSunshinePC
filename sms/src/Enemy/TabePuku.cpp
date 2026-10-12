@@ -118,9 +118,7 @@ void TTPHitActor::bind()
 	pos.x        = record.mCenter.x;
 	pos.z        = record.mCenter.z;
 
-	JGeometry::TVec3<f32> diff = pos;
-	diff -= mPosition;
-	mLinearVelocity = diff;
+	mLinearVelocity = pos - mPosition;
 	mIsTouchedWall  = touched;
 	mPosition       = pos;
 }
@@ -432,9 +430,8 @@ DEFINE_NERVE(TNerveTabePukuAttack, TLiveActor)
 		giveUp = true;
 	} else {
 		f32 giveUpLength = self->getSaveParams()->getSLGiveUpLength();
-		JGeometry::TVec3<f32> toGoal = self->getUnk104().getPoint();
-		toGoal -= self->mPosition;
-		if (toGoal.length() > giveUpLength) {
+		if ((self->getUnk104().getPoint() - self->mPosition).length()
+		    > giveUpLength) {
 			giveUp = true;
 		} else {
 			JGeometry::TVec3<f32> toLink
@@ -514,9 +511,8 @@ DEFINE_NERVE(TNerveTabePukuDrag, TLiveActor)
 
 	bool done = true;
 	if (!self->mIsTouchedWall && self->isAirborne()) {
-		JGeometry::TVec3<f32> toGoal = self->getUnk104().getPoint();
-		toGoal -= self->mPosition;
-		f32 dist = toGoal.length();
+		f32 dist
+		    = (self->getUnk104().getPoint() - self->mPosition).length();
 		if (!(self->getSaveParam2()->mDragLength.get() < dist))
 			done = false;
 	}

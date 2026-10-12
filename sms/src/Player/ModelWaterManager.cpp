@@ -421,7 +421,7 @@ void TModelWaterManager::move()
 {
 	f32 fVar1 = unk5E08;
 	for (int i = 0; i < mParticleCount; ++i) {
-		bool sprayed = false;
+		BOOL sprayed = FALSE;
 		if (unk2514[i] != nullptr) {
 			mStaticHitActor.mPosition = mParticlePositionSOA[i];
 			mStaticHitActor.unk68     = i;
@@ -471,8 +471,8 @@ void TModelWaterManager::move()
 				    = mParticleVelocitySOA[i].x * getPlaneFriction(unk2914[i])
 				      + unk2914[i]->getNormal().x;
 				mParticleVelocitySOA[i].y = getWPGravity(i);
-				mParticleVelocitySOA[i].x
-				    = mParticleVelocitySOA[i].x * getPlaneFriction(unk2914[i])
+				mParticleVelocitySOA[i].z
+				    = mParticleVelocitySOA[i].z * getPlaneFriction(unk2914[i])
 				      + unk2914[i]->getNormal().z;
 
 				mParticlePositionSOA[i].x += mParticleVelocitySOA[i].x;
@@ -853,54 +853,49 @@ void TModelWaterManager::calcDrawVtx(MtxPtr viewMtx)
 }
 #pragma dont_inline off
 
-void TModelWaterManager::calcVMMtxGround(MtxPtr param_1, f32 param_2,
-                                         const JGeometry::TVec3<f32>& param_3,
-                                         const JGeometry::TVec3<f32>& param_4,
-                                         MtxPtr param_5)
+void TModelWaterManager::calcVMMtxGround(MtxPtr m, f32 scale,
+                                         const JGeometry::TVec3<f32>& p3,
+                                         const JGeometry::TVec3<f32>& p4,
+                                         MtxPtr out)
 {
-	// TODO: matching this is ewwwwwwwwwwwwwwwwww
-
-	f32 fVar6  = param_2 * param_4.x;
-	f32 fVar7  = param_2 * param_4.y;
-	f32 fVar11 = param_4.y * 2.0f + param_3.y;
-	f32 fVar12 = -fVar6;
-
-	f32 fVar10 = param_4.x * 2.0f + param_3.x;
-	f32 fVar8  = param_2 * param_4.z;
-	f32 fVar9  = param_4.z * 2.0f + param_3.z;
-	f32 fVar13 = -fVar8;
+	f32 sx = scale * p4.x;
+	f32 sy = scale * p4.y;
+	f32 cy = p4.y * 2.0f + p3.y;
+	f32 nx = -sx;
+	f32 cx = p4.x * 2.0f + p3.x;
+	f32 sz = scale * p4.z;
+	f32 cz = p4.z * 2.0f + p3.z;
+	f32 nz = -sz;
 
 	{
-		f32 fVar4     = param_1[0][0];
-		f32 fVar2     = param_1[0][1];
-		f32 fVar1     = param_1[0][2];
-		f32 fVar5     = param_1[0][3];
-		param_5[0][0] = fVar4 * fVar7 + fVar2 * fVar12;
-		param_5[0][1] = fVar1 * fVar8 + (fVar4 * fVar6 + fVar2 * fVar7);
-		param_5[0][2] = fVar2 * fVar13 + fVar1 * fVar7;
-		param_5[0][3] = fVar5 + (fVar1 * fVar9 + (fVar4 * fVar10 + fVar2 * fVar11));
+		f32 b = m[0][1];
+		f32 c = m[0][2];
+		f32 d = m[0][3];
+		f32 a = m[0][0];
+		out[0][0] = a * sy + b * nx;
+		out[0][1] = c * sz + (a * sx + b * sy);
+		out[0][2] = b * nz + c * sy;
+		out[0][3] = d + (c * cz + (a * cx + b * cy));
 	}
-
 	{
-		f32 fVar1     = param_1[1][1];
-		f32 fVar2     = param_1[1][2];
-		f32 fVar3     = param_1[1][0];
-		f32 fVar4     = param_1[1][3];
-		param_5[1][0] = fVar3 * fVar7 + fVar1 * fVar12;
-		param_5[1][1] = fVar2 * fVar8 + (fVar3 * fVar6 + fVar1 * fVar7);
-		param_5[1][2] = fVar1 * fVar13 + fVar2 * fVar7;
-		param_5[1][3] = fVar4 + (fVar2 * fVar9 + (fVar3 * fVar10 + fVar1 * fVar11));
+		f32 b = m[1][1];
+		f32 c = m[1][2];
+		f32 d = m[1][3];
+		f32 a = m[1][0];
+		out[1][0] = a * sy + b * nx;
+		out[1][1] = c * sz + (a * sx + b * sy);
+		out[1][2] = b * nz + c * sy;
+		out[1][3] = d + (c * cz + (a * cx + b * cy));
 	}
-
 	{
-		f32 fVar1     = param_1[2][1];
-		f32 fVar2     = param_1[2][2];
-		f32 fVar3     = param_1[2][0];
-		f32 fVar4     = param_1[2][3];
-		param_5[2][0] = fVar3 * fVar7 + fVar1 * fVar12;
-		param_5[2][1] = fVar2 * fVar8 + (fVar3 * fVar6 + fVar1 * fVar7);
-		param_5[2][2] = fVar1 * fVar13 + fVar2 * fVar7;
-		param_5[2][3] = fVar4 + (fVar2 * fVar9 + (fVar3 * fVar10 + fVar1 * fVar11));
+		f32 b = m[2][1];
+		f32 c = m[2][2];
+		f32 d = m[2][3];
+		f32 a = m[2][0];
+		out[2][0] = a * sy + b * nx;
+		out[2][1] = c * sz + (a * sx + b * sy);
+		out[2][2] = b * nz + c * sy;
+		out[2][3] = d + (c * cz + (a * cx + b * cy));
 	}
 }
 

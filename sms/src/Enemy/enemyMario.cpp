@@ -321,12 +321,18 @@ void TEnemyMario::initEnemyValues()
 	}
 
 	J3DModelData* specialModelData = nullptr;
-	if (modelIndex >= 0 && modelIndex < 4) {
+	switch (modelIndex) {
+	case 0:
+	case 1:
+	case 2:
+	case 3:
 		mPlayerType = PLAYER_TYPE_SHADOW_MARIO;
-	} else if (modelIndex == 4) {
+		break;
+	case 4:
 		specialModelData = J3DModelLoaderDataBase::load(
 		    JKRGetResource(bmdFileNames[modelIndex]), 0x10040000);
 		mPlayerType = PLAYER_TYPE_MONTE_MAN;
+		break;
 	}
 
 	mBrushModel                = nullptr;
@@ -342,7 +348,7 @@ void TEnemyMario::initEnemyValues()
 		    JKRGetResource("/scene/kagemario/kagemario_brush.bmd"), 0x11040000);
 		mBrushModel           = new J3DModel(pencilModelData, 0, 1);
 		ResTIMG* dirtyTexture = (ResTIMG*)JKRGetResource(cDirtyFileName);
-		if (dirtyTexture != nullptr)
+		if (dirtyTexture)
 			SMS_ChangeTextureAll(pencilModelData, cDirtyTexName, *dirtyTexture);
 
 		mStampActor = SMS_MakeMActor(
@@ -369,15 +375,20 @@ void TEnemyMario::initEnemyValues()
 		mEMario->offHitFlag(HIT_FLAG_NO_COLLISION);
 	}
 
-	if (shadowMarioEvent == 2) {
-		mPadIndex      = 1;
-		mSettingParams = new TSettingParams("/../map/pad2/Setting.prm");
-	} else if (shadowMarioEvent == 3) {
-		mPadIndex      = 2;
-		mSettingParams = new TSettingParams("/../map/pad3/Setting.prm");
-	} else if (shadowMarioEvent == 0 || shadowMarioEvent == 1) {
+	switch (shadowMarioEvent) {
+	case 0:
+	case 1:
 		mPadIndex      = 0;
 		mSettingParams = new TSettingParams("/../map/pad/Setting.prm");
+		break;
+	case 2:
+		mPadIndex      = 1;
+		mSettingParams = new TSettingParams("/../map/pad2/Setting.prm");
+		break;
+	case 3:
+		mPadIndex      = 2;
+		mSettingParams = new TSettingParams("/../map/pad3/Setting.prm");
+		break;
 	}
 
 	mWaterCounter          = mSettingParams->mWaterCtMax.get();
@@ -393,7 +404,7 @@ void TEnemyMario::initEnemyValues()
 	}
 
 	void* linkData = JKRGetResource(linkDataPath);
-	if (linkData != nullptr) {
+	if (linkData) {
 		s32 linkDataSize
 		    = JKRFileLoader::getVolume("scene")->getResSize(linkData);
 		JSUMemoryInputStream stream(linkData, linkDataSize);

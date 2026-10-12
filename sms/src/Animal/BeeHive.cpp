@@ -168,7 +168,7 @@ void TBeeHive::reset()
 #pragma dont_inline on
 void TBeeHive::receiveMessageFromChild(TBee* bee)
 {
-	if (bee->mFlags & TRealoidActor::FLAG_UNK4)
+	if (bee->checkFlag(TRealoidActor::FLAG_UNK4))
 		return;
 
 	bee->onFlag(TRealoidActor::FLAG_UNK4);
@@ -343,7 +343,7 @@ void TBeeHive::controlCollision()
 	if (num <= idx)
 		idx = 0;
 	bee = unk154[idx];
-	if (!(bee->mFlags & TRealoidActor::FLAG_UNK2_OR_UNK4))
+	if (!bee->checkFlag(TRealoidActor::FLAG_UNK2_OR_UNK4))
 		bee->offHitFlag(HIT_FLAG_CANNOT_ATTACK);
 }
 #pragma dont_inline off
@@ -359,7 +359,7 @@ void TBeeHive::controlSound()
 	int count = 0;
 	for (int i = 0; i < mNumBees; ++i) {
 		TRealoidActor* bee = unk154[i];
-		if (!(bee->mFlags & TRealoidActor::FLAG_UNK2_OR_UNK4)) {
+		if (!bee->checkFlag(TRealoidActor::FLAG_UNK2_OR_UNK4)) {
 			++count;
 			x += bee->mPosition.x;
 			y += bee->mPosition.y;
@@ -396,7 +396,8 @@ void TBeeHive::calcRootMatrix()
 bool TBeeHive::doWait()
 {
 	f32 prevAngularVel = mAngularVel;
-	mAngularVel += mAngle * -getSaveParam2()->mRebound.get();
+	f32 spring = mAngle * -getSaveParam2()->mRebound.get();
+	mAngularVel += spring;
 	mAngularVel *= getSaveParam2()->mDecay.get();
 	mAngle += mAngularVel;
 
@@ -441,9 +442,9 @@ bool TBeeHive::doWait()
 void TBeeHive::appearBee(int idx)
 {
 	TRealoidActor* bee = unk154[idx];
-	if (bee->mFlags & TRealoidActor::FLAG_UNK4)
+	if (bee->checkFlag(TRealoidActor::FLAG_UNK4))
 		return;
-	if (!(bee->mFlags & TRealoidActor::FLAG_UNK2))
+	if (!bee->checkFlag(TRealoidActor::FLAG_UNK2))
 		return;
 
 	bee->offFlag(TRealoidActor::FLAG_UNK2);
@@ -510,7 +511,7 @@ BOOL TNerveBeeHiveWait::execute(TSpineBase<TLiveActor>* spine) const
 		if (self->mNumBees > 3) {
 			--self->mNumBees;
 			TRealoidActor* bee = self->unk154[self->mNumBees];
-			if (!(bee->mFlags & TRealoidActor::FLAG_UNK2)) {
+			if (!bee->checkFlag(TRealoidActor::FLAG_UNK2)) {
 				bee->onFlag(TRealoidActor::FLAG_UNK2);
 				bee->onHitFlag(HIT_FLAG_NO_COLLISION);
 			}

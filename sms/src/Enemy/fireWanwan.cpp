@@ -402,14 +402,6 @@ void TFireWanwanTailNode::setBarAnmMtx(MtxPtr mtx)
 	mMActor->getModel()->setAnmMtx(mJointIdx, mtx);
 }
 
-// Keeps inv_sqrt an out-of-line call as in retail (bl inv_sqrt); mwcc inlines the header version otherwise.
-#pragma dont_inline on
-static f32 invSqrtCall(f32 mag)
-{
-	return JGeometry::TUtil<f32>::inv_sqrt(mag);
-}
-#pragma dont_inline off
-
 #pragma dont_inline on
 void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
                                   const JGeometry::TVec3<f32>& param_3,
@@ -417,34 +409,15 @@ void TFireWanwanTailNode::perform(u32 cue, JDrama::TGraphics* graphics,
 {
 	if (cue & CUE_CALC_ANIM) {
 		TPosition3f mtx;
-
-		// Basis built inline as retail does: X = norm(up x dir), Y = norm(dir x X),
-		// both zeroed when lenSq <= 2^-18; Z column is dir as given.
-		const f32 kEps = 1.0f / 262144.0f;
+		char trash[0x30]; // stack padding to match the retail frame size
 
 		JGeometry::TVec3<f32> xDir;
 		xDir.cross(JGeometry::TVec3<f32>(0.0f, 1.0f, 0.0f), param_4);
-		f32 lsq = xDir.squared();
-		if (lsq <= kEps) {
-			xDir.zero();
-		} else {
-			f32 k = 1.0f * invSqrtCall(lsq);
-			xDir.x *= k;
-			xDir.y *= k;
-			xDir.z *= k;
-		}
+		xDir.normalize();
 
 		JGeometry::TVec3<f32> yDir;
 		yDir.cross(param_4, xDir);
-		lsq = yDir.squared();
-		if (lsq <= kEps) {
-			yDir.zero();
-		} else {
-			f32 k = 1.0f * invSqrtCall(lsq);
-			yDir.x *= k;
-			yDir.y *= k;
-			yDir.z *= k;
-		}
+		yDir.normalize();
 
 		mtx.ref(0, 0) = xDir.x;
 		mtx.ref(1, 0) = xDir.y;

@@ -175,8 +175,9 @@ void TKumokun::initCollision()
 
 void TKumokun::initAttachPlane()
 {
-	TBGWallCheckRecord record(mPosition.x, mPosition.y, mPosition.z, 100.0f, 1,
-	                          0);
+	// asm 0x80332D9C: center.y includes mHeadHeight
+	TBGWallCheckRecord record(mPosition.x, mPosition.y + mHeadHeight,
+	                          mPosition.z, 100.0f, 1, 0);
 
 	const TBGCheckData* wall = gpMap->isTouchedWallsAndMoveXZ(&record)
 	                               ? record.mResultWalls[0]

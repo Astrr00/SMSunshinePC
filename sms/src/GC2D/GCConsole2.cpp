@@ -227,132 +227,118 @@ static inline void playHudMoveSound(u32 soundID)
 }
 
 // fabricated
-static inline void writeBalloonTextByte(TGCConsole2* console, u8 value)
+static inline void writeBalloonByteTo(JSUOutputStream* stream, u8 value)
 {
-	console->unk3D8->write(&value, 1);
-	console->unk3DC->write(&value, 1);
+	stream->write(&value, 1);
 }
 
 // fabricated
-static inline void writeBalloonColor(TGCConsole2* console, const char* text,
-                                     int length)
+static inline void writeBalloonCodeTo(JSUOutputStream* stream, u16 value)
 {
-	console->unk3D8->write(text, length);
-	console->unk3DC->write(text, length);
+	stream->write(&value, 2);
 }
 
 // fabricated
 static inline void processBalloonTextStep(TGCConsole2* console)
 {
-	JSUMemoryInputStream* input   = (JSUMemoryInputStream*)console->unk3D4;
-	JSUMemoryOutputStream* output = (JSUMemoryOutputStream*)console->unk3D8;
+	// asm 0x80205654: getAvailable() of both streams, else-branch runs the byte loop
+	if (console->unk3D4->getAvailable() != 0
+	    && ((JSURandomOutputStream*)console->unk3D8)->getAvailable() != 0) {
+		for (int i = 0; i < 2; ++i) {
+			u8 raw;
+			console->unk3D4->read(&raw, 1);
+			u8 value = raw;
 
-	if (input->getAvailable() == 0 || output->getAvailable() == 0) {
-		console->unk10 = 3;
-		return;
-	}
-
-	for (int i = 0; i < 2; ++i) {
-		u8 value;
-		input->read(&value, 1);
-
-		if (value == 0x1A) {
-			u8 skip;
-			input->read(&skip, 1);
-			console->unk3D4->skip((s32)skip - 2);
-			continue;
-		}
-
-		if (value == 0) {
-			writeBalloonTextByte(console, value);
-			console->unk10 = 3;
-			continue;
-		}
-
-		if (value >= 0x80) {
-			u8 trail;
-			input->read(&trail, 1);
-			u8 color[4];
-			u16 code = ((u16)value << 8) | trail;
-			bool hasColor;
-			switch (code) {
-			case 0x817B:
-				color[0] = 0xDC;
-				color[1] = 0xDC;
-				color[2] = 0xDC;
-				color[3] = 0xFF;
-				hasColor = true;
+			switch (value) {
+			case 0x1A: {
+				u8 skip;
+				console->unk3D4->read(&skip, 1);
+				console->unk3D4->skip((s32)skip - 2);
 				break;
-			case 0x8184:
-			case 0x8185:
-				color[0] = 0xFF;
-				color[1] = 0xFF;
-				color[2] = 0x00;
-				color[3] = 0xFF;
-				hasColor = true;
-				break;
-			case 0x8191:
-				color[0] = 0x6E;
-				color[1] = 0xE6;
-				color[2] = 0xFF;
-				color[3] = 0xFF;
-				hasColor = true;
-				break;
-			case 0x8194:
-				color[0] = 0xFF;
-				color[1] = 0xA0;
-				color[2] = 0x64;
-				color[3] = 0xFF;
-				hasColor = true;
-				break;
-			case 0x8196:
-			case 0x8197:
-				color[0] = 0x64;
-				color[1] = 0xFF;
-				color[2] = 0x64;
-				color[3] = 0xFF;
-				hasColor = true;
+			}
+			case 0:
+				console->unk10 = 3;
+				// fallthrough
+			case 0xA:
+				writeBalloonByteTo(console->unk3D8, value);
+				writeBalloonByteTo(console->unk3DC, value);
 				break;
 			default:
-				hasColor = false;
+				if (value >= 0x80) {
+					u8 trail;
+					console->unk3D4->read(&trail, 1);
+					u16 code = (value << 8) + trail;
+					JUtility::TColor color;
+					bool hasColor = true;
+					// asm 0x80205A38 jump table @7091: index = code - 0x817B
+					switch (code) {
+					case 0x8197:
+						color.set(100, 255, 100, 255);
+						break;
+					case 0x8194:
+						color.set(255, 160, 100, 255);
+						break;
+					case 0x8193:
+						color.set(255, 255, 0, 255);
+						break;
+					case 0x817B:
+					case 0x8183:
+					case 0x8184:
+					case 0x818F:
+						color.set(220, 220, 220, 255);
+						break;
+					case 0x8190:
+						color.set(110, 230, 255, 255);
+						break;
+					default:
+						hasColor = false;
+						break;
+					}
+					char buffer[0xff];
+					if (hasColor) {
+						snprintf(buffer, 0xff,
+						         "\033GM[0]\033CC[%02x%02x%02x]\033FX[28]\033FY[28]"
+						         "\033SH[3]\033CD[4]",
+						         color.r, color.g, color.b);
+						console->unk3D8->write(buffer, 0x2B);
+						console->unk3DC->write(buffer, 0x2B);
+					}
+					writeBalloonCodeTo(console->unk3D8, code);
+					writeBalloonCodeTo(console->unk3DC, code);
+					if (hasColor) {
+						snprintf(buffer, 0xff,
+						         "\033GM[0]\033CC\033FX\033FY\033SH\033CU[4]");
+						console->unk3D8->write(buffer, 0x18);
+						console->unk3DC->write(buffer, 0x18);
+					}
+				} else {
+					writeBalloonByteTo(console->unk3D8, value);
+					writeBalloonByteTo(console->unk3DC, value);
+				}
 				break;
 			}
-			if (hasColor) {
-				char buffer[0xff];
-				snprintf(buffer, 0xff,
-				         "\033GM[0]\033CC[%02x%02x%02x]\033FX[28]\033FY[28]"
-				         "\033SH[3]\033CD[4]",
-				         color[0], color[1], color[2]);
-				writeBalloonColor(console, buffer, 0x2B);
-			}
-			writeBalloonTextByte(console, value);
-			writeBalloonTextByte(console, trail);
-			if (hasColor)
-				writeBalloonColor(console,
-				                  "\033GM[0]\033CC\033FX\033FY\033SH\033CU[4]",
-				                  0x18);
-		} else {
-			writeBalloonTextByte(console, value);
 		}
+	} else {
+		console->unk10 = 3;
 	}
 }
 
 // fabricated
-static inline bool startLifeMeterDisappear(TGCConsole2* console, u16 frame)
+static inline void startLifeMeterDisappear(TGCConsole2* console, u16 frame, int nextState = -1)
 {
-	if (console->unk38 || console->unk4C)
-		return false;
-
-	console->unk4C = 1;
-	console->unk1C4->setPanePosition(
-	    40, JUTPoint(0, 0),
-	    JUTPoint(0, (-(console->unk1C4->unk4.y2 + 1)
-	                 - console->unk174->getPane()->getHeight())
-	                    >> 1),
-	    JUTPoint(0, -(console->unk1C4->unk4.y2 + 1)
-	                    - console->unk174->getPane()->getHeight()));
-	console->unk84 = frame;
-	return true;
+	if (!console->unk38 && !console->unk4C) {
+		console->unk4C = 1;
+		console->unk1C4->setPanePosition(
+		    40, JUTPoint(0, 0),
+		    JUTPoint(0, (-(console->unk1C4->unk4.y2 + 1)
+		                 - console->unk174->getPane()->getHeight())
+		                    >> 1),
+		    JUTPoint(0, -(console->unk1C4->unk4.y2 + 1)
+		                    - console->unk174->getPane()->getHeight()));
+		console->unk84 = frame;
+		if (nextState != -1)
+			console->unk18 = nextState;
+	}
 }
 
 // fabricated
@@ -476,16 +462,14 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 			console->unk18 = 2;
 			console->unk38 = 0;
 		}
-		if (airTimeout && startLifeMeterDisappear(console, 1))
-			console->unk18 = 3;
+		if (airTimeout)
+			startLifeMeterDisappear(console, 1, 3);
 		break;
 	case 2:
 		if (console->unk1CC[0] == 8) {
-			if (startLifeMeterDisappear(console, 0))
-				console->unk18 = 3;
+			startLifeMeterDisappear(console, 0, 3);
 		} else if (airTimeout) {
-			if (startLifeMeterDisappear(console, 0))
-				console->unk18 = 3;
+			startLifeMeterDisappear(console, 0, 3);
 		}
 		break;
 	case 3:
@@ -519,8 +503,7 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 	case 7:
 		if (!gpMarioOriginal->isUnderWater()) {
 			if (console->unk1CC[0] == 8) {
-				if (startLifeMeterDisappear(console, 0))
-					console->unk18 = 6;
+				startLifeMeterDisappear(console, 0, 6);
 			} else if (console->unk1CC[0] != console->unk1C) {
 				console->startAppearLife(1);
 				amount             = gpMarioOriginal->mHealth;
@@ -701,19 +684,22 @@ static inline void updateMarioLifeCounter(TGCConsole2* console)
 	}
 }
 
+#define SET_DIGIT_PANE(pane, textures, digit) \
+	((J2DPicture*)(pane)->getPane())->changeTexture((textures)[(digit)]->getTexInfo(), 0)
+
 // fabricated
 static inline void setCounterDigits(TBlendPane** panes, JUTTexture** textures,
                                     int value)
 {
 	if (value < 100) {
-		setDigitPane(panes[0], textures, (int)(value * 0.1f));
-		setDigitPane(panes[1], textures, value % 10);
+		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.1f));
+		SET_DIGIT_PANE(panes[1], textures, value % 10);
 	} else {
-		setDigitPane(panes[0], textures, (int)(value * 0.01f));
+		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.01f));
 
 		int remainder = value - (int)(value * 0.01f) * 100;
-		setDigitPane(panes[1], textures, (int)(remainder * 0.1f));
-		setDigitPane(panes[2], textures, remainder % 10);
+		SET_DIGIT_PANE(panes[1], textures, (int)(remainder * 0.1f));
+		SET_DIGIT_PANE(panes[2], textures, remainder % 10);
 	}
 }
 
@@ -722,16 +708,16 @@ static inline void setBlueCoinDigits(TBoundPane** panes, JUTTexture** textures,
                                      int value)
 {
 	if (value < 100) {
-		setDigitPane(panes[0], textures, (int)(value * 0.1f));
-		setDigitPane(panes[1], textures, value % 10);
+		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.1f));
+		SET_DIGIT_PANE(panes[1], textures, value % 10);
 		if (panes[2]->getPane()->isVisible())
 			panes[2]->getPane()->hide();
 	} else {
-		setDigitPane(panes[0], textures, (int)(value * 0.01f));
+		SET_DIGIT_PANE(panes[0], textures, (int)(value * 0.01f));
 
 		int remainder = value - (int)(value * 0.01f) * 100;
-		setDigitPane(panes[1], textures, (int)(remainder * 0.1f));
-		setDigitPane(panes[2], textures, remainder % 10);
+		SET_DIGIT_PANE(panes[1], textures, (int)(remainder * 0.1f));
+		SET_DIGIT_PANE(panes[2], textures, remainder % 10);
 		if (!panes[2]->getPane()->isVisible())
 			panes[2]->getPane()->show();
 	}
@@ -980,7 +966,7 @@ static inline void updateCounterState(TGCConsole2* console)
 			if (TFlagManager::smInstance->getFlag(0x10000 + flag) != 0)
 				++spentBlueCoins;
 
-		for (int flag = 0x6C; flag <= 0x73; ++flag)
+		for (int flag = 0x6C; flag < 0x74; ++flag)
 			if (TFlagManager::smInstance->getFlag(0x10000 + flag) != 0)
 				++spentBlueCoins;
 		int blueValue = console->unk168 - spentBlueCoins * 10;
@@ -1016,7 +1002,7 @@ static inline void updateCounterState(TGCConsole2* console)
 				if (TFlagManager::smInstance->getFlag(0x10000 + flag) != 0)
 					++spentBlueCoins;
 
-			for (int flag = 0x6C; flag <= 0x73; ++flag)
+			for (int flag = 0x6C; flag < 0x74; ++flag)
 				if (TFlagManager::smInstance->getFlag(0x10000 + flag) != 0)
 					++spentBlueCoins;
 			int target = blueTotal - spentBlueCoins * 10;
@@ -1971,15 +1957,14 @@ void TGCConsole2::loadAfter()
 	unk29C->getPane()->hide();
 	unk520->getPane()->hide();
 	unk524->getPane()->show();
+	// asm 0x80208428..: each box is hidden, gets the system font, then resize(getWidth() * 0x400, boundsHeight)
 	unk528->hide();
-	unk52C->hide();
-
 	unk528->setFont(gpSystemFont);
+	JUTRect fontRect(unk528->mBounds);
+	unk528->resize(gpSystemFont->getWidth() << 10, fontRect.getHeight());
+	unk52C->hide();
 	unk52C->setFont(gpSystemFont);
-
-	int fontHeight = gpSystemFont->getHeight();
-	unk528->setFontSize(fontHeight, unk528->mBounds.getHeight());
-	unk52C->setFontSize(fontHeight, unk52C->mBounds.getHeight());
+	unk52C->resize(gpSystemFont->getWidth() << 10, fontRect.getHeight());
 
 	JUTRect telopBounds(unk524->getPane()->mBounds);
 	JUTRect telopPaneBounds(unk520->getPane()->mBounds);
@@ -2032,7 +2017,7 @@ void TGCConsole2::loadAfter()
 	unk144 = gpEmitterManager4D2->unkC8[0][0];
 	unk144->setStatus(JPABaseEmitter::STATUS_STOP_EMIT);
 
-	TNozzleBase* nozzle = gpMarioOriginal->mWaterGun->getCurrentNozzle();
+	TNozzleBase* nozzle = ((const TWaterGun*)gpMarioOriginal->mWaterGun)->getCurrentNozzle();
 	unk28               = *(u32*)((u8*)nozzle + 0xCC);
 
 	unkBC = static_cast<TBathtub*>(JDrama::TNameRefGen::search("バスタブ"));
@@ -2647,7 +2632,8 @@ bool TGCConsole2::startAppearBalloon(u32 messageID, bool autoClose)
 			unk3F4 = messageID;
 			// The ROM compares unk3E0 with itself here, so the middle term is
 			// always true. Probably a copy-paste slip in the original source.
-			if (unk3F4 != 0xffffffff || (unk3E0 == unk3E0 && unk3E4 == 0)) {
+			u32 id = unk3E0;
+			if (unk3F4 != 0xffffffff || (id == unk3E0 && unk3E4 == 0)) {
 				unk3B8->hide();
 				unk48 = 0;
 				unk10 = 4;
@@ -2666,7 +2652,7 @@ bool TGCConsole2::startAppearBalloon(u32 messageID, bool autoClose)
 
 	// TODO: the ROM copies the contents rect twice here, as if
 	// J2DWindow::getContentsBounds() returned a JUTRect by value.
-	JUTRect contents(unk3B0->getContentsBounds());
+	JUTRect contents = JUTRect(unk3B0->getContentsBounds());
 	unk3B0->resize(unk3BC.getWidth(),
 	               unk3BC.getHeight() - contents.getHeight());
 	unk3B0->add(0, contents.getHeight());

@@ -293,7 +293,7 @@ void TRollEnemy::setBehavior()
 				s32 cycle = getSaveParams()->getSLPolluteCycle();
 				s32 time  = mSpine->getTime() % cycle;
 				f32 angle = 180.0f * (f32)time / (f32)cycle;
-				s16 idx   = angle * (65536.0f / 360.0f);
+				s16 idx   = (65536.0f / 360.0f) * angle;
 				f32 s     = jmaSinTable[static_cast<u16>(idx) >> jmaSinShift];
 				size      = mBodyScale * ((f32)(rMax - rMin) * s) + (f32)rMin;
 			}
@@ -369,6 +369,9 @@ void TIgaigaManager::perform(u32 cue, JDrama::TGraphics* graphics)
 
 static BOOL RollEnemyBodyCallback(J3DNode* node, BOOL param_2)
 {
+	Mtx rot;
+	char trash[8];
+	MtxPtr rotp = rot;
 	if (param_2 == 0) {
 		if (gpCurRollEnemy == nullptr || !gpCurRollEnemy->isRolling())
 			return true;
@@ -377,12 +380,11 @@ static BOOL RollEnemyBodyCallback(J3DNode* node, BOOL param_2)
 		MtxPtr jointMtx
 		    = gpCurRollEnemy->getModel()->getAnmMtx(jointIndex);
 
-		Mtx rot;
-		MsMtxSetRotX(rot, gpCurRollEnemy->unk194);
+		MsMtxSetRotX(rotp, gpCurRollEnemy->unk194);
 
 		jointMtx[1][3] += TRollEnemy::mTransYOffset;
-		MTXConcat(jointMtx, rot, jointMtx);
-		MTXConcat(J3DSys::mCurrentMtx, rot, J3DSys::mCurrentMtx);
+		MTXConcat(jointMtx, rotp, jointMtx);
+		MTXConcat(J3DSys::mCurrentMtx, rotp, J3DSys::mCurrentMtx);
 	}
 	return true;
 }

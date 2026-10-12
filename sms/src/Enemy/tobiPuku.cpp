@@ -1153,9 +1153,7 @@ DEFINE_NERVE(TNerveTobiPukuReturnLaunch, TLiveActor)
 		return true;
 	}
 
-	JGeometry::TVec3<f32> diff = self->unk1DC->mPosition;
-	diff.sub(self->mPosition);
-	JGeometry::TVec3<f32> dir = diff;
+	JGeometry::TVec3<f32> dir = self->unk1DC->mPosition - self->mPosition;
 	dir.y                     = 0.0f;
 	MsVECNormalize(&dir, &dir);
 	self->unk1D0.x *= 0.99f;

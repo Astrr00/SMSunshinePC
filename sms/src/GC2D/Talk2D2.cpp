@@ -87,6 +87,20 @@ static inline void makeLine(f32* outX, f32* outY, f32 t, const JUTPoint& p0,
 	*outY  = p0.y * b0 + p1.y * b1 + p2.y * b2;
 }
 
+// Same curve; makeBoxLine's asm (0x80214A5C..) sums p2*b2 last, unfused: p2*b2 + (p0*b0 + p1*b1)
+static inline void makeLineBox(f32* outX, f32* outY, f32 t, const JUTPoint& p0,
+                               const JUTPoint& p1, const JUTPoint& p2)
+{
+	f32 u  = 1.0f - t;
+	f32 b0 = u * u;
+	f32 b1 = 2.0f * t * u;
+	f32 b2 = t * t;
+	f32 x2 = p2.x * b2;
+	f32 y2 = p2.y * b2;
+	*outX  = x2 + (p0.x * b0 + p1.x * b1);
+	*outY  = y2 + (p0.y * b0 + p1.y * b1);
+}
+
 TTalk2D2::TTalk2D2(const char* name)
     : JDrama::TViewObj(name)
     , mIsBoard(false)
@@ -444,7 +458,7 @@ void TTalk2D2::makeBoxLine(s8 line, char* text)
 	f32 t = 0.0f;
 	f32 prevX;
 	f32 prevY;
-	makeLine(&prevX, &prevY, t, p0, p1, p2);
+	makeLineBox(&prevX, &prevY, t, p0, p1, p2);
 
 	do {
 		int idx = col + line * 30;
@@ -476,9 +490,9 @@ void TTalk2D2::makeBoxLine(s8 line, char* text)
 
 		f32 x;
 		f32 y;
-		makeLine(&x, &y, t, p0, p1, p2);
+		makeLineBox(&x, &y, t, p0, p1, p2);
 
-		f32 angle = fabs(atan2f(y - prevY, x - prevX));
+		f32 angle = fabsf(atan2f(y - prevY, x - prevX));
 		if (x > 0.0f)
 			angle = angle * -1.0f;
 
@@ -505,7 +519,7 @@ void TTalk2D2::makeBoxLine(s8 line, char* text)
 		}
 
 		++col;
-		makeLine(&prevX, &prevY, t, p0, p1, p2);
+		makeLineBox(&prevX, &prevY, t, p0, p1, p2);
 	} while (col < 30);
 }
 

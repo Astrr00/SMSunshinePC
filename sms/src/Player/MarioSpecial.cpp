@@ -654,6 +654,9 @@ BOOL TMario::taken()
 	return 0;
 }
 
+// Fake inline: mwcc folds a literal `x * 1.0f`, retail keeps the fmuls
+static inline f32 mulFake(f32 a, f32 b) { return a * b; }
+
 void TMario::getOnWirePosAngle(JGeometry::TVec3<f32>* outPos, s16* outAngle)
 {
 	JGeometry::TVec3<f32> start   = mWireStartPos;
@@ -670,7 +673,7 @@ void TMario::getOnWirePosAngle(JGeometry::TVec3<f32>* outPos, s16* outAngle)
 	Mtx concat;
 	MTXConcat(rotB, rotA, concat);
 
-	JGeometry::TVec3<f32> sagVec(0.0f, -mWireSag * 1.0f, 0.0f);
+	JGeometry::TVec3<f32> sagVec(0.0f, mulFake(-mWireSag, 1.0f), 0.0f);
 	MTXMultVec(concat, &sagVec, &sagVec);
 
 	outPos->x += sagVec.x;
@@ -1354,11 +1357,11 @@ BOOL TMario::fenceMove()
 			s16 camDelta = mFaceAngle.y - gpCamera->unk258;
 			f32 normX, normZ;
 			if (camDelta > -0x4000 && camDelta < 0x4000) {
-				normZ = wall->mNormal.z;
-				normX = -wall->mNormal.x;
+				normX = -wall->mNormal.z; // asm 0x8013d6a8: f3 = -[0x3c], f7 = [0x34]
+				normZ = wall->mNormal.x;
 			} else {
-				normX = wall->mNormal.x;
-				normZ = -wall->mNormal.z;
+				normX = wall->mNormal.z;
+				normZ = -wall->mNormal.x;
 			}
 
 			f32 stickH = 0.015625f * unk108->mStickH;

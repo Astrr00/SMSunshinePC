@@ -60,14 +60,104 @@ static const char* koopa_bastable[] = {
 
 // ============= nerves =============
 
+#pragma dont_inline on
+static f32 fmodDeg(f32 x, f32 y) { return std::fmodf(x, y); }
+static f32 modDeg(f32 x, f32 y) { return JGeometry::TUtil<f32>::mod(x, y); }
+// Retail calls TEnemyManager::getSaveParam / TKoopa::changeAnm out of line here.
+static TKoopaSaveLoadParams* saveParamCall(TEnemyManager* mgr)
+{
+	return (TKoopaSaveLoadParams*)mgr->getSaveParam();
+}
+static void changeAnmCall(TKoopa* self, int bck, int btp, f32 rate)
+{
+	self->changeAnm(bck, btp, rate);
+}
+#pragma dont_inline off
+
+#define KOOPA_PARAMS(self) \
+	((TKoopaSaveLoadParams*)((TEnemyManager*)(self)->mManager)->unk38)
+#define KOOPA_SAVE(self) saveParamCall((TEnemyManager*)(self)->mManager)
+
+// asm 0x8033A128 (retail: first params read inline, the rest out of line)
+BOOL TNerveKoopaTurnL::execute(TSpineBase<TLiveActor>* spine) const
+{
+	char trash[0x160];
+	TKoopa* self = (TKoopa*)spine->getBody();
+	bool turning;
+
+	f32 diff = self->mTargetDir - self->mRotation.y;
+	diff = -180.0f + fmodDeg(360.0f + (diff - -180.0f), 360.0f);
+
+	if (diff < -((TKoopaSaveLoadParams*)((TEnemyManager*)self->mManager)->unk38)
+	               ->turnSpeed.get()) {
+		f32 turnSpeed = -KOOPA_SAVE(self)->turnSpeed.get();
+		if (turnSpeed > 0.0f)
+			changeAnmCall(self, 0xB, 0, turnSpeed * KOOPA_SAVE(self)->turnAnim.get());
+		else
+			changeAnmCall(self, 0xA, 0, -turnSpeed * KOOPA_SAVE(self)->turnAnim.get());
+		self->mRotation.y
+		    = -180.0f
+		      + modDeg(360.0f + ((self->mRotation.y + turnSpeed) - -180.0f), 360.0f);
+		turning = true;
+	} else if (diff < 0.0f) {
+		if (diff > 0.0f)
+			changeAnmCall(self, 0xB, 0, diff * KOOPA_SAVE(self)->turnAnim.get());
+		else
+			changeAnmCall(self, 0xA, 0, -diff * KOOPA_SAVE(self)->turnAnim.get());
+		self->mRotation.y
+		    = -180.0f
+		      + modDeg(360.0f + ((self->mRotation.y + diff) - -180.0f), 360.0f);
+		turning = true;
+	} else {
+		turning = false;
+	}
+
+	return turning ? false : true;
+}
+
+BOOL TNerveKoopaTurnR::execute(TSpineBase<TLiveActor>* spine) const
+{
+	char trash[0x158];
+	TKoopa* self = (TKoopa*)spine->getBody();
+	bool turning;
+
+	f32 diff = self->mTargetDir - self->mRotation.y;
+	diff = -180.0f + fmodDeg(360.0f + (diff - -180.0f), 360.0f);
+
+	if (diff > ((TKoopaSaveLoadParams*)((TEnemyManager*)self->mManager)->unk38)
+	               ->turnSpeed.get()) {
+		f32 turnSpeed = KOOPA_SAVE(self)->turnSpeed.get();
+		if (turnSpeed > 0.0f)
+			changeAnmCall(self, 0xB, 0, turnSpeed * KOOPA_SAVE(self)->turnAnim.get());
+		else
+			changeAnmCall(self, 0xA, 0, -turnSpeed * KOOPA_SAVE(self)->turnAnim.get());
+		self->mRotation.y
+		    = -180.0f
+		      + modDeg(360.0f + ((self->mRotation.y + turnSpeed) - -180.0f), 360.0f);
+		turning = true;
+	} else if (diff > 0.0f) {
+		if (diff > 0.0f)
+			changeAnmCall(self, 0xB, 0, diff * KOOPA_SAVE(self)->turnAnim.get());
+		else
+			changeAnmCall(self, 0xA, 0, -diff * KOOPA_SAVE(self)->turnAnim.get());
+		self->mRotation.y
+		    = -180.0f
+		      + modDeg(360.0f + ((self->mRotation.y + diff) - -180.0f), 360.0f);
+		turning = true;
+	} else {
+		turning = false;
+	}
+
+	return turning ? false : true;
+}
+
 BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[0x108];
+	char trash[0x90];
 	TKoopa* self               = (TKoopa*)spine->getBody();
-	TKoopaSaveLoadParams* params = self->getParam();
 
 	if (self->unk19C > 0) {
-		self->changeAnm(0xC, 1, params->waitSpeed.get());
+		self->changeAnm(0xC, 1, KOOPA_PARAMS(self)->waitSpeed.get());
 		return false;
 	}
 
@@ -78,27 +168,29 @@ BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 	marioSpeed.set(*gpMarioSpeedX, *gpMarioSpeedY, *gpMarioSpeedZ);
 
 	JGeometry::TVec3<f32> speed;
-	speed.x = marioSpeed.x * params->marioEstimationWait.get();
-	speed.y = marioSpeed.y * params->marioEstimationWait.get();
-	speed.z = marioSpeed.z * params->marioEstimationWait.get();
+	TKoopaSaveLoadParams* estWait = KOOPA_SAVE(self);
+	speed.x = marioSpeed.x * estWait->marioEstimationWait.get();
+	speed.y = marioSpeed.y * estWait->marioEstimationWait.get();
+	speed.z = marioSpeed.z * estWait->marioEstimationWait.get();
 
 	u8 grip = bathtub->getNextGrip(*gpMarioPos, speed,
-	                               params->waitRange.get(), &self->mTargetDir);
+	                               KOOPA_PARAMS(self)->waitRange.get(), &self->mTargetDir);
 	if (!grip) {
 		JGeometry::TVec3<f32> speed2;
-		speed2.x = marioSpeed.x * params->marioEstimationFire.get();
-		speed2.y = marioSpeed.y * params->marioEstimationFire.get();
-		speed2.z = marioSpeed.z * params->marioEstimationFire.get();
+		TKoopaSaveLoadParams* estFire = KOOPA_SAVE(self);
+		speed2.x = marioSpeed.x * estFire->marioEstimationFire.get();
+		speed2.y = marioSpeed.y * estFire->marioEstimationFire.get();
+		speed2.z = marioSpeed.z * estFire->marioEstimationFire.get();
 		self->mTargetDir = bathtub->getNextJuncture(*gpMarioPos, speed2);
 	}
 
 	f32 diff = self->mTargetDir - self->mRotation.y;
-	diff = -180.0f + std::fmodf(360.0f + (diff + 180.0f), 360.0f);
+	diff = -180.0f + fmodDeg(360.0f + (diff - -180.0f), 360.0f);
 
 	int side;
-	if (diff < -params->focusRange.get())
+	if (diff < -KOOPA_PARAMS(self)->focusRange.get())
 		side = -1;
-	else if (diff > params->focusRange.get())
+	else if (diff > KOOPA_PARAMS(self)->focusRange.get())
 		side = 1;
 	else
 		side = 0;
@@ -113,7 +205,7 @@ BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 			break;
 		case 0:
 		default:
-			self->changeAnm(0xC, 1, params->waitSpeed.get());
+			self->changeAnm(0xC, 1, KOOPA_PARAMS(self)->waitSpeed.get());
 			bool tumble = self->getAnmIndex() == 0xC
 			              && (self->endsAnm() || self->passesAnmFrame(2.0f)
 			                  || self->passesAnmFrame(400.0f)
@@ -137,9 +229,9 @@ BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 		default:
 			self->mTargetDir = self->getTargetDir(*gpMarioPos);
 			f32 newDiff     = self->mTargetDir - self->mRotation.y;
-			newDiff = -180.0f + std::fmodf(360.0f + (newDiff + 180.0f), 360.0f);
+			newDiff = -180.0f + fmodDeg(360.0f + (newDiff - -180.0f), 360.0f);
 			self->mIgnoreMario = newDiff < 0.0f;
-			spine->pushNerve(&TNerveKoopaFlame::theNerve());
+			spine->setNext(&TNerveKoopaFlame::theNerve());
 			break;
 		}
 	}
@@ -180,9 +272,17 @@ BOOL TNerveKoopaFall::execute(TSpineBase<TLiveActor>* spine) const
 BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TKoopa* self               = (TKoopa*)spine->getBody();
-	TKoopaSaveLoadParams* params = self->getParam();
 
 	switch (self->getAnmIndex()) {
+	case 5:
+		if (self->endsAnm()) {
+			self->changeAnm(0x4, 0, 2.0f); // asm 0x80336208: constant, not fireSpeed
+			spine->setNext(&TNerveKoopaFlame::theNerve());
+		} else {
+			self->unk155 = 0;
+		}
+		break;
+
 	case 3:
 		if (self->endsAnm()) {
 			if (self->unk155) {
@@ -202,29 +302,31 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 			marioSpeed.set(*gpMarioSpeedX, *gpMarioSpeedY, *gpMarioSpeedZ);
 
 			JGeometry::TVec3<f32> speed;
-			speed.x = marioSpeed.x * params->marioEstimationWait.get();
-			speed.y = marioSpeed.y * params->marioEstimationWait.get();
-			speed.z = marioSpeed.z * params->marioEstimationWait.get();
+			TKoopaSaveLoadParams* estWait = KOOPA_SAVE(self);
+			speed.x = marioSpeed.x * estWait->marioEstimationWait.get();
+			speed.y = marioSpeed.y * estWait->marioEstimationWait.get();
+			speed.z = marioSpeed.z * estWait->marioEstimationWait.get();
 
 			u8 grip = bathtub->getNextGrip(*gpMarioPos, speed,
-			                               params->waitRange.get(),
+			                               KOOPA_PARAMS(self)->waitRange.get(),
 			                               &self->mTargetDir);
 			if (!grip) {
 				JGeometry::TVec3<f32> speed2;
-				speed2.x = marioSpeed.x * params->marioEstimationFire.get();
-				speed2.y = marioSpeed.y * params->marioEstimationFire.get();
-				speed2.z = marioSpeed.z * params->marioEstimationFire.get();
+				TKoopaSaveLoadParams* estFire = KOOPA_SAVE(self);
+				speed2.x = marioSpeed.x * estFire->marioEstimationFire.get();
+				speed2.y = marioSpeed.y * estFire->marioEstimationFire.get();
+				speed2.z = marioSpeed.z * estFire->marioEstimationFire.get();
 				self->mTargetDir
 				    = bathtub->getNextJuncture(*gpMarioPos, speed2);
 			}
 
 			f32 diff = self->mTargetDir - self->mRotation.y;
-			diff = -180.0f + std::fmodf(360.0f + (diff + 180.0f), 360.0f);
+			diff = -180.0f + fmodDeg(360.0f + (diff - -180.0f), 360.0f);
 
 			int side;
-			if (diff < -params->focusRange.get())
+			if (diff < -KOOPA_PARAMS(self)->focusRange.get())
 				side = -1;
-			else if (diff > params->focusRange.get())
+			else if (diff > KOOPA_PARAMS(self)->focusRange.get())
 				side = 1;
 			else
 				side = 0;
@@ -243,9 +345,9 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 					self->mTargetDir = self->getTargetDir(*gpMarioPos);
 					f32 newDiff     = self->mTargetDir - self->mRotation.y;
 					newDiff         = -180.0f
-					          + std::fmodf(360.0f + (newDiff + 180.0f), 360.0f);
+					          + fmodDeg(360.0f + (newDiff - -180.0f), 360.0f);
 					self->mIgnoreMario = newDiff < 0.0f;
-					self->changeAnm(0x5, 0, params->fireSpeed.get());
+					self->changeAnm(0x5, 0, KOOPA_PARAMS(self)->fireSpeed.get());
 					spine->setNext(&TNerveKoopaFlame::theNerve());
 					break;
 				}
@@ -254,7 +356,7 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 		break;
 
 	case 4:
-		if (spine->getTime() >= params->flameCount.get()) {
+		if (spine->getTime() >= KOOPA_PARAMS(self)->flameCount.get()) {
 			if ((spine->getTime() & 7) == 0) {
 				TBathtub* bathtub
 				    = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
@@ -263,53 +365,46 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 				marioSpeed.set(*gpMarioSpeedX, *gpMarioSpeedY, *gpMarioSpeedZ);
 
 				JGeometry::TVec3<f32> speed;
-				speed.x = marioSpeed.x * params->marioEstimationWait.get();
-				speed.y = marioSpeed.y * params->marioEstimationWait.get();
-				speed.z = marioSpeed.z * params->marioEstimationWait.get();
+				TKoopaSaveLoadParams* estWait = KOOPA_SAVE(self);
+				speed.x = marioSpeed.x * estWait->marioEstimationWait.get();
+				speed.y = marioSpeed.y * estWait->marioEstimationWait.get();
+				speed.z = marioSpeed.z * estWait->marioEstimationWait.get();
 
 				u8 grip = bathtub->getNextGrip(*gpMarioPos, speed,
-				                               params->waitRange.get(),
+				                               KOOPA_PARAMS(self)->waitRange.get(),
 				                               &self->mTargetDir);
 				if (!grip) {
 					JGeometry::TVec3<f32> speed2;
-					speed2.x = marioSpeed.x * params->marioEstimationFire.get();
-					speed2.y = marioSpeed.y * params->marioEstimationFire.get();
-					speed2.z = marioSpeed.z * params->marioEstimationFire.get();
+					TKoopaSaveLoadParams* estFire = KOOPA_SAVE(self);
+					speed2.x = marioSpeed.x * estFire->marioEstimationFire.get();
+					speed2.y = marioSpeed.y * estFire->marioEstimationFire.get();
+					speed2.z = marioSpeed.z * estFire->marioEstimationFire.get();
 					self->mTargetDir
 					    = bathtub->getNextJuncture(*gpMarioPos, speed2);
 				}
 
 				f32 diff = self->mTargetDir - self->mRotation.y;
-				diff = -180.0f + std::fmodf(360.0f + (diff + 180.0f), 360.0f);
+				diff = -180.0f + fmodDeg(360.0f + (diff - -180.0f), 360.0f);
 
 				int side;
-				if (diff < -params->focusRange.get())
+				if (diff < -KOOPA_PARAMS(self)->focusRange.get())
 					side = -1;
-				else if (diff > params->focusRange.get())
+				else if (diff > KOOPA_PARAMS(self)->focusRange.get())
 					side = 1;
 				else
 					side = 0;
 
 				if (grip || side != 0)
-					self->changeAnm(0x3, 0, params->fireSpeed.get());
+					self->changeAnm(0x3, 0, KOOPA_PARAMS(self)->fireSpeed.get());
 			} else if (self->endsAnm()
-			           && spine->getTime() >= params->flameFocusEndStep.get()) {
-				self->changeAnm(0x3, 0, params->fireSpeed.get());
+			           && spine->getTime() >= KOOPA_PARAMS(self)->flameFocusEndStep.get()) {
+				self->changeAnm(0x3, 0, KOOPA_PARAMS(self)->fireSpeed.get());
 			}
 		}
 		break;
 
-	case 5:
-		if (self->endsAnm()) {
-			self->changeAnm(0x4, 0, params->fireSpeed.get());
-			spine->setNext(&TNerveKoopaFlame::theNerve());
-		} else {
-			self->unk155 = 0;
-		}
-		break;
-
 	default:
-		self->changeAnm(0x5, 0, params->fireSpeed.get());
+		self->changeAnm(0x5, 0, KOOPA_PARAMS(self)->fireSpeed.get());
 		break;
 	}
 
@@ -493,19 +588,23 @@ void TKoopaFlame::control()
 
 BOOL TKoopaFlame::receiveMessage(THitActor* sender, u32 message)
 {
-	if (message == HIT_MESSAGE_SPRAYED_BY_WATER)
+	switch (message) {
+	case HIT_MESSAGE_SPRAYED_BY_WATER:
 		return false;
-	return true;
+	default:
+		return true;
+	}
 }
 
 void TKoopaFlame::attack_(THitActor* other)
 {
 	if (other->receiveMessage(this, HIT_MESSAGE_UNKA)
 	    && other == gpMarioAddress) {
+		char trash[0x18];
 		JGeometry::TVec3<f32> dir(0.0f, 1.0f, 0.0f);
 		SMS_ThrowMario(dir, mOwner->getParam()->flameJump.get());
 		mOwner->unk155 = 1;
-		mOwner->changeAnm(0x3, 0, mOwner->getParam()->fireSpeed.get());
+		changeAnmCall(mOwner, 0x3, 0, mOwner->getParam()->fireSpeed.get());
 		mOwner->unk19C = 0xF0;
 	}
 }
@@ -617,9 +716,7 @@ void TKoopaBody::attack_(THitActor* other)
 f32 TKoopa::getFlameDirDegree() const
 {
 	f32 degree = getFlameDirRate() * getParam()->flameNeckRange.get();
-	if (mIgnoreMario)
-		degree = -degree;
-	return mRotation.y + degree;
+	return mRotation.y + (mIgnoreMario ? -degree : degree);
 }
 
 namespace {
@@ -915,12 +1012,14 @@ f32 TKoopa::getFlameDirRate() const
 
 bool TKoopa::isFlaming() const
 {
-	int anmIdx = mMActor->getCurAnmIdx(ANM_TYPE_BCK);
-	if (anmIdx >= 6)
-		return false;
-	if (anmIdx >= 3)
+	switch (mMActor->getCurAnmIdx(ANM_TYPE_BCK)) {
+	case 3:
+	case 4:
+	case 5:
 		return true;
-	return false;
+	default:
+		return false;
+	}
 }
 
 f32 TKoopa::getNeckFocus() const
@@ -1024,7 +1123,7 @@ f32 TKoopa::getNeckFocus() const
 
 bool TKoopa::allowsLaunch() const
 {
-	return mSpine->getCurrentNerve() != &TNerveKoopaTumble::theNerve();
+	return mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve() ? false : true;
 }
 
 void TKoopa::getDown()
@@ -1116,17 +1215,13 @@ f32 TKoopa::getAnmFrame() const
 
 f32 TKoopa::getAnmFrameNext() const
 {
-	return mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
-	       + mMActor->getFrameCtrl(ANM_TYPE_BCK)->getRate();
+	J3DFrameCtrl* ctrl = mMActor->getFrameCtrl(ANM_TYPE_BCK);
+	return ctrl->getFrame() + ctrl->getRate();
 }
 
 bool TKoopa::passesAnmFrame(f32 frame) const
 {
-	return mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() <= frame
-	       && 0.005f
-	              + (mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame()
-	                 + mMActor->getFrameCtrl(ANM_TYPE_BCK)->getRate())
-	              >= frame;
+	return getAnmFrame() <= frame && frame <= 0.005f + getAnmFrameNext();
 }
 
 void TKoopa::fall()
@@ -1138,7 +1233,7 @@ void TKoopa::fall()
 void TKoopa::updateAnmSound()
 {
 	if (mMActor->getCurAnmIdx(ANM_TYPE_BCK) == 8) {
-		mSoundPos = mPosition;
+		mSoundPos.set(mPosition);
 	} else {
 		MtxPtr headMtx = mMActor->getModel()->getAnmMtx(mHeadJntIdx);
 		mSoundPos.set(headMtx[0][3], headMtx[1][3], headMtx[2][3]);
