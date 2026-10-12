@@ -130,7 +130,7 @@ Measured: SHA-1 unchanged, 11 317 / 12 881 byte-identical (87.858 %), matched co
 
 Route 70 needs `SUNSHINE_ALLOW_CPU_ADAPTER=0`: about 70 logic ticks/s instead of about 21 on the CPU adapter. `[status]` `t` is logic time. A devscript TIMEOUT exits with rc 3 since the `atexit(aurora_shutdown)` fix (before: 0xC0000409 from the static pipeline thread at teardown).
 
-Chase (Delfino shadow Mario): 9 of 9 distinct decided runs on the round-7 tree end in the same stuck TIMEOUT (Mario and shadow both waiting). Clean d414ba0 tree, 7 runs: 2 PASS, 3 fell into water, 2 cut by the wall clock, 0 stuck. Cause not found; `graph.cpp` and `walkToCurPathNode` ruled out as single-hunk causes. ChaseBisect result pending.
+Chase (Delfino shadow Mario): 9 of 9 distinct decided runs on the round-7 tree end in the same stuck TIMEOUT (Mario and shadow both waiting). Clean d414ba0 tree, 7 runs: 2 PASS, 3 fell into water, 2 cut by the wall clock, 0 stuck. Cause (single-file bisect on a clean d414ba0 worktree, 2026-10-12): the round-7 fix in `sms/src/Map/MapCheck.cpp` (`checkFlag(0x4)` -> `checkFlag(0x8)` in the wall-triangle test inside `TMapCollisionData::checkWallList`, verified against retail asm `MapCheck.s` 0x801DE8C0-0x801DE8C8, `rlwinm. 28,28`) makes wall collision retail-faithful. Mario is now really blocked by a wall at (4088,-4450) and the dev verb `chase` steers in a straight line; the old wrong flag let him pass some walls. The fix belongs in the chase steering, not in the collision. `graph.cpp` and `walkToCurPathNode` were ruled out as single-hunk causes first.
 
 Bianco Shines, floor model (`tools/bianco_path.py`, not verified in game): no Shine reachable on foot in any variant tested. Jumps, nozzle and enemies are not modelled.
 
