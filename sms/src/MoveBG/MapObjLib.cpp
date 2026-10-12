@@ -103,6 +103,7 @@ void TMapObjBase::throwObjToFront(TMapObjBase* object, f32 y_offset, f32 speed,
 		object->offLiveFlag(LIVE_FLAG_UNK10);
 	} else {
 		Mtx mtx;
+		char trash[0x10];
 		MsMtxSetRotRPH(mtx, mRotation.x, mRotation.y, mRotation.z);
 		object->mVelocity.set(mtx[0][2] * speed,
 		                      mtx[1][2] * speed + vertical_speed,
@@ -124,6 +125,7 @@ void TMapObjBase::throwObjToFrontFromPoint(TMapObjBase* object,
 		object->offLiveFlag(LIVE_FLAG_UNK10);
 	} else {
 		Mtx mtx;
+		char trash[8];
 		MsMtxSetRotRPH(mtx, mRotation.x, mRotation.y, mRotation.z);
 		object->mVelocity.set(mtx[0][2] * speed, mtx[1][2] * speed + y_speed,
 		                      mtx[2][2] * speed);
@@ -190,6 +192,7 @@ void TMapObjBase::startAllAnim(MActor* param_1, const char* param_2)
 
 void TMapObjBase::joinToGroup(const char* param_1, THitActor* param_2)
 {
+	char trash[8];
 	// TODO: The group type here is a wild guess
 	static_cast<JDrama::TViewObjPtrListT<THitActor>*>(
 	    JDrama::TNameRefGen::search(param_1))

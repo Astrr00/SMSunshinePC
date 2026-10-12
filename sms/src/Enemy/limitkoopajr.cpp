@@ -61,6 +61,7 @@ TLimitKoopaJr::TLimitKoopaJr(const char* name)
 
 void TLimitKoopaJr::init(TLiveManager* manager)
 {
+	char trash[0x10];
 	mManager = manager;
 	mManager->manageActor(this);
 	mMActorKeeper = new TMActorKeeper(mManager, 1);
@@ -91,6 +92,7 @@ void TLimitKoopaJr::init(TLiveManager* manager)
 
 void TLimitKoopaJr::reset()
 {
+	char trash[0x10];
 	TSpineEnemy::reset();
 
 	mSpine->reset();
@@ -104,6 +106,7 @@ void TLimitKoopaJr::reset()
 
 void TLimitKoopaJr::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+	char trash[0x10];
 	if (!mKoopa) {
 		TKoopaManager* manager
 		    = (TKoopaManager*)JDrama::TNameRefGen::search("クッパマネージャー");
@@ -131,12 +134,13 @@ void TLimitKoopaJr::bind() { }
 
 void TLimitKoopaJr::calcRootMatrix()
 {
-	f32 halfAngle = 0.5f * mFaceDir.mDirection;
+	f32 halfAngle = mFaceDir.mDirection * 0.5f;
 	f32 s         = sinf(halfAngle);
 	f32 c         = cosf(halfAngle);
 
 	JGeometry::TQuat4<f32> quat(0.0f, s, 0.0f, c);
 	TPosition3f mtx;
+	char trash[8];
 	mtx.setQT(quat, mPosition);
 
 	getModel()->setBaseTRMtx(mtx);
@@ -289,6 +293,7 @@ BOOL TNerveLimitKoopaJrLaunch::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveLimitKoopaJrYahoo::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[8];
 	TLimitKoopaJr* self = (TLimitKoopaJr*)spine->getBody();
 
 	if (spine->getTime() == 0) {

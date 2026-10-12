@@ -264,6 +264,7 @@ BOOL TNerveKoopaTumble::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveKoopaFall::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[8];
 	TKoopa* self = (TKoopa*)spine->getBody();
 	self->changeAnm(0x2, 0, self->getParam()->fallSpeed.get());
 	return false;
@@ -715,6 +716,7 @@ void TKoopaBody::attack_(THitActor* other)
 
 f32 TKoopa::getFlameDirDegree() const
 {
+	char trash[8];
 	f32 degree = getFlameDirRate() * getParam()->flameNeckRange.get();
 	return mRotation.y + (mIgnoreMario ? -degree : degree);
 }
@@ -1132,27 +1134,28 @@ f32 TKoopa::getNeckFocus() const
 
 bool TKoopa::allowsLaunch() const
 {
-	return mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve() ? false : true;
+	return &TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve() ? false : true;
 }
 
 void TKoopa::getDown()
 {
-	if (mSpine->getCurrentNerve() == &TNerveKoopaFall::theNerve())
+	char trash[0x10];
+	if (&TNerveKoopaFall::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaProvoke::theNerve())
+	if (&TNerveKoopaProvoke::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve())
+	if (&TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaStagger::theNerve())
+	if (&TNerveKoopaStagger::theNerve() == mSpine->getCurrentNerve())
 		mSpine->setNext(&TNerveKoopaGetDown::theNerve());
-	if (mSpine->getCurrentNerve() == &TNerveKoopaGetShowered::theNerve())
+	if (&TNerveKoopaGetShowered::theNerve() == mSpine->getCurrentNerve())
 		mSpine->setNext(&TNerveKoopaGetDown::theNerve());
 	mSpine->pushNerve(&TNerveKoopaGetDown::theNerve());
 }
 
 bool TKoopa::effectsTumble() const
 {
-	if (mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve()
+	if (&TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve()
 	    && mSpine->getTime() < 900 && mSpine->getTime() > 190)
 		return true;
 	return false;
@@ -1160,21 +1163,22 @@ bool TKoopa::effectsTumble() const
 
 bool TKoopa::getShowered()
 {
-	if (mSpine->getCurrentNerve() == &TNerveKoopaFall::theNerve())
+	char trash[0x20];
+	if (&TNerveKoopaFall::theNerve() == mSpine->getCurrentNerve())
 		return false;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaProvoke::theNerve())
+	if (&TNerveKoopaProvoke::theNerve() == mSpine->getCurrentNerve())
 		return false;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve())
+	if (&TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve())
 		return false;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaGetDown::theNerve())
+	if (&TNerveKoopaGetDown::theNerve() == mSpine->getCurrentNerve())
 		return false;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaGetShowered::theNerve())
+	if (&TNerveKoopaGetShowered::theNerve() == mSpine->getCurrentNerve())
 		return true;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaStagger::theNerve()) {
+	if (&TNerveKoopaStagger::theNerve() == mSpine->getCurrentNerve()) {
 		mSpine->setNext(&TNerveKoopaGetShowered::theNerve());
 		return true;
 	}
-	if (mSpine->getCurrentNerve() == &TNerveKoopaFlame::theNerve()) {
+	if (&TNerveKoopaFlame::theNerve() == mSpine->getCurrentNerve()) {
 		mSpine->setNext(&TNerveKoopaWait::theNerve());
 		return false;
 	}
@@ -1184,17 +1188,18 @@ bool TKoopa::getShowered()
 
 void TKoopa::stagger(bool force)
 {
-	if (mSpine->getCurrentNerve() == &TNerveKoopaFall::theNerve())
+	char trash[0x18];
+	if (&TNerveKoopaFall::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaProvoke::theNerve())
+	if (&TNerveKoopaProvoke::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (!force && mSpine->getCurrentNerve() == &TNerveKoopaFlame::theNerve())
+	if (!force && &TNerveKoopaFlame::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaTumble::theNerve())
+	if (&TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaGetDown::theNerve())
+	if (&TNerveKoopaGetDown::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (mSpine->getCurrentNerve() == &TNerveKoopaGetShowered::theNerve())
+	if (&TNerveKoopaGetShowered::theNerve() == mSpine->getCurrentNerve())
 		return;
 	mSpine->pushNerve(&TNerveKoopaStagger::theNerve());
 }
@@ -1202,6 +1207,7 @@ void TKoopa::stagger(bool force)
 #pragma dont_inline on
 f32 TKoopa::getTargetDir(const JGeometry::TVec3<f32>& target) const
 {
+	char trash[0xA8];
 	TBathtub* bathtub
 	    = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
 	MtxPtr bathMtx = *bathtub->getRootJointMtx();
@@ -1241,11 +1247,15 @@ void TKoopa::fall()
 
 void TKoopa::updateAnmSound()
 {
+	char trash[0x18];
 	if (mMActor->getCurAnmIdx(ANM_TYPE_BCK) == 8) {
 		mSoundPos.set(mPosition);
 	} else {
 		MtxPtr headMtx = mMActor->getModel()->getAnmMtx(mHeadJntIdx);
-		mSoundPos.set(headMtx[0][3], headMtx[1][3], headMtx[2][3]);
+		f32 z = headMtx[2][3];
+		f32 y = headMtx[1][3];
+		f32 x = headMtx[0][3];
+		mSoundPos.set(x, y, z);
 	}
 
 	if (mAnmSound != nullptr && mAnmSoundPath != nullptr) {
@@ -1345,6 +1355,7 @@ MtxPtr TKoopa::getHeadMtx() const
 
 void TKoopa::reset()
 {
+	char trash[8];
 	TSpineEnemy::reset();
 	changeAnm(0xC, 1, getParam()->waitSpeed.get());
 	unk19C = 0x258;

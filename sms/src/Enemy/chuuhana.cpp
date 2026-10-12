@@ -307,6 +307,7 @@ void TChuuHana::perform(u32 cue, JDrama::TGraphics* graphics)
 	TSmallEnemy::perform(cue, graphics);
 
 	JGeometry::TVec3<f32> marioPos = *gpMarioPos;
+	char trash[0x4];
 	if (checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
 		if (gpMirrorModelManager->isInMirror(mPosition)
 		    || gpMirrorModelManager->isInMirror(marioPos)) {
@@ -1077,8 +1078,10 @@ BOOL TNerveChuuHanaAttack::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaJumpPrepare::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[0x10];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
+	JGeometry::TVec3<f32> target;
+	JGeometry::TVec3<f32> vel;
+	char trash[0xc];
 	if (spine->getTime() == 0)
 		self->setBckAnm(3);
 
@@ -1087,7 +1090,6 @@ BOOL TNerveChuuHanaJumpPrepare::execute(TSpineBase<TLiveActor>* spine) const
 	                     ->getAnmMtx(TChuuHana::mFootJntIndex)[1][3];
 
 	if (self->mMActor->getFrameCtrl(0)->checkPass(10.0f)) {
-		JGeometry::TVec3<f32> target;
 		target.x = 2.0f * self->unk1F8.x - self->mPosition.x;
 		target.y = 2.0f * self->unk1F8.y - self->mPosition.y;
 		target.z = 2.0f * self->unk1F8.z - self->mPosition.z;
@@ -1095,8 +1097,7 @@ BOOL TNerveChuuHanaJumpPrepare::execute(TSpineBase<TLiveActor>* spine) const
 		target.y += self->unk1B4->mSLJumpHeight.get();
 
 		f32 jumpSp                = self->unk1B4->mSLJumpSp.get();
-		JGeometry::TVec3<f32> vel = self->calcVelocityToJumpToY(
-		    target, jumpSp, self->getGravityY());
+		vel = self->calcVelocityToJumpToY(target, jumpSp, self->getGravityY());
 		vel.y += 10.0f;
 		self->mPosition.y += 10.0f;
 		self->mVelocity = vel;

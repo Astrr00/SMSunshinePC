@@ -1093,5 +1093,6 @@ void TMapObjMonteRoot::initMapObj()
 {
 	TMapObjBase::initMapObj();
 	setDamageHeight(1400.0f * mScaling.y);
-	mPosition.y = getInitialPosition().y + mYOffset;
+	f32 y       = getInitialPosition().y;
+	mPosition.y = y + mYOffset;
 }

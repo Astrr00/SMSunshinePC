@@ -103,6 +103,7 @@ void TBee::init()
 
 BOOL TBee::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[8];
 	switch (message) {
 	case HIT_MESSAGE_TAKE:
 		if (mHolder == nullptr) {
@@ -168,6 +169,7 @@ void TBeeHive::reset()
 #pragma dont_inline on
 void TBeeHive::receiveMessageFromChild(TBee* bee)
 {
+	char trash[0x10];
 	if (bee->checkFlag(TRealoidActor::FLAG_UNK4))
 		return;
 
@@ -500,6 +502,7 @@ BOOL TNerveBeeHiveWait::execute(TSpineBase<TLiveActor>* spine) const
 		}
 
 		stayAtHive(self);
+		char trash[0x48];
 	}
 
 	if (self->doWait()) {
@@ -581,6 +584,7 @@ BOOL TNerveBeeHiveBreak::execute(TSpineBase<TLiveActor>* spine) const
 		self->mNumBees = self->unk150->mNumBoids;
 
 		chaseMario(self, 200.0f);
+		char trash[0x58];
 	}
 
 	if (self->checkCurAnmEnd(0)) {
@@ -596,6 +600,7 @@ BOOL TNerveBeeHiveAttack::execute(TSpineBase<TLiveActor>* spine) const
 	TBeeHive* self = (TBeeHive*)spine->getBody();
 	if (spine->getTime() == 0) {
 		chaseMario(self, 200.0f);
+		char trash[0x38];
 	}
 
 	if (isMarioInWater()) {
@@ -615,6 +620,7 @@ BOOL TNerveBeeHiveMarioWaterIn::execute(TSpineBase<TLiveActor>* spine) const
 	TBeeHive* self = (TBeeHive*)spine->getBody();
 	if (spine->getTime() == 0) {
 		chaseMario(self, 500.0f);
+		char trash[0x18];
 	}
 
 	if (self->getSaveParam2()->mGiveupTimer.get() < spine->getTime()) {
@@ -626,12 +632,14 @@ BOOL TNerveBeeHiveMarioWaterIn::execute(TSpineBase<TLiveActor>* spine) const
 		spine->pushAfterCurrent(&TNerveBeeHiveAttack::theNerve());
 		return true;
 	}
+	char trash2[0x20];
 	return false;
 }
 
 BOOL TNerveBeeHiveReset::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TBeeHive* self = (TBeeHive*)spine->getBody();
+	char trash[8];
 	if (spine->getTime() == 0) {
 		self->reset();
 		self->offLiveFlag(LIVE_FLAG_HIDDEN);

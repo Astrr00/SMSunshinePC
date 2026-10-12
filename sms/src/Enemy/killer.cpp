@@ -112,6 +112,7 @@ bool TKiller::isFindMario(f32 scale)
 	f32 searchHeight        = prms->mSLSearchHeight.get();
 
 	if (fabsf(SMS_GetMarioPos().y - mPosition.y) < searchHeight) {
+		char trash[8];
 		JGeometry::TVec3<f32> marioPos(gpMarioPos->x, gpMarioPos->y,
 		                               gpMarioPos->z);
 
@@ -302,6 +303,7 @@ void TKiller::reset()
 
 void TKiller::changeOut()
 {
+	char trash[8];
 	SMSGetMSound()->startSoundActor(MSD_SE_EN_TELSA_RECOVER, &mPosition, 0,
 	                                nullptr, 0, 4);
 	onLiveFlag(LIVE_FLAG_DEAD);
@@ -318,6 +320,7 @@ void TKiller::changeOut()
 
 void TKiller::flyBehavior()
 {
+	char trash[0x18];
 	mTurnSpeed = mKillerParams->mSLTurnSpeedLow.get();
 
 	TKillerSaveLoadParams* prms = mKillerParams;
@@ -450,6 +453,7 @@ void TKiller::behaveToWater(THitActor*)
 
 void TKiller::setMActorAndKeeper()
 {
+	char trash[8];
 	mMActorKeeper = new TMActorKeeper(mManager, 2);
 	mMActor       = mMActorKeeper->createMActor("killer_model1.bmd", 3);
 	mMActorKeeper->createMActor("downkiller_model1.bmd", 3);

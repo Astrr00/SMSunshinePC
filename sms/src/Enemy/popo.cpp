@@ -117,7 +117,7 @@ void TPopoManager::initSetEnemies()
 
 void TPopoManager::createModelData()
 {
-	static const TModelDataLoadEntry entry[] = {
+	static TModelDataLoadEntry entry[] = {
 		{ "popoH.bmd", 0x10020000, 0 },
 		{ "popoL.bmd", 0x10020000, 0 },
 		{ nullptr, 0, 0 },
@@ -507,6 +507,7 @@ f32 TPopo::getGravityY() const
 
 void TPopo::behaveToFindMario()
 {
+	char trash[0x10];
 	TPopoManager* manager = (TPopoManager*)mManager;
 	if (SMS_CheckMarioFlag(MARIO_FLAG_HAS_FLUDD) && manager->mIsNozzleFree
 	    && (int)SMS_GetMarioWaterGun()->mCurrentNozzle == 0
@@ -583,6 +584,7 @@ void TPopo::walkBehavior(int, f32)
 
 void TPopo::attackToMario()
 {
+	char trash[0x18];
 	TPopoManager* manager = (TPopoManager*)mManager;
 	if ((mSpine->getCurrentNerve() == &TNervePopoAttack::theNerve()
 	     || mSpine->getCurrentNerve() == &TNervePopoWait::theNerve())
@@ -794,6 +796,7 @@ bool TPopo::isCollidMove(THitActor* other)
 
 void TPopo::flyBehavior()
 {
+	char trash[0x18];
 	++mFlyTimer;
 	if (mFlyTimer > mParams->mSLFlyLimitTime.get()) {
 		mFlyTimer = 0;
@@ -850,6 +853,7 @@ void TPopo::explosion()
 
 void TPopo::possessedIn()
 {
+	char trash[0x10];
 	mMActor = mMActorKeeper->getMActor("popoH.bmd");
 	setBckAnm(3);
 	mMActor->setBtpFromIndex(0);
@@ -878,6 +882,7 @@ const char** TPopo::getBasNameTable() const { return popo_bastable; }
 
 BOOL TNervePopoPossessedNozzle::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TPopo* self = (TPopo*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -912,6 +917,7 @@ BOOL TNervePopoPossessedNozzle::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNervePopoAttack::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TPopo* self = (TPopo*)spine->getBody();
 
 	if (spine->getTime() == 0)
@@ -978,6 +984,7 @@ BOOL TNervePopoFly::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNervePopoExplosion::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x20];
 	TPopo* self = (TPopo*)spine->getBody();
 
 	if (spine->getTime() == 0) {

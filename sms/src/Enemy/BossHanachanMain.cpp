@@ -1058,6 +1058,7 @@ TBossHanachan::TBossHanachan(const char* name)
     , mCommonSaveParams(nullptr)
     , mChangeSaveParams(nullptr)
 {
+	char trash[8];
 	mWeakBodyIndex = 8.0f * MsRandF();
 }
 
@@ -1071,6 +1072,7 @@ void TBossHanachanManager::clipEnemies(JDrama::TGraphics* graphics)
 
 void TBossHanachanManager::loadAfter()
 {
+	char trash[0x10];
 	J3DMaterialTable* table = gpMapObjManager->unkC0;
 	s32 textureIndex = table->getTextureName()->getIndex(cSandTextureName);
 	const ResTIMG* sandTexture = table->getTexture()->getResTIMG(textureIndex);

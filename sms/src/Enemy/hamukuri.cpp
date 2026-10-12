@@ -711,6 +711,7 @@ void THamuKuri::bind()
 		// NOTE: copypasta from TLiveActor::bind
 
 		JGeometry::TVec3<f32> nextPos = mPosition;
+		char trash[8];
 		nextPos += mLinearVelocity;
 		nextPos += mVelocity;
 
@@ -762,7 +763,7 @@ void THamuKuri::behaveToWater(THitActor* param_1)
 		}
 
 		if (mVelocity.y < 0.0f)
-			forceRoll(SMS_GetMarioPos(), true);
+			forceRoll(*gpMarioPos, true);
 	}
 }
 
@@ -813,6 +814,7 @@ void THamuKuri::jumpToSearchActor()
 	TLiveActor* pTVar5 = (TLiveActor*)unk1F8;
 	if (pTVar5) {
 		JGeometry::TVec3<f32> local_1C = mPosition;
+		char trash[0xc];
 		local_1C -= pTVar5->mPosition;
 
 		if (local_1C.squared() > 40000.0f) {
@@ -941,6 +943,7 @@ void THamuKuri::selectCapHolder()
 
 void THamuKuri::makeCapFly(TMapObjBase* param_1)
 {
+	char trash[0x20];
 	JGeometry::TVec3<f32> local_3c = mPosition;
 	local_3c.x += -mVelocity.x * 20.0f;
 	local_3c.z += -mVelocity.z * 20.0f;
@@ -1462,6 +1465,7 @@ void THaneHamuKuri::bind()
 		return;
 
 	JGeometry::TVec3<f32> local_18 = mPosition;
+	char trash[8];
 	local_18.y -= unk234 + unk210;
 	local_18 += mLinearVelocity;
 	local_18 += mVelocity;
@@ -2175,8 +2179,8 @@ void TFireHamuKuri::behaveToWater(THitActor* param_1)
 	if (unk210) {
 		JGeometry::TVec3<f32> local_20(mPosition.x - gpMarioPos->x, 0.0f,
 		                               mPosition.z - gpMarioPos->z);
+		char trash[0x1c];
 
-		char trash[0x14];
 
 		if (local_20.x == 0.0f && local_20.y == 0.0f && local_20.z == 0.0f)
 			local_20.x += 1.0f;
@@ -2798,6 +2802,7 @@ DEFINE_NERVE(TNerveFireHamuKuriRecover, TLiveActor)
 DEFINE_NERVE(TNerveDoroHaneRise, TLiveActor)
 {
 	TDoroHaneKuri* self = (TDoroHaneKuri*)spine->getBody();
+	char trash[8];
 
 	if (self->mPosition.y < self->mGroundHeight + 800.0f)
 		self->unk234 += MsClamp(self->mSpine->getTime() * 0.01f, 0.01f, 5.0f);

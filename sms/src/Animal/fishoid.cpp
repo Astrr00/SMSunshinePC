@@ -42,6 +42,10 @@ void TRealoidActor::perform(u32 cue, JDrama::TGraphics* graphics)
 
 void TRealoidActor::calcRootMatrix(TBoid* boid)
 {
+	JGeometry::TVec3<f32> trans;
+	JGeometry::TVec3<f32> up;
+	JGeometry::TVec3<f32> dir;
+	JGeometry::TVec3<f32> n;
 	if (mFlags & FLAG_UNK2_OR_UNK4)
 		return;
 
@@ -60,13 +64,13 @@ void TRealoidActor::calcRootMatrix(TBoid* boid)
 
 	mPosition = boid->mPosition;
 
-	JGeometry::TVec3<f32> trans = boid->mPosition;
+	char trash[0x30];
+	trans = boid->mPosition;
 
 	MtxPtr root = unk70->getModel()->getBaseTRMtx();
 
-	JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
-	JGeometry::TVec3<f32> dir = boid->mHeading;
-	JGeometry::TVec3<f32> n;
+	up.set(0.0f, 1.0f, 0.0f);
+	dir = boid->mHeading;
 
 	n.cross(up, dir);
 	VECNormalize(&n, &n);
@@ -140,6 +144,7 @@ void TRealoid::loadDefault(JSUMemoryInputStream& stream, const char* name,
 
 	TMActorKeeper* keeper     = mMActorKeeper;
 	JGeometry::TVec3<f32> pos = mPosition;
+	char trash[8];
 	for (int i = 0; i < count; ++i) {
 		MActor* actor   = keeper->createMActor(name, 3);
 		TBoid* boid     = unk150->getBoid(i);
@@ -179,6 +184,7 @@ void TRealoid::clipBoids(JDrama::TGraphics* graphics)
 	for (int i = 0; i < unk150->getBoidNum(); ++i) {
 		TBoid* boid               = unk150->getBoid(i);
 		JGeometry::TVec3<f32> pos = boid->mPosition;
+		char trash[4];
 		if (ViewFrustumClipCheck(graphics, &pos, 100.0f))
 			unk154[i]->offFlag(TRealoidActor::FLAG_CLIPPED_OUT);
 		else
@@ -266,6 +272,7 @@ void TFishoid::load(JSUMemoryInputStream& stream)
 	loadDefault(stream, cFishoidMdlNames[mType], 0);
 
 	u32 eventId;
+	char trash[0x80];
 	stream >> eventId;
 
 	unk15C = TMapObjBaseManager::newAndRegisterObjByEventID(eventId, "");
@@ -281,7 +288,7 @@ void TFishoid::load(JSUMemoryInputStream& stream)
 	unk150->mMaxPitch          = 5.0f;
 	unk150->mAlignmentStrength = 0.5f;
 
-	unk150->mFleeTarget = (THitActor*)gpMarioAddress;
+	unk150->setFleeTarget((THitActor*)gpMarioAddress);
 
 	unk150->mFleeRadius   = 400.0f;
 	unk150->mFleeStrength = 3.0f;

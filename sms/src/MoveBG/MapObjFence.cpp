@@ -101,6 +101,7 @@ void TRevolvingFenceOuter::initMapCollisionData()
 
 BOOL TRevolvingFenceInner::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x38];
 	if (message == HIT_MESSAGE_SUPER_HIP_DROP && !unk140) {
 		if (isState(1)) {
 			gpMSound->startSoundActor(MSD_SE_OBJ_FENCE_REVERSE1, &mPosition, 0,
@@ -164,6 +165,7 @@ inline void TRevolvingFenceInner::calcCurrentMtx()
 
 void TRevolvingFenceInner::controlWall()
 {
+	char trash[0x50];
 	switch (mState) {
 	case 1:
 	case 2:
@@ -213,6 +215,7 @@ void TRevolvingFenceInner::controlWall()
 
 void TRevolvingFenceInner::controlGroundRoof()
 {
+	char trash[0x10];
 	switch (mState) {
 	case 1:
 	case 2:
@@ -318,6 +321,7 @@ void TFenceWater::changeStatusToWait()
 
 void TFenceWater::controlRotation()
 {
+	char trash[0x10];
 	switch (mState) {
 	case 1:
 		break;
@@ -348,6 +352,7 @@ void TFenceWater::controlRotation()
 
 void TFenceWater::control()
 {
+	char trash[8];
 	TMapObjBase::control();
 	controlRotation();
 
@@ -375,7 +380,8 @@ void TFenceWater::initMapObj()
 
 	unk144        = new TMapObjMessenger("地形オブジェメッセンジャー");
 	unk144->unk68 = this;
-	unk144->initHitActor(mActorType, 1, 0, 0.0f, 0.0f, 100.0f, 300.0f);
+	u32 actorType = mActorType;
+	unk144->initHitActor(actorType, 1, 0, 0.0f, 0.0f, 100.0f, 300.0f);
 	unk144->offHitFlag(HIT_FLAG_NO_COLLISION);
 	unk144->mPosition.set(mPosition.x, mPosition.y - 150.0f, mPosition.z);
 	JDrama::TViewObjPtrListT<THitActor>* group
@@ -422,6 +428,7 @@ void TFenceWaterH::changeStatusToWait()
 
 BOOL TRailFence::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[8];
 	if (message == HIT_MESSAGE_SUPER_HIP_DROP) {
 		gpMSound->startSoundActor(MSD_SE_OBJ_MVING_FENCT_PNCH, &mPosition, 0,
 		                          nullptr, 0, 4);
@@ -462,6 +469,7 @@ void TRailFence::goOnRail()
 
 	JGeometry::TVec3<f32> toTarget = unk13C->getCurrentPos();
 	toTarget.sub(mPosition);
+	char trash[0x48];
 	if (toTarget.squared() < 50.0f) {
 		TRailNode* node = unk13C->unk0->unk0[unk13C->mCurrIdx].unk0;
 		if (node->mConnectionNum == 0 && node->mFlags & 0x8) {
@@ -488,6 +496,7 @@ void TRailFence::goOnRail()
 
 void TRailFence::control()
 {
+	char trash[0x28];
 	TMapObjBase::control();
 
 	switch (mState) {
@@ -514,6 +523,7 @@ void TRailFence::initMapCollisionData() { TMapObjBase::initMapCollisionData(); }
 
 void TRailFence::load(JSUMemoryInputStream& stream)
 {
+	char trash[8];
 	TMapObjBase::load(stream);
 
 	char graphName[0x40];

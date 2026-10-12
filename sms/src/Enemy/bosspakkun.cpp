@@ -1018,6 +1018,7 @@ void TBossPakkun::launchPolDrop()
 		return;
 
 	JGeometry::TVec3<f32> launchPosition;
+	char trash[8];
 	if (checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
 		launchPosition = mPosition;
 		launchPosition.x += 1.0f;
@@ -1030,8 +1031,8 @@ void TBossPakkun::launchPolDrop()
 	s16 angle    = DEG2SHORTANGLE(marioYaw);
 	JGeometry::TVec3<f32> target = fromPolar(angle, front);
 	target += SMS_GetMarioPos();
-
 	JGeometry::TVec3<f32> velocity;
+
 	SMSCalcJumpVelocityXZ(target, launchPosition,
 	                      getBossPakkunParams()->mSLPollBallSpeed.get(), 0.1f,
 	                      &velocity);
@@ -1143,7 +1144,8 @@ BOOL TBossPakkun::receiveMessage(THitActor* sender, u32)
 	if (static_cast<TBossPakkunManager*>(mManager)->unk54 != 0)
 		return false;
 
-	if (&TNerveBPSleep::theNerve() == mSpine->getLatestNerve()
+	const TNerveBase<TLiveActor>* sleepNerve = &TNerveBPSleep::theNerve();
+	if (mSpine->getLatestNerve() == sleepNerve
 	    && sender->getActorType() == 0x1000000d) {
 		mSpine->reset();
 		mSpine->setNext(&TNerveBPBreakSleep::theNerve());
@@ -1671,6 +1673,7 @@ DEFINE_NERVE(TNerveBPTumble, TLiveActor)
 
 DEFINE_NERVE(TNerveBPTumbleOut, TLiveActor)
 {
+	char trash[0x48];
 	TBossPakkun* boss = static_cast<TBossPakkun*>(spine->getBody());
 	MActor* actor     = boss->mMActor;
 	if (spine->getTime() == 0) {
@@ -1703,7 +1706,6 @@ DEFINE_NERVE(TNerveBPTumbleOut, TLiveActor)
 		if (35.0f < frame)
 			boss->unk1BC = 1;
 	}
-	char trash[0x48];
 	return false;
 }
 

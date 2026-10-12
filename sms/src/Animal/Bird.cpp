@@ -106,10 +106,10 @@ void TAnimalBird::initParams()
 
 void TAnimalBird::load(JSUMemoryInputStream& stream)
 {
+	s32 eventId;
 	char trash[8];
 	TSpineEnemy::load(stream);
 
-	s32 eventId;
 	stream >> eventId;
 
 	if (eventId >= 0)

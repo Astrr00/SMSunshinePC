@@ -98,6 +98,7 @@ void TKazekun::init(TLiveManager* live_manager)
 
 void TKazekun::reset()
 {
+	char trash[8];
 	mQuat.x = 0.0f;
 	mQuat.y = 0.0f;
 	mQuat.z = 0.0f;
@@ -510,6 +511,7 @@ DEFINE_NERVE(TNerveKazekunWait, TLiveActor)
 
 DEFINE_NERVE(TNerveKazekunHitWater, TLiveActor)
 {
+	char trash[0x10];
 	TKazekun* self = (TKazekun*)spine->getBody();
 
 	if (spine->getTime() == 0) {

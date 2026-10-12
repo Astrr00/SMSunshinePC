@@ -698,7 +698,8 @@ void TTelesa::initAttacker(THitActor* param_1)
 	unk184 = 1;
 	mSpine->initWith(&TNerveTelesaAttackMario::theNerve());
 
-	MtxPtr mtx = ((TLiveActor*)param_1)->getModel()->getAnmMtx(5);
+	TLiveActor* actor = static_cast<TLiveActor*>(param_1);
+	MtxPtr mtx        = actor->getModel()->getAnmMtx(5);
 	mPosition.set(mtx[0][3], mtx[1][3] - 150.0f, mtx[2][3]);
 	mDampenedGroundHeight = mPosition.y;
 

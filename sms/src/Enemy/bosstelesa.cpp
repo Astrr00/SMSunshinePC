@@ -326,6 +326,7 @@ void TBubble::appendEnemy()
 DEFINE_NERVE(TNerveBubbleLive, TLiveActor)
 {
 	TBubble* self = static_cast<TBubble*>(spine->getBody());
+	char trash[0x20];
 
 	if (spine->getTime() == 0) {
 		self->offHitFlag(HIT_FLAG_NO_COLLISION);
@@ -534,6 +535,7 @@ void TTelesaSlot::initMapObj()
 	unk144 = mDamageHeight;
 	mMapCollisionMove = new TMapCollisionMove;
 	mMapCollisionMove->init(2, 0, 0, nullptr);
+	char trash[8];
 	randomResetDrums(this);
 }
 
@@ -677,6 +679,7 @@ u32 TTelesaSlot::touchWater(THitActor*) { return 0; }
 void TTelesaSlot::forceStopSlot(int idx)
 {
 	TMsRange<f32> range(0.0f, 1.0f);
+	char trash[0x18];
 	if (unk19C) {
 		f32 rate = mBoss->mBossParams->mSLSlotFirstHitCollectRate.get();
 		if (SMS_GetMarioHP() == 1)
@@ -719,6 +722,7 @@ bool TTelesaSlot::isRollDrum()
 #pragma dont_inline on
 int TTelesaSlot::getSlotResult()
 {
+	char trash[8];
 	int result = getResultFromAng(unk13C[0]);
 	for (int i = 1; i < 3; ++i)
 		if (result != getResultFromAng(unk13C[i]))

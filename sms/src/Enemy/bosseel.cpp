@@ -88,7 +88,7 @@ TBEelTearsDrop::TBEelTearsDrop(TBEelTears* owner, int jointIndex,
     , mSharedParts(nullptr)
     , mOwner(owner)
 {
-	char trash[0x30];
+	char trash[0x2C];
 	mSharedParts
 	    = new TSharedParts(mOwner, jointIndex, modelData, 0, "<TSharedParts>");
 	initHitActor(0x2000002C, 3, ACTOR_TYPE_PLAYER,
@@ -571,9 +571,11 @@ DEFINE_NERVE(TNerveBEelTearsWaterHit, TLiveActor)
 DEFINE_NERVE(TNerveBEelTearsMarioRecover, TLiveActor)
 {
 	TBEelTears* tears = static_cast<TBEelTears*>(spine->getBody());
+	char trash[8];
 	if (!tears->mRecoverCollision->mRecovering) {
+		JGeometry::TVec3<f32>* marioPos = gpMarioPos;
 		JPABaseEmitter* emitter = gpMarioParticleManager->emitAndBindToPosPtr(
-		    BOSSEELTEARS_MS_MEO_TEAR_AWAGET, gpMarioPos, 0, nullptr);
+		    BOSSEELTEARS_MS_MEO_TEAR_AWAGET, marioPos, 0, nullptr);
 		if (emitter)
 			emitter->setGlobalScale(tears->mScaling);
 		tears->kill();
@@ -2013,9 +2015,8 @@ static s32 hoseiDiveCameraCallback(TMarDirector::DemoCallbackArg actorAddress,
                                    u32 state)
 {
 	if (state == 1) {
-		const TLiveActor* actor
-		    = reinterpret_cast<const TLiveActor*>(actorAddress);
-		JGeometry::TVec3<f32> position = actor->mPosition;
+		JGeometry::TVec3<f32> position
+		    = reinterpret_cast<const TLiveActor*>(actorAddress)->mPosition;
 		position.y += 12300.0f;
 		gpCamera->warpPosAndAt(position, *gpMarioPos);
 	}
@@ -2046,7 +2047,7 @@ DEFINE_NERVE(TNerveBossEelWaitAppear, TLiveActor)
 		gpMarDirector->getConsole()->startAppearBalloon(0xE0012, true);
 
 	JGeometry::TVec3<f32> marioPosition = *gpMarioPos;
-	char trash[0x10];
+	char trash[0x14];
 	marioPosition.y += 75.0f;
 	if (eel->mMouthCubeManager->isInCube(marioPosition, (s32)0)) {
 		spine->pushAfterCurrent(&TNerveBossEelFirstSpin::theNerve());
@@ -2314,6 +2315,7 @@ DEFINE_NERVE(TNerveBossEelEat, TLiveActor)
 		}
 	}
 
+	char trash[0x50];
 	if (eel->mMActor->checkCurBckFromIndex(12)) {
 		if (eel->mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() < 250.0f)
 			SMSRumbleMgr->start(8, &eel->mPosition);
@@ -2384,6 +2386,7 @@ DEFINE_NERVE(TNerveBossEelDie, TLiveActor)
 DEFINE_NERVE(TNerveBossEelMouthOpenWait, TLiveActor)
 {
 	TBossEel* eel = static_cast<TBossEel*>(spine->getBody());
+	char trash[0x28];
 	if (spine->getTime() == 0) {
 		if (eel->mToothBroken)
 			eel->mToothBroken = false;

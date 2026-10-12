@@ -533,7 +533,6 @@ void TMapObjSwitch::registerObjInfo(THideObjInfo* info)
 
 void TMapObjSwitch::load(JSUMemoryInputStream& stream)
 {
-	char trash[0x10];
 	TMapObjBase::load(stream);
 	stream >> unk140;
 	if (unk140 <= 0)
@@ -544,6 +543,7 @@ void TMapObjSwitch::load(JSUMemoryInputStream& stream)
 	s32 r;
 	s32 g;
 	s32 b;
+	char trash[0x10];
 	stream >> r;
 	stream >> g;
 	stream >> b;
@@ -615,10 +615,10 @@ void TRedCoinSwitch::control()
 
 void TRedCoinSwitch::loadAfter()
 {
-	char trash[8];
 	TMapObjBase::loadAfter();
 	for (int i = 0; i < 8; ++i) {
 		char buf[0x40];
+		char trash2[4];
 		snprintf(buf, 0x40, "赤コイン %d", i);
 		static_cast<TMapObjBase*>(JDrama::TNameRefGen::search(buf))
 		    ->makeObjDead();

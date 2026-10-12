@@ -848,6 +848,7 @@ DEFINE_NERVE(TNerveTamaNokoPickUp, TLiveActor)
 DEFINE_NERVE(TNerveTamaNokoThrown, TLiveActor)
 {
 	TTamaNoko* self = (TTamaNoko*)spine->getBody();
+	char trash[8];
 
 	if (spine->getTime() == 0) {
 		TTamaNokoSaveLoadParams* params = self->getSaveParams2();
@@ -916,6 +917,7 @@ DEFINE_NERVE(TNerveTamaNokoSink, TLiveActor)
 DEFINE_NERVE(TNerveTamaNokoHitWater, TLiveActor)
 {
 	TTamaNoko* self = (TTamaNoko*)spine->getBody();
+	char trash[8];
 
 	if (spine->getTime() < 2) {
 		self->setBckAnm(15);
@@ -952,6 +954,7 @@ DEFINE_NERVE(TNerveTamaNokoHitWater, TLiveActor)
 DEFINE_NERVE(TNerveTamaNokoWait, TLiveActor)
 {
 	TTamaNoko* self = (TTamaNoko*)spine->getBody();
+	char trash[8];
 
 	if (spine->getTime() < 2) {
 		self->setBckAnm(14);

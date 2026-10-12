@@ -79,6 +79,7 @@ void JPADrawExecGenPrjTexMtx::exec(const JPADrawContext* dc)
 	                      0.5f);
 
 	Mtx mtx;
+	char trash[8];
 
 	f32 tick   = dc->mBaseEmitter->getFrame();
 	f32 transX = tick * dc->mBaseShape->getTexScrollTransX()
@@ -344,6 +345,7 @@ void JPADrawExecBillBoard::exec(const JPADrawContext* dc,
 	offs[3].set(-scaleX, -y1);
 
 	JGeometry::TVec3<f32> pt;
+	char trash[4];
 	particle->getGlobalPosition(pt);
 	MTXMultVec(dc->pcb->mViewMtx, &pt, &pt);
 
@@ -382,6 +384,7 @@ void JPADrawExecRotBillBoard::exec(const JPADrawContext* dc,
 	offs[3].set((x0 * cos - y1 * sin), (y1 * cos + x0 * sin));
 
 	JGeometry::TVec3<f32> pt;
+	char trash[4];
 	particle->getGlobalPosition(pt);
 	MTXMultVec(dc->pcb->mViewMtx, &pt, &pt);
 
@@ -420,6 +423,7 @@ void JPADrawExecYBillBoard::exec(const JPADrawContext* dc,
 	MTXMultVecArray(dc->pcb->unk38, offs, offs, ARRAY_COUNT(offs));
 
 	JGeometry::TVec3<f32> pt;
+	char trash[4];
 	particle->getGlobalPosition(pt);
 	MTXMultVecSR(dc->pcb->mViewMtx, &pt, &pt);
 
@@ -459,8 +463,9 @@ void JPADrawExecRotYBillBoard::exec(const JPADrawContext* dc,
 	MTXMultVecArray(dc->pcb->unk38, offs, offs, ARRAY_COUNT(offs));
 
 	JGeometry::TVec3<f32> pt;
+	char trash[4];
 	particle->getGlobalPosition(pt);
-	MTXMultVec(dc->pcb->mViewMtx, &pt, &pt);
+	MTXMultVecSR(dc->pcb->mViewMtx, &pt, &pt);
 
 	GXBegin(GX_QUADS, GX_VTXFMT0, 4);
 	GXPosition3f32(offs[0].x + pt.x, offs[0].y + pt.y, offs[0].z + pt.z);
@@ -613,6 +618,7 @@ void rotTypeYJiggle(f32 sin, f32 cos, Mtx& out)
 void JPADrawExecDirectional::exec(const JPADrawContext* dc,
                                   JPABaseParticle* particle)
 {
+	char trash2[8];
 	if (particle->isInvisibleParticle())
 		return;
 
@@ -630,6 +636,7 @@ void JPADrawExecDirectional::exec(const JPADrawContext* dc,
 	offs[3].set(x0, y1, 0.0f);
 
 	JGeometry::TVec3<f32> local_BC;
+	char trash[0x20];
 	dc->pcb->mDirTypeFunc(particle, dc->mBaseEmitter, local_BC);
 	if (local_BC.isZero())
 		return;
@@ -693,16 +700,17 @@ void JPADrawExecRotDirectional::exec(const JPADrawContext* dc,
 	f32 x1 = +params->mScaleX * (dc->pcb->unk4.x - dc->pcb->unkC.x);
 	f32 y1 = -params->mScaleY * (dc->pcb->unk4.y - dc->pcb->unkC.y);
 
+	Mtx local_120;
 	JGeometry::TVec3<f32> offs[4];
 	offs[0].set(x0, y0, 0.0f);
 	offs[1].set(x1, y0, 0.0f);
 	offs[2].set(x1, y1, 0.0f);
 	offs[3].set(x0, y1, 0.0f);
 
-	Mtx local_120;
 	dc->pcb->mRotTypeFunc(sin, cos, local_120);
 
 	JGeometry::TVec3<f32> local_E4;
+	char trash[8];
 	dc->pcb->mDirTypeFunc(particle, dc->mBaseEmitter, local_E4);
 	if (local_E4.isZero())
 		return;
@@ -998,17 +1006,18 @@ void JPADrawExecRotation::exec(const JPADrawContext* dc,
 	f32 cos = JMASCos(params->unk34);
 
 	f32 x0 = -params->mScaleX * (dc->pcb->unk4.x + dc->pcb->unkC.x);
-	f32 x1 = params->mScaleX * (dc->pcb->unk4.x - dc->pcb->unkC.x);
 	f32 y0 = params->mScaleY * (dc->pcb->unk4.y + dc->pcb->unkC.y);
+	f32 x1 = params->mScaleX * (dc->pcb->unk4.x - dc->pcb->unkC.x);
 	f32 y1 = -params->mScaleY * (dc->pcb->unk4.y - dc->pcb->unkC.y);
 
+	Mtx mtx;
 	JGeometry::TVec3<f32> offs[4];
+	char trash[4];
 	offs[0].set(x0, y0, 0.0f);
 	offs[1].set(x1, y0, 0.0f);
 	offs[2].set(x1, y1, 0.0f);
 	offs[3].set(x0, y1, 0.0f);
 
-	Mtx mtx;
 	dc->pcb->mRotTypeFunc(sin, cos, mtx);
 	MTXMultVecArray(mtx, offs, offs, ARRAY_COUNT(offs));
 
@@ -1045,6 +1054,7 @@ void JPADrawExecRotationCross::exec(const JPADrawContext* dc,
 
 	Mtx rotMtx;
 	JGeometry::TVec3<f32> pt[8];
+	char trash[4];
 
 	pt[0].set(x0, y0, 0.0f);
 	pt[1].set(x1, y0, 0.0f);
@@ -1526,6 +1536,7 @@ void JPADrawCalcScaleXBySpeed::calc(const JPADrawContext* dc,
 	JPADrawParams* params = particle->getDrawParamPPtr();
 
 	JGeometry::TVec3<f32> vel;
+	char trash[8];
 	particle->getVelVec(vel);
 
 	if (dc->pcb->mScaleAnmTimer < dc->mExtraShape->getScaleInTiming()) {
@@ -1551,6 +1562,7 @@ void JPADrawCalcScaleYBySpeed::calc(const JPADrawContext* dc,
 	JPADrawParams* params = particle->getDrawParamPPtr();
 
 	JGeometry::TVec3<f32> vel;
+	char trash[8];
 	particle->getVelVec(vel);
 
 	if (dc->pcb->mScaleAnmTimer < dc->mExtraShape->getScaleInTiming()) {

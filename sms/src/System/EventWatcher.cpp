@@ -432,6 +432,7 @@ static void evSetDead4LiveActor(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evSetTimeLimit(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[0x10];
 	interp->verifyArgNum(1, &arg_num);
 	int time = TSpcSlice(interp->pop()).getDataInt();
 	OSResetStopwatch(&SMSGetMarDirector()->unkE8);
@@ -442,6 +443,7 @@ static void evSetTimeLimit(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evSetAttentionTime(TSpcTypedInterp<TEventWatcher>* interp,
                                u32 arg_num)
 {
+	char trash[0x18];
 	interp->verifyArgNum(1, &arg_num);
 	int tmp = interp->pop().getDataInt();
 
@@ -453,6 +455,7 @@ static void evSetAttentionTime(TSpcTypedInterp<TEventWatcher>* interp,
 static void evSetPollutionIncreaseCount(TSpcTypedInterp<TEventWatcher>* interp,
                                         u32 arg_num)
 {
+	char trash[0x18];
 	interp->verifyArgNum(1, &arg_num);
 	int tmp = interp->pop().getDataInt();
 
@@ -485,6 +488,7 @@ static void evSetEventEnd(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evSetNextStage(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(2, &arg_num);
 	int scenario = TSpcSlice(interp->pop()).getDataInt();
 	int stage    = TSpcSlice(interp->pop()).getDataInt();
@@ -500,6 +504,7 @@ static void evSetNextStage(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evRegisterMovie(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	int movieId = TSpcSlice(interp->pop()).getDataInt();
 	SMSGetMarDirector()->fireStreamingMovie(movieId);
@@ -508,6 +513,7 @@ static void evRegisterMovie(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evGameOver(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[0x10];
 	interp->verifyArgNum(0, &arg_num);
 	SMSGetMarDirector()->onUnk4CFlag(0x1);
 	interp->push();
@@ -634,6 +640,7 @@ static void evRaiseBuilding(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evForceCloseTalk(TSpcTypedInterp<TEventWatcher>* interp,
                              u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(0, &arg_num);
 
 	gpTalk2D->forceCloseTalk();
@@ -643,6 +650,7 @@ static void evForceCloseTalk(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evInsertTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(2, &arg_num);
 
 	int p1 = interp->pop().getDataInt();
@@ -660,6 +668,7 @@ static void evInsertTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evStartTimer(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 
 	int time = interp->pop().getDataInt();
@@ -725,6 +734,7 @@ static void evKillShine(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evKillMushroom1up(TSpcTypedInterp<TEventWatcher>* interp,
                               u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	((TMushroom1up*)getNameRefPtr(interp->pop()))->kill();
 	interp->push();
@@ -733,6 +743,7 @@ static void evKillMushroom1up(TSpcTypedInterp<TEventWatcher>* interp,
 static void evAppearMushroom1up(TSpcTypedInterp<TEventWatcher>* interp,
                                 u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	TMushroom1up* mushroom = (TMushroom1up*)getNameRefPtr(interp->pop());
 	mushroom->appear();
@@ -840,6 +851,7 @@ static void evAppearShineForWoodBox(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evChangeNozzle(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	TWaterGun::TNozzleType id
 	    = (TWaterGun::TNozzleType)interp->pop().getDataInt();
@@ -1101,6 +1113,7 @@ static void evStartSE(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 static void evStartEventSE(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	int se;
 	switch (interp->pop().getDataInt()) {
@@ -1172,6 +1185,7 @@ static void evWarpMario(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evStartAppearJetBalloon(TSpcTypedInterp<TEventWatcher>* interp,
                                     u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(2, &arg_num);
 
 	int p1 = interp->pop().getDataInt();
@@ -1279,6 +1293,7 @@ static void evOnNeutralMarioKey(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evInvalidatePad(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	char trash[8];
 	interp->verifyArgNum(1, &arg_num);
 	int frames = interp->pop().getDataInt();
 

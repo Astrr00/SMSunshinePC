@@ -198,6 +198,7 @@ void TFruitsBoat::setGroundCollision()
 {
 	JGeometry::TVec3<f32> toMario = mPosition;
 	toMario -= *gpMarioPos;
+	char trash[8];
 
 	if (mColCount != 0 || toMario.length() < 1000.0f
 	    || (SMS_GetYoshi()->isHatched()
@@ -424,8 +425,7 @@ void TFruitsBoatManager::createModelData()
 
 void TFruitsBoatManager::load(JSUMemoryInputStream& stream)
 {
-	TFruitsBoatParams* params = new TFruitsBoatParams("/enemy/fruitsBoat.prm");
-	unk38                     = params;
+	unk38 = new TFruitsBoatParams("/enemy/fruitsBoat.prm");
 	TEnemyManager::load(stream);
 }
 
@@ -511,6 +511,7 @@ BOOL TNerveFruitsBoatGraphWander::execute(TSpineBase<TLiveActor>* spine) const
 BOOL TNerveFruitsBoatBckTrace::execute(TSpineBase<TLiveActor>* spine) const
 {
 	TFruitsBoat* self = (TFruitsBoat*)spine->getBody();
+	char trash[8];
 
 	self->mBckFrameCtrl->update();
 	self->mBckTrack->setFrame(self->mBckFrameCtrl->getFrame());

@@ -83,6 +83,7 @@ void TSandLeaf::control()
 
 bool TSandBase::withering()
 {
+	char trash[8];
 	mScaling.y -= mWitherSpeed;
 	if (mScaling.y < mScaleMin)
 		mScaling.y = mScaleMin;
@@ -118,6 +119,7 @@ void TSandLeafBase::grow()
 			}
 
 			f32 rate        = SMSGetAnmFrameRate();
+			char trash[0x18];
 			TSandLeaf* leaf = mLeaf;
 			f32 frame = leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 			leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(rate + frame);
@@ -131,6 +133,7 @@ void TSandLeafBase::grow()
 
 void TSandLeafBase::control()
 {
+	char trash[0x10];
 	TMapObjBase::control();
 
 	switch (mState) {
@@ -226,6 +229,7 @@ void TSandBombBase::withered()
 
 void TSandBombBase::expanded()
 {
+	char trash[0x10];
 	TSandLeaf* leaf = mLeaf;
 	f32 speed       = mExpandFrameSpeed;
 	f32 frame       = leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
@@ -266,6 +270,7 @@ void TSandBombBase::exploding()
 
 void TSandBombBase::explode()
 {
+	char trash[8];
 	startControlAnim(1);
 	mScaling.y = 1.0f;
 	mMapCollisionManager->changeCollision(1);
@@ -441,6 +446,7 @@ void TSandCastle::expanded()
 
 void TSandCastle::explode()
 {
+	char trash[8];
 	startControlAnim(1);
 	mScaling.y = 1.0f;
 	mMapCollisionManager->changeCollision(1);
@@ -497,6 +503,7 @@ void TSandCastle::calcRootMatrix()
 
 TSandBomb* TSandCastle::findTriggerActor()
 {
+	char trash[8];
 	// Translated: "Sand castle explosion sprout"
 	return (TSandBomb*)JDrama::TNameRefGen::getInstance()
 	    ->getRootNameRef()
@@ -505,6 +512,7 @@ TSandBomb* TSandCastle::findTriggerActor()
 
 void TSandCastle::loadAfter()
 {
+	char trash[8];
 	mLeaf        = findTriggerActor();
 	mLeaf->mBase = this;
 	mLeaf->appear();
@@ -545,6 +553,7 @@ void TLeanMirror::draw() const
 
 	near          = up;
 	f32 nearScale = 0.001f * (350.0f * mBodyRadius);
+	char trash[0x14];
 	near.scale(nearScale);
 	near += mPosition;
 
@@ -558,6 +567,7 @@ void TLeanMirror::draw() const
 
 BOOL TLeanMirror::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x18];
 	if (message == 0) {
 		sendMsg(0x10000016, message);
 		addShake(sender, mTrampleRate);
@@ -583,6 +593,7 @@ BOOL TLeanMirror::receiveMessage(THitActor* sender, u32 message)
 
 void TLeanMirror::touchPlayer(THitActor* actor)
 {
+	char trash[0x10];
 	if (isState(STATE_SHAKE) && marioIsOn()) {
 		addShake(actor, mPlayerRate);
 		if (!mBgmStarted) {
@@ -595,6 +606,7 @@ void TLeanMirror::touchPlayer(THitActor* actor)
 
 void TLeanMirror::touchEnemy(THitActor* actor)
 {
+	char trash[8];
 	if (actor->isActorType(0x10000016) && ((TChuuHana*)actor)->unk1B0)
 		addShake(actor, mEnemyRate);
 }
@@ -704,6 +716,7 @@ void TLeanMirror::controlGoTarget()
 		}
 		mStateTimer = mDemoLightTime;
 		mState      = STATE_DEMO;
+		char trash[0x1c];
 	}
 }
 
@@ -881,6 +894,7 @@ TLeanMirror::TLeanMirror(const char* name)
 
 void TShiningStone::putOnLight(TLiveActor* mirror)
 {
+	char trash[0x20];
 	if (strcmp(mirror->getName(), "mirrorS") == 0) {
 		mStoneActors[0]->setBck("shiningstonegreen");
 		mStoneActors[0]->setBrk("shiningstonegreen");
@@ -1122,6 +1136,7 @@ void TMammaYacht::initMapObj()
 
 void TSandBird::control()
 {
+	char trash[0x50];
 	TJointCoin::control();
 
 	if (gpMSound->gateCheck(0x217C)) {
@@ -1238,6 +1253,7 @@ void TGoalWatermelon::control()
 
 void TGoalWatermelon::loadAfter()
 {
+	char trash[8];
 	TMapObjBase::loadAfter();
 	onHitFlag(HIT_FLAG_CANNOT_GET_HIT);
 
@@ -1254,6 +1270,7 @@ void TGoalWatermelon::load(JSUMemoryInputStream& stream)
 	TMapObjBase::load(stream);
 
 	char buffer[0x20];
+	char trash[0x10];
 	stream.readString(buffer, 0x20);
 	stream.read(&mShinePos.x, 4);
 	stream.read(&mShinePos.y, 4);

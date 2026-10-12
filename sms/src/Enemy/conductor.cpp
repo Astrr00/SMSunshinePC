@@ -118,6 +118,7 @@ TLiveManager* TConductor::getManagerByName(const char* name)
 	u16 key = JDrama::TNameRef::calcKeyCode(name);
 
 	JGadget::TList<TLiveManager*>::iterator it, e;
+	char trash[0x10];
 	for (it = unk10.begin(), e = unk10.end(); it != e; ++it)
 		if ((*it)->searchF(key, name))
 			return *it;
@@ -215,6 +216,7 @@ TSpineEnemy*
 TConductor::makeOneEnemyAppear(const JGeometry::TVec3<f32>& param_1,
                                const char* param_2, int param_3)
 {
+	char trash[0x10];
 	TEnemyManager* mgr = (TEnemyManager*)getManagerByName(param_2);
 
 	if (!mgr)
@@ -245,6 +247,7 @@ void TConductor::killEnemiesWithin(const JGeometry::TVec3<f32>& param_1,
                                    f32 param_2)
 {
 	JGadget::TList<TEnemyManager*>::iterator it, e;
+	char trash[0x10];
 	for (it = unk20.begin(), e = unk20.end(); it != e; ++it) {
 		if ((*it)->search("ボスワンワンマネージャー") == nullptr)
 			(*it)->killChildrenWithin(param_1, param_2);

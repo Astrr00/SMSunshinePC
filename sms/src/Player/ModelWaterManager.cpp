@@ -1537,8 +1537,7 @@ void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 
 void TModelWaterManager::drawRefracAndSpec() const
 {
-	char trash[8];
-
+	char trash[4];
 	Mtx afStack_3c;
 	PSMTXIdentity(afStack_3c);
 	GXSetCurrentMtx(GX_PNMTX0);
@@ -1559,6 +1558,7 @@ void TModelWaterManager::drawRefracAndSpec() const
 	GXSetIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD1, GX_TEXMAP1);
 	GXSetTevIndWarp(GX_TEVSTAGE0, GX_INDTEXSTAGE0, 1, 0, GX_ITM_0);
 	f32 local_84[2][3];
+	char trash2[4];
 	local_84[0][0] = unk5D1C;
 	local_84[0][1] = 0.0f;
 	local_84[0][2] = 0.0f;

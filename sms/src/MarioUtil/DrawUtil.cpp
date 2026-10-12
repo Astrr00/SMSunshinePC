@@ -646,6 +646,7 @@ int SMS_CountPolygonNumInShape(J3DShape* shape)
 		/* GX_INDEX8 */ 1,
 		/* GX_INDEX16*/ 2,
 	};
+	char trash[4];
 
 	int polyNum = 0;
 	int vtxSize = 0;

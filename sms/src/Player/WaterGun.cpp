@@ -271,7 +271,7 @@ void TNozzleBase::movement(const TMarioControllerWork& controllerWork)
 
 void TNozzleBase::emitCommon(int param_1, TWaterEmitInfo* param_2)
 {
-	char trash[0x18];
+	char trash0[8];
 	param_2->mAlive.set(
 	    gpModelWaterManager->mWaterParticleTypes[mEmitParams.mType.get()]
 	        ->mAlive.get());
@@ -279,6 +279,7 @@ void TNozzleBase::emitCommon(int param_1, TWaterEmitInfo* param_2)
 	JGeometry::TVec3<f32> pos;
 	JGeometry::TVec3<f32> dir;
 	JGeometry::TVec3<f32> speed;
+	char trash[0x10];
 	mFludd->getEmitPosDirSpeed(param_1, &pos, &dir, &speed);
 
 	// TODO: This feels wrong

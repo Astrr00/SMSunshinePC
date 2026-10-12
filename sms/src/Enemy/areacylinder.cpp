@@ -14,6 +14,9 @@ void TAreaCylinder::load(JSUMemoryInputStream& stream)
 	JDrama::TNameRef::load(stream);
 
 	JGeometry::TVec3<f32> v;
+	char trash[8];
+	s32 rate;
+	f32 tmp;
 
 	stream >> mPos.x >> mPos.y >> mPos.z;
 	stream >> v.x >> v.y >> v.z;
@@ -27,7 +30,6 @@ void TAreaCylinder::load(JSUMemoryInputStream& stream)
 
 	int count = stream.readS32();
 	for (int i = 0; i < count; ++i) {
-		f32 tmp;
 		stream >> tmp;
 		stream.readString();
 	}
@@ -41,7 +43,6 @@ void TAreaCylinder::load(JSUMemoryInputStream& stream)
 
 	mgr->registerCylinder(this);
 
-	s32 rate;
 	stream >> rate;
 	mProbability = (f32)rate / 100.0f;
 }

@@ -758,10 +758,10 @@ void TElecNokonoko::genRandomItem()
 
 void TElecNokonoko::setMeltAnm()
 {
-	char trash[4];
 	setBckAnm(2);
 	onLiveFlag(LIVE_FLAG_UNK8);
 	JGeometry::TVec3<f32> zero(0.0f, 0.0f, 0.0f);
+	char trash[4];
 	unk18C = 3;
 	mCarapace->setVelocity(zero);
 

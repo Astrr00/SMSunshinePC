@@ -76,7 +76,6 @@ TRoulette::TRoulette(const char* name)
 
 void TRoulette::initMapObj()
 {
-	char trash[4];
 	mPosition.y += 500.0f;
 	TMapObjBase::initMapObj();
 	for (u16 i = 0; i < getModel()->getModelData()->getMaterialNum(); i++) {
@@ -94,6 +93,7 @@ void TRoulette::initMapObj()
 	    JDrama::TNameRefGen::search("オブジェクトグループ"))
 	    ->getChildren()
 	    .push_back(unk150);
+	char trash[4];
 	f32 attackR = 500.0f;
 	f32 attackH = 100.0f;
 	if (gpApplication.mCurrArea.unk0 == 14) {

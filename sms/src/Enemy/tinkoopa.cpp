@@ -402,6 +402,7 @@ void TTinKoopaFlame::emitFlameEffects()
 
 void TTinKoopaLaunchOrder::checkOrder()
 {
+	char trash[8];
 	if (mOwner->mWaitCycle == mWaitCycle) {
 		bool passed = checkRailPass(mOwner->mKoopaRail, mFrame);
 		if (passed) {
@@ -605,6 +606,7 @@ f32 TTinKoopa::calcCoasterDistance(int from, int to)
 
 void TTinKoopa::resetTinKoopa()
 {
+	char trash[0x28];
 	if (mKillerManager == nullptr)
 		mKillerManager = (TCoasterKillerManager*)JDrama::TNameRefGen::search(
 		    "コースターキラーマネージャー");
@@ -759,10 +761,12 @@ void TTinKoopa::launchKiller(int direction)
 
 void TTinKoopa::checkTinKoopaKillerApproachingMessage()
 {
+	char trash[8];
 	u32 messageId = 0xE0009;
 	for (int i = 0; i < mKillerManager->getActiveObjNum(); ++i) {
 		TCoasterKiller* killer = (TCoasterKiller*)mKillerManager->getObj(i);
 		if (!killer->checkLiveFlag(LIVE_FLAG_DEAD)) {
+			char trash2[8];
 			f32 approachDistance
 			    = getSaveParam2()->mSLKillerApproachingDistance.get();
 			JGeometry::TVec3<f32> marioPos = *gpMarioPos;

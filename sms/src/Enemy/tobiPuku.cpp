@@ -445,6 +445,7 @@ void TTobiPuku::walkBehavior(int param_1, f32 param_2)
 	mPosition.y = unk1E0 + 10.0f * MsSin(2.0f * (f32)mSpine->getTime());
 
 	JGeometry::TVec3<f32> velocity = mLinearVelocity;
+	char trash[8];
 	velocity.y                     = prevY - mPosition.y;
 	mRotation.x                    = MsGetRotFromZaxis(velocity).x;
 }
@@ -466,8 +467,7 @@ void TTobiPuku::swimEffect()
 
 bool TTobiPuku::isReachedToGoalXZ()
 {
-	JGeometry::TVec3<f32> tmp;
-	tmp = getUnk104().getPoint();
+	JGeometry::TVec3<f32> tmp = getUnk104().getPoint();
 	tmp -= mPosition;
 	tmp.y = 0.0f;
 
@@ -528,6 +528,7 @@ void TTobiPuku::hitWater()
 	JGeometry::TVec3<f32> velocity = mVelocity;
 
 	JGeometry::TVec3<f32> dir;
+	char trash[0x1C];
 	dir.set(mPosition.x - gpMarioPos->x, mPosition.y - gpMarioPos->y,
 	        mPosition.z - gpMarioPos->z);
 	if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f)
@@ -849,6 +850,7 @@ DEFINE_NERVE(TNerveTobiPukuFly, TLiveActor)
 
 	JGeometry::TVec3<f32> velocity  = self->mVelocity;
 	self->unk1E4                    = velocity.y;
+	char trash[0x10];
 	JGeometry::TVec3<f32> velocity2 = self->mVelocity;
 	self->mRotation.x               = MsGetRotFromZaxis(velocity2).x;
 	return false;
@@ -865,6 +867,7 @@ DEFINE_NERVE(TNerveTobiPukuAttack, TLiveActor)
 			self->unk194                   = 0;
 			JGeometry::TVec3<f32> velocity = self->mVelocity;
 			JGeometry::TVec3<f32> newVelocity;
+			char trash[0xC];
 			newVelocity.x   = 0.0f;
 			newVelocity.y   = velocity.y;
 			newVelocity.z   = 0.0f;
@@ -877,9 +880,10 @@ DEFINE_NERVE(TNerveTobiPukuAttack, TLiveActor)
 			spine->pushAfterCurrent(&TNerveTobiPukuFall::theNerve());
 			return true;
 		}
-		return false;
+	} else {
+		return true;
 	}
-	return true;
+	return false;
 }
 
 DEFINE_NERVE(TNerveTobiPukuHitWater, TLiveActor)
@@ -898,6 +902,7 @@ DEFINE_NERVE(TNerveTobiPukuHitWater, TLiveActor)
 
 	if (!self->isAirborne()) {
 		JGeometry::TVec3<f32> dir;
+		char trash[0x10];
 		dir.set(self->mPosition.x - gpMarioPos->x, 0.0f,
 		        self->mPosition.z - gpMarioPos->z);
 		if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f)
@@ -968,6 +973,7 @@ DEFINE_NERVE(TNerveTobiPukuDie, TLiveActor)
 			self->onHitFlag(HIT_FLAG_NO_COLLISION);
 			JGeometry::TVec3<f32> zero(0.0f, 0.0f, 0.0f);
 			JGeometry::TVec3<f32> velocity = self->mVelocity;
+			char trash[0x8];
 			zero.y                         = velocity.y;
 			self->mVelocity                = zero;
 			self->setDownAirAnm();

@@ -85,7 +85,6 @@ void TSplineRail::getPosAndRot(f32 t, JGeometry::TVec3<f32>* out_pos,
 	JGeometry::TVec3<f32> dir;
 
 	char trash2[0xC];
-
 	for (;;) {
 		if (t + dt > 1.0f)
 			t = 1.0f - dt;

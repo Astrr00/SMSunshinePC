@@ -450,6 +450,7 @@ TFireWanwanTailHit::TFireWanwanTailHit(TFireWanwan& param_1)
 
 BOOL TFireWanwanTailHit::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x10];
 	if (sender->getActorType() == 0x80000001) {
 		if (message == HIT_MESSAGE_TAKE) {
 			if (!mOwner->canTakenByMario())
@@ -769,8 +770,9 @@ void TFireWanwan::init(TLiveManager* manager)
 	mActorType = 0x1000000E;
 	unk150     = 1;
 	mSpine->initWith(&TNerveFireWanwanGraphWander::theNerve());
+	char trash[0x4];
 	TPosition3f mtx;
-	char trash[0x8];
+	char trash2[0x4];
 	mtx.translation(mPosition);
 	getModel()->setBaseTRMtx(mtx);
 	getModel()->setBaseScale(mScaling);
@@ -1022,6 +1024,7 @@ void TFireWanwan::behaveToWater(THitActor* param_1)
 			if (!isRecovering()) {
 				JGeometry::TVec3<f32> scale = mScaling;
 				scale *= 0.75f;
+				char trash[0x14];
 				SMS_EasyEmitParticle(PARTICLE_MS_CHO_ASE, &mPosition, this,
 				                     scale);
 			}
@@ -1047,6 +1050,7 @@ void TFireWanwan::behaveToWater(THitActor* param_1)
 	mSpine->reset();
 	mSpine->setNext(&TNerveFireWanwanEscape::theNerve());
 	unk194->offFireEffect();
+	char trash2[0x3C];
 	unk194->mIsOnFire       = false;
 	mSprayedByWaterCooldown = 20;
 }
@@ -1916,11 +1920,13 @@ DEFINE_NERVE(TNerveFireWanwanFindMario, TLiveActor)
 DEFINE_NERVE(TNerveFireWanwanAttack, TLiveActor)
 {
 	TFireWanwan* self = (TFireWanwan*)spine->getBody();
+	char trash0[0x4];
 
 	if (spine->getTime() == 0) {
 		self->setBckAnm(3);
 		self->setGoalPath(TPathNode((THitActor*)gpMarioAddress));
 	}
+	char trash[0x4];
 
 	if (self->doAttack()) {
 		spine->pushAfterCurrent(&TNerveFireWanwanRecoverGraph::theNerve());
@@ -1994,6 +2000,7 @@ DEFINE_NERVE(TNerveFireWanwanRecoverGraph, TLiveActor)
 DEFINE_NERVE(TNerveFireWanwanRecover, TLiveActor)
 {
 	TFireWanwan* self = (TFireWanwan*)spine->getBody();
+	char trash[0x48];
 
 	if (spine->getTime() == 0) {
 		self->setBckAnm(2);
@@ -2075,6 +2082,7 @@ DEFINE_NERVE(TNerveFireWanwanHungTail, TLiveActor)
 
 	JGeometry::TVec3<f32> vec = self->mPosition;
 	vec -= SMS_GetMarioPos();
+	char trash[0x8];
 
 	self->mRotation.y = MsGetRotFromZaxisY(vec);
 	if (self->isReadyToFly()) {
@@ -2132,7 +2140,6 @@ DEFINE_NERVE(TNerveFireWanwanFly, TLiveActor)
 DEFINE_NERVE(TNerveFireWanwanFreeze, TLiveActor)
 {
 	TFireWanwan* self = (TFireWanwan*)spine->getBody();
-	char trash[8];
 
 	if (spine->getTime() == 0) {
 		self->setBckAnm(0);
@@ -2143,6 +2150,7 @@ DEFINE_NERVE(TNerveFireWanwanFreeze, TLiveActor)
 		                                &self->mPosition, 0, nullptr, 0, 4);
 	}
 
+	char trash[0x8];
 	self->setVelocity(JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f));
 
 	if (self->getFreezeTime() < spine->getTime()) {

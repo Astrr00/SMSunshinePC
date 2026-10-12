@@ -1043,7 +1043,7 @@ DEFINE_NERVE(TNerveSmallEnemyJump, TLiveActor)
 	TSmallEnemy* self = (TSmallEnemy*)spine->getBody();
 
 	if (spine->getTime() == 0) {
-		if (self->checkLiveFlag2(LIVE_FLAG_UNK8000)
+		if ((self->mLiveFlag & LIVE_FLAG_UNK8000 ? 1 : 0)
 		    || self->checkLiveFlag(LIVE_FLAG_UNK40000))
 			return true;
 
@@ -1069,7 +1069,7 @@ DEFINE_NERVE(TNerveSmallEnemyHitWaterJump, TLiveActor)
 	TSmallEnemy* self = (TSmallEnemy*)spine->getBody();
 
 	if (spine->getTime() == 0) {
-		if (self->checkLiveFlag2(0x8000)
+		if ((self->mLiveFlag & 0x8000 ? 1 : 0)
 		    || self->checkLiveFlag(LIVE_FLAG_UNK40000))
 			return true;
 
@@ -1077,6 +1077,7 @@ DEFINE_NERVE(TNerveSmallEnemyHitWaterJump, TLiveActor)
 		self->jumpBehavior();
 
 		JGeometry::TVec3<f32> v = self->mVelocity;
+		char trash[0x1c];
 		v.y                     = self->getSaveParams()->mSLJumpForce.get();
 		self->mVelocity         = v;
 

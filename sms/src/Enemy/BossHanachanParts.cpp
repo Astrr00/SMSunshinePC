@@ -197,10 +197,12 @@ void TBossHanachanPartsBase::entryCircleShadow_()
 	if (mOwner->mSpine->getCurrentNerve() != &TNerveBossHanachanDead::theNerve()
 	    || mOwner->mSpine->getTime() <= 200) {
 		TCircleShadowRequest request;
+		char trash[0x18];
 		request.mPosition.set(mJointMtx[0][3], mJointMtx[1][3],
 		                      mJointMtx[2][3]);
 		request.mRadiusX = request.mRadiusZ = mScaledBodyRadius;
-		gpBindShadowManager->forceRequest(request, mActorType);
+		u32 type = mActorType;
+		gpBindShadowManager->forceRequest(request, type);
 	}
 }
 
@@ -247,6 +249,7 @@ bool TBossHanachanPartsBase::isCurBckAlreadyEnd_() const
 
 void TBossHanachanPartsBase::copyFrameFromOldAnmToNewAnm_()
 {
+	char trash[0x10];
 	J3DAnmTransformKey* anm = mMActor->getBckAnm();
 	J3DFrameCtrl* ctrl      = mMActor->getFrameCtrl(ANM_TYPE_BCK);
 	if (anm && ctrl) {

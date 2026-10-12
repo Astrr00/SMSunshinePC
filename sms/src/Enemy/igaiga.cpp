@@ -143,6 +143,8 @@ TRollEnemy::TRollEnemy(const char* name)
 
 void TRollEnemy::reset()
 {
+	JGeometry::TVec3<f32> point;
+	JGeometry::TVec3<f32> dir;
 	// stack padding to match the retail frame size
 	char trash[0x30];
 	gpCurRollEnemy = this;
@@ -151,13 +153,11 @@ void TRollEnemy::reset()
 	unk194 = TMsRange<f32>(0.0f, 360.0f).rand();
 	unk158 = 1.0f;
 
-	JGeometry::TVec3<f32> point;
 	unk124->getGraph()->getGraphNode(0).getPoint(&point);
 	mPosition = point;
 	mPosition.y += 10.0f;
 
 	unk124->getGraph()->getGraphNode(1).getPoint(&point);
-	JGeometry::TVec3<f32> dir;
 	dir.x = point.x - mPosition.x;
 	dir.y = 0.0f;
 	dir.z = point.z - mPosition.z;
@@ -357,6 +357,7 @@ TSpineEnemy* TIgaigaManager::createEnemyInstance()
 
 void TIgaigaManager::initSetEnemies()
 {
+	char trash[0x78];
 	unk60 = new TIgaigaPolluteModelManager("イガイガモデル汚染");
 	unk60->init((TLiveActor*)unk18[0]);
 }

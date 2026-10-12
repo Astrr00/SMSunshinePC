@@ -526,6 +526,7 @@ void TGesso::pollute()
 
 	JGeometry::TVec3<f32> local_2c(0.0f, 0.0f, 100.0f);
 	Mtx afStack_5c;
+	char trash[0x10];
 	if (mState == STATE_WANDERING) {
 		MsMtxSetRotRPH(afStack_5c, 0.0f, mRotation.y, 0.0f);
 	} else {
@@ -674,6 +675,7 @@ void TGesso::calcRootMatrix()
 		               mRotation.x, mRotation.y, mRotation.z);
 
 		Mtx local_68;
+		char trash[4];
 		MsMtxSetRotY(local_68, mStayYaw);
 
 		MTXConcat(mA, local_68, mA);

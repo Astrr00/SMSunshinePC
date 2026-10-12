@@ -755,6 +755,7 @@ BOOL THinokuri2::receiveMessageLv0(THitActor* sender, u32 message)
 
 BOOL THinokuri2::receiveMessageLv1(THitActor* sender, u32 message)
 {
+	char trash[0x10];
 	if (mJointIdxMessageCameFrom == 0x13 && sender->getActorType() == 0x1000001
 	    && message == HIT_MESSAGE_SPRAYED_BY_WATER)
 		return true;
@@ -770,7 +771,8 @@ BOOL THinokuri2::receiveMessageLv1(THitActor* sender, u32 message)
 		if (dmgAmount <= 0)
 			return true;
 
-		if (mHitPoints >= dmgAmount)
+		// asm 0x80272AA4: dmg >= hp -> 0 else hp -= dmg (was inverted)
+		if (dmgAmount >= mHitPoints)
 			mHitPoints = 0;
 		else
 			mHitPoints -= dmgAmount;
@@ -1013,6 +1015,7 @@ void THinokuri2::perform(u32 cue, JDrama::TGraphics* graphics)
 		if (cue & CUE_CALC_VIEW) {
 			unk150->entryDrawShadow();
 			gpQuestionManager->request(mPosition, mScaledBodyRadius);
+			char trash[8];
 		}
 	}
 }
@@ -1066,7 +1069,7 @@ DEFINE_NERVE(TNerveHino2GraphWander, TLiveActor)
 			local_60 = self->mPosition;
 			local_60.y += 500.0f;
 		} else {
-			self->getJointTransByIndex(0x14, &local_60);
+			self->getJointTransByIndex(0x18, &local_60);
 		}
 
 		self->resetPolInterval();
@@ -1218,6 +1221,7 @@ DEFINE_NERVE(TNerveHino2PrePol, TLiveActor)
 DEFINE_NERVE(TNerveHino2Pollute, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash2[8];
 
 	if (spine->getTime() == 0) {
 		self->changeBck(0x2);
@@ -1239,7 +1243,7 @@ DEFINE_NERVE(TNerveHino2Pollute, TLiveActor)
 			int polWait = self->getSaveParam()->mSLPolWaitCount.get();
 			if (uVar1 > polWait) {
 				self->unk180 = FALSE;
-				self->changeBck(3);
+				self->changeBck(0x10);
 				uVar1 = 0;
 			}
 			self->mWaitTimer = uVar1;
@@ -1249,15 +1253,16 @@ DEFINE_NERVE(TNerveHino2Pollute, TLiveActor)
 
 	if (self->mCurrentBck == 16) {
 		if (self->getMActor()->curAnmEndsNext()) {
-			self->changeBck(3);
+			self->changeBck(0x11);
 			self->unk15C = 0;
 
 			JGeometry::TVec3<f32> local_40;
+			char trash[0x44];
 			if (self->checkLiveFlag(LIVE_FLAG_CLIPPED_OUT)) {
 				local_40 = self->mPosition;
 				local_40.y += 500.0f;
 			} else {
-				self->getJointTransByIndex(0x14, &local_40);
+				self->getJointTransByIndex(0x18, &local_40);
 			}
 		}
 		return false;
@@ -1340,6 +1345,7 @@ DEFINE_NERVE(TNerveHino2Damage, TLiveActor)
 DEFINE_NERVE(TNerveHino2Squat, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash[0x20];
 
 	self->unk188 = 0;
 
@@ -1372,6 +1378,7 @@ DEFINE_NERVE(TNerveHino2Burst, TLiveActor)
 		self->emitWaterParticle();
 	}
 
+	char trash[0x24];
 	if (self->getMActor()->curAnmEndsNext()) {
 		self->setLevel(self->mLevel - 1);
 		self->mHitPoints = self->calcHitPoints();
@@ -1388,6 +1395,7 @@ DEFINE_NERVE(TNerveHino2Burst, TLiveActor)
 DEFINE_NERVE(TNerveHino2Die, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash2[8];
 	if (spine->getTime() == 0) {
 		self->changeBck(0xD);
 		JGeometry::TVec3<f32> local_1C = self->mPosition;
@@ -1395,6 +1403,7 @@ DEFINE_NERVE(TNerveHino2Die, TLiveActor)
 		                             0x2000000E, false);
 		self->invalidateCollisionAll();
 		self->emitWaterParticle();
+		char trash[0x14];
 	}
 
 	if (self->getMActor()->curAnmEndsNext()) {
@@ -1412,6 +1421,7 @@ DEFINE_NERVE(TNerveHino2Die, TLiveActor)
 DEFINE_NERVE(TNerveHino2Stamp, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	char trash[0x40];
 	if (spine->getTime() == 0) {
 		self->changeBck(0xB);
 		self->setUnk160(0);

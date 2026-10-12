@@ -2187,6 +2187,7 @@ void TGCConsole2::startAppearTank()
 	unk2F8->getPane()->show();
 	unk2F8->setPaneOffset(unk98, 0, 0, 0, 465 - unk2F8->mInitialBounds.y1);
 
+	char trash[8];
 	unk26C->setPanePosition(50, JUTPoint(0, 100), JUTPoint(0, -30),
 	                        JUTPoint(0, -30));
 
@@ -3581,8 +3582,8 @@ bool TGCConsole2::processAppearTimer(int param_1)
 bool TGCConsole2::processAppearBalloon()
 {
 	bool isFinished = false;
-	char trash[8];
 
+	char trash[8];
 	u16 alpha = unk3B0->getAlpha();
 	if (alpha < 0xFF) {
 		alpha += 0x30;

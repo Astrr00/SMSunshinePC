@@ -8,6 +8,9 @@
 #include <System/MSoundMainSide.hpp>
 #include <Camera/CubeManagerBase.hpp>
 
+static const char* dummyMactorStringValue1 = "\0\0\0\0\0\0\0\0\0\0\0";
+static const char* SMS_NO_MEMORY_MESSAGE   = "メモリが足りません\n";
+
 // rogue
 #include <MSound/MSoundBGM.hpp>
 
@@ -31,6 +34,7 @@ MSRandVol::MSRandVol(u32 param)
     , unk14(param)
     , mAmplitude(0.5f)
 {
+	char trash[8];
 	mPSlopes[0] = 0.0f;
 	mPSlopes[1] = 0.25f;
 	mPSlopes[2] = 0.5f;
@@ -56,11 +60,11 @@ u32 MSRandVol::getRandomVolume(u32 param_1, u32 param_2) { }
 
 f32 MSRandVol::getRandVol(u32 param_1)
 {
-	f32 d = JALCalc::getRandom(
-	            mAmplitudes[param_1 >> MSSeSwBit_RandomVolumeAmplitudeShift & 3]
-	                * mAmplitude,
-	            mCSlopes[param_1 >> MSSeSwBit_RandomVolumeCSlopeShift & 3],
-	            mPSlopes[param_1 >> MSSeSwBit_RandomVolumePSlopeShift & 3])
+	u32 amp = param_1 >> MSSeSwBit_RandomVolumeAmplitudeShift & 3;
+	u32 ps  = param_1 >> MSSeSwBit_RandomVolumePSlopeShift & 3;
+	u32 cs  = param_1 >> MSSeSwBit_RandomVolumeCSlopeShift & 3;
+	f32 d = JALCalc::getRandom(mAmplitudes[amp] * mAmplitude, mCSlopes[cs],
+	                           mPSlopes[ps])
 	        + 1.0f;
 
 	f32 x = d < 0.0f ? 0.0f : d;
@@ -136,6 +140,7 @@ MSRandPlay::MSRandPlay(u32 sound_id, s32 wait_min, s32 wait_max,
     , mCurveSlope(curve_slope)
     , mPlusSlope(plus_slope)
 {
+	char trash[8];
 }
 
 void MSRandPlay::randPlay(u32 vec_idx)
@@ -196,6 +201,7 @@ MSoundSE::MSoundSE() { }
 
 void MSoundSE::construct()
 {
+	char trash[0x40];
 	mObj = new MSoundSE;
 
 	MSRandVol::construct(0);
@@ -807,6 +813,7 @@ void MSoundSE::startSoundNpcActor(u32 id, const Vec* position, u32 ground_no,
 	JAIActor actor(position, position, position, ground_no);
 	checkMonoSound(id, &actor);
 	startSoundActorInner(id, out_handle, &actor, fade, camera_idx);
+	char trash[12];
 }
 
 bool MSoundSE::checkMonoSound(u32 id, JAIActor* actor)

@@ -68,6 +68,7 @@ void TMareWallRock::appear()
 
 void TMareWallRock::movement()
 {
+	char trash[0x18];
 	switch (unkF4) {
 	case 0:
 		if (((TPollutionLayer*)gpPollution->getJointModel(unk108))
@@ -191,14 +192,14 @@ void TMareWallRock::loadAfter()
 	unk10C[1] = new TMapCollisionWarp;
 
 	char buf[0x100];
+	char trash[0x2C];
 	snprintf(buf, 0x100, "/map/map/building%02d", unkF8 + 1);
 	unk10C[0]->init(buf, 0, this);
 	unk10C[1]->init(buf, 0, this);
 	unk104          = TMapObjBase::getBuildingJointObj(unkF8 + 1);
 	unk108          = unkF8;
-	J3DJoint* joint = unk104->getJoint();
-	const Vec& max  = joint->getMax();
-	const Vec& min  = joint->getMin();
+	const Vec& max  = unk104->getJoint()->getMax();
+	const Vec& min  = unk104->getJoint()->getMin();
 	mPosition.x     = (max.x + min.x) / 2.0f;
 	mPosition.y     = (max.y + min.y) / 2.0f;
 	mPosition.z     = (max.z + min.z) / 2.0f;
@@ -221,12 +222,12 @@ TMareWallRock::TMareWallRock(const char*) { }
 
 void TMareEventWallRock::load(JSUMemoryInputStream& stream)
 {
+	char trash[4];
 	JDrama::TNameRef::load(stream);
 	unk14 = new TMareWallRock[unk10];
 	JDrama::TViewObjPtrListT<JDrama::TViewObj>* group
 	    = static_cast<JDrama::TViewObjPtrListT<JDrama::TViewObj>*>(
 	        JDrama::TNameRefGen::search("マップグループ"));
-	char trash[4]; // unused stack slot (present in the retail frame)
 	for (int i = 0; i < unk10; ++i) {
 		unk14[i].unkF8 = i;
 		group->getChildren().push_back((JDrama::TViewObj*)&unk14[i]);
@@ -247,6 +248,7 @@ void TMareEventDepressWall::setJointPosX(float, int) { }
 void TMareEventDepressWall::rising()
 {
 	f32 x = TMapObjBase::getJointTransX(unk30[unk48]);
+	char trash[0x10];
 	SMSGetMSound()->startSoundActor(MSD_SE_OBJ_QUAKE, &unk34[unk48], 0, nullptr,
 	                                0, 4);
 
@@ -315,6 +317,7 @@ void TMareEventDepressWall::emitEffect(int) { }
 void TMareEventDepressWall::depressing()
 {
 	int doneCount = 0;
+	char trash[0x28];
 	for (int i = 0; i < unk10; ++i) {
 		f32 x = TMapObjBase::getJointTransX(unk30[i]);
 		if (unk1C[i]) {
