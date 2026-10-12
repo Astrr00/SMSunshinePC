@@ -29,7 +29,7 @@ Every non-100 % GAME function (sms/, mwcc decomp; also PC-valid with clang-cl, k
 5. Release the unit; claim the next.
 
 ## Rules
-- Hold a unit before editing it; edit only held units' files (+headers as above). No plain `ninja` runs (the lead runs the gates), no configure.py edits, no git writes (read-only `git show/diff/log` ok), no game runs (decomp agents), no files in sms/ root, delete your scratch files. Ledger key = bare function name (no class prefix).
+- Hold a unit before editing it; edit only held units' files (+headers as above). No plain `ninja` runs (the lead runs the gates), no configure.py edits, no git writes (read-only `git show/diff/log` ok), no game runs (decomp agents), no files in sms/ root, delete your scratch files. Ledger key = full demangled symbol (bare names like `execute` collide across nerve classes).
 - Final report: units, functions before->after %, bugs fixed (asm addr), rewritten functions, ledger rows (counts), still-unproven items with reason.
 
 ## Recipes found in rounds 2-3 (observed, 2026-10-12)
@@ -51,3 +51,15 @@ Every non-100 % GAME function (sms/, mwcc decomp; also PC-valid with clang-cl, k
 - No float literals in dead temps: `(Vec){1,2,3}` / float structs go into the constant pool and shift later string offsets (fireWanwan SaveLoadParams ctor 0x28 off); use int-only temps (`GXColor`, int structs).
 - Ledger key = full demangled symbol (bare names like `execute` collide across nerve classes); `logic-verified` only after an individual review.
 - Open bug candidates for an asm-trace task: `TSmallEnemy::changeMove` switch constants (retail 2/1/4 vs ours 3/2/5, asm 0x8027EB6C), `TConsoleStr::processGo` (retail offsets 0x34..0x40 vs ours 0..0xc), `TNameIndParCallback::execute` (load at 0 vs 0x10).
+
+## Agent workflow v4 (lead decision 2026-10-12, from rounds 1-7)
+Observed problems: agents hit the request limit near 1 h and lose their list; several agents wait for the same held unit; scripts wrote ledger rows without a read; a header edit broke all includers twice; a swapped operand hid behind a register rename; pool-value diffs are invisible to objdiff.
+- Disjoint lists: the lead assigns whole units per agent up front. Do not claim units outside your list. A refused claim means: skip the unit, name it in the report.
+- Time box: about 30 min or 8 units per agent, then final report. The lead starts a fresh agent for the rest of the list. Do not idle and do not poll.
+- Order per unit: `--build`; `--check` and `--immscan`/`--branchscan` first (cheap, they find pool values and branch senses); then read the function against the asm, lowest % first. Byte-recipes: at most 4 builds per function.
+- Register-rename diffs: decode compare operands and argument registers before calling a row `register-only`. A swapped operand or argument is a real bug.
+- Ledger: `logic-verified` only after you read the function (evidence names what you read: branches, calls, constants, offsets). Diff statistics alone give `partial (pending review)`. Never write rows from a script.
+- Headers: only the header owner edits headers. Others send a wish in the report. Never put `(void)(GXColor){..}`/float literals into a header. After a header edit the owner rebuilds every includer (`grep -rl`) and reverts on any drop.
+- After every edit: `python sunshine-pc/tools/decomp_triage.py --build <unit>`; revert if another function dropped.
+- PC safety (observed round 7): never replace `readU32()`/`>>` by a raw multi-byte `stream.read(&x, n)` without the `#ifdef TARGET_PC x = stream.readU32(); #else stream.read(..) #endif` branch (raw read skips the big-endian swap; `TMapEventSink::load` crashed). Never restructure control flow so a state loses an invariant other code relies on (`TModelWaterManager::move`: state 2/3 particles need `unk2914[i]` set). Retail asm equality in a diff is not proof the PC build still runs. After a round: run Route 70; on a new crash revert the round's diff and bisect, do not add null guards.
+- Report format (max 12 lines): bugs fixed (unit, function, asm address, ours vs retail); units fully read; units left open with reason; header wishes.

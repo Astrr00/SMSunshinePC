@@ -1,0 +1,26 @@
+# DRAFT, UNTESTED. Offline floor-path check (bianco_path.py, Modell = Vermutet): NO Shine is reachable on foot.
+# Shine 2 (-845, 5239, 1725): nearest reachable cell is (-380, 2749, 8780), 3D distance ~7496, dy ~2490. This route ends THERE, not at a Shine. No `shine N` here.
+# Prelude copied from 60_acceptance.dev:377-389 (Bianco arrival).
+waitfor stage=2 timeout=1200
+log
+wait frames=400
+mash A period=40 until stage=2 director mario dirstate=4 camDemo=0 timeout=2400
+wait frames=120
+log
+hold stick=0,127 frames=60
+log
+hold A stick=0,127 frames=30
+log
+wait frames=60
+log
+shot bianco.png
+# Walk waypoints (bianco_path.py, base model, step 20). Timeouts are a Vermutet ticks/unit heuristic.
+walkto x=-5900 z=16260 radius=30 timeout=1361
+walkto x=-2740 z=11660 radius=30 timeout=1735
+walkto x=-1140 z=10060 radius=30 timeout=739
+walkto x=-880 z=9420 radius=30 timeout=268
+walkto x=-560 z=8920 radius=30 timeout=239
+walkto x=-440 z=8820 radius=30 timeout=107
+walkto x=-380 z=8780 radius=50 timeout=82
+log
+shot bianco_end.png
