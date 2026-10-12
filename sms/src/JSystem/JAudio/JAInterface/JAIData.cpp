@@ -94,6 +94,11 @@ void JAIData::initDummyVecLink()
 void JAIData::initSeqParameter(JAISeqParameter* param)
 {
 	param->mWaitSceneSet        = 0xffffffff;
+#ifdef TARGET_PC
+	// Retail leaves the previous user's handle here; storeBuffer() stops a replaced sound's handle even if it never started.
+	// Zeroed pool memory made that handle 0, the SE master sequence, and stopped it. -1 is the "no sequence" value stopSeq ignores.
+	param->mSeqHandle = -1;
+#endif
 	param->mTempo.mCurrentValue = 1.0f;
 	param->mTempo.mMoveCounter  = 0;
 	param->mPauseMode           = 0;

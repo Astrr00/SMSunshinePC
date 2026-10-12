@@ -43,7 +43,245 @@ log
 shot rim.png
 walkto x=-2000 z=1500 radius=100 timeout=4500
 log
-hold L trig=255,255 frames=3000
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
+log
+hold L trig=255,255 frames=8
+hold L trig=255,255 frames=60
+wait frames=6
 log
 shot boss_end.png
 end
