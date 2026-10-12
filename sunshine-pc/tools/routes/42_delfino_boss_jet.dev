@@ -1,0 +1,251 @@
+# Diagnosis only (dolpic/0 dev start, Null backend, dev cheats, tp and the dev-only hold token `aimhead`): kill the Delfino GateKeeper (boss at (12,300,4631)) with the water jet only; flag 0x10384 is the goal.
+# Squat (L) + stick BACK raises the nozzle; sweep over distance and stick strength.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_health
+cheat infinite_water
+cheat unlock_nozzles
+wait frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5271 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-50 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-80 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-110 aimhead frames=60
+log
+tp x=12 y=320 z=5071 yaw=180
+wait frames=6
+hold L trig=255,255 stick=0,-127 aimhead frames=60
+log
+waitfor flag=0x10384 timeout=300
+log
+end

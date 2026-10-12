@@ -169,6 +169,8 @@ Command parseLine(const std::string& text, int line)
 				if (!parsePair(tok.substr(5), 0, 255, l, r)) fail(line, "bad trig", tok);
 				c.pad.triggerLeft = static_cast<u8>(l);
 				c.pad.triggerRight = static_cast<u8>(r);
+			} else if (tok == "aimhead") {
+				c.spray = true; // dev-only: face the airport GateKeeper head every tick while the pad is held (diagnosis only)
 			} else {
 				bool found = false;
 				for (const ButtonName& b : kButtons) {
@@ -645,6 +647,15 @@ void step()
 				    c.op == Op::Wait ? "wait" : "hold", c.line, c.frames, gTick);
 			}
 			const PADStatus neutral{};
+			if (c.op == Op::Hold && c.spray && gpMarioOriginal) {
+				if (TBiancoGateKeeper* b = findBoss()) {
+					if (b->mHead) {
+						const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
+						const float dz = b->mHead->mPosition.z - gpMarioOriginal->mPosition.z;
+						gpMarioOriginal->mFaceAngle.y = static_cast<s16>(std::atan2(dx, dz) * (32768.0f / 3.14159265f));
+					}
+				}
+			}
 			PADSetVirtualStatus(0, c.op == Op::Hold ? &c.pad : &neutral);
 			if (--gRemaining == 0) {
 				gStarted = false;
