@@ -1,0 +1,49 @@
+# Retail flow without start switches (needs SUNSHINE_DEV_AIM_ASSIST=1 for the boss part, user-approved dev switch): logos -> option map -> new game -> airport0 -> walk to the briefing trigger ->
+# briefing movie -> "hear the story again?" (No) -> airport scen 1 FLUDD tutorial -> wash the M graffiti.
+# Run: python tools/route.py Strict tools/routes/12_tutorial_full.dev --name <n> --seconds 340   (route.py sets WARP + RENDER_SCALE 0.25)
+waitfor stage=15 dirstate=4 timeout=30000
+wait frames=240
+mash A period=30 until cardprog=19 timeout=4500
+walkto x=1080 z=-1000 radius=20 timeout=3000
+mash A period=24 until cardprog=27 timeout=4500
+mash A period=30 until stage=0 timeout=12000
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=27000
+log
+shot ap0.png
+wait frames=90
+hold A frames=4
+wait frames=60
+# y=500 plateau waypoints from airport0 map.col (+-70 units margin); the y=300 pit is goop (OIL_SLIP, health loss).
+walkto x=-1198 z=167 radius=150 timeout=3000
+walkto x=-5876 z=976 radius=150 timeout=4500
+walkto x=-6630 z=1600 radius=250 timeout=3000
+waitfor thp=2 timeout=3000
+log
+# thp=0 flickers at the start of a movie: let it run, then wait for the real end.
+wait frames=600
+waitfor thp=0 timeout=15000
+shot movie_end.png
+# A answers the prompt (cursor on No); stage/scen already read 0/1 during the movie, so wait for the new director.
+mash A period=30 until stage=0 scen=1 director mario dirstate=4 timeout=15000
+log
+shot tut0.png
+# Tutorial: the M graffiti is at about (-6301, 536, 2350); walk toward it (faces it), then spray with the analog R trigger.
+walkto x=-6300 z=2150 radius=60 timeout=3000
+log
+hold trig=0,255 frames=240
+log
+shot wash.png
+wait frames=60
+log
+# Boss part: walk along the plateau to the pit rim, into the pit toward the airport GateKeeper (-1500,300,1500), crouch + spray with the assist.
+walkto x=-5876 z=976 radius=150 timeout=4500
+walkto x=-4005 z=652 radius=150 timeout=4500
+walkto x=-2700 z=1500 radius=120 timeout=4500
+log
+shot rim.png
+walkto x=-2000 z=1500 radius=100 timeout=4500
+log
+hold L trig=255,255 frames=3000
+log
+shot boss_end.png
+end
