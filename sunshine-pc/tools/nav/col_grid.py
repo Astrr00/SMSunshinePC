@@ -53,6 +53,21 @@ def cells_of(tri):
                 yield cx, cz
 
 
+def wall_cells(tri):
+    """Cells touched by a wall triangle's XZ footprint: edges sampled every 10 units, plus the centroid."""
+    _bg, A, B, C = tri
+    cells = set()
+    for P, Q in ((A, B), (B, C), (C, A)):
+        n = max(1, int(math.hypot(Q[0] - P[0], Q[2] - P[2]) // 10))
+        for i in range(n + 1):
+            t = i / n
+            x, z = P[0] + (Q[0] - P[0]) * t, P[2] + (Q[2] - P[2]) * t
+            cells.add((int(math.floor(x / CELL)), int(math.floor(z / CELL))))
+    cx, cz = (A[0] + B[0] + C[0]) / 3.0, (A[2] + B[2] + C[2]) / 3.0
+    cells.add((int(math.floor(cx / CELL)), int(math.floor(cz / CELL))))
+    return cells
+
+
 def main():
     stage, out = sys.argv[1], sys.argv[2]
     ylo, yhi = (float(sys.argv[3]), float(sys.argv[4])) if len(sys.argv) > 4 else (-1e9, 1e9)
@@ -68,6 +83,18 @@ def main():
         for cell in cells_of(tri):
             if cell not in grid or grid[cell] < ymid:
                 grid[cell] = ymid
+    # Walls have no floor cell: drop floor cells within one cell of any wall that reaches the band (the chase must not steer into cliffs).
+    blocked = set()
+    for tri in tris:
+        _bg, A, B, C = tri
+        if abs(normal(A, B, C)[1]) >= 0.7:
+            continue
+        if max(A[1], B[1], C[1]) < ylo + 30 or min(A[1], B[1], C[1]) > yhi + 150:
+            continue
+        for cx, cz in wall_cells(tri):
+            blocked.update((cx + dx, cz + dz) for dx in (-1, 0, 1) for dz in (-1, 0, 1))
+    for cell in blocked:
+        grid.pop(cell, None)
     with open(out, 'wb') as f:
         for (cx, cz), y in sorted(grid.items()):
             f.write(struct.pack('<hhh', cx, cz, int(round(y))))

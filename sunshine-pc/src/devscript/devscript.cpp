@@ -667,6 +667,17 @@ bool navNearest(float x, float z, int& cx, int& cz)
 	return false;
 }
 
+// Cell and all 8 neighbours are floor at about the same height: keeps the path off cliff bases and water edges (the grid has no walls).
+bool navSafe(int cx, int cz, short y)
+{
+	for (int dx = -1; dx <= 1; ++dx)
+		for (int dz = -1; dz <= 1; ++dz) {
+			auto it = gNav.find(navKey(cx + dx, cz + dz));
+			if (it == gNav.end() || std::abs(it->second - y) >= 45) return false;
+		}
+	return true;
+}
+
 // Point `look` cells ahead of (mx,mz) on the shortest floor path to (tx,tz); false when either end is off the grid or unreachable.
 bool navAhead(float mx, float mz, float tx, float tz, int look, float& ox, float& oz)
 {
@@ -680,12 +691,11 @@ bool navAhead(float mx, float mz, float tx, float tz, int look, float& ox, float
 		const auto [cx, cz] = q.front();
 		q.pop_front();
 		if (cx == mcx && cz == mcz) break;
-		const short y = gNav[navKey(cx, cz)];
 		for (int dx = -1; dx <= 1; ++dx)
 			for (int dz = -1; dz <= 1; ++dz) {
 				const long long k = navKey(cx + dx, cz + dz);
 				auto it = gNav.find(k);
-				if ((dx || dz) && it != gNav.end() && !toward.count(k) && std::abs(it->second - y) < 45) {
+				if ((dx || dz) && it != gNav.end() && !toward.count(k) && (navSafe(cx + dx, cz + dz, it->second) || (cx + dx == mcx && cz + dz == mcz))) {
 					toward[k] = navKey(cx, cz);
 					q.emplace_back(cx + dx, cz + dz);
 				}
@@ -885,6 +895,11 @@ void step()
 				float dist = 0.f;
 				const float dx = e->mPosition.x - gpMarioOriginal->mPosition.x, dz = e->mPosition.z - gpMarioOriginal->mPosition.z;
 				const float direct = std::sqrt(dx * dx + dz * dz);
+				if (gpMarioOriginal->mPosition.y < 0.f) {
+					std::printf("[devscript] TIMEOUT chase fell line=%d mario=(%.0f,%.0f,%.0f) tick=%d\n", c.line, gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.y, gpMarioOriginal->mPosition.z, gTick);
+					std::fflush(stdout);
+					std::exit(3);
+				}
 				if (!gNavLoaded) navLoad();
 				float wx, wz;
 				if (direct > 150.f && !gNav.empty() && navAhead(gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.z, e->mPosition.x, e->mPosition.z, 4, wx, wz)) {
