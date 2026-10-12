@@ -65,6 +65,7 @@ Exit criterion: Bianco and Delfino playable for 10 minutes without crash, goop c
 | DLSS | DECIDED: infeasible without motion vectors and a GPU handoff (`docs/dlss-feasibility.md`) | launcher shows it as unavailable |
 | Controller glyph sets (Xbox, PlayStation, Switch, GameCube) | PART (all four styles load; Xbox/PlayStation frames differ at the water-button slot; PlayStation X asset is a square; Y/Z/L/R/stick/dpad prompts absent from the game archive) | fix asset; keyboard style missing |
 | Cheats and mods (DLL mods, data overlay) | PART (cheats verified by log: lives/coins held at 99; water/health cheat and mod overlay effect NOT verified) | in-game effects, defaults all OFF assertion |
+| UI at Dusklight level (target set 2026-10-12): launcher and in-game menu with controller navigation, settings pages, glyph-aware rebinding, cheats/mods pages, disc picker with verification, update check, confirmations, localization | OPEN (gap study done: `sunshine-pc/docs/ui-gap-dusklight.md`, plan UI-1 to UI-16 in `sunshine-pc/docs/ui-plan.md`; same stack as Dusklight: RmlUi on Aurora; today the launcher has no gamepad navigation, no in-game menu, a cheats placeholder, hard-coded colours without focus state) | UI-1 theme tokens and fonts, UI-2 scaling, UI-3 launcher controller navigation, then UI-4 in-game menu shell; owner decisions listed in the plan (font, hash table, HTTP client, widescreen, dev gate, languages) |
 
 Exit criterion: every toggle in the launcher has an observed effect in game.
 
