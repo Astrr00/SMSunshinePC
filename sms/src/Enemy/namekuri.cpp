@@ -199,12 +199,22 @@ void TNameIndParCallback::execute(JPABaseEmitter* param_1,
 		// Maybe a function to extract the scale vector from a matrix?
 		JGeometry::TVec3<f32> local_7c;
 
+		// asm 0x80277D88: retail sums unfused (fmuls/fadds), tmp stored to stack first
 		JGeometry::TVec3<f32> tmp1(mA[0][0], mA[1][0], mA[2][0]);
-		local_7c.y = tmp1.length();
+		f32 xx = tmp1.x * tmp1.x;
+		f32 yy = tmp1.y * tmp1.y;
+		f32 zz = tmp1.z * tmp1.z;
+		local_7c.y = JGeometry::TUtil<f32>::sqrt(zz + (xx + yy));
 		JGeometry::TVec3<f32> tmp2(mA[0][1], mA[1][1], mA[2][1]);
-		local_7c.z = tmp2.length();
+		xx = tmp2.x * tmp2.x;
+		yy = tmp2.y * tmp2.y;
+		zz = tmp2.z * tmp2.z;
+		local_7c.z = JGeometry::TUtil<f32>::sqrt(zz + (xx + yy));
 		JGeometry::TVec3<f32> tmp3(mA[0][2], mA[1][2], mA[2][2]);
-		local_7c.x = tmp3.length();
+		xx = tmp3.x * tmp3.x;
+		yy = tmp3.y * tmp3.y;
+		zz = tmp3.z * tmp3.z;
+		local_7c.x = JGeometry::TUtil<f32>::sqrt(zz + (xx + yy));
 
 		param_1->setGlobalRTMatrix(mBase);
 

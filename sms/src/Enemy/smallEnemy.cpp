@@ -655,6 +655,8 @@ bool TSmallEnemy::changeMove()
 			}
 
 			switch (unk185) {
+			case 1:
+				return 0;
 			case 2: {
 				JGeometry::TVec3<f32> local_38(0.0f, 0.0f, 1.0f);
 				Mtx afStack_68;
@@ -694,9 +696,7 @@ bool TSmallEnemy::changeMove()
 				break;
 			}
 
-			case 0:
-			case 1:
-			case 4:
+			default:
 				return 0;
 			}
 
