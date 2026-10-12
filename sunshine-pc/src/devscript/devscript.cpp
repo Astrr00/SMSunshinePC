@@ -859,12 +859,19 @@ namespace {
 // per read, so the script clock is the game's logic clock: independent of wall time, FPS cap and replay presents.
 // Steps apply via PADSetVirtualStatus before that read.
 // SUNSHINE_DEV_AIM_ASSIST=1 (dev-only, never on by default): while Mario crouches (MARIO_STATUS_SQUAT) and a GateKeeper boss exists,
-// face its head and set the nozzle pitch so the jet should reach it. The pitch uses the measured jet (apex 221 at 45 degrees, i.e.
-// range v^2/g ~ 884, section 25 of the session doc): y(D) = D tan(a) - D^2 / (2 * 884 * cos(a)^2), clamped to the squat range.
+// face its head and set the nozzle pitch to the elevation of the head plus a 10 degree lead, clamped to 0..64 degrees (the ballistic
+// model of an earlier version was wrong: its apex came from runs with the nozzle tilted down).
 void aimAssist()
 {
 	static const bool enabled = std::getenv("SUNSHINE_DEV_AIM_ASSIST") != nullptr;
-	if (!enabled || !gpMarioOriginal || !gpMarioOriginal->mWaterGun || gpMarioOriginal->mStatus != MARIO_STATUS_SQUAT) return;
+	if (!enabled || !gpMarioOriginal || !gpMarioOriginal->mWaterGun) return;
+	// The slippery goop floor turns every crouch into OIL_RUN again; while L is held and Mario stands still on it, keep him crouching.
+	const u32 st = gpMarioOriginal->mStatus;
+	const TMarioGamePad* pad = gpApplication.mGamePads[0];
+	if ((st == MARIO_STATUS_OIL_RUN || st == MARIO_STATUS_OIL_SLIP) && pad && pad->checkMeaning(TMarioGamePad::MEANING_L)
+	    && std::fabs(gpMarioOriginal->mVel.x) < 1.0f && std::fabs(gpMarioOriginal->mVel.z) < 1.0f)
+		gpMarioOriginal->changePlayerStatus(MARIO_STATUS_SQUAT, 0, true);
+	if (gpMarioOriginal->mStatus != MARIO_STATUS_SQUAT) return;
 	TBiancoGateKeeper* b = findBoss();
 	if (!b || !b->mHead) return;
 	const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
@@ -872,12 +879,9 @@ void aimAssist()
 	const float dy = b->mHead->mPosition.y - (gpMarioOriginal->mPosition.y + 60.0f);
 	const float dist = std::sqrt(dx * dx + dz * dz);
 	gpMarioOriginal->mFaceAngle.y = static_cast<s16>(std::atan2(dx, dz) * (32768.0f / 3.14159265f));
-	float best = 0.0f, bestErr = 1e9f;
-	for (float deg = 0.0f; deg <= 64.0f; deg += 0.5f) {
-		const float a = deg * 3.14159265f / 180.0f, c = std::cos(a);
-		const float err = std::fabs(dist * std::tan(a) - dist * dist / (2.0f * 884.0f * c * c) - dy);
-		if (err < bestErr) { bestErr = err; best = deg; }
-	}
+	float best = std::atan2(dy, dist) * 57.29578f + 10.0f; // aim at the head plus a 10 degree lead (the jet drops)
+	if (best < 0.0f) best = 0.0f;
+	if (best > 64.0f) best = 64.0f;
 	gpMarioOriginal->mWaterGun->mNozzleList[gpMarioOriginal->mWaterGun->mCurrentNozzle]->unk36E = static_cast<s16>(-best * (65536.0f / 360.0f));
 }
 

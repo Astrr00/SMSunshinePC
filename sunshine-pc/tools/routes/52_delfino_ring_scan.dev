@@ -1,0 +1,102 @@
+# Diagnosis (dolpic/0 dev start, Null backend): does spraying the floor clean a standing spot (OIL_RUN -> normal)?
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=60
+tp x=12 y=330 z=5331 yaw=0
+wait frames=40
+log
+tp x=507 y=330 z=5126 yaw=0
+wait frames=40
+log
+tp x=712 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=507 y=330 z=4136 yaw=0
+wait frames=40
+log
+tp x=12 y=330 z=3931 yaw=0
+wait frames=40
+log
+tp x=-483 y=330 z=4136 yaw=0
+wait frames=40
+log
+tp x=-688 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=-483 y=330 z=5126 yaw=0
+wait frames=40
+log
+tp x=12 y=330 z=5631 yaw=0
+wait frames=40
+log
+tp x=719 y=330 z=5338 yaw=0
+wait frames=40
+log
+tp x=1012 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=719 y=330 z=3924 yaw=0
+wait frames=40
+log
+tp x=12 y=330 z=3631 yaw=0
+wait frames=40
+log
+tp x=-695 y=330 z=3924 yaw=0
+wait frames=40
+log
+tp x=-988 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=-695 y=330 z=5338 yaw=0
+wait frames=40
+log
+tp x=12 y=330 z=6031 yaw=0
+wait frames=40
+log
+tp x=1002 y=330 z=5621 yaw=0
+wait frames=40
+log
+tp x=1412 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=1002 y=330 z=3641 yaw=0
+wait frames=40
+log
+tp x=12 y=330 z=3231 yaw=0
+wait frames=40
+log
+tp x=-978 y=330 z=3641 yaw=0
+wait frames=40
+log
+tp x=-1388 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=-978 y=330 z=5621 yaw=0
+wait frames=40
+log
+tp x=12 y=330 z=6531 yaw=0
+wait frames=40
+log
+tp x=1356 y=330 z=5975 yaw=0
+wait frames=40
+log
+tp x=1912 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=1356 y=330 z=3287 yaw=0
+wait frames=40
+log
+tp x=12 y=330 z=2731 yaw=0
+wait frames=40
+log
+tp x=-1332 y=330 z=3287 yaw=0
+wait frames=40
+log
+tp x=-1888 y=330 z=4631 yaw=0
+wait frames=40
+log
+tp x=-1332 y=330 z=5975 yaw=0
+wait frames=40
+log
+end

@@ -1,34 +1,88 @@
-# Diagnosis (dolpic/0 dev start, Null backend, SUNSHINE_DEV_AIM_ASSIST=1): crouch on the clean spawn, tp next to the Delfino GateKeeper (12,300,4631), keep crouching and spraying; goal flag 0x10384.
+# Diagnosis (dolpic/0 dev start, Null backend, SUNSHINE_DEV_AIM_ASSIST=1): crouch on the clean spawn, tp next to the Delfino GateKeeper (12,300,4631),
+# spray in bursts (hits while the boss is in bck 7 keep it there; damage only comes from a hit in bck 0x12); goal flag 0x10384.
 waitfor director mario dirstate=4 camDemo=0 timeout=3000
 cheat infinite_health
 cheat infinite_water
 wait frames=60
 log
 hold L trig=255,255 frames=12
-log
 tp x=12 y=320 z=5150 yaw=180
 wait frames=2
-hold L trig=255,255 frames=120
+hold L trig=255,255 frames=260
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
 log
-tp x=12 y=320 z=5150 yaw=180
-wait frames=2
-hold L trig=255,255 frames=120
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
 log
-tp x=12 y=320 z=5150 yaw=180
-wait frames=2
-hold L trig=255,255 frames=120
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
 log
-tp x=12 y=320 z=5150 yaw=180
-wait frames=2
-hold L trig=255,255 frames=120
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
 log
-tp x=12 y=320 z=5150 yaw=180
-wait frames=2
-hold L trig=255,255 frames=120
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
 log
-tp x=12 y=320 z=5150 yaw=180
-wait frames=2
-hold L trig=255,255 frames=120
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
+log
+hold L trig=255,0 frames=100
+hold L trig=255,255 frames=40
 log
 waitfor flag=0x10384 timeout=300
 log
