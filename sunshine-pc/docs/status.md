@@ -37,6 +37,10 @@ Measured: `ninja -k 0 -j4` exit 0, DOL SHA-1 `9f5a8caf...` OK, `changes_all` no 
   `bosspakkun.cpp`. Only these diffs were checked by the lead against retail asm; ledger rows are not audited.
 - Observed but unexplained: option-map and title screenshots are pure white PNGs.
 
+### Update 2026-10-11 (session b, measured; see `session-2026-10-11b.md` sections 10-35)
+
+Gates: DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625`, 11 013 / 12 881 functions, 445 / 736 units, strict link 0 unresolved, Aurora series 11 patches. Fixed in the decomp/port: `TEMario::perform` control flow (shadow Mario froze), `TSelectDir` `OSJoinThread` result, `TSelectMenu` stage-name index and `break`, `TMarDirector::mConsole` init (PC), Aurora alpha-compare shader (patch 0011). Reached with dev assists only: Delfino gate chain to Bianco Ep.1 (controllable), both GateKeepers killed by the water jet (dev aim assist), Shine collect via dev verb, `.gci` PASS, switch-free reload `shines=1`. Not reached: a switch-free route logos to Bianco under 330 s (the whole flow needs about 20 000 logic ticks at 30 Hz), the bosses and the real Shine without dev assists, two clean full runs.
+
 ### Latest lead update (end of the agent session; supersedes everything else in this file where they conflict, including the A3/R02/R03 rows)
 
 Measured by the lead: `ninja -k 0 -j4` in `sms/` exit 0, DOL SHA-1 `9f5a8caf…` OK, strict link 0 unresolved, `apply-aurora-patches.py --check` "applied: 7 patches", 11 012 / 12 881 functions bytegleich (58.56 % code, 97.98 % fuzzy), 445 / 736 units Matching. Ledger: 1 196 `logic-verified`, 66 `matched`, 614 `partial`. Last commit `a3a6709`.

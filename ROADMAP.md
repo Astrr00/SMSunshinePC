@@ -36,7 +36,7 @@ Scope limit (`sms/AGENTS.md`): game code is the target; shared and JSystem heade
 | Bianco Hills renders (geometry, textures, HUD), Mario controllable, camera follows | DONE (dev start) | none |
 | Title screen renders correctly | OPEN | TitleRender: copy-with-clear ordering, TEV/palette checks via pass dumps |
 | Retail flow: logo, movies, title, file select, new game, Delfino, Bianco | PART (condition-based route reaches `airport0` reproducibly without start switches: `tools/routes/07_airport.dev`; walk to `MapObjStartDemo` not yet arrived; Delfino/Bianco not reached) | waypoints along the airport0 path to `MapObjStartDemo` (-6630,500,1600) -> Delfino -> GateKeeper (3 nozzle hits) -> Bianco; confirm the FIFO fix (`GXBegin` count in JPA cross particles) over a full 330 s run |
-| Shine collected by the real path, Shine-get sequence, save to `.gci`, reload | OPEN | needs the Bianco entry; dev-start Shine path not yet collecting |
+| Shine collected by the real path, Shine-get sequence, save to `.gci`, reload | PART (dev verb `shine 2` on the Bianco 100-coin shine: `shines=1`, `.gci` PASS, switch-free reload `shines=1`; not from a switch-free flow) | boss kills need the dev aim assist; route without dev switches from the logos not built (sessions 2026-10-11b sections 22-35) |
 | Particles (EmitterViewObj null in perform lists), Mario shape packet callback | OPEN | ParticlesNull |
 | Missing decomp pieces: `ConsoleStr::processGo/startCloseWipe`, `ShapePacketCallBackFunc` | OPEN | from asm, as the flow needs them |
 
