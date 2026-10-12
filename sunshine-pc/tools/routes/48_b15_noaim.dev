@@ -1,0 +1,367 @@
+# Diagnosis only (airport/1 + Null backend, uses dev cheats and teleports): Enter the squat with L+R and neutral stick (keeps the tp facing), then stick back for the nozzle; no aimhead.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=30
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-997 y=320 z=1034 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1100 y=320 z=1105 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-50 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-80 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-110 frames=60
+log
+tp x=-1200 y=320 z=1180 yaw=-47
+wait frames=6
+hold L trig=255,255 frames=8
+hold L trig=255,255 stick=0,-127 frames=60
+log
+end
