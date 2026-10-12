@@ -1118,7 +1118,7 @@ public:
 		GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1,
 		                GX_TRUE, GX_TEVPREV);
 		GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-		GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+		GXSetZMode(GX_TRUE, GX_LESS, GX_TRUE); // retail passes func 1 (GX_LESS), not GX_LEQUAL
 		GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_NOOP);
 		GXSetColorUpdate(GX_FALSE);
 		GXSetAlphaUpdate(GX_FALSE);
@@ -1410,7 +1410,7 @@ public:
 		                               unk80134->kRegB.get(),
 		                               unk80134->kRegA.get(),
 		                           });
-		GXSetTevColor(GX_TEVREG1, (GXColor) {
+		GXSetTevColor(GX_TEVREG0, (GXColor) {
 		                              unk80134->regR.get(),
 		                              unk80134->regG.get(),
 		                              unk80134->regB.get(),
@@ -1867,7 +1867,8 @@ void TBathWaterManager::perform(u32 cue, JDrama::TGraphics* graphics)
 				JGeometry::TVec3<f32> vel;
 				if (fakeCalcPos(data, unk14[1]->dropRadius.get(),
 				                unk10.get_float(-1.0f, 1.0f), &vel))
-					unk20[1]->addDrop(vel, unk10.get_float01());
+					// asm 0x801F9A08-0x801F9ABC: 0.0f + 10.0f * u (@3413, @3424) is stored inline
+					unk20[1]->addDrop(vel, 10.0f * unk10.get_float01());
 			}
 
 			TBathWater* soundBw = unk20[0];

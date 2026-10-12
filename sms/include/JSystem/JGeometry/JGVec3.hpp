@@ -336,11 +336,12 @@ public:
 	}
 
 #pragma dont_inline on
-	void scaleAdd(f32 scale, const TVec3& b, const TVec3& c)
+	// asm (MapMirror 0x801E5090 caller / 0x801E51xx body): this = a * scale + b
+	void scaleAdd(f32 scale, const TVec3& a, const TVec3& b)
 	{
-		x = b.x + c.x * scale;
-		y = b.y + c.y * scale;
-		z = b.z + c.z * scale;
+		x = a.x * scale + b.x;
+		y = a.y * scale + b.y;
+		z = a.z * scale + b.z;
 	}
 #pragma dont_inline off
 

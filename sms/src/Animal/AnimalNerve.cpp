@@ -8,7 +8,8 @@
 #include <Camera/cameralib.hpp>
 #include <Strategic/Spine.hpp>
 
-f32 calcDist(const JGeometry::TVec3<f32>& a, const JGeometry::TVec3<f32>& b)
+static inline f32 calcDist(const JGeometry::TVec3<f32>& a,
+                           const JGeometry::TVec3<f32>& b)
 {
 	JGeometry::TVec3<f32> diff = a;
 	diff.sub(b);
@@ -72,15 +73,13 @@ DEFINE_NERVE(TNerveAnimalGraphWander, TLiveActor)
 	actor->execWalk(true);
 
 	if (!actor->unk114.empty()) {
-		const JGeometry::TVec3<f32>& goalPos = actor->unkF4.getPoint();
-		f32 dist = calcDist(goalPos, actor->mPosition);
+		f32 dist = calcDist(actor->unkF4.getPoint(), actor->mPosition);
 
 		if (dist < 200.0f && !actor->unk114.empty()) {
 			actor->unkF4 = actor->unk114.pop();
 		}
 	} else {
-		const JGeometry::TVec3<f32>& curPos = actor->unk104.getPoint();
-		f32 dist = calcDist(curPos, actor->mPosition);
+		f32 dist = calcDist(actor->unk104.getPoint(), actor->mPosition);
 
 		if (dist < 100.0f) {
 			actor->goToRandomNextGraphNode();

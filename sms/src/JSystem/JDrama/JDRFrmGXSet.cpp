@@ -32,6 +32,7 @@ void TFrmGXSet::perform(u32 cue, TGraphics* graphics)
 #else
 void TFrmGXSet::perform(u32 cue, TGraphics* graphics)
 {
+	char trash[0x78];
 	if (cue & CUE_DRAW) {
 		graphics->mFrameBuffer = unk10->getCurrentFrameBuffer();
 		graphics->mRenderMode  = unk10->getRenderMode();

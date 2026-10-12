@@ -1251,10 +1251,11 @@ BOOL TMario::pulling()
 	f32 rateV, rateH;
 	getCurrentPullParams(&rateV, &rateH);
 
-	pos.x += cosF * rateH * JMASSin(backAngle)
-	         - sinF * rateV * JMASCos(backAngle);
-	pos.z += cosF * rateH * JMASCos(backAngle)
-	         + sinF * rateV * JMASSin(backAngle);
+	// asm 0x8013DF9C-DFF4: x uses rateV*cosF*sinB - rateH*sinF*cosB, z uses rateV*cosF*cosB + rateH*sinF*sinB
+	pos.x += rateV * (cosF * JMASSin(backAngle))
+	         - rateH * (sinF * JMASCos(backAngle));
+	pos.z += rateV * (cosF * JMASCos(backAngle))
+	         + rateH * (sinF * JMASSin(backAngle));
 
 	if (mHeldObject->moveRequest(pos) == 1) {
 		mPosition = pos;
@@ -1443,15 +1444,17 @@ BOOL TMario::fenceMove()
 			f32 hDot, vDiff, dist;
 			if (unk2C0 == nullptr) {
 				vDiff    = mPosition.y - mPrevPosition.y;
-				f32 sinY = JMASSin(mFaceAngle.y);
 				f32 cosY = JMASCos(mFaceAngle.y);
+				f32 sinY = JMASSin(mFaceAngle.y);
 
 				JGeometry::TVec3<f32> diff = mPosition - mPrevPosition;
 
-				hDot = -cosY * diff.z + sinY * diff.x;
+				// asm 0x8013DB4C-DB98: retail hDot = cos*dx + 0.0f*dy - sin*dz (@3400=0.0f, @3401=1.0f), not sin*dx - cos*dz
+				hDot = cosY * diff.x + 0.0f * diff.y - sinY * diff.z;
 				dist = diff.length();
 			} else {
-				vDiff = unk300.y - unk2F4.y;
+				// asm 0x8013DC10 fsubs f30,f4(0x2f8),f6(0x304): retail vDiff = unk2F4.y - unk300.y
+				vDiff = unk2F4.y - unk300.y;
 				hDot  = unk2F4.x - unk300.x;
 				if ((s16)((182.04445f * unk30C) - (f32)mFaceAngle.y) != 0)
 					hDot = -hDot;

@@ -359,8 +359,8 @@ void TMapObjBase::makeLowerStr(const char* in, char* out)
 void TMapObjBase::makeRootMtxRotZ(MtxPtr ptr)
 {
 	char trash[0x18];
-	f32 fVar1 = sinf(mRotation.z * (M_PI / 180.0f));
-	f32 fVar2 = cosf(mRotation.z * (M_PI / 180.0f));
+	f32 fVar1 = sinf(mRotation.z * 0.017453294f);
+	f32 fVar2 = cosf(mRotation.z * 0.017453294f);
 
 	ptr[0][0] = fVar2;
 	ptr[0][1] = -fVar1;
@@ -387,8 +387,8 @@ void TMapObjBase::setRootMtxRotZ()
 void TMapObjBase::makeRootMtxRotY(MtxPtr ptr)
 {
 	char trash[0x18];
-	f32 fVar1 = sinf(mRotation.y * (M_PI / 180.0f));
-	f32 fVar2 = cosf(mRotation.y * (M_PI / 180.0f));
+	f32 fVar1 = sinf(mRotation.y * 0.017453294f);
+	f32 fVar2 = cosf(mRotation.y * 0.017453294f);
 
 	ptr[0][0] = fVar2;
 	ptr[0][1] = 0.0f;
@@ -415,8 +415,8 @@ void TMapObjBase::setRootMtxRotY()
 void TMapObjBase::makeRootMtxRotX(MtxPtr ptr)
 {
 	char trash[0x18];
-	f32 fVar1 = sinf(mRotation.x * (M_PI / 180.0f));
-	f32 fVar2 = cosf(mRotation.x * (M_PI / 180.0f));
+	f32 fVar1 = sinf(mRotation.x * 0.017453294f);
+	f32 fVar2 = cosf(mRotation.x * 0.017453294f);
 
 	ptr[0][0] = 1.0f;
 	ptr[0][1] = 0.0f;

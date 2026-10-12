@@ -485,7 +485,7 @@ void TSpineEnemy::walkToCurPathNode(f32 march_speed, f32 turn_speed,
 		f32 fVar3 = calcTurnSpeedToReach(march_speed, fVar7 * 0.5f);
 
 		if (fVar2 > 0.0f) {
-			fVar5 = fVar2 > fVar3 ? fVar2 : fVar3;
+			fVar5 = fVar2 > fVar3 ? fVar3 : fVar2; // asm 0x8024E95C: min(angle, limit)
 		} else {
 			fVar5 = fVar2 > -fVar3 ? fVar2 : -fVar3;
 		}

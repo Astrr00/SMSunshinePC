@@ -68,6 +68,8 @@ void TMareWallRock::appear()
 
 void TMareWallRock::movement()
 {
+	JGeometry::TVec3<f32> t2;
+	JGeometry::TVec3<f32> t4;
 	char trash[0x18];
 	switch (unkF4) {
 	case 0:
@@ -102,8 +104,8 @@ void TMareWallRock::movement()
 			SMSRumbleMgr->stop(0x13);
 			return;
 		}
-		JGeometry::TVec3<f32> t(0.0f, 0.0f, z);
-		unk10C[0]->moveTrans(t);
+		t2.set(0.0f, 0.0f, z);
+		unk10C[0]->moveTrans(t2);
 		break;
 	}
 
@@ -136,8 +138,8 @@ void TMareWallRock::movement()
 			unkF4  = 3;
 			return;
 		}
-		JGeometry::TVec3<f32> t(0.0f, 0.0f, z);
-		unk10C[0]->moveTrans(t);
+		t4.set(0.0f, 0.0f, z);
+		unk10C[0]->moveTrans(t4);
 		break;
 	}
 	}
@@ -316,8 +318,14 @@ void TMareEventDepressWall::emitEffect(int) { }
 
 void TMareEventDepressWall::depressing()
 {
+	JGeometry::TVec3<f32> ta;
+	JGeometry::TVec3<f32> tb;
+	char padx[12];
+	JGeometry::TVec3<f32> tA;
+	char pady[12];
+	JGeometry::TVec3<f32> tB;
 	int doneCount = 0;
-	char trash[0x28];
+	char trash[0xc];
 	for (int i = 0; i < unk10; ++i) {
 		f32 x = TMapObjBase::getJointTransX(unk30[i]);
 		if (unk1C[i]) {
@@ -340,12 +348,12 @@ void TMareEventDepressWall::depressing()
 					SMSRumbleMgr->stop(0x13);
 				}
 				TMapObjBase::setJointTransX(unk30[i], x);
-				JGeometry::TVec3<f32> t(x, 0.0f, 0.0f);
-				unk28[i].moveTrans(t);
+				tA.set(x, 0.0f, 0.0f);
+				unk28[i].moveTrans(tA);
 				if (x >= unk20[i]) {
 					unk28[i].remove();
-					JGeometry::TVec3<f32> t2(x, 0.0f, 0.0f);
-					unk24[i].setUpTrans(t2);
+					ta.set(x, 0.0f, 0.0f);
+					unk24[i].setUpTrans(ta);
 					doneCount += 1;
 				}
 			} else {
@@ -371,12 +379,12 @@ void TMareEventDepressWall::depressing()
 					SMSRumbleMgr->stop(0x13);
 				}
 				TMapObjBase::setJointTransX(unk30[i], x);
-				JGeometry::TVec3<f32> t(x, 0.0f, 0.0f);
-				unk28[i].moveTrans(t);
+				tB.set(x, 0.0f, 0.0f);
+				unk28[i].moveTrans(tB);
 				if (x <= -unk20[i]) {
 					unk28[i].remove();
-					JGeometry::TVec3<f32> t2(x, 0.0f, 0.0f);
-					unk24[i].setUpTrans(t2);
+					tb.set(x, 0.0f, 0.0f);
+					unk24[i].setUpTrans(tb);
 					doneCount += 1;
 				}
 			} else {
@@ -610,8 +618,8 @@ void TMareEventBumpyWall::bumpDownZ()
 	f32 z = TMapObjBase::getJointTransZ(unk13C);
 	JGeometry::TVec3<f32> trans(0.0f, 0.0f, z);
 	char trash[4]; // unused stack slot (present in the retail frame)
-	f32 limit = -unk144;
-	if (z > limit) {
+	f32 limit;
+	if (z > (limit = -unk144)) {
 		if (!TMapObjBase::isDemo()) {
 			z -= unk140;
 			SMSRumbleMgr->start(0x13, -1, (f32*)nullptr);
@@ -638,8 +646,8 @@ void TMareEventBumpyWall::bumpUpZ()
 	f32 z = TMapObjBase::getJointTransZ(unk13C);
 	JGeometry::TVec3<f32> trans(0.0f, 0.0f, z);
 	char trash[4]; // unused stack slot (present in the retail frame)
-	f32 limit = unk144;
-	if (z < limit) {
+	f32 limit;
+	if (z < (limit = unk144)) {
 		if (!TMapObjBase::isDemo()) {
 			z += unk140;
 			SMSRumbleMgr->start(0x13, -1, (f32*)nullptr);
@@ -666,8 +674,8 @@ void TMareEventBumpyWall::bumpDownX()
 	f32 x = TMapObjBase::getJointTransX(unk13C);
 	JGeometry::TVec3<f32> trans(x, 0.0f, 0.0f);
 	char trash[4]; // unused stack slot (present in the retail frame)
-	f32 limit = -unk144;
-	if (x > limit) {
+	f32 limit;
+	if (x > (limit = -unk144)) {
 		if (!TMapObjBase::isDemo()) {
 			x -= unk140;
 			SMSRumbleMgr->start(0x13, -1, (f32*)nullptr);
@@ -694,8 +702,8 @@ void TMareEventBumpyWall::bumpUpX()
 	f32 x = TMapObjBase::getJointTransX(unk13C);
 	JGeometry::TVec3<f32> trans(x, 0.0f, 0.0f);
 	char trash[4]; // unused stack slot (present in the retail frame)
-	f32 limit = unk144;
-	if (x < limit) {
+	f32 limit;
+	if (x < (limit = unk144)) {
 		if (!TMapObjBase::isDemo()) {
 			x += unk140;
 			SMSRumbleMgr->start(0x13, -1, (f32*)nullptr);

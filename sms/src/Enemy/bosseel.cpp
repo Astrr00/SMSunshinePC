@@ -1529,8 +1529,7 @@ void TBossEel::init(TLiveManager* manager)
 		    = JKRGetResource("/scene/bosseel/meoto_heartcoin.bmd");
 		SDLModelData* heartModelData
 		    = new SDLModelData(J3DModelLoaderDataBase::load(
-		        heartResource, J3DMLF_MaterialPEFull | J3DMLF_MaterialUseIndirect
-		                           | J3DMLF_UseUniqueMaterials
+		        heartResource, J3DMLF_MaterialPEFull | J3DMLF_UseUniqueMaterials
 		                           | (4 << J3DMLF_TevStageNumShift)));
 		mHeartCoin = new TBossEelHeartCoin(this, 0, heartModelData, 3,
 		                                   "めおとウナギハートコイン");
@@ -2328,16 +2327,18 @@ DEFINE_NERVE(TNerveBossEelEat, TLiveActor)
 				if (emitter)
 					emitter->setGlobalScale(eel->mScaling);
 			}
-		} else if (eel->mMActor->checkCurBckFromIndex(12)) {
-			if (SMS_SendMessageToMario(eel, 8)) {
-				eel->mHeldObject = nullptr;
-				SMS_SendMessageToMario(eel, 14);
-				gpMarDirector->fireEndDemoCamera();
-				eel->mMoguCameraActive = false;
+		} else {
+			if (eel->mMActor->checkCurBckFromIndex(12)) {
+				if (SMS_SendMessageToMario(eel, 8)) {
+					eel->mHeldObject = nullptr;
+					SMS_SendMessageToMario(eel, 14);
+					gpMarDirector->fireEndDemoCamera();
+					eel->mMoguCameraActive = false;
+				}
+				spine->reset();
+				spine->setDefaultNext();
+				spine->pushAfterCurrent(&TNerveBossEelQuickBack::theNerve());
 			}
-			spine->reset();
-			spine->setDefaultNext();
-			spine->pushAfterCurrent(&TNerveBossEelQuickBack::theNerve());
 			return true;
 		}
 	}

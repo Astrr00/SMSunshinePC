@@ -19,6 +19,78 @@
 #include <M3DUtil/InfectiousStrings.hpp>
 #include <MoveBG/MapObjManager.hpp>
 
+class TNerveLimitKoopaHipDropJump : public TNerveBase<TLiveActor> {
+public:
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
+	static const TNerveLimitKoopaHipDropJump& theNerve()
+	{
+		static TNerveLimitKoopaHipDropJump nerve;
+		return nerve;
+	}
+};
+
+class TNerveLimitKoopaHipDropStart : public TNerveBase<TLiveActor> {
+public:
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
+	static const TNerveLimitKoopaHipDropStart& theNerve()
+	{
+		static TNerveLimitKoopaHipDropStart nerve;
+		return nerve;
+	}
+};
+
+class TNerveLimitKoopaTurn : public TNerveBase<TLiveActor> { };
+
+class TNerveLimitKoopaTumble : public TNerveLimitKoopaTurn {
+public:
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
+	static const TNerveLimitKoopaTumble& theNerve()
+	{
+		static TNerveLimitKoopaTumble nerve;
+		return nerve;
+	}
+};
+
+class TNerveLimitKoopaWait : public TNerveLimitKoopaTurn {
+public:
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
+	static const TNerveLimitKoopaWait& theNerve()
+	{
+		static TNerveLimitKoopaWait nerve;
+		return nerve;
+	}
+};
+
+class TNerveLimitKoopaGetDown : public TNerveBase<TLiveActor> {
+public:
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
+	static const TNerveLimitKoopaGetDown& theNerve()
+	{
+		static TNerveLimitKoopaGetDown nerve;
+		return nerve;
+	}
+};
+
+class TNerveLimitKoopaStagger : public TNerveBase<TLiveActor> {
+public:
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
+	static const TNerveLimitKoopaStagger& theNerve()
+	{
+		static TNerveLimitKoopaStagger nerve;
+		return nerve;
+	}
+};
+
+class TNerveLimitKoopaGetShowered : public TNerveBase<TLiveActor> {
+public:
+	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
+	static const TNerveLimitKoopaGetShowered& theNerve()
+	{
+		static TNerveLimitKoopaGetShowered nerve;
+		return nerve;
+	}
+};
+
 namespace {
 
 int KoopaNeckCallBack(J3DNode*, int);

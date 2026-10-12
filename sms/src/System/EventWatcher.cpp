@@ -1343,7 +1343,6 @@ static void evInvalidatePad(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 static void evIsWaterMelonIsReached(TSpcTypedInterp<TEventWatcher>* interp,
                                     u32 arg_num)
 {
-	SLICE_SLOT;
 	char trash[0x8];
 	interp->verifyArgNum(1, &arg_num);
 	TBigWatermelon* melon = SPC_GET_PTR(TBigWatermelon*, interp->pop());
@@ -1356,7 +1355,7 @@ static void evIsWaterMelonIsReached(TSpcTypedInterp<TEventWatcher>* interp,
 	if (delta.squared() <= 90000.0f)
 		result = 1;
 
-	SLICE_PUSH(interp, result);
+	interp->push(result);
 }
 
 template <> void TSpcTypedBinary<TEventWatcher>::initUserBuiltin()

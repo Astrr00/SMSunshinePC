@@ -1137,6 +1137,7 @@ const char** TBossPakkun::getBasNameTable() const
 void TBossPakkun::setGroundCollision()
 {
 	TPosition3f collisionMtx;
+	int pad;
 	const TNerveBase<TLiveActor>* dieNerve = &TNerveBPDie::theNerve();
 	if (mSpine->getLatestNerve() != dieNerve
 	    && mMapCollisionManager != nullptr) {
@@ -1602,6 +1603,7 @@ DEFINE_NERVE(TNerveBPPivot, TLiveActor)
 
 	JGeometry::TVec3<f32> delta = boss->mPosition;
 	delta -= SMS_GetMarioPos();
+	char trash[4];
 	f32 swingLength = boss->getBossPakkunParams()->mSLSwingLength.get();
 	f32 pivotSpeed;
 	if (delta.squared() < swingLength * swingLength)
@@ -1790,8 +1792,8 @@ DEFINE_NERVE(TNerveBPStompReact, TLiveActor)
 		boss->mHeadHit->offHitFlag(HIT_FLAG_NO_COLLISION);
 		return true;
 	}
-
 	char trash[0x20];
+
 	return false;
 }
 

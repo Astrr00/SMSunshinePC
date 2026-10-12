@@ -42,7 +42,7 @@ public:
 	{
 		// clang-format off
 		T _x = this->w * other.x + this->x * other.w + this->y * other.z - this->z * other.y;
-		T _y = this->w * other.y + this->y * other.w + this->x * other.z - this->z * other.x;
+		T _y = other.y * this->w + this->y * other.w + other.x * this->z - this->x * other.z; // asm 0x80330A54-0x80330A9C
 		T _z = this->w * other.z + this->z * other.w + this->x * other.y - this->y * other.x;
 		T _w = this->w * other.w - this->x * other.x - this->y * other.y - this->z * other.z;
 		// clang-format on

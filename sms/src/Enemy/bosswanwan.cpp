@@ -462,16 +462,18 @@ BOOL TBWPicket::receiveMessage(THitActor* sender, u32 message)
 
 BOOL TBWPicket::moveRequest(const JGeometry::TVec3<f32>& target)
 {
-	char trash[0x28]; // stack padding to match the retail frame size
-	if (&TNerveBWJumpToBath::theNerve() == latestNerveOutOfLine(mOwner->mSpine)
-	    || &TNerveBWDie::theNerve() == latestNerveOutOfLine(mOwner->mSpine))
+	// stack padding to match the retail frame size (declared after pull)
+	if (latestNerveOutOfLine(mOwner->mSpine) == &TNerveBWJumpToBath::theNerve()
+	    || latestNerveOutOfLine(mOwner->mSpine) == &TNerveBWDie::theNerve())
 		return false;
 
 	if (mOwner->mHitPoints != 0)
 		return false;
 
 	TBWLeash* leash = mOwner->mLeash;
+	char trash0[8];
 	JGeometry::TVec3<f32> pull = leash->mRope->mPoints[0].unkC;
+	char trash[0x20];
 	leash->mRope->constraintTail(target);
 	pull -= leash->mRope->mPoints[0].unkC;
 	pull.negate();

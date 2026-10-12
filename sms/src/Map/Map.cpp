@@ -84,19 +84,19 @@ static void initMare()
 
 	{
 		TMareEventDepressWall* event
-		    = new TMareEventDepressWall("イベント(マーレへこむ壁)");
+		    = new TMareEventDepressWall("イベント（マーレへこむ壁）");
 		event->init1stEvent();
 		group->getChildren().push_back(event);
 	}
 	{
 		TMareEventDepressWall* event
-		    = new TMareEventDepressWall("イベント(マーレへこむ壁)");
+		    = new TMareEventDepressWall("イベント（マーレへこむ壁）");
 		event->init2ndEvent();
 		group->getChildren().push_back(event);
 	}
 	{
 		TMareEventDepressWall* event
-		    = new TMareEventDepressWall("イベント(マーレへこむ壁)");
+		    = new TMareEventDepressWall("イベント（マーレへこむ壁）");
 		event->init3rdEvent();
 		group->getChildren().push_back(event);
 	}

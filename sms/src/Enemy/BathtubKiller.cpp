@@ -496,7 +496,7 @@ void TBathtubKiller::makeInitialVelocity(JGeometry::TVec3<f32> v)
 
 	JGeometry::TQuat4<f32> steer;
 	steer.setRotate(forward, v, 1.0f);
-	mQuat.mul(steer);
+	mQuat.mul(steer, mQuat); // asm 0x803438A8: steer * mQuat
 }
 
 void TBathtubKiller::moveParabolic() { }
@@ -551,7 +551,7 @@ void TBathtubKiller::makeQuat(JGeometry::TVec3<f32> axis, f32 moveAmountY,
 
 	JGeometry::TQuat4<f32> steer;
 	steer.setRotate(forward, normAxis, moveAmountY);
-	mQuat.mul(steer);
+	mQuat.mul(steer, mQuat); // asm 0x803431DC: steer * mQuat
 
 	// Y-axis rotation
 	JGeometry::TVec3<f32> right;
@@ -566,7 +566,7 @@ void TBathtubKiller::makeQuat(JGeometry::TVec3<f32> axis, f32 moveAmountY,
 		tiltQuat.rotate(forward, curUp);
 
 		steer.setRotate(up, curUp, moveAmountX);
-		mQuat.mul(steer);
+		mQuat.mul(steer, mQuat); // asm 0x80343224
 	}
 
 	mQuat.normalize();

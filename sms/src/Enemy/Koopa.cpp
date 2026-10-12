@@ -136,7 +136,7 @@ BOOL TNerveKoopaTurnL::execute(TSpineBase<TLiveActor>* spine) const
 		turning = false;
 	}
 
-	return turning ? false : true;
+	return turning ? 0 : 1;
 }
 
 BOOL TNerveKoopaTurnR::execute(TSpineBase<TLiveActor>* spine) const
@@ -172,7 +172,7 @@ BOOL TNerveKoopaTurnR::execute(TSpineBase<TLiveActor>* spine) const
 		turning = false;
 	}
 
-	return turning ? false : true;
+	return turning ? 0 : 1;
 }
 
 BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
@@ -230,11 +230,10 @@ BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 		case 0:
 		default:
 			self->changeAnm(0xC, 1, KOOPA_PARAMS(self)->waitSpeed.get());
-			bool tumble = self->getAnmIndex() == 0xC
-			              && (self->endsAnm() || self->passesAnmFrame(2.0f)
-			                  || self->passesAnmFrame(400.0f)
-			                  || self->passesAnmFrame(700.0f));
-			if (tumble) {
+			if (self->getAnmIndex() == 0xC
+			    && (self->endsAnm() || self->passesAnmFrame(2.0f)
+			        || self->passesAnmFrame(400.0f)
+			        || self->passesAnmFrame(700.0f))) {
 				bathtub = (TBathtub*)JDrama::TNameRefGen::search("バスタブ");
 				if (bathtub->allowsTumble())
 					spine->pushNerve(&TNerveKoopaTumble::theNerve());
@@ -251,8 +250,8 @@ BOOL TNerveKoopaWait::execute(TSpineBase<TLiveActor>* spine) const
 			break;
 		case 0:
 		default:
-			self->mTargetDir = self->getTargetDir(*gpMarioPos);
-			f32 newDiff     = self->mTargetDir - self->mRotation.y;
+			// asm 0x80339ED0: retail does not store getTargetDir() and subtracts mTargetDir (0x150), not mRotation.y
+			f32 newDiff = self->getTargetDir(*gpMarioPos) - self->mTargetDir;
 			newDiff = -180.0f + fmodDeg(360.0f + (newDiff - -180.0f), 360.0f);
 			self->mIgnoreMario = newDiff < 0.0f;
 			spine->setNext(&TNerveKoopaFlame::theNerve());
@@ -368,8 +367,8 @@ BOOL TNerveKoopaFlame::execute(TSpineBase<TLiveActor>* spine) const
 					spine->pushNerve(&TNerveKoopaTurnR::theNerve());
 					break;
 				case 0:
-					self->mTargetDir = self->getTargetDir(*gpMarioPos);
-					f32 newDiff     = self->mTargetDir - self->mRotation.y;
+					// asm 0x80338E18: getTargetDir() is not stored; diff is against mTargetDir (0x150)
+					f32 newDiff = self->getTargetDir(*gpMarioPos) - self->mTargetDir;
 					newDiff         = -180.0f
 					          + fmodDeg(360.0f + (newDiff - -180.0f), 360.0f);
 					self->mIgnoreMario = newDiff < 0.0f;
@@ -1043,7 +1042,7 @@ f32 TKoopa::getNeckFocus() const
 		if (frame >= 164.0f)
 			focus = (frame - 164.0f) / (end - 164.0f);
 		break;
-	case 1:
+	case 2: // asm 0x80336318: retail body order is 2, 0, 1
 		focus = 0.0f;
 		break;
 	case 0:
@@ -1052,7 +1051,7 @@ f32 TKoopa::getNeckFocus() const
 		else
 			focus = 0.0f;
 		break;
-	case 2:
+	case 1:
 		focus = 0.0f;
 		break;
 	case 7:
@@ -1192,7 +1191,7 @@ void TKoopa::stagger(bool force)
 		return;
 	if (&TNerveKoopaProvoke::theNerve() == mSpine->getCurrentNerve())
 		return;
-	if (!force && &TNerveKoopaFlame::theNerve() == mSpine->getCurrentNerve())
+	if (!force && mSpine->getCurrentNerve() == &TNerveKoopaFlame::theNerve())
 		return;
 	if (&TNerveKoopaTumble::theNerve() == mSpine->getCurrentNerve())
 		return;

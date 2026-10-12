@@ -139,9 +139,9 @@ void TMapEventSink::startControl()
 	unk3C     = dVar4 / iVar3;
 	unk4C     = unk40;
 
-	unk5C[mRaisingBuildingIdx]->setUpTrans(JGeometry::TVec3<f32>(
-	    info.mTranslate.x, info.mTranslate.y, info.mTranslate.z));
-	char trash[0x14];
+	JGeometry::TVec3<f32> pos(info.mTranslate.x, info.mTranslate.y, info.mTranslate.z);
+	unk5C[mRaisingBuildingIdx]->setUpTrans(pos);
+	char trash[0x1c];
 }
 
 void TMapEventSink::initBuilding(int index, JSUMemoryInputStream& stream)
@@ -171,9 +171,15 @@ void TMapEventSink::initWithBuildingNum(JSUMemoryInputStream& stream)
 
 void TMapEventSink::load(JSUMemoryInputStream& stream)
 {
-	char trash[0x18];
+	u32 slot;
+	char trash[0x20];
 	TMapEvent::load(stream);
-	mBuildingNum = stream.readU32();
+#ifdef TARGET_PC
+	slot = stream.readU32(); // big-endian on disc; raw read() does not swap
+#else
+	stream.read(&slot, sizeof(u32));
+#endif
+	mBuildingNum = slot;
 	initWithBuildingNum(stream);
 	for (int i = 0; i < mBuildingNum; ++i) {
 		mIsBuildingRecovered[i] = false;

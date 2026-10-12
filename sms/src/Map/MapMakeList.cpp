@@ -161,7 +161,7 @@ bool TMapCollisionData::getGridArea(const TBGCheckData* param_1, int param_2,
 	f32 minX
 	    = min(min(param_1->mPoint3.x, param_1->mPoint2.x), param_1->mPoint1.x);
 	f32 minZ
-	    = min(min(param_1->mPoint3.z, param_1->mPoint2.z), param_1->mPoint1.z);
+	    = min(min(param_1->mPoint3.z, param_1->mPoint2.z), param_1->mPoint1.z); // asm 0x801E4554: p2>p3?p3:p2 (NaN/+-0 ties)
 
 	f32 maxX
 	    = max(param_1->mPoint1.x, max(param_1->mPoint2.x, param_1->mPoint3.x));
@@ -202,9 +202,10 @@ void TMapCollisionData::addCheckDataToGrid(TBGCheckData* param_1, int kind)
 {
 	int iVar7 = param_1->getPlaneType();
 	int local_ac;
-	int local_b4;
 	int local_b0;
+	int local_b4;
 	int local_b8;
+	char trash[0x30];
 	if (getGridArea(param_1, iVar7, &local_ac, &local_b4, &local_b0,
 	                &local_b8)) {
 		for (int i = local_b4; i <= local_b8; ++i) {

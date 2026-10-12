@@ -70,10 +70,17 @@ void TWireTrap::load(JSUMemoryInputStream& stream)
 	int scale;
 	int mode;
 	int color;
+#ifdef TARGET_PC
+	scale     = stream.readS32();
+	mode      = stream.readS32();
+	mWaitTime = stream.readS32();
+	color     = stream.readS32();
+#else
 	stream.read(&scale, 4);
 	stream.read(&mode, 4);
 	stream.read(&mWaitTime, 4);
 	stream.read(&color, 4);
+#endif
 
 	mSpeedScale = scale / 10.0f;
 	if (mode == -1)

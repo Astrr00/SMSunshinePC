@@ -19,7 +19,8 @@ static inline f32 acosDeg(f32 c)
 
 	f32 t = -(c * c - 1.0f);
 	volatile f32 s = t * __frsqrte(t);
-	return 90.0f - matan(s, c) * (360.0f / 65536.0f);
+	f32 deg        = matan(s, c) * (360.0f / 65536.0f);
+	return 90.0f - deg; // asm 0x80258EB4: retail does not fuse the subtract
 }
 
 // fabricated: asin(x) in degrees

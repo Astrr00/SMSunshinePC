@@ -173,8 +173,7 @@ void CPolarSubCamera::calcNoticeTargetYrot_(const Vec& target)
 	Vec mPos     = gpCameraMario->unk0;
 	JGeometry::TVec3<f32> diff;
 	char trash[0x24];
-	f32 dz2      = CLBSquared<f32>(mPos.z - target.z);
-	f32 dist2    = dz2 + CLBSquared<f32>(mPos.x - target.x);
+	f32 dist2    = CLBSquared<f32>(mPos.x - target.x) + CLBSquared<f32>(mPos.z - target.z);
 	f32 farClip2 = CLBSquared<f32>(mSaveNotice->mRotateMinDistXZ.get());
 	f32 near2    = CLBSquared<f32>(mSaveNotice->mRotateFastMinDistXZ.get());
 

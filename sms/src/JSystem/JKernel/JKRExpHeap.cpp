@@ -196,6 +196,7 @@ void* JKRExpHeap::allocFromHead(u32 size, int align)
 	CMemBlock* foundBlock   = nullptr;
 	CMemBlock* newFreeBlock = nullptr;
 	CMemBlock* newUsedBlock = nullptr;
+	char trash[8];
 
 	for (CMemBlock* block = mHead; block; block = block->mNext) {
 		// this bastard is the problem

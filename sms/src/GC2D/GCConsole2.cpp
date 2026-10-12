@@ -415,9 +415,8 @@ static inline void playLifeChangeSound(u32 sound)
 }
 
 // fabricated
-static inline void updateLifeMeterState(TGCConsole2* console)
+static inline void updateLifeMeterState(TGCConsole2* console, u8& amount)
 {
-	u8 amount;
 	bool airMode = true;
 
 	switch (console->unk18) {
@@ -506,7 +505,7 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 			startLifeMeterDisappear(console, 0);
 			console->unk18 = 3;
 		} else if (airTimeout) {
-			if (startLifeMeterDisappear(console, 0))
+			if (startLifeMeterDisappear(console, 1)) // asm 0x80202A74: frame 1
 				console->unk18 = 3;
 		}
 		break;
@@ -520,15 +519,16 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 			++console->unk84;
 		}
 		break;
-	case 4:
+	// asm 0x80202B54..0x80202D48: retail jump table @7077 maps 7/8 to the insert bodies and 4/5/6 to appear/wait
+	case 7:
 		if (console->processInsertLife(console->unk84++))
 			console->unk18 = 2;
 		break;
-	case 5:
+	case 8:
 		if (console->processInsertLife(console->unk84++))
 			console->unk18 = SMS_isDivingMap() ? 9 : 5;
 		break;
-	case 6:
+	case 4:
 		if (console->processAppearLife(console->unk84)) {
 			console->unk18 = 5;
 			console->unk38 = 0;
@@ -538,7 +538,7 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 		if (!(amount >= 8 && console->unk84 == 0) && console->unk84 < 1000)
 			++console->unk84;
 		break;
-	case 7:
+	case 5:
 		if (!gpMarioOriginal->isUnderWater()) {
 			if (console->unk1CC[0] == 8) {
 				startLifeMeterDisappear(console, 0);
@@ -552,7 +552,7 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 			}
 		}
 		break;
-	case 8:
+	case 6:
 		if (console->unk84 > 0x78) {
 			if (console->unk1C4->update()) {
 				console->unk4C = 0;
@@ -581,7 +581,8 @@ static inline void updateLifeMeterState(TGCConsole2* console)
 			console->startInsertLife(1);
 			console->unk18 = 8;
 		} else {
-			console->unk1CC[0] = 8;
+			amount             = 8; // asm 0x80202E3C: li r30,8
+			console->unk1CC[0] = amount;
 			console->unk18     = 0;
 		}
 		break;
@@ -1177,17 +1178,17 @@ static inline void updateStarHudAutoHide(TGCConsole2* console)
 }
 
 // fabricated
-static inline void updateLifeMeterBlink(TGCConsole2* console)
+static inline void updateLifeMeterBlink(TGCConsole2* console, u8 amount)
 {
 	if (!console->unk1C4->getPane()->isVisible())
 		return;
 
 	f32 rate = 100.0f;
-	if (console->unk1CC[0] == 3)
+	if (amount == 3) // asm 0x802049E0: rate/mul come from callee-saved r30 (amount), not unk1CC
 		rate = 80.0f;
-	if (console->unk1CC[0] == 2)
+	if (amount == 2)
 		rate = 60.0f;
-	if (console->unk1CC[0] == 1)
+	if (amount == 1)
 		rate = 35.0f;
 
 	if ((f32)console->unk86 < rate * 2.0f) {
@@ -1202,7 +1203,7 @@ static inline void updateLifeMeterBlink(TGCConsole2* console)
 		f32 diff = (f32)console->unk86 - rate;
 		diff = diff >= 0.0f ? diff : -diff;
 
-		f32 mul = console->unk1CC[0] > 3 ? 3.0f : 5.0f;
+		f32 mul = amount > 3 ? 3.0f : 5.0f;
 		int delta = (int)(0.5f + diff / rate);
 		int scaledY = (int)(mul * (f32)delta);
 
@@ -1379,7 +1380,7 @@ static inline void updateShineAppearState(TGCConsole2* console)
 // fabricated
 static inline void updateJetAppearState(TGCConsole2* console)
 {
-	if (console->unk3D && console->processAppearJet(console->unk72++)) {
+	if (console->unk3D && console->processAppearJet((s8)console->unk72++)) { // asm 0x8020528C: extsb
 		console->unk3D = 0;
 	}
 }
@@ -1416,7 +1417,7 @@ static inline void updateTelopState(TGCConsole2* console)
 
 	if (console->unk44 && console->unk520->getPane()->isVisible()) {
 		if (console->processDrawTelop(console->unk80++)) {
-			JUTRect telopPaneBounds(console->unk524->getPane()->mBounds);
+			JUTRect telopPaneBounds(console->unk524->getPane()->mGlobalBounds); // asm 0x80205090: +0x24
 			console->unk568 = console->unk544.x2;
 			console->unk534.add(console->mTelopTextWidth + telopPaneBounds.x2,
 			                    0);
@@ -1493,7 +1494,7 @@ static inline void updateWaterTankState(TGCConsole2* console)
 // fabricated
 static inline void updateCoinAppearState(TGCConsole2* console)
 {
-	if (console->unk4F && console->processAppearCoin(console->unk88++))
+	if (console->unk4F && console->processAppearCoin((s8)console->unk88++)) // asm 0x80204C84: extsb
 		console->unk4F = 0;
 }
 
@@ -2080,7 +2081,7 @@ void TGCConsole2::loadAfter()
 	unk544.set(telopBounds.x1 + 8, telopBounds.y1 + 8, telopBounds.x2 - 8,
 	           telopBounds.y2 - 8);
 
-	unk534 = unk528->mBounds;
+	// asm 0x8020FD7C: retail does NOT copy the box bounds into unk534; add() runs on the ctor value (0,0,0,0)
 	unk534.add(unk544.x2, unk544.y1 + unk528->mBounds.getHeight());
 
 	unk544.resize(unk544.getWidth() * (16.0f / 15.0f), unk544.getHeight());
@@ -4006,6 +4007,7 @@ void TGCConsole2::drawWater(J2DOrthoGraph& graph)
 
 void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 {
+	u8 amount; // asm r30: life-meter target, shared by updateLifeMeterState and updateLifeMeterBlink
 	if (flags & 1) {
 		if (!unk50) {
 			if (gpCamera->isDemoCamera() || SMS_CheckMarioFlag(0x400)
@@ -4056,7 +4058,7 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 				unk39 = 0;
 		}
 
-		updateLifeMeterState(this);
+		updateLifeMeterState(this, amount);
 		updateCoinCountState(this);
 		updateStarHudAutoHide(this);
 
@@ -4087,7 +4089,7 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 			startAppearTank();
 		updateWaterTankState(this);
 
-		updateLifeMeterBlink(this);
+		updateLifeMeterBlink(this, amount);
 		updateCoinAppearState(this);
 
 		if (unk4D) {
@@ -4139,12 +4141,14 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 			break;
 		case 2:
 			processBalloonTextStep(this);
-			break;
+			// asm 0x80205914: case 2 falls into the case-3 timeout code
 		case 3:
-			if (unk3E4 > 0)
+			// asm 0x80205928: whole tail is skipped when unk3E4 <= 0
+			if (unk3E4 > 0) {
 				--unk3E4;
-			if ((unk3F8 && unk3E4 == 0) || unk3F4 != 0xffffffff)
-				startDisappearBalloon(unk3E0, false);
+				if ((unk3F8 && unk3E4 == 0) || unk3F4 != 0xffffffff)
+					startDisappearBalloon(unk3E0, false);
+			}
 			break;
 		case 4:
 			updateBalloonDisappearState(this);

@@ -92,15 +92,25 @@ static void evIsNpcSinkBottom(TSpcTypedInterp<TEventWatcher>* interp,
 	IsNpcFlagOn_(interp, arg_num, TBaseNPC::LIVE_FLAG_SINK_BOTTOM);
 }
 
+#ifdef TARGET_PC
+#define SLICE_SLOT
+#define SLICE_PUSH(interp, v) (interp)->push(v)
+#else
+#define SLICE_SLOT int slot[2]
+#define SLICE_PUSH(interp, v) \
+	(slot[0] = 0, slot[1] = (v), (interp)->push(*(TSpcSlice*)slot))
+#endif
+
 static void evIsGameModeNormal(TSpcTypedInterp<TEventWatcher>* interp,
                                u32 arg_num)
 {
-	char trash[0x10];
+	SLICE_SLOT;
+	char trash[0xc];
 	interp->verifyArgNum(0, &arg_num);
 	int result = 0;
 	if (gpMarDirector->unk124 == 0)
 		result = 1;
-	interp->push(result);
+	SLICE_PUSH(interp, result);
 }
 
 static void ev__ForceStartTalkExceptNpc(TSpcTypedInterp<TEventWatcher>* interp,
@@ -308,12 +318,13 @@ static void evFireStartDemoCamera(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evIsDemoMode(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
-	char trash[0x8];
+	SLICE_SLOT;
+	char trash[4];
 	interp->verifyArgNum(0, &arg_num);
 	int result = 0;
 	if (gpMarDirector->isDemoModeNow())
 		result = 1;
-	interp->push(result);
+	SLICE_PUSH(interp, result);
 }
 
 static void evCheckMonteClear(TSpcTypedInterp<TEventWatcher>* interp,

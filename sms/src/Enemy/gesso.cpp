@@ -891,11 +891,12 @@ void TGessoPolluteObj::loadInit(TSpineEnemy* param_1, const char* param_2)
 
 f32 TGessoPolluteObj::getNowGravity()
 {
-	f32 gravity = unk16C->getSaveParams()->mSLPolluteObjGravity.get();
-	if (unk16C->unk1D8 == 0)
+	TGesso* gesso = unk16C;
+	f32 gravity   = gesso->getSaveParams()->mSLPolluteObjGravity.get();
+	if (gesso->unk1D8 == 0)
 		return gravity;
 
-	return unk16C->getSaveParams()->mSLPolluteObjLinerG.get();
+	return gesso->getSaveParams()->mSLPolluteObjLinerG.get();
 }
 
 void TGessoPolluteObj::pollute()
@@ -943,6 +944,9 @@ void TGessoPolluteObj::rebirth()
 	if (mPosition.y < mGroundHeight - 30.0f) {
 		mVelocity.y = 0.0f;
 		onHitFlag(HIT_FLAG_NO_COLLISION);
+	}
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
 	}
 }
 

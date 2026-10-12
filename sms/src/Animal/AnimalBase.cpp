@@ -115,7 +115,8 @@ void TAnimalBase::initNoLoad_(TAnimalBase* other)
 
 	static_cast<TIdxGroupObj*>(JDrama::TNameRefGen::search("敵グループ"))
 	    ->getChildren()
-	    .push_back(other);
+	    .push_back(this); // asm 0x80366B74: retail pushes `this` (&stack[8]), not the clone
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TAnimalBase::load(JSUMemoryInputStream& stream)

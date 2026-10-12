@@ -672,8 +672,8 @@ void THangingBridge::loadAfter()
 		// Discarded in the original as well: a bridge sag that always stays 0.
 		sinf(3.14f * t);
 		pos.y = t * (mEndPos.y - mStartPos.y) + mStartPos.y - sag;
-		JGeometry::TVec3<f32> rot(15.0f, boardRotY, sag);
 		pos.z = t * (mEndPos.z - mStartPos.z) + mStartPos.z;
+		JGeometry::TVec3<f32> rot(15.0f, boardRotY, sag);
 		if (gpMarDirector->getCurrentMap() == 8) {
 			mBoards[i]
 			    = (THangingBridgeBoard*)TMapObjBaseManager::newAndRegisterObj(

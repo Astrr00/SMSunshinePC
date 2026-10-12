@@ -60,6 +60,7 @@ static int PakkunSeedCallback(J3DNode* node, int type)
             joint->getJntNo());
 
 		Mtx rotation;
+		char trash[0x18];
 		MsMtxSetRotZ(rotation, gpCurPakkunSeed->unk170);
 
 		MTXConcat(anmMtx, rotation, anmMtx);
@@ -85,6 +86,7 @@ static int PakkunRootCallback(J3DNode* node, int type)
                 joint->getJntNo());
 
 			TRotation3f scaling;
+			char trash[0x28];
 			scaling.ref(0, 3) = 0.0f;
 			scaling.ref(1, 3) = 0.0f;
 			scaling.ref(2, 3) = 0.0f;
@@ -119,6 +121,7 @@ static int PakkunRootCallback2(J3DNode* node, int type)
 		    ((J3DJoint*)node)->getJntNo());
 
 		TRotation3f scaling;
+		char trash[0x20];
 		scaling.ref(0, 3) = 0.0f;
 		scaling.ref(1, 3) = 0.0f;
 		scaling.ref(2, 3) = 0.0f;
@@ -284,6 +287,7 @@ void TPakkun::init(TLiveManager* manager)
 	TPathNode marioNode((THitActor*)gpMarioAddress);
 	setGoalPath(marioNode);
 
+	char trash[0x20];
 	if (mInstanceIndex == 0) {
 		for (u8 i = 0; i < getModel()->getModelData()->getJointNum(); ++i) {
 			const char* name
@@ -596,6 +600,7 @@ void TPakkunSeed::shoot()
 
 void TPakkunSeed::rebirth()
 {
+	char trash[0x28];
 	if (unk16C->unk199) {
 		unk150 = 0;
 		unk158 = 0;
@@ -968,7 +973,7 @@ DEFINE_NERVE(TNervePakkunAppear, TLiveActor)
 		self->offHitFlag(HIT_FLAG_NO_COLLISION);
 	}
 
-	self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->checkPass(100.0f);
+	(void)(self->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->checkPass(100.0f) ? 1 : 0);
 	if (self->checkCurAnmEnd(ANM_TYPE_BCK)) {
 		spine->pushAfterCurrent(&TNervePakkunStay::theNerve());
 		return true;

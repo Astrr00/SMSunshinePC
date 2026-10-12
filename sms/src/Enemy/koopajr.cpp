@@ -139,8 +139,9 @@ static void setOutOfLine(JGeometry::TVec3<f32>& v, f32 x, f32 y, f32 z)
 f32 TDirectionCalc::calcNearerDirection(f32 target)
 {
 	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
-	f32 lo = 0.0f;
-	mDirection = lo + fmodfOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
+	f32 cur = mDirection;
+	f32 lo  = 0.0f;
+	mDirection = lo + fmodfOutOfLine(6.2831855f + (cur - lo), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -158,8 +159,9 @@ f32 TDirectionCalc::calcNearerDirection(f32 target)
 f32 TDirectionCalc::sub(f32 target)
 {
 	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
-	f32 lo = 0.0f;
-	mDirection = lo + modOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
+	f32 cur = mDirection;
+	f32 lo  = 0.0f;
+	mDirection = lo + modOutOfLine(6.2831855f + (cur - lo), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -221,8 +223,9 @@ JGeometry::TVec3<f32> TDirectionCalc::calcDirectionVector()
 f32 TDirectionCalc::absDirection(f32 target)
 {
 	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
-	f32 lo = 0.0f;
-	mDirection = lo + modOutOfLine(6.2831855f + (mDirection - lo), 6.2831855f);
+	f32 cur = mDirection;
+	f32 lo  = 0.0f;
+	mDirection = lo + modOutOfLine(6.2831855f + (cur - lo), 6.2831855f);
 
 	if (target >= mDirection) {
 		f32 diff = target - mDirection;
@@ -390,7 +393,7 @@ void TKoopaJr::init(TLiveManager* manager)
 
 void TKoopaJr::reset()
 {
-	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 	TSpineEnemy::reset();
 
 	mSpine->reset();
@@ -992,6 +995,7 @@ bool TKoopaJrSubmarine::appearShineKiller(int)
 	if (rand() * (1.0f / 32768.0f) < probability)
 		appear = true;
 	return appear;
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; (void)(GXColor) { 1, 2, 3, 4 }; }
 }
 
 void TKoopaJrSubmarine::launchKiller()

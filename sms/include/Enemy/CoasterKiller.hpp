@@ -20,8 +20,8 @@ public:
 		mSLCoasterSpeedReverse.value = 16.0f;
 	}
 
-	/* 0x338 */ TParamRT<f32> mSLCoasterSpeedInOrder;
-	/* 0x34C */ TParamRT<f32> mSLCoasterSpeedReverse;
+	/* 0x32C */ TParamRT<f32> mSLCoasterSpeedInOrder;
+	/* 0x340 */ TParamRT<f32> mSLCoasterSpeedReverse;
 };
 
 class TCoasterKillerSaveLoadParams : public TCoasterEnemyParams {
@@ -33,7 +33,7 @@ public:
 		TParams::load(mPrmPath);
 	}
 
-	/* 0x360 */ TParamRT<f32> mSLBombRange;
+	/* 0x354 */ TParamRT<f32> mSLBombRange;
 };
 
 class TCoasterEnemy : public TWalkerEnemy {

@@ -209,6 +209,7 @@ void TRocket::reset()
 
 void TRocket::attackToMario()
 {
+	char trash[0x10];
 	if (mSpine->getCurrentNerve() == &TNerveRocketWait::theNerve()
 	    && static_cast<TRocketManager*>(mManager)->mIsFree) {
 		mSpine->pushNerve(&TNerveRocketPossessedNozzle::theNerve());

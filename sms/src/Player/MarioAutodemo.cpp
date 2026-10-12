@@ -57,8 +57,9 @@ BOOL TMario::readBillboard()
 		f32 dist = std::sqrtf(dx * dx + dz * dz);
 		if (dist < 100.0f) {
 			JGeometry::TVec3<f32> moveDist;
-			moveDist.x = dx / dist * 2.0f * 50.0f + mPosition.x;
-			moveDist.z = dz / dist * 2.0f * 50.0f + mPosition.z;
+			// asm 0x801203B0/0x801203CC: retail adds the NPC position (lfs 0x10/0x18(r5)), not Mario's
+			moveDist.x = dx / dist * 2.0f * 50.0f + talkingNpc->mPosition.x;
+			moveDist.z = dz / dist * 2.0f * 50.0f + talkingNpc->mPosition.z;
 			moveDist.y = mFloorPosition.y;
 			moveRequest(moveDist);
 		}
@@ -223,7 +224,7 @@ BOOL TMario::warpIn()
 			offUnk114(UNK114_FLAG_VISIBLE);
 			rumbleStart(0x15, 0x14);
 		}
-		if (mAutoDemoParams.mWarpInBallsTime.get() > (f32)mStatusTimer) {
+		if ((f32)mStatusTimer > mAutoDemoParams.mWarpInBallsTime.get()) { // asm 0x80120104: timer > param (was param > timer)
 			mStatusTimer = 0;
 			unk468       = mAutoDemoParams.mWarpInVecBase.get();
 			mStatusState = 2;

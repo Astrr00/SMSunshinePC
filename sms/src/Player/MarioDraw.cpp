@@ -420,14 +420,12 @@ static int MarioHeadCtrl(J3DNode* param_1, int param_2)
 
 			s16 angle = -matan(mult, other.y);
 			MsMtxSetRotRPH(transform, 0.0f, 0.0f, SHORTANGLE2DEG(angle));
-		} else if (gpMarioForCallBack->mStatus == MARIO_STATUS_ROCKET) {
-			if (gpMarioForCallBack->mWaterGun->canSpray() == true) {
-
-				s16 headAngle = gpMarioForCallBack->mUpperBodyParams
-				                    .mHoverHeadAngle.get();
-				MsMtxSetRotRPH(transform, 0.0f, 0.0f,
-				               SHORTANGLE2DEG(headAngle));
-			}
+		} else if (gpMarioForCallBack->mStatus == MARIO_STATUS_ROCKET
+		           && gpMarioForCallBack->mWaterGun->canSpray() == true) {
+			// asm 0x80127FFC..0x801280B4: canSpray false falls through to the WAIT/wall/default branches
+			s16 headAngle
+			    = gpMarioForCallBack->mUpperBodyParams.mHoverHeadAngle.get();
+			MsMtxSetRotRPH(transform, 0.0f, 0.0f, SHORTANGLE2DEG(headAngle));
 		} else if (gpMarioForCallBack->mStatus == MARIO_STATUS_WAIT
 		           && (gpMarioForCallBack->unk370
 		                       > gpMarioForCallBack->mDeParams.mFeelDeep.get()
@@ -938,59 +936,58 @@ f32 TMario::setAnimation(int param_id, f32 rate)
 		}
 
 		switch (mYoshi->mActor->getCurAnmIdx(ANM_TYPE_BCK)) {
-		case 0x1:
+		case 0x16:
 			anm_id = 0xB6;
 			break;
-		case 0x2:
+		case 0x18:
 			anm_id = 0xB7;
 			break;
-		case 0x3:
+		case 0xF:
 			anm_id = 0xB8;
 			break;
-		case 0x4:
+		case 0x3:
 			anm_id = 0xB9;
 			break;
-		case 0x6:
+		case 0xE:
 			anm_id = 0xBF;
 			break;
-		case 0x7:
+		case 0x4:
 			anm_id = 0xBA;
 			break;
-		case 0x8:
+		case 0xA:
 			anm_id = 0xBB;
 			break;
-		case 0x9:
+		case 0xC:
 			anm_id = 0xBC;
 			break;
-		case 0xA:
+		case 0xB:
 			anm_id = 0xBD;
 			break;
-		case 0xB:
+		case 0x9:
 			anm_id = 0xBE;
-			break;
-		case 0xC:
-			anm_id = 0xB8;
-			break;
-		case 0xE:
-			anm_id = 0xC0;
-			break;
-		case 0xF:
-			anm_id = 0xC1;
 			break;
 		case 0x10:
 		case 0x11:
+			anm_id = 0xB8;
+			break;
+		case 0x8:
+			anm_id = 0xC0;
+			break;
+		case 0x7:
+			anm_id = 0xC1;
+			break;
+		case 0x6:
 			anm_id = 0xC2;
 			break;
-		case 0x12:
+		case 0x2:
 			anm_id = 0xC4;
 			break;
 		case 0x13:
 			anm_id = 0xC5;
 			break;
-		case 0x16:
+		case 0x12:
 			anm_id = 0xC6;
 			break;
-		case 0x18:
 		default:
 			anm_id = 0xB6;
 			break;
@@ -1338,8 +1335,9 @@ void TMario::initModel()
 				MTXIdentity(pinnaMtx);
 				mPinaRail->getModel()->setBaseTRMtx(pinnaMtx);
 				mPinaRail->calcAnm();
-				mPinaRail->getModel()->setBaseTRMtx(
-				    mTorocco->getModel()->getAnmMtx(0));
+				// asm 0x80126588: PSMTXCopy(rail anmMtx0 -> torocco baseTR)
+				mTorocco->getModel()->setBaseTRMtx(
+				    mPinaRail->getModel()->getAnmMtx(0));
 			}
 			if (gpMarDirector->unk7D == 1) {
 				mRailType              = 1;
@@ -1363,8 +1361,9 @@ void TMario::initModel()
 				MTXIdentity(koopaMtx);
 				mKoopaRail->getModel()->setBaseTRMtx(koopaMtx);
 				mKoopaRail->calcAnm();
-				mKoopaRail->getModel()->setBaseTRMtx(
-				    mTorocco->getModel()->getAnmMtx(0));
+				// asm 0x80126688: PSMTXCopy(rail anmMtx0 -> torocco baseTR)
+				mTorocco->getModel()->setBaseTRMtx(
+				    mKoopaRail->getModel()->getAnmMtx(0));
 			}
 			onFlag(MARIO_FLAG_HAS_FLUDD);
 			mTorocco->calcAnm();
@@ -1512,7 +1511,7 @@ void TMario::considerWaist()
 	}
 
 	// Likely clamp inline, but i couldn't find an existing that worked
-	f32 targetRollCopy = targetRoll * diffAngle * mForwardVel;
+	f32 targetRollCopy = targetRoll * (diffAngle * mForwardVel); // asm 0x80125580: roll * (diff*vel)
 	if (targetRollCopy > rollMax) {
 		targetRollCopy = rollMax;
 	}
@@ -1651,15 +1650,15 @@ void TMario::calcBaseMtx(MtxPtr mtx)
 
 		mtx[0][0] = axis.x;
 		mtx[0][1] = ncross.x;
-		mtx[0][2] = bin.z;
+		mtx[0][2] = bin.x; // asm 0x80124C84: f30 (cross x) -> mtx[0][2]
 		mtx[0][3] = mPosition.x;
 		mtx[1][0] = axis.y;
 		mtx[1][1] = ncross.y;
-		mtx[1][2] = bin.x;
+		mtx[1][2] = bin.y; // asm 0x80124CA0: f31 (cross y) -> mtx[1][2]
 		mtx[1][3] = (avgY < mPosition.y) ? mPosition.y : avgY;
 		mtx[2][0] = axis.z;
 		mtx[2][1] = ncross.z;
-		mtx[2][2] = bin.y;
+		mtx[2][2] = bin.z; // asm 0x80124CCC: f28 (cross z) -> mtx[2][2]
 		mtx[2][3] = mPosition.z;
 		(void)d;
 	} else {

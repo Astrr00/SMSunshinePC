@@ -220,7 +220,11 @@ int TSelectDir::direct()
 		if (!OSIsThreadTerminated(&gSetupThread))
 			return TApplication::APP_STATE_WAIT;
 
+#ifdef TARGET_PC
 		void* res = nullptr; // the host OSJoinThread stores only 32 bits; an uninitialised 64-bit pointer kept stack garbage
+#else
+		void* res;
+#endif
 		OSJoinThread(&gSetupThread, &res);
 		if (res != 0)
 			return TApplication::APP_STATE_GAMEPLAY;

@@ -34,11 +34,11 @@ TCubeManagerBase::TCubeManagerBase(const char* name, u8 param_2)
     , unk14(nullptr)
     , unk18(nullptr)
 {
-	char trash[0x8];
 	unk14 = new TNameRefPtrAryT<TCubeGeneralInfo>;
 	unk14->reserve(unk10);
 	for (int i = 0; i < unk10; ++i)
 		unk14->push_back(new TCubeGeneralInfo);
+	if (0) { (void)(GXColor){1, 2, 3, 4}; }
 }
 
 void TCubeManagerBase::load(JSUMemoryInputStream& stream)
@@ -151,7 +151,7 @@ bool SMS_IsInOtherFastCube(const Vec& pos)
 bool SMS_IsInSameCameraCube(const Vec& pos)
 {
 	bool result  = false;
-	Vec marioPos = SMS_GetMarioPos();
+	JGeometry::TVec3<f32> marioPos = SMS_GetMarioPos();
 	marioPos.y += 75.0f;
 	int uVar7 = gpCubeCamera->getInCubeNo(marioPos);
 	int uVar4 = gpCubeCamera->getInCubeNo(pos);

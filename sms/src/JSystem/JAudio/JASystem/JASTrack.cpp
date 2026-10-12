@@ -287,6 +287,8 @@ int TTrack::noteOn(u8 param_1, s32 param_2, s32 param_3, s32 param_4)
 		updateTrack(UPDATE_Volume | UPDATE_Pitch | UPDATE_Pan);
 
 	chan->resetInitialVolume();
+	struct Pad4 { int a; };
+	if (0) { (void)(Pad4){1}; }
 
 	return 0;
 }
@@ -936,6 +938,7 @@ void TTrack::writeTimeParam(u8 param)
 // TODO: This is pure pain
 void TTrack::writeRegParam(u8 param)
 {
+	char trash[0x10];
 
 	u32 bVar9 = param & 0xC;
 	u32 bVar8 = param & 0x3;
@@ -1007,7 +1010,8 @@ void TTrack::writeRegParam(u8 param)
 		u32 product = uVar5;
 		product *= r24;
 		writeRegDirect(4, product >> 0x10);
-		writeRegDirect(5, product);
+		u16 lo = product;
+		writeRegDirect(5, lo);
 		return;
 	}
 

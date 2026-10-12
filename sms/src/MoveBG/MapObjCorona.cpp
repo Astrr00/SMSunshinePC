@@ -247,8 +247,8 @@ void TBathtub::updatePosture_()
 		axis.cross(y, up);
 		axis.normalize();
 		axis.scale(unk16C->rebound.get() * (rate * -acosf(y.dot(up))));
-		mAngularVelocity.scaleAdd(unk16C->angleVelDamp.get(), axis,
-		                          mAngularVelocity);
+		mAngularVelocity.scaleAdd(unk16C->angleVelDamp.get(), mAngularVelocity,
+		                          axis);
 	} else {
 		unk250--;
 	}
@@ -299,7 +299,7 @@ static f32 getDir(MtxPtr mtx, const JGeometry::TVec3<f32>& pos,
 	JGeometry::TVec3<f32> normal;
 	normal.normalize(delta);
 	JGeometry::TVec3<f32> tangent;
-	tangent.scaleAdd(-normal.dot(direction), direction, normal);
+	tangent.scaleAdd(-normal.dot(direction), normal, direction);
 	delta += tangent;
 	f32 localZ = zDir.dot(delta);
 	f32 localX = xDir.dot(delta);

@@ -42,6 +42,7 @@ static inline void RotateAboutAxis(const JGeometry::TVec3<f32>& param_axis,
 	mtxT.identity();
 	mtxT.setRotate(param_axis, angle);
 	JGeometry::TVec3<f32> src = *vec;
+	// asm 0x80357F6C-0x80358044: retail multiplies with column 0 (m00*x + m10*y + m20*z of mMtx)
 	vec->x = mtxT.at(0, 0) * src.x + mtxT.at(0, 1) * src.y + mtxT.at(0, 2) * src.z;
 	vec->y = mtxT.at(1, 0) * src.x + mtxT.at(1, 1) * src.y + mtxT.at(1, 2) * src.z;
 	vec->z = mtxT.at(2, 0) * src.x + mtxT.at(2, 1) * src.y + mtxT.at(2, 2) * src.z;
@@ -197,7 +198,8 @@ bool CLBIsPointInCube(const Vec& param_1, const Vec& param_2,
 
 	if (param_3.y != 0.0f || param_3.x != 0.0f || param_3.z != 0.0f) {
 		if (param_3.z != 0.0f) {
-			s16 zAngle = CLBRoundf<s16>(DEG2SHORTANGLE(-param_3.z));
+			f32 zDeg = -param_3.z;
+			s16 zAngle = CLBRoundf<s16>(DEG2SHORTANGLE(zDeg));
 			f32 cosZ   = JMASCos(zAngle);
 			f32 sinZ   = JMASSin(zAngle);
 
@@ -208,7 +210,8 @@ bool CLBIsPointInCube(const Vec& param_1, const Vec& param_2,
 		}
 
 		if (param_3.y != 0.0f) {
-			s16 yAngle = CLBRoundf<s16>(DEG2SHORTANGLE(-param_3.y));
+			f32 yDeg = -param_3.y;
+			s16 yAngle = CLBRoundf<s16>(DEG2SHORTANGLE(yDeg));
 			f32 cosY   = JMASCos(yAngle);
 			f32 sinY   = JMASSin(yAngle);
 
@@ -219,7 +222,8 @@ bool CLBIsPointInCube(const Vec& param_1, const Vec& param_2,
 		}
 
 		if (param_3.x != 0.0f) {
-			s16 xAngle = CLBRoundf<s16>(DEG2SHORTANGLE(-param_3.x));
+			f32 xDeg = -param_3.x;
+			s16 xAngle = CLBRoundf<s16>(DEG2SHORTANGLE(xDeg));
 			f32 cosX   = JMASCos(xAngle);
 			f32 sinX   = JMASSin(xAngle);
 
@@ -374,7 +378,7 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 	normalizeInner2(local_a8);
 
 	// Center point
-	out_grid[4].scaleAdd(near_dist, origin, local_a8);
+	out_grid[4].scaleAdd(near_dist, local_a8, origin);
 
 	f32 dz         = origin.z - lookat.z;
 	f32 dx         = origin.x - lookat.x;
@@ -446,7 +450,7 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 	out_grid[1].x = out_grid[4].x + fVar19.x;
 	out_grid[1].y = out_grid[4].y + fVar19.y;
 	out_grid[1].z = out_grid[4].z + fVar19.z;
-	out_grid[7].scaleAdd(fVar6, out_grid[4], local_68);
+	out_grid[7].scaleAdd(fVar6, local_68, out_grid[4]);
 
 	// local_74 * -half width, shared by out_grid[3] and the diagonal (retail CSEs it, so no fused madd)
 	JGeometry::TVec3<f32> leftOffset;
@@ -469,16 +473,16 @@ void CLBCalcNearNinePos(JGeometry::TVec3<f32>* out_grid, S16Vec* out_euler,
 	local_90.z = leftOffset.z + fVar19.z;
 	MsVECNormalize(&local_90, &local_90);
 
-	out_grid[0].scaleAdd(halfPlaneDiagonal, out_grid[4], local_90);
+	out_grid[0].scaleAdd(halfPlaneDiagonal, local_90, out_grid[4]);
 	local_90.negate();
-	out_grid[8].scaleAdd(halfPlaneDiagonal, out_grid[4], local_90);
+	out_grid[8].scaleAdd(halfPlaneDiagonal, local_90, out_grid[4]);
 
 	local_90.x = (f32)(fVar16.x + fVar19.x);
 	local_90.y = (f32)(fVar16.y + fVar19.y);
 	local_90.z = (f32)(fVar16.z + fVar19.z);
 	MsVECNormalize(&local_90, &local_90);
 
-	out_grid[2].scaleAdd(halfPlaneDiagonal, out_grid[4], local_90);
+	out_grid[2].scaleAdd(halfPlaneDiagonal, local_90, out_grid[4]);
 	local_90.negate();
-	out_grid[6].scaleAdd(halfPlaneDiagonal, out_grid[4], local_90);
+	out_grid[6].scaleAdd(halfPlaneDiagonal, local_90, out_grid[4]);
 }

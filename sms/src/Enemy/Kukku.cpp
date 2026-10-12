@@ -370,7 +370,7 @@ void TKukku::dropCoins()
 void TKukku::setDeadAnm()
 {
 	mMActor->setBck("tori_down");
-	setCurAnmSound();
+	TLiveActor::setCurAnmSound();
 }
 
 void TKukku::setAfterDeadEffect()

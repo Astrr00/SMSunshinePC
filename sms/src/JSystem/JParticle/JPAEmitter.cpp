@@ -599,9 +599,10 @@ JPABaseParticle* JPABaseEmitter::createParticle()
 		}
 
 		JGeometry::TVec3<f32> local_35c;
-		local_35c.x = local_398.x + add3_vec.x + f26_f25_f28.x + f22_f23_f24.x;
-		local_35c.y = local_398.y + add3_vec.y + f26_f25_f28.y + f22_f23_f24.y;
-		local_35c.z = local_398.z + add3_vec.z + f26_f25_f28.z + f22_f23_f24.z;
+		// asm 0x8006E548: retail adds L + (add3 + (f26 + f22)), right-associated
+		local_35c.x = local_398.x + (add3_vec.x + (f26_f25_f28.x + f22_f23_f24.x));
+		local_35c.y = local_398.y + (add3_vec.y + (f26_f25_f28.y + f22_f23_f24.y));
+		local_35c.z = local_398.z + (add3_vec.z + (f26_f25_f28.z + f22_f23_f24.z));
 
 		if (unk1C4 != 0.0f)
 			local_35c *= random_scale;

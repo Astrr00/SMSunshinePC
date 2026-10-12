@@ -107,15 +107,13 @@ void TCoasterEnemy::moveCoaster()
 	JGeometry::TVec3<f32> forward;
 	mQuat.getZDir(forward);
 
-	JGeometry::TVec3<f32> axis;
-	axis.cross(forward, delta);
-
 	JGeometry::TVec3<f32> up;
 	mQuat.getYDir(up);
 
 	JGeometry::TQuat4<f32> steer;
-	steer.setRotate(forward, axis, 0.1f);
-	mQuat.mul(steer);
+	// asm: setRotate(forward, delta) crosses internally
+	steer.setRotate(forward, delta, 0.1f);
+	mQuat.mul(steer, mQuat); // asm 0x803469A4: steer * mQuat
 
 	// Y-axis rotation
 	JGeometry::TVec3<f32> right;
@@ -130,7 +128,7 @@ void TCoasterEnemy::moveCoaster()
 		tiltQuat.rotate(forward, curUp);
 
 		steer.setRotate(up, curUp, 0.1f);
-		mQuat.mul(steer);
+		mQuat.mul(steer, mQuat); // asm 0x80346C7C
 	}
 
 	mQuat.normalize();

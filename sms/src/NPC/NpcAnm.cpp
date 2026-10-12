@@ -712,7 +712,7 @@ bool TBaseNPC::npcWetting()
 								break;
 
 							case NPC_ANM_KIND_UNK7:
-							case NPC_ANM_KIND_UNK10:
+							case NPC_ANM_KIND_MAD: // asm 0x801687EC: jump table idx 5 (kind 0xA), not UNK10
 							case NPC_ANM_KIND_UNK18:
 								npcWetOut();
 								result = true;

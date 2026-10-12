@@ -714,10 +714,10 @@ bool TChuuHana::willFall(s32 checkTime)
 		limit += 250.0f;
 
 	if (unk218 != nullptr) {
-		f32 dy = mPosition.y - unk218->mPosition.y;
 		f32 dx = mPosition.x - unk218->mPosition.x;
+		f32 dy = mPosition.y - unk218->mPosition.y;
 		f32 dz = mPosition.z - unk218->mPosition.z;
-		if (JGeometry::TUtil<f32>::sqrt(dy * dy + dx * dx + dz * dz) > limit) {
+		if (JGeometry::TUtil<f32>::sqrt(dx * dx + dy * dy + dz * dz) > limit) {
 			unk1A4 = mCheckOnPanelTime;
 
 			JGeometry::TVec3<f32> pt;
@@ -780,8 +780,10 @@ void TChuuHana::checkStretchType()
 			unk214 = 1;
 			mSpine->pushNerve(&TNerveChuuHanaFall2::theNerve());
 			mSpine->pushNerve(&TNerveChuuHanaJumpPrepare::theNerve());
+			return;
 		}
-	} else {
+	}
+	{
 		int idx = mInstanceIndex;
 		f32 limit = unk1B4->mSLStretchHeightS.get();
 		if (idx > 0)
@@ -949,7 +951,7 @@ BOOL TNerveChuuHanaKeepBalance::execute(TSpineBase<TLiveActor>* spine) const
 
 BOOL TNerveChuuHanaStick::execute(TSpineBase<TLiveActor>* spine) const
 {
-	char trash[0x10];
+	char trash[0x8];
 	TChuuHana* self = (TChuuHana*)spine->getBody();
 	if (spine->getTime() == 0 || !self->isBckAnm(4)) {
 		self->setBckAnm(4);
@@ -975,6 +977,9 @@ BOOL TNerveChuuHanaStick::execute(TSpineBase<TLiveActor>* spine) const
 		return true;
 	}
 
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	self->walkBehavior(3, 0.2f);
 	return false;
 }
@@ -1113,7 +1118,6 @@ BOOL TNerveChuuHanaJumpPrepare::execute(TSpineBase<TLiveActor>* spine) const
 		self->onLiveFlag(LIVE_FLAG_AIRBORNE);
 		self->unk130 = 0;
 	}
-
 	return self->checkCurAnmEnd(0) ? TRUE : FALSE;
 }
 

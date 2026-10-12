@@ -221,7 +221,6 @@ latestNerveOutOfLine(TSpineBase<TLiveActor>* spine)
 
 void TBossHanachanPartsBase::setDamageFog_(JDrama::TGraphics* graphics)
 {
-	char trash[0x10]; // unused stack slot (present in the retail frame)
 	bool notHead = true;
 	if (mActorType == 0x8000014)
 		notHead = false;
@@ -230,6 +229,7 @@ void TBossHanachanPartsBase::setDamageFog_(JDrama::TGraphics* graphics)
 	u16 materialNum = modelData->getMaterialNum();
 	JGeometry::TVec3<f32> pos(mJointMtx[0][3], mJointMtx[1][3],
 	                          mJointMtx[2][3]);
+	char trash[0x10]; // unused stack slot (present in the retail frame)
 
 	const TNerveBase<TLiveActor>* nerve = latestNerveOutOfLine(mOwner->mSpine);
 	if (nerve == &TNerveBossHanachanDamage::theNerve()) {
@@ -544,6 +544,7 @@ static inline bool isReceivable(const TBossHanachanPartsBase* self)
 
 BOOL TBossHanachanPartsBody::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x28];
 	if (gpMarDirector->isThing())
 		return FALSE;
 
@@ -591,6 +592,7 @@ BOOL TBossHanachanPartsBody::receiveMessage(THitActor* sender, u32 message)
 
 BOOL TBossHanachanPartsHead::receiveMessage(THitActor* sender, u32 message)
 {
+	char trash[0x18];
 	if (gpMarDirector->isThing())
 		return FALSE;
 

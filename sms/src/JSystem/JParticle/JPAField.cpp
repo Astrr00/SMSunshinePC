@@ -136,14 +136,9 @@ void JPABaseField::loadFieldBlock(JPADataBlock* block)
 	stream >> unk51;
 	stream >> unk52;
 	stream >> unk53;
-#ifdef TARGET_PC
-	// Retail (loadFieldBlock asm, 0x8007018C) reads the u16 status at +0x54 here and then skips 2 padding bytes; the f32 read
-	// below shifts every later field by 2 bytes (the real data has the strength at block offset 0x14 and the vectors at
-	// 0x20/0x2C). mMaxDistanceSq is computed by calcMaxDistance(), never loaded.
+	// asm 0x8007018C: retail reads the u16 status at +0x54 here, then skips 2 padding bytes (mMaxDistanceSq is computed by
+	// calcMaxDistance(), never loaded); the old non-PC path read an f32 into +0x88 and shifted every later field.
 	stream >> unk54;
-#else
-	stream >> mMaxDistanceSq;
-#endif
 	stream.skip(0x2);
 	stream >> unk10;
 	stream >> unk14;

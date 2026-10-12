@@ -48,8 +48,8 @@ TPoihanaSaveLoadParams::TPoihanaSaveLoadParams(const char* path)
     , PARAM_INIT(mSLBackThrowVal, 0.5f)
     , PARAM_INIT(mSLSleepFrame, 1000)
     , PARAM_INIT(mSLWakeFrame, 2000)
-    , PARAM_INIT(mSLTrapJumpMinSpY, 10.0f)
     , PARAM_INIT(mSLTrapJumpMaxSpY, 10.0f)
+    , PARAM_INIT(mSLTrapJumpMinSpY, 10.0f)
     , PARAM_INIT(mSLTrapJumpMaxSpXZ, 8.0f)
     , PARAM_INIT(mSLTrapJumpMinSpXZ, 8.0f)
     , PARAM_INIT(mSLTrapJumpGravity, 1.0f)
@@ -670,6 +670,7 @@ DEFINE_NERVE(TNervePoihanaThrow, TLiveActor)
 			MsMtxSetRotRPH(afStack_4c, self->mRotation.x, self->mRotation.y,
 			               self->mRotation.z);
 			JGeometry::TVec3<f32> local_58(0.0f, 1.0f, -backThrowVal);
+			char trash[0x10];
 			MTXMultVec(afStack_4c, &local_58, &local_58);
 			SMS_ThrowMario(local_58, self->unk19C->mSLThrowSpeed.get());
 			self->mThrowTimer = 0;

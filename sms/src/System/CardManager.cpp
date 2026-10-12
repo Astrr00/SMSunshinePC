@@ -153,9 +153,17 @@ void TCardManager::copyTo(TCardManager::TCriteria* param_1,
 		char trash[0x20];
 
 		param_2->unk4 = stream.readU32();
+#ifdef TARGET_PC
+		tmp = stream.readU64();
+#else
 		stream.read(&tmp, sizeof(u64));
+#endif
 		param_2->unk8 = tmp;
+#ifdef TARGET_PC
+		tmp = stream.readU64();
+#else
 		stream.read(&tmp, sizeof(u64));
+#endif
 		param_2->unk10 = tmp;
 		param_2->unk18 = stream.readU32();
 		param_2->unk1C = stream.readU16();

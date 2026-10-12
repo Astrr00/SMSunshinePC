@@ -10,6 +10,23 @@
 #include <Player/MarioAccess.hpp>
 #include <math.h>
 
+#define LIMITKOOPAJR_NERVE(Name)                                               \
+	class Name : public TNerveBase<TLiveActor> {                               \
+	public:                                                                    \
+		virtual BOOL execute(TSpineBase<TLiveActor>*) const;                   \
+		static const Name& theNerve();                                         \
+	};                                                                         \
+	const Name& Name::theNerve()                                               \
+	{                                                                          \
+		static Name instance;                                                  \
+		return instance;                                                       \
+	}
+
+LIMITKOOPAJR_NERVE(TNerveLimitKoopaJrRun)
+LIMITKOOPAJR_NERVE(TNerveLimitKoopaJrWait)
+LIMITKOOPAJR_NERVE(TNerveLimitKoopaJrLaunch)
+LIMITKOOPAJR_NERVE(TNerveLimitKoopaJrYahoo)
+
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
@@ -220,6 +237,7 @@ void TLimitKoopaJr::moveRun()
 
 BOOL TNerveLimitKoopaJrRun::execute(TSpineBase<TLiveActor>* spine) const
 {
+	char trash[0x10];
 	TLimitKoopaJr* self = (TLimitKoopaJr*)spine->getBody();
 
 	if (spine->getTime() == 0) {

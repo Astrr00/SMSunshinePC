@@ -884,7 +884,7 @@ bool TCardLoad::titleDraw()
 				if (unk20C[i] > 500) {
 					JUTRect bounds = unkF8[i]->getPane()->getBounds();
 					unkF8[i]->setPaneAlpha(25, 0, 255);
-					unk222[i] = 3;
+					unk222[i] = 2; // asm 0x8022CCB4: retail stores 2 (was 3)
 				}
 				break;
 
@@ -901,8 +901,8 @@ bool TCardLoad::titleDraw()
 					JUTRect local_124 = unkF8[i]->getPane()->getBounds();
 
 					unkF8[i]->setCenteredSize(
-					    25, local_124.getWidth() * 2, local_124.getHeight() * 2,
-					    local_124.getWidth(), local_124.getHeight());
+					    25, local_124.getWidth(), local_124.getHeight(), // asm 0x8022CCE4: target w,h from initial 2w,2h (was swapped)
+					    local_124.getWidth() * 2, local_124.getHeight() * 2);
 
 					unkF8[i]->setPaneAlpha(25, 255, 0);
 					unk222[i] = 0;
@@ -1225,8 +1225,8 @@ s8 TCardLoad::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
 		}
 
 		if (unkC4 == 4) {
-			unk4D8[unkB7]->setCenteredSize(40, unk4E0[unkB7].getWidth() * 0.5f,
-			                               unk4E0[unkB7].getHeight() * 0.5f,
+			unk4D8[unkB7]->setCenteredSize(40, unk4E0[unkB7].getWidth() * 1.5f, // asm 0x8022AF28: target 1.5x (pool @5144), was 0.5x
+			                               unk4E0[unkB7].getHeight() * 1.5f,
 			                               unk4E0[unkB7].getWidth(),
 			                               unk4E0[unkB7].getHeight());
 			JUTRect bounds = unk4D8[unkB7]->getPane()->mGlobalBounds;
@@ -2062,8 +2062,8 @@ s8 TCardLoad::selectFunction()
 				unk2CC[i]->hide();
 				unk2D8[i]->hide();
 				unk2FC[i]->hide();
-				unk2A4[i]->setCenteredSize(30, 0, 0, rect.getWidth(),
-				                           rect.getHeight());
+				unk2A4[i]->setCenteredSize(30, 0, 0, unk2B0.getWidth(), // asm 0x802271D8: size from unk2B0, not unk348[unkB0]
+				                           unk2B0.getHeight());
 			}
 		}
 	} break;

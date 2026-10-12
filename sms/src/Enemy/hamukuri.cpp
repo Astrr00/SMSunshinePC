@@ -259,7 +259,8 @@ void THamuKuriManager::setSearchHamuKuri()
 			f32 canSearchDist = params->mSLCanSearchDist.get();
 
 			TMapObjBase* pTVar18 = nullptr;
-			f32 fVar1            = canSearchDist * canSearchDist;
+			f32 fVar1            = canSearchDist;
+			fVar1 *= canSearchDist;
 
 			int nObjs = unk68;
 			for (int j = 0; j < nObjs; ++j) {
@@ -518,6 +519,7 @@ TSpineEnemy* TFireHamuKuriManager::createEnemyInstance()
 
 void TFireHamuKuriManager::initSetEnemies()
 {
+	char trash[0x18];
 	for (int i = 0; i < mObjNum; ++i) {
 		TFireHamuKuri* hamu = (TFireHamuKuri*)unk18[i];
 		hamu->unk21C        = mFireHamNoseColorStart;
@@ -2476,10 +2478,10 @@ bool TDoroHamuKuri::isCollidMove(THitActor* param_1)
 						mHeldObject = pTVar1;
 
 						// TODO: this is an inline
+						int uVar10 = -1;
 						int uVar11 = other->unk124->getCurGraphIndex(); // asm 0x80262F74 (lwz 0x124(r31))
 
 						int count  = TMsRange<s32>(2, 3).rand();
-						int uVar10 = -1;
 						for (int i = 0; i < count; ++i) {
 							int next = other->unk124->unk0->getRandomNextIndex( // asm 0x80262FF0 (lwz 0x124(r31))
 							    uVar11, uVar10, 0xffffffff);

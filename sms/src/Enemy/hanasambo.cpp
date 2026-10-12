@@ -403,8 +403,13 @@ void TSamboFlowerManager::dropLeaf(JGeometry::TVec3<f32>& param_1,
 void TSamboFlower::load(JSUMemoryInputStream& stream)
 {
 	TSpineEnemy::load(stream);
+#ifdef TARGET_PC
+	unk15C = stream.readS32();
+	unk158 = stream.readS32();
+#else
 	stream.read(&unk15C, 4);
 	stream.read(&unk158, 4);
+#endif
 	unk160 = 1;
 	reset();
 	offLiveFlag(LIVE_FLAG_UNK800);

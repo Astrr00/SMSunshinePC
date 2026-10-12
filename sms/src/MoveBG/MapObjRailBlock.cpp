@@ -280,22 +280,19 @@ void TNormalLift::readRailFlag()
 	TRailMapObj::readRailFlag();
 
 	TGraphWeb* graph = unk138->unk0;
+	char trash[0x18];
 
-	if (!unk138->unk0)
-		return;
-
-	if (graph->isDummy())
-		return;
-
-	TGraphNode& node = graph->getGraphNode(unk138->mCurrIdx);
-	if (node.getRailNode()->mFlags & 0x800) {
-		unk150 = node.getRailNode()->mPitch;
-	}
-	if (node.getRailNode()->mFlags & 0x1000) {
-		u16 roll = node.getRailNode()->mRoll;
-		if (roll == 0xffff)
-			roll = 0;
-		unk152 = roll;
+	if (graph != nullptr && !graph->isDummy()) {
+		TGraphNode& node = graph->getGraphNode(unk138->mCurrIdx);
+		if (node.getRailNode()->mFlags & 0x800) {
+			unk150 = node.getRailNode()->mPitch;
+		}
+		if (node.getRailNode()->mFlags & 0x1000) {
+			u16 roll = node.getRailNode()->mRoll;
+			if (roll == 0xffff)
+				roll = 0;
+			unk152 = roll;
+		}
 	}
 }
 
@@ -412,9 +409,9 @@ void TRailBlock::control()
 
 			if (checkRailFlag(2)) {
 				MTXIdentity(unk174);
-				unk168.x = 0.0f;
-				unk168.y = 0.0f;
 				unk168.z = 0.0f;
+				unk168.y = 0.0f;
+				unk168.x = 0.0f;
 			} else {
 				unk168 = unk15C;
 
@@ -422,9 +419,9 @@ void TRailBlock::control()
 				MsMtxSetRotRPH(rotMtx, unk168.x, unk168.y, unk168.z);
 				MTXConcat(rotMtx, unk174, unk174);
 
-				unk168.x = 0.0f;
-				unk168.y = 0.0f;
 				unk168.z = 0.0f;
+				unk168.y = 0.0f;
+				unk168.x = 0.0f;
 
 				JGeometry::TVec3<f32> xAxis;
 				xAxis.x = unk174[0][0];

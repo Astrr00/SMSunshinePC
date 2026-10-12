@@ -503,11 +503,12 @@ void TModelWaterManager::move()
 	for (int i = 0; i < mParticleCount; ++i) {
 		if (mParticleVelocitySOA[i].y < 0.0f) {
 			f31 = gpMap->checkGroundIgnoreWaterThrough(
-			    mParticlePositionSOA[i].x, mParticlePositionSOA[i].y - fVar1,
+			    mParticlePositionSOA[i].x,
+			    mParticlePositionSOA[i].y - mParticleVelocitySOA[i].y, // asm 0x8015E354
 			    mParticlePositionSOA[i].z, &local_248);
 
 			if (!local_248->isLegal() || 1.0f + f31 < mParticlePositionSOA[i].y)
-				continue;
+				goto wallBranch; // asm 0x8015E39C/E3AC: retail takes the wall branch
 
 			if (local_248->isWaterSurface()) {
 				if (MsRandF() < unk5D88[11])
@@ -555,9 +556,8 @@ void TModelWaterManager::move()
 					setFlagBottom4Bits(i, 2);
 				} else {
 					mParticleLifetimeSOA[i] = 0.0f;
+					continue; // asm 0x8015E634: only this path skips the unk2914 store
 				}
-
-				continue;
 			}
 
 			unk2914[i] = local_248;
@@ -570,6 +570,7 @@ void TModelWaterManager::move()
 					mParticleLifetimeSOA[i] = 0.0f;
 			}
 		} else {
+wallBranch:
 			static TBGWallCheckRecord wcheck;
 
 			wcheck.set(mParticlePositionSOA[i].x,
@@ -582,6 +583,7 @@ void TModelWaterManager::move()
 
 				if (getFlagBottom4Bits(i) == 2) {
 					mParticleLifetimeSOA[i] = 0.0f;
+					continue; // asm 0x8015E72C: skips the unk2914 store
 				} else {
 					if (local_248 != nullptr && local_248->isLegal()
 					    && mParticlePositionSOA[i].y
@@ -591,6 +593,7 @@ void TModelWaterManager::move()
 					                               ->mMagnify.get()
 					                 + f31) {
 						mParticleLifetimeSOA[i] = 0.0f;
+						continue; // asm 0x8015E7A0: skips the unk2914 store
 					} else {
 						if (r27->mActor != nullptr) {
 							mStaticHitActor.mPosition = mParticlePositionSOA[i];
@@ -699,10 +702,10 @@ void TModelWaterManager::move()
 						mParticleSizeSOA[r20]     = mParticleSizeSOA[i];
 						mParticleLifetimeSOA[r20] = mParticleLifetimeSOA[i];
 						mParticleLifetimeSOA[i]   = 0.0f;
+					} else {
+						r20 = i; // asm 0x8015ECE8: len >= max sets r20
 					}
 				}
-			} else {
-				r20 = i;
 			}
 			break;
 		}
@@ -726,10 +729,10 @@ void TModelWaterManager::move()
 						mParticleSizeSOA[r26]     = mParticleSizeSOA[i];
 						mParticleLifetimeSOA[r26] = mParticleLifetimeSOA[i];
 						mParticleLifetimeSOA[i]   = 0.0f;
+					} else {
+						r26 = i; // asm 0x8015EE58: len >= max sets r26
 					}
 				}
-			} else {
-				r26 = i;
 			}
 			break;
 		}

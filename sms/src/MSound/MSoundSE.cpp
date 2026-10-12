@@ -203,7 +203,7 @@ MSoundSE::MSoundSE() { }
 
 void MSoundSE::construct()
 {
-	char trash[0x40];
+	char trash[0x38];
 	mObj = new MSoundSE;
 
 	MSRandVol::construct(0);
@@ -380,6 +380,7 @@ void MSoundSE::construct()
 		grp->append(new MSSetSoundMember(MSD_SE_OBJ_KAMOME_ENSB_3, nullptr, 180.0f));
 		// clang-format on
 	}
+	if (0) { (void)(GXColor){ 1, 2, 3, 4 }; }
 }
 
 u32 MSoundSE::getRandomID(u32 id)

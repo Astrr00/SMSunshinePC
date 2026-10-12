@@ -839,6 +839,8 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					}
 
 					mMenuState = MENU_ANIM_LOOP;
+				} else {
+					break; // asm 0x80233C1C: retail jumps to end of switch (beq .L_802348D0) when no prev index
 				}
 			} else if (mGamePad->checkFrameMeaning(
 			               TMarioGamePad::MEANING_MENU_RIGHT)) {
@@ -912,6 +914,8 @@ void TSelectMenu::perform(u32 flags, JDrama::TGraphics* gfx)
 					}
 
 					mMenuState = MENU_ANIM_LOOP;
+				} else {
+					break; // asm 0x80233FEC: retail jumps to end of switch when no next index
 				}
 			}
 		}

@@ -104,10 +104,12 @@ void MAnmSoundNPC::startAnimSound(void* interface, u32 sound_id,
 	if (MSGMSound->gateCheck(sound_id)) {
 		JAIAnimeSoundData* ptr = mData;
 
-		if (ptr->mEntries[mDataCounter].unk10 & 0xFFFF0000) {
-			if (ptr->mEntries[mDataCounter].unk10 & 0xFF000000) {
+		u32 flags = ptr->mEntries[mDataCounter].unk10;
+		u32 hi    = flags & 0xFFFF0000;
+		if (hi) {
+			if (hi & 0xFF000000) {
 				u32 uVar5 = mLoopCount;
-				u32 uVar6 = (ptr->mEntries[mDataCounter].unk10 >> 24) + 1;
+				u32 uVar6 = (flags >> 24) + 1;
 				if (uVar5 != 0) {
 					u32 uVar3 = uVar5 + unk98 % uVar6;
 					if (uVar3 % uVar6 != 0)
@@ -115,7 +117,7 @@ void MAnmSoundNPC::startAnimSound(void* interface, u32 sound_id,
 				}
 			}
 
-			if (ptr->mEntries[mDataCounter].unk10 & 0xFF0000) {
+			if (hi & 0xFF0000) {
 				u8 b = ptr->mEntries[mDataCounter].unk10 >> 16;
 				b += 1;
 				b *= JAIConst::random.get_ufloat_1();

@@ -55,15 +55,15 @@ inline void TMirrorCamera::makeMirrorViewMtx()
 	// reflect the eye point, the target and the up point across the plane
 	// asm 0x801E4E88-0x801E4F84 / 0x801E5090-C4: p' = p + n * (-2 * (n.p - d))
 	unk98.scaleAdd((Vec3DotOutOfLine(plane.n, gpCamera->unk124) - plane.d) * -2.0f,
-	               gpCamera->unk124, plane.n);
+	               plane.n, gpCamera->unk124);
 
 	JGeometry::TVec3<f32> target;
 	target.scaleAdd((Vec3DotOutOfLine(plane.n, gpCamera->unk148) - plane.d) * -2.0f,
-	                gpCamera->unk148, plane.n);
+	                plane.n, gpCamera->unk148);
 
 	JGeometry::TVec3<f32> up;
 	up.scaleAdd((Vec3DotOutOfLine(plane.n, gpCamera->mUp) - plane.d) * -2.0f,
-	            gpCamera->mUp, plane.n);
+	            plane.n, gpCamera->mUp);
 
 	C_MTXLookAt(unk30, &unk98, &up, &target);
 }
@@ -221,17 +221,17 @@ inline void TMirrorModel::entry()
 
 		ScaleAddOutOfLine(cam->unk98,
 		                  (Vec3DotOutOfLine(plane.n, gpCamera->unk124) - plane.d) * -2.0f,
-		                  gpCamera->unk124, plane.n);
+		                  plane.n, gpCamera->unk124);
 
 		JGeometry::TVec3<f32> target;
 		ScaleAddOutOfLine(target,
 		                  (Vec3DotOutOfLine(plane.n, gpCamera->unk148) - plane.d) * -2.0f,
-		                  gpCamera->unk148, plane.n);
+		                  plane.n, gpCamera->unk148);
 
 		JGeometry::TVec3<f32> up;
 		ScaleAddOutOfLine(up,
 		                  (Vec3DotOutOfLine(plane.n, gpCamera->mUp) - plane.d) * -2.0f,
-		                  gpCamera->mUp, plane.n);
+		                  plane.n, gpCamera->mUp);
 
 		C_MTXLookAt(cam->unk30, &cam->unk98, &up, &target);
 	}
@@ -334,10 +334,10 @@ bool TMirrorModelManager::isUpperThanMirrorPlane(
 	const JGeometry::TVec3<f32>* normal
 	    = unk18 != -1 ? &unk1C[unk18]->getNormalVec() : nullptr;
 
-	f32 d   = unk18 != -1 ? unk1C[unk18]->getD() : 0.0f;
-	f32 dot = normal->dot(param_1);
-
-	return dot + d < -50.0f ? false : true;
+	return normal->dot(param_1) + (unk18 != -1 ? unk1C[unk18]->getD() : 0.0f)
+	               < -50.0f
+	           ? false
+	           : true;
 }
 
 bool TMirrorModelManager::isInMirror(JGeometry::TVec3<f32>& param_1) const

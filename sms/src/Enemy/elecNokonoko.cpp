@@ -406,9 +406,10 @@ BOOL TNerveElecNokonokoCollect::execute(TSpineBase<TLiveActor>* spine) const
 		return true;
 	}
 
-	char trash[24]; // matching: stack padding
-
 	self->walkToCurPathNode(0.0f, self->mTurnSpeed, 0.0f);
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	return false;
 }
 
@@ -805,8 +806,7 @@ void TElecNokonoko::behaveToWater(THitActor* actor)
 		return;
 
 	if (mSpine->getCurrentNerve() != &TNerveSmallEnemyDie::theNerve()) {
-		if (isBckAnm(0) && mCarapaceShot == 0) {
-		} else {
+		if (!isBckAnm(0) || mCarapaceShot != 0) {
 			unk165                  = 1;
 			mSprayedByWaterCooldown = 0;
 			if (mSpine->getCurrentNerve()

@@ -337,9 +337,12 @@ void TFruitsBoat::moveObject()
 			JGeometry::TVec3<f32> axis;
 			axis.cross(up, toMario);
 			axis.normalize();
-			mTiltAxis.x += 0.1f * (axis.x - mTiltAxis.x);
-			mTiltAxis.y += 0.1f * (axis.y - mTiltAxis.y);
-			mTiltAxis.z += 0.1f * (axis.z - mTiltAxis.z);
+			f32 dx = 0.1f * (axis.x - mTiltAxis.x);
+			mTiltAxis.x += dx;
+			f32 dy = 0.1f * (axis.y - mTiltAxis.y);
+			mTiltAxis.y += dy;
+			f32 dz = 0.1f * (axis.z - mTiltAxis.z);
+			mTiltAxis.z += dz;
 		}
 	}
 
@@ -487,9 +490,10 @@ BOOL TNerveFruitsBoatGraphWander::execute(TSpineBase<TLiveActor>* spine) const
 
 		JGeometry::TVec3<f32> dir;
 		f32 radius = 1.0f;
-		dir.x      = radius * MsSin(self->mRotation.y);
+		f32 theta  = self->mRotation.y;
+		dir.x      = radius * MsSin(theta);
 		dir.y      = 0.0f;
-		dir.z      = radius * MsCos(self->mRotation.y);
+		dir.z      = radius * MsCos(theta);
 		self->goToDirectedNextGraphNode(dir);
 
 		if (!self->checkLiveFlag(LIVE_FLAG_UNK10000))

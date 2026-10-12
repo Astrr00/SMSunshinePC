@@ -342,7 +342,7 @@ bool TBaseNPC::isBehaveToWaterNpc() const
 	return result;
 }
 
-bool TBaseNPC::isBehaveToHitNpc() const
+inline bool TBaseNPC::isBehaveToHitNpc() const
 {
 	bool result = false;
 
@@ -778,7 +778,11 @@ void TBaseNPC::perform(u32 cue, JDrama::TGraphics* graphics)
 				f32 anmOffDist = getAnmOffDist_();
 				JGeometry::TVec3<f32> diff;
 				diff.sub(mPosition, gpCamera->unk124);
-				if (diff.squared() > CLBSquared(anmOffDist) && !bVar6
+				f32 sqx    = diff.x * diff.x;
+				f32 sqy    = diff.y * diff.y;
+				f32 sqz    = diff.z * diff.z;
+				f32 distSq = sqz + (sqx + sqy);
+				if (distSq > CLBSquared(anmOffDist) && !bVar6
 				    && mSpine->getTime() > 2) {
 					r31 = true;
 					execMotionBlend_();
@@ -806,7 +810,11 @@ void TBaseNPC::perform(u32 cue, JDrama::TGraphics* graphics)
 		offLiveFlag(LIVE_FLAG_UNK1000000);
 		JGeometry::TVec3<f32> diff;
 		diff.sub(mPosition, gpCamera->unk124);
-		if (diff.squared() > CLBSquared(mIndividualParams->mAllDLLockDist.get())
+		f32 sqx    = diff.x * diff.x;
+		f32 sqy    = diff.y * diff.y;
+		f32 sqz    = diff.z * diff.z;
+		f32 distSq = sqz + (sqx + sqy);
+		if (distSq > CLBSquared(mIndividualParams->mAllDLLockDist.get())
 		    && !isSunflower()) {
 			getModel()->lock();
 		} else {

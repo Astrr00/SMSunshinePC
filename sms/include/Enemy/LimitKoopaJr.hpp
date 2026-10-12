@@ -75,50 +75,5 @@ public:
 	/* 0x178 */ TDirectionCalc mFaceDir;
 };
 
-// ============= nerves =============
-
-class TNerveLimitKoopaJrRun : public TNerveBase<TLiveActor> {
-public:
-	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
-	static const TNerveLimitKoopaJrRun& theNerve()
-	{
-		static TNerveLimitKoopaJrRun instance;
-		return instance;
-	}
-};
-
-class TNerveLimitKoopaJrWait : public TNerveBase<TLiveActor> {
-public:
-	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
-	static const TNerveLimitKoopaJrWait& theNerve()
-	{
-		static TNerveLimitKoopaJrWait instance;
-		return instance;
-	}
-};
-
-class TNerveLimitKoopaJrLaunch : public TNerveBase<TLiveActor> {
-public:
-	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
-	static const TNerveLimitKoopaJrLaunch& theNerve()
-	{
-		static TNerveLimitKoopaJrLaunch instance;
-		return instance;
-	}
-};
-
-class TNerveLimitKoopaJrYahoo : public TNerveBase<TLiveActor> {
-public:
-	virtual BOOL execute(TSpineBase<TLiveActor>*) const;
-
-	static const TNerveLimitKoopaJrYahoo& theNerve()
-	{
-		static TNerveLimitKoopaJrYahoo instance;
-		return instance;
-	}
-};
 
 #endif

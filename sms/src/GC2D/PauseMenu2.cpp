@@ -133,7 +133,6 @@ void TPauseMenu2::load(JSUMemoryInputStream& pStream)
 
 void TPauseMenu2::loadAfter()
 {
-	char trash[0x28]; // unused stack slot (present in the retail frame)
 	// "Save data"
 	mCardSave
 	    = static_cast<TCardSave*>(JDrama::TNameRefGen::search("データセーブ"));
@@ -158,6 +157,12 @@ void TPauseMenu2::loadAfter()
 		mFirstItemAngle -= 360;
 	}
 
+
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
+	if (0) { (void)(GXColor) { 1, 2, 3, 4 }; }
 	mGamePad = gpMarDirector->unk18[0];
 }
 

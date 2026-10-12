@@ -45,7 +45,7 @@ inline static bool someUnknownInline(TBGCheckData* r31, TBGWallCheckRecord* r29)
 	f32 y2 = r31->getPoint2().y;
 	f32 y3 = r31->getPoint3().y;
 
-	if (r31->checkFlag(0x4)) {
+	if (r31->checkFlag(0x8)) {
 		if (nx > 0.0f) {
 			cz = -cz;
 
@@ -428,7 +428,6 @@ static bool LineInLineXZ(const JGeometry::TVec2<f32>& a0,
 	if ((b0 - a0).cross(a1 - a0) * (b1 - a0).cross(a1 - a0) <= 0.0f
 	    && (a0 - b0).cross(b1 - b0) * (a1 - b0).cross(b1 - b0) <= 0.0f)
 		return true;
-
 	return false;
 }
 

@@ -68,7 +68,7 @@ public:
 		tmp.set(*param_2);
 		f32 dist = wall->mNormal.dot(tmp) - wall->mDist;
 		if (param_3 - dist > 0.0f) {
-			param_2->scaleAdd(param_3 - dist, tmp, wall->mNormal);
+			param_2->scaleAdd(param_3 - dist, wall->mNormal, tmp);
 			return true;
 		}
 		return false;
@@ -194,7 +194,7 @@ void TKumokun::initAttachPlane()
 	if (wall) {
 		unk198 = wall;
 		JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
-		unk19C.setRotate(getPlaneNormal(), up, 0.0f);
+		unk19C.setRotate(up, getPlaneNormal(), 1.0f); // asm 0x80332E2C: axis=cross(up,n), amount 1.0
 		return;
 	}
 
@@ -226,7 +226,7 @@ void TKumokun::initAttachPlane()
 		unk198 = floor;
 
 		JGeometry::TVec3<f32> up(0.0f, 1.0f, 0.0f);
-		unk19C.setRotate(getPlaneNormal(), up, 0.0f);
+		unk19C.setRotate(up, getPlaneNormal(), 1.0f); // asm 0x8033305C: axis=cross(up,n), amount 1.0
 	}
 }
 
@@ -252,7 +252,7 @@ void TKumokun::bind()
 
 	if (isOnFloor()) {
 		JGeometry::TVec3<f32> local_140 = local_168;
-		local_140.normalize();
+		local_140.setLength(50.0f); // asm 0x80332838: scaled by 50.0 (@6235), not unit length
 
 		local_140 += mPosition;
 
@@ -261,7 +261,7 @@ void TKumokun::bind()
 		bVar7 |= checkOnMovingFloor(&local_15C, &floor, mPosition, local_168);
 	} else if (isOnRoof()) {
 		JGeometry::TVec3<f32> local_134 = local_168;
-		local_134.normalize();
+		local_134.setLength(50.0f); // asm 0x80332998: scaled by 50.0 (@6235), not unit length
 
 		local_134 += mPosition;
 
@@ -287,9 +287,10 @@ void TKumokun::bind()
 		JGeometry::TVec3<f32> local_110 = local_11C;
 		bVar7 |= unk1E8->checkWalls(&local_110, mWallRadius);
 
-		JGeometry::TVec3<f32> local_f8 = local_110 - mPosition;
+		// asm 0x80332C8C: delta = pushed - pre-push point, added to local_15C (retail); was mPosition/local_168 (dropped the correction)
+		JGeometry::TVec3<f32> local_f8 = local_110 - local_11C;
 
-		local_168 += local_f8;
+		local_15C += local_f8;
 	}
 
 	if (bVar7)
@@ -310,7 +311,7 @@ bool TKumokun::checkOnMovingWall(JGeometry::TVec3<f32>* param_1,
 	JGeometry::TVec3<f32> normal = getPlaneNormal();
 
 	JGeometry::TVec3<f32> local_30;
-	local_30.scaleAdd(100.0f, param_3, normal); // retail: normal*100 + param_3 (fmadds order checked vs asm)
+	local_30.scaleAdd(100.0f, normal, param_3); // asm: normal*100 + param_3
 
 	JGeometry::TVec3<f32> local_3C = local_30;
 	local_3C += param_4;
@@ -327,26 +328,24 @@ bool TKumokun::checkOnMovingWall(JGeometry::TVec3<f32>* param_1,
 
 	JGeometry::TVec3<f32> local_70 = getPlaneNormal();
 	JGeometry::TVec3<f32> local_48;
-	local_48.scaleAdd(-10.0f, local_3C, local_70);
+	local_48.scaleAdd(-10.0f, local_70, local_3C);
 
 	const TBGCheckData* wall = checkWallPlane(&local_48, mHeadHeight, 100.0f);
 
-	JGeometry::TVec3<f32> local_3C2;
+	// asm 0x80332534/0x80332554: retail reuses local_3C; no wall -> restores the original probe point local_30, wall -> only x/z from local_48
 	if (!wall) {
 		result = true;
-		local_3C2.set(local_48);
+		local_3C.set(local_30);
 	} else {
-		local_3C2.x = local_48.x;
-		local_3C2.z = local_48.z;
+		local_3C.x = local_48.x;
+		local_3C.z = local_48.z;
 	}
-	(void)local_48; // hmmmmm....
 
 	JGeometry::TVec3<f32> offset = getPlaneNormal();
 	offset *= -100.0f;
-	JGeometry::TVec3<f32> vec = local_3C2;
-	vec += offset;
+	local_3C += offset;
 
-	param_1->set(vec);
+	param_1->set(local_3C);
 	*param_1 -= param_3;
 
 	return result;
@@ -377,7 +376,7 @@ bool TKumokun::checkOnMovingFloor(JGeometry::TVec3<f32>* param_1,
 			uVar7 = true;
 			local_8C.set(local_98);
 		} else {
-			local_8C.y = yTmp;
+			local_8C.y = dVar10; // asm 0x803321E0: snaps y to ground+1 (was yTmp = no snap)
 		}
 	} else {
 		uVar7 = true;
@@ -426,9 +425,9 @@ bool TKumokun::checkOnMovingRoof(JGeometry::TVec3<f32>* param_1,
 	    = gpMap->checkRoof(local_A8.x, yTmp - mHeadHeight, local_A8.z, param_2);
 	dVar10 -= 1.0f;
 	if (yTmp > dVar10 - 0.05f) {
-		local_A8.y = yTmp;
-	} else if (mHeadHeight < dVar10 - yTmp) {
-		local_A8.y = yTmp;
+		local_A8.y = dVar10; // asm 0x80331F04
+	} else if (dVar10 - yTmp < mHeadHeight) {
+		local_A8.y = dVar10; // asm 0x80331F1C: roof within head height (was inverted, wrote yTmp)
 	} else {
 		uVar7 = true;
 		local_A8.set(local_b4);
@@ -480,7 +479,7 @@ void TKumokun::bindOnFlying()
 	}
 
 	const TBGCheckData* wall
-	    = checkWallPlane(&local_74, mWallRadius, mBodyRadius);
+	    = checkWallPlane(&local_74, mHeadHeight, mBodyRadius); // asm 0x80331BC4: y offset is 0xC0 (mHeadHeight), not 0x14C
 
 	if (wall)
 		hit = true;
@@ -767,6 +766,7 @@ void TKumokun::decideTargetAtDir(const JGeometry::TVec3<f32>& param_1)
 		local_A4.setRotate(forward, local_C4, 1.0f);
 	}
 
+	// asm 0x80330A3C: local_b4 = local_b4 * local_A4
 	local_b4.mul(local_A4);
 
 	unk1AC = unk19C;
@@ -986,8 +986,9 @@ const TBGCheckData* TKumokun::checkRoofPlane(JGeometry::TVec3<f32>* param_1,
 	const TBGCheckData* roof = nullptr;
 	f32 y                    = param_1->y;
 	f32 dVar6 = gpMap->checkRoof(param_1->x, y, param_1->z, &roof);
-	f32 fVar8 = dVar6 - 1.0f - y;
-	if (0.0f <= fVar8 && fVar8 < param_2)
+	f32 fVar8 = dVar6 - 1.0f;
+	f32 dist  = fVar8 - y; // asm 0x80331AEC: retail stores roofY-1 (not the distance)
+	if (0.0f <= dist && dist < param_2)
 		param_1->y = fVar8;
 	else
 		roof = nullptr;

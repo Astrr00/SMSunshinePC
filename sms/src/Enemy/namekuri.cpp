@@ -45,7 +45,7 @@ int TNameKuriManager::mStopMinScaleFrame = 8;
 static TNameKuri* gpCurNameKuri;
 
 const char* namekuri2_bastable[] = {
-	nullptr, nullptr, nullptr, "/scene/namekuri2/bas/name_jump_start.base",
+	nullptr, nullptr, nullptr, "/scene/namekuri2/bas/name_jump_start.bas",
 	nullptr, nullptr, nullptr, nullptr,
 };
 
@@ -578,7 +578,6 @@ void TNameKuri::setMActorAndKeeper()
 
 void TNameKuri::reset()
 {
-	char trash[8];
 	gpCurNameKuri = this;
 	TWalkerEnemy::reset();
 	unk1B0 = 1.0f;
@@ -597,6 +596,7 @@ void TNameKuri::reset()
 	                                  ->getNextColorIdx()];
 
 	offLiveFlag(LIVE_FLAG_UNK10);
+	if (0) { (void)(GXColor){1,2,3,4}; }
 }
 
 void TNameKuri::attackToMario()
@@ -820,7 +820,6 @@ DEFINE_NERVE(TNerveNameKuriDrawPollute, TLiveActor) { return true; }
 
 DEFINE_NERVE(TNerveNKFollowMario, TLiveActor)
 {
-	char trash[0x10];
 	TNameKuri* self = (TNameKuri*)spine->getBody();
 
 	if (spine->getTime() == 0)
@@ -838,5 +837,6 @@ DEFINE_NERVE(TNerveNKFollowMario, TLiveActor)
 		return true;
 	}
 
+	if (0) { (void)(GXColor){1,2,3,4}; (void)(GXColor){1,2,3,4}; }
 	return false;
 }

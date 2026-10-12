@@ -311,7 +311,7 @@ void TYoshiTongue::movement()
 			tpos.y += 0.5f * target->mDamageHeight;
 			JGeometry::TVec3<f32> prevTip = mTipPos;
 			JGeometry::TVec3<f32> step = (tpos - mTipPos) * mExtendAmount;
-			mTipPos += step;
+			mTipPos = mTipPos + step;
 			mInitialVelocity = mTipPos - prevTip;
 
 			JGeometry::TVec3<f32> rem = tpos - mTipPos;
@@ -330,7 +330,7 @@ void TYoshiTongue::movement()
 	}
 
 	case STATE_GRABBED:
-		mTipPos += mInitialVelocity;
+		// asm 0x80147554: retail only counts the progress here (no mTipPos advance)
 		mProgress += 1;
 		if (mProgress > 10)
 			mState = STATE_RETRACTING;
@@ -339,8 +339,7 @@ void TYoshiTongue::movement()
 	case STATE_RETRACTING: {
 		JGeometry::TVec3<f32> diff = (mTipPos - mHeadPos) * mRetractAmount;
 
-		mTipPos = mHeadPos;
-		mTipPos += diff;
+		mTipPos = mHeadPos + diff;
 		break;
 	}
 

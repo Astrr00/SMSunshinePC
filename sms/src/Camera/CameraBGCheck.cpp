@@ -46,7 +46,7 @@ void CPolarSubCamera::calcInHouseNo_(bool param_1)
 		f32 fVar1 = unk2C4;
 		JGeometry::TVec3<f32>* src = local_120;
 		for (int i = 0; i < 9; ++i, ++src) {
-			src[9].scaleAdd(fVar1, *src, unk25C);
+			src[9].scaleAdd(fVar1, unk25C, *src);
 		}
 
 		f32 tmp = unk2C0;
@@ -222,6 +222,7 @@ bool CPolarSubCamera::execRoofCheck_(Vec param_1)
 
 bool CPolarSubCamera::execGroundCheck_(Vec param_1)
 {
+	const TBGCheckData* ground;
 	bool moved    = false;
 	f32 groundChg = mSaveEx->mGroundChangeY.get();
 	f32 groundOff = CLBLinearInbetween<f32>(
@@ -233,7 +234,6 @@ bool CPolarSubCamera::execGroundCheck_(Vec param_1)
 		groundOff = groundOff > 400.0f ? groundOff : 400.0f;
 	}
 
-	const TBGCheckData* ground;
 	f32 groundY = gpMap->checkGroundIgnoreWaterSurface(
 	    param_1.x, mPreviousTarget.mPosition.y + groundChg, param_1.z, &ground);
 

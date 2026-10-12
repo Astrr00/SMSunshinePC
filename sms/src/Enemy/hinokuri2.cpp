@@ -85,9 +85,9 @@ THino2Params::THino2Params(const char* path)
     , PARAM_INIT(mSLHeadHitH, 20.0f)
     , PARAM_INIT(mSLBodyHitR, 175.0f)
     , PARAM_INIT(mSLBodyHitH, 180.0f)
-    , PARAM_INIT(mSLBodyHitR0, 200.0f)
-    , PARAM_INIT(mSLBodyHitH0, 0.5f)
-    , PARAM_INIT(mSLBankProp, 10.0f)
+    , PARAM_INIT(mSLBodyHitR0, 100.0f)
+    , PARAM_INIT(mSLBodyHitH0, 200.0f)
+    , PARAM_INIT(mSLBankProp, 0.5f)
     , PARAM_INIT(mSLBankLimit, 10.0f)
     , PARAM_INIT(mSLJumpQuakeLen, 2000.0f)
     , PARAM_INIT(mSLStampProb, 0.5f)
@@ -353,7 +353,7 @@ void THino2Mask::perform(u32 cue, JDrama::TGraphics* graphics)
 				afStack_58[1][3] = unk28.y;
 				afStack_58[2][3] = unk28.z;
 				MsMtxSetRotRPH(afStack_88, 0.0f, 360.0f - unk8, 0.0f);
-				MTXConcat(getUnk4C(), afStack_88, afStack_88);
+				MTXConcat(getUnk4C(), afStack_58, afStack_58); // asm 0x80270DE0: 4C*T, not 4C*rot
 				MTXConcat(afStack_58, afStack_88, afStack_58);
 				unk14->getModel()->setBaseTRMtx(afStack_58);
 			}
@@ -1173,9 +1173,9 @@ DEFINE_NERVE(TNerveHino2Landing, TLiveActor)
 DEFINE_NERVE(TNerveHino2Turn, TLiveActor)
 {
 	THinokuri2* self = (THinokuri2*)spine->getBody();
+	const TPathNode& node = self->unkF4;
+	JGeometry::TVec3<f32> posDiff = node.getPoint(); // asm: TPathNode at 0xF4
 	char trash[0x18];
-
-	JGeometry::TVec3<f32> posDiff = self->unk104.getPoint();
 
 	posDiff -= self->mPosition;
 
@@ -1187,11 +1187,12 @@ DEFINE_NERVE(TNerveHino2Turn, TLiveActor)
 		self->changeBck(0x15);
 	}
 
-	f32 fVar3 = symmetric_clamp(angleDiff, self->mTurnSpeed);
+	f32 turnSpeed = self->mTurnSpeed;
+	f32 fVar3 = symmetric_clamp(angleDiff, turnSpeed);
 
 	self->mRotation.y = MsWrap(self->mRotation.y + fVar3, 0.0f, 360.0f);
 
-	if (fabsf(fVar3) < self->mTurnSpeed * 0.5f)
+	if (fabsf(fVar3) < turnSpeed * 0.5f)
 		return true;
 
 	return false;

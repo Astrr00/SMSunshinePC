@@ -852,16 +852,26 @@ void TLeanMirror::load(JSUMemoryInputStream& stream)
 	TMapObjBase::load(stream);
 
 	f32 size;
+#ifdef TARGET_PC
+	size = stream.readF32();
+#else
 	stream.read(&size, 4);
+#endif
 	mHalfSize = 100.0f * size * 0.5f;
 	unk13C    = mHalfSize;
 
 	if (gpMarDirector->unk7D == 1) {
 		char buffer[0x40];
 		stream.readString(buffer, 0x40);
+#ifdef TARGET_PC
+		mMarioMovePos.x = stream.readF32();
+		mMarioMovePos.y = stream.readF32();
+		mMarioMovePos.z = stream.readF32();
+#else
 		stream.read(&mMarioMovePos.x, 4);
 		stream.read(&mMarioMovePos.y, 4);
 		stream.read(&mMarioMovePos.z, 4);
+#endif
 	}
 
 	TMirrorModelObj* mirror = new TMirrorModelObj;
@@ -1280,9 +1290,15 @@ void TGoalWatermelon::load(JSUMemoryInputStream& stream)
 	char buffer[0x20];
 	char trash[0x10];
 	stream.readString(buffer, 0x20);
+#ifdef TARGET_PC
+	mShinePos.x = stream.readF32();
+	mShinePos.y = stream.readF32();
+	mShinePos.z = stream.readF32();
+#else
 	stream.read(&mShinePos.x, 4);
 	stream.read(&mShinePos.y, 4);
 	stream.read(&mShinePos.z, 4);
+#endif
 }
 
 TGoalWatermelon::TGoalWatermelon(const char* name)

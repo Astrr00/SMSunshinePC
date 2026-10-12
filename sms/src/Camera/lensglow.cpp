@@ -95,10 +95,11 @@ TLensGlow::TLensGlow(bool param_1, const char* name)
 
 void TLensGlow::perform(u32 cue, JDrama::TGraphics* graphics)
 {
-	char trash[0x50];
-	if (0) {
-		(void)(GXColor) { 1, 2, 3, 4 };
-	}
+	char pad0[0xc];
+	JGeometry::TVec3<f32> scaleV;
+	Mtx mtx;
+	J3DGXColorS10 c;
+	char trash[0x44];
 	bool inBounds = false;
 	if (gpCameraMario->isMarioIndoor()) {
 		inBounds = false;
@@ -184,9 +185,8 @@ void TLensGlow::perform(u32 cue, JDrama::TGraphics* graphics)
 		unk34.update();
 
 		if (inBounds) {
-			JGeometry::TVec3<f32> scaleV(unk60, unk60, 1.0f);
+			scaleV.set(unk60, unk60, 1.0f);
 
-			Mtx mtx;
 			CLBCalcScaleTranslateMatrix(mtx, scaleV, unk74);
 			unk14->setBaseTRMtx(mtx);
 			unk14->calc();
@@ -196,7 +196,6 @@ void TLensGlow::perform(u32 cue, JDrama::TGraphics* graphics)
 	if ((cue & CUE_ENTRY) != 0 && inBounds) {
 		int matCount = unk10->getMaterialNum();
 		for (u16 i = 0; i < matCount; ++i) {
-			J3DGXColorS10 c;
 			c         = *unk10->getMaterialNodePointer(i)->getTevColor(0);
 			c.color.a = (s16)unk48;
 			unk10->getMaterialNodePointer(i)->setTevColor(0, &c);
@@ -210,5 +209,8 @@ void TLensGlow::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	if ((cue & CUE_CALC_VIEW) && inBounds) {
 		unk14->viewCalc();
+	}
+	if (0) {
+		(void)(GXColor) { 1, 2, 3, 4 };
 	}
 }

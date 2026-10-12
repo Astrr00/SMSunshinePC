@@ -470,7 +470,8 @@ int TGraphWeb::getRandomButDirLimited(int param_1, int param_2,
 		}
 	}
 
-	if (result > 0)
+	// asm 0x8025FC4C: retail tests the match count (iVar13 > 0), not result > 0 (node 0 is a valid result)
+	if (iVar13 > 0)
 		return result;
 
 	result     = -1;
@@ -778,7 +779,7 @@ TGraphWeb::getNearestPosOnGraphLink(const JGeometry::TVec3<f32>& param_1) const
 			thing.sub(param_1);
 			f32 dVar18 = thing.squared();
 			if (bVar9 || dVar18 < min) {
-				local_48.scaleAdd(fVar4, point, point2); // retail fmadds(point2, t, point), operand order checked vs asm
+				local_48.scaleAdd(fVar4, point2, point); // retail fmadds(point2, t, point)
 				bVar9 = 0;
 				min   = dVar18;
 			}
@@ -1009,24 +1010,26 @@ f32 TGraphTracer::calcSplineSpeed(f32 param_1)
 
 bool TGraphTracer::traceSpline(f32 param_1)
 {
-	char trash[0x40];
-	if (!unk0->unk14)
+	char trash[0x50];
+	TGraphWeb* web = unk0;
+	TSplineRail* sp = web->unk14;
+	if (!sp)
 		return false;
 
 	f32 dVar8 = unk14;
 	f32 dVar9 = dVar8 + param_1;
 
 	f32 dVar10;
-	if (unk0->unk14->unk4 && mPrevIdx == unk0->unk8 - 1 && mCurrIdx == 0) {
-		dVar10 = unk0->unk14->getNthT(mPrevIdx + 1);
-	} else if (unk0->unk14->unk4 && mPrevIdx == 0
-	           && mCurrIdx == unk0->unk8 - 1) {
-		dVar10 = unk0->unk14->getNthT(mPrevIdx);
+	if (sp->unk4 && mPrevIdx == web->unk8 - 1 && mCurrIdx == 0) {
+		dVar10 = sp->getNthT(web->unk8 + 1); // asm 0x8025E274
+	} else if (sp->unk4 && mPrevIdx == 0
+	           && mCurrIdx == web->unk8 - 1) {
+		dVar10 = sp->getNthT(web->unk8); // asm 0x8025E2A8
 	} else {
 		u32 uVar7 = mCurrIdx;
-		if (unk0->unk14->unk4)
+		if (sp->unk4)
 			uVar7 += 1;
-		dVar10 = unk0->unk14->getNthT(uVar7);
+		dVar10 = sp->getNthT(uVar7);
 	}
 
 	bool result;
@@ -1037,6 +1040,6 @@ bool TGraphTracer::traceSpline(f32 param_1)
 		result = false;
 	}
 
-	unk14 = unk0->unk14->wrapT(dVar9);
+	unk14 = sp->wrapT(dVar9);
 	return result;
 }

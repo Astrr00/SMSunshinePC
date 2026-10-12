@@ -91,9 +91,8 @@ void TKazekun::init(TLiveManager* live_manager)
 
 	mHeadHeight       = 40.0f;
 	mScaledBodyRadius = mBodyRadius = 50.0f;
-	f32 r = mBodyScale * mBodyRadius;
-	f32 h = mBodyScale * mHeadHeight;
-	initHitActor(0x10000029, 1, 0x80000000, r, h, r, h);
+	initHitActor(0x10000029, 1, 0x80000000, getBodyRadius(), getHeadHeight(),
+	             getBodyRadius(), getHeadHeight());
 	onHitFlag(HIT_FLAG_NO_COLLISION);
 
 	SMS_LoadParticle("/scene/kazekun/jpa/ms_kaze_appear.jpa",
@@ -154,7 +153,8 @@ void TKazekun::bind() { mLinearVelocity += mVelocity; }
 
 void TKazekun::behaveToWater(THitActor*)
 {
-	TSpineBase<TLiveActor>* spine = mSpine;
+	TSpineBase<TLiveActor>* spine;
+	spine = mSpine;
 	bool attacking = spine->getLatestNerve() == &TNerveKazekunTurn::theNerve()
 	                 || spine->getLatestNerve()
 	                        == &TNerveKazekunPreAttack::theNerve()
@@ -404,7 +404,8 @@ DEFINE_NERVE(TNerveKazekunTurn, TLiveActor)
 DEFINE_NERVE(TNerveKazekunPreAttack, TLiveActor)
 {
 	TKazekun* self = (TKazekun*)spine->getBody();
-	char trash[8];
+	JGeometry::TVec3<f32> pos;
+	char trash[4];
 
 	if (spine->getTime() == 0) {
 		self->doAttackPose(true);
@@ -416,7 +417,10 @@ DEFINE_NERVE(TNerveKazekunPreAttack, TLiveActor)
 	if (self->getSaveParam2()->mPoseTime.get()
 	        * self->getSaveParam2()->mDicideTiming.get()
 	    < spine->getTime())
-		self->setGoalPath(TPathNode(JGeometry::TVec3<f32>(*gpMarioPos)));
+	{
+		pos = *gpMarioPos;
+		self->setGoalPath(TPathNode(pos));
+	}
 
 	self->doAttackPose(false);
 
@@ -425,6 +429,9 @@ DEFINE_NERVE(TNerveKazekunPreAttack, TLiveActor)
 		return true;
 	}
 
+	if (0) {
+		(void)(GXColor){1, 2, 3, 4};
+	}
 	return false;
 }
 
@@ -531,7 +538,8 @@ DEFINE_NERVE(TNerveKazekunWait, TLiveActor)
 
 DEFINE_NERVE(TNerveKazekunHitWater, TLiveActor)
 {
-	char trash[0x10];
+	JGeometry::TVec3<f32> zero;
+	char trash[0xc];
 	TKazekun* self = (TKazekun*)spine->getBody();
 
 	if (spine->getTime() == 0) {
@@ -547,6 +555,9 @@ DEFINE_NERVE(TNerveKazekunHitWater, TLiveActor)
 		return true;
 	}
 
-	self->mVelocity = JGeometry::TVec3<f32>(0.0f);
+	zero.x = 0.0f;
+	zero.y = 0.0f;
+	zero.z = 0.0f;
+	self->mVelocity = zero;
 	return false;
 }
