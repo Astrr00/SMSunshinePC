@@ -203,3 +203,7 @@ Measured by the lead in a new folder: clone, `git submodule update --init`, `app
 ### Update 2026-10-13: route 72 in real time
 
 Observed (details: ROADMAP update `2026-10-13 (route 72 in real time, 30 Hz)`): without `SUNSHINE_DEV_STEP_RETRACE` and `SUNSHINE_DEV_SKIP_MOVIES`, route 72 passed once (`rt2`, rc=0, 1010 s wall, logic 30/s in 835 of 1001 one-second samples, 31 in 135, stage 2/0 at logic t=970 s) and failed once (`rt1`, `walkto` stood still at (3692,704,-2716), cause not found). `walkto` now recovers from a stall (sideways steering plus a jump after 120 ticks under 30 units; `tools/routes/74_walk_stall_test.dev`). Command for the real-time run: `python tools/route.py Strict tools/routes/72_boss_tpchase.dev --name <n> --seconds 1800 SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_ALLOW_CPU_ADAPTER=0` (use a new `--name` every time; start it as a background job; takes about 17 minutes). Do not run other CPU-heavy work during a timing run.
+
+### Update 2026-10-13: route 85 (no `shine 2`)
+
+`tools/routes/85_accept_no_shine2.dev`: route 72 without `shine 2`, ends at Bianco controllable. Run `a85a` (stepped command): rc=0, 203 s, `stage=2 scen=0`, `shines=1`, `.gci` PASS. Use this route as the Phase-1 acceptance candidate; crutches left: `SUNSHINE_DEV_AIM_ASSIST`, `cheat infinite_health`, `chase tp=1`.
