@@ -814,3 +814,18 @@ Mechanism search for out-of-line header helpers (HeaderLab, ~38 probes in a temp
 - Discarded: camera state (the `[status-cam]` lines are identical in anomalous and normal runs); allocation timing alone (touch-only stays anomalous).
 - Not identified: the object that reads uninitialised memory. The zero fill removes the symptom; the read itself is assumed to still exist [INFERENCE].
 - Next probe, not done: size-range bisection of the fill to find the class of object.
+
+## Delfino GateKeeper without aim assist (open, 2026-10-13)
+
+- Three attempts without `SUNSHINE_DEV_AIM_ASSIST` failed (agents Route78, DelfinoDry, DelfinoWash). Every tested spot near the boss is goop (pol=2 dirty=1). Mario stays in OIL_RUN `0x0004045C`, never squats there, nozzle pitch stays 0, boss hp stays 3. Washing the goop pad-only gave 0 dry floor samples.
+- Run `r78full7` (Route78): OIL_RUN in all 204 samples from tick 6900.
+- `canSquat()` (`sms/src/Player/MarioMove.cpp:51`) is called from `sms/src/Player/MarioRun.cpp:706` and `sms/src/Player/MarioWait.cpp:112`.
+- `cheat infinite_health` compensates the goop damage while the bot stands still at the spray spot. Route 77 (`tools/routes/77_boss_no_health_cheat.dev`, route 72 without that cheat) dies at tick 10620 and times out.
+- The `headHits` log field sums `unk154` increases (`unk154` is reset by `CUE_MOVE`); it is not a hit count.
+- The airport boss dies with pad input only (`fightboss`, `tools/routes/76b_airport_boss_fight.dev`). The Delfino boss has not died that way in three attempts.
+
+## Exit fatal after a TIMEOUT run (open, 2026-10-13)
+
+- 3 of 170 TIMEOUT runs end with a fatal at exit: 2x `0xc0000005` (access violation) in `RtlFreeHeap`, 1x `0xc0000374` (heap corruption).
+- The teardown-order hypothesis is ruled out. Cause open.
+- Next probe (not run): `SUNSHINE_CHECK_HEAP=2`. In `sunshine-pc/src/sdk/jkr_new_delete.cpp`, line 58 tests only that the variable is set (`=1` and `=2` both enable the checks); the page-heap mode for `=2` is in `pageHeap()` (lines 62-71). The header comment at line 38 documents only `=1`.

@@ -229,3 +229,42 @@ Observed: any deterministic fill removes the anomaly, so what decides is the con
 Other fixes of this round (observed): `GetAtanTable` index clamp under `TARGET_PC` (`sms/src/MarioUtil/MathUtil.cpp`, commit 9d1f0ca): route 91 had crashed once at tick 662 with a NaN-derived index in the camera; 3 of 3 later runs complete; matching build unchanged.
 
 Real-input boss fight (observed): `fightboss timeout=N` in `sunshine-pc/src/devscript/devscript.cpp` plays the airport GateKeeper fight with `setVirtualPad` only (crouch held, R spray and stick Y -127 in the head windows bck 0x3/0x11/0xF with head y > 700, stick X toward the head, sleep phase bck 0xA/0x4 body spray with stick Y following the nozzle angle). Route `tools/routes/76b_airport_boss_fight.dev` (prefix of route 54, cheats `infinite_health` and `infinite_water` still on): boss dead in 3 of 3 runs of an agent in a fresh clone and 1 of 1 run in the main tree (`bb76b_0531`): hp 3 -> 2 at tick 2525-2527, 2 -> 1 by 2840, 1 -> 0 in the window 3374-3440, verb done at tick 3586-3589, 929-930 ticks after the bot started. The log field `headHits` sums increases of `unk154` and is not a hit count (`unk154` is reset by `CUE_MOVE`); the kill evidence is `hp`. Not done: Delfino GateKeeper with pad input (it still uses `SUNSHINE_DEV_AIM_ASSIST`), the health and water cheats, the real-time (30 Hz) run of this route.
+
+### Update 2026-10-13 (Phase 1 acceptance)
+
+Acceptance chain (observed by agents Accept and Reload86RT; HEAD `846d81f` plus the route-86 fix; Strict exe 09:11:43; clone `fresh-gate-2`; 0 unresolved): route 85 (`tools/routes/85_accept_no_shine2.dev`, route 72 without `shine 2`, ends at Bianco Ep.1 stage 2 scen 0, no Bianco Shine), then route 86 (`tools/routes/86_accept_reload.dev`, `--appdata-from` the route-85 run) reloading the route-85 card. Real time: no `SUNSHINE_DEV_STEP_RETRACE`, no `SUNSHINE_DEV_SKIP_MOVIES`. Phase 1 is marked DONE under dev aids by user decision via Main (2026-10-13); the exit wording "no dev switch" is met only by that decision. The section "route 85 (no `shine 2`)" above is superseded for the acceptance chain. Details: ROADMAP.md Phase 1.
+
+| Run | Route | rc | Wall | Logic 30/s samples | Result |
+| --- | --- | ---: | ---: | ---: | --- |
+| accA1 | 85 | 0 | 1171 s | 940/1156 (81.3 %) | stage 2 scen 0 (Bianco Ep.1), shines=1, gci_check PASS, 0 overrun, 0 fatal |
+| accB1 | 85 | 0 | 1001 s | 840/994 (84.5 %) | stage 2 scen 0 (Bianco Ep.1), shines=1, gci_check PASS, 0 overrun, 0 fatal |
+| acc86a | 86 from accA1 | 0 | - | 261/312 (83.7 %) | shines 0->1 at tick 3420 after load, 0 fatal/overrun |
+| acc86b | 86 from accB1 | 0 | - | 237/311 (76.2 %) | shines 0->1 at tick 3390, 0 fatal/overrun |
+
+Logic 30/s in 76-85 % of one-second samples (76.2 % for acc86b). No threshold is defined.
+
+Commands (`--seconds <S>`):
+
+```
+python tools/route.py Strict tools/routes/85_accept_no_shine2.dev --name <n> --seconds <S> SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_ALLOW_CPU_ADAPTER=0
+python tools/route.py Strict tools/routes/86_accept_reload.dev --name <n2> --appdata-from <n> --seconds <S> SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_ALLOW_CPU_ADAPTER=0
+```
+
+`--seconds` for accA1/accB1 was not recorded. The default is 330 (`tools/route.py` line 36) and the walls were 1001-1171 s, so S was above 1171 `[INFERENCE]`.
+
+Dev aids (user decision via Main, 2026-10-13; none is retail input; cheats are switched off only for damage tests):
+- `SUNSHINE_DEV_AIM_ASSIST=1`: faces the head, sets nozzle pitch, forces the crouch (Delfino spray gate).
+- `SUNSHINE_ALLOW_CPU_ADAPTER=0`: keeps the game off the CPU adapter (about 21 ticks/s without it).
+- `chase timeout=4000 tp=1` (route 85 line 333): teleports Mario behind the shadow Mario and sprays; counts DONE for the chase item.
+- `cheat infinite_health` (route 85 line 305).
+- `cheat infinite_water` and `godmode`: accepted; named in the run record; not in the route 85, 86 or 72 files.
+
+Open items:
+- Route 86: `waitfor thp=0` was met at tick ~6564, but status samples show thp=2 until ~8670. Not explained. Before the fix, runs accA2/accB2 pressed A during the Delfino load movie (thp=2) and failed with rc 3.
+- Route 86 line 1 says "Stepped env as fg85"; stale, not edited. Route 85 header lines 5-6 still describe the step-retrace chain; not edited.
+- Reload count: acc86a/acc86b record `shines 0->1 after load`; the route-85 section above records `fg85reload` as `stage=1 shines=1`. Not reconciled; check `build/Route/acc86a/run.log`.
+- Exit fatal after a TIMEOUT run: see platform-notes "Exit fatal after a TIMEOUT run (open, 2026-10-13)".
+- Delfino GateKeeper without aim assist: see platform-notes "Delfino GateKeeper without aim assist (open, 2026-10-13)".
+- walkto stall (route 72 line 292): cause not found; see ROADMAP Phase 1, background (b).
+- accA1 ran its first minutes with two orphan `cygpath.exe` processes (load 54 %); killed afterwards. Measurement caveat.
+- Uncommitted at writing: `sunshine-pc/tools/routes/86_accept_reload.dev` (the fix) and `sunshine-pc/src/devscript/devscript.cpp` (4 changed lines; content not inspected).

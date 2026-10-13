@@ -29,13 +29,34 @@ Exit criterion: every function the port builds is an exact match (preferred) or,
 Scope limit (`sms/AGENTS.md`): game code is the target; shared and JSystem headers may now be edited when it helps (rebuild every includer, Matching units stay 100 %, SHA-1 unchanged). MSL, MetroTRK, THPPlayer and the dolphin SDK stay untouched; port fixes there stay under `TARGET_PC`.
 
 ## Phase 1: Boot to gameplay (core)
-Status: PART (2026-10-13). The exit criterion below is not met. Blockers, observed:
-- (a) `SUNSHINE_DEV_AIM_ASSIST` still needed for the Delfino GateKeeper (the 2026-10-13 real-input boss paragraph covers the airport boss only). Observed without it (agent Route78, run `r78full7`): Mario stands on goop at the spray spot, status `0x0004045C` OIL_RUN in all 204 samples from tick 6900; he cannot squat (`canSquat()` `MarioMove.cpp:51` is called only from `MarioRun.cpp:706` and `MarioWait.cpp:112`), the nozzle pitch stays 0, the `headHits` log field rises 14 -> 33 (it sums `unk154` increases, not hits) but hp stays 3. The airport works because Mario squats on a dry tile. Pad-only fix in progress (agent DelfinoDry).
-- (b) walkto stall at route 72 line 292 (`walkto x=-1500 z=1500`), Mario at (-1950,300,1512). 4 of 5 clone runs (`cwh1`, `cwc2`, `cwh2`, `cwh3`) stalled and ended `TIMEOUT walkto` (rc 3); `cwp1` reached the target. Clone runs used `SUNSHINE_DEV_STEP_RETRACE=1`. Cause not found. Separate from the `rt1` stall at route 72 line 338.
-- (c) closed: route 85 had no reload step. `tools/routes/86_accept_reload.dev` (commit `a6ae867`) reloads the route-85 card: `python tools/route.py Strict tools/routes/86_accept_reload.dev --name <n> --appdata-from <route-85 run>`; run `fg85reload` rc 0, after load `stage=1 shines=1`, reloaded card byte-identical, `gci_check` PASS. Route 86 still uses `SUNSHINE_DEV_AIM_ASSIST` and the stepped env.
-- (d) two clean real-time runs not yet met: route 72 has 1 of 2 (`rt1` rc 3 at walkto line 338; `rt2` rc 0 in 1010 s); route 85 has no real-time run in the files read.
+Status: DONE under user-accepted dev aids (2026-10-13). The exit wording "no dev switch" below is met only by user decision, not by the wording itself: the chain uses the aids listed here.
 
-Accepted dev aids, not blockers (user decision via Main, 2026-10-13): `chase tp=1` counts DONE for the chase item as a dev crutch; cheats `infinite_health`, `infinite_water` and `godmode` are allowed in dev and acceptance routes and switched off for damage tests. None is retail input.
+Acceptance chain (observed by agents Accept and Reload86RT; HEAD `846d81f` + route-86 fix; Strict exe 09:11:43; clone `fresh-gate-2`; 0 unresolved): route 85 (`tools/routes/85_accept_no_shine2.dev`), then route 86 (`tools/routes/86_accept_reload.dev --appdata-from <route-85 run>`). Real time: no `SUNSHINE_DEV_STEP_RETRACE`, no `SUNSHINE_DEV_SKIP_MOVIES`.
+
+| Run | Route | rc | Wall | Logic 30/s samples | Result |
+| --- | --- | ---: | ---: | ---: | --- |
+| accA1 | 85 | 0 | 1171 s | 940/1156 (81.3 %) | stage 2 scen 0 (Bianco Ep.1), shines=1, gci_check PASS, 0 overrun, 0 fatal |
+| accB1 | 85 | 0 | 1001 s | 840/994 (84.5 %) | stage 2 scen 0 (Bianco Ep.1), shines=1, gci_check PASS, 0 overrun, 0 fatal |
+| acc86a | 86 from accA1 | 0 | - | 261/312 (83.7 %) | shines 0->1 at tick 3420 after load, 0 fatal/overrun |
+| acc86b | 86 from accB1 | 0 | - | 237/311 (76.2 %) | shines 0->1 at tick 3390, 0 fatal/overrun |
+
+Dev aids used by the chain (user decision via Main, 2026-10-13; none is retail input). Cheats are switched off only for damage tests.
+- `SUNSHINE_DEV_AIM_ASSIST=1`: faces the head, sets nozzle pitch, forces the crouch (Delfino spray gate).
+- `SUNSHINE_ALLOW_CPU_ADAPTER=0`: keeps the game off the CPU adapter (about 21 ticks/s without it).
+- `chase timeout=4000 tp=1` (route 85 line 333): the chase teleports Mario behind the shadow Mario and sprays; counts DONE for the chase item.
+- `cheat infinite_health` (route 85 line 305).
+- `cheat infinite_water`: named in the run record; not present in the route 85 or 86 file.
+- `godmode`: accepted for acceptance runs; not present in the route 85 or 86 file.
+
+The exit wording "no dev switch" is met only by user decision (2026-10-13), with the aids above.
+
+[INFERENCE] The airport Shine (`shines=1`, collected by walking to it) is the real Shine of the exit criterion. Route 85 ends at Bianco with no Bianco Shine.
+
+30 Hz: logic ran at 30/s in 76-85 % of one-second samples in the four runs above (76.2 % for acc86b). No threshold is defined for this share.
+
+Background, not blocking the accepted chain:
+- (a) Delfino GateKeeper without `SUNSHINE_DEV_AIM_ASSIST`: open. Three attempts failed (agents Route78, DelfinoDry, DelfinoWash): every tested spot near the boss is goop (pol=2 dirty=1); Mario stays in OIL_RUN `0x0004045C`, never squats there, nozzle pitch stays 0, boss hp stays 3. Washing the goop pad-only gave 0 dry floor samples. Run `r78full7` (Route78): OIL_RUN in all 204 samples from tick 6900; `canSquat()` (`MarioMove.cpp:51`) is called only from `MarioRun.cpp:706` and `MarioWait.cpp:112`; the `headHits` log field sums `unk154` increases, not hits. The airport boss dies pad-only (`fightboss`).
+- (b) walkto stall at route 72 line 292 (`walkto x=-1500 z=1500`, Mario at (-1950,300,1512)): cause not found. 4 of 5 clone runs (`cwh1`, `cwc2`, `cwh2`, `cwh3`) ended `TIMEOUT walkto` (rc 3); `cwp1` reached the target. Those runs used `SUNSHINE_DEV_STEP_RETRACE=1`; in `cwc2` the airport boss was still alive (hp=3 to tick 7590). Route 85 with AIM_ASSIST met the walk 3 of 3 (`w292a/b/c`). [INFERENCE] The stalled clone runs lacked AIM_ASSIST (env not logged, no negative control). Separate from the `rt1` stall at route 72 line 338.
 
 | Item | State | Next |
 | --- | --- | --- |
@@ -59,7 +80,7 @@ Open crash items (separate causes):
 
 ## Phase 2: Correctness of gameplay systems
 
-Status: started by user decision before Phase 1 exit; departs from Order of work item 2 ("After Phase 1 exit"). The Phase 1 exit criterion is not met (see Phase 1 status).
+Status: started. Phase 1 exit met under the user-accepted dev aids listed in Phase 1 (2026-10-13).
 
 | Item | State | Next |
 | --- | --- | --- |
