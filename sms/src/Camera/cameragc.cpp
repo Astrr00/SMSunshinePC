@@ -1,4 +1,6 @@
+#ifndef TARGET_PC // the port uses the inline definition from Mario.hpp everywhere; a strong copy here collides with COMDAT copies (lld-link duplicate symbol)
 #define SMS_CHECKSTATUSTYPE_OUT_OF_LINE
+#endif
 #include <Camera/Camera.hpp>
 #include <MarioUtil/MathUtil.hpp>
 #include <System/StageUtil.hpp>
@@ -20,12 +22,14 @@
 #include <macros.h>
 #include <stdio.h>
 
+#ifndef TARGET_PC
 #pragma dont_inline on
 bool TMario::checkStatusType(s32 flag) const
 {
 	return mStatus & flag ? true : false;
 }
 #pragma dont_inline off
+#endif
 
 // Retail calls these out of line from calcExternalData_ (inline depth limit).
 #pragma dont_inline on
