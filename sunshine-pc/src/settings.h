@@ -41,6 +41,7 @@ struct Settings {
 	std::string saveDirectory; // empty = default; see resolveSaveDirectory()
 	// [launcher]
 	std::string lastImagePath;
+	bool skipLauncher = false; // start lastImagePath without showing the launcher (hold Shift at start to show it)
 };
 
 Settings& settings(); // process-wide instance, loaded by main before Aurora starts

@@ -795,6 +795,8 @@ private:
 		setText("substick-deadzone", "C-stick dead zone: " + std::to_string(s.substickDeadZonePct) + "%");
 		setText("glyph-style", std::string("Button glyphs: ") + kGlyphNames[static_cast<int>(s.glyphStyle)]);
 		setText("ui-scale", std::string("UI scale: ") + (s.uiScalePct == 0 ? "Window scale" : std::to_string(s.uiScalePct) + "%"));
+		setText("skip-launcher", std::string("Skip launcher: ") +
+		                             (s.skipLauncher ? "On (starts the last disc; hold Shift while starting to show this page)" : "Off"));
 		for (const char* name : kKeyNames) {
 			const std::string id = std::string("bind-") + name;
 			const std::string label = capture_ == name ? "press a key..." : keyName(keyOf(s, name));
@@ -949,6 +951,8 @@ private:
 			return;
 		} else if (id == "ui-scale") {
 			s.uiScalePct = nextPreset(kUiScalePresets, s.uiScalePct);
+		} else if (id == "skip-launcher") {
+			s.skipLauncher = !s.skipLauncher;
 		} else if (id == "reset-keys") {
 			askConfirm(id, "Restore the default key bindings?", "Restore");
 			return;
@@ -998,6 +1002,22 @@ bool openDisc(const std::string& path, std::string& error) {
 }
 
 bool run(const std::filesystem::path& settingsFile) {
+	// [launcher] skip_launcher: start the last disc like --dvd does, without a frame. Shift held at start, or a disc that
+	// does not open, shows the launcher instead (its open() validates last_image again and shows the error).
+	const Settings& s = settings();
+	if (s.skipLauncher && !s.lastImagePath.empty()) {
+		std::string error;
+		if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+			std::printf("[launcher] skip: Shift held, showing the launcher\n");
+		} else if (openDisc(s.lastImagePath, error)) {
+			std::printf("[launcher] skip: starting %s\n", s.lastImagePath.c_str());
+			std::fflush(stdout);
+			return true;
+		} else {
+			std::printf("[launcher] skip: %s Showing the launcher.\n", error.c_str());
+		}
+		std::fflush(stdout);
+	}
 	Launcher ui(settingsFile);
 	if (!ui.open()) {
 		std::fprintf(stderr, "launcher: could not load assets/launcher (the assets folder must sit next to sunshine.exe)\n");

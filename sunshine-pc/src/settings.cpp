@@ -188,6 +188,7 @@ Settings parseSettings(std::string_view text)
 	}
 	s.saveDirectory = readString(ini, "saves.directory", def.saveDirectory);
 	s.lastImagePath = readString(ini, "launcher.last_image", def.lastImagePath);
+	s.skipLauncher = readBool(ini, "launcher.skip_launcher", def.skipLauncher);
 	return s;
 }
 
@@ -232,6 +233,7 @@ std::string serializeSettings(const Settings& in)
 	out << "directory=" << in.saveDirectory << '\n';
 	out << "[launcher]\n";
 	out << "last_image=" << in.lastImagePath << '\n';
+	out << "skip_launcher=" << (in.skipLauncher ? 1 : 0) << '\n';
 	return out.str();
 }
 

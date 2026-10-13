@@ -1,12 +1,13 @@
 """Run one scripted, invisible, silent game session and wait for it (dev-only, never touches %APPDATA%\\Sunshine).
 
-  python tools/route.py <tree> <script> [--name N] [--seconds S] [--appdata-from N] [KEY=VAL ...]
+  python tools/route.py <tree> <script> [--name N] [--seconds S] [--appdata-from N] [--no-dvd] [KEY=VAL ...]
 
   <tree>     build tree under build/ that holds sunshine.exe (e.g. Strict)
   <script>   devscript file (SUNSHINE_DEV_SCRIPT); relative to the repo's sunshine-pc folder or absolute
   --name     run name; output goes to build/Route/<name>/ (run.log, appdata/, PNGs written by `shot` verbs)
   --seconds  wall-clock limit, default 330 (< 6 min: tools/reap.py kills older runs)
   --appdata-from N  copy build/Route/N/appdata into this run before the start (reload a saved game)
+  --no-dvd   start sunshine.exe without --dvd <disc>: the launcher runs (or [launcher] skip_launcher starts last_image)
   KEY=VAL    extra environment variables (SUNSHINE_DEV_MAX_SECONDS is set to the limit)
 
 Rules kept here: CREATE_NO_WINDOW + BELOW_NORMAL priority, window parked off screen, muted, temporary APPDATA
@@ -37,6 +38,7 @@ def main():
     seconds = 330
     extra = {}
     appdata_from = None
+    no_dvd = False
     pos = []
     i = 0
     while i < len(args):
@@ -48,6 +50,10 @@ def main():
         if a == "--seconds":
             seconds = int(args[i + 1])
             i += 2
+            continue
+        if a == "--no-dvd":
+            no_dvd = True
+            i += 1
             continue
         if a == "--appdata-from":
             appdata_from = args[i + 1]
@@ -110,7 +116,7 @@ def main():
     p = None
     try:
         logf = open(os.path.join(out, "run.log"), "w")
-        p = subprocess.Popen([exe, "--dvd", disc], cwd=out, stdout=logf, stderr=subprocess.STDOUT, env=env,
+        p = subprocess.Popen([exe] if no_dvd else [exe, "--dvd", disc], cwd=out, stdout=logf, stderr=subprocess.STDOUT, env=env,
                              creationflags=NO_WINDOW | BELOW_NORMAL)
         lock("touch", pid=str(p.pid))
         open(os.path.join(out, "pid"), "w").write(str(p.pid))

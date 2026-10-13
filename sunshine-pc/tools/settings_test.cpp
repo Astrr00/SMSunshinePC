@@ -14,6 +14,7 @@ int main()
 	const Settings def = defaultSettings();
 	const std::string defText = serializeSettings(def);
 	assert(serializeSettings(parseSettings(defText)) == defText);
+	assert(!def.skipLauncher && defText.find("skip_launcher=0") != std::string::npos);
 
 	// Non-default values round-trip.
 	Settings s = defaultSettings();
@@ -34,6 +35,7 @@ int main()
 	s.keys["A"] = 26;
 	s.glyphStyle = GlyphStyle::PlayStation;
 	s.lastImagePath = "C:/games/Super Mario Sunshine (Japan).rvz";
+	s.skipLauncher = true;
 	const std::string text = serializeSettings(s);
 	const Settings back = parseSettings(text);
 	assert(back.fullscreen && back.windowWidth == 1920 && back.windowHeight == 1080 && !back.vsync);
@@ -42,7 +44,7 @@ int main()
 	assert(back.outputDevice == s.outputDevice);
 	assert(back.keys.at("A") == 26 && back.glyphStyle == GlyphStyle::PlayStation);
 	assert(!back.rememberWindowSize && back.uiScalePct == 75);
-	assert(back.lastImagePath == s.lastImagePath);
+	assert(back.lastImagePath == s.lastImagePath && back.skipLauncher);
 	assert(serializeSettings(back) == text);
 	for (GlyphStyle g : {GlyphStyle::Switch, GlyphStyle::GameCube, GlyphStyle::Generic}) {
 		Settings gs;

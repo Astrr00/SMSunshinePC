@@ -78,7 +78,7 @@ Columns: Dusklight feature (where, how) | Sunshine today (file, state) | Gap | N
 | # | Dusklight feature | Sunshine today | Gap | Notes |
 |---|---|---|---|---|
 | B1 | Prelaunch screen: background image, logo, styled layout (`prelaunch.cpp`, `res/prelaunch-bg.png`, `res/rml/prelaunch.rcss`) | Partial. Layout and buttons present (`launcher.rml:7-19`); no background or logo | M | Background is game-adjacent art; check license before adding. |
-| B2 | Skip main menu setting (`settings.cpp:1577`) | Partial. `--dvd <file>` skips the launcher (`platform-notes.md:455`); no INI key or UI row | S | |
+| B2 | Skip main menu setting (`settings.cpp:1577`) | Done (UI-8). `[launcher] skip_launcher` row on the Interface pane starts `last_image`; Shift at start or a bad disc shows the launcher. `--dvd <file>` still skips it | S | Unlike Dusklight the key is not cleared on a bad disc. |
 | B3 | Disc verification with hash (`prelaunch.cpp` `DiscVerificationTask`; `settings.h:39-43`) | Missing. Only the GMSJ01 ID check (`platform-notes.md:455`). Grep `md5\|sha1\|sha256\|crc32\|hash\|checksum` in `src/`: 0 hits | M | Needs a known-hash table (no game data in the repo) and a background task for multi-GB reads (`[INFERENCE]`). |
 | B4 | Drag-and-drop install (`drop_install_modal.*`, `package_row.*`; not read) | Missing. Grep `drag\|dropfile\|DROP_FILE`: 0 hits | M | `[INFERENCE]` needs SDL/Aurora drop events (not verified). |
 | B5 | Disc picker, controller-operable | Partial. Native `SDL_ShowOpenFileDialog` (`launcher.cpp:395-396`, `421-424`) cannot be driven by gamepad | M | Sunshine-specific gap. Needs an in-launcher file list or a recent-discs list. |
@@ -125,10 +125,10 @@ Columns: Dusklight feature (where, how) | Sunshine today (file, state) | Gap | N
 
 | # | Dusklight feature (`ui/settings.cpp`) | Sunshine today | Gap | Notes |
 |---|---|---|---|---|
-| F1 | Interface tab (1463) | Partial. Glyph style only (`launcher.rml:77-79`) | S | |
+| F1 | Interface tab (1463) | Done (UI-8). Button glyphs, UI scale (UI-2), Skip launcher | S | Menu scaling mode (C5, game menus) needs `sms/` and stays with C4. |
 | F2 | Game language choice from disc (`language.hpp`; `settings.cpp:580`) | Missing | L | `[INFERENCE]` GMSJ01 is Japanese-only; `launcher.rml:9` says "Japanese version". Availability per disc is Dusklight's `available_languages`. |
 | F3 | Launcher UI localization (`language.hpp` `msg_folder()`) | Missing. All strings are inline in `launcher.rml` | L | Dusklight UI localization not verified. |
-| F4 | Advanced settings gate (1610) | Missing | S | Only needed if dev rows are exposed. Related to R31 in `docs/status.md:118`. |
+| F4 | Advanced settings gate (1610) | Closed (UI-8): not needed until a dev row exists; dev hooks stay env-only | S | Only needed if dev rows are exposed. Related to R31 in `docs/status.md:118`. |
 
 ### G. Cheats, mods, updates, integrations
 
