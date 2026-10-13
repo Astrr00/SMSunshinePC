@@ -34,6 +34,8 @@ struct Settings {
 	int uiScalePct = 0;             // launcher UI scale in percent; 0 = window scale (aurora::rmlui::set_ui_scale)
 	// [cheats]
 	std::map<std::string, bool> cheats; // cheat id from assets/cheats.json -> on or off; absent = the JSON default
+	// [mods]
+	std::map<std::string, bool> mods; // mod id -> on or off; absent = on
 	// [saves]
 	std::string saveDirectory; // empty = default; see resolveSaveDirectory()
 	// [launcher]

@@ -11,6 +11,7 @@
 #include <RmlUi/Core.h>
 #include <SDL3/SDL.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -22,12 +23,17 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <shellapi.h>
 
 #include "../settings.h"
 #include "../glyphs/glyphs.h"
 #include "../render/render_scale.h"
 #include "../widescreen/widescreen.h"
 #include "../cheats/cheats.h"
+#include "../mods/mods_loader.h"
 // Aurora headers by path: the game's include directories shadow <dolphin/...> (see sdk/pad_keys.cpp).
 #include "../../extern/aurora/include/dolphin/dvd.h"
 #include "../../extern/aurora/include/dolphin/pad.h"
@@ -80,7 +86,7 @@ constexpr const char* kKeyNames[] = {
 	"A", "B", "X", "Y", "START", "Z", "L", "R", "DPAD_UP", "DPAD_DOWN", "DPAD_LEFT", "DPAD_RIGHT",
 	"STICK_UP", "STICK_DOWN", "STICK_LEFT", "STICK_RIGHT", "CSTICK_UP", "CSTICK_DOWN", "CSTICK_LEFT", "CSTICK_RIGHT",
 };
-constexpr const char* kPanes[] = { "video", "audio", "controls", "interface", "cheats" };
+constexpr const char* kPanes[] = { "video", "audio", "controls", "interface", "cheats", "mods" };
 constexpr const char* kGlyphNames[] = { "Generic", "Xbox", "PlayStation", "Switch", "GameCube" };
 
 struct WindowSize {
@@ -241,6 +247,7 @@ public:
 		cheatsLoad(base != nullptr ? base : ".");
 		applyCheats(settings());
 		buildCheatList();
+		buildModList(base != nullptr ? base : ".");
 
 		aurora::input::LayerDescriptor desc{};
 		desc.label = "sunshine.launcher";
@@ -471,6 +478,16 @@ private:
 		return { el->GetAbsoluteLeft() + el->GetOffsetWidth() * 0.5f, el->GetAbsoluteTop() + el->GetOffsetHeight() * 0.5f };
 	}
 
+	// Compares box edges, not centres: a wide button beside a narrow one must not lose to a centred one further away.
+	static float perpendicularGap(Rml::Element* a, Rml::Element* b, int dx) {
+		const bool sideways = dx != 0;
+		const float a0 = sideways ? a->GetAbsoluteTop() : a->GetAbsoluteLeft();
+		const float a1 = a0 + (sideways ? a->GetOffsetHeight() : a->GetOffsetWidth());
+		const float b0 = sideways ? b->GetAbsoluteTop() : b->GetAbsoluteLeft();
+		const float b1 = b0 + (sideways ? b->GetOffsetHeight() : b->GetOffsetWidth());
+		return std::max(0.f, std::max(a0, b0) - std::min(a1, b1));
+	}
+
 	// Moves focus to the nearest visible button in direction (dx, dy); y grows downward. Stays put at the edge.
 	void navigate(int dx, int dy) {
 		ctx_->Update(); // geometry below needs the layout of the current frame
@@ -495,7 +512,7 @@ private:
 			if (ahead <= 0.f) {
 				continue;
 			}
-			const float across = std::abs((p.x - f.x) * dy) + std::abs((p.y - f.y) * dx);
+			const float across = perpendicularGap(from, el, dx);
 			const float score = ahead + 2.f * across;
 			if (best == nullptr || score < bestScore) {
 				best = el;
@@ -689,11 +706,51 @@ private:
 		}
 	}
 
+	// Mod rows are built once, like the cheat rows. Ids are mod-<index>; mods_ holds them in load order.
+	void buildModList(const std::string& exeDir) {
+		mods_ = scanModManifests(exeDir);
+		mods::sortLoadOrder(mods_);
+		std::string rows;
+		for (size_t i = 0; i < mods_.size(); ++i) {
+			const mods::Manifest& m = mods_[i];
+			std::string meta = "API " + std::to_string(m.api.major) + "." + std::to_string(m.api.minor);
+			if (!m.author.empty()) meta += " | by " + escapeRml(m.author);
+			if (!m.description.empty()) meta += " | " + escapeRml(m.description);
+			rows += "<div class=\"row\"><button id=\"mod-" + std::to_string(i) + "\"></button><p class=\"hint\">" + meta + "</p></div>";
+		}
+		if (mods_.empty()) {
+			rows = "<p class=\"hint\">No mods found: each mod is a folder in mods/ with a mod.json.</p>";
+		}
+		setText("mods-list", rows);
+	}
+
+	void refreshMods() {
+		const auto& switches = settings().mods;
+		for (size_t i = 0; i < mods_.size(); ++i) {
+			const auto it = switches.find(mods_[i].id);
+			const bool on = it == switches.end() || it->second; // absent = on
+			const std::string label = escapeRml(mods_[i].name) + " " + escapeRml(mods_[i].version) + ": " + (on ? "On" : "Off");
+			setText(("mod-" + std::to_string(i)).c_str(), label);
+		}
+	}
+
 	void persist() {
 		if (sunshine::saveSettings(settings(), file_)) {
 			setText("settings-status", "Saved to " + escapeRml(file_.string()));
 		} else {
 			setText("settings-status", "Could not write " + escapeRml(file_.string()));
+		}
+	}
+
+	// Opens the folder that holds settings.ini. SUNSHINE_DEV_NO_SHELL logs the path instead (tests run without a shell).
+	void openDataFolder() {
+		const std::filesystem::path dir = file_.parent_path();
+		if (std::getenv("SUNSHINE_DEV_NO_SHELL") != nullptr) {
+			std::printf("[launcher] open data folder: %s\n", dir.string().c_str());
+			return;
+		}
+		if (reinterpret_cast<INT_PTR>(ShellExecuteW(nullptr, L"open", dir.c_str(), nullptr, nullptr, SW_SHOWNORMAL)) <= 32) {
+			setText("settings-status", "Could not open " + escapeRml(dir.string()));
 		}
 	}
 
@@ -717,7 +774,7 @@ private:
 		setText("scale", std::string("Resolution scale: ") +
 		                     (s.resolutionScalePct == 0 ? "Auto" : std::to_string(s.resolutionScalePct) + "%"));
 		setText("fps", std::string("FPS limit: ") + (s.fpsLimit == 0 ? "Unlimited" : std::to_string(s.fpsLimit)));
-		setText("widescreen", std::string("Widescreen: ") + (s.widescreen ? "On" : "Off") + " (" + s.aspect + ")");
+		setText("widescreen", std::string("Widescreen: ") + (s.widescreen ? "On" : "Off") + " (" + s.aspect + "), applies at next start");
 		setText("aspect", "Aspect ratio: " + s.aspect + " (applies at next start)");
 		setText("remember-window-size", std::string("Remember window size: ") + (s.rememberWindowSize ? "On" : "Off") +
 		                                   (s.rememberWindowSize ? "" : " (opens at " + std::to_string(def.windowWidth) + " x " + std::to_string(def.windowHeight) + ")"));
@@ -733,6 +790,7 @@ private:
 			setText(id.c_str(), std::string(name) + ": " + label);
 		}
 		refreshCheats();
+		refreshMods();
 	}
 
 	// Reads the picked file's header; leaves the disc closed (Start reopens it).
@@ -818,6 +876,17 @@ private:
 			return;
 		}
 
+		if (id.rfind("mod-", 0) == 0) {
+			const auto i = static_cast<size_t>(std::atoi(id.c_str() + 4));
+			if (i < mods_.size()) {
+				const std::string mid = mods_[i].id;
+				const auto it = s.mods.find(mid);
+				s.mods[mid] = it != s.mods.end() && !it->second; // absent = on, so the first press turns it off
+				changed();
+			}
+			return;
+		}
+
 		if (id == "window-mode") {
 			s.fullscreen = !s.fullscreen;
 		} else if (id == "window-size") {
@@ -857,6 +926,9 @@ private:
 				++i;
 			}
 			s.aspect = kAspects[(i + 1) % std::size(kAspects)];
+		} else if (id == "open-data") {
+			openDataFolder();
+			return;
 		} else if (id == "ui-scale") {
 			s.uiScalePct = nextPreset(kUiScalePresets, s.uiScalePct);
 		} else if (id == "reset-keys") {
@@ -883,6 +955,7 @@ private:
 	int padWait_ = 0;
 	bool finished_ = false;
 	bool started_ = false;
+	std::vector<mods::Manifest> mods_; // Mods pane rows in load order; button ids are mod-<index>
 };
 
 aurora::input::EventResult onInputThunk(const aurora::input::InputEvent& event, void* userdata) {

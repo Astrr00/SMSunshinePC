@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 	// Cheats and mods read files next to the exe and register disc overlays, so they need the disc open.
 	const std::string exeDir = std::filesystem::path(argv[0]).parent_path().string();
 	cheatsLoad(exeDir); // cheats/cheats_game.cpp
-	modsLoad(exeDir);   // mods/mods_loader.cpp
+	modsLoad(exeDir, s.mods); // mods/mods_loader.cpp
 
 	sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
 	launcher::applyRuntimeSettings(); // launcher/launcher.cpp: PAD bindings, dead zones, master volume, window

@@ -177,6 +177,14 @@ Settings parseSettings(std::string_view text)
 				s.cheats[name.substr(7)] = on != 0;
 		}
 	}
+	for (const auto& entry : ini) {
+		const std::string& name = entry.first;
+		if (name.size() > 5 && name.compare(0, 5, "mods.") == 0) {
+			const int on = readInt(ini, name, -1, 0, 1);
+			if (on >= 0) // invalid values are skipped; the mod keeps its default (on)
+				s.mods[name.substr(5)] = on != 0;
+		}
+	}
 	s.saveDirectory = readString(ini, "saves.directory", def.saveDirectory);
 	s.lastImagePath = readString(ini, "launcher.last_image", def.lastImagePath);
 	return s;
@@ -211,6 +219,11 @@ std::string serializeSettings(const Settings& in)
 	out << "[cheats]\n";
 	for (const auto& [id, on] : in.cheats) {
 		if (!id.empty() && id.find_first_of("=[\r\n") == std::string::npos) // ids come from assets/cheats.json
+			out << id << '=' << (on ? 1 : 0) << '\n';
+	}
+	out << "[mods]\n";
+	for (const auto& [id, on] : in.mods) {
+		if (!id.empty() && id.find_first_of("=[\r\n") == std::string::npos) // ids come from mod.json
 			out << id << '=' << (on ? 1 : 0) << '\n';
 	}
 	out << "[saves]\n";

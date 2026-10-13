@@ -263,18 +263,13 @@ void modsLogLine(int32_t level, const std::string& line) {
     }
 }
 
-bool modsLoad(const std::string& exeDir) {
-    const fs::path exe = fs::path(exeDir);
-    gLogFile = _wfopen((exe / L"sunshine_mods.log").c_str(), L"w");
-
-    const fs::path root = exe / "mods";
+std::vector<mods::Manifest> scanModManifests(const std::string& exeDir) {
+    std::vector<mods::Manifest> manifests;
+    const fs::path root = fs::path(exeDir) / "mods";
     std::error_code ec;
     if (!fs::is_directory(root, ec)) {
-        modsLogLine(SUNSHINE_LOG_INFO, "[mods] no mods folder (" + root.string() + "), 0 mods loaded");
-        return true;
+        return manifests;
     }
-
-    std::vector<mods::Manifest> manifests;
     for (fs::directory_iterator it(root, ec), end; !ec && it != end; it.increment(ec)) {
         if (!it->is_directory(ec)) {
             continue;
@@ -298,11 +293,31 @@ bool modsLoad(const std::string& exeDir) {
         m.dir = it->path().string();
         manifests.push_back(m);
     }
+    return manifests;
+}
+
+bool modsLoad(const std::string& exeDir, const std::map<std::string, bool>& modSwitches) {
+    const fs::path exe = fs::path(exeDir);
+    gLogFile = _wfopen((exe / L"sunshine_mods.log").c_str(), L"w");
+
+    const fs::path root = exe / "mods";
+    std::error_code ec;
+    if (!fs::is_directory(root, ec)) {
+        modsLogLine(SUNSHINE_LOG_INFO, "[mods] no mods folder (" + root.string() + "), 0 mods loaded");
+        return true;
+    }
+
+    std::vector<mods::Manifest> manifests = scanModManifests(exeDir);
     mods::sortLoadOrder(manifests);
 
     std::set<std::string> seen;
     std::vector<mods::OverlayFile> overlays;
     for (const mods::Manifest& m : manifests) {
+        const auto sw = modSwitches.find(m.id);
+        if (sw != modSwitches.end() && !sw->second) {
+            modsLogLine(SUNSHINE_LOG_INFO, "[mods] " + m.id + " disabled by settings");
+            continue;
+        }
         if (!seen.insert(m.id).second) {
             modsLogLine(SUNSHINE_LOG_ERROR, "[mods] duplicate mod id '" + m.id + "' in " + m.dir + ", skipped");
             continue;

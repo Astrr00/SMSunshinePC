@@ -30,6 +30,11 @@ The log is `sunshine_mods.log` next to the exe, and the same lines go to stdout.
 Compatibility: the host major must equal the mod's major. The mod's minor must not be newer than the host's.
 A mod that fails the check is disabled and logged.
 
+## Enable and disable
+
+- `[mods]` in `settings.ini`, also set by the launcher's Mods pane: `<id>=0` disables a mod, `<id>=1` or no key enables it.
+- The loader does not load a disabled id and logs `[mods] <id> disabled by settings`.
+
 ## Overlays
 
 - Each file under `files/` (recursively) becomes an overlay for the DVD path `"/" + relative path`, with `\` turned into `/`.
@@ -92,3 +97,4 @@ path. Copy a folder into `<exe dir>/mods/` to enable it.
 - Overlay effect in-game: NOT verified. No `[mods] overlay in use` and no `[mods] overlay replaced` line appears in any mod-on run (`src/mods/mods_loader.cpp:170,248`). The bianco stage (`SUNSHINE_DEV_START=bianco/0`) shows `ビアンコヒルズ`, not the replaced station name. Delfino was not run in this session.
 - Carried over from an earlier session, not re-run: `mod_pack.py` output round-trips through `tools/discfmt.py` (only `/station.bmg` differs).
 - Not exercised: unload of a faulted DLL mod.
+- Disable switch: with `hello=0` in `[mods]`, a disc start logs `[mods] hello disabled by settings` (`build/UiDev/ui_pages3/mods_disc`, run before the 04:46:20 rebuild). `mods_disc_on` had no INI and no skip line. Not checked: a DLL mod that runs when disabled and enabled.

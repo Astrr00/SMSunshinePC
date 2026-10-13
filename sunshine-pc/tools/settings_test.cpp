@@ -74,6 +74,16 @@ int main()
 	assert(serializeSettings(chBack) == chText);
 	assert(parseSettings("[cheats]\ninfinite_coins=abc\ninfinite_lives=1\n").cheats.size() == 1);
 
+	// Mod toggles: "off" is stored explicitly; absent ids stay on, invalid values are skipped.
+	Settings md = defaultSettings(); // keys need defaults, or the round trip adds them and the texts differ
+	md.mods["hello"] = false;
+	const std::string mdText = serializeSettings(md);
+	const Settings mdBack = parseSettings(mdText);
+	assert(mdBack.mods.size() == 1 && !mdBack.mods.at("hello"));
+	assert(serializeSettings(mdBack) == mdText);
+	const Settings mdOdd = parseSettings("[mods]\nhello=0\nfaulty=1\nbad=abc\n"); // non-numeric is skipped; a number is clamped like every bool key
+	assert(mdOdd.mods.at("hello") == false && mdOdd.mods.at("faulty") == true && mdOdd.mods.count("bad") == 0);
+
 	// File round trip through saveSettings / loadSettings.
 	const std::filesystem::path file = std::filesystem::temp_directory_path() / "sunshine_settings_test.ini";
 	assert(saveSettings(s, file));
