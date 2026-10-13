@@ -1028,6 +1028,10 @@ void CPolarSubCamera::perform(u32 cue, JDrama::TGraphics* graphics)
 		}
 
 		if (mMode != CAMERA_MODE_REPRODUCE_DEMO) {
+#ifdef TARGET_PC
+			if (SMS_isOptionMap()) // port: option camera never sets far; title sky (radius 100000) is clipped at 10000
+				mFar = 300000.0f;
+#endif
 			C_MTXPerspective(unk16C, mFovy, mAspect, mNear, mFar);
 			C_MTXLookAt(unk1EC, unk124, mUp, unk148);
 		}

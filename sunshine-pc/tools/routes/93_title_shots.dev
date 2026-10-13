@@ -1,0 +1,16 @@
+# Title backdrop shots (RenderTile): same timeline as 90, plus a trailing wait so the last PNG is written.
+# Run: SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_ALLOW_CPU_ADAPTER=1 via tools/route.py <tree> tools/routes/93_title_shots.dev --name <run>
+wait frames=300
+log
+shot t_300.png
+wait frames=300
+log
+shot t_600.png
+wait frames=600
+log
+shot t_1200.png
+wait frames=600
+log
+shot t_1800.png
+wait frames=60
+end

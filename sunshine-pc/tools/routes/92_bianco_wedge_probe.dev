@@ -1,0 +1,6 @@
+# Wedge probe: bianco/0 via SUNSHINE_DEV_START, no input, screenshot at logic tick 600 (about 20 s at 30/s).
+waitfor director mario dirstate=4 timeout=3000
+wait frames=600
+shot w600.png
+wait frames=30
+end

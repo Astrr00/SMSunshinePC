@@ -1,0 +1,21 @@
+# Particle probe on bianco/0 (run with SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_ALLOW_CPU_ADAPTER=1).
+# Idle, mid-spray shot (FLUDD droplets), walk shot (running dust). Cheats only keep water and health up.
+waitfor director mario dirstate=4 timeout=3000
+wait frames=90
+cheat infinite_health
+cheat infinite_water
+wait frames=30
+log
+shot p_idle.png
+wait frames=10
+hold R trig=255,255 frames=30
+shot p_spray_a.png
+hold R trig=255,255 frames=30
+log
+wait frames=60
+hold stick=0,-127 frames=30
+shot p_walk.png
+hold stick=0,-127 frames=30
+log
+wait frames=30
+end
