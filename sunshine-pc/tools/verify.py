@@ -2,8 +2,10 @@
 
 Usage: python tools/verify.py [--build] [--matching] [--full] [--boot-secs 45] [--tile 2800,520]
 
-Default (cheap, no compiles): TEMP-DEBUG grep, Aurora patch presence, matching SHA of mario.dol, headless tests,
-boot smoke on build/strict/sunshine.exe (SKIP when it is not there).
+Default (cheap, no compiles): TEMP-DEBUG grep, Aurora patch presence (+ `apply-aurora-patches.py --check` count vs the
+tracked series, clean patches/aurora), matching SHA of mario.dol, line endings of the files changed since origin/main
+(fallback @{u}, HEAD~1) incl. staged/unstaged edits, headless tests, boot smoke on build/strict/sunshine.exe (SKIP when
+it is not there).
   --build     also (re)build build/strict via tools/_strict.cmd and count unresolved symbols (LNK2019).
   --matching  lead only: runs `ninja -k 0` in sms/ first (the only place plain ninja is allowed). Needs MSVC env.
   --full      also runs probe-units over the decomp sources (slow; writes tools/probe-results.json).
@@ -64,6 +66,21 @@ def last_line(text):
     return lines[-1].strip() if lines else "(no output)"
 
 
+def git(*args):
+    """git output (bytes) run in the repo root, or None on a non-zero exit."""
+    p = subprocess.run(["git", *args], cwd=root, capture_output=True)
+    return p.stdout if p.returncode == 0 else None
+
+
+def eol_class(data):
+    """LF / CRLF / mixed; None for a missing or binary (NUL byte) file or one without line breaks."""
+    if not data or b"\0" in data:
+        return None
+    crlf = data.count(b"\r\n")
+    lf = data.count(b"\n") - crlf
+    return "mixed" if crlf and lf else "CRLF" if crlf else "LF" if lf else None
+
+
 @step("temp-debug")
 def temp_debug():
     hits = []
@@ -104,9 +121,21 @@ def aurora_patches():
             for rx in regexes.split(" && "):
                 if not re.search(rx, text, re.M):
                     missing.append(f"{name} (no match: {rx})")
+    # the series itself: what --check applies must be what git tracks, with nothing uncommitted in patches/aurora
+    rc, out = run_cmd([sys.executable, os.path.join(here, "apply-aurora-patches.py"), "--check"], pc, "aurora-check")
+    m = re.search(r"(\d+) patches", out)
+    tracked = [p for p in (git("ls-files", "sunshine-pc/patches/aurora") or b"").decode().splitlines()
+               if re.fullmatch(r"\d{4}-.*\.patch", os.path.basename(p))]
+    dirty = (git("status", "--porcelain", "--", "sunshine-pc/patches/aurora") or b"").decode().splitlines()
+    if rc != 0 or not m:
+        missing.append(f"--check exit {rc}: {last_line(out)}")
+    elif int(m.group(1)) != len(tracked):
+        missing.append(f"--check counts {m.group(1)} patches, git tracks {len(tracked)}")
+    if dirty:
+        missing.append("patches/aurora not clean: " + ", ".join(ln.strip() for ln in dirty[:3]))
     if missing:
         return "FAIL", "; ".join(missing)
-    return "PASS", f"{count} patch(es) present"
+    return "PASS", f"{count} patch(es) present; {last_line(out)}; {len(tracked)} tracked, clean"
 
 
 @step("matching-sha")
@@ -114,6 +143,11 @@ def matching_sha(run_ninja):
     if run_ninja:
         t0 = time.time()
         rc, out = run_cmd(["ninja", "-k", "0"], sms, "sms-ninja")
+        if re.search(r"download_tool\.py|\] TOOL ", out):
+            return "FAIL", ("ninja ran download_tool.py (configure.py ran without the local tool paths); in sms/ re-run "
+                            "`python configure.py --dtk build/tools/dtk.exe --objdiff build/tools/objdiff-cli.exe "
+                            "--sjiswrap build/tools/sjiswrap.exe --compilers build/compilers --binutils build/binutils` "
+                            "(relative paths: an absolute path with a space breaks argparse)")
         if rc != 0:
             return "FAIL", f"ninja -k 0 exit {rc}: {last_line(out)}"
         detail_pre = f"ninja -k 0 ok in {time.time() - t0:.0f}s; "
@@ -128,6 +162,36 @@ def matching_sha(run_ninja):
     if actual != expected:
         return "FAIL", detail_pre + f"sha1 {actual} != {expected}"
     return "PASS", detail_pre + actual
+
+
+@step("line-endings")
+def line_endings():
+    ref = next((r for r in ("origin/main", "@{u}", "HEAD~1") if git("rev-parse", "--verify", "--quiet", r)), None)
+    if ref is None:
+        return "SKIP", "no base commit (origin/main, @{u}, HEAD~1)"
+    base = git("merge-base", ref, "HEAD").decode().strip()
+    names = set()
+    for args in ([base, "HEAD"], ["--cached", base], [base]):  # pushed commits, staged, unstaged
+        names.update(n.decode("utf8") for n in (git("diff", "--name-only", "-z", *args) or b"").split(b"\0") if n)
+    autocrlf = (git("config", "core.autocrlf") or b"").strip() in (b"true", b"input")
+    bad = []
+    for path in sorted(names):
+        attrs = (git("check-attr", "text", "eol", "--", path) or b"").decode("utf8", "replace")
+        normalised = autocrlf or re.search(r": (text: (set|auto)|eol: (lf|crlf))$", attrs, re.M) is not None
+        was = eol_class(git("cat-file", "blob", f"{base}:{path}"))
+        versions = [("HEAD", git("cat-file", "blob", f"HEAD:{path}")), ("index", git("cat-file", "blob", f":{path}"))]
+        work = os.path.join(root, path)
+        if not normalised and os.path.isfile(work):  # text/eol attributes or core.autocrlf: `git add` converts it
+            versions.append(("work", open(work, "rb").read()))
+        for where, data in versions:
+            now = eol_class(data)
+            if now == "mixed" or (was in ("LF", "CRLF") and now and now != was) or \
+                    (was is None and now == "CRLF" and not normalised):
+                bad.append(f"{path} ({where} {was or 'new'} -> {now})")
+                break
+    if bad:
+        return "FAIL", f"{len(bad)} file(s): " + ", ".join(bad[:5]) + (" ..." if len(bad) > 5 else "")
+    return "PASS", f"{len(names)} changed path(s) since {ref} ({base[:7]}), no EOL flip, mixed or new CRLF file"
 
 
 @step("strict-link")
@@ -203,6 +267,7 @@ def main():
     temp_debug()
     aurora_patches()
     matching_sha(args.matching)
+    line_endings()
     strict_link(args.build)
     headless_tests()
     probe_units(args.full)
