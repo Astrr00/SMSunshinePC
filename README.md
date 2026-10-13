@@ -31,7 +31,7 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 | Controller glyphs | partial | 65 | Xbox/PlayStation/Switch/GameCube styles load and change the water-button glyph (PNGs); PlayStation X asset is a square; keyboard style missing |
 | FSR1 upscaling | partial | 65 | FSR1 pass observed in log at 429x322 → 1279x960 (`build/PortLauncherRun/fsr67_on.log`); quality vs native not compared |
 | DLSS | blocked | 0 | needs motion vectors and a D3D12 handoff Dawn does not expose (`docs/dlss-feasibility.md`) |
-| Release package | partial | 40 | packaging script exists, not run on the current tree |
+| Release package | partial | 65 | `package.py` zip built and smoke-run on 2026-10-13 (Release build rc 0, 20.2 MiB, no game data, unpacked launcher and `--dvd` title run OK); not tested on a clean PC, no installer, no signing |
 
 Overall (mean of the rows): **61 %**.
 

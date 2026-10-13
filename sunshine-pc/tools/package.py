@@ -34,7 +34,6 @@ LICENSES = [
     ("rmlui-LICENSE.txt", "build", "_deps/rmlui-src/LICENSE.txt"),
     ("imgui-LICENSE.txt", "build", "_deps/imgui-src/LICENSE.txt"),
     ("fmt-LICENSE", "build", "_deps/fmt-src/LICENSE"),
-    ("tracy-LICENSE", "build", "_deps/tracy-src/LICENSE"),
     ("xxhash-LICENSE", "build", "_deps/xxhash-src/LICENSE"),
     ("zstd-LICENSE", "build", "_deps/zstd-src/LICENSE"),
     ("abseil-LICENSE", "build", "_deps/abseil-cpp-src/LICENSE"),

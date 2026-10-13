@@ -61,3 +61,11 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 - [ ] Keep the release notes free of game data and download links to game data.
 - [ ] Re-check the licence items in `THIRD_PARTY_LICENSES.md` open notes before publishing (Visual C++ redist terms,
       the port's own licence).
+
+## Verified 2026-10-13 (lead + ReleasePkg worker)
+
+- Release configure/build in a new tile: `python tools\locked.py cmd /c tools\build-alt.cmd ReleasePkg` style build of the `sunshine` target with `SUNSHINE_ALLOW_UNRESOLVED=OFF`: rc 0, 94 s with sccache, `sunshine.exe` 11 104 768 bytes, 0 `LNK2019/LNK2001/LNK1120` hits. `TracyClient.lib` is an 8.7 KB stub, the exe holds no Tracy strings, so no Tracy licence row is shipped.
+- `cmake --install build/ReleasePkg --prefix <dir>`: 92 files, runtime DLLs now installed through `install(FILES $<TARGET_RUNTIME_DLLS:sunshine>)` plus `dxcompiler.dll`/`dxil.dll` (loaded by Dawn at run time, not in the import table). The install does NOT contain the VC runtime: the release path is `python tools/package.py --build-dir build/ReleasePkg --llvm-bin <LLVM bin> --redist-dir <...>\VC\Redist\MSVC\14.44.35112\x64\Microsoft.VC143.CRT`, which adds it (zip `dist/sunshine-0.1.0.zip`, 20.2 MiB, 110 entries, `dist/` is git-ignored).
+- Zip content check: no `.iso/.rvz/.szs/.arc/.dol/.bmd/.thp/.bin`, no `sms/`, assets complete (launcher rml/rcss/theme.rcss, fonts, glyphs, `cheats.json`), 16 licence files, every linked component (Aurora, SDL3, Dawn, DXC, nod, libpng, zlib, freetype, fmt, imgui, rmlui, sqlite3, xxhash, zstd, abseil, Lato) has a shipped text.
+- Smoke of the UNPACKED zip from a different working directory with a temp `APPDATA`: launcher (WARP) shows the launcher page (screenshot written); `--dvd` with the owner's own disc image: 60 s run reaches `stage=15` (title), no fatal exception, ended by `SUNSHINE_DEV_MAX_SECONDS` (rc `0xDEAD0002`). Observed: the launcher run ignores `SUNSHINE_DEV_MAX_SECONDS` and had to be killed by the harness after 100 s.
+- Not verified: a clean PC without Visual Studio (the VC runtime DLLs come from the zip), the Windows installer/CPack generator, code signing.

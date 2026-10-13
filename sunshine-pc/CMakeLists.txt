@@ -142,7 +142,14 @@ endif ()
 # Installation-free Windows package. `cmake --install <build> --prefix <dir>` or `cpack` (ZIP). The release path is
 # tools/package.py, which also writes the licence texts and refuses to ship anything that looks like a game image.
 install(TARGETS sunshine RUNTIME DESTINATION .)
-aurora_install_runtime_dlls(sunshine .)
+if (WIN32)
+    # Import closure of sunshine.exe plus the DXC pair Dawn LoadLibrary()s (in no import table).
+    # Not aurora_install_runtime_dlls: its install(CODE) writes to the relative destination "." (cwd), not the prefix.
+    install(FILES $<TARGET_RUNTIME_DLLS:sunshine> DESTINATION .)
+    if (TARGET dawn::webgpu_dawn)
+        install(FILES "$<TARGET_FILE_DIR:sunshine>/dxcompiler.dll" "$<TARGET_FILE_DIR:sunshine>/dxil.dll" DESTINATION .)
+    endif ()
+endif ()
 install(DIRECTORY assets/ DESTINATION assets OPTIONAL)
 install(FILES THIRD_PARTY_LICENSES.md DESTINATION .)
 install(DIRECTORY licenses/ DESTINATION licenses)

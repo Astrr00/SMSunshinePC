@@ -74,7 +74,7 @@ Exit criterion: every toggle in the launcher has an observed effect in game.
 | Item | State | Next |
 | --- | --- | --- |
 | Published on GitHub (`Astrr00/SMSunshinePC`, single repo, sms flattened, Aurora patch series) | DONE | keep gates green |
-| Release package (exe, assets, licenses, no game data) | PART | install/CPack run, unpacked smoke test |
+| Release package (exe, assets, licenses, no game data) | PART (2026-10-13: Release build rc 0 in 94 s, `package.py` zip 20.2 MiB with VC runtime and 16 licence files, no game data; unpacked launcher smoke and 60 s `--dvd` run to the title OK; details `docs/release-checklist.md`) | clean-PC test, installer/CPack, signing |
 | `probe-units`: clang-cl 624/733 (584/584 built), MSVC `cl` 565/733 | DONE (documented) | optional: fix the 66 built-unit `cl` failures |
 | Docs: status, platform notes, verification, mods | PART | update after each phase |
 

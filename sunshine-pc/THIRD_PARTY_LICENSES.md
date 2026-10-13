@@ -6,19 +6,18 @@ of the release zip. Versions marked "pinned" are fixed in the CMake build; other
 
 | Component | Used for | Version | Licence | File in `licenses/` |
 |---|---|---|---|---|
-| Aurora | GameCube SDK replacement | HEAD `94431fd6` (pinned) | MIT | `aurora-LICENSE` |
+| Aurora | GameCube SDK replacement | upstream `50e5be3` (submodule pin) + 11 port patches (`patches/aurora`) | MIT | `aurora-LICENSE` |
 | Dawn / Tint (`webgpu_dawn.dll`) | WebGPU renderer | `v20260807.225922` (pinned) | BSD-3-Clause | `dawn-LICENSE.txt` |
 | DirectX Shader Compiler (`dxcompiler.dll`, `dxil.dll`) | Shader compilation | from Dawn prebuilt | NCSA / LLVM Release License (plus Miniz notice) | `dxc-LICENSE.txt` |
 | SDL3 (`SDL3.dll`) | Window, input, audio | `3.4.10` (pinned) | Zlib | `SDL3-LICENSE.txt` |
 | nod (`nod.dll`) | Disc image reading | `v2.0.0-alpha.12` (pinned) | Apache-2.0 OR MIT; shipped under MIT | `nod-LICENSE-MIT.txt` |
-| libpng (`libpng16.dll`) | PNG loading | pinned in CMake | libpng License | `libpng-LICENSE` |
-| zlib (`zlib1.dll`) | Compression | pinned in CMake | zlib License | `zlib-LICENSE.md` |
+| libpng (`libpng16.dll`) | PNG loading | `v1.6.58` (pinned) | libpng License | `libpng-LICENSE` |
+| zlib (`zlib1.dll`) | Compression | zlib-ng `2.3.3` (pinned) | zlib License | `zlib-LICENSE.md` |
 | FreeType | Font rasterisation | pinned in CMake | FreeType License (FTL) | `freetype-LICENSE.TXT` |
 | RmlUi | UI layout | pinned in CMake | MIT | `rmlui-LICENSE.txt` |
 | Lato (`assets/launcher/LatoLatin-*.ttf`) | Launcher UI font | as shipped in RmlUi samples | SIL OFL 1.1 | `Lato-OFL-LICENSE.txt` |
-| Dear ImGui | Debug UI | pinned in CMake | MIT | `imgui-LICENSE.txt` |
-| {fmt} | Formatting | pinned in CMake | MIT (with exception) | `fmt-LICENSE` |
-| Tracy | Profiling client (inactive in release) | pinned in CMake | BSD-3-Clause | `tracy-LICENSE` |
+| Dear ImGui | Debug UI | `v1.91.9b-docking` (pinned) | MIT | `imgui-LICENSE.txt` |
+| {fmt} | Formatting | `12.1.0` (pinned) | MIT (with exception) | `fmt-LICENSE` |
 | xxHash | Hashing | `v0.8.3` (pinned) | BSD-2-Clause | `xxhash-LICENSE` |
 | zstd | Compression | pinned in CMake | BSD-3-Clause / GPLv2 dual; BSD elected | `zstd-LICENSE` |
 | Abseil | C++ utilities | `20240722.0` (pinned) | Apache-2.0 | `abseil-LICENSE` |
