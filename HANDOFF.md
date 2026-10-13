@@ -211,3 +211,20 @@ Observed (details: ROADMAP update `2026-10-13 (route 72 in real time, 30 Hz)`): 
 ### Update 2026-10-13: health crutch analysis
 
 `cheat infinite_health` compensates goop damage while the bot stands still at the Delfino spray spot (see ROADMAP update `2026-10-13 (why cheat infinite_health is needed)`). Route 77 (`tools/routes/77_boss_no_health_cheat.dev`) is route 72 without the cheat: it dies at tick 10620 and times out. Diagnostics `SUNSHINE_DEV_HPLOG=1` (env-gated) exist in the working tree in `sms/src/Player/MarioCollision.cpp`, `MarioMove.cpp`, `MarioReceiveMsg.cpp` and reference `gDbgGKCurBck` from the gatekeeper diagnostics: commit them together or not at all.
+
+### Update 2026-10-13 (later): flat-colour Bianco screen fixed, boss killed with pad input only
+
+Wedge (observed, route 92 = `tools/routes/92_bianco_wedge_probe.dev`: `SUNSHINE_DEV_START=bianco/0`, no input, screenshot `w600.png` at logic tick 600; Strict build, WARP adapter): anomalous images (dark blue or purple screen, red wedge) are found with a script that takes the share of the dominant 16-level colour bucket of a 160x120 downscale: normal 0.059 (every normal image falls in the same bucket), anomalous 0.256-0.924.
+
+| variant (env `SUNSHINE_DEV_HEAP_FILL`, temporary probe, removed again) | runs | anomalous |
+| --- | --- | --- |
+| none (CRT heap contents as they come) | 14 (6 + 8, two sessions) | 8 (2 + 6) |
+| fill every plain-new block with 0x00 / 0xAA / 0xFF / 0x7F | 6 each, 24 total | 0 |
+| `touch` (read one byte per cache line, contents unchanged) | 8 | 3 |
+| production build, plain `new` zeroed (`sunshine-pc/src/sdk/jkr_new_delete.cpp`, commit 7bbcaee) | 12 | 0 |
+
+Observed: any deterministic fill removes the anomaly, so what decides is the content of a plain-new block, not allocation timing alone (touch-only still shows 3 of 8). The `[status-cam]` lines of anomalous and normal runs are identical (target, up, fov, near, far, `[status-cam2]` pos), so the camera state that is logged is not the carrier. Not identified: which object reads uninitialised memory (INFERENCE: a field that no decomp constructor writes; retail arena memory is not documented here). The fix is a port-level zero fill; size-range bisection of the fill (to find the class) is the next step if the object matters.
+
+Other fixes of this round (observed): `GetAtanTable` index clamp under `TARGET_PC` (`sms/src/MarioUtil/MathUtil.cpp`, commit 9d1f0ca): route 91 had crashed once at tick 662 with a NaN-derived index in the camera; 3 of 3 later runs complete; matching build unchanged.
+
+Real-input boss fight (observed): `fightboss timeout=N` in `sunshine-pc/src/devscript/devscript.cpp` plays the airport GateKeeper fight with `setVirtualPad` only (crouch held, R spray and stick Y -127 in the head windows bck 0x3/0x11/0xF with head y > 700, stick X toward the head, sleep phase bck 0xA/0x4 body spray with stick Y following the nozzle angle). Route `tools/routes/76b_airport_boss_fight.dev` (prefix of route 54, cheats `infinite_health` and `infinite_water` still on): boss dead in 3 of 3 runs of an agent in a fresh clone and 1 of 1 run in the main tree (`bb76b_0531`): hp 3 -> 2 at tick 2525-2527, 2 -> 1 by 2840, 1 -> 0 in the window 3374-3440, verb done at tick 3586-3589, 929-930 ticks after the bot started. The log field `headHits` sums increases of `unk154` and is not a hit count (`unk154` is reset by `CUE_MOVE`); the kill evidence is `hp`. Not done: Delfino GateKeeper with pad input (it still uses `SUNSHINE_DEV_AIM_ASSIST`), the health and water cheats, the real-time (30 Hz) run of this route.
