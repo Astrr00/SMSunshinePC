@@ -28,6 +28,7 @@ int main()
 	s.rememberWindowSize = false;
 	s.uiScalePct = 75;
 	s.masterVolumePct = 35;
+	s.outputDevice = "{0.0.0.00000000}.{8d1a4c4e-6c0f-4f63-9d6e-2b7a1e5c3f10}";
 	s.stickDeadZonePct = 25;
 	s.substickDeadZonePct = 0;
 	s.keys["A"] = 26;
@@ -38,6 +39,7 @@ int main()
 	assert(back.fullscreen && back.windowWidth == 1920 && back.windowHeight == 1080 && !back.vsync);
 	assert(back.resolutionScalePct == 200 && back.fpsLimit == 60 && back.widescreen && back.aspect == "21:9");
 	assert(back.masterVolumePct == 35 && back.stickDeadZonePct == 25 && back.substickDeadZonePct == 0);
+	assert(back.outputDevice == s.outputDevice);
 	assert(back.keys.at("A") == 26 && back.glyphStyle == GlyphStyle::PlayStation);
 	assert(!back.rememberWindowSize && back.uiScalePct == 75);
 	assert(back.lastImagePath == s.lastImagePath);

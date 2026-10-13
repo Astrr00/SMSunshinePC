@@ -34,6 +34,7 @@
 #include "../widescreen/widescreen.h"
 #include "../cheats/cheats.h"
 #include "../mods/mods_loader.h"
+#include "../sdk/av.hpp"
 // Aurora headers by path: the game's include directories shadow <dolphin/...> (see sdk/pad_keys.cpp).
 #include "../../extern/aurora/include/dolphin/dvd.h"
 #include "../../extern/aurora/include/dolphin/pad.h"
@@ -55,6 +56,15 @@ namespace {
 
 using sunshine::Settings;
 using sunshine::settings;
+
+// Name shown for the saved output device; an endpoint that is not active shows the Windows default (the fallback the
+// audio output takes, sdk/av_win.cpp).
+std::string outputDeviceName(const std::string& id) {
+	for (const av::AudioDevice& d : av::AudioOutputDevices())
+		if (d.id == id)
+			return d.name;
+	return "Windows default";
+}
 
 // PAD bindings are keyed by the settings names. The tables mirror the layout of sdk/pad_keys.cpp.
 struct ButtonSlot {
@@ -780,6 +790,7 @@ private:
 		                                   (s.rememberWindowSize ? "" : " (opens at " + std::to_string(def.windowWidth) + " x " + std::to_string(def.windowHeight) + ")"));
 		setText("fsr1", std::string("FSR 1 upscale: ") + (s.fsr1 ? "On" : "Off"));
 		setText("volume", "Master volume: " + std::to_string(s.masterVolumePct) + "%");
+		setText("output-device", "Output device: " + outputDeviceName(s.outputDevice));
 		setText("stick-deadzone", "Stick dead zone: " + std::to_string(s.stickDeadZonePct) + "%");
 		setText("substick-deadzone", "C-stick dead zone: " + std::to_string(s.substickDeadZonePct) + "%");
 		setText("glyph-style", std::string("Button glyphs: ") + kGlyphNames[static_cast<int>(s.glyphStyle)]);
@@ -911,6 +922,13 @@ private:
 			s.fsr1 = !s.fsr1;
 		} else if (id == "volume") {
 			s.masterVolumePct = nextPreset(kVolumePresets, s.masterVolumePct);
+		} else if (id == "output-device") {
+			const std::vector<av::AudioDevice> devices = av::AudioOutputDevices();
+			size_t at = 0;
+			for (size_t i = 0; i < devices.size(); ++i)
+				if (devices[i].id == s.outputDevice)
+					at = i;
+			s.outputDevice = devices[(at + 1) % devices.size()].id;
 		} else if (id == "stick-deadzone") {
 			s.stickDeadZonePct = nextPreset(kDeadZonePresets, s.stickDeadZonePct);
 		} else if (id == "substick-deadzone") {
@@ -1022,6 +1040,7 @@ void applyRuntimeSettings() {
 		break;
 	}
 	hostdsp::setOutputVolumePct(s.masterVolumePct);
+	av::AudioSetDevice(s.outputDevice);
 	VISetWindowFullscreen(s.fullscreen);
 	// remember_window_size=0: the window always opens at the default size; the saved size is kept for the next time it is on.
 	const sunshine::Settings def = sunshine::defaultSettings();

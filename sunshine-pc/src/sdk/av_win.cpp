@@ -8,12 +8,14 @@
 #include <objbase.h>
 #include <mmdeviceapi.h>
 #include <audioclient.h>
+#include <functiondiscoverykeys_devpkey.h>
 
 #include <atomic>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
 #include <thread>
+#include <mutex>
 
 #pragma comment(lib, "ole32.lib")
 
@@ -72,6 +74,28 @@ struct Device {
 	bool warned = false;
 };
 Device g_dev;
+std::wstring g_openId;  // endpoint of the next open (OpenAsync copies it); empty = default. Pump thread only
+std::mutex g_wantMutex; // guards g_wantId
+std::wstring g_wantId;  // endpoint AudioSetDevice asked for
+std::atomic<bool> g_wantNew{false}; // g_wantId changed since the pump last read it
+
+std::string toUtf8(const wchar_t* w)
+{
+	const int n = WideCharToMultiByte(CP_UTF8, 0, w, -1, nullptr, 0, nullptr, nullptr); // includes the terminator
+	std::string s(n > 1 ? static_cast<size_t>(n - 1) : 0, '\0');
+	if (n > 1)
+		WideCharToMultiByte(CP_UTF8, 0, w, -1, s.data(), n, nullptr, nullptr);
+	return s;
+}
+
+std::wstring toWide(const std::string& s)
+{
+	const int n = MultiByteToWideChar(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), nullptr, 0);
+	std::wstring w(n > 0 ? static_cast<size_t>(n) : 0, L'\0');
+	if (n > 0)
+		MultiByteToWideChar(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), w.data(), n);
+	return w;
+}
 
 // Blocks that never reached the device, counted for the exit summary. Written by the pump thread only.
 struct Stats {
@@ -115,8 +139,33 @@ bool Silence(UINT32 frames)
 	       && SUCCEEDED(g_dev.render->ReleaseBuffer(frames, AUDCLNT_BUFFERFLAGS_SILENT));
 }
 
+// The requested endpoint while it is active, else the default endpoint (a saved device that was unplugged).
+HRESULT pickEndpoint(IMMDeviceEnumerator* enumerator, const std::wstring& id, IMMDevice** out)
+{
+	// Logged once per id: Open retries every second while the device is lost. Helper threads run one at a time
+	// (OpenAsync is only called once the previous open ended), so the static needs no lock.
+	static std::wstring logged;
+	const bool log = id != logged;
+	logged = id;
+	if (id.empty())
+		return enumerator->GetDefaultAudioEndpoint(eRender, eConsole, out);
+	if (SUCCEEDED(enumerator->GetDevice(id.c_str(), out))) {
+		DWORD state = 0;
+		if (SUCCEEDED((*out)->GetState(&state)) && state == DEVICE_STATE_ACTIVE) {
+			if (log)
+				std::fprintf(stderr, "[av] audio output device %s\n", toUtf8(id.c_str()).c_str());
+			return S_OK;
+		}
+		Release(*out);
+	}
+	if (log)
+		std::fprintf(stderr, "[av] audio output device %s is not available; using the Windows default\n",
+		             toUtf8(id.c_str()).c_str());
+	return enumerator->GetDefaultAudioEndpoint(eRender, eConsole, out);
+}
+
 // Shared-mode stream at `hz`, 16-bit stereo. AUTOCONVERTPCM lets Windows resample to whatever the endpoint mixes at.
-bool Open(UINT32 hz)
+bool Open(UINT32 hz, const std::wstring& id)
 {
 	// S_FALSE and RPC_E_CHANGED_MODE both leave COM usable on this thread.
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -134,7 +183,7 @@ bool Open(UINT32 hz)
 	const bool ok
 	    = SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
 	                                 __uuidof(IMMDeviceEnumerator), reinterpret_cast<void**>(&enumerator)))
-	      && SUCCEEDED(enumerator->GetDefaultAudioEndpoint(eRender, eConsole, &device))
+	      && SUCCEEDED(pickEndpoint(enumerator, id, &device))
 	      && SUCCEEDED(device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr,
 	                                    reinterpret_cast<void**>(&g_dev.client)))
 	      && SUCCEEDED(g_dev.client->Initialize(
@@ -173,9 +222,9 @@ void Fail(std::chrono::steady_clock::time_point now, const char* what)
 void OpenAsync(UINT32 hz)
 {
 	g_dev.open = kOpening;
-	std::thread([hz] {
+	std::thread([hz, id = g_openId] {
 		const auto t0 = std::chrono::steady_clock::now();
-		const bool ok = Open(hz);
+		const bool ok = Open(hz, id);
 		static bool reported;
 		if (!reported) {
 			reported = true;
@@ -190,10 +239,63 @@ void OpenAsync(UINT32 hz)
 
 } // namespace
 
+void AudioSetDevice(const std::string& id)
+{
+	const std::wstring wide = toWide(id);
+	std::lock_guard<std::mutex> lock(g_wantMutex);
+	if (wide == g_wantId)
+		return;
+	g_wantId = wide;
+	g_wantNew = true;
+}
+
+std::vector<AudioDevice> AudioOutputDevices()
+{
+	std::vector<AudioDevice> out{AudioDevice{"", "Windows default"}};
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED); // S_FALSE and RPC_E_CHANGED_MODE both leave COM usable here
+	IMMDeviceEnumerator* enumerator = nullptr;
+	IMMDeviceCollection* devices = nullptr;
+	if (SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator),
+	                               reinterpret_cast<void**>(&enumerator)))
+	    && SUCCEEDED(enumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &devices))) {
+		UINT count = 0;
+		devices->GetCount(&count);
+		for (UINT i = 0; i < count; ++i) {
+			IMMDevice* device = nullptr;
+			LPWSTR id = nullptr;
+			IPropertyStore* props = nullptr;
+			PROPVARIANT name;
+			PropVariantInit(&name);
+			if (SUCCEEDED(devices->Item(i, &device)) && SUCCEEDED(device->GetId(&id))
+			    && SUCCEEDED(device->OpenPropertyStore(STGM_READ, &props))
+			    && SUCCEEDED(props->GetValue(PKEY_Device_FriendlyName, &name)) && name.vt == VT_LPWSTR)
+				out.push_back({toUtf8(id), toUtf8(name.pwszVal)});
+			PropVariantClear(&name);
+			if (props)
+				props->Release();
+			if (id)
+				CoTaskMemFree(id);
+			if (device)
+				device->Release();
+		}
+	}
+	if (devices)
+		devices->Release();
+	if (enumerator)
+		enumerator->Release();
+	return out;
+}
+
 void AudioWrite(const int16_t* stereo, uint32_t frames, double hz)
 {
 	static const bool summaryRegistered = (std::atexit(summaryAtExit), true);
 	(void)summaryRegistered;
+	// A running open writes g_dev on its helper thread, so the switch waits until it has ended.
+	if (g_dev.open != kOpening && g_wantNew.exchange(false)) {
+		std::lock_guard<std::mutex> lock(g_wantMutex);
+		g_openId = g_wantId;
+		Close();
+	}
 	const UINT32 rate = static_cast<UINT32>(hz + 0.5);
 	const auto now    = std::chrono::steady_clock::now();
 

@@ -25,6 +25,7 @@ struct Settings {
 	std::string aspect = "16:9"; // 4:3, 16:9, 16:10, 21:9, 32:9 or auto (window aspect at startup)
 	// [audio]
 	int masterVolumePct = 100;  // 0..100
+	std::string outputDevice; // [audio] output_device: endpoint id, empty = Windows default
 	// [controls]
 	int stickDeadZonePct = 10;     // 0..50, percent of full stick travel
 	int substickDeadZonePct = 10;  // 0..50
