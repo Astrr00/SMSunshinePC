@@ -28,7 +28,7 @@ No game data and no PowerPC code are tracked in git. The disc image lives under 
 
 Run `sunshine-pc/tools/handoff-setup.ps1` from the bundle root (it clones the repo from `repo.bundle`, extracts the toolchain, installs Python wheels, copies the game data, applies the WIP patch, runs the first gates). Manual equivalent:
 
-1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 12 patches`).
+1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 13 patches`).
 2. Extract `toolchain/llvm.tar.xz`; `setx LLVM_BIN <folder>\bin`.
 3. `pip install -r sunshine-pc/tools/requirements.txt` (online).
 4. Copy the game data folder to `sms/orig/GMSJ01/` (keep the layout: `Super Mario Sunshine (Japan).rvz`, `extracted/`, `files/`, `sys/`).
@@ -50,8 +50,9 @@ certutil -hashfile build\GMSJ01\mario.dol SHA1    # must be 9f5a8caf56f5356aeac9
 cd ..\sunshine-pc
 set LLVM_BIN=<llvm>\bin
 python tools\locked.py cmd /c tools\_strict.cmd    # strict link: 0 unresolved symbols
-python tools\apply-aurora-patches.py --check       # "applied: 12 patches"
+python tools\apply-aurora-patches.py --check       # "applied: 13 patches"
 ```
+`python sunshine-pc/tools/verify.py --matching` (from the repo root; `sunshine-pc\tools\verify.cmd --matching` loads the MSVC environment first) runs `ninja -k 0` in `sms/` + the DOL SHA-1 check, the TEMP-DEBUG grep, the Aurora series check (`--check` count vs the tracked patches, clean `patches/aurora`), the line-ending check of the changed files, the headless tests and the boot smoke (one PASS/FAIL/SKIP line each, exit 1 on any FAIL). If ninja runs `download_tool.py`, re-run `configure.py` with the relative tool paths of the worktree procedure below. Until the line-ending step is proven, also check the touched files with `git ls-files --eol`. The strict link stays manual (`--build` rebuilds `build/strict` in the tree it runs in).
 Expected at handoff: 11 317 / 12 881 functions byte-identical, 445 / 736 units Matching, 62.56 % code, 98.64 % fuzzy.
 
 ### Baseline for changes_all (corrected 2026-10-12)
@@ -86,73 +87,109 @@ Expected at handoff: 11 317 / 12 881 functions byte-identical, 445 / 736 units M
 - Route 70 (`tools/routes/70_boss_until.dev`, from `sunshine-pc`) needs `SUNSHINE_ALLOW_CPU_ADAPTER=0` in its command: `python tools/route.py Strict tools/routes/70_boss_until.dev --name <n> --seconds 330 SUNSHINE_DEV_STEP_RETRACE=1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_ALLOW_CPU_ADAPTER=0`. Without it the game takes the CPU adapter: about 21 logic ticks/s; runs r8a and an earlier one ended rc=124 at logic t=219-235 s and looked like a hang. With it: about 70 ticks/s (r8b: 21180 ticks in 298 s); u01/u02 about 120 ticks/s. `[status]` `t` is logic time (tick/30), not wall time.
 - A devscript TIMEOUT exits with rc 3 (a failure). Until 2026-10-12 it returned 0xC0000409: `std::exit` skipped `aurora_shutdown()`, so Aurora's static pipeline-worker `std::thread` was still joinable at the static destructors (`std::terminate`). `main.cpp` now registers `aurora_shutdown` with `atexit` (see `platform-notes.md`, "Exit after a devscript TIMEOUT").
 - Dev switches (`SUNSHINE_DEV_START=bianco/0`, `SUNSHINE_DEV_SCRIPT`, `SUNSHINE_DEV_STATUS`, `SUNSHINE_DEV_SEED`, `SUNSHINE_DEV_MAX_SECONDS`, `SUNSHINE_CHECK_HEAP`, `SUNSHINE_DEV_HIT_LOG`, `AURORA_SCREENSHOT*`) are for diagnosis; the acceptance flow (B1) must run without start/skip switches. `SUNSHINE_DEV_HIT_LOG=1` adds a `[-spray]` line (cumulative GateKeeper head/body spray hits from `gDbgGKHeadSprayHits`/`gDbgGKBodySprayHits` in `sms/src/Enemy/gatekeeper.cpp`, TARGET_PC only) to each `logBoss` line; routes 80-82 need it.
-- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0012`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
+- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0013`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
 - Dolphin as a reference emulator is blocked (apploader stall, popups); do not run it.
 
-Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit, not on a known remote branch), but `apply-aurora-patches.py --check` says its files equal upstream 50e5be3 + patches 0001-0007 (0008, the FIFO diagnostics patch, was added on 2026-10-11). On a new PC `git submodule update --init` checks out 50e5be3; then run `python sunshine-pc/tools/apply-aurora-patches.py` (the setup script does) and expect `applied: 12 patches` (the series is 0001-0012). `aurora-worktree/` in the bundle is the already-patched fallback.
+Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit, not on a known remote branch), but `apply-aurora-patches.py --check` says its files equal upstream 50e5be3 + patches 0001-0007 (0008, the FIFO diagnostics patch, was added on 2026-10-11). On a new PC `git submodule update --init` checks out 50e5be3; then run `python sunshine-pc/tools/apply-aurora-patches.py` (the setup script does) and expect `applied: 13 patches` (the series is 0001-0013). `aurora-worktree/` in the bundle is the already-patched fallback.
 
-## 7. State at handoff and next steps (2026-10-13, end of the lead session)
+## 7. State at handoff and next steps (2026-10-13, HEAD `a49732c`)
 
 Start here. Details per topic are in the `### Update 2026-10-13 ...` sections at the end of this file, in `ROADMAP.md`
-(Phase 1 and Phase 2 sections) and in `sunshine-pc/docs/platform-notes.md`. Agent reports and patches of the last
-session (not in git, session-local) were copied to `C:/Users/Administrator/Documents/Projekte/handoff-2026-10-13/`
-(62 files: `<Agent>_report.md`, `*.patch`, scratch `.dev` routes).
+(Phase 1 and Phase 2 sections) and in `sunshine-pc/docs/platform-notes.md`. Agent reports and patches are not in git
+(session-local): first session in `C:/Users/Administrator/Documents/Projekte/handoff-2026-10-13/` (62 files), second
+session in `C:/Users/Administrator/Documents/Projekte/lead-2026-10-13b/` (`<Agent>_report.md`, `*.patch`, `TODO.md`,
+UI plans in `uiplans/`).
 
-**State (observed):** origin/main `40999a3`. DOL SHA-1 `9f5a8caf...` unchanged at every commit. Fresh-clone gate passed
-for `768e5f7`; later commits changed only docs, routes, tools, the ledger and one `TARGET_PC` hunk (`HelpActor.cpp`,
-matching build re-checked). Strict link 0 unresolved (agent builds at `846d81f` and `eed8045`).
+**State (observed):** origin/main `a49732c`. Landed since `db0844e`: `ec1c0eb` UI-6, `32f3941` exit heap crash +
+per-run `USERPROFILE` + Aurora 0012, `45015f6` THP L/R, `93a9a1c` DSP voice mix, `934ee78` UI-8 + `route.py --no-dvd`,
+`cfe7373` goop readback + Aurora 0013, `a49732c` DSP output matrix + effect lines. Gates recorded in the commit
+messages (agents' clone builds): `ec1c0eb` STRICT 0 unresolved + DOL SHA-1 `9f5a8caf...` unchanged; `32f3941` DOL
+SHA-1 (rebuilt) + STRICT 0 unresolved + Aurora "applied: 12 patches"; `45015f6` DOL SHA-1 unchanged (rebuilt), no
+STRICT; `cfe7373` STRICT 0 unresolved + DOL SHA-1 unchanged + "applied: 13 patches"; `93a9a1c`, `934ee78`, `a49732c`
+STRICT 0 unresolved, no SHA-1 (they touch no `sms/`). Aurora series: 13 patches (0001-0013).
 
-- **Phase 1: DONE under user-accepted dev aids.** Chain route 85 (`tools/routes/85_accept_no_shine2.dev`) then route 86
-  (`86_accept_reload.dev --appdata-from <route-85 run>`) passed twice in a row in real time (runs accA1/acc86a and
-  accB1/acc86b): Bianco Ep.1, `shines=1`, `.gci` PASS, `shines=1` after reload, no overrun or fatal. Dev aids used and
-  accepted by the user: `SUNSHINE_DEV_AIM_ASSIST`, `chase tp=1`, `cheat infinite_health`, env
-  `SUNSHINE_ALLOW_CPU_ADAPTER=0`. User rule: all dev cheats are allowed in test runs; switch them off only for damage tests.
-- **Phase 2: in progress.** Done: audit of the 9 scanner hits (all codegen residue), 10-minute soak Bianco 646 s and
-  Delfino 706 s game time under page heap without crash (after the `HelpActor` fix `eed8045`: the name
-  `ナメクリマネージャー` resolves to a 176-byte non-actor NameRef, `check()` read past it). Open, in this order:
-  1. **Goop does not clean in game logic.** Spraying shows a clean patch on screen, but `isPolluted`
-     (`sms/src/Map/PollutionLayer.cpp:257-270`, read by `MarioMove.cpp:1015-1043`) stays `pol=2 dirty=1` (runs goopA1/A2,
-     report `GoopClean_report.md`). [INFERENCE] the stamp is rendered on the GPU and the EFB copy is not written back
-     to the CPU texture that `isPolluted` reads. Next: trace `TPollutionLayer::stamp` -> counter layer -> `GXCopyTex`,
-     check Aurora's copy path (`extern/aurora/lib/dolphin/gx`, `lib/gfx/tex_copy_conv.cpp`), then fix by (a) an Aurora
-     readback patch or (b) a `TARGET_PC` CPU-side stamp. Agent GoopPath was stopped before reporting.
-  2. **Audio clipping.** 13 of 14 clipping seconds disappear with the auto-mixer (Dolby) voices gated off
-     (`SUNSHINE_DSP_NOAUTO=1`, run afNoAuto); master output gain is 5.0 (20480) on every `[dsp-out]` line. Code
-     asymmetry `JASChannel.cpp:295` vs `:378` suggests auto voices about 2.5x hot [INFERENCE]. Next: find the origin of
-     the 5.0 (`git log -S20480 -- sunshine-pc/src/sdk`), same-build control run, then one fix at the layer the
-     evidence supports, measured before/after (clip seconds and RMS). Reports `AudioClip_report.md`, `AudioFix_report.md`;
-     DIAG patch `audioclip.patch`.
-  3. **Logic rate below 30/s** in 10-minute runs (27-28 % of one-second samples at 30/s; acceptance runs 79-85 %). Page
-     heap ruled out (`LogicRate_report.md`). The slow runs used the WARP CPU renderer; acceptance runs used
-     `SUNSHINE_ALLOW_CPU_ADAPTER=0`. Next: three 120 s bianco/0 runs (as is, with `SUNSHINE_ALLOW_CPU_ADAPTER=0`, plus
-     vsync off) and read `sunshine-pc/src/framerate/framerate.cpp` pacing. This machine has no hardware GPU, so rates
-     here may not represent a real PC.
-  4. **Exit-time heap crash**, 3 of 170 TIMEOUT runs (2x 0xc0000005 in RtlFreeHeap, 1x 0xc0000374), teardown order ruled
-     out (`HeapCrash_report.md`). Next: TIMEOUT runs with `SUNSHINE_CHECK_HEAP=2`.
-  5. GoopCount (pixel counter, Aurora private copy) is paused: `goopcount.patch`, `GoopCount3_report.md`. Revisit after 1.
-- **Uncommitted in the main tree: UI-6 (audio pane) by agent UiPack, unfinished, not built.** Files:
-  `sunshine-pc/src/sdk/av.hpp`, `av_win.cpp` (output device list, open the saved endpoint id, fall back to the default
-  with a log line), `src/settings.*`, `assets/launcher/launcher.rml`, `src/launcher/launcher.cpp`,
-  `tools/settings_test.cpp`. Finish: build `build/UiDev`, run `settings_test` and `tools/port_tests.cmd` (38 checks),
-  one run with a valid and one with a bogus device id, update `sunshine-pc/docs/ui-plan.md`. Music volume (D4) is
-  folded into the master volume row: the BGM level lives in `sms/src/MSound/MSoundBGM.cpp:8` (`MSBgm::smMainVolume`).
-- UI packages: done UI-1..3, 5, 9, 10, 13; open UI-4 (in-game menu, needs `main.cpp`, a new module and a `TARGET_PC`
-  pause hook in `sms/src/System/MarDirectorDirect.cpp`), UI-6 (above), UI-7, 8, 11, 12, 14-16.
+- **Phase 1: DONE under user-accepted dev aids** (runs accA1/acc86a and accB1/acc86b at `846d81f`; ROADMAP Phase 1).
+  Dev aids accepted by the user: `SUNSHINE_DEV_AIM_ASSIST`, `chase tp=1`, `cheat infinite_health`, env
+  `SUNSHINE_ALLOW_CPU_ADAPTER=0`. User rule: all dev cheats are allowed in test runs; switch them off only for damage
+  tests. **Since `cfe7373` the chain does not pass** (regression below; runs at `cfe7373`; [INFERENCE] the same at
+  `a49732c`, which changes only the host DSP).
+- **Known regression after `cfe7373` (open, fix in progress; report `Regress85_report.md`).** Observed: on the Null
+  backend (`SUNSHINE_ALLOW_CPU_ADAPTER=0`) the copy readback zeroes the goop maps (airport nonzero texels 6306 -> 0,
+  Delfino 15022 -> 15 and -> 4); route 85 then stalls at the Delfino GateKeeper (boss hp 2, TIMEOUT line 320; runs
+  rg85a/rg85b rc 3). With WARP (rg85w) the goop survives and the boss dies, but the run failed at the gate walk:
+  `walkto` line 345 overshoots, gate `openRatio` stays 0.00 during the sprays (lines 348-352), TIMEOUT `walkto` line
+  356. [INFERENCE] Null renders nothing, so its readback copies zeros. Cause of the WARP gate failure: under
+  investigation (candidate in the report: `faceto x=0 z=4941` before line 348; not applied). Work in progress (not
+  landed): skip the readback on Null, then re-prove route 85/86.
+- **Phase 2: in progress; exit NOT met.** The acceptance runs after the fixes are still to do: 10 minutes each in
+  Bianco and Delfino without crash, goop cleans, BGM and SFX audible to a person. Done before these fixes: audit of the
+  9 scanner hits (all codegen residue); soak Bianco 646 s and Delfino 706 s game time under page heap without crash
+  (after the `HelpActor` fix `eed8045`). The open items of the previous handoff:
+  1. **Goop cleans in game logic: landed (`cfe7373`), on WARP.** Each pollution layer pass renders offscreen at the
+     map's size; Aurora 0013 (`GXSetCopyReadback`) writes the R8 copy back into `mPollutionMap`, 2-4 frames late.
+     Runs goopRB6/7/8 (`tools/routes/95_goop_readback.dev`, dolpic/0): sprayed patch raw 0, `dirty=0` on it, goop
+     outside stays polluted; the unfixed exe stays `dirty=1`. Side effect: goop stages now start with their goop on
+     screen and in logic (before, skipped draws left dolpic nearly clean), so routes tuned to the old state may slip.
+     Not verified: other goop and boss stages, fpsLimit != 30, window resize (`GoopFix_report.md`).
+  2. **Audio: landed (`93a9a1c`, `a49732c`, `45015f6`).** Clipping gone (route 85 59 clip seconds -> 0, bianco/0 idle
+     111 -> 0, title 7 -> 0); levels follow the ucode, so the game is quieter than before (mixer channels -6.02 dB,
+     auto-mixer voices about -18.1 dB); effect returns reach L/R; THP L/R order fixed. The title BGM stop at about
+     21.5 s is retail: the title jingle is one 11 s sequence without a loop (`AudioRest_report.md`). Not verified:
+     nobody has listened; no LLE or console capture. Reports `AudioFix`, `AudioMatrix`, `DspDisasm`, `DspOut`.
+  3. **Logic rate below 30/s: explained, no code change** (`LogicRate2_report.md`). route.py's screenshot monitor
+     (`AURORA_SCREENSHOT_EVERY=60:live.png`) is the main cost; with it off WARP holds 30/s at idle (at or above 30/s in
+     92.4 % and 93.3 % of samples vs 54.5 % and 54.0 % with it); vsync off (Mailbox) did not raise the rate;
+     [INFERENCE] WARP vs Null is not the cause (8 idle runs). The monitor-off runs used `AURORA_SCREENSHOT_EVERY=0:x`,
+     which Aurora rejects and so disables; timing runs set `AURORA_SCREENSHOT_EVERY=` (empty, also disables it). Not
+     run: a loaded run (host contention half tested). This machine has no hardware GPU, so rates here may not
+     represent a real PC.
+  4. **Exit-time heap crash: fixed (`32f3941`).** The muted AI pump buffer is `thread_local` (`std::exit` freed the
+     static under the detached pump); forced interleaving 4 of 4 faults before, 0 of 4 after; 18 of 18 natural TIMEOUT
+     runs clean (`HeapCrash2_report.md`). Still open: host threads are not joined at exit; window close,
+     `OSResetSystem` and launcher quit not run.
+  5. **GoopCount (pixel counts): in progress** (CPU count; design `GoopCountDesign.md`). The pixel metric still gives
+     0/1 only.
+- **Next, in this order:** land the Null-backend readback fix and re-prove route 85 + 86; the Phase 2 acceptance runs
+  (and a person listens to the audio); GoopCount; UI track A (plans in `lead-2026-10-13b/uiplans/`: UI-4, UI-14A,
+  UI-15, UI-11, UI-7, UI-12, UI-16; owner questions: UI-11 hash table, UI-12 network); Phase 3 after the Phase 2
+  acceptance: proof plan per launcher toggle with tasks T1-T5 (`ToggleMatrix.md`; bug found by code reading: the
+  launcher row "Unlock all nozzles" has no in-game effect, the one-shot is not saved).
+- UI packages: done UI-1..3, 5, 6, 8, 9, 10, 13; open UI-4 (in-game menu, needs `main.cpp`, a new module and a
+  `TARGET_PC` pause hook in `sms/src/System/MarDirectorDirect.cpp`), UI-7, 11, 12, 14-16. Music volume (D4) is folded
+  into the master volume row (the BGM level lives in `sms/src/MSound/MSoundBGM.cpp:8`, `MSBgm::smMainVolume`).
 - Decomp: 16 units / 34 functions open (hard leftovers: koopajr 9, GCConsole2 7, elecNokonoko 3, ...), all claims free.
   Ledger cleaned (`40999a3`).
+- Main tree at `a49732c`: no uncommitted tracked changes except the patched Aurora submodule; 11 untracked scratch
+  routes in `sunshine-pc/tools/routes/` (76-82, 90, 94).
 
 **Not done / known gaps:** Delfino GateKeeper cannot be killed with pad input only (Mario stands on goop in OIL_RUN and
-cannot squat; three attempts failed, see platform-notes), so `AIM_ASSIST` stays. Bianco flat-colour screen is mitigated
-(zeroed plain `new`), root object unknown. Route 86 sees `thp=0` thousands of ticks before the status lines do
-(unexplained). Switch-free retail flow from the logos without dev aids and a Bianco Shine are not proven.
+cannot squat; three attempts failed, see platform-notes; not retried since the goop logic changed), so `AIM_ASSIST`
+stays. Bianco flat-colour screen is mitigated (zeroed plain `new`), root object unknown. Route 86 sees `thp=0`
+thousands of ticks before the status lines do (unexplained). Switch-free retail flow from the logos without dev aids
+and a Bianco Shine are not proven.
 
-**How the lead worked (keep this):** the lead only plans, reviews and commits; every task goes to a fresh `task` agent
-with a 45-75 min time box, facts in the brief, observed vs inferred separated. Agents that already reported tend to
-repeat their old report instead of a new task: give new tasks to fresh agents. Game/build agents work in clones
-(`C:/Users/Administrator/Documents/Projekte/fresh-gate-2`, `clone-chase`), runs go through the runlock (`tools/route.py`),
-builds through `tools/locked.py`, so timing runs never overlap; never `git checkout`/`reset` in the main repo (one agent
-did, nothing was lost). Before every push: SHA-1, strict link, `apply-aurora-patches.py --check` (12 patches), scoped
-TEMP-DEBUG grep (working rule 1), explicit paths in `git add`, check line endings with `git ls-files --eol`.
+**How the lead worked (keep this; rules approved by the owner on 2026-10-13):**
+- The lead only plans, reviews, lands and pushes; every task goes to a fresh agent with a 45-75 min time box, facts in
+  the brief, observed vs inferred separated. Agents that already reported tend to repeat their old report instead of
+  a new task: give new tasks to fresh agents. The omp advisor is no longer used.
+- Game/build agents work in clones: `C:/Users/Administrator/Documents/Projekte/fresh-gate-2`, `clone-chase` and
+  `clone-3` (being set up). Each clone has a `lead` remote, so agents can fetch commits the lead has not pushed yet.
+- Agents commit locally on a branch `agent/<name>` in their clone and never push; the lead fetches from the clone,
+  cherry-picks onto main and pushes. `git add` with explicit paths only. Never `git checkout`/`reset`/`stash`/`clean`
+  in the main repo (one agent did once, nothing was lost).
+- Locks are per clone: runs go through the run lock (`tools/route.py`), builds through `tools/locked.py`, inside one
+  clone. The lead serialises timing runs across clones; timing runs set `AURORA_SCREENSHOT_EVERY=` (empty).
+- Before every push (working rule 1): `python sunshine-pc/tools/verify.py --matching` from the repo root (TEMP-DEBUG
+  grep, Aurora series count and clean `patches/aurora`, matching DOL SHA-1, line endings of the changed files); until
+  its line-ending step is proven, also `git ls-files --eol` on the touched files; the strict link
+  (`python tools\locked.py cmd /c tools\_strict.cmd` in a clone with the exact tree); and the fresh-clone build passes.
+- Before pushing a game-behaviour change: route 85 stepped on the Null backend (`python tools/route.py Strict
+  tools/routes/85_accept_no_shine2.dev --name <n> --seconds 330 SUNSHINE_DEV_STEP_RETRACE=1 SUNSHINE_DEV_SKIP_MOVIES=1
+  SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_ALLOW_CPU_ADAPTER=0`) plus one WARP run of the affected spot (route.py's default
+  adapter, `SUNSHINE_ALLOW_CPU_ADAPTER=1`; a full route 85 on WARP took 646 s wall in rg85w, so raise `--seconds`).
+  Current baseline until the Null-backend readback fix lands: route 85 on Null fails at line 320 (rg85a/rg85b:
+  TIMEOUT, boss hp 2), on WARP at line 356 (rg85w: TIMEOUT `walkto`); a change must not make it worse. The `cfe7373`
+  regression was found only after the push.
 
 ## 8. Repo hygiene notes
 
