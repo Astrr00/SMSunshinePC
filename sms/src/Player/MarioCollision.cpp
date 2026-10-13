@@ -18,6 +18,15 @@
 #ifdef TARGET_PC
 bool cheatsHealthLossBlocked(int damage);
 #endif
+#ifdef TARGET_PC
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <System/MarDirector.hpp>
+// dev diagnostic (env-gated): SUNSHINE_DEV_HPLOG=1 logs ATTACK, health loss and damage source.
+bool gHpLogOn = std::getenv("SUNSHINE_DEV_HPLOG") != nullptr;
+int hpLogTick() { return gpMarDirector ? gpMarDirector->mMoveTickCount : -1; }
+#endif
 
 void TMario::rumbleStart(int channelDataIdx, int repeatCount)
 {
@@ -71,6 +80,10 @@ void TMario::decHP(int hp)
 	if (cheatsHealthLossBlocked(hp)) {
 		return;
 	}
+#endif
+#ifdef TARGET_PC
+	if (gHpLogOn) // dev diagnostic (env-gated)
+		std::printf("[hplog] tick=%d dec=%d health=%d ret=%p\n", hpLogTick(), hp, (int)mHealth, __builtin_return_address(0));
 #endif
 	mHealth -= hp;
 	if (0 >= mHealth) {
@@ -376,6 +389,15 @@ void TMario::damageExec(THitActor* hittingActor, int damage, int damageAnimType,
 			}
 		}
 	}
+#ifdef TARGET_PC
+	if (gHpLogOn) { // dev diagnostic (env-gated)
+		extern int gDbgGKCurBck;
+		f32 dx = hittingActor->mPosition.x - mPosition.x;
+		f32 dy = hittingActor->mPosition.y - mPosition.y;
+		f32 dz = hittingActor->mPosition.z - mPosition.z;
+		std::printf("[hplog-dmg] tick=%d sender=%08X dmg=%d anim=%d inv=%d hp=%d dist=%.0f status=%08X pol=%d dirty=%d fogT=%d sinkT=%.2f bck=%d\n", hpLogTick(), (unsigned)hittingActor->getActorType(), damage, damageAnimType, (int)invincibilityFrames, (int)mHealth, (double)std::sqrt(dx * dx + dy * dy + dz * dz), (unsigned)mStatus, (int)mPollutionTypeStandingOn, checkFlag(MARIO_FLAG_DIRTY) ? 1 : 0, (int)mStandingOnGraffitoTimer, (double)mSinkTimer, gDbgGKCurBck);
+	}
+#endif
 	mInvincibilityFrames = invincibilityFrames;
 	decHP(damage);
 	if (checkFlag(MARIO_FLAG_HAS_FLUDD)) {

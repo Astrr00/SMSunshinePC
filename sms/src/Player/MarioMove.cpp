@@ -17,6 +17,9 @@
 #include <Map/PollutionManager.hpp>
 #include <Camera/CubeManagerBase.hpp>
 #include <Player/MarioCap.hpp>
+#ifdef TARGET_PC
+#include <cstdio> // dev diagnostic (env-gated)
+#endif
 
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
@@ -993,6 +996,14 @@ void TMario::checkGraffito()
 	char trash[0x18];
 	mPollutionTypeStandingOn
 	    = gpPollution->getPollutionType(mPosition.x, mPosition.y, mPosition.z);
+#ifdef TARGET_PC
+	{ // dev diagnostic (env-gated): pollution under Mario every 30 logic ticks (SUNSHINE_DEV_HPLOG=1)
+		extern bool gHpLogOn;
+		extern int hpLogTick();
+		if (gHpLogOn && hpLogTick() % 30 == 0)
+			std::printf("[hplog-pol] tick=%d pos=(%.0f,%.0f,%.0f) pol=%d dirty=%d fogT=%d\n", hpLogTick(), (double)mPosition.x, (double)mPosition.y, (double)mPosition.z, (int)mPollutionTypeStandingOn, checkFlag(MARIO_FLAG_DIRTY) ? 1 : 0, (int)mStandingOnGraffitoTimer);
+	}
+#endif
 
 	switch (mPollutionTypeStandingOn) {
 	case POLLUTION_TYPE_SLIP:

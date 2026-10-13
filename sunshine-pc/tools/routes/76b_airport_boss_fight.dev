@@ -1,0 +1,49 @@
+# Route 76b: real-input fight with the airport GateKeeper (dev bot `fightboss`). NO tp, NO aimhead/aimboss/faceto assist, NO SUNSHINE_DEV_AIM_ASSIST.
+# Prefix: logos -> option map -> card prompts -> new game -> airport0 (route 54/72 walk, cheats infinite_health and infinite_water on, see docs: the arena goop hurts a standing Mario),
+# walk to the dry pit tile (-1400,300,1034), wake the boss with L+R and the stick down, then `fightboss` plays the fight with pad input only
+# (crouch, R spray, stick Y -127 in the head window bck 3/0x11/0xF, small stick X correction toward the head). It ends when the boss is dead.
+# Run: python tools/route.py Strict tools/routes/76b_airport_boss_fight.dev --name <n> --seconds 330 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_ALLOW_CPU_ADAPTER=0
+waitfor stage=15 dirstate=4 timeout=30000
+wait frames=240
+mash A period=30 until cardprog=19 timeout=4500
+walkto x=1080 z=-1000 radius=20 timeout=3000
+mash A period=24 until cardprog=27 timeout=4500
+mash A period=30 until stage=0 timeout=12000
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=27000
+log
+wait frames=90
+hold A frames=4
+wait frames=60
+walkto x=-1198 z=167 radius=150 timeout=3000
+walkto x=-5876 z=976 radius=150 timeout=4500
+walkto x=-6630 z=1600 radius=250 timeout=3000
+waitfor thp=2 timeout=3000
+log
+wait frames=600
+waitfor thp=0 timeout=15000
+mash A period=30 until stage=0 scen=1 director mario dirstate=4 timeout=15000
+log
+cheat infinite_health
+cheat infinite_water
+wait frames=30
+walkto x=-5876 z=976 radius=150 timeout=4500
+walkto x=-4005 z=652 radius=150 timeout=4500
+walkto x=-2700 z=1500 radius=120 timeout=4500
+walkto x=-2000 z=1500 radius=100 timeout=4500
+log
+walkto x=-1400 z=1034 radius=60 timeout=4500
+log
+faceto x=-1500 z=1500 tol=5 timeout=600
+hold L trig=255,255 frames=20
+hold L R trig=255,255 stick=0,127 until camDemo=1 timeout=3000
+log
+waitfor camDemo=0 timeout=15000
+log
+faceto x=-1500 z=1500 tol=5 timeout=600
+hold L trig=255,255 frames=20
+log
+fightboss timeout=6000
+log
+shot boss_dead.png
+wait frames=30
+end

@@ -78,11 +78,22 @@ TGKHitObj::TGKHitObj(TGateKeeperBase* owner, int joint_idx, const char* name)
 	    .push_back(this);
 }
 
+#ifdef TARGET_PC
+// Dev hook: cumulative spray hits on the GateKeeper head/body (not reset by CUE_MOVE), printed by devscript logBoss with SUNSHINE_DEV_HIT_LOG=1.
+int gDbgGKHeadSprayHits = 0;
+int gDbgGKBodySprayHits = 0;
+// Dev hook: bck index of the GateKeeper performed last (devscript `bck=N` condition, SUNSHINE_DEV_HPLOG hit lines).
+int gDbgGKCurBck = -1;
+#endif
+
 BOOL TGKHitObj::receiveMessage(THitActor* sender, u32 message)
 {
 	char trash[8];
 	if (sender->getActorType() == 0x1000001
 	    && message == HIT_MESSAGE_SPRAYED_BY_WATER) {
+#ifdef TARGET_PC
+		gDbgGKHeadSprayHits++;
+#endif
 		if (mVulnerable)
 			mOwner->unk154++;
 		gpMarioParticleManager->emit(PARTICLE_MS_ENM_WATHIT, &sender->mPosition,
@@ -129,6 +140,10 @@ BOOL TGateKeeperBase::receiveMessage(THitActor* sender, u32 message)
 {
 	char trash[8];
 	if (sender->getActorType() == 0x1000001) {
+#ifdef TARGET_PC
+		if (message == HIT_MESSAGE_SPRAYED_BY_WATER)
+			gDbgGKBodySprayHits++;
+#endif
 		if (mVulnerable && message == HIT_MESSAGE_SPRAYED_BY_WATER)
 			unk154++;
 		gpMarioParticleManager->emit(PARTICLE_MS_ENM_WATHIT, &sender->mPosition,
@@ -142,6 +157,9 @@ BOOL TGateKeeperBase::receiveMessage(THitActor* sender, u32 message)
 
 void TGateKeeperBase::perform(u32 cue, JDrama::TGraphics* graphics)
 {
+#ifdef TARGET_PC
+	gDbgGKCurBck = mMActor->getCurAnmIdx(ANM_TYPE_BCK);
+#endif
 	if (!checkLiveFlag(LIVE_FLAG_DEAD)) {
 		if (cue & CUE_CALC_ANIM)
 			mMultiBtk->update();

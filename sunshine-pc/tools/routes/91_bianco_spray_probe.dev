@@ -8,9 +8,9 @@ wait frames=30
 log
 shot p_idle.png
 wait frames=10
-hold R trig=255,255 frames=30
+hold R trig=0,255 frames=60
 shot p_spray_a.png
-hold R trig=255,255 frames=30
+wait frames=30
 log
 wait frames=60
 hold stick=0,-127 frames=30

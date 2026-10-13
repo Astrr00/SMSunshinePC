@@ -1,4 +1,7 @@
 #include <Player/Mario.hpp>
+#ifdef TARGET_PC
+#include <cstdio>
+#endif
 #include <Player/WaterGun.hpp>
 #include <Player/MarioCap.hpp>
 #include <Map/MapWire.hpp>
@@ -96,6 +99,13 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 	JGeometry::TVec3<f32> tmp, tmp2;
 	char trash[0x2d];
 	int padB;
+#ifdef TARGET_PC
+	extern bool gHpLogOn;
+	extern int hpLogTick();
+	extern int gDbgGKCurBck;
+	if (gHpLogOn && message == HIT_MESSAGE_ATTACK) // dev diagnostic (env-gated)
+		std::printf("[hplog-atk] tick=%d sender=%08X inv=%d invincible=%d hp=%d bck=%d\n", hpLogTick(), (unsigned)sender->getActorType(), (int)mInvincibilityFrames, isInvincible() ? 1 : 0, (int)mHealth, gDbgGKCurBck);
+#endif
 	if (checkFlag(MARIO_FLAG_GAME_OVER))
 		return FALSE;
 

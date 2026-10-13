@@ -60,16 +60,22 @@ extern "C" void PADClearVirtualStatus(u32 port);
 extern "C" void aurora_screenshot_next(const char* path);
 extern "C" s32 THPPlayerGetState();
 
+#ifdef TARGET_PC
+// Dev hook: cumulative spray hit counters, defined at file scope in sms/src/Enemy/gatekeeper.cpp (TARGET_PC).
+extern int gDbgGKHeadSprayHits;
+extern int gDbgGKBodySprayHits;
+extern int gDbgGKCurBck;
+#endif
 // Logic tick count from sunshine-pc/src/framerate/framerate.cpp. Return type must be u32: MSVC mangling includes it,
 // and an `unsigned` declaration links to an undefined symbol (/FORCE:UNRESOLVED turns the call into a bogus address).
 u32 sunshineInterpStep();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -141,6 +147,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("camDemo=", 0) == 0) k = Command::Cond::CamDemo; // 1 while a demo camera owns the view
 	else if (tok.rfind("washed=", 0) == 0) k = Command::Cond::Washed; // graffiti wash finished (see washedCount)
 	else if (tok.rfind("talk=", 0) == 0) k = Command::Cond::Talk; // 1 while a talk/message window owns the game (TMarDirector::isTalkModeNow)
+	else if (tok.rfind("bck=", 0) == 0) k = Command::Cond::Bck; // TBiancoGateKeeper/GateKeeper current bck index (gatekeeper.cpp gDbgGKCurBck)
 	else return false;
 	const size_t eq = tok.find('=');
 	c.conds.emplace_back(k, eq == std::string::npos ? 0 : static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0)));
@@ -253,6 +260,17 @@ Command parseLine(const std::string& text, int line)
 		}
 		if (!gotX || !gotZ) fail(line, "walkto needs x= and z=", text);
 		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
+		return c;
+	}
+	if (verb == "fightboss") {
+		// fightboss timeout=N: real-input bot that sprays the airport GateKeeper's head (see step()); ends when the boss is dead.
+		c.op = Op::FightBoss;
+		std::string tok;
+		while (in >> tok) {
+			if (tok.rfind("timeout=", 0) == 0) c.maxTicks = std::atoi(tok.c_str() + 8);
+			else fail(line, "unexpected token in fightboss", tok);
+		}
+		if (c.maxTicks <= 0) fail(line, "fightboss needs timeout=N (logic ticks)", text);
 		return c;
 	}
 	if (verb == "aimboss") {
@@ -452,6 +470,16 @@ void logBoss(const char* tag)
 			if (b->getMActor()->checkCurBckFromIndex(i)) { bck = i; break; }
 	std::printf("[%s-boss] hp=%d vulnerable=%d unk154=%d dead=%d bck=0x%X pos=(%.0f,%.0f,%.0f) tick=%d\n", tag, (int)g->getHitPoints(),
 	    (int)g->mVulnerable, g->unk154, g->checkLiveFlag(LIVE_FLAG_DEAD) ? 1 : 0, bck, g->mPosition.x, g->mPosition.y, g->mPosition.z, gTick);
+#ifdef TARGET_PC
+	// Dev hook: cumulative spray hits (not reset by CUE_MOVE), defined in sms gatekeeper.cpp; only with SUNSHINE_DEV_HIT_LOG=1
+	if (std::getenv("SUNSHINE_DEV_HIT_LOG"))
+		std::printf("[%s-spray] headHits=%d bodyHits=%d\n", tag, gDbgGKHeadSprayHits, gDbgGKBodySprayHits);
+#endif
+	// Dev hook: sleep/appear counters (gatekeeper.cpp TNerveBGKSleep: unk17C >= 0xFF -> Appear); only with SUNSHINE_DEV_HIT_LOG=1
+	if (std::getenv("SUNSHINE_DEV_HIT_LOG")) {
+		if (TBiancoGateKeeper* w = dynamic_cast<TBiancoGateKeeper*>(g))
+			std::printf("[%s-wake] unk17C=%d unk17E=%d unk298=%d unk288=%d unk28A=%d\n", tag, (int)w->unk17C, (int)w->unk17E, (int)w->unk298, (int)w->unk288, (int)w->unk28A);
+	}
 	if (TBiancoGateKeeper* b = dynamic_cast<TBiancoGateKeeper*>(g)) {
 		if (b->mHead && gpMarioOriginal && gpCamera) {
 			const float dx = b->mHead->mPosition.x - gpMarioOriginal->mPosition.x;
@@ -466,6 +494,12 @@ void logBoss(const char* tag)
 			    gpMarioOriginal->mWaterGun ? (int)gpMarioOriginal->mWaterGun->mNozzleList[gpMarioOriginal->mWaterGun->mCurrentNozzle]->unk36E : -1,
 			    (unsigned)gpMarioOriginal->mStatus, gpMarioOriginal->mWaterGun ? (int)gpMarioOriginal->mWaterGun->mCurrentNozzle : -1,
 			    (int)gpMarioOriginal->checkFlag(MARIO_FLAG_HAS_FLUDD), (unsigned)gpMarioOriginal->mInput);
+			// env-gated (SUNSHINE_DEV_HIT_LOG): live nozzle clamp params and the stick Y that the squat branch of calcGunAngle reads
+			if (gpMarioOriginal->mWaterGun && gpMarioOriginal->mGamePad) {
+				TNozzleBase::TEmitParams& ep = gpMarioOriginal->mWaterGun->getCurrentNozzle()->mEmitParams;
+				std::printf("[%s-boss]   nozzle prm lAngleBase=%d lAngleMin=%d lAngleMax=%d lAngleChase=%.3f rButtonMult=%.1f stickY=%.1f\n", tag,
+				    (int)ep.mLAngleBase.get(), (int)ep.mLAngleMin.get(), (int)ep.mLAngleMax.get(), ep.mLAngleChase.get(), ep.mRButtonMult.get(), gpMarioOriginal->mGamePad->mCompSPos[1]);
+			}
 		}
 	}
 }
@@ -608,6 +642,7 @@ bool condHolds(const Command& c)
 		case Command::Cond::CamDemo: ok = gpCamera && gpCamera->isDemoCamera() == (val != 0); break;
 		case Command::Cond::Washed: ok = washedCount() >= val; break;
 		case Command::Cond::Talk: ok = gpMarDirector && gpMarDirector->isTalkModeNow() == (val != 0); break;
+		case Command::Cond::Bck: ok = gDbgGKCurBck == val; break;
 		default: break;
 		}
 		if (!ok) return false;
@@ -787,6 +822,93 @@ void step()
 				gStarted = false;
 				++gCursor;
 			}
+			return;
+		}
+		if (c.op == Op::FightBoss) {
+			// fightboss timeout=N: real-input bot for the airport GateKeeper (dev aid, no direct writes to Mario or the nozzle).
+			// Crouch (L) always held. Hit window = boss bck 3/11/F and head hit object y > 700: R spray, stick Y -127 (max up),
+			// stick X a small correction toward the head bearing. Outside it R is released and the stick neutral, so the pitch holds.
+			static bool fbWindow = false, fbSeen = false;
+			static int fbLastUnk = 0, fbHits = 0;
+			TBiancoGateKeeper* b = findBoss();
+			if (!gStarted) {
+				gStarted = true;
+				gRemaining = 0;
+				fbWindow = fbSeen = false;
+				fbHits = 0;
+				fbLastUnk = 0;
+				std::printf("[devscript] fightboss start line=%d tick=%d\n", c.line, gTick);
+			}
+			if (b) {
+				fbSeen = true;
+				const int unk = static_cast<int>(b->unk154); // vulnerable spray hits (TGKHitObj / TGateKeeperBase::receiveMessage)
+				if (unk > fbLastUnk) fbHits += unk - fbLastUnk;
+				fbLastUnk = unk;
+			}
+			// The boss object is removed once it is dead; before it is built the bot waits with the pad neutral.
+			const bool dead = fbSeen && (!b || b->checkLiveFlag(LIVE_FLAG_DEAD));
+			const int hp = b ? static_cast<int>(b->getHitPoints()) : -1;
+			int bck = -1;
+			if (b && !dead)
+				for (int i = 0; i < 0x20; ++i)
+					if (b->getMActor()->checkCurBckFromIndex(i)) { bck = i; break; }
+			const bool headReady = b && b->mHead;
+			const float headY = headReady ? b->mHead->mPosition.y : 0.f;
+			const bool win = !dead && headReady && (bck == 0x3 || bck == 0x11 || bck == 0xF) && headY > 700.f;
+			if (win != fbWindow) {
+				fbWindow = win;
+				std::printf("[devscript] fightboss window %s tick=%d bck=0x%X headY=%.0f hp=%d headHits=%d\n", win ? "start" : "end", gTick, bck, headY, hp, fbHits);
+			}
+			if (dead || gRemaining >= c.maxTicks) {
+				std::printf("[devscript] fightboss done hp=%d headHits=%d dead=%d ticks=%d tick=%d\n", hp, fbHits, dead ? 1 : 0, gRemaining, gTick);
+				if (!dead) {
+					std::printf("[devscript] TIMEOUT fightboss line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
+					std::fflush(stdout);
+					std::exit(3);
+				}
+				const PADStatus neutral{};
+				setVirtualPad(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
+			PADStatus pad{};
+			if (!headReady) { // boss not built yet
+				setVirtualPad(0, &pad);
+				++gRemaining;
+				return;
+			}
+			pad.button |= PAD_TRIGGER_L;
+			pad.triggerLeft = 255;
+			// Asleep (bck 0xA/0x4) a body spray wakes the boss (no head hit needed); spray the body, stick Y neutral.
+			const bool asleep = bck == 0xA || bck == 0x4;
+			if (win || asleep) {
+				pad.button |= PAD_TRIGGER_R;
+				pad.triggerRight = 255;
+				if (win) {
+					pad.stickY = -127;
+				} else if (gpMarioOriginal && gpMarioOriginal->mWaterGun) {
+					// Asleep: step the nozzle pitch (read back from unk36E) toward the body origin; +127 lowers it, -127 raises it.
+					const float dxb = b->mPosition.x - gpMarioOriginal->mPosition.x;
+					const float dzb = b->mPosition.z - gpMarioOriginal->mPosition.z;
+					const float up = std::atan2(b->mPosition.y - gpMarioOriginal->mPosition.y, std::sqrt(dxb * dxb + dzb * dzb)) * 57.29578f;
+					const float target = -up * (65536.0f / 360.0f);
+					const float cur = static_cast<float>(gpMarioOriginal->mWaterGun->mNozzleList[gpMarioOriginal->mWaterGun->mCurrentNozzle]->unk36E);
+					if (cur - target > 600.f) pad.stickY = -127;
+					else if (cur - target < -600.f) pad.stickY = 127;
+				}
+				if (gpMarioOriginal && gpCamera) {
+					Command t = c;
+					t.pos[0] = win ? b->mHead->mPosition.x : b->mPosition.x;
+					t.pos[2] = win ? b->mHead->mPosition.z : b->mPosition.z;
+					s8 sx = 0, sy = 0;
+					float dist = 0.f;
+					walkStick(t, sx, sy, dist);
+					pad.stickX = static_cast<s8>(std::fmax(-40.f, std::fmin(40.f, 0.4f * sx)));
+				}
+			}
+			setVirtualPad(0, &pad);
+			++gRemaining;
 			return;
 		}
 		if (c.op == Op::AimBoss) {
