@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <deque>
 #include <iterator>
 #include <mutex>
 #include <optional>
@@ -50,6 +51,9 @@ void VISetFrameBufferScale(float scale);
 namespace hostdsp {
 void setOutputVolumePct(int pct);
 }
+
+bool sunshineCanReplay();           // sms/src/System/MarDirectorDirect.cpp: gameplay (director state 4), a frame can be redrawn
+unsigned long sunshineInterpStep(); // src/framerate/framerate.cpp: logic tick count (u32 is unsigned long in the decomp's types)
 
 namespace launcher {
 namespace {
@@ -207,6 +211,16 @@ void onDialogResult(void* /*userdata*/, const char* const* filelist, int /*filte
 aurora::input::EventResult onInputThunk(const aurora::input::InputEvent& event, void* userdata);
 bool capturesAll(const aurora::input::InputSource& /*source*/, void* /*userdata*/) { return true; }
 
+// Lato is registered once per process: the launcher and every in-game menu open share it.
+bool loadFonts() {
+	static bool loaded = false;
+	if (!loaded) {
+		loaded = Rml::LoadFontFace("assets/launcher/LatoLatin-Regular.ttf") &&
+		         Rml::LoadFontFace("assets/launcher/LatoLatin-Bold.ttf");
+	}
+	return loaded;
+}
+
 // Like main's sunshinePresentFrame, but reports window close.
 bool pumpEvents() {
 	bool alive = true;
@@ -231,7 +245,9 @@ bool presentFrame() {
 
 class Launcher final : public Rml::EventListener {
 public:
-	explicit Launcher(std::filesystem::path settingsFile) : file_(std::move(settingsFile)) {}
+	// inGame: the in-game menu (menuPoll), over the frozen game; otherwise the launcher before the game starts.
+	explicit Launcher(std::filesystem::path settingsFile, bool inGame = false)
+	    : file_(std::move(settingsFile)), inGame_(inGame) {}
 
 	bool open() {
 		if (!aurora::rmlui::is_initialized()) {
@@ -242,8 +258,7 @@ public:
 			return false;
 		}
 		applyUiScale(settings()); // main calls launcher::run before applyRuntimeSettings(), so apply the saved scale here
-		if (!Rml::LoadFontFace("assets/launcher/LatoLatin-Regular.ttf") ||
-		    !Rml::LoadFontFace("assets/launcher/LatoLatin-Bold.ttf")) {
+		if (!loadFonts()) {
 			return false;
 		}
 		doc_ = ctx_->LoadDocument("assets/launcher/launcher.rml");
@@ -252,6 +267,19 @@ public:
 		}
 		doc_->AddEventListener("click", this);
 		doc_->Show();
+		if (inGame_) {
+			// In game the cheat registry main loaded is live (cheatsLoad would reset it), the disc stays open (no
+			// validate), the menu layer (menuInstall) routes input here, and only the settings page is shown.
+			const char* base = SDL_GetBasePath();
+			buildCheatList();
+			buildModList(base != nullptr ? base : ".");
+			setText("back", "Resume");
+			showPage(true);
+			showPane("video");
+			ensureFocus();
+			refresh();
+			return true;
+		}
 		// Cheats are listed from assets/cheats.json next to the exe. main loads them again after the launcher returns.
 		const char* base = SDL_GetBasePath();
 		cheatsLoad(base != nullptr ? base : ".");
@@ -346,6 +374,12 @@ public:
 
 	bool finished() const { return finished_; }
 	bool started() const { return started_; }
+	// In game: why the menu should close ("b", "start", "escape", "f1", "back", "a"); empty while it stays open.
+	const std::string& closeRequest() const { return closeWhy_; }
+	std::string focusId() {
+		Rml::Element* focused = focusedButton();
+		return focused != nullptr ? focused->GetId() : "none";
+	}
 
 	void ProcessEvent(Rml::Event& event) override {
 		Rml::Element* target = event.GetTargetElement();
@@ -369,6 +403,11 @@ public:
 					closeConfirm();
 					return aurora::input::EventResult::Consume;
 				}
+			if (inGame_ && key->pressed && !key->repeat && !confirmShown() &&
+			    (key->scancode == SDL_SCANCODE_ESCAPE || key->scancode == SDL_SCANCODE_F1)) {
+				closeWhy_ = key->scancode == SDL_SCANCODE_F1 ? "f1" : "escape";
+				return aurora::input::EventResult::Consume;
+			}
 		}
 		if (handlePad(event)) {
 			return aurora::input::EventResult::Consume;
@@ -402,7 +441,15 @@ private:
 			case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: navigate(1, 0); break;
 			case SDL_GAMEPAD_BUTTON_SOUTH: activateFocused(); break;
 			case SDL_GAMEPAD_BUTTON_EAST: goBack(); break;
-			case SDL_GAMEPAD_BUTTON_START: if (!confirmShown()) onAction("start"); break;
+			case SDL_GAMEPAD_BUTTON_START:
+				if (!confirmShown()) {
+					if (inGame_) {
+						closeWhy_ = "start"; // in game Start resumes; it never reaches startGame
+					} else {
+						onAction("start");
+					}
+				}
+				break;
 			default: break;
 			}
 			return true;
@@ -537,7 +584,7 @@ private:
 	void activateFocused() {
 		if (Rml::Element* el = focusedButton()) {
 			if (el->GetId() == "back") { // A on Back does what B does
-				leaveSettings();
+				leaveSettings("a");
 				return;
 			}
 			el->Click(); // runs the click listener, i.e. onAction(id)
@@ -546,7 +593,12 @@ private:
 	}
 
 	// Back to the main page (B, or A on the Back button); focus lands on Settings, the button that opened it.
-	void leaveSettings() {
+	// In game there is no main page: Back (labelled Resume) closes the menu.
+	void leaveSettings(const char* why) {
+		if (inGame_) {
+			closeWhy_ = why;
+			return;
+		}
 		onAction("back");
 		ctx_->Update();
 		if (Rml::Element* opener = doc_->GetElementById("open-settings")) {
@@ -563,7 +615,7 @@ private:
 		if (!settingsShown()) {
 			return;
 		}
-		leaveSettings();
+		leaveSettings("b");
 	}
 
 	bool confirmShown() {
@@ -611,6 +663,7 @@ private:
 		}
 	}
 
+public:
 	// Dev hook: runs one synthetic gamepad token through onInput, so it takes the same path as a real pad event.
 	// Tokens: up|down|left|right (D-pad), a|b|start (buttons), lstick-up|lstick-down|lstick-left|lstick-right (left stick).
 	void runPadToken(const std::string& token) {
@@ -653,15 +706,15 @@ private:
 		} else if (token == "lstick-right") {
 			flick(SDL_GAMEPAD_AXIS_LEFTX, 1.f);
 		} else {
-			std::printf("[launcher] pad %s: unknown token\n", token.c_str());
+			std::printf("[%s] pad %s: unknown token\n", inGame_ ? "menu" : "launcher", token.c_str());
 			return;
 		}
-		Rml::Element* focused = focusedButton();
-		std::printf("[launcher] pad %s page=%s focus=%s\n", token.c_str(), settingsShown() ? "settings" : "main",
-		            focused != nullptr ? focused->GetId().c_str() : "none");
+		std::printf("[%s] pad %s page=%s focus=%s\n", inGame_ ? "menu" : "launcher", token.c_str(),
+		            settingsShown() ? "settings" : "main", focusId().c_str());
 		std::fflush(stdout); // dev harness: SUNSHINE_DEV_MAX_SECONDS ends the process with TerminateProcess, which drops buffered stdout
 	}
 
+private:
 	void setText(const char* id, const std::string& text) {
 		if (Rml::Element* el = doc_->GetElementById(id)) {
 			el->SetInnerRML(text);
@@ -739,7 +792,8 @@ private:
 		for (size_t i = 0; i < mods_.size(); ++i) {
 			const auto it = switches.find(mods_[i].id);
 			const bool on = it == switches.end() || it->second; // absent = on
-			const std::string label = escapeRml(mods_[i].name) + " " + escapeRml(mods_[i].version) + ": " + (on ? "On" : "Off");
+			const std::string label = escapeRml(mods_[i].name) + " " + escapeRml(mods_[i].version) + ": " + (on ? "On" : "Off") +
+			                          (inGame_ ? " (next start)" : ""); // mods load once, when the game starts
 			setText(("mod-" + std::to_string(i)).c_str(), label);
 		}
 	}
@@ -865,6 +919,10 @@ private:
 			return;
 		}
 		if (id == "back") {
+			if (inGame_) {
+				closeWhy_ = "back"; // mouse click on Resume
+				return;
+			}
 			showPage(false);
 			return;
 		}
@@ -977,11 +1035,135 @@ private:
 	int padWait_ = 0;
 	bool finished_ = false;
 	bool started_ = false;
+	bool inGame_ = false; // in-game menu: settings page only; Start/B/Escape/F1/Resume set closeWhy_
+	std::string closeWhy_;
 	std::vector<mods::Manifest> mods_; // Mods pane rows in load order; button ids are mod-<index>
 };
 
 aurora::input::EventResult onInputThunk(const aurora::input::InputEvent& event, void* userdata) {
 	return static_cast<Launcher*>(userdata)->onInput(event);
+}
+
+// In-game menu (UI-4). The input layer is permanent (menuInstall); the document exists only while the menu is open.
+// The layer callback only records requests: menuPoll opens and closes the document outside the router.
+std::filesystem::path gMenuFile;
+std::optional<Launcher> gMenu;
+aurora::input::LayerId gMenuLayer = aurora::input::kInvalidLayerId;
+const char* gMenuRequest = nullptr; // "chord" or "f1": open at the next menuPoll
+bool gMenuRHeld = false;            // R trigger axis >= 0.5, or the native button mapped to PAD R is down
+int gMenuFrames = 0;                // frames presented while open
+unsigned long gMenuLogicAtOpen = 0;
+std::deque<std::string> gMenuDev; // menuDevQueue tokens
+int gMenuDevWait = 0;
+constexpr int kMenuDevStepFrames = 30;
+
+// Open or opening: every source is blocked for the layers below, so the game's pad layer drops held input.
+bool menuCaptures(const aurora::input::InputSource& /*source*/, void* /*userdata*/) {
+	return gMenu.has_value() || gMenuRequest != nullptr;
+}
+
+aurora::input::PointerMode menuPointer(void* /*userdata*/) {
+	return gMenu ? aurora::input::PointerMode::Visible : aurora::input::PointerMode::None;
+}
+
+// Pads with a digital R report it as a button; Aurora's mapping names the native button behind PAD R.
+bool isMappedR(SDL_GamepadButton button) {
+	u32 count = 0;
+	const PADButtonMapping* map = PADGetButtonMappings(0, &count);
+	for (u32 i = 0; map != nullptr && i < count; ++i) {
+		if (map[i].padButton == PAD_TRIGGER_R && map[i].nativeButton == static_cast<u32>(button)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+aurora::input::EventResult menuLayerEvent(const aurora::input::InputEvent& event, void* /*userdata*/) {
+	using aurora::input::EventResult;
+	using aurora::input::InputEvent;
+	bool startPress = false;
+	bool f1Press = false;
+	if (const auto* axis = event.payload.get_if<InputEvent::AxisChanged>()) {
+		if (axis->axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) {
+			gMenuRHeld = axis->value >= 0.5f;
+		}
+	} else if (const auto* button = event.payload.get_if<InputEvent::ButtonChanged>()) {
+		if (isMappedR(button->button)) {
+			gMenuRHeld = button->pressed;
+		}
+		startPress = button->pressed && button->button == SDL_GAMEPAD_BUTTON_START;
+	} else if (const auto* key = event.payload.get_if<InputEvent::KeyChanged>()) {
+		f1Press = key->pressed && !key->repeat && key->scancode == SDL_SCANCODE_F1;
+	} else if (event.payload.is<InputEvent::Cancelled>() && event.source.kind == aurora::input::InputSource::Kind::Controller) {
+		gMenuRHeld = false;
+	}
+	if (gMenu) {
+		return gMenu->onInput(event);
+	}
+	if (gMenuRequest != nullptr) {
+		return EventResult::Consume; // opens at the next menuPoll
+	}
+	const bool chord = startPress && gMenuRHeld;
+	if (!chord && !f1Press) {
+		return EventResult::Pass;
+	}
+	if (!sunshineCanReplay()) {
+		std::printf("[menu] ignored (not in gameplay)\n");
+		std::fflush(stdout);
+		return EventResult::Pass;
+	}
+	gMenuRequest = chord ? "chord" : "f1";
+	return EventResult::Consume; // the chord's Start never reaches the game's pause (TMarDirector::updateGameMode)
+}
+
+void pushKey(SDL_Scancode scancode, bool pressed) {
+	SDL_Event ev{};
+	ev.type = pressed ? SDL_EVENT_KEY_DOWN : SDL_EVENT_KEY_UP;
+	ev.key.timestamp = SDL_GetTicksNS();
+	ev.key.windowID = SDL_GetWindowID(aurora_get_window());
+	ev.key.scancode = scancode;
+	ev.key.key = SDL_GetKeyFromScancode(scancode, SDL_KMOD_NONE, true);
+	ev.key.down = pressed;
+	SDL_PushEvent(&ev);
+}
+
+// One dev token (menuDevQueue). chord goes into the menu layer's callback; keys go through SDL and the real router.
+void runMenuToken(const std::string& token) {
+	using aurora::input::InputEvent;
+	if (token == "chord") {
+		InputEvent event{};
+		event.source.kind = aurora::input::InputSource::Kind::Controller;
+		event.source.origin = aurora::input::InputSource::Origin::Synthetic;
+		event.payload = InputEvent::AxisChanged{ SDL_GAMEPAD_AXIS_RIGHT_TRIGGER, 1.f };
+		menuLayerEvent(event, nullptr);
+		event.payload = InputEvent::ButtonChanged{ SDL_GAMEPAD_BUTTON_START, true };
+		const bool consumed = menuLayerEvent(event, nullptr) == aurora::input::EventResult::Consume;
+		event.payload = InputEvent::ButtonChanged{ SDL_GAMEPAD_BUTTON_START, false };
+		menuLayerEvent(event, nullptr);
+		event.payload = InputEvent::AxisChanged{ SDL_GAMEPAD_AXIS_RIGHT_TRIGGER, 0.f };
+		menuLayerEvent(event, nullptr);
+		std::printf("[menu] dev chord: start %s\n", consumed ? "consumed" : "passed");
+	} else if (token == "f1") {
+		pushKey(SDL_SCANCODE_F1, true);
+		pushKey(SDL_SCANCODE_F1, false);
+		std::printf("[menu] dev f1 pushed\n");
+	} else if (token.rfind("key:", 0) == 0) { // key:<SDL scancode name>:down|up
+		const size_t colon = token.rfind(':');
+		const std::string name = colon > 4 ? token.substr(4, colon - 4) : "";
+		const std::string edge = token.substr(colon + 1);
+		const SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
+		if (scancode == SDL_SCANCODE_UNKNOWN || (edge != "down" && edge != "up")) {
+			std::printf("[menu] dev %s: unknown key token\n", token.c_str());
+		} else {
+			pushKey(scancode, edge == "down");
+			std::printf("[menu] dev %s pushed\n", token.c_str());
+		}
+	} else if (gMenu) {
+		gMenu->runPadToken(token);
+	} else {
+		std::printf("[menu] dev %s: menu closed, pad token dropped\n", token.c_str());
+	}
+	std::fflush(stdout);
 }
 
 } // namespace
@@ -1072,6 +1254,84 @@ void applyRuntimeSettings() {
 		VISetFrameBufferScale(static_cast<float>(s.resolutionScalePct) / 100.f);
 	}
 	sunshineApplyUpscaler(s.fsr1); // render/render_scale.cpp: FSR 1 or bilinear, unless SUNSHINE_UPSCALER is set
+}
+
+void menuInstall(const std::filesystem::path& settingsFile) {
+	gMenuFile = settingsFile;
+	if (gMenuLayer != aurora::input::kInvalidLayerId) {
+		return;
+	}
+	aurora::input::LayerDescriptor desc{};
+	desc.label = "sunshine.ingame-menu";
+	desc.priority = aurora::input::kRmlUiLayerPriority; // above aurora.pad (kGameLayerPriority)
+	desc.onEvent = &menuLayerEvent;
+	desc.capturesSource = &menuCaptures;
+	desc.pointerMode = &menuPointer;
+	gMenuLayer = aurora::input::register_layer(desc);
+}
+
+void menuPoll() {
+	if (!gMenuDev.empty() && ++gMenuDevWait >= kMenuDevStepFrames) {
+		gMenuDevWait = 0;
+		const std::string token = gMenuDev.front();
+		gMenuDev.pop_front();
+		runMenuToken(token);
+	}
+	if (gMenu) {
+		++gMenuFrames;
+		const std::string why = gMenu->closeRequest();
+		if (!why.empty()) {
+			const std::string focus = gMenu->focusId();
+			gMenu->close();
+			gMenu.reset();
+			aurora::input::reconcile(); // the game's pad layer regains its sources; keys still held stay hidden from it
+			std::printf("[menu] close (%s) frames=%d logic=%lu->%lu focus=%s\n", why.c_str(), gMenuFrames,
+			            gMenuLogicAtOpen, sunshineInterpStep(), focus.c_str());
+			std::fflush(stdout);
+		}
+		return;
+	}
+	if (gMenuRequest == nullptr) {
+		return;
+	}
+	const char* why = gMenuRequest;
+	gMenuRequest = nullptr;
+	gMenu.emplace(gMenuFile, true);
+	if (!gMenu->open()) {
+		gMenu->close();
+		gMenu.reset();
+		aurora::input::reconcile();
+		std::fprintf(stderr, "[menu] could not load assets/launcher\n");
+		return;
+	}
+	for (u32 port = 0; port < PAD_MAX_CONTROLLERS; ++port) {
+		PADControlMotor(port, PAD_MOTOR_STOP); // a rumble running when the game froze would never be stopped by it
+	}
+	gMenuFrames = 0;
+	gMenuLogicAtOpen = sunshineInterpStep();
+	aurora::input::reconcile(); // capture: the game's pad layer gets Cancelled and drops held buttons
+	std::printf("[menu] open (%s) logic=%lu focus=%s\n", why, gMenuLogicAtOpen, gMenu->focusId().c_str());
+	std::fflush(stdout);
+}
+
+bool menuOpen() { return gMenu.has_value(); }
+
+void menuDevQueue(const char* tokens) {
+	if (gMenuDev.empty()) {
+		gMenuDevWait = kMenuDevStepFrames - 1; // the first token runs at the next menuPoll
+	}
+	std::string list = tokens != nullptr ? tokens : "";
+	size_t begin = 0;
+	while (begin < list.size()) {
+		size_t end = list.find(',', begin);
+		if (end == std::string::npos) {
+			end = list.size();
+		}
+		if (end > begin) {
+			gMenuDev.push_back(list.substr(begin, end - begin));
+		}
+		begin = end + 1;
+	}
 }
 
 } // namespace launcher

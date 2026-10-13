@@ -23,6 +23,7 @@
 
 // ABI guard: the game's PADStatus (sms/include/dolphin/pad.h, TARGET_PC) must match Aurora's, which PADRead() fills.
 #include <dolphin/pad.h>
+#include <dolphin/vi.h> // VIWaitForRetrace: in-game menu pacing
 static_assert(sizeof(PADStatus) == 16, "PADStatus layout differs from Aurora's");
 
 // BSS object defined by the decomp's main.cpp.
@@ -61,12 +62,9 @@ bool sunshineDevSkipMovies()
 	return skip;
 }
 
-// Called by TVideo::waitForRetrace (JDRVideo.cpp) once per game frame, right before VIFlush: present what the game
-// drew, pump window events, open the next frame. Aurora has no XFB, so the game's XFB handoff cannot mark frames.
-// This is also the single seam where a later phase decouples rendering from the 30 Hz game logic.
-void sunshinePresentFrame()
+// Present the open frame, pump window events, open the next frame.
+static void presentAndPump()
 {
-	modsPresent(); // mods/mods_loader.cpp
 	aurora_end_frame();
 	for (;;) {
 		for (const AuroraEvent* e = aurora_update(); e != nullptr && e->type != AURORA_NONE; ++e) {
@@ -78,6 +76,25 @@ void sunshinePresentFrame()
 		sunshineHeartbeat(); // minimized or paused windows keep pumping events: not a hang
 		if (aurora_begin_frame()) // false while minimized or paused: keep pumping events
 			break;
+	}
+}
+
+// Called by TVideo::waitForRetrace (JDRVideo.cpp) once per game frame, right before VIFlush: present what the game
+// drew, pump window events, open the next frame. Aurora has no XFB, so the game's XFB handoff cannot mark frames.
+// This is also the single seam where a later phase decouples rendering from the 30 Hz game logic.
+void sunshinePresentFrame()
+{
+	launcher::menuPoll(); // in-game menu (UI-4): opens on a request from the last pump or a dev token, so this present shows it
+	modsPresent(); // mods/mods_loader.cpp
+	presentAndPump();
+	// Menu open: the game is frozen here. Logic, the devscript and the game's PAD reads wait; each frame draws only the
+	// menu (opaque, no game draws). VIWaitForRetrace paces it and lets the other game threads run.
+	// shortcut: no sunshineReplayFrame under the menu: at a49732c a replay in dolpic/0 aborts in Aurora's FIFO worker
+	// (frame index buffer full, recording.cpp push) even without the menu (fps_limit=60). Upgrade: replay once that is fixed.
+	while (launcher::menuOpen()) {
+		presentAndPump();
+		VIWaitForRetrace();
+		launcher::menuPoll(); // closed: the caller draws into the open frame as usual
 	}
 }
 
@@ -144,6 +161,7 @@ int main(int argc, char* argv[])
 
 	sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
 	launcher::applyRuntimeSettings(); // launcher/launcher.cpp: PAD bindings, dead zones, master volume, window
+	launcher::menuInstall(settingsFile); // launcher/launcher.cpp: R+Start / F1 in-game menu layer
 	savesApplyDirectory(s, exeDir); // saves/save_directory.cpp: [saves] directory, before CARDInit in initialize()
 
 	// The console's startup code (excluded, __start) runs OSInit before main; it sets up the arena JKRHeap draws from.

@@ -1,0 +1,24 @@
+# UI-4a in-game menu (launcher settings page over the frozen game), dolpic/0. Env: SUNSHINE_DEV_START=dolpic/0.
+# menu tokens run one per 30 presented frames (launcher::menuDevQueue); the devscript itself waits while the menu is open.
+# Evidence: [menu] open (chord) ... [menu] close (b) frames>=120 logic=N->N (no logic tick while open), dir.state=4 after,
+# focus never none; F1 part: Mario position/status unchanged (W held inside the menu does not leak after close);
+# control: W pushed with the menu closed moves Mario (pushed keys do reach the game).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+# pad: R+Start chord opens, D-pad moves the focus, B closes; the shot is the first menu frame over the scene
+menu chord,right,right,down,b
+shot menu_chord.png
+wait frames=30
+log
+# keyboard: F1 opens, W goes down inside the menu, F1 closes, W goes up 30 frames after the close
+menu f1,key:W:down,f1,key:W:up
+wait frames=60
+log
+# control: W held with the menu closed walks Mario
+menu key:W:down
+wait frames=45
+menu key:W:up
+wait frames=15
+log
+end

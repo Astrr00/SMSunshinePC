@@ -22,6 +22,7 @@
 #include "System/StageUtil.hpp"
 #include "JSystem/JDrama/JDRNameRefGen.hpp"
 #include "cheats/cheats.h"
+#include "launcher/launcher.hpp"
 #include "MoveBG/Item.hpp"
 #include "MoveBG/ItemManager.hpp"
 #include "MoveBG/MapObjManager.hpp"
@@ -72,7 +73,7 @@ u32 sunshineInterpStep();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu };
 
 struct Command {
 	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck };
@@ -361,6 +362,11 @@ Command parseLine(const std::string& text, int line)
 		std::getline(in >> std::ws, c.path);
 		while (!c.path.empty() && (c.path.back() == '\r' || c.path.back() == ' ')) c.path.pop_back();
 		if (c.path.empty()) fail(line, "shot needs a path", text);
+		return c;
+	}
+	if (verb == "menu") { // menu tok,tok,...: in-game menu dev tokens (launcher::menuDevQueue), one per 30 presented frames
+		c.op = Op::Menu;
+		if (!(in >> c.path)) fail(line, "menu needs tokens", text);
 		return c;
 	}
 	if (verb == "log") { c.op = Op::Log; return c; }
@@ -1194,6 +1200,10 @@ void step()
 			aurora_screenshot_next(c.path.c_str());
 		}
 		if (c.op == Op::Log) logStatus("devscript");
+		if (c.op == Op::Menu) {
+			std::printf("[devscript] menu %s tick=%d\n", c.path.c_str(), gTick);
+			launcher::menuDevQueue(c.path.c_str());
+		}
 		if (c.op == Op::End) {
 			gCursor = gScript.size();
 			break;
