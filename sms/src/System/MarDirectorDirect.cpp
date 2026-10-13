@@ -1231,6 +1231,9 @@ JStage::TObject* TMarDirector::JSGFindObject(const char* param_1,
 }
 
 #ifdef TARGET_PC
+#include <JSystem/JDrama/JDRDrawBufObj.hpp>
+#include <JSystem/J3D/J3DGraphBase/J3DDrawBuffer.hpp>
+
 // Presentation replay (sunshine-pc/src/framerate/framerate.cpp): draws the current game frame again without advancing
 // logic. DRAW_INIT clears the draw buffers, so the entry stage is re-run first with logic (MOVE) and animation (CALC_ANIM)
 // masked out; then the draw lists and the post-direct overlay run as in direct() and gameLoop.
@@ -1246,6 +1249,21 @@ bool sunshineCanReplay()
 	       && d->mPerformListGXPost && d->unk260 == 1;
 }
 
+typedef JGadget::TSingleLinkList<TPerformLink, 0>::iterator SunshineLinkIt;
+
+// A draw buffer that the draw lists clear only after drawing it: a bare CUE_DRAW_INIT link on a TDrawBufObj that no draw
+// list makes current. The entry stage fills it (DrawBuf AfterIndirect Opa/Xlu: TMapStaticObj on CUE_ENTRY).
+static bool sunshineIsPostDrawClear(TPerformList* const* lists, int count, TPerformLink& link)
+{
+	if (link.mCueFilter != CUE_DRAW_INIT || dynamic_cast<JDrama::TDrawBufObj*>(link.mPerformer) == nullptr)
+		return false;
+	for (int i = 0; i < count; ++i)
+		for (SunshineLinkIt it = lists[i]->getChildren().begin(); it != lists[i]->getChildren().end(); it++)
+			if (it->mPerformer == link.mPerformer && (it->mCueFilter & CUE_SET_DRAW_BUFFER))
+				return false;
+	return true;
+}
+
 void sunshineReplayFrame()
 {
 	TMarDirector* d = gpMarDirector;
@@ -1254,14 +1272,28 @@ void sunshineReplayFrame()
 	JDrama::TGraphics local;
 	JDrama::SunshineApplyDisplay(d->unkC0, &local);
 	local.unk0 = 0; // the flag halfword direct() writes (asm 0x800ED050: sth to TGraphics+0x0)
+	// Post-draw-clear buffers still hold this tick's entries here. J3D links an entered packet in place, so entering a
+	// model twice loops the packet list and its draw never ends (Aurora aborts on its full 2 MiB index buffer). Empty
+	// them before the entry stage and skip their clear below: the next direct() draws the replay's entries and clears
+	// them, as retail does with its own.
+	TPerformList* const draws[] = { d->mPerformListGX, d->mPerformListSilhouette, d->mPerformListGXPost };
+	for (int i = 0; i < 3; ++i)
+		for (SunshineLinkIt it = draws[i]->getChildren().begin(); it != draws[i]->getChildren().end(); it++)
+			if (sunshineIsPostDrawClear(draws, 3, *it))
+				static_cast<JDrama::TDrawBufObj*>(it->mPerformer)->getDrawBuffer()->frameInit();
 	d->unk34->perform(CUE_ALL & ~(CUE_MOVE | CUE_CALC_ANIM), &local);
 	d->unk40->perform(CUE_ALL, &local);
-	d->unk38->perform(CUE_ALL, &local);
-	d->unk3C->perform(CUE_ALL, &local);
-	d->mPerformListGX->perform(CUE_ALL, &local);
-	if ((gpSilhouetteManager->unk48 > 0.0f ? true : false) || gpCamera->unk2C8 != -1)
-		d->mPerformListSilhouette->perform(CUE_ALL, &local);
-	d->mPerformListGXPost->perform(CUE_ALL, &local);
+	// unk38/unk3C are the pollution passes (initECTGft): they count goop, apply the stamps queued by logic and the
+	// layer's per-frame change, and the copy is read back into the map that logic reads. That is game logic run once
+	// per tick in retail, not a picture: the replay skips them and draws with the maps of the last tick.
+	const bool silhouette = (gpSilhouetteManager->unk48 > 0.0f ? true : false) || gpCamera->unk2C8 != -1;
+	for (int i = 0; i < 3; ++i) {
+		if (i == 1 && !silhouette)
+			continue;
+		for (SunshineLinkIt it = draws[i]->getChildren().begin(); it != draws[i]->getChildren().end(); it++)
+			if (!sunshineIsPostDrawClear(draws, 3, *it))
+				it->perform(CUE_ALL, &local);
+	}
 	GXInvalidateTexAll();
 
 	// Same overlay as TApplication::gameLoop (Application.cpp), without advancing the fader or the sound mixer.

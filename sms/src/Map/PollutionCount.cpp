@@ -703,6 +703,16 @@ void TPollutionCounterLayer::pushModelStampTask(u8 target_layer,
 	if (mModelStampTaskNum >= 20)
 		return;
 
+#ifdef TARGET_PC
+	// Polluters push their stamp on CUE_ENTRY, and the frame-rate replay (sunshineReplayFrame) re-runs the entry
+	// stage before the queue is drawn. A second task for the same model enters it into the stamp draw buffer twice:
+	// its packet list loops and countTexDegree draws until Aurora's index buffer aborts. Retail pushes each once.
+	for (int i = 0; i < mModelStampTaskNum; ++i) {
+		if (mModelStampTaskQueue[i].mModel == model && mModelStampTaskQueue[i].mLayerIdx == target_layer)
+			return;
+	}
+#endif
+
 	mModelStampTaskQueue[mModelStampTaskNum].mLayerIdx = target_layer;
 	mModelStampTaskQueue[mModelStampTaskNum].mModel    = model;
 	++mLayerModelStampTaskNum[target_layer];
