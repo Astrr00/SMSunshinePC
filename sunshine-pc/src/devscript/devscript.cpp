@@ -956,16 +956,44 @@ void step()
 			return;
 		}
 		if (c.op == Op::WalkTo) {
+			static int walkStall = 0, walkRecover = 0, walkSide = 1;
+			static float walkRefX = 0.f, walkRefZ = 0.f;
 			if (!gStarted) {
 				gStarted = true;
 				gRemaining = 0;
 				std::printf("[devscript] walkto start line=%d to=(%.0f,%.0f) radius=%.0f tick=%d\n", c.line, c.pos[0], c.pos[2], c.radius, gTick);
+				walkStall = 0;
+				walkRecover = 0;
+				walkRefX = gpMarioOriginal ? gpMarioOriginal->mPosition.x : 0.f;
+				walkRefZ = gpMarioOriginal ? gpMarioOriginal->mPosition.z : 0.f;
 			}
 			PADStatus pad{};
 			float dist = 0.f;
 			if (gpMarioOriginal && gpCamera) {
 				walkStick(c, pad.stickX, pad.stickY, dist);
 				if (c.spray) pad.triggerRight = 255;
+				// Stall recovery (dev aid): Mario standing still while the stick pushes (seen once in a real-time run at (3692,704,-2716), cause not found)
+				// gets 40 ticks of sideways steering plus a jump, alternating sides. A wall that really blocks the line still ends in the walkto TIMEOUT.
+				if (dist > c.radius) {
+					const float mx = gpMarioOriginal->mPosition.x, mz = gpMarioOriginal->mPosition.z;
+					if (std::hypot(mx - walkRefX, mz - walkRefZ) > 30.f) { // a run covers far more; a crawl along a wall (0.12 units/tick seen) does not
+						walkRefX = mx;
+						walkRefZ = mz;
+						walkStall = 0;
+					} else if (walkRecover == 0 && ++walkStall >= 120) {
+						walkRecover = 40;
+						walkSide = -walkSide;
+						walkStall = 0;
+						std::printf("[devscript] walkto stall line=%d mario=(%.0f,%.0f,%.0f) dist=%.0f side=%d tick=%d\n", c.line, mx, gpMarioOriginal->mPosition.y, mz, dist, walkSide, gTick);
+					}
+					if (walkRecover > 0) {
+						const s8 sx = pad.stickX, sy = pad.stickY;
+						pad.stickX = static_cast<s8>(-walkSide * sy);
+						pad.stickY = static_cast<s8>(walkSide * sx);
+						if (walkRecover > 36) pad.button |= PAD_BUTTON_A;
+						--walkRecover;
+					}
+				}
 				if (dist <= c.radius) {
 					std::printf("[devscript] walkto met line=%d after=%d dist=%.0f tick=%d\n", c.line, gRemaining, dist, gTick);
 					const PADStatus neutral{};

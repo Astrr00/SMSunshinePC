@@ -1,0 +1,8 @@
+# Diagnosis: walkto stall recovery (devscript.cpp). Run: python tools/route.py Strict tools/routes/74_walk_stall_test.dev --name <n> --seconds 120 SUNSHINE_DEV_START=dolpic/0 SUNSHINE_ALLOW_CPU_ADAPTER=0
+# Mario is put east of the Delfino wall at x=4000 (normal +x, z -7900..-1000) and walks west into it: expect one `walkto stall` line (about 120 ticks after the start) and sideways movement with a jump and the walkto TIMEOUT (rc 3).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+tp x=4088 y=305 z=-4450
+wait frames=30
+walkto x=3000 z=-4450 radius=100 timeout=500
+end
