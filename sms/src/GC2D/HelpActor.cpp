@@ -30,7 +30,12 @@ void THelpActor::load(JSUMemoryInputStream& stream)
 void THelpActor::loadAfter()
 {
 	THitActor::loadAfter();
+#ifdef TARGET_PC
+	// name can match a non-actor NameRef; check() would read past it. null takes the not-found path.
+	unk70 = dynamic_cast<TLiveActor*>(JDrama::TNameRefGen::search(unk6C));
+#else
 	unk70 = static_cast<TLiveActor*>(JDrama::TNameRefGen::search(unk6C));
+#endif
 	static_cast<TGCConsole2*>(JDrama::TNameRefGen::search("GCコンソール"))
 	    ->entryHelpActor(this);
 }
