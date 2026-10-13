@@ -1,0 +1,246 @@
+# Pollution object counter (CPU footprint count, PollutionCount.cpp TARGET_PC), bianco/0: spray the footprint of object O1
+# (joint bounds x 1422..3066, z 5062..5605, [hplog-objreg]) on a teleport grid: rows facing +z, then from the north facing -z,
+# then from the south facing +z. Expect [hplog-obj] O1 deg below 30 (map 2) -> cleaned=1 -> [hplog-event] sink building 1 rises.
+# Env: SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_HPLOG=1. About 280 s on WARP (route.py --seconds 320).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+cheat infinite_health
+cheat infinite_water
+log
+tp x=1450 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1610 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1770 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1930 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2090 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2250 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2410 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2570 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2730 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2890 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=3050 y=2600 z=4900 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+log
+tp x=1450 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1610 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1770 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1930 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2090 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2250 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2410 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2570 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2730 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2890 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=3050 y=2600 z=5100 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+log
+tp x=1450 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1610 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1770 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1930 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2090 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2250 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2410 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2570 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2730 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2890 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=3050 y=2600 z=5300 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+log
+tp x=1600 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1696 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1792 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1888 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1984 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2080 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2176 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2272 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2368 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2464 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2560 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2656 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2752 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2848 y=2600 z=5550 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+log
+tp x=1600 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1696 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1792 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1888 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1984 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2080 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2176 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2272 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2368 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2464 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2560 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2656 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2752 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2848 y=2600 z=5450 yaw=180
+wait frames=12
+hold trig=0,255 frames=60
+log
+tp x=1600 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1696 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1792 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1888 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=1984 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2080 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2176 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2272 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2368 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2464 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2560 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2656 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2752 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+tp x=2848 y=2600 z=5000 yaw=0
+wait frames=12
+hold trig=0,255 frames=60
+log
+tp x=2250 y=2600 z=4700 yaw=0
+wait frames=150
+log
+wait frames=300
+log
+end

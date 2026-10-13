@@ -19,6 +19,9 @@
 #include <JSystem/J3D/J3DGraphAnimator/J3DJoint.hpp>
 #include <JSystem/JParticle/JPAResourceManager.hpp>
 #include <Jsystem/JDrama/JDRNameRefGen.hpp>
+#ifdef TARGET_PC
+#include <cstdio> // dev diagnostic (env-gated)
+#endif
 
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
@@ -118,6 +121,14 @@ bool TMapEventSink::control()
 void TMapEventSink::startControl()
 {
 	unk18 = 2;
+#ifdef TARGET_PC
+	{ // dev diagnostic (env-gated, SUNSHINE_DEV_HPLOG=1): a cleaned pollution object (or the gatekeeper) raises a building
+		extern bool gHpLogOn;
+		extern int hpLogTick();
+		if (gHpLogOn)
+			std::printf("[hplog-event] tick=%d sink building %d rises\n", hpLogTick(), getRaisingBuildingIdx());
+	}
+#endif
 	unk2C = getBuilding(getRaisingBuildingIdx());
 	unk2C->alive();
 	unk30 = getBuilding(getRaisingBuildingIdx())->getJoint();

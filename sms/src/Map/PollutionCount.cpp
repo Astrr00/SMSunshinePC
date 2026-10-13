@@ -17,6 +17,14 @@
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
 
+#ifdef TARGET_PC
+#include <Map/PollutionObj.hpp>
+#include <hostendian.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#endif
+
 static void drawBlack(u16 param_1, u16 param_2)
 {
 
@@ -46,6 +54,272 @@ static void drawBlack(u16 param_1, u16 param_2)
 	GXPosition2u16(0, (param_2 << 1) + 1);
 	GXEnd();
 }
+
+#ifdef TARGET_PC
+// TARGET_PC: Aurora's GXReadPixMetric returns occlusion visibility (0 or 1 per draw), not a pixel count, so the
+// layer and object counters are computed on the CPU from mPollutionMap, the map both passes sample (kept in step
+// with the GPU map by GXSetCopyReadback). The counts are net pixels, so the retail "- mPolygonCount * 4" (which
+// cancels the hardware's per-triangle overhead) is not applied to them.
+extern bool gHpLogOn;
+extern int hpLogTick();
+
+// Unit: pixels, as retail sees them (SDK GXReadPixMetric multiplies the PE quad counter by 4, dolphin/gx/GXPerf.c:381).
+
+// Count of the layer pass (drawTex, alpha compare GREATER 0): texels whose TEV-updated value stays above 0.
+static u32 pcLayerCount(const TPollutionLayer* layer)
+{
+	const bool decay = (layer->mFlags & TPollutionLayer::FLAG_DECAY) != 0;
+	const int thr    = layer->mPerFrameChangeThreshold;
+	const int step   = decay ? 2 : layer->mPerFrameChangeDelta;
+	u8 pass[256];
+	for (int t = 0; t < 256; ++t) {
+		if (layer->mPollutionType == POLLUTION_TYPE_UNK7)
+			pass[t] = t > 0; // T' = min(255, T + step) if T > thr, else T
+		else if (decay)
+			pass[t] = t > step; // T' = max(0, T - step)
+		else
+			pass[t] = t >= thr ? t > 0 : t > step; // T' = T if T >= thr, else max(0, T - step)
+	}
+	const u32 n = (u32)layer->mPollutionImage->width * layer->mPollutionImage->height;
+	u32 cnt     = 0;
+	for (u32 k = 0; k < n; ++k)
+		cnt += pass[layer->mPollutionMap[k]];
+	return cnt;
+}
+
+// Object pass footprints: per registered object, the mPollutionMap offsets of the texels its shapes sample, one
+// entry per covered pixel of the 512x512 "graffito check" viewport (overlapping triangles add theirs twice, as on
+// the GPU). The layer model is static, so this is rasterised once at registration. A null list means the build
+// failed: countObjDegree then leaves the counter at its registration value -1 (never cleaned).
+static u32** sPcFootprint;
+static u32* sPcFootprintNum;
+static int sPcFootprintMax;
+
+struct TPcFpVtx {
+	f32 x, y, u, v;
+	bool ok; // false: POS or TEX0 index out of range, triangles using this vertex are skipped
+};
+
+// Same matrix as initCountObjDegree.
+static void pcCountObjMtx(f32 minX, f32 minZ, Mtx out)
+{
+	TPosition3f m;
+	TPosition3f t;
+	m.identity();
+	t.identity();
+	t.setScale(0.03125f, 0.03125f, 0.0f);
+	MTXConcat(m.mMtx, t.mMtx, m.mMtx);
+	t.setEular((s16)DEG2SHORTANGLE(-90.0f), 0, 0);
+	MTXConcat(m.mMtx, t.mMtx, m.mMtx);
+	m.setTrans(-minX / 32, -minZ / 32, 0);
+	MTXCopy(m.mMtx, out);
+}
+
+static f32 pcEdge(const TPcFpVtx& a, const TPcFpVtx& b, f32 px, f32 py)
+{
+	return (b.x - a.x) * (py - a.y) - (b.y - a.y) * (px - a.x);
+}
+
+// A pixel centre exactly on an edge belongs to one of the two triangles sharing it.
+static bool pcOwnsTie(const TPcFpVtx& a, const TPcFpVtx& b)
+{
+	return b.y > a.y || (b.y == a.y && b.x < a.x);
+}
+
+static void pcRasterTri(TPcFpVtx a, TPcFpVtx b, TPcFpVtx c, const TPollutionPos& pos, int texW, int texH,
+                        u32* out, u32& num)
+{
+	enum { kViewW = 512, kViewH = 512 };
+	f32 area = pcEdge(a, b, c.x, c.y);
+	if (area == 0.0f)
+		return;
+	if (area < 0.0f) {
+		TPcFpVtx tmp = b;
+		b            = c;
+		c            = tmp;
+		area         = -area;
+	}
+	const int x0 = std::max((int)std::floor(std::min(a.x, std::min(b.x, c.x))), 0);
+	const int x1 = std::min((int)std::ceil(std::max(a.x, std::max(b.x, c.x))), (int)kViewW - 1);
+	const int y0 = std::max((int)std::floor(std::min(a.y, std::min(b.y, c.y))), 0);
+	const int y1 = std::min((int)std::ceil(std::max(a.y, std::max(b.y, c.y))), (int)kViewH - 1);
+	const bool ownA = pcOwnsTie(b, c), ownB = pcOwnsTie(c, a), ownC = pcOwnsTie(a, b);
+	for (int py = y0; py <= y1; ++py) {
+		for (int px = x0; px <= x1; ++px) {
+			const f32 cx = px + 0.5f, cy = py + 0.5f;
+			const f32 wa = pcEdge(b, c, cx, cy);
+			const f32 wb = pcEdge(c, a, cx, cy);
+			const f32 wc = pcEdge(a, b, cx, cy);
+			if (wa < 0.0f || wb < 0.0f || wc < 0.0f)
+				continue;
+			if ((wa == 0.0f && !ownA) || (wb == 0.0f && !ownB) || (wc == 0.0f && !ownC))
+				continue;
+			if (out != nullptr) {
+				const f32 u = (wa * a.u + wb * b.u + wc * c.u) / area;
+				const f32 v = (wa * a.v + wb * b.v + wc * c.v) / area;
+				int s       = (int)std::floor(u * texW); // GX_NEAR, GX_CLAMP
+				int t       = (int)std::floor(v * texH);
+				s           = s < 0 ? 0 : (s >= texW ? texW - 1 : s);
+				t           = t < 0 ? 0 : (t >= texH ? texH - 1 : t);
+				out[num]    = pos.index(s, t);
+			}
+			++num;
+		}
+	}
+}
+
+static f32 pcVtxComp(const u8* p, GXCompType type, u8 frac)
+{
+	switch (type) {
+	case GX_U8:
+		return *p / (f32)(1 << frac);
+	case GX_S8:
+		return *(const s8*)p / (f32)(1 << frac);
+	case GX_U16:
+		return *(const u16*)p / (f32)(1 << frac);
+	case GX_S16:
+		return *(const s16*)p / (f32)(1 << frac);
+	default:
+		return *(const f32*)p;
+	}
+}
+
+static int pcCompSize(GXCompType type)
+{
+	return type == GX_F32 ? 4 : (type == GX_U16 || type == GX_S16) ? 2 : 1;
+}
+
+// Walks the object's shape display lists (big-endian, fans/strips as SMS_CountPolygonNumInShape) through the same
+// transform, ortho and viewport as countObjDegree; two passes: count, then fill.
+static void pcBuildFootprint(TPollutionObj* obj, u32** outList, u32* outNum)
+{
+	*outList = nullptr;
+	*outNum  = 0;
+	TPollutionLayer* layer   = obj->mLayer;
+	const ResTIMG* img       = layer->getPollutionImage();
+	const J3DVertexData& vd  = layer->getModelData()->getVertexData();
+	const GXVtxAttrFmtList* posFmt = nullptr;
+	const GXVtxAttrFmtList* texFmt = nullptr;
+	for (const GXVtxAttrFmtList* f = vd.getVtxAttrFmtList(); f->attr != GX_VA_NULL; ++f) {
+		if (f->attr == GX_VA_POS)
+			posFmt = f;
+		else if (f->attr == GX_VA_TEX0)
+			texFmt = f;
+	}
+	const u8* posArr = (const u8*)vd.getVtxPosArray();
+	const u8* texArr = (const u8*)vd.getVtxTexCoordArray(0);
+	if (posFmt == nullptr || texFmt == nullptr || posArr == nullptr || texArr == nullptr) {
+		std::printf("[pollution] object footprint: layer model without POS/TEX0, counter stays -1\n");
+		return;
+	}
+	const int posStride = pcCompSize(posFmt->type) * (posFmt->cnt == GX_POS_XYZ ? 3 : 2);
+	const int texStride = pcCompSize(texFmt->type) * (texFmt->cnt == GX_TEX_ST ? 2 : 1);
+	const u32 posNum    = vd.getVtxPosSize() / posStride;
+	const u32 texNum    = vd.getVtxTexCoordSize(0) / texStride;
+
+	Mtx m;
+	const Vec& minVec = obj->getJoint()->getMin();
+	pcCountObjMtx(minVec.x, minVec.z, m);
+
+	u32* list = nullptr;
+	u32 num   = 0;
+	for (int fill = 0; fill < 2; ++fill) {
+		num = 0;
+		for (int j = 0; j < obj->getShapeNum(); ++j) {
+			J3DShape* shape = obj->getShape(j);
+			int vtxSize = 0, posOff = -1, texOff = -1, posIdxSize = 0, texIdxSize = 0;
+			for (const GXVtxDescList* d = shape->getVtxDesc(); d->attr != GX_VA_NULL; ++d) {
+				const int size = d->type == GX_INDEX16 ? 2 : (d->type == GX_NONE ? 0 : 1);
+				if (d->attr == GX_VA_POS && d->type >= GX_INDEX8) {
+					posOff     = vtxSize;
+					posIdxSize = size;
+				} else if (d->attr == GX_VA_TEX0 && d->type >= GX_INDEX8) {
+					texOff     = vtxSize;
+					texIdxSize = size;
+				} else if (d->attr == GX_VA_PNMTXIDX && fill == 0) {
+					std::printf("[pollution] object footprint: shape with PNMTXIDX, using PNMTX0 only\n");
+				}
+				vtxSize += size;
+			}
+			if (posOff < 0 || texOff < 0) {
+				std::printf("[pollution] object footprint: shape without indexed POS/TEX0 skipped\n");
+				continue;
+			}
+			for (u16 k = 0; k < shape->getMtxGroupNum(); ++k) {
+				const u8* dl  = shape->getShapeDraw(k)->getDisplayList();
+				const u8* end = dl + shape->getShapeDraw(k)->getDisplayListSize();
+				const u8* p   = dl;
+				while (p + 3 <= end) {
+					const u8 op = p[0];
+					if (op != GX_TRIANGLEFAN && op != GX_TRIANGLESTRIP) {
+						static bool sLoggedCmd = false;
+						if (op >= 0x80 && fill == 0) {
+							std::printf("[pollution] object footprint: primitive 0x%02X not counted\n", op);
+						} else if (op < 0x80 && op != 0 && !sLoggedCmd) { // 0 = NOP padding at the end of the list
+							sLoggedCmd = true;
+							std::printf("[pollution] object footprint: display-list command 0x%02X ends the parse, rest of the shape not counted\n", op);
+						}
+						break;
+					}
+					const u16 n = rdbe16(p + 1);
+					p += 3;
+					if (p + n * vtxSize > end)
+						break;
+					TPcFpVtx v0 = {}, v1 = {}, v2 = {};
+					for (u16 i = 0; i < n; ++i) {
+						const u8* vp  = p + i * vtxSize;
+						const u32 pi  = posIdxSize == 2 ? rdbe16(vp + posOff) : vp[posOff];
+						const u32 ti  = texIdxSize == 2 ? rdbe16(vp + texOff) : vp[texOff];
+						TPcFpVtx cur = {};
+						if (pi < posNum && ti < texNum) {
+							cur.ok       = true;
+							const u8* pp = posArr + pi * posStride;
+							const int cs = pcCompSize(posFmt->type);
+							Vec world    = { pcVtxComp(pp, posFmt->type, posFmt->frac),
+							                 pcVtxComp(pp + cs, posFmt->type, posFmt->frac),
+							                 posFmt->cnt == GX_POS_XYZ
+							                     ? pcVtxComp(pp + 2 * cs, posFmt->type, posFmt->frac)
+							                     : 0.0f };
+							Vec screen;
+							MTXMultVec(m, &world, &screen); // ortho 0..512 onto the 512x512 viewport: 1:1
+							const u8* tp = texArr + ti * texStride;
+							cur.x        = screen.x;
+							cur.y        = screen.y;
+							cur.u        = pcVtxComp(tp, texFmt->type, texFmt->frac);
+							cur.v        = texFmt->cnt == GX_TEX_ST
+							                   ? pcVtxComp(tp + pcCompSize(texFmt->type), texFmt->type, texFmt->frac)
+							                   : 0.0f;
+						} else if (fill == 0) {
+							static bool sLoggedIdx = false;
+							if (!sLoggedIdx) {
+								sLoggedIdx = true;
+								std::printf("[pollution] object footprint: vertex index pos=%u tex=%u out of range (%u/%u), its triangles skipped\n",
+								            (unsigned)pi, (unsigned)ti, (unsigned)posNum, (unsigned)texNum);
+							}
+						}
+						if (i == 0)
+							v0 = cur;
+						const TPcFpVtx& va = op == GX_TRIANGLEFAN ? v0 : v1;
+						if (i >= 2 && va.ok && v2.ok && cur.ok)
+							pcRasterTri(va, v2, cur, layer->mPos, img->width,
+							            img->height, list, num);
+						v1 = v2;
+						v2 = cur;
+					}
+					p += n * vtxSize;
+				}
+			}
+		}
+		if (fill == 0) {
+			if (num == 0)
+				return;
+			list = new u32[num];
+		}
+	}
+	*outList = list;
+	*outNum  = num;
+}
+#endif
 
 void TPollutionCounterBase::setCallback(int param_1) const
 {
@@ -169,7 +443,9 @@ void TPollutionCounterObj::draw(int index) const
 	loadPollutionLayer((u8*)pRVar6 + pRVar6->imageDataOffset, pRVar6->width,
 	                   pRVar6->height, GX_TEXMAP0);
 	j3dSys.setVtxPos(mObjects[index]->mLayer->getModelData()->getVtxPosArray());
+#ifndef TARGET_PC
 	GXClearPixMetric();
+#endif
 	for (int j = 0; j < mObjects[index]->getShapeNum(); ++j)
 		drawShape(mObjects[index]->getShape(j));
 }
@@ -182,7 +458,19 @@ void TPollutionCounterObj::countObjDegree() const
 		const Vec& minVec = mObjects[i]->getJoint()->getMin();
 		initCountObjDegree(minVec.x, minVec.z);
 		draw(i);
+#ifdef TARGET_PC
+		if (sPcFootprint[i] != nullptr) { // no footprint: the counter keeps its registration value -1
+			u32 cnt = 0;
+			for (u32 k = 0; k < sPcFootprintNum[i]; ++k)
+				cnt += mObjects[i]->mLayer->mPollutionMap[sPcFootprint[i][k]] > 0 ? 1 : 0;
+			*mCounters[i] = cnt;
+		}
+		if (gHpLogOn && hpLogTick() % 10 == 0)
+			std::printf("[hplog-obj] tick=%d O%d deg=%u fp=%u cleaned=%d\n", hpLogTick(), (int)i, (unsigned)*mCounters[i],
+			            (unsigned)sPcFootprintNum[i], mObjects[i]->isCleaned() ? 1 : 0);
+#else
 		setCallback(i);
+#endif
 	}
 }
 
@@ -196,6 +484,9 @@ void TPollutionCounterObj::registerPollutionObj(TPollutionObj* obj,
 	}
 	mCounters[mCounterNum] = counter_ptr;
 	*counter_ptr           = -1;
+#ifdef TARGET_PC
+	pcBuildFootprint(obj, &sPcFootprint[mCounterNum], &sPcFootprintNum[mCounterNum]);
+#endif
 	++mCounterNum;
 }
 
@@ -208,6 +499,21 @@ void TPollutionCounterObj::init(int max_counters)
 		mObjects[i]      = nullptr;
 		mPolygonCount[i] = 0;
 	}
+#ifdef TARGET_PC
+	// Per stage. Plain `new` is the CRT heap on PC (sunshine-pc/src/sdk/jkr_new_delete.cpp), not the stage heap,
+	// so the previous stage's lists are freed here.
+	for (int i = 0; i < sPcFootprintMax; ++i)
+		delete[] sPcFootprint[i];
+	delete[] sPcFootprint;
+	delete[] sPcFootprintNum;
+	sPcFootprintMax = max_counters;
+	sPcFootprint    = new u32*[max_counters];
+	sPcFootprintNum = new u32[max_counters];
+	for (int i = 0; i < max_counters; ++i) {
+		sPcFootprint[i]    = nullptr;
+		sPcFootprintNum[i] = 0;
+	}
+#endif
 }
 
 TPollutionCounterObj::TPollutionCounterObj()
@@ -317,10 +623,16 @@ void TPollutionCounterLayer::drawPollutionLayer(int layer_index) const
 	                        layer->mPerFrameChangeThreshold,
 	                        layer->mPerFrameChangeDelta);
 
+#ifdef TARGET_PC
+	drawTex(mLayers[layer_index]->mPollutionImage->width,
+	        mLayers[layer_index]->mPollutionImage->height);
+	*mCounters[layer_index] = pcLayerCount(layer);
+#else
 	GXClearPixMetric();
 	drawTex(mLayers[layer_index]->mPollutionImage->width,
 	        mLayers[layer_index]->mPollutionImage->height);
 	setCallback(layer_index);
+#endif
 }
 
 static void makeWorldToPollutionMtx(f32 scale, f32 x, f32 z, TPosition3f* mtx)

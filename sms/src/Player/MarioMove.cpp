@@ -1014,7 +1014,7 @@ void TMario::checkGraffito()
 				const int texN = layer->mPos.getWidth() * layer->mPos.getHeight();
 				for (int k = 0; k < texN; ++k)
 					cnt += layer->mPollutionMap[k] > layer->mPollutedThreshold ? 1 : 0;
-				int n = std::snprintf(buf, sizeof(buf), "[hplog-map] tick=%d L%d %dx%d thr=%d cnt=%d", hpLogTick(), li, layer->mPos.getWidth(), layer->mPos.getHeight(), (int)layer->mPollutedThreshold, cnt);
+				int n = std::snprintf(buf, sizeof(buf), "[hplog-map] tick=%d L%d %dx%d thr=%d cnt=%d deg=%u", hpLogTick(), li, layer->mPos.getWidth(), layer->mPos.getHeight(), (int)layer->mPollutedThreshold, cnt, (unsigned)layer->getPollutionDegree());
 				static const int kDist[] = { 0, 60, 120, 200, 300, 450 };
 				for (int di = 0; di < 6 && n < (int)sizeof(buf) - 24; ++di) {
 					const f32 x = mPosition.x + fs * kDist[di];
