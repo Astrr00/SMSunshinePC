@@ -15,6 +15,7 @@ Data offsets (commentAddr, iconAddr) are relative to the data start at file
 u32 checksum at 0x1FFC (top/bottom u16 sums over the preceding 0x1FFC bytes,
 big-endian). Exit code 0 when every check passes.
 """
+import os
 import struct
 import sys
 
@@ -50,6 +51,10 @@ def main(argv):
         print(__doc__)
         return 2
     path = argv[1]
+    if not os.path.isfile(path):
+        print(__doc__)
+        print(f"not a file: {path}")
+        return 2
     dump = 0
     if "--dump" in argv:
         dump = int(argv[argv.index("--dump") + 1], 0)

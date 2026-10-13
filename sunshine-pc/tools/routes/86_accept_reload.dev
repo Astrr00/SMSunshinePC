@@ -1,0 +1,31 @@
+# Reload check for route 85: boots from fg85's appdata (route.py --appdata-from fg85), walks under file block B (x=1080, where 85's new game saved), head-bumps, loads, logs the shine count after load. Stepped env as fg85. No cheats, no tp. Based on 61_reload.dev (its header block A is stale; its code walks to x=1080).
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+walkto x=1080 z=-1000 radius=25 timeout=600
+log
+hold A frames=4
+wait frames=26
+log
+hold A frames=4
+wait frames=26
+log
+hold A frames=4
+wait frames=26
+log
+hold A frames=4
+wait frames=26
+log
+hold A frames=4
+wait frames=26
+log
+hold A frames=4
+wait frames=26
+log
+mash A period=30 until director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=120
+log
+shot reload_loaded.png
+end

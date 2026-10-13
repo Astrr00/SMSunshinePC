@@ -1,11 +1,12 @@
 """Run one scripted, invisible, silent game session and wait for it (dev-only, never touches %APPDATA%\\Sunshine).
 
-  python tools/route.py <tree> <script> [--name N] [--seconds S] [KEY=VAL ...]
+  python tools/route.py <tree> <script> [--name N] [--seconds S] [--appdata-from N] [KEY=VAL ...]
 
   <tree>     build tree under build/ that holds sunshine.exe (e.g. Strict)
   <script>   devscript file (SUNSHINE_DEV_SCRIPT); relative to the repo's sunshine-pc folder or absolute
   --name     run name; output goes to build/Route/<name>/ (run.log, appdata/, PNGs written by `shot` verbs)
   --seconds  wall-clock limit, default 330 (< 6 min: tools/reap.py kills older runs)
+  --appdata-from N  copy build/Route/N/appdata into this run before the start (reload a saved game)
   KEY=VAL    extra environment variables (SUNSHINE_DEV_MAX_SECONDS is set to the limit)
 
 Rules kept here: CREATE_NO_WINDOW + BELOW_NORMAL priority, window parked off screen, muted, temporary APPDATA
@@ -13,6 +14,7 @@ Rules kept here: CREATE_NO_WINDOW + BELOW_NORMAL priority, window parked off scr
 ever killed. Exit code: the game's own exit code, 124 when the wall-clock limit ended the run.
 """
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -33,6 +35,7 @@ def main():
     name = None
     seconds = 330
     extra = {}
+    appdata_from = None
     pos = []
     i = 0
     while i < len(args):
@@ -43,6 +46,10 @@ def main():
             continue
         if a == "--seconds":
             seconds = int(args[i + 1])
+            i += 2
+            continue
+        if a == "--appdata-from":
+            appdata_from = args[i + 1]
             i += 2
             continue
         if "=" in a and not os.path.exists(a):
@@ -60,6 +67,13 @@ def main():
     exe = os.path.join(ROOT, "build", tree, "sunshine.exe")
     disc = os.path.abspath(os.path.join(ROOT, "..", "sms", "orig", "GMSJ01", "Super Mario Sunshine (Japan).rvz"))
     out = os.path.join(ROOT, "build", "Route", name)
+    if appdata_from:
+        src = os.path.join(ROOT, "build", "Route", appdata_from, "appdata")
+        if appdata_from == name or not os.path.isdir(src):
+            print(f"--appdata-from {appdata_from}: needs another run's appdata (build/Route/{appdata_from}/appdata)")
+            return 2
+        shutil.rmtree(os.path.join(out, "appdata"), ignore_errors=True)
+        shutil.copytree(src, os.path.join(out, "appdata"))
     os.makedirs(os.path.join(out, "appdata"), exist_ok=True)
     env = dict(os.environ)
     # Keep tooling of the surrounding agent session (Headroom proxy: HEADROOM_*, its onnxruntime in ORT_DYLIB_PATH) out of the game run.
