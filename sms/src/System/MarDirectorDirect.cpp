@@ -1233,6 +1233,7 @@ JStage::TObject* TMarDirector::JSGFindObject(const char* param_1,
 #ifdef TARGET_PC
 #include <JSystem/JDrama/JDRDrawBufObj.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DDrawBuffer.hpp>
+#include <Map/PollutionManager.hpp>
 
 // Presentation replay (sunshine-pc/src/framerate/framerate.cpp): draws the current game frame again without advancing
 // logic. DRAW_INIT clears the draw buffers, so the entry stage is re-run first with logic (MOVE) and animation (CALC_ANIM)
@@ -1283,9 +1284,13 @@ void sunshineReplayFrame()
 				static_cast<JDrama::TDrawBufObj*>(it->mPerformer)->getDrawBuffer()->frameInit();
 	d->unk34->perform(CUE_ALL & ~(CUE_MOVE | CUE_CALC_ANIM), &local);
 	d->unk40->perform(CUE_ALL, &local);
-	// unk38/unk3C are the pollution passes (initECTGft): they count goop, apply the stamps queued by logic and the
-	// layer's per-frame change, and the copy is read back into the map that logic reads. That is game logic run once
-	// per tick in retail, not a picture: the replay skips them and draws with the maps of the last tick.
+	// On a stage with pollution layers unk38/unk3C are the pollution passes (initECTGft): they count goop, apply the
+	// stamps queued by logic and the layer's per-frame change, and the copy is read back into the map that logic reads.
+	// That is game logic run once per tick in retail, not a picture: the replay skips them and draws with the maps of the
+	// last tick. Without layers unk38 is empty and unk3C holds only the bath water preprocessor (a draw-only depth
+	// pre-pass and its GXCopyTex for the bath water draw), so the replay runs it as direct() does.
+	if (gpPollution->getJointModelNum() == 0)
+		d->unk3C->perform(CUE_ALL, &local);
 	const bool silhouette = (gpSilhouetteManager->unk48 > 0.0f ? true : false) || gpCamera->unk2C8 != -1;
 	for (int i = 0; i < 3; ++i) {
 		if (i == 1 && !silhouette)
