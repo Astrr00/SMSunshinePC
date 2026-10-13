@@ -14,3 +14,4 @@ screenshot | lib/gfx/screenshot.hpp | ^void finish\(
 texture side channel opcodes | include/dolphin/gx/GXAurora.h | ^#define GX_AURORA_SET_TEX_DATA 0x0045 && ^#define GX_AURORA_SET_TLUT_DATA 0x0046 && ^#define GX_AURORA_SET_TEX_TLUT 0x0047
 texture side channel emit | lib/dolphin/gd/GDTexture.cpp | GDWriteAuroraCmd\(GX_AURORA_SET_TEX_DATA\)
 copy readback | include/dolphin/gx/GXAurora.h | ^void GXSetCopyReadback\(
+copy readback off on Null | lib/gfx/depth_peek.cpp | Copy readback off: Null backend

@@ -1,0 +1,26 @@
+diff --git a/lib/gfx/depth_peek.cpp b/lib/gfx/depth_peek.cpp
+--- a/lib/gfx/depth_peek.cpp
++++ b/lib/gfx/depth_peek.cpp
+@@ -119,6 +119,7 @@ struct CopyReadback {
+ std::unordered_map<const void*, CopyReadback> g_copyReadbacks;
+ uint64_t g_copyGen = 0;
+ bool g_copyLoggedUnavailable = false;
++bool g_copyLoggedNull = false;
+ 
+ struct PendingCopyMap {
+   const void* dest = nullptr;
+@@ -628,6 +629,14 @@ void after_submit() noexcept {
+ 
+ void register_copy_readback(const void* dest, uint32_t width, uint32_t height) noexcept {
+   std::lock_guard lock{g_mutex};
++  // The Null backend renders nothing: its copies are empty and would wipe the CPU map. Leave the map at its load state.
++  if (webgpu::g_backendType == wgpu::BackendType::Null) {
++    if (!g_copyLoggedNull) {
++      Log.info("Copy readback off: Null backend (renders nothing; CPU maps keep their load state)");
++      g_copyLoggedNull = true;
++    }
++    return;
++  }
+   auto& entry = g_copyReadbacks[dest];
+   entry = {};
+   entry.width = width;
