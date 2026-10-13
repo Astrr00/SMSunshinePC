@@ -89,8 +89,9 @@ void sunshinePresentFrame()
 	presentAndPump();
 	// Menu open: the game is frozen here. Logic, the devscript and the game's PAD reads wait; each frame draws only the
 	// menu (opaque, no game draws). VIWaitForRetrace paces it and lets the other game threads run.
-	// shortcut: no sunshineReplayFrame under the menu: at a49732c a replay in dolpic/0 aborts in Aurora's FIFO worker
-	// (frame index buffer full, recording.cpp push) even without the menu (fps_limit=60). Upgrade: replay once that is fixed.
+	// shortcut: no sunshineReplayFrame under the menu: with it the game aborted in Aurora's FIFO worker (frame index buffer
+	// full, recording.cpp push); a control without the menu aborted the same way, observed in one run (replay60,
+	// fps_limit=60, dolpic/0, a49732c). Upgrade: replay once that is fixed.
 	while (launcher::menuOpen()) {
 		presentAndPump();
 		VIWaitForRetrace();

@@ -23,6 +23,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -53,7 +54,7 @@ void setOutputVolumePct(int pct);
 }
 
 bool sunshineCanReplay();           // sms/src/System/MarDirectorDirect.cpp: gameplay (director state 4), a frame can be redrawn
-unsigned long sunshineInterpStep(); // src/framerate/framerate.cpp: logic tick count (u32 is unsigned long in the decomp's types)
+u32 sunshineInterpStep();           // src/framerate/framerate.cpp
 
 namespace launcher {
 namespace {
@@ -391,7 +392,8 @@ public:
 	aurora::input::EventResult onInput(const aurora::input::InputEvent& event) {
 		if (const auto* key = event.payload.get_if<aurora::input::InputEvent::KeyChanged>()) {
 			if (!capture_.empty() && key->pressed && !key->repeat) {
-				if (key->scancode != SDL_SCANCODE_ESCAPE) {
+				// Escape cancels; F1 cancels too: the in-game menu layer consumes F1 in gameplay, so the game never sees it.
+				if (key->scancode != SDL_SCANCODE_ESCAPE && key->scancode != SDL_SCANCODE_F1) {
 					settings().keys[capture_] = key->scancode;
 					changed();
 				}
@@ -1052,7 +1054,7 @@ aurora::input::LayerId gMenuLayer = aurora::input::kInvalidLayerId;
 const char* gMenuRequest = nullptr; // "chord" or "f1": open at the next menuPoll
 bool gMenuRHeld = false;            // R trigger axis >= 0.5, or the native button mapped to PAD R is down
 int gMenuFrames = 0;                // frames presented while open
-unsigned long gMenuLogicAtOpen = 0;
+u32 gMenuLogicAtOpen = 0;
 std::deque<std::string> gMenuDev; // menuDevQueue tokens
 int gMenuDevWait = 0;
 constexpr int kMenuDevStepFrames = 30;
@@ -1113,7 +1115,7 @@ aurora::input::EventResult menuLayerEvent(const aurora::input::InputEvent& event
 		return EventResult::Pass;
 	}
 	gMenuRequest = chord ? "chord" : "f1";
-	return EventResult::Consume; // the chord's Start never reaches the game's pause (TMarDirector::updateGameMode)
+	return EventResult::Consume; // the router does not pass the chord's Start on to aurora.pad (game pause: TMarDirector::updateGameMode)
 }
 
 void pushKey(SDL_Scancode scancode, bool pressed) {
@@ -1243,12 +1245,26 @@ void applyRuntimeSettings() {
 	}
 	hostdsp::setOutputVolumePct(s.masterVolumePct);
 	av::AudioSetDevice(s.outputDevice);
-	VISetWindowFullscreen(s.fullscreen);
+	// Window calls only when the values differ from the last applied ones: every settings change (a cheat toggled in the
+	// in-game menu too) runs this, and VISetWindowSize un-maximizes (SDL_RestoreWindow) and resizes the window.
+	static std::optional<bool> appliedFullscreen;
+	static std::optional<std::pair<uint32_t, uint32_t>> appliedSize;
+	if (appliedFullscreen != s.fullscreen) {
+		appliedFullscreen = s.fullscreen;
+		VISetWindowFullscreen(s.fullscreen);
+		std::printf("[launcher] window: fullscreen=%d\n", s.fullscreen ? 1 : 0);
+	}
 	// remember_window_size=0: the window always opens at the default size; the saved size is kept for the next time it is on.
 	const sunshine::Settings def = sunshine::defaultSettings();
 	const auto winW = static_cast<uint32_t>(s.rememberWindowSize ? s.windowWidth : def.windowWidth);
 	const auto winH = static_cast<uint32_t>(s.rememberWindowSize ? s.windowHeight : def.windowHeight);
-	VISetWindowSize(widescreenWindowWidth(winW, winH), winH);
+	const std::pair<uint32_t, uint32_t> size{ widescreenWindowWidth(winW, winH), winH };
+	if (appliedSize != size) {
+		appliedSize = size;
+		VISetWindowSize(size.first, size.second);
+		std::printf("[launcher] window: size %ux%u\n", size.first, size.second);
+	}
+	std::fflush(stdout);
 	// SUNSHINE_RENDER_SCALE (render/render_scale.cpp) overrides the saved scale.
 	if (std::getenv("SUNSHINE_RENDER_SCALE") == nullptr) {
 		VISetFrameBufferScale(static_cast<float>(s.resolutionScalePct) / 100.f);
@@ -1296,6 +1312,12 @@ void menuPoll() {
 	}
 	const char* why = gMenuRequest;
 	gMenuRequest = nullptr;
+	if (!sunshineCanReplay()) { // gameplay ended between the request and this poll: drop it, give the sources back
+		aurora::input::reconcile();
+		std::printf("[menu] ignored (not in gameplay)\n");
+		std::fflush(stdout);
+		return;
+	}
 	gMenu.emplace(gMenuFile, true);
 	if (!gMenu->open()) {
 		gMenu->close();

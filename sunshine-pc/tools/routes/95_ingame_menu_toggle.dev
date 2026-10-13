@@ -1,0 +1,20 @@
+# UI-4a review fix: settings changed in the in-game menu leave the window alone. dolpic/0, SUNSHINE_DEV_START=dolpic/0.
+# Every change runs launcher::applyRuntimeSettings; it calls VISetWindowFullscreen/VISetWindowSize (SDL_RestoreWindow +
+# SDL_SetWindowSize) and logs "[launcher] window: ..." only when fullscreen or size differ from the last applied values.
+# Evidence: one "[launcher] window: size" line at startup; none after the cheat toggle (part 1); one after the window-size
+# toggle (part 2, control: the line does print on a real change). Part 0: chord and F1 before gameplay log
+# "[menu] ignored (not in gameplay)" twice and open nothing.
+menu chord,f1
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+# part 1: open, Cheats tab (A on the tab), down lands on cheat-4 (Unlock all nozzles), A turns it on, close;
+# "[cheats] unlock_nozzles = on" and [cheats-state] nozzles=0x3FFFF after the close
+menu chord,right,right,right,right,right,a,down,a,b
+wait frames=30
+log
+# part 2 (control): open, Video tab, Window size row, A (next size preset), close
+menu chord,right,right,down,a,b
+wait frames=30
+log
+end

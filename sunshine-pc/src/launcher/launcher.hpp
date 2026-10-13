@@ -19,7 +19,8 @@ void applyRuntimeSettings();
 
 // In-game menu (UI-4): the launcher's settings page over the frozen game. R+Start (pad) or F1 opens it in gameplay;
 // Start, B, Escape, F1 and Back close it. menuInstall registers its input layer once; main's present seam calls
-// menuPoll once per presented frame and keeps presenting replays of the current game frame while menuOpen() is true.
+// menuPoll once per presented frame and, while menuOpen() is true, keeps presenting frames that draw only the menu
+// (no replay of the game frame under it, see sunshinePresentFrame in main.cpp).
 void menuInstall(const std::filesystem::path& settingsFile);
 void menuPoll();
 bool menuOpen();
