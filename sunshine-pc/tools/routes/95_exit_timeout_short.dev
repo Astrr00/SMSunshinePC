@@ -1,0 +1,11 @@
+# HeapCrash2: reach gameplay, play ~10 s, then end in a devscript TIMEOUT (std::exit(3)) to exercise the exit path.
+# dirstate=99 never holds, so the last waitfor always times out after 300 ticks.
+waitfor director mario dirstate=4 timeout=3000
+wait frames=60
+cheat infinite_health
+cheat infinite_water
+hold A frames=6
+wait frames=20
+hold stick=0,-127 trig=0,255 frames=120
+hold stick=127,0 trig=0,255 frames=60
+waitfor director dirstate=99 timeout=300

@@ -28,7 +28,7 @@ No game data and no PowerPC code are tracked in git. The disc image lives under 
 
 Run `sunshine-pc/tools/handoff-setup.ps1` from the bundle root (it clones the repo from `repo.bundle`, extracts the toolchain, installs Python wheels, copies the game data, applies the WIP patch, runs the first gates). Manual equivalent:
 
-1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 11 patches`).
+1. `git clone repo.bundle "Sunshine Decomp"`; `cd "Sunshine Decomp"`; `git checkout main`; `git submodule update --init` (needs the network; or copy the bundled `aurora-worktree/` over `sunshine-pc/extern/aurora`, then `python sunshine-pc/tools/apply-aurora-patches.py --check` must say `applied: 12 patches`).
 2. Extract `toolchain/llvm.tar.xz`; `setx LLVM_BIN <folder>\bin`.
 3. `pip install -r sunshine-pc/tools/requirements.txt` (online).
 4. Copy the game data folder to `sms/orig/GMSJ01/` (keep the layout: `Super Mario Sunshine (Japan).rvz`, `extracted/`, `files/`, `sys/`).
@@ -50,7 +50,7 @@ certutil -hashfile build\GMSJ01\mario.dol SHA1    # must be 9f5a8caf56f5356aeac9
 cd ..\sunshine-pc
 set LLVM_BIN=<llvm>\bin
 python tools\locked.py cmd /c tools\_strict.cmd    # strict link: 0 unresolved symbols
-python tools\apply-aurora-patches.py --check       # "applied: 11 patches"
+python tools\apply-aurora-patches.py --check       # "applied: 12 patches"
 ```
 Expected at handoff: 11 317 / 12 881 functions byte-identical, 445 / 736 units Matching, 62.56 % code, 98.64 % fuzzy.
 
@@ -82,14 +82,14 @@ Expected at handoff: 11 317 / 12 881 functions byte-identical, 445 / 736 units M
 - Build: `sunshine-pc\tools\build-alt.cmd <Name>` builds into `sunshine-pc\build\<Name>` (needs `LLVM_BIN`; global build lock via `tools/locked.py`). Strict link check: `tools\_strict.cmd`.
 - Run the game ONLY via `sunshine-pc/tools/watch.py` / `shot.py` (invisible, silent: `CREATE_NO_WINDOW|BELOW_NORMAL`, temp APPDATA; never touch `%APPDATA%\Sunshine\saves`). The game needs the disc: `--dvd <rvz/iso path>`.
 - `tools/reap.py --loop` (if running) kills `sunshine.exe` that is older than 6 min or older than `src/sdk/av.cpp`: rebuild after av.cpp edits, keep runs < 6 min, check `build/reap.log` when a process dies. Serialise game runs with `python sunshine-pc/tools/runlock.py acquire <name>` / `release` (owner-only release, `touch` heartbeat, log in `build/runlock.log`). Kill only your own PID.
-- Scripted runs: `python tools/route.py <tree> <script.dev> --name <n> --seconds 330` from `sunshine-pc` (wraps the rules above: invisible, muted, temp APPDATA, run lock, own PID only). Scripts live in `tools/routes/`; verbs and conditions are listed in `docs/session-2026-10-11.md` section 2.1. Run `tools\_strict.cmd` from PowerShell (Git Bash turns `cmd /c` into `cmd C:\`), and start long runs with the harness's background mode, not `( ... &)`. After a killed run release a stale lock with `python tools/runlock.py release lead`.
+- Scripted runs: `python tools/route.py <tree> <script.dev> --name <n> --seconds 330` from `sunshine-pc` (wraps the rules above: invisible, muted, temp APPDATA and USERPROFILE, run lock, own PID only). Scripts live in `tools/routes/`; verbs and conditions are listed in `docs/session-2026-10-11.md` section 2.1. Run `tools\_strict.cmd` from PowerShell (Git Bash turns `cmd /c` into `cmd C:\`), and start long runs with the harness's background mode, not `( ... &)`. After a killed run release a stale lock with `python tools/runlock.py release lead`.
 - Route 70 (`tools/routes/70_boss_until.dev`, from `sunshine-pc`) needs `SUNSHINE_ALLOW_CPU_ADAPTER=0` in its command: `python tools/route.py Strict tools/routes/70_boss_until.dev --name <n> --seconds 330 SUNSHINE_DEV_STEP_RETRACE=1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_ALLOW_CPU_ADAPTER=0`. Without it the game takes the CPU adapter: about 21 logic ticks/s; runs r8a and an earlier one ended rc=124 at logic t=219-235 s and looked like a hang. With it: about 70 ticks/s (r8b: 21180 ticks in 298 s); u01/u02 about 120 ticks/s. `[status]` `t` is logic time (tick/30), not wall time.
 - A devscript TIMEOUT exits with rc 3 (a failure). Until 2026-10-12 it returned 0xC0000409: `std::exit` skipped `aurora_shutdown()`, so Aurora's static pipeline-worker `std::thread` was still joinable at the static destructors (`std::terminate`). `main.cpp` now registers `aurora_shutdown` with `atexit` (see `platform-notes.md`, "Exit after a devscript TIMEOUT").
 - Dev switches (`SUNSHINE_DEV_START=bianco/0`, `SUNSHINE_DEV_SCRIPT`, `SUNSHINE_DEV_STATUS`, `SUNSHINE_DEV_SEED`, `SUNSHINE_DEV_MAX_SECONDS`, `SUNSHINE_CHECK_HEAP`, `SUNSHINE_DEV_HIT_LOG`, `AURORA_SCREENSHOT*`) are for diagnosis; the acceptance flow (B1) must run without start/skip switches. `SUNSHINE_DEV_HIT_LOG=1` adds a `[-spray]` line (cumulative GateKeeper head/body spray hits from `gDbgGKHeadSprayHits`/`gDbgGKBodySprayHits` in `sms/src/Enemy/gatekeeper.cpp`, TARGET_PC only) to each `logBoss` line; routes 80-82 need it.
-- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0011`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
+- Aurora is a submodule pinned at 50e5be3 plus the patch series `sunshine-pc/patches/aurora/0001-0012`; never leave unrecorded edits in `extern/aurora` (`apply-aurora-patches.py --check` refuses "mixed" trees).
 - Dolphin as a reference emulator is blocked (apploader stall, popups); do not run it.
 
-Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit, not on a known remote branch), but `apply-aurora-patches.py --check` says its files equal upstream 50e5be3 + patches 0001-0007 (0008, the FIFO diagnostics patch, was added on 2026-10-11). On a new PC `git submodule update --init` checks out 50e5be3; then run `python sunshine-pc/tools/apply-aurora-patches.py` (the setup script does) and expect `applied: 11 patches` (the series is 0001-0011). `aurora-worktree/` in the bundle is the already-patched fallback.
+Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit, not on a known remote branch), but `apply-aurora-patches.py --check` says its files equal upstream 50e5be3 + patches 0001-0007 (0008, the FIFO diagnostics patch, was added on 2026-10-11). On a new PC `git submodule update --init` checks out 50e5be3; then run `python sunshine-pc/tools/apply-aurora-patches.py` (the setup script does) and expect `applied: 12 patches` (the series is 0001-0012). `aurora-worktree/` in the bundle is the already-patched fallback.
 
 ## 7. State at handoff and next steps (2026-10-13, end of the lead session)
 
@@ -151,7 +151,7 @@ with a 45-75 min time box, facts in the brief, observed vs inferred separated. A
 repeat their old report instead of a new task: give new tasks to fresh agents. Game/build agents work in clones
 (`C:/Users/Administrator/Documents/Projekte/fresh-gate-2`, `clone-chase`), runs go through the runlock (`tools/route.py`),
 builds through `tools/locked.py`, so timing runs never overlap; never `git checkout`/`reset` in the main repo (one agent
-did, nothing was lost). Before every push: SHA-1, strict link, `apply-aurora-patches.py --check` (11 patches), scoped
+did, nothing was lost). Before every push: SHA-1, strict link, `apply-aurora-patches.py --check` (12 patches), scoped
 TEMP-DEBUG grep (working rule 1), explicit paths in `git add`, check line endings with `git ls-files --eol`.
 
 ## 8. Repo hygiene notes

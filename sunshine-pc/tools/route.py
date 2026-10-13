@@ -10,7 +10,8 @@
   KEY=VAL    extra environment variables (SUNSHINE_DEV_MAX_SECONDS is set to the limit)
 
 Rules kept here: CREATE_NO_WINDOW + BELOW_NORMAL priority, window parked off screen, muted, temporary APPDATA
-(settings and card saves live in build/Route/<name>/appdata), serialised through tools/runlock.py, only the own PID is
+(settings and card saves live in build/Route/<name>/appdata), temporary USERPROFILE (SDL pref path: pipeline and Dawn
+caches in build/Route/<name>/home/AppData/Roaming/Sunshine), serialised through tools/runlock.py, only the own PID is
 ever killed. Exit code: the game's own exit code, 124 when the wall-clock limit ended the run.
 """
 import os
@@ -75,12 +76,16 @@ def main():
         shutil.rmtree(os.path.join(out, "appdata"), ignore_errors=True)
         shutil.copytree(src, os.path.join(out, "appdata"))
     os.makedirs(os.path.join(out, "appdata"), exist_ok=True)
+    os.makedirs(os.path.join(out, "home"), exist_ok=True)
     env = dict(os.environ)
     # Keep tooling of the surrounding agent session (Headroom proxy: HEADROOM_*, its onnxruntime in ORT_DYLIB_PATH) out of the game run.
     for key in [k for k in env if k.startswith("HEADROOM_") or k == "ORT_DYLIB_PATH"]:
         del env[key]
     env.update(
         APPDATA=os.path.join(out, "appdata"),
+        # SDL's pref path (Aurora's pipeline_cache.db, dawn_cache.db) follows the user profile, not APPDATA: without this
+        # every run of every clone shares %APPDATA%\Sunshine\pipeline_cache.db (a corrupt copy there crashed all runs).
+        USERPROFILE=os.path.join(out, "home"),
         SUNSHINE_WINDOW_POS="30000,30000",
         SDL_WINDOW_ACTIVATE_WHEN_SHOWN="0",
         SUNSHINE_WINDOW_SIZE="640,480",

@@ -103,7 +103,9 @@ void PlayBlock(u32 addr, u32 bytes, double hz)
 	// SUNSHINE_MUTE=1: the device gets silence (same timing, so the AI clock is unchanged); the dump above keeps the mix.
 	static const bool mute = std::getenv("SUNSHINE_MUTE") != nullptr || std::getenv("SUNSHINE_DEV_MAX_SECONDS") != nullptr; // dev harness runs are always silent
 	if (mute) {
-		static std::vector<s16> silence;
+		// thread_local, not static: std::exit runs static destructors while this detached thread still plays blocks, so a
+		// static buffer was freed under the pump and written after the free (exit-time heap corruption).
+		thread_local std::vector<s16> silence;
 		silence.assign(bytes / 2, 0);
 		av::AudioWrite(silence.data(), bytes / 4, hz);
 		return;
