@@ -1002,6 +1002,8 @@ void TEnemyMario::emReplayJumpToNearestNode()
 	JGeometry::TVec3<f32> marioDirection(*gpMarioPos - currentPoint);
 	marioDirection.normalize();
 	TGraphNode* nextNode = nullptr;
+	// asm 0x80255B5C/0x80255B74: deterministic candidate points go to stack 0x230, the nextPoint slot read at 0x80255FAC.
+	JGeometry::TVec3<f32> nextPoint;
 
 	if (mSettingParams->mRandomFlag.get() == 0) {
 		TReplayLink* links = replayLinks[nodeIndex];
@@ -1015,10 +1017,8 @@ void TEnemyMario::emReplayJumpToNearestNode()
 			TGraphNode* candidate
 			    = &mEMario->getTracer()->getGraph()->getGraphNode(
 			        link.mNodeIndex);
-			JGeometry::TVec3<f32> candidatePoint;
-			candidate->getPoint(&candidatePoint);
-			JGeometry::TVec3<f32> candidateDirection(candidatePoint
-			                                         - currentPoint);
+			candidate->getPoint(&nextPoint);
+			JGeometry::TVec3<f32> candidateDirection(nextPoint - currentPoint);
 			candidateDirection.normalize();
 			f32 dot = marioDirection.dot(candidateDirection);
 			if (dot < smallestDot) {
@@ -1079,7 +1079,6 @@ void TEnemyMario::emReplayJumpToNearestNode()
 		    = &mEMario->getTracer()->getGraph()->getGraphNode(link.mNodeIndex);
 	}
 
-	JGeometry::TVec3<f32> nextPoint;
 	if (nextNode != nullptr) {
 		nextNode->getPoint(&nextPoint);
 	}

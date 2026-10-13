@@ -368,8 +368,9 @@ bool TKumokun::checkOnMovingFloor(JGeometry::TVec3<f32>* param_1,
 	local_8C += local_80;
 
 	f32 yTmp   = local_8C.y;
+	const TBGCheckData* ground;
 	f32 dVar10 = gpMap->checkGround(local_8C.x, yTmp + mHeadHeight, local_8C.z,
-	                                param_2);
+	                                &ground); // asm 0x80332090: out-pointer is stack temp sp+0x7c, not param_2
 	dVar10 += 1.0f;
 	if (yTmp <= dVar10 + 0.05f) {
 		if (30.0f < dVar10 - yTmp) {
@@ -421,8 +422,9 @@ bool TKumokun::checkOnMovingRoof(JGeometry::TVec3<f32>* param_1,
 	local_A8 += local_9C;
 
 	f32 yTmp = local_A8.y;
+	const TBGCheckData* roof;
 	f32 dVar10
-	    = gpMap->checkRoof(local_A8.x, yTmp - mHeadHeight, local_A8.z, param_2);
+	    = gpMap->checkRoof(local_A8.x, yTmp - mHeadHeight, local_A8.z, &roof); // asm 0x80331EE8: out-pointer is stack temp sp+0x98, not param_2
 	dVar10 -= 1.0f;
 	if (yTmp > dVar10 - 0.05f) {
 		local_A8.y = dVar10; // asm 0x80331F04

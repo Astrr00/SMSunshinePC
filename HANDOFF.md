@@ -176,7 +176,7 @@ Open:
 - Chase (Delfino shadow Mario): see the update `2026-10-12 (route 72)` below. The walking `chase` of route 70 fails 9 of 9; route 72 (`chase tp=1`) passes 2 of 2.
 - Null-rail guard (`enemyMario.cpp` ~L979-986): static analysis says the guard never fires; the crash read of run v02 is unexplained. Hypothesis only.
 - Exit after devscript TIMEOUT: fixed (rc 3 observed). `OSResetSystem` and `AURORA_EXIT` also end with `std::exit(0)` and now run `aurora_shutdown` through `atexit`; verified only for a devscript TIMEOUT (rc 3) and a normal script end (rc 0).
-- Ledger rows: 1977 logic-verified, 149 matched, 250 partial (rows, not unique functions). 141 rows differ by more than 0.5 points from current scores; 41 rows unmapped.
+- Ledger rows (updated by round 8): 1983 logic-verified, 149 matched, 255 partial (rows, not unique functions). 141 rows differ by more than 0.5 points from current scores; 41 rows unmapped.
 - Hunk audits still unverified: `SelectDir.cpp`, `JPAField.cpp` loadFieldBlock, `CardLoad.cpp` setCenteredSize, `GCConsole2`, `cameralib.cpp` middle part, `bossgesso`, `MapEventMare`/`MapEventSink`.
 - Follow-ups to a finished agent are lost after its context compaction; start a fresh agent with the full context.
 
@@ -187,3 +187,11 @@ Observed: route `sunshine-pc/tools/routes/72_boss_tpchase.dev` (route 70 with `c
 Use route 72 as the regression route (decomp rounds, port changes) until the walking chase works. It re-introduces a teleport crutch (route 70 had none): every 60 ticks Mario is put 250 units behind the shadow Mario (100 units when the shadow is down) and sprays for 45 ticks. Reason: with the retail-faithful wall test (`MapCheck.cpp` `checkFlag(0x8)`, asm 0x801DE8C0-0x801DE8C8, never revert) the walking `chase` fails 9 of 9; a floor-grid planner passed 0 of 6. The chase ends with 64 water hits on the shadow (`mWaterCtMax` 64, `TEnemyMario::hitWater`), then `doing=0xF` and the talk window, not at a graph node. The shadow flees from Mario along its replay links (ring B-C-D-E-F-G-B, `linkdata.bin`, 7 nodes; rail graph `mariomodoki` has 9; read by an agent, not re-decoded by me). A future walking chase has to stay within spray range of a shadow that runs at Mario's speed.
 
 Open items for Phase 1: walking chase, `cheat infinite_health` (the Delfino boss hurts a standing Mario: health 4 -> 0 at the spray spot in an earlier run), `shine 2`, `SUNSHINE_DEV_STEP_RETRACE`/`SKIP_MOVIES`/`AIM_ASSIST`, 30 Hz real-time evidence, two clean runs in a row without dev switches.
+
+### Update 2026-10-12 (decomp round 8): three real fixes, gates green
+
+Measured by the lead: SHA-1 unchanged, 11 317 / 12 881 functions byte-identical (87.86 %, unchanged), matched code 62.56 %, fuzzy 98.6378 %, 445 / 736 units, `ninja -k 0 -j4` rc 0, `changes_all` against `d414ba0`: 227 rows, 3 drops, all decided (`BathWaterManager`, `TKumokun::checkOnMovingWall`). Strict link 0 unresolved. Route 72: `r8a`, `g8b` rc=0. Use a fresh `--name` for every `route.py` run: it reuses `build/Route/<name>/appdata`, and an old save changes the flow (run `r8b` skipped the airport and failed `mash ... until stage=0`).
+
+Fixes (all asm-proven): `TKumokun::checkOnMovingFloor`/`checkOnMovingRoof` out-pointer is a stack temp, not `param_2` (asm 0x80332090, 0x80331EE8); `TEnemyMario::emReplayJumpToNearestNode` candidate points share the `nextPoint` stack slot (asm 0x80255B5C, 0x80255B74, 0x80255FAC). Retail has no bounds check on `replayLinks[nodeIndex]` (the source matches), so the run `v02` null-rail read is most likely an unchecked `nodeIndex` outside `[0, unk8)`; not proven. Ledger: 1 983 logic-verified, 149 matched, 255 partial.
+
+Open: about 33 functions in `decomp_queue.py status` (`koopajr`, `GCConsole2`, `KoopaNeckCallBack`, `calcNrm`, `wireRolling`, `TModelWaterManager::move` partial, singles). The decomp workers are slow on big functions (20-40 min each); give one function per worker, tell them to read asm with `read <file>:raw:<from>-<to>` in chunks of about 150 lines.
