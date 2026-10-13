@@ -169,6 +169,14 @@ Settings parseSettings(std::string_view text)
 		scancode = readInt(ini, "keys." + name, scancode, 0, 511);
 	s.glyphStyle = parseGlyph(readString(ini, "interface.glyph_style", glyphName(def.glyphStyle)));
 	s.uiScalePct = readInt(ini, "interface.ui_scale", def.uiScalePct, 0, 400);
+	for (const auto& entry : ini) {
+		const std::string& name = entry.first;
+		if (name.size() > 7 && name.compare(0, 7, "cheats.") == 0) {
+			const int on = readInt(ini, name, -1, 0, 1);
+			if (on >= 0) // invalid values are skipped; the cheat keeps its JSON default
+				s.cheats[name.substr(7)] = on != 0;
+		}
+	}
 	s.saveDirectory = readString(ini, "saves.directory", def.saveDirectory);
 	s.lastImagePath = readString(ini, "launcher.last_image", def.lastImagePath);
 	return s;
@@ -200,6 +208,11 @@ std::string serializeSettings(const Settings& in)
 	out << "[interface]\n";
 	out << "glyph_style=" << glyphName(in.glyphStyle) << '\n';
 	out << "ui_scale=" << in.uiScalePct << '\n';
+	out << "[cheats]\n";
+	for (const auto& [id, on] : in.cheats) {
+		if (!id.empty() && id.find_first_of("=[\r\n") == std::string::npos) // ids come from assets/cheats.json
+			out << id << '=' << (on ? 1 : 0) << '\n';
+	}
 	out << "[saves]\n";
 	out << "directory=" << in.saveDirectory << '\n';
 	out << "[launcher]\n";

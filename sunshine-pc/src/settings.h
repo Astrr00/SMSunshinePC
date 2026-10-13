@@ -32,6 +32,8 @@ struct Settings {
 	// [interface]
 	GlyphStyle glyphStyle = GlyphStyle::Generic; // applied via glyphsSetStyle() (glyphs/glyphs.h); Generic shows the Xbox set
 	int uiScalePct = 0;             // launcher UI scale in percent; 0 = window scale (aurora::rmlui::set_ui_scale)
+	// [cheats]
+	std::map<std::string, bool> cheats; // cheat id from assets/cheats.json -> on or off; absent = the JSON default
 	// [saves]
 	std::string saveDirectory; // empty = default; see resolveSaveDirectory()
 	// [launcher]

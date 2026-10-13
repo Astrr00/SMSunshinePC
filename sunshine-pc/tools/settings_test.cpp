@@ -64,6 +64,16 @@ int main()
 		assert(parseSettings(serializeSettings(as)).aspect == a);
 	}
 
+	// Cheat toggles: explicit on/off per id; invalid values are skipped.
+	Settings ch = defaultSettings(); // keys need defaults, or the round trip adds them and the texts differ
+	ch.cheats["infinite_health"] = true;
+	ch.cheats["unlock_nozzles"] = false;
+	const std::string chText = serializeSettings(ch);
+	const Settings chBack = parseSettings(chText);
+	assert(chBack.cheats.size() == 2 && chBack.cheats.at("infinite_health") && !chBack.cheats.at("unlock_nozzles"));
+	assert(serializeSettings(chBack) == chText);
+	assert(parseSettings("[cheats]\ninfinite_coins=abc\ninfinite_lives=1\n").cheats.size() == 1);
+
 	// File round trip through saveSettings / loadSettings.
 	const std::filesystem::path file = std::filesystem::temp_directory_path() / "sunshine_settings_test.ini";
 	assert(saveSettings(s, file));

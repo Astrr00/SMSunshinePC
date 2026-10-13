@@ -83,11 +83,20 @@
 	</div>
 
 	<div id="pane-cheats" class="pane" style="display: none;">
-		<p class="hint">Cheats are not wired into the launcher yet.</p>
+		<p class="hint">Cheats apply during play. Changes are saved at once.</p>
+		<div id="cheats-list"></div>
 	</div>
 
 	<p id="settings-status" class="status"></p>
 	<div class="row"><button id="back">Back</button></div>
+</div>
+<div id="page-confirm" class="page" style="display: none;">
+	<h1>Confirm</h1>
+	<p id="confirm-text" class="hint"></p>
+	<div class="row">
+		<button id="confirm-cancel" class="primary">Cancel</button>
+		<button id="confirm-yes">OK</button>
+	</div>
 </div>
 </body>
 </rml>

@@ -27,6 +27,7 @@
 #include "../glyphs/glyphs.h"
 #include "../render/render_scale.h"
 #include "../widescreen/widescreen.h"
+#include "../cheats/cheats.h"
 // Aurora headers by path: the game's include directories shadow <dolphin/...> (see sdk/pad_keys.cpp).
 #include "../../extern/aurora/include/dolphin/dvd.h"
 #include "../../extern/aurora/include/dolphin/pad.h"
@@ -131,6 +132,19 @@ void applyUiScale(const Settings& s) {
 	aurora::rmlui::set_ui_scale(static_cast<float>(s.uiScalePct) / 100.f); // 0 = window scale
 }
 
+// Cheat toggles from [cheats]. Absent ids keep the JSON default. Needs cheatsLoad first (it resets the registry).
+void applyCheats(const Settings& s) {
+	for (int i = 0; i < cheatCount(); ++i) {
+		CheatInfo info{};
+		if (cheatAt(i, info)) {
+			const auto it = s.cheats.find(info.id);
+			if (!info.oneShot && it != s.cheats.end()) {
+				cheatSet(info.id, it->second);
+			}
+		}
+	}
+}
+
 void applyDeadZones(const Settings& s) {
 	// ponytail: trigger activation zones stay at Aurora's defaults; only stick dead zones are exposed.
 	PADDeadZones* zones = PADGetDeadZones(0);
@@ -222,6 +236,11 @@ public:
 		}
 		doc_->AddEventListener("click", this);
 		doc_->Show();
+		// Cheats are listed from assets/cheats.json next to the exe. main loads them again after the launcher returns.
+		const char* base = SDL_GetBasePath();
+		cheatsLoad(base != nullptr ? base : ".");
+		applyCheats(settings());
+		buildCheatList();
 
 		aurora::input::LayerDescriptor desc{};
 		desc.label = "sunshine.launcher";
@@ -329,6 +348,10 @@ public:
 				refresh();
 				return aurora::input::EventResult::Consume;
 			}
+				if (key->pressed && !key->repeat && key->scancode == SDL_SCANCODE_ESCAPE && confirmShown()) {
+					closeConfirm();
+					return aurora::input::EventResult::Consume;
+				}
 		}
 		if (handlePad(event)) {
 			return aurora::input::EventResult::Consume;
@@ -362,7 +385,7 @@ private:
 			case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: navigate(1, 0); break;
 			case SDL_GAMEPAD_BUTTON_SOUTH: activateFocused(); break;
 			case SDL_GAMEPAD_BUTTON_EAST: goBack(); break;
-			case SDL_GAMEPAD_BUTTON_START: onAction("start"); break;
+			case SDL_GAMEPAD_BUTTON_START: if (!confirmShown()) onAction("start"); break;
 			default: break;
 			}
 			return true;
@@ -504,12 +527,61 @@ private:
 		}
 	}
 
-	// B on the settings page.
+	// B on the settings page; B on the confirm page cancels it.
 	void goBack() {
+		if (confirmShown()) {
+			closeConfirm();
+			return;
+		}
 		if (!settingsShown()) {
 			return;
 		}
 		leaveSettings();
+	}
+
+	bool confirmShown() {
+		Rml::Element* page = doc_->GetElementById("page-confirm");
+		return page != nullptr && page->IsVisible();
+	}
+
+	// Replaces the open page with the confirm page. The action runs only on OK; Cancel and B return to the page it came from.
+	void askConfirm(const std::string& action, const char* message, const char* yes) {
+		confirmAction_ = action;
+		confirmReturnSettings_ = settingsShown();
+		setText("confirm-text", message);
+		setText("confirm-yes", yes);
+		setDisplay("page-main", false);
+		setDisplay("page-settings", false);
+		setDisplay("page-confirm", true);
+		ctx_->Update();
+		if (Rml::Element* cancel = doc_->GetElementById("confirm-cancel")) {
+			focusTarget(cancel); // Cancel has the default focus
+		}
+	}
+
+	// Closes the confirm page; focus goes back to the button that opened it.
+	void closeConfirm() {
+		confirmAction_.clear();
+		setDisplay("page-confirm", false);
+		showPage(confirmReturnSettings_);
+		ctx_->Update();
+		if (Rml::Element* opener = doc_->GetElementById(confirmReturnSettings_ ? "reset-keys" : "quit")) {
+			focusTarget(opener);
+		}
+	}
+
+	void confirmYes() {
+		if (confirmAction_ == "quit") {
+			finished_ = true;
+			return;
+		}
+		const std::string action = confirmAction_;
+		closeConfirm();
+		if (action == "reset-keys") {
+			settings().keys = sunshine::defaultSettings().keys;
+			capture_.clear();
+			changed();
+		}
 	}
 
 	// Dev hook: runs one synthetic gamepad token through onInput, so it takes the same path as a real pad event.
@@ -594,6 +666,29 @@ private:
 		}
 	}
 
+	// Cheat rows are built once: rebuilding would drop the focused button. Ids are cheat-<index>.
+	void buildCheatList() {
+		std::string rows;
+		for (int i = 0; i < cheatCount(); ++i) {
+			rows += "<div class=\"row\"><button id=\"cheat-" + std::to_string(i) + "\"></button></div>";
+		}
+		if (cheatCount() == 0) {
+			rows = "<p class=\"hint\">No cheats found: assets/cheats.json is missing or invalid.</p>";
+		}
+		setText("cheats-list", rows);
+	}
+
+	void refreshCheats() {
+		for (int i = 0; i < cheatCount(); ++i) {
+			CheatInfo info{};
+			if (cheatAt(i, info)) {
+				const std::string label = escapeRml(info.name) + ": " + (cheatEnabled(info.id) ? "On" : "Off") +
+				                          (info.oneShot ? " (runs once when turned on)" : "");
+				setText(("cheat-" + std::to_string(i)).c_str(), label);
+			}
+		}
+	}
+
 	void persist() {
 		if (sunshine::saveSettings(settings(), file_)) {
 			setText("settings-status", "Saved to " + escapeRml(file_.string()));
@@ -637,6 +732,7 @@ private:
 			const std::string label = capture_ == name ? "press a key..." : keyName(keyOf(s, name));
 			setText(id.c_str(), std::string(name) + ": " + label);
 		}
+		refreshCheats();
 	}
 
 	// Reads the picked file's header; leaves the disc closed (Start reopens it).
@@ -682,7 +778,15 @@ private:
 			return;
 		}
 		if (id == "quit") {
-			finished_ = true;
+			askConfirm(id, "Quit Super Mario Sunshine?", "Quit");
+			return;
+		}
+		if (id == "confirm-yes") {
+			confirmYes();
+			return;
+		}
+		if (id == "confirm-cancel") {
+			closeConfirm();
 			return;
 		}
 		if (id == "open-settings") {
@@ -700,6 +804,17 @@ private:
 		if (id.rfind("bind-", 0) == 0) {
 			capture_ = id.substr(5);
 			refresh();
+			return;
+		}
+
+		if (id.rfind("cheat-", 0) == 0) {
+			CheatInfo info{};
+			if (cheatAt(std::atoi(id.c_str() + 6), info)) {
+				const bool on = !cheatEnabled(info.id);
+				cheatSet(info.id, on);
+				if (!info.oneShot) s.cheats[info.id] = on; // one-shot cheats are actions: not saved
+				changed();
+			}
 			return;
 		}
 
@@ -745,8 +860,8 @@ private:
 		} else if (id == "ui-scale") {
 			s.uiScalePct = nextPreset(kUiScalePresets, s.uiScalePct);
 		} else if (id == "reset-keys") {
-			s.keys = sunshine::defaultSettings().keys;
-			capture_.clear();
+			askConfirm(id, "Restore the default key bindings?", "Restore");
+			return;
 		} else {
 			return;
 		}
@@ -759,6 +874,8 @@ private:
 	aurora::input::LayerId layer_ = aurora::input::kInvalidLayerId;
 	std::string imagePath_;
 	std::string capture_; // settings key waiting for the next key press
+	std::string confirmAction_;          // action waiting for OK on the confirm page
+	bool confirmReturnSettings_ = false; // the page the confirm page replaced
 	static constexpr int kPadStepFrames = 30; // frames between synthetic gamepad tokens (dev hook)
 	bool stickHeld_[4] = {};                  // left stick: up, down, left, right; one step per crossing of the neutral band
 	std::vector<std::string> padScript_;      // SUNSHINE_DEV_PAD_EVENTS tokens
@@ -815,6 +932,7 @@ void applyRuntimeSettings() {
 	applyPadBindings(s);
 	applyDeadZones(s);
 	applyUiScale(s);
+	applyCheats(s);
 	// Generic has no art set of its own: it shows the Xbox set, which glyphs.cpp loads by default.
 	switch (s.glyphStyle) {
 	case sunshine::GlyphStyle::PlayStation:
