@@ -128,7 +128,17 @@ static u16 GetAtanTable(f32 param_1, f32 param_2)
 		return atntable[0];
 
 	f32 r = __fres(param_1);
+#ifdef TARGET_PC
+	// port: __fres is an estimate, so retail can read a table entry past the end, and a NaN argument gave a huge index (crash in the camera, run rt_spray2 tick 662); clamp to the table
+	int i = (int)(param_2 * r * 1024.0f + 0.5f);
+	if (i < 0)
+		i = 0;
+	if (i > (int)(sizeof(atntable) / sizeof(atntable[0])) - 1)
+		i = (int)(sizeof(atntable) / sizeof(atntable[0])) - 1;
+	return atntable[i];
+#else
 	return atntable[(int)(param_2 * r * 1024.0f + 0.5f)];
+#endif
 }
 
 s16 matan(f32 param_1, f32 param_2)
