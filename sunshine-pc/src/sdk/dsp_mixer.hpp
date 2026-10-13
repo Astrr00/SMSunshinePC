@@ -13,8 +13,9 @@
 //    Stream voices (samplesSourceType 0x21, JAIGFrameStream Play_DirectPCM) instead read host-endian s16 from a
 //    main-RAM ring buffer: baseAddress is then a real host pointer and positions are 16.16 fixed point.
 //  * resamplingRatio is 4.12 fixed point of source samples per output sample (0x1000 = 1.0).
-//  * Mixer channel volumes are 1.15 fixed point (JAIGFrameStream plays at 0x7FFF and uses 0x5A7E = 0.707 * 0x7FFF for
-//    an equal-power centre pan). A mixer channel routes the voice to the bus whose DSP RAM address is `id` (0 = off).
+//  * Mixer channel volumes are s16, added as (vol * src) >> 16 (Mixer::mixVoice; JAIGFrameStream plays at 0x7FFF and
+//    uses 0x5A7E = 0.707 * 0x7FFF for an equal-power centre pan). A mixer channel routes the voice to the bus whose DSP
+//    RAM address is `id` (0 = off).
 //  * The master level of the frame command (DsetMixerLevel) is 4.12 fixed point (4096.0f * level).
 //
 // Bus layout (JASDSPInterface.cpp connect_table/SEND_TABLE): DSP RAM address -> bus. 0x0D00 is the left output, 0x0D60

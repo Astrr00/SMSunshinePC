@@ -53,6 +53,7 @@ constexpr u16 kTypePcm16     = 0x10;
 constexpr int kResTapWords = 128;
 constexpr int kOscSine     = 128; // word index, 64 samples = 32 words
 constexpr int kOscTriangle = 160;
+constexpr int kDolbySine   = 256; // word index, 128 samples: quarter sine, sine[i] = 32768 sin(i pi/256) within 1
 
 #define DSP_WARN_ONCE(...)                                                                                             \
 	do {                                                                                                               \
@@ -70,7 +71,7 @@ inline uintptr_t addrOf(const void* p) { return reinterpret_cast<uintptr_t>(p); 
 
 inline u32 posOf(const DSPBuffer& v) { return static_cast<u32>(v.currentPosition); }
 
-// Sample `idx` of a 64-sample table stored as 32 words, high half first.
+// Sample `idx` of a table of s16 stored two per word, high half first.
 inline s16 tableSample(const u32* table, int idx)
 {
 	const u32 w = table[idx >> 1];
@@ -298,7 +299,9 @@ void Mixer::filterVoice(DSPBuffer& v, s32* mono)
 }
 
 // Adds the voice to its buses. Each mixer channel ramps linearly from its current to its target volume over the
-// subframe (1.15 fixed point) and the target becomes the current volume, as DSPBuffer::setMixerVolume expects.
+// subframe and the target becomes the current volume, as DSPBuffer::setMixerVolume expects. The add is
+// bus += (vol * src) >> 16, so 0x7FFF is 0.5: the microcode's voice mixer (jdsp[] 0x0d0a, both callers 0x03b2 and
+// 0x0db6) multiplies in M0, i.e. without the DSP's product doubling.
 void Mixer::mixVoice(DSPBuffer& v, const s32* mono)
 {
 	auto addToBus = [&](int slot, s32 from, s32 to) {
@@ -308,27 +311,34 @@ void Mixer::mixVoice(DSPBuffer& v, const s32* mono)
 		const s64 span = static_cast<s64>(to - from) << 16;
 		for (int i = 0; i < kSubframeSamples; ++i) { // exact at the end: the last sample is at `to`
 			const s64 gain = (static_cast<s64>(from) << 16) + span * (i + 1) / kSubframeSamples;
-			bus[i] += static_cast<s32>((mono[i] * gain) >> 31);
+			bus[i] += static_cast<s32>((mono[i] * gain) >> 32);
 		}
 	};
 
 	if (v.useDolbyVolume) {
-		// Auto mixer (the sequence selected mixer config 0xFFFF): the DSP derives the buses itself from volume, pan,
-		// effect send and surround. approximation: equal-power pan between the two outputs, the effect send feeds the
-		// default send buses 0x0DC0/0x0E20 with the same law; surround (dolbyVoicePosition low byte) is reported.
+		// Auto mixer (the sequence selected mixer config 0xFFFF): the DSP derives the buses itself from volume, pan X
+		// (dolbyVoicePosition high byte), surround Y (low byte) and effect send. Quadrant law of the microcode (jdsp[]
+		// 0x0d6b-0x0d70, as in Dolphin's Zelda HLE): front quadrant = sine[X^0x7F or X] * sine[Y^0x7F] >> 16 from
+		// DSPRES_FILTER, times the s16 volume >> 16, then the voice mixer above: a hard-panned voice at 0x7FFF adds
+		// 0x1FFE / 65536 = 0.125 of its signal. The CPU does not clamp this volume (JASChannel.cpp: volume * 32767.5); the
+		// earlier unit-gain float pan made these voices clip the output. approximation: the back (surround) quadrants are
+		// dropped, as in that HLE; the effect send is that HLE's (dry * dolbyReverbFactor) >> 16 into the default send
+		// buses 0x0DC0/0x0E20 (the port's choice; no effect line of the game reads them), while the ucode (0x0d7f-0x0d85)
+		// scales it by the current volume once more, so its send falls faster below full volume.
+		const int x = (v.dolbyVoicePosition >> 8) & 0x7F, y = v.dolbyVoicePosition & 0x7F;
+		const u32* sine = cfg_.resTable + kDolbySine;
+		auto m16        = [](s32 a, s32 b) { return (a * b) >> 16; };
+		const s32 front = tableSample(sine, y ^ 0x7F);
+		const s32 qL = m16(tableSample(sine, x ^ 0x7F), front), qR = m16(tableSample(sine, x), front);
 		const s32 from = static_cast<s16>(v.dolbyVolumeCurrent);
 		const s32 to   = v.endRequested ? 0 : static_cast<s16>(v.dolbyVolumeTarget);
-		const double p = std::min(127, v.dolbyVoicePosition >> 8) / 127.0;
-		const double f = std::min(127, v.dolbyReverbFactor >> 8) / 127.0;
-		const double hp = 1.5707963267948966;
-		const double gl = std::cos(p * hp), gr = std::sin(p * hp), gf = std::sin(f * hp);
-		auto scaled = [](s32 x, double g) { return static_cast<s32>(x * g); };
-		addToBus(0, scaled(from, gl), scaled(to, gl));
-		addToBus(1, scaled(from, gr), scaled(to, gr));
-		addToBus(busSlot(kBusFxLeft), scaled(from, gl * gf), scaled(to, gl * gf));
-		addToBus(busSlot(kBusFxRight), scaled(from, gr * gf), scaled(to, gr * gf));
-		if ((v.dolbyVoicePosition & 0xFF) != 0)
-			DSP_WARN_ONCE("surround (dolby) position of the auto mixer is not implemented");
+		const s32 rf   = static_cast<s16>(v.dolbyReverbFactor);
+		addToBus(0, m16(qL, from), m16(qL, to));
+		addToBus(1, m16(qR, from), m16(qR, to));
+		addToBus(busSlot(kBusFxLeft), m16(m16(qL, from), rf), m16(m16(qL, to), rf));
+		addToBus(busSlot(kBusFxRight), m16(m16(qR, from), rf), m16(m16(qR, to), rf));
+		if (y != 0)
+			DSP_WARN_ONCE("surround (dolby) position of the auto mixer: back quadrants are not mixed");
 		v.dolbyVolumeCurrent = static_cast<u16>(to);
 		return;
 	}

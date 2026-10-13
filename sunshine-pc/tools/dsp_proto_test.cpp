@@ -143,7 +143,7 @@ int main()
 			CHECK(gBufLeft[f][i] == gBufLeft[0][100]);
 			CHECK(gBufRight[f][i] == gBufRight[0][100]);
 		}
-	CHECK(gBufLeft[0][100] > 11900 && gBufLeft[0][100] < 12100); // 12000 * DC gain of the resample taps (32779 / 32768)
+	CHECK(gBufLeft[0][100] > 5900 && gBufLeft[0][100] < 6100); // 12000 * DC gain of the taps (32779 / 32768) * 0x7FFF >> 16
 	CHECK(std::abs(gBufRight[0][100] * 2 - gBufLeft[0][100]) <= 2);
 
 	// a voice that left the map is silent; so is a frame without voices

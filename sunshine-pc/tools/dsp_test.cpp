@@ -166,7 +166,8 @@ static std::vector<s16> refResample(const std::vector<s16>& x, u32 ratio, int co
 	return y;
 }
 
-static s16 gain(s16 v, s32 vol) { return sat((static_cast<s64>(v) * vol) >> 15); }
+static s16 gain(s16 v, s32 vol) { return sat((static_cast<s64>(v) * vol) >> 15); } // 1.15 stages (FIR, effect line)
+static s16 mix(s16 v, s32 vol) { return sat((static_cast<s64>(v) * vol) >> 16); } // voice -> bus (ucode mixer, M0)
 
 static std::vector<s16> pseudoSignal(int n, unsigned seed)
 {
@@ -248,8 +249,8 @@ static void testPcm16Pitch()
 		std::vector<s16> ref = refResample(x, ratio, 4 * kSubframeSamples);
 		std::vector<s16> wantL, wantR;
 		for (s16 s : ref) {
-			wantL.push_back(gain(s, 0x7FFF));
-			wantR.push_back(gain(s, 0x3FFF));
+			wantL.push_back(mix(s, 0x7FFF));
+			wantR.push_back(mix(s, 0x3FFF));
 		}
 		// the reference runs on past the end of the sample; the mixer stops as soon as the data ended, but its output
 		// up to the flush of the resampler window must agree sample for sample
@@ -299,7 +300,7 @@ static void testPcm8AndLoop()
 		r.run(bit(1), 2, l, rr);
 		std::vector<s16> ref = refResample(x, 0x1000, 2 * kSubframeSamples);
 		for (s16& s : ref)
-			s = gain(s, 0x7FFF);
+			s = mix(s, 0x7FFF);
 		CHECK(sameSamples(l, ref, 0, 2 * kSubframeSamples));
 	}
 	{
@@ -319,7 +320,7 @@ static void testPcm8AndLoop()
 			seq.insert(seq.end(), x.begin() + 20, x.begin() + 80);
 		std::vector<s16> ref = refResample(seq, 0x1000, 4 * kSubframeSamples);
 		for (s16& s : ref)
-			s = gain(s, 0x7FFF);
+			s = mix(s, 0x7FFF);
 		CHECK(sameSamples(l, ref, 0, 4 * kSubframeSamples));
 		CHECK(v.done == 0);
 		CHECK(v.samplesBeforeLoop <= 60);
@@ -357,7 +358,7 @@ static void testAdpcmVoice(const char* path)
 		r.run(bit(7), 3, l, rr);
 		std::vector<s16> ref = refResample(pcm, ratio, 3 * kSubframeSamples);
 		for (s16& s : ref)
-			s = gain(s, 0x7FFF);
+			s = mix(s, 0x7FFF);
 		CHECK(sameSamples(l, ref, 0, 3 * kSubframeSamples));
 	}
 	// loop frames [16, 48) with the history the wave file stores for the loop start
@@ -377,7 +378,7 @@ static void testAdpcmVoice(const char* path)
 			seq.insert(seq.end(), pcm.begin() + ls, pcm.begin() + le);
 		std::vector<s16> ref = refResample(seq, 0x1000, 6 * kSubframeSamples);
 		for (s16& s : ref)
-			s = gain(s, 0x7FFF);
+			s = mix(s, 0x7FFF);
 		CHECK(sameSamples(l, ref, 0, 6 * kSubframeSamples));
 	}
 }
@@ -406,12 +407,12 @@ static void testMixerStage()
 		std::vector<s16> l, rr;
 		r.run(bit(3), 2, l, rr);
 		CHECK(v.mixChannels[0].currentVolume == 0x4000);
-		CHECK(l[kSubframeSamples + 79] == gain(dc, 0x4000) && l[kSubframeSamples + 10] == gain(dc, 0x4000));
+		CHECK(l[kSubframeSamples + 79] == mix(dc, 0x4000) && l[kSubframeSamples + 10] == mix(dc, 0x4000));
 		for (int i = 1; i < kSubframeSamples; ++i)
 			CHECK(l[i] >= l[i - 1]);
-		CHECK(l[0] > 0 && l[0] < 200 && l[79] > gain(dc, 0x4000) - 200);
+		CHECK(l[0] > 0 && l[0] < 200 && l[79] > mix(dc, 0x4000) - 200);
 		const int mid = l[39];
-		CHECK(std::abs(mid - gain(dc, 0x4000) / 2) < 300); // linear
+		CHECK(std::abs(mid - mix(dc, 0x4000) / 2) < 300); // linear
 		for (s16 s : rr)
 			CHECK(s == 0);
 	}
@@ -420,11 +421,11 @@ static void testMixerStage()
 		build(r, 4, 0x7FFF, 0x3FFF);
 		std::vector<s16> l, rr, l2, r2;
 		r.run(bit(4), 1, l, rr);
-		CHECK(l[30] == gain(dc, 0x7FFF) && rr[30] == gain(dc, 0x3FFF));
+		CHECK(l[30] == mix(dc, 0x7FFF) && rr[30] == mix(dc, 0x3FFF));
 		Rig q;
 		build(q, 4, 0x7FFF, 0x3FFF);
 		q.run(bit(4), 1, l2, r2, 0x2000); // 2.0
-		CHECK(l2[30] == sat(static_cast<s64>(gain(dc, 0x7FFF)) * 2) && r2[30] == sat(static_cast<s64>(gain(dc, 0x3FFF)) * 2));
+		CHECK(l2[30] == sat(static_cast<s64>(mix(dc, 0x7FFF)) * 2) && r2[30] == sat(static_cast<s64>(mix(dc, 0x3FFF)) * 2));
 		l2.clear(), r2.clear();
 		Rig z;
 		build(z, 4, 0x7FFF, 0);
@@ -433,12 +434,11 @@ static void testMixerStage()
 	}
 	{ // several voices add; saturation at the output
 		Rig r;
-		build(r, 0, 0x7FFF, 0);
-		build(r, 1, 0x7FFF, 0);
-		build(r, 2, 0x7FFF, 0);
+		for (int vi = 0; vi < 6; ++vi) // 0.5 each: six voices saturate
+			build(r, vi, 0x7FFF, 0);
 		std::vector<s16> l, rr;
-		r.run(bit(0) | bit(1) | bit(2), 1, l, rr);
-		CHECK(l[30] == sat(3 * static_cast<s64>(gain(dc, 0x7FFF))));
+		r.run(bit(0) | bit(1) | bit(2) | bit(3) | bit(4) | bit(5), 1, l, rr);
+		CHECK(l[30] == sat(6 * static_cast<s64>(mix(dc, 0x7FFF))));
 		CHECK(l[30] == 32767);
 	}
 	{ // forced stop (endRequested): ramp to 0, then `done`; a voice outside the map is not rendered
@@ -468,10 +468,45 @@ static void testMixerStage()
 		CHECK(v.currentPosition == pos);
 		CHECK(v.constantSample == dc); // latched at the pause: the constant signal
 		for (int i = 0; i < 2 * kSubframeSamples; ++i)
-			CHECK(l[kSubframeSamples + i] == gain(dc, 0x7FFF));
+			CHECK(l[kSubframeSamples + i] == mix(dc, 0x7FFF));
 		v.useConstantSample = 0;
 		r.run(bit(10), 1, l, rr);
-		CHECK(v.currentPosition > pos && l[3 * kSubframeSamples + 30] == gain(dc, 0x7FFF));
+		CHECK(v.currentPosition > pos && l[3 * kSubframeSamples + 30] == mix(dc, 0x7FFF));
+	}
+}
+
+static void testAutoMixer()
+{
+	section("auto mixer (useDolbyVolume): integer quadrant law, hard pan right and its mirror");
+	const std::vector<s16> x(2000, 12000);
+	const s16 dc = refResample(x, 0x1000, 50).back();
+	auto sine    = [](int i) -> s32 { // DSPRES_FILTER words 256-319, high half first
+		const u32 w = DSPRES_FILTER[256 + i / 2];
+		return static_cast<s16>((i & 1) ? w : w >> 16);
+	};
+	const s32 hard = ((sine(0x7F) * sine(0x7F)) >> 16) * 0x7FFF >> 16; // quadrant X=0x7F/Y=0, times the volume
+	CHECK(sine(0) == 0 && sine(0x40) == 23170 && sine(0x7F) == 32765 && hard == 0x1FFE);
+	for (int pan : { 0x7F, 0 }) {
+		Rig r;
+		for (size_t i = 0; i < x.size(); ++i)
+			putBe16(r, kAramBase + static_cast<u32>(i) * 2, x[i]);
+		DSPBuffer& v = r.voices[5];
+		allocInit(v);
+		setWave(v, 3, kAramBase, static_cast<int>(x.size()));
+		playStart(v, 0x1000);
+		v.useDolbyVolume     = 1; // DSPBuffer::setAutoMixer(0x7FFF, pan, 0, 0, ...), already at its target
+		v.dolbyVoicePosition = static_cast<u16>(pan << 8);
+		v.dolbyReverbFactor  = 0;
+		v.dolbyVolumeCurrent = 0x7FFF;
+		v.dolbyVolumeTarget  = 0x7FFF;
+		std::vector<s16> l, rr;
+		r.run(bit(5), 2, l, rr);
+		const std::vector<s16>& on  = pan ? rr : l;
+		const std::vector<s16>& off = pan ? l : rr;
+		CHECK(on[30] == mix(dc, hard) && on[kSubframeSamples + 79] == mix(dc, hard)); // 0.125 of the source
+		for (s16 s : off)
+			CHECK(s == 0);
+		CHECK(v.dolbyVolumeCurrent == 0x7FFF);
 	}
 }
 
@@ -502,7 +537,7 @@ static void testFxLine()
 	const s16 dc = refResample(x, 0x1000, 50).back();
 	CHECK(l[10] == 0 && l[kSubframeSamples + 70] == 0);               // nothing yet in subframes 0 and 1
 	// then the delayed send: voice volume 1.15 and the (untapped) FIR; the line gains are 4.12 = 1.0
-	CHECK(std::abs(l[2 * kSubframeSamples + 40] - gain(gain(dc, 0x7FFF), 0x7FFF)) <= 3);
+	CHECK(std::abs(l[2 * kSubframeSamples + 40] - gain(mix(dc, 0x7FFF), 0x7FFF)) <= 3);
 	CHECK(std::abs(l[4 * kSubframeSamples + 40] - l[2 * kSubframeSamples + 40]) <= 1);
 	CHECK(rr[2 * kSubframeSamples + 40] == 0);
 }
@@ -530,7 +565,7 @@ static void testStreamAndOsc()
 			seq.insert(seq.end(), ring.begin(), ring.end());
 		std::vector<s16> ref = refResample(seq, 0x1000, 3 * kSubframeSamples);
 		for (s16& s : ref)
-			s = gain(s, 0x7FFF);
+			s = mix(s, 0x7FFF);
 		CHECK(sameSamples(l, ref, 0, 3 * kSubframeSamples));
 		const u32 fetched = 3 + 3 * kSubframeSamples; // window priming + one per output sample at ratio 1.0
 		CHECK(static_cast<u32>(v.currentPosition) >> 16 == fetched % 1000);
@@ -554,7 +589,7 @@ static void testStreamAndOsc()
 		s16 peak = 0;
 		for (s16 s : l)
 			peak = std::max<s16>(peak, s);
-		CHECK(peak > 28000 && peak < 32768);
+		CHECK(peak > 14000 && peak < 16384); // table peak near full scale, 0x7FFF = 0.5
 		CHECK(v.done == 0);
 	}
 }
@@ -567,6 +602,7 @@ int main(int argc, char** argv)
 	testPcm8AndLoop();
 	testAdpcmVoice(argv[1]);
 	testMixerStage();
+	testAutoMixer();
 	testFxLine();
 	testStreamAndOsc();
 	std::fprintf(stderr, "dsp_test: ok\n");

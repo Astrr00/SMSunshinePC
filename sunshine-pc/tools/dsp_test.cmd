@@ -27,7 +27,7 @@ clang-cl /nologo /TP /std:c++20 /Zc:__cplusplus /utf-8 /W0 -Wno-everything -Wno-
   /I"%PC%\src\sdk" /I"%PC%\include" /I"%SMS%\include" /I"%SMS%\include\dolphin" /I"%SMS%\include\PowerPC_EABI_Support" ^
   /I"%PC%\extern\aurora\include" ^
   "%~dp0dsp_proto_test.cpp" "%PC%\src\sdk\dsp_glue.cpp" "%PC%\src\sdk\dsp_mixer.cpp" "%PC%\src\sdk\av.cpp" ^
-  "%PC%\src\sdk\av_win.cpp" "%PC%\src\sdk\os_thread.cpp" "%PC%\src\sdk\os_misc.cpp" ^
+  "%PC%\src\sdk\av_win.cpp" "%PC%\src\sdk\av_dump.cpp" "%PC%\src\sdk\os_thread.cpp" "%PC%\src\sdk\os_misc.cpp" ^
   "%SMS%\src\JSystem\JAudio\JASystem\JASDriverTables.cpp" ^
   /Fo"%OUT%\proto\\" /Fe"%OUT%\dsp_proto_test.exe" || exit /b 1
 "%OUT%\dsp_proto_test.exe"
