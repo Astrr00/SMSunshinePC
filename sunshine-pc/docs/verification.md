@@ -12,7 +12,7 @@ Runs these steps in order and prints one line each (`PASS` / `FAIL` / `SKIP`, se
 
 | Step | What it checks | Default |
 |---|---|---|
-| temp-debug | No `TEMP-DEBUG` markers in `sunshine-pc/src`, `include`, `extern/aurora/{lib,include}`, `sms/src` | always |
+| temp-debug | No `TEMP-DEBUG` markers in `sunshine-pc/src`, `include`, `extern/aurora/{lib,include}`, `sms/src` (manual gate: `git grep -n TEMP-DEBUG -- sms/src sms/include sunshine-pc/src sunshine-pc/include` prints nothing; bare `git grep TEMP-DEBUG` always hits docs and `tools/verify.py`) | always |
 | aurora-patches | Each patch in `tools/aurora-patches.txt` (name, file, regex) is present | always |
 | matching-sha | `sms/build/GMSJ01/mario.dol` hashes to `sms/config/GMSJ01/build.sha1` | always (SKIP if the dol is not built) |
 | strict-link | `tools\_strict.cmd` builds `build/strict`; 0 unresolved `LNK2019` | `--build` |

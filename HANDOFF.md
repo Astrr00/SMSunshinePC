@@ -102,8 +102,9 @@ changes, crash analysis). Highlights (2026-10-11):
   Title (option map, stage 15) -> card prompts (`cardprog=19`) -> bump file block B -> new game -> opening movie -> airport0
   (stage 0, scen 0). No dev start switches. The pad-clock rework (script clock = logic pad reads) is committed.
 - Open at the end: walking from the airport0 spawn (819,500,1246) to `MapObjStartDemo` (-6630,500,1600) did not arrive
-  (path wanders, Mario falls from y 500 to 300 near x -500..-960). A GX FIFO crash at ~204 s (tick 6120) was traced to two
-  decomp `GXBegin` counts (4 instead of 8) and fixed; the post-fix run was cut short at 196 s, so **the fix is not yet confirmed**.
+  (path wanders, Mario falls from y 500 to 300 near x -500..-960).
+- Crash A (`GXBegin` FIFO overrun, `[aurora::gx::fifo] draw vertex data overrun`, exit 0xC0000409): seen at ~204 s (tick 6120) in route 07 runs `r07b`-`r07e`, always at stream position 77590. Cause found: two decomp `GXBegin` counts of 4 where retail passes 8 (`sms/src/JSystem/JParticle/JPADrawVisitor.cpp` lines 828 and 921). Fix in committed HEAD. **Not confirmed**: run `r07f` stopped at tick 5880 (196 s), before the old crash point. Indirect only: route 72 `rt2` ran 1010 s real-time with no `overrun`, but it does not follow the route 07 path, so it is not a direct test.
+- Crash B (`TEnemyMario::emReplayJumpToNearestNode`, null rail node in `TGraphNode::getPoint`): one crash in about 10 runs after decomp round 2, none in about 25 before. Cause open. Hypothesis, not proven: `nodeIndex` outside `[0, unk8)`; retail has no bounds check there.
 
 Next steps in order:
 1. Re-run route 07 for 330 s; confirm no `overrun` in `run.log` (patch 0008 prints the offending caller otherwise).
@@ -206,13 +207,13 @@ Observed (details: ROADMAP update `2026-10-13 (route 72 in real time, 30 Hz)`): 
 
 ### Update 2026-10-13: route 85 (no `shine 2`)
 
-`tools/routes/85_accept_no_shine2.dev`: route 72 without `shine 2`, ends at Bianco controllable. Run `a85a` (stepped command): rc=0, 203 s, `stage=2 scen=0`, `shines=1`, `.gci` PASS. Use this route as the Phase-1 acceptance candidate; crutches left: `SUNSHINE_DEV_AIM_ASSIST`, `cheat infinite_health`, `chase tp=1`.
+`tools/routes/85_accept_no_shine2.dev`: route 72 without `shine 2`, ends at Bianco controllable (stage 2/0, `bianco_end.png`, no Bianco Shine). Run `a85a` (stepped command): rc=0, 203 s, `stage=2 scen=0`, `shines=1` (the airport Shine [INFERENCE]), `.gci` PASS. Route 85 has no reload step; the reload is covered by `tools/routes/86_accept_reload.dev` (commit `a6ae867`, ROADMAP Phase 1, blocker c): `python tools/route.py Strict tools/routes/86_accept_reload.dev --name <n> --appdata-from <route-85 run>`; run `fg85reload` rc 0, after load `stage=1 shines=1`, reloaded card byte-identical, `gci_check` PASS (still with `SUNSHINE_DEV_AIM_ASSIST` and the stepped env). Not accepted as the Phase-1 candidate yet. Dev aids left: `SUNSHINE_DEV_AIM_ASSIST`, `cheat infinite_health`, `chase tp=1`.
 
 ### Update 2026-10-13: health crutch analysis
 
 `cheat infinite_health` compensates goop damage while the bot stands still at the Delfino spray spot (see ROADMAP update `2026-10-13 (why cheat infinite_health is needed)`). Route 77 (`tools/routes/77_boss_no_health_cheat.dev`) is route 72 without the cheat: it dies at tick 10620 and times out. Diagnostics `SUNSHINE_DEV_HPLOG=1` (env-gated) exist in the working tree in `sms/src/Player/MarioCollision.cpp`, `MarioMove.cpp`, `MarioReceiveMsg.cpp` and reference `gDbgGKCurBck` from the gatekeeper diagnostics: commit them together or not at all.
 
-### Update 2026-10-13 (later): flat-colour Bianco screen fixed, boss killed with pad input only
+### Update 2026-10-13 (later): flat-colour Bianco screen mitigated, cause open; boss killed with pad input only
 
 Wedge (observed, route 92 = `tools/routes/92_bianco_wedge_probe.dev`: `SUNSHINE_DEV_START=bianco/0`, no input, screenshot `w600.png` at logic tick 600; Strict build, WARP adapter): anomalous images (dark blue or purple screen, red wedge) are found with a script that takes the share of the dominant 16-level colour bucket of a 160x120 downscale: normal 0.059 (every normal image falls in the same bucket), anomalous 0.256-0.924.
 

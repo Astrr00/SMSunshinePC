@@ -805,3 +805,12 @@ Mechanism search for out-of-line header helpers (HeaderLab, ~38 probes in a temp
 - `ninja baseline` rewrites `build\GMSJ01\baseline.json` from the current tree on every run (target `always` in `sms/build.ninja`), so `ninja baseline && ninja changes_all` never shows a change. Build the baseline in a clean worktree instead; the full procedure is in `HANDOFF.md` section 4.
 - Use relative tool paths in the worktree's `configure.py` (`--dtk build/tools/dtk.exe` and so on). An absolute path containing a space ("Sunshine Decomp") lands unquoted in `build.ninja` and breaks argparse.
 - Remove the junctions with `cmd /c rmdir` (no `/S`) before `git worktree remove`.
+
+## Bianco flat-colour screen: port zero fill (mitigated, cause open)
+
+- Probe `tools/routes/92_bianco_wedge_probe.dev` (`SUNSHINE_DEV_START=bianco/0`, no input, screenshot at logic tick 600, Strict build, WARP). Anomaly metric: share of the dominant 16-level colour bucket of a 160x120 downscale; normal 0.059, anomalous 0.256-0.924.
+- Before the change: 8 of 14 runs anomalous. After: 0 of 12 runs. The change zeroes plain `new` only (`sunshine-pc/src/sdk/jkr_new_delete.cpp` lines 15-17, commit `7bbcaee`); JKR `new (heap, align)` is untouched.
+- Temporary probe `SUNSHINE_DEV_HEAP_FILL` (removed again): filling every plain-new block with 0x00, 0xAA, 0xFF or 0x7F gives 0 of 24 runs anomalous (6 each). Touch-only (one byte read per cache line, contents unchanged) still gives 3 of 8.
+- Discarded: camera state (the `[status-cam]` lines are identical in anomalous and normal runs); allocation timing alone (touch-only stays anomalous).
+- Not identified: the object that reads uninitialised memory. The zero fill removes the symptom; the read itself is assumed to still exist [INFERENCE].
+- Next probe, not done: size-range bisection of the fill to find the class of object.
