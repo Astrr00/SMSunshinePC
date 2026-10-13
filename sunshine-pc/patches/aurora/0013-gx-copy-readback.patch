@@ -1,0 +1,502 @@
+diff --git a/include/dolphin/gx/GXAurora.h b/include/dolphin/gx/GXAurora.h
+--- a/include/dolphin/gx/GXAurora.h
++++ b/include/dolphin/gx/GXAurora.h
+@@ -209,6 +209,16 @@ void GXCreateFrameBuffer(u32 width, u32 height);
+  */
+ void GXRestoreFrameBuffer(void);
+ 
++/**
++ * Opt-in CPU write-back of texture copies, like a GameCube EFB copy writes main RAM.
++ * After this call, every GX_CTF_R8 copy into dest with a source rect and destination of exactly width x height
++ * (1:1, e.g. rendered with GXCreateFrameBuffer(width, height)) is read back from the GPU and written into dest as
++ * GX I8 tiles. The write lands on the calling thread inside a later GXCopyTex(dest), a few frames after the copy.
++ * The call also destroys any existing copy texture of dest. dest == NULL drops every registration (and destroys
++ * their copy textures).
++ */
++void GXSetCopyReadback(void* dest, u16 width, u16 height);
++
+ #if __cplusplus
+ }
+ #endif
+diff --git a/lib/dolphin/gx/GXAurora.cpp b/lib/dolphin/gx/GXAurora.cpp
+--- a/lib/dolphin/gx/GXAurora.cpp
++++ b/lib/dolphin/gx/GXAurora.cpp
+@@ -7,6 +7,8 @@
+ #include "../../window.hpp"
+ 
+ #include "../../gx/fifo.hpp"
++#include "../../gfx/depth_peek.hpp"
++#include "dolphin/gx/GXExtra.h"
+ 
+ static void GXWriteString(const char* label) {
+   auto length = strlen(label);
+@@ -97,3 +99,14 @@ void GXRestoreFrameBuffer() {
+   GX_WRITE_AURORA(GX_AURORA_END_OFFSCREEN);
+   aurora::gx::fifo::publish();
+ }
++
++void GXSetCopyReadback(void* dest, u16 width, u16 height) {
++  if (dest == nullptr) {
++    for (const void* old : aurora::gfx::depth_peek::clear_copy_readbacks()) {
++      GXDestroyCopyTex(const_cast<void*>(old));
++    }
++    return;
++  }
++  aurora::gfx::depth_peek::register_copy_readback(dest, width, height);
++  GXDestroyCopyTex(dest);
++}
+diff --git a/lib/dolphin/gx/GXFrameBuffer.cpp b/lib/dolphin/gx/GXFrameBuffer.cpp
+--- a/lib/dolphin/gx/GXFrameBuffer.cpp
++++ b/lib/dolphin/gx/GXFrameBuffer.cpp
+@@ -1,6 +1,7 @@
+ #include "gx.hpp"
+ #include "__gx.h"
+ 
++#include "../../gfx/depth_peek.hpp"
+ #include "../../gfx/tex_copy_conv.hpp"
+ #include "../../gfx/texture.hpp"
+ #include "../../gfx/recording.hpp"
+@@ -59,8 +60,13 @@ void copy_tex(const void* dest, GXBool clear) noexcept {
+   const auto clearColor = clear && g_gxState.colorUpdate;
+   const auto clearAlpha = clear && g_gxState.alphaUpdate && efb_has_alpha(g_gxState.pixelFmt);
+   const auto clearDepth = clear && g_gxState.depthUpdate;
++  // GXSetCopyReadback: an exact 1:1 R8 copy into a registered dest is read back into dest (GameCube writes main RAM).
++  uint64_t readbackGen = 0;
++  const bool readback = texCopyFmt == GX_CTF_R8 &&
++                        gfx::depth_peek::copy_readback_gen(dest, dstWidth, dstHeight, static_cast<uint32_t>(rect.width),
++                                                           static_cast<uint32_t>(rect.height), readbackGen);
+   gfx::resolve_pass_into(handle.handle, rect, clearColor, clearAlpha, clearDepth, g_gxState.clearColor,
+-                         clear_depth_value(), texCopyFmt, g_gxState.pixelFmt);
++                         clear_depth_value(), texCopyFmt, g_gxState.pixelFmt, readback ? dest : nullptr, readbackGen);
+   ++handle.revision;
+   g_gxState.copyTextures[dest] = handle;
+   texture::invalidate_bindings();
+@@ -163,7 +169,15 @@ void GXSetTexCopySrc(u16 left, u16 top, u16 wd, u16 ht) {
+ 
+ void GXSetDispCopyDst(u16 wd, u16 ht) {}
+ 
++// Game-thread copy of the last GXSetTexCopyDst, for apply_copy_readback in GXCopyTex.
++static u16 sTexCopyDstWidth = 0;
++static u16 sTexCopyDstHeight = 0;
++static GXTexFmt sTexCopyDstFmt = GX_TF_I4;
++
+ void GXSetTexCopyDst(u16 wd, u16 ht, GXTexFmt fmt, GXBool mipmap) {
++  sTexCopyDstWidth = wd;
++  sTexCopyDstHeight = ht;
++  sTexCopyDstFmt = fmt;
+   GX_WRITE_AURORA(GX_AURORA_LOAD_COPY_DST);
+   GX_WRITE_U32(wd);
+   GX_WRITE_U32(ht);
+@@ -206,6 +220,8 @@ void GXSetDispCopyGamma(GXGamma gamma) {}
+ void GXCopyDisp(void* dest, GXBool clear) {}
+ 
+ void GXCopyTex(void* dest, GXBool clear) {
++  // Write the latest finished readback of this dest (if any) before the game reads it again (game thread).
++  aurora::gfx::depth_peek::apply_copy_readback(dest, sTexCopyDstWidth, sTexCopyDstHeight, sTexCopyDstFmt);
+   GX_WRITE_AURORA(GX_AURORA_LOAD_COPY_DEST);
+   GX_WRITE_U64(reinterpret_cast<u64>(dest));
+ 
+diff --git a/lib/gfx/recording.hpp b/lib/gfx/recording.hpp
+--- a/lib/gfx/recording.hpp
++++ b/lib/gfx/recording.hpp
+@@ -102,7 +102,7 @@ PipelineRef pipeline_ref(const PipelineConfig& config);
+ 
+ void resolve_pass_into(TextureHandle texture, ClipRect rect, bool clearColor, bool clearAlpha, bool clearDepth,
+                        Vec4<float> clearColorValue, float clearDepthValue, GXTexFmt resolveFormat,
+-                       GXPixelFmt sourceFormat);
++                       GXPixelFmt sourceFormat, const void* readbackDest = nullptr, uint64_t readbackGen = 0);
+ uint32_t align_uniform(uint32_t value);
+ Vec2<uint32_t> get_render_target_size() noexcept;
+ void set_viewport(const Viewport& viewport) noexcept;
+diff --git a/lib/gfx/recording.cpp b/lib/gfx/recording.cpp
+--- a/lib/gfx/recording.cpp
++++ b/lib/gfx/recording.cpp
+@@ -875,10 +875,12 @@ PipelineRef pipeline_ref(const clear::PipelineConfig& config) {
+ 
+ void resolve_pass_into(TextureHandle texture, ClipRect rect, bool clearColor, bool clearAlpha, bool clearDepth,
+                        Vec4<float> clearColorValue, float clearDepthValue, GXTexFmt resolveFormat,
+-                       GXPixelFmt sourceFormat) {
++                       GXPixelFmt sourceFormat, const void* readbackDest, uint64_t readbackGen) {
+   // Resolve current render pass
+   auto& prevPass = current_render_passes()[g_recorder.currentRenderPass];
+   prevPass.resolveTarget = std::move(texture);
++  prevPass.readbackDest = readbackDest;
++  prevPass.readbackGen = readbackGen;
+   prevPass.resolveRect = rect;
+   prevPass.resolveFormat = resolveFormat;
+   prevPass.resolveSourceFormat = sourceFormat;
+@@ -1216,7 +1218,10 @@ void push_draw_command(rmlui::DrawData data) {
+ 
+ template <>
+ PipelineRef pipeline_ref(const gx::PipelineConfig& config) {
+-  return find_pipeline(config, get_render_target_layout());
++  // Offscreen passes (GXCreateFrameBuffer) feed their own next frame through a copy and, with GXSetCopyReadback, the
++  // CPU: a draw skipped while its pipeline compiles would lose that state for good (the pollution base pass at stage
++  // start wiped every goop map). Compile those blocking; EFB draws keep the async skip.
++  return find_pipeline(config, get_render_target_layout(), g_recorder.inOffscreen);
+ }
+ 
+ #ifdef AURORA_ENABLE_RMLUI
+diff --git a/lib/gfx/frame_packet.hpp b/lib/gfx/frame_packet.hpp
+--- a/lib/gfx/frame_packet.hpp
++++ b/lib/gfx/frame_packet.hpp
+@@ -102,6 +102,9 @@ struct RenderPass {
+   GXPixelFmt resolveSourceFormat = GX_PF_RGBA6_Z24;
+   ClipRect resolveRect;
+   Range resolveUniformRange;
++  // GXSetCopyReadback: dest of a registered R8 copy (read back after the conversion), and its registration gen.
++  const void* readbackDest = nullptr;
++  uint64_t readbackGen = 0;
+   wgpu::Texture snapshotColorDst;
+   wgpu::TextureView snapshotDepthDst;
+   wgpu::Texture snapshotNormalDst;
+diff --git a/lib/gfx/encoding.cpp b/lib/gfx/encoding.cpp
+--- a/lib/gfx/encoding.cpp
++++ b/lib/gfx/encoding.cpp
+@@ -314,6 +314,10 @@ void render(wgpu::CommandEncoder& cmd, FramePacket& frame, RenderPass& passInfo,
+       };
+       cmd.CopyTextureToTexture(&src, &dst, &size);
+     }
++    if (passInfo.readbackDest != nullptr) {
++      depth_peek::encode_copy_readback(cmd, passInfo.resolveTarget->texture, dstSize, passInfo.readbackDest,
++                                       passInfo.readbackGen);
++    }
+   }
+ 
+   if (passInfo.snapshotColorDst) {
+diff --git a/lib/gfx/depth_peek.hpp b/lib/gfx/depth_peek.hpp
+--- a/lib/gfx/depth_peek.hpp
++++ b/lib/gfx/depth_peek.hpp
+@@ -19,6 +19,17 @@ void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureV
+                            uint32_t msaaSamples) noexcept;
+ void after_submit() noexcept;
+ 
++// GXSetCopyReadback: GX_CTF_R8 copies into a registered dest are read back and written into dest as GX I8 tiles,
++// like a GameCube EFB copy writes main RAM. Game thread: register/clear/apply. FIFO thread: copy_readback_gen.
++// Render worker: encode_copy_readback.
++void register_copy_readback(const void* dest, uint32_t width, uint32_t height) noexcept;
++std::vector<const void*> clear_copy_readbacks() noexcept;
++bool copy_readback_gen(const void* dest, uint32_t dstWidth, uint32_t dstHeight, uint32_t srcWidth,
++                       uint32_t srcHeight, uint64_t& gen) noexcept;
++void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture& texture, wgpu::Extent3D size,
++                          const void* dest, uint64_t gen) noexcept;
++void apply_copy_readback(void* dest, uint32_t width, uint32_t height, uint32_t fmt) noexcept;
++
+ namespace testing {
+ void reset() noexcept;
+ bool snapshot_requested() noexcept;
+diff --git a/lib/gfx/depth_peek.cpp b/lib/gfx/depth_peek.cpp
+--- a/lib/gfx/depth_peek.cpp
++++ b/lib/gfx/depth_peek.cpp
+@@ -9,8 +9,10 @@
+ #include <algorithm>
+ #include <array>
+ #include <chrono>
++#include <cstring>
+ #include <mutex>
+ #include <string>
++#include <unordered_map>
+ 
+ #include <magic_enum.hpp>
+ #include <tracy/Tracy.hpp>
+@@ -92,6 +94,71 @@ std::array<Clock::time_point, KindCount> g_nextSnapshotTime{};
+ std::array<LatestSnapshot, KindCount> g_latest;
+ std::mutex g_mutex;
+ 
++// GXSetCopyReadback registry (guarded by g_mutex). One readback in flight per dest.
++struct CopyReadback {
++  uint32_t width = 0;
++  uint32_t height = 0;
++  uint64_t gen = 0;
++  wgpu::Buffer buffer;
++  uint32_t rowPitch = 0;
++  SlotState state = SlotState::Available;
++  std::vector<uint8_t> staged;
++  bool hasStaged = false;
++  bool loggedApply = false;
++  bool loggedMismatch = false;
++  // Latency bookkeeping (log only): copies counted per registration on the game thread (GXCopyTex) and the render
++  // worker (encode), which see the same copies in the same order.
++  uint32_t gameCopies = 0;
++  uint32_t encodedCopies = 0;
++  uint32_t inflightSeq = 0;
++  uint32_t stagedSeq = 0;
++  uint32_t applies = 0;
++  uint32_t latencyMin = UINT32_MAX;
++  uint32_t latencyMax = 0;
++};
++std::unordered_map<const void*, CopyReadback> g_copyReadbacks;
++uint64_t g_copyGen = 0;
++bool g_copyLoggedUnavailable = false;
++
++struct PendingCopyMap {
++  const void* dest = nullptr;
++  uint64_t gen = 0;
++  wgpu::Buffer buffer;
++  uint64_t byteSize = 0;
++};
++
++// Map callback: RGBA8 rows (r = the R8 copy value) -> GX I8 tiles (8x4 texels, 32 bytes per tile), the inverse of
++// DecodeTiled<I8>.
++void complete_copy_readback(const PendingCopyMap& pending, wgpu::MapAsyncStatus status, wgpu::StringView message) {
++  std::lock_guard lock{g_mutex};
++  const auto it = g_copyReadbacks.find(pending.dest);
++  const bool alive = it != g_copyReadbacks.end() && it->second.gen == pending.gen &&
++                     it->second.buffer.Get() == pending.buffer.Get();
++  if (status == wgpu::MapAsyncStatus::Success) {
++    const auto* mapped = static_cast<const uint8_t*>(pending.buffer.GetConstMappedRange(0, pending.byteSize));
++    if (alive && mapped != nullptr) {
++      auto& entry = it->second;
++      const uint32_t w = entry.width;
++      const uint32_t h = entry.height;
++      entry.staged.resize(static_cast<size_t>(w) * h);
++      for (uint32_t t = 0; t < h; ++t) {
++        const uint8_t* row = mapped + static_cast<size_t>(t) * entry.rowPitch;
++        for (uint32_t s = 0; s < w; ++s) {
++          entry.staged[((t >> 2) * (w >> 3) + (s >> 3)) * 32 + (t & 3) * 8 + (s & 7)] = row[s * 4];
++        }
++      }
++      entry.hasStaged = true;
++      entry.stagedSeq = entry.inflightSeq;
++    }
++    pending.buffer.Unmap();
++  } else if (status != wgpu::MapAsyncStatus::CallbackCancelled && status != wgpu::MapAsyncStatus::Aborted) {
++    Log.warn("Copy readback mapping failed {}: {}", magic_enum::enum_name(status), message);
++  }
++  if (alive) {
++    it->second.state = SlotState::Available;
++  }
++}
++
+ constexpr std::string_view ShaderPreamble = R"(
+ struct Params {
+     dstSize: vec2u,
+@@ -465,6 +532,10 @@ void initialize() {
+ 
+ void shutdown() {
+   testing::reset();
++  {
++    std::lock_guard lock{g_mutex};
++    g_copyReadbacks.clear();
++  }
+   g_pipelines = {};
+   g_bindGroupLayouts = {};
+   for (auto& slot : g_slots) {
+@@ -501,6 +572,30 @@ void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureV
+ }
+ 
+ void after_submit() noexcept {
++  // Copy readbacks need no compute pipeline, so they run even when the peek pipelines are disabled.
++  std::vector<PendingCopyMap> copyMaps;
++  {
++    std::lock_guard lock{g_mutex};
++    for (auto& [dest, entry] : g_copyReadbacks) {
++      if (entry.state != SlotState::CopySubmitted) {
++        continue;
++      }
++      entry.state = SlotState::MapPending;
++      copyMaps.push_back({
++          .dest = dest,
++          .gen = entry.gen,
++          .buffer = entry.buffer,
++          .byteSize = static_cast<uint64_t>(entry.rowPitch) * entry.height,
++      });
++    }
++  }
++  for (const auto& pending : copyMaps) {
++    pending.buffer.MapAsync(wgpu::MapMode::Read, 0, pending.byteSize, wgpu::CallbackMode::AllowSpontaneous,
++                            [pending](wgpu::MapAsyncStatus status, wgpu::StringView message) {
++                              complete_copy_readback(pending, status, message);
++                            });
++  }
++
+   if (!g_enabled) {
+     return;
+   }
+@@ -531,6 +626,130 @@ void after_submit() noexcept {
+   }
+ }
+ 
++void register_copy_readback(const void* dest, uint32_t width, uint32_t height) noexcept {
++  std::lock_guard lock{g_mutex};
++  auto& entry = g_copyReadbacks[dest];
++  entry = {};
++  entry.width = width;
++  entry.height = height;
++  entry.gen = ++g_copyGen;
++}
++
++std::vector<const void*> clear_copy_readbacks() noexcept {
++  std::lock_guard lock{g_mutex};
++  std::vector<const void*> dests;
++  dests.reserve(g_copyReadbacks.size());
++  for (const auto& [dest, entry] : g_copyReadbacks) {
++    dests.push_back(dest);
++  }
++  g_copyReadbacks.clear();
++  ++g_copyGen;
++  return dests;
++}
++
++bool copy_readback_gen(const void* dest, uint32_t dstWidth, uint32_t dstHeight, uint32_t srcWidth,
++                       uint32_t srcHeight, uint64_t& gen) noexcept {
++  std::lock_guard lock{g_mutex};
++  const auto it = g_copyReadbacks.find(dest);
++  if (it == g_copyReadbacks.end()) {
++    return false;
++  }
++  auto& entry = it->second;
++  // Only an exact 1:1 copy (e.g. from a GXCreateFrameBuffer(w, h) pass) maps texel for texel onto the map.
++  if (dstWidth != entry.width || dstHeight != entry.height || srcWidth != entry.width || srcHeight != entry.height) {
++    if (!entry.loggedMismatch) {
++      Log.warn("Copy readback skipped for {}: copy {}x{} from a {}x{} source, registered {}x{}", dest, dstWidth,
++               dstHeight, srcWidth, srcHeight, entry.width, entry.height);
++      entry.loggedMismatch = true;
++    }
++    return false;
++  }
++  gen = entry.gen;
++  return true;
++}
++
++void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture& texture, wgpu::Extent3D size,
++                          const void* dest, uint64_t gen) noexcept {
++  std::lock_guard lock{g_mutex};
++  const auto it = g_copyReadbacks.find(dest);
++  if (it == g_copyReadbacks.end() || it->second.gen != gen) {
++    return;
++  }
++  auto& entry = it->second;
++  const uint32_t seq = ++entry.encodedCopies;
++  if (entry.state != SlotState::Available || size.width != entry.width || size.height != entry.height ||
++      (entry.width & 7) != 0 || (entry.height & 3) != 0) {
++    return;
++  }
++  if (!entry.buffer) {
++    entry.rowPitch = (entry.width * 4 + 255) & ~255u;
++    const wgpu::BufferDescriptor descriptor{
++        .label = "Copy Readback Buffer",
++        .usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst,
++        .size = static_cast<uint64_t>(entry.rowPitch) * entry.height,
++    };
++    entry.buffer = g_device.CreateBuffer(&descriptor);
++    if (!entry.buffer) {
++      if (!g_copyLoggedUnavailable) {
++        Log.warn("Copy readback unavailable: readback buffer {}x{} could not be created", entry.width, entry.height);
++        g_copyLoggedUnavailable = true;
++      }
++      return;
++    }
++  }
++  const wgpu::TexelCopyTextureInfo src{.texture = texture};
++  const wgpu::TexelCopyBufferInfo dst{
++      .layout = {.offset = 0, .bytesPerRow = entry.rowPitch, .rowsPerImage = entry.height},
++      .buffer = entry.buffer,
++  };
++  const wgpu::Extent3D extent{.width = entry.width, .height = entry.height, .depthOrArrayLayers = 1};
++  cmd.CopyTextureToBuffer(&src, &dst, &extent);
++  entry.state = SlotState::CopySubmitted;
++  entry.inflightSeq = seq;
++}
++
++void apply_copy_readback(void* dest, uint32_t width, uint32_t height, uint32_t fmt) noexcept {
++  if (fmt != GX_CTF_R8) {
++    return;
++  }
++  std::lock_guard lock{g_mutex};
++  const auto it = g_copyReadbacks.find(dest);
++  if (it == g_copyReadbacks.end()) {
++    return;
++  }
++  auto& entry = it->second;
++  if (entry.width != width || entry.height != height) {
++    return;
++  }
++  const uint32_t seq = ++entry.gameCopies; // this GXCopyTex is copy #seq of the registration
++  if (!entry.hasStaged) {
++    return;
++  }
++  const uint32_t latency = seq - entry.stagedSeq; // frames between the copy read back and this write (0 on GameCube)
++  entry.latencyMin = std::min(entry.latencyMin, latency);
++  entry.latencyMax = std::max(entry.latencyMax, latency);
++  if (++entry.applies == 300) {
++    Log.info("Copy readback: 300 applies to {}, latency {}..{} frames", dest, entry.latencyMin, entry.latencyMax);
++  }
++  if (!entry.loggedApply) {
++    // One-time sanity line: how far the first GPU result is from the bytes the game had (its load state).
++    const auto* old = static_cast<const uint8_t*>(dest);
++    size_t changed = 0;
++    size_t nonzeroOld = 0;
++    size_t nonzeroNew = 0;
++    for (size_t i = 0; i < entry.staged.size(); ++i) {
++      changed += old[i] != entry.staged[i];
++      nonzeroOld += old[i] != 0;
++      nonzeroNew += entry.staged[i] != 0;
++    }
++    Log.info("Copy readback: first apply to {} ({}x{}, gen {}): {} bytes changed, nonzero {} -> {}, latency {} frames",
++             dest, width, height, entry.gen, changed, nonzeroOld, nonzeroNew, latency);
++    entry.loggedApply = true;
++  }
++  std::memcpy(dest, entry.staged.data(), entry.staged.size());
++  entry.hasStaged = false;
++}
++
+ namespace testing {
+ void reset() noexcept {
+   std::lock_guard lock{g_mutex};
+diff --git a/lib/gfx/pipeline_cache.hpp b/lib/gfx/pipeline_cache.hpp
+--- a/lib/gfx/pipeline_cache.hpp
++++ b/lib/gfx/pipeline_cache.hpp
+@@ -37,7 +37,7 @@ void begin_pipeline_frame();
+ void end_pipeline_frame();
+ void rebuild_pipeline_cache();
+ 
+-PipelineRef find_pipeline(const gx::PipelineConfig& config, const RenderTargetLayout& layout);
++PipelineRef find_pipeline(const gx::PipelineConfig& config, const RenderTargetLayout& layout, bool blocking = false);
+ PipelineRef find_pipeline(const clear::PipelineConfig& config, const RenderTargetLayout& layout);
+ PipelineRef find_pipeline(const rmlui::PipelineConfig& config);
+ 
+diff --git a/lib/gfx/pipeline_cache.cpp b/lib/gfx/pipeline_cache.cpp
+--- a/lib/gfx/pipeline_cache.cpp
++++ b/lib/gfx/pipeline_cache.cpp
+@@ -1093,9 +1093,10 @@ PipelineRef find_pipeline(const clear::PipelineConfig& config, const RenderTarge
+   return resolve_pipeline(ShaderType::Clear, config, layout, PipelinePriority::Normal);
+ }
+ 
+-PipelineRef find_pipeline(const gx::PipelineConfig& config, const RenderTargetLayout& layout) {
++PipelineRef find_pipeline(const gx::PipelineConfig& config, const RenderTargetLayout& layout, bool blocking) {
+   remember_pipeline_config(ShaderType::GX, config, current_frame(), true);
+-  return resolve_pipeline(ShaderType::GX, config, layout, PipelinePriority::Normal);
++  return resolve_pipeline(ShaderType::GX, config, layout,
++                          blocking ? PipelinePriority::Blocking : PipelinePriority::Normal);
+ }
+ 
+ #ifdef AURORA_ENABLE_RMLUI
+diff --git a/tests/gx_test_stubs.cpp b/tests/gx_test_stubs.cpp
+--- a/tests/gx_test_stubs.cpp
++++ b/tests/gx_test_stubs.cpp
+@@ -217,7 +217,7 @@ std::atomic<uint32_t> offscreenHeight{0};
+ 
+ void resolve_pass_into(TextureHandle texture, ClipRect rect, bool clearColor, bool clearAlpha, bool clearDepth,
+                        Vec4<float> clearColorValue, float clearDepthValue, GXTexFmt resolveFormat,
+-                       GXPixelFmt sourceFormat) {
++                       GXPixelFmt sourceFormat, const void* readbackDest, uint64_t readbackGen) {
+   testing::resolvePassCount.fetch_add(1, std::memory_order_release);
+ }
+ void begin_offscreen(uint32_t width, uint32_t height) {
+@@ -249,6 +249,15 @@ void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureV
+                            const wgpu::TextureView& colorView, wgpu::Extent3D sourceSize,
+                            uint32_t msaaSamples) noexcept {}
+ void after_submit() noexcept {}
++void register_copy_readback(const void* dest, uint32_t width, uint32_t height) noexcept {}
++std::vector<const void*> clear_copy_readbacks() noexcept { return {}; }
++bool copy_readback_gen(const void* dest, uint32_t dstWidth, uint32_t dstHeight, uint32_t srcWidth,
++                       uint32_t srcHeight, uint64_t& gen) noexcept {
++  return false;
++}
++void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture& texture, wgpu::Extent3D size,
++                          const void* dest, uint64_t gen) noexcept {}
++void apply_copy_readback(void* dest, uint32_t width, uint32_t height, uint32_t fmt) noexcept {}
+ 
+ bool read_latest(uint16_t x, uint16_t y, uint32_t& z) noexcept {
+   if (x >= s_width || y >= s_height || s_data.empty()) {

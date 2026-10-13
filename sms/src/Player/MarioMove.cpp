@@ -1002,6 +1002,37 @@ void TMario::checkGraffito()
 		extern int hpLogTick();
 		if (gHpLogOn && hpLogTick() % 30 == 0)
 			std::printf("[hplog-pol] tick=%d pos=(%.0f,%.0f,%.0f) pol=%d dirty=%d fogT=%d\n", hpLogTick(), (double)mPosition.x, (double)mPosition.y, (double)mPosition.z, (int)mPollutionTypeStandingOn, checkFlag(MARIO_FLAG_DIRTY) ? 1 : 0, (int)mStandingOnGraffitoTimer);
+		// raw map byte / layer isPolluted / threshold under Mario and ahead (d along the facing), every layer
+		// (turned-off ones too): shows whether the CPU map follows the GPU goop (GXSetCopyReadback).
+		if (gHpLogOn && hpLogTick() % 10 == 0) {
+			const f32 fs = JMASSin(mFaceAngle.y);
+			const f32 fc = JMASCos(mFaceAngle.y);
+			for (int li = 0; li < gpPollution->getJointModelNum(); ++li) {
+				const TPollutionLayer* layer = gpPollution->getLayer(li);
+				char buf[256];
+				int cnt = 0; // texels above the threshold in the whole layer
+				const int texN = layer->mPos.getWidth() * layer->mPos.getHeight();
+				for (int k = 0; k < texN; ++k)
+					cnt += layer->mPollutionMap[k] > layer->mPollutedThreshold ? 1 : 0;
+				int n = std::snprintf(buf, sizeof(buf), "[hplog-map] tick=%d L%d %dx%d thr=%d cnt=%d", hpLogTick(), li, layer->mPos.getWidth(), layer->mPos.getHeight(), (int)layer->mPollutedThreshold, cnt);
+				static const int kDist[] = { 0, 60, 120, 200, 300, 450 };
+				for (int di = 0; di < 6 && n < (int)sizeof(buf) - 24; ++di) {
+					const f32 x = mPosition.x + fs * kDist[di];
+					const f32 z = mPosition.z + fc * kDist[di];
+					if (!layer->isInArea(x, mPosition.y, z)) {
+						n += std::snprintf(buf + n, sizeof(buf) - n, " d%d=-", kDist[di]);
+						continue;
+					}
+					const int s = layer->getTexPosS(x);
+					const int t = layer->getTexPosT(z);
+					const bool inMap = s >= 0 && t >= 0 && s < layer->mPos.getWidth() && t < layer->mPos.getHeight();
+					n += std::snprintf(buf + n, sizeof(buf) - n, " d%d=%d/%d", kDist[di],
+					                   inMap ? (int)layer->mPollutionMap[layer->mPos.index(s, t)] : -1,
+					                   layer->isPolluted(x, mPosition.y, z) ? 1 : 0);
+				}
+				std::printf("%s\n", buf);
+			}
+		}
 	}
 #endif
 

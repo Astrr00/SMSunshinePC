@@ -1,0 +1,34 @@
+# Goop readback (GXSetCopyReadback, Aurora patch 0013), dolpic/0. S0=(712,330,4631) is on goop (route 94).
+# Spray while standing (R held, the nozzle points at the ground in front), then stand on points ahead.
+# Per layer every 10 ticks: [hplog-map] raw map byte / isPolluted at d=0..450 along the facing; [hplog-pol] dirty=.
+# Env: SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_HPLOG=1.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+cheat infinite_health
+cheat infinite_water
+tp x=712 y=330 z=4631 yaw=0
+wait frames=40
+log
+shot rb_before.png
+hold trig=0,255 frames=150
+wait frames=10
+log
+shot rb_spray_end.png
+wait frames=60
+log
+tp x=712 y=330 z=4691 yaw=0
+wait frames=40
+log
+tp x=712 y=330 z=4751 yaw=0
+wait frames=40
+log
+shot rb_on_patch.png
+tp x=712 y=330 z=4831 yaw=0
+wait frames=40
+log
+tp x=712 y=330 z=5031 yaw=0
+wait frames=40
+log
+shot rb_after.png
+wait frames=30
+end

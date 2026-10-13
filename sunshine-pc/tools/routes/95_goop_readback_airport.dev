@@ -1,0 +1,13 @@
+# Goop readback on a 512x512 layer stage (airport/0): the readback must apply without errors and give plausible raw
+# bytes ([hplog-map] per layer, SUNSHINE_DEV_HPLOG=1). Env: SUNSHINE_DEV_START=airport/0 SUNSHINE_DEV_SKIP_MOVIES=1.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+cheat infinite_health
+log
+shot rba_start.png
+hold stick=0,127 frames=60
+wait frames=30
+log
+shot rba_walk.png
+wait frames=30
+end

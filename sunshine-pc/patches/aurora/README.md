@@ -1,6 +1,6 @@
 # Aurora patch series
 
-`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as eight patches so the submodule can be pinned to upstream and the changes re-applied.
+`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as thirteen patches so the submodule can be pinned to upstream and the changes re-applied.
 
 Series base: `50e5be3`. Applying all eight to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
 
@@ -21,7 +21,7 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 46 file entries over 34 distinct files, +1750 / -136.
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 63 file entries over 40 distinct files, +2096 / -149 (recounted with 0013).
 
 | file | topic | files | +/- |
 |---|---|---|---|
@@ -37,6 +37,7 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0010-gx-corrupt-texobj-diagnostics.patch` | `GXLoadTexObj` prints caller and module base for a texture object larger than 4096 px; `resolve_static_texture` logs implausible static textures before the allocation; diagnostics only (found a corrupt `JUTTexture` in a `J2DPicture`, see `sunshine-pc/docs/session-2026-10-11b.md`) | 2 | see patch |
 | `0011-gx-alpha-compare-scalar.patch` | `tev_alpha_op` maps the GR16/BGR24 compares to the scalar RGB8 compare (alpha operands are `f32`; `.rg`/`.rgb` made the shader fail and aborted the process once the shadow Mario was drawn); see `sunshine-pc/docs/session-2026-10-11b.md` |
 | `0012-pipeline-cache-read-error-no-use-after-abort.patch` | `load_pipeline_cache_entries` returns right after `pipeline_cache_abort()` when reading the rows fails; before, it called `sqlite3_reset`/`sqlite3_clear_bindings` on the finalized (null) load statement, and a corrupt `pipeline_cache.db` ("database disk image is malformed") crashed `aurora_initialize` with 0xc0000005; see `sunshine-pc/docs/platform-notes.md`, "Pipeline cache per run; corrupt cache" | 1 | +2 / -1 |
+| `0013-gx-copy-readback.patch` | `GXSetCopyReadback(dest, w, h)`: an exact 1:1 `GX_CTF_R8` copy into a registered `dest` is read back (texture-to-buffer copy after the conversion, async map in `depth_peek::after_submit`, one readback in flight per dest) and written into `dest` as GX I8 tiles on the game thread inside the next `GXCopyTex(dest)`, like a GameCube EFB copy writes main RAM; registering destroys the old copy texture of `dest`, `dest == NULL` drops all registrations; one log line on the first apply (bytes changed against the CPU copy, latency) and one after 300 applies (latency range). GX draws inside offscreen passes (`GXCreateFrameBuffer`) compile their pipeline blocking instead of being skipped (a skipped pollution base pass at stage start wiped the goop maps). Used by the pollution maps (`MarDirectorInitECT.cpp`, TARGET_PC), so `isPolluted` sees sprayed goop | 12 | +299 / -8 |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
 

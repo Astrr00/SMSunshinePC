@@ -16,12 +16,40 @@
 // rogue includes
 #include <M3DUtil/InfectiousStrings.hpp>
 
+#ifdef TARGET_PC
+namespace {
+// TARGET_PC: each pollution layer pass renders into an offscreen framebuffer of exactly the map's w x h (Aurora's
+// logical EFB is only 448 lines and is scaled), so the R8 copy is 1:1 and GXSetCopyReadback can write it back into
+// the CPU map (mPollutionMap) the way the GameCube copy writes main RAM. The offscreen target starts cleared to 0,
+// the state the copy's clear (colour 0) leaves the EFB in on hardware.
+class TGraffitoEfbTex : public JDrama::TEfbCtrlTex {
+public:
+	TGraffitoEfbTex(const char* name)
+	    : JDrama::TEfbCtrlTex(name)
+	{
+	}
+
+	virtual void perform(u32 cue, JDrama::TGraphics* graphics)
+	{
+		if (cue & CUE_DRAW_INIT)
+			GXCreateFrameBuffer(mSize.mWidth, mSize.mHeight);
+		JDrama::TEfbCtrlTex::perform(cue, graphics);
+		if (cue & CUE_DRAW)
+			GXRestoreFrameBuffer();
+	}
+};
+} // namespace
+#endif
+
 void TMarDirector::initECTGft(
     TPerformList* param_1, TPerformList* param_2,
     JDrama::TViewObjPtrListT<JDrama::TViewObj>* perf_event_group,
     JDrama::TViewObjPtrListT<JDrama::TViewObj>* scene)
 {
 	char trash[0x38];
+#ifdef TARGET_PC
+	GXSetCopyReadback(nullptr, 0, 0); // stage change: drop the previous stage's map registrations
+#endif
 	if (gpPollution->getJointModelNum() == 0) {
 		TBathWaterManager* bathtubWater = static_cast<TBathWaterManager*>(
 		    JDrama::TNameRefGen::search("バスタブの水"));
@@ -55,12 +83,21 @@ void TMarDirector::initECTGft(
 	param_1->push_back(graffitiEfbTex, CUE_DRAW);
 
 	for (int i = 0; i < gpPollution->getJointModelNum(); ++i) {
+#ifdef TARGET_PC
+		JDrama::TEfbCtrlTex* efbTex = new TGraffitoEfbTex("graffito");
+#else
 		JDrama::TEfbCtrlTex* efbTex = new JDrama::TEfbCtrlTex("graffito");
+#endif
 		scene->insert(efbTex);
 
 		const ResTIMG* img = gpPollution->getLayer(i)->getPollutionImage();
 
 		efbTex->setImgPtr((u8*)img + img->imageDataOffset); // asm 0x800EF4F0: img + offset, not &img
+#ifdef TARGET_PC
+		// On GameCube this copy writes the map in main RAM, which isPolluted/cleaned read on the next tick; Aurora
+		// keeps copies on the GPU, so register the map for a readback of its exact w x h R8 copy.
+		GXSetCopyReadback((u8*)img + img->imageDataOffset, img->width, img->height);
+#endif
 		JDrama::TSize size(img->width, img->height);
 		efbTex->setDstSize(size);
 		efbTex->setTexFmt(GX_CTF_R8);
