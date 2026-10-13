@@ -205,10 +205,19 @@ namespace Kernel {
 			return;
 
 		s16* destPtr = buffer;
+#ifdef TARGET_PC
+		// The source pairs are in console DAC order (right, left: THPAudioDecode), but the host DAC buffer is left,
+		// right (dsp_glue.cpp hands the left bus to the first slot), so each pair is added crosswise.
+		for (int i = 0; i < sampleCount; i++, destPtr += 2, src += 2) {
+			destPtr[0] = clamp_s32_to_s16(destPtr[0] + src[1]);
+			destPtr[1] = clamp_s32_to_s16(destPtr[1] + src[0]);
+		}
+#else
 		for (int i = 0; i < sampleCount * 2; i++) {
 			*destPtr++ = clamp_s32_to_s16(*destPtr + *src);
 			src++;
 		}
+#endif
 	}
 
 } // namespace Kernel
