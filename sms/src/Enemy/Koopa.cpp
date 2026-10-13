@@ -97,6 +97,10 @@ static void changeAnmCall(TKoopa* self, int bck, int btp, f32 rate)
 	self->changeAnm(bck, btp, rate);
 }
 #pragma dont_inline off
+// asm 0x803372BC: retail calls TUtil::sqrt out of line for cross.length()
+#pragma dont_inline on
+static f32 crossLengthSqrt(f32 sq) { return JGeometry::TUtil<f32>::sqrt(sq); }
+#pragma dont_inline off
 
 #define KOOPA_PARAMS(self) \
 	((TKoopaSaveLoadParams*)((TEnemyManager*)(self)->mManager)->unk38)
@@ -763,7 +767,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 
 	JGeometry::TVec3<f32> marioPos = *gpMarioPos;
 	marioPos.y += 85.0f;
-	char trash[0x50];
+	char trash[0x48];
 	marioPos.x -= jointMtx->at(0, 3);
 	marioPos.y -= jointMtx->at(1, 3);
 	marioPos.z -= jointMtx->at(2, 3);
@@ -842,7 +846,7 @@ int KoopaNeckCallBack(J3DNode* node, int timing)
 		                            aimNorm.z * marioPos.x - aimNorm.x * marioPos.z,
 		                            aimNorm.x * marioPos.y - aimNorm.y * marioPos.x);
 
-		f32 angle2 = atan2f(cross.length(),
+		f32 angle2 = atan2f(crossLengthSqrt(cross.squared()),
 		                    aimNorm.x * marioPos.x + aimNorm.y * marioPos.y
 		                        + aimNorm.z * marioPos.z);
 		f32 dot2 = marioPos.x * jointMtx->at(0, 1)

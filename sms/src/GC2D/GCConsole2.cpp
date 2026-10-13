@@ -306,7 +306,7 @@ static inline void processBalloonTextStep(TGCConsole2* console)
 					u16 code = (value << 8) + trail;
 					JUtility::TColor color;
 					bool hasColor = true;
-					// asm 0x80205A38 jump table @7091: index = code - 0x817B
+					// asm 0x80205794 bctr jump table @7091: index = code - 0x817B
 					switch (code) {
 					case 0x8197:
 						color.set(100, 255, 100, 255);
