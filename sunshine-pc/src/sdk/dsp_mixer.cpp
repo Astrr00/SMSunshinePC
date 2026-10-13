@@ -1,6 +1,6 @@
 // Host DSP, part 2: the HLE mixer. See dsp_mixer.hpp for what the CPU side defines. Per voice and subframe:
 //   source (ARAM wave / stream ring / oscillator) -> 4-tap polyphase resampler -> FIR/IIR -> 6 mixer channels
-//   -> bus accumulators -> effect lines -> master level -> two s16 output buffers.
+//   -> bus accumulators (+ effect-line returns) -> output matrix -> master level -> two s16 output buffers.
 //
 // Things the decomp cannot tell (the microcode is not part of it) are marked "approximation" below; they run silently.
 // Things that are not implemented log once to stderr when a game hits them: "[dsp] ...".
@@ -38,10 +38,34 @@ const int gDiagSolo = std::getenv("SUNSHINE_DSP_SOLO") != nullptr ? std::atoi(st
 
 namespace {
 
-constexpr u16 kBusAddr[kBusCount] = { 0x0D00, 0x0D60, 0x0DC0, 0x0E20, 0x0E80, 0x0EE0,
-	                                  0x0CA0, 0x0F40, 0x0FA0, 0x0B00, 0x09A0 };
-constexpr u16 kBusFxLeft          = 0x0DC0; // default mixer config 0x352 (bus 3) and 0x412 (bus 4): the effect sends
-constexpr u16 kBusFxRight         = 0x0E20;
+// Slot 2 + k is effect line k's send bus (0x0DC0 + 0x60 k, jdsp[] 0x0172). 0x0C00/0x0C50 are only reached by the
+// auto mixer's back effect sends (IRAM table 0x0dd6).
+constexpr u16 kBusAddr[kBusCount] = { 0x0D00, 0x0D60, 0x0DC0, 0x0E20, 0x0E80, 0x0EE0, 0x0CA0,
+	                                  0x0F40, 0x0FA0, 0x0B00, 0x09A0, 0x0C00, 0x0C50 };
+constexpr int slotOf(u16 id)
+{
+	for (int i = 0; i < kBusCount; ++i)
+		if (kBusAddr[i] == id)
+			return i;
+	return -1;
+}
+constexpr int kSlotSend0        = slotOf(0x0DC0); // + line
+constexpr int kSlotRevLeft      = slotOf(0x0E80); // send bus of line 2
+constexpr int kSlotRevRight     = slotOf(0x0EE0); // send bus of line 3
+constexpr int kSlotBackLeft     = slotOf(0x0F40);
+constexpr int kSlotBackRight    = slotOf(0x0CA0);
+constexpr int kSlotCentre       = slotOf(0x09A0);
+constexpr int kSlotMinusRight   = slotOf(0x0FA0);
+constexpr int kSlotRevBackLeft  = slotOf(0x0C00);
+constexpr int kSlotRevBackRight = slotOf(0x0C50);
+// The auto mixer's 8 destinations (IRAM table 0x0dd6): dry FL FR BL BR, then the same quadrants as effect sends.
+constexpr u16 kAutoDest[8] = { 0x0D00, 0x0D60, 0x0F40, 0x0CA0, 0x0E80, 0x0EE0, 0x0C00, 0x0C50 };
+
+// Q15 volumes of the ucode's output matrix (0x00ef-0x0113, 0x03f4-0x042b).
+constexpr s16 kQ15One   = 0x7FFF;
+constexpr s16 kQ15Cross = static_cast<s16>(0xB820); // -0.5615 (-5.0 dB)
+constexpr s16 kQ15Mid   = 0x5A82;                   // 0.7071
+constexpr s16 kQ15Minus = static_cast<s16>(0x8000); // -1.0
 
 constexpr u16 kTypeDirectPcm = 0x21; // JAIGFrameStream Play_DirectPCM
 constexpr u16 kTypeAfc4      = 9;    // DSPBuffer::setWaveInfo COMP_BLOCKBYTES: bytes per 16-sample frame / sample width
@@ -66,6 +90,28 @@ constexpr int kDolbySine   = 256; // word index, 128 samples: quarter sine, sine
 	} while (0)
 
 inline s16 sat16(s64 v) { return v > 32767 ? 32767 : v < -32768 ? -32768 : static_cast<s16>(v); }
+
+// The ucode's fixed buffer mixes (jdsp[] 0x00d8 add, 0x00e7 copy, FIR 0x0bd7) multiply in M2 (product doubled), round
+// the product at bit 16 half to even (MULMVZ/MOVPZ) and store 16 bits in SET16 mode: they wrap, they do not saturate.
+inline s32 roundQ15(s64 prod2) { return static_cast<s32>(((prod2 & 0x10000) ? prod2 + 0x8000 : prod2 + 0x7FFF) >> 16); }
+inline s32 wrap16(s64 v) { return static_cast<s16>(static_cast<u16>(v)); }
+
+void mixQ15(s32* dst, const s32* src, int n, s16 vol, bool copy = false)
+{
+	for (int i = 0; i < n; ++i)
+		dst[i] = wrap16((copy ? 0 : dst[i]) + roundQ15(2 * static_cast<s64>(src[i]) * vol));
+}
+
+// 0x0bd7: 8-tap FIR in place over an effect line's 88-sample window, tap 7 on the newest sample.
+void firQ15(s32* u, const s16* taps)
+{
+	for (int i = 0; i < kSubframeSamples; ++i) {
+		s64 acc = 0;
+		for (int j = 0; j < 8; ++j)
+			acc += static_cast<s64>(u[i + j]) * taps[j];
+		u[i] = wrap16(roundQ15(2 * acc));
+	}
+}
 
 inline uintptr_t addrOf(const void* p) { return reinterpret_cast<uintptr_t>(p); }
 
@@ -104,6 +150,7 @@ void Mixer::configure(const Config& c)
 	cfg_ = c;
 	std::memset(state_, 0, sizeof(state_));
 	std::memset(fxState_, 0, sizeof(fxState_));
+	std::memset(bus_, 0, sizeof(bus_)); // the back buses carry into the next subframe (render)
 }
 
 int Mixer::busSlot(u16 id) const
@@ -318,27 +365,26 @@ void Mixer::mixVoice(DSPBuffer& v, const s32* mono)
 	if (v.useDolbyVolume) {
 		// Auto mixer (the sequence selected mixer config 0xFFFF): the DSP derives the buses itself from volume, pan X
 		// (dolbyVoicePosition high byte), surround Y (low byte) and effect send. Quadrant law of the microcode (jdsp[]
-		// 0x0d6b-0x0d70, as in Dolphin's Zelda HLE): front quadrant = sine[X^0x7F or X] * sine[Y^0x7F] >> 16 from
-		// DSPRES_FILTER, times the s16 volume >> 16, then the voice mixer above: a hard-panned voice at 0x7FFF adds
-		// 0x1FFE / 65536 = 0.125 of its signal. The CPU does not clamp this volume (JASChannel.cpp: volume * 32767.5); the
-		// earlier unit-gain float pan made these voices clip the output. approximation: the back (surround) quadrants are
-		// dropped, as in that HLE; the effect send is that HLE's (dry * dolbyReverbFactor) >> 16 into the default send
-		// buses 0x0DC0/0x0E20 (the port's choice; no effect line of the game reads them), while the ucode (0x0d7f-0x0d85)
-		// scales it by the current volume once more, so its send falls faster below full volume.
+		// 0x0d6b-0x0d70, as in Dolphin's Zelda HLE): quadrant = sine[X^0x7F or X] * sine[Y^0x7F or Y] >> 16 from
+		// DSPRES_FILTER (FL, FR, BL, BR), times the s16 volume >> 16, then the voice mixer above: a hard-panned voice at
+		// 0x7FFF adds 0x1FFE / 65536 = 0.125 of its signal. The CPU does not clamp this volume (JASChannel.cpp: volume *
+		// 32767.5). The 8 destinations are IRAM table 0x0dd6 (kAutoDest): the back quadrants go to 0x0F40/0x0CA0 and the
+		// effect sends to 0x0E80/0x0EE0/0x0C00/0x0C50. approximation: the effect send is that HLE's (dry *
+		// dolbyReverbFactor) >> 16, while the ucode (0x0d7f-0x0d85) scales it by the current volume once more, so its send
+		// falls faster below full volume.
 		const int x = (v.dolbyVoicePosition >> 8) & 0x7F, y = v.dolbyVoicePosition & 0x7F;
 		const u32* sine = cfg_.resTable + kDolbySine;
 		auto m16        = [](s32 a, s32 b) { return (a * b) >> 16; };
-		const s32 front = tableSample(sine, y ^ 0x7F);
-		const s32 qL = m16(tableSample(sine, x ^ 0x7F), front), qR = m16(tableSample(sine, x), front);
-		const s32 from = static_cast<s16>(v.dolbyVolumeCurrent);
-		const s32 to   = v.endRequested ? 0 : static_cast<s16>(v.dolbyVolumeTarget);
-		const s32 rf   = static_cast<s16>(v.dolbyReverbFactor);
-		addToBus(0, m16(qL, from), m16(qL, to));
-		addToBus(1, m16(qR, from), m16(qR, to));
-		addToBus(busSlot(kBusFxLeft), m16(m16(qL, from), rf), m16(m16(qL, to), rf));
-		addToBus(busSlot(kBusFxRight), m16(m16(qR, from), rf), m16(m16(qR, to), rf));
-		if (y != 0)
-			DSP_WARN_ONCE("surround (dolby) position of the auto mixer: back quadrants are not mixed");
+		const s32 left = tableSample(sine, x ^ 0x7F), right = tableSample(sine, x);
+		const s32 front = tableSample(sine, y ^ 0x7F), back = tableSample(sine, y);
+		const s32 q[4]  = { m16(left, front), m16(right, front), m16(left, back), m16(right, back) };
+		const s32 from  = static_cast<s16>(v.dolbyVolumeCurrent);
+		const s32 to    = v.endRequested ? 0 : static_cast<s16>(v.dolbyVolumeTarget);
+		const s32 rf    = static_cast<s16>(v.dolbyReverbFactor);
+		for (int k = 0; k < 4; ++k) {
+			addToBus(slotOf(kAutoDest[k]), m16(q[k], from), m16(q[k], to));
+			addToBus(slotOf(kAutoDest[4 + k]), m16(m16(q[k], from), rf), m16(m16(q[k], to), rf));
+		}
 		v.dolbyVolumeCurrent = static_cast<u16>(to);
 		return;
 	}
@@ -350,8 +396,6 @@ void Mixer::mixVoice(DSPBuffer& v, const s32* mono)
 		if (c.id != 0)
 			addToBus(busSlot(c.id), from, to);
 		c.currentVolume = static_cast<u16>(to);
-		if ((c.id == 0x0F40 || c.id == 0x0FA0) && (from != 0 || to != 0))
-			DSP_WARN_ONCE("voice send to the surround buses 8/9 (Dolby output mode) is not implemented (dropped)");
 		// Per-mixer-channel delay (the high byte of `level`, kept in step with samplesToKeepCount by
 		// setMixerInitDelayMax) is not implemented.
 		if ((c.level >> 8) != 0 && v.samplesToKeepCount != 0)
@@ -425,66 +469,114 @@ void Mixer::renderVoice(int index, DSPBuffer& v)
 // Effect lines and output
 // ---------------------------------------------------------------------------------------------------------------------
 
-// FXBuffer (JASDSPInterface.cpp setFXLine): unk0 = mode (0 = off), unk2 = delay in subframes (the buffer holds
-// unk2 * 80 s16), unk4 = delay buffer in main RAM, unk8 = source bus, unkA = gain on the source side, unkC = destination
-// bus, unkE = gain on the destination side, unk10[8] = FIR taps (1.15). The microcode is not part of the decomp;
-// approximation: the line stores the source bus (times unkA) into the delay buffer and adds the block written unk2
-// subframes ago, run through the 8-tap FIR and times unkE, to the destination bus. The gains are 4.12 (the game's own
-// scene data holds 4096 and 2047 = 1.0 and 0.5). That data (mSound.aaf, 2 scenes) reads the main buses 0x0D00/0x0D60 and
-// delays them by 48 subframes (120 ms) into bus 0x0F40 (bus 8): surround material that the stereo output stage ignores.
-void Mixer::runFx()
+// FXBuffer (JASDSPInterface.cpp setFXLine) is the ucode's 16-word effect block (jdsp[] 0x0172, copied to 0x0390):
+// unk0 = on (bit 0: FIR before the returns, bit 1: after), unk2 = delay in subframes (the buffer holds unk2 * 80 s16),
+// unk4 = delay buffer, unk8/unkA = destination 1 and its Q15 volume, unkC/unkE = destination 2 and its Q15 volume
+// (0x014b-0x0163), unk10[8] = FIR taps (Q15). Line k reads its own send bus 0x0DC0 + 0x60 k: the block written unk2
+// subframes ago, behind the last 8 samples of the previous block (0x0190, 0x012d). That window, filtered, is added to
+// both destinations and becomes the send bus, so the voices' sends add to it and fxStore writes it back: the line feeds
+// back through its FIR. The game's scenes (mSound.aaf) return to a main bus and to 0x0F40.
+void Mixer::fxReturn(const s32* revBackLeft, const s32* revBackRight)
 {
 	for (int line = 0; line < kFxLineCount; ++line) {
-		FXBuffer& f  = cfg_.fx[line];
-		FxState& st  = fxState_[line];
-		const int sm = busSlot(f.unk8);
-		const int dm = busSlot(f.unkC);
-		if (f.unk0 == 0 || f.unk4 == nullptr || f.unk2 == 0 || sm < 0 || dm < 0)
+		FXBuffer& f = cfg_.fx[line];
+		FxState& st = fxState_[line];
+		st.active   = f.unk0 != 0 && f.unk4 != nullptr && f.unk2 != 0;
+		if (!st.active)
 			continue;
 		if (st.buffer != f.unk4 || st.blocks != f.unk2) { // setFXLine zeroes the buffer; start over
+			st        = FxState();
 			st.buffer = f.unk4;
 			st.blocks = f.unk2;
-			st.write  = 0;
+			st.active = true;
 		}
-		s16* block = f.unk4 + static_cast<size_t>(st.write) * kSubframeSamples; // oldest block = the one to overwrite
-		bool anyTap = false;
-		for (int k = 0; k < 8; ++k)
-			anyTap |= f.unk10[k] != 0;
-		s32 dst[kSubframeSamples];
-		for (int i = 0; i < kSubframeSamples; ++i) { // delayed signal through the FIR (all-zero taps: no filter)
-			s32 acc = block[i] * 0x7FFF;
-			if (anyTap) {
-				acc = 0;
-				for (int k = 0; k < 8 && i - k >= 0; ++k)
-					acc += block[i - k] * f.unk10[k];
-			}
-			dst[i] = (acc >> 15) * f.unkE >> 12;
+		s32 u[kSubframeSamples + 8];
+		const s16* block = st.buffer + static_cast<size_t>(st.write) * kSubframeSamples;
+		for (int i = 0; i < 8; ++i)
+			u[i] = st.hist[i];
+		for (int i = 0; i < kSubframeSamples; ++i)
+			u[8 + i] = block[i];
+		for (int i = 0; i < 8; ++i)
+			st.hist[i] = static_cast<s16>(u[kSubframeSamples + i]);
+		if (f.unk0 & 1)
+			firQ15(u, f.unk10);
+		const u16 dest[2] = { f.unk8, f.unkC };
+		const s16 vol[2]  = { f.unkA, f.unkE };
+		for (int d = 0; d < 2; ++d) {
+			const int slot = busSlot(dest[d]);
+			if (dest[d] != 0 && slot < 0)
+				DSP_WARN_ONCE("effect line returns to unknown buffer 0x%x (dropped)", static_cast<unsigned>(dest[d]));
+			if (slot >= 0)
+				mixQ15(bus_[slot], u, kSubframeSamples, vol[d]);
 		}
-		for (int i = 0; i < kSubframeSamples; ++i) {
-			const s32 in = clamp16(bus_[sm][i]);
-			block[i]     = clamp16(in * f.unkA >> 12);
-			bus_[dm][i] += dst[i];
-		}
+		if (f.unk0 & 2)
+			firQ15(u, f.unk10);
+		std::copy(u, u + kSubframeSamples, bus_[kSlotSend0 + line]);
+	}
+	// 0x01a6-0x01c8: the effect back buses feed lines 2/3 like the output matrix: 0x0C00 one subframe late, the second
+	// half of 0x0C50 40 samples late (its first half follows in fxStore).
+	mixQ15(bus_[kSlotRevLeft], revBackLeft, kSubframeSamples, kQ15One);
+	mixQ15(bus_[kSlotRevRight], revBackLeft, kSubframeSamples, kQ15Cross);
+	mixQ15(bus_[kSlotRevLeft], revBackRight + 40, 40, kQ15Cross);
+	mixQ15(bus_[kSlotRevRight], revBackRight + 40, 40, kQ15One);
+}
+
+// End of the subframe (0x01f0-0x0202, then 0x0204 -> 0x01d6): first half of 0x0C50 into the second half of lines 2/3,
+// then every line stores its send bus as the newest block.
+void Mixer::fxStore()
+{
+	mixQ15(bus_[kSlotRevLeft] + 40, bus_[kSlotRevBackRight], 40, kQ15Cross);
+	mixQ15(bus_[kSlotRevRight] + 40, bus_[kSlotRevBackRight], 40, kQ15One);
+	for (int line = 0; line < kFxLineCount; ++line) {
+		FxState& st = fxState_[line];
+		if (!st.active)
+			continue;
+		s16* block = st.buffer + static_cast<size_t>(st.write) * kSubframeSamples;
+		for (int i = 0; i < kSubframeSamples; ++i)
+			block[i] = static_cast<s16>(bus_[kSlotSend0 + line][i]);
 		st.write = (st.write + 1) % st.blocks;
 	}
 }
 
 void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 {
+	s32 last[4][kSubframeSamples]; // the previous subframe's back buses, read before they are cleared (0x0115, 0x01ca)
+	const int lastSlot[4] = { kSlotBackLeft, kSlotBackRight, kSlotRevBackLeft, kSlotRevBackRight };
+	for (int k = 0; k < 4; ++k)
+		std::memcpy(last[k], bus_[lastSlot[k]], sizeof(last[k]));
 	std::memset(bus_, 0, sizeof(bus_));
 	std::memset(left, 0, kSubframeSamples * sizeof(s16));
 	std::memset(right, 0, kSubframeSamples * sizeof(s16));
 	if (!cfg_.voices || !cfg_.resTable || !cfg_.adpcmTable)
 		return;
+
+	// Output matrix, start of the subframe (0x00ef-0x0113): the main buses start as the previous subframe's back left
+	// (L 1.0, R -0.5615) plus the second half of its back right (L -0.5615, R 1.0): back left is 80, back right 40
+	// samples late.
+	s32* L = bus_[0];
+	s32* R = bus_[1];
+	mixQ15(L, last[0], kSubframeSamples, kQ15One, true);
+	mixQ15(R, last[0], kSubframeSamples, kQ15Cross, true);
+	mixQ15(L, last[1] + 40, 40, kQ15Cross);
+	mixQ15(R, last[1] + 40, 40, kQ15One);
+	if (cfg_.fx)
+		fxReturn(last[2], last[3]);
 	for (int i = 0; i < kVoiceCount; ++i)
 		if (((voiceMap >> (63 - i)) & 1) && !cfg_.voices[i].done && (gDiagSolo < 0 || i == gDiagSolo))
 			renderVoice(i, cfg_.voices[i]);
-	if (cfg_.fx)
-		runFx();
+	for (auto& bus : bus_) // the voice adds saturate (SET40, 0x0386 and 0x0d44); one clamp after all voices stands in
+		for (s32& s : bus)
+			s = clamp16(s);
 
-	// Output stage: master level (4.12), saturate. Only the two main buses reach the output; the surround buses 0x0F40/
-	// 0x0FA0 (bus 8/9) are where the effect lines write and where surround-mode voices send, and the Dolby encode the
-	// microcode would do with them is not implemented (see mixVoice).
+	// Output matrix, after the voices (0x03f4-0x0416, 0x0424): centre 0x09A0 at 0.7071 into both, the first half of
+	// back right into the second half, and 0x0FA0 subtracted from the right bus only.
+	mixQ15(L, bus_[kSlotCentre], kSubframeSamples, kQ15Mid);
+	mixQ15(R, bus_[kSlotCentre], kSubframeSamples, kQ15Mid);
+	mixQ15(L + 40, bus_[kSlotBackRight], 40, kQ15Cross);
+	mixQ15(R + 40, bus_[kSlotBackRight], 40, kQ15One);
+	mixQ15(R, bus_[kSlotMinusRight], kSubframeSamples, kQ15Minus);
+
+	// Output stage (0x0d22): master level (4.12), saturate.
 	const s64 level = (static_cast<s64>(masterLevel) * gOutputVolumePct) / 100;
 	for (int i = 0; i < kSubframeSamples; ++i) {
 		const s64 l = (static_cast<s64>(bus_[0][i]) * level) >> 12;
@@ -496,6 +588,8 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 			gDiagPeak = std::max({gDiagPeak, std::abs(static_cast<s64>(bus_[0][i])), std::abs(static_cast<s64>(bus_[1][i]))});
 		}
 	}
+	if (cfg_.fx)
+		fxStore();
 	if (gDiagOn && ++gDiagSubframes % 400 == 0) {
 		for (int i = 0; i < kVoiceCount; ++i) {
 			VoiceDiag& d = gDiag[i];

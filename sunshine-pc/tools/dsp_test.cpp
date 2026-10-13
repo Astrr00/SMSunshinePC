@@ -6,7 +6,8 @@
 //     (real frames from the disc's wave banks + random frames that exercise the saturation).
 //  2. Mixer on synthetic voices built the way JASDSPInterface.cpp's DSPBuffer methods build them (the helpers below mirror
 //     allocInit/setWaveInfo/playStart/setMixerInitVolume/setBusConnect): PCM16/PCM8/ADPCM sources, pitch, loops, end of
-//     sample, volume ramp, panning buses, master level, effect line, stream ring buffer, oscillator, pause, forced stop.
+//     sample, volume ramp, panning buses, master level, output matrix, effect line, stream ring buffer, oscillator, pause,
+//     forced stop.
 //     Expected values come from a direct (random access) formulation of the resampler, not from the mixer's window code.
 #include "dsp_mixer.hpp"
 
@@ -166,8 +167,18 @@ static std::vector<s16> refResample(const std::vector<s16>& x, u32 ratio, int co
 	return y;
 }
 
-static s16 gain(s16 v, s32 vol) { return sat((static_cast<s64>(v) * vol) >> 15); } // 1.15 stages (FIR, effect line)
 static s16 mix(s16 v, s32 vol) { return sat((static_cast<s64>(v) * vol) >> 16); } // voice -> bus (ucode mixer, M0)
+// Buffer-to-buffer mix of the ucode (output matrix, effect returns, FIR): v * vol / 32768 rounded half to even, then
+// stored in 16 bits without saturation. Exact rational formulation, independent of the mixer's product rounding.
+static s16 q15(s32 v, s32 vol)
+{
+	const s64 p = static_cast<s64>(v) * vol;
+	s64 q       = p >= 0 ? p / 32768 : -((-p + 32767) / 32768); // floor
+	const s64 rem = p - q * 32768;
+	if (rem > 16384 || (rem == 16384 && (q & 1)))
+		++q;
+	return static_cast<s16>(static_cast<u16>(q));
+}
 
 static std::vector<s16> pseudoSignal(int n, unsigned seed)
 {
@@ -508,38 +519,132 @@ static void testAutoMixer()
 			CHECK(s == 0);
 		CHECK(v.dolbyVolumeCurrent == 0x7FFF);
 	}
+	// back quadrants (IRAM table 0x0dd6): Y = 0x7F puts the voice on 0x0F40 (X = 0) or 0x0CA0 (X = 0x7F), which reach
+	// the output through the matrix one subframe / 40 samples late
+	const std::vector<s16> ref = refResample(x, 0x1000, 2 * kSubframeSamples);
+	for (int pan : { 0x007F, 0x7F7F }) {
+		Rig r;
+		for (size_t i = 0; i < x.size(); ++i)
+			putBe16(r, kAramBase + static_cast<u32>(i) * 2, x[i]);
+		DSPBuffer& v = r.voices[5];
+		allocInit(v);
+		setWave(v, 3, kAramBase, static_cast<int>(x.size()));
+		playStart(v, 0x1000);
+		v.useDolbyVolume     = 1;
+		v.dolbyVoicePosition = static_cast<u16>(pan);
+		v.dolbyReverbFactor  = 0;
+		v.dolbyVolumeCurrent = 0x7FFF;
+		v.dolbyVolumeTarget  = 0x7FFF;
+		std::vector<s16> l, rr;
+		r.run(bit(5), 2, l, rr);
+		const bool backLeft = pan == 0x007F;
+		const int delay     = backLeft ? kSubframeSamples : 40;
+		for (int n = 0; n < 2 * kSubframeSamples; ++n) {
+			const s32 b = n >= delay ? mix(ref[n - delay], hard) : 0;
+			CHECK(l[n] == q15(b, backLeft ? 0x7FFF : -0x47E0) && rr[n] == q15(b, backLeft ? -0x47E0 : 0x7FFF));
+		}
+	}
+}
+
+static void testOutputMatrix()
+{
+	section("output matrix (jdsp[] 0x00ef-0x0113, 0x03f4-0x042b): back, centre and 0x0FA0 buses into the stereo output");
+	const std::vector<s16> x(2000, 12000);
+	const std::vector<s16> ref = refResample(x, 0x1000, 3 * kSubframeSamples);
+	struct Case {
+		u16 bus;
+		s32 l, r; // Q15 volume into left / right
+		int delay;
+	};
+	const Case cases[] = {
+		{ 0x0F40, 0x7FFF, -0x47E0, kSubframeSamples }, // back left: 1.0 / -0.5615, one subframe late
+		{ 0x0CA0, -0x47E0, 0x7FFF, 40 },               // back right: -0.5615 / 1.0, 40 samples late
+		{ 0x09A0, 0x5A82, 0x5A82, 0 },                 // centre: 0.7071 into both
+		{ 0x0FA0, 0, -0x8000, 0 },                     // subtracted from the right output only
+	};
+	for (const Case& c : cases) {
+		Rig r;
+		for (size_t i = 0; i < x.size(); ++i)
+			putBe16(r, kAramBase + static_cast<u32>(i) * 2, x[i]);
+		DSPBuffer& v = r.voices[0];
+		allocInit(v);
+		setWave(v, 3, kAramBase, static_cast<int>(x.size()));
+		mixInit(v, 0, c.bus, 0x7FFF);
+		playStart(v, 0x1000);
+		std::vector<s16> l, rr;
+		r.run(bit(0), 3, l, rr);
+		for (int n = 0; n < 3 * kSubframeSamples; ++n) {
+			const s32 b = n >= c.delay ? mix(ref[n - c.delay], 0x7FFF) : 0;
+			CHECK(l[n] == q15(b, c.l) && rr[n] == q15(b, c.r));
+		}
+	}
+	{ // a matrix add that overflows wraps (SET16 store), the voice adds before it saturate
+		const std::vector<s16> full(2000, 32767);
+		Rig r;
+		for (size_t i = 0; i < full.size(); ++i)
+			putBe16(r, kAramBase + static_cast<u32>(i) * 2, full[i]);
+		for (int vi = 0; vi < 4; ++vi) {
+			DSPBuffer& v = r.voices[vi];
+			allocInit(v);
+			setWave(v, 3, kAramBase, static_cast<int>(full.size()));
+			mixInit(v, 0, vi < 2 ? hostdsp::kBusLeft : 0x09A0, 0x7FFF);
+			playStart(v, 0x1000);
+		}
+		std::vector<s16> l, rr;
+		r.run(bit(0) | bit(1) | bit(2) | bit(3), 1, l, rr);
+		const s16 dcFull = refResample(full, 0x1000, 50).back();
+		const s32 bus    = 2 * mix(dcFull, 0x7FFF);
+		CHECK(bus > 32700 && bus <= 32767);
+		CHECK(l[40] == static_cast<s16>(static_cast<u16>(bus + q15(bus, 0x5A82)))); // wrapped: negative
+		CHECK(l[40] < 0 && rr[40] == q15(bus, 0x5A82));
+	}
 }
 
 static void testFxLine()
 {
-	section("effect line: delay of 2 subframes from bus 0x0DC0 to the left output");
-	Rig r;
+	section("effect line (jdsp[] 0x0172, 0x01d6): own send bus 0x0DC0, 2 subframes, two Q15 returns, feedback, FIR");
 	const std::vector<s16> x(4000, 10000);
-	for (size_t i = 0; i < x.size(); ++i)
-		putBe16(r, kAramBase + static_cast<u32>(i) * 2, x[i]);
-	DSPBuffer& v = r.voices[0];
-	allocInit(v);
-	setWave(v, 3, kAramBase, static_cast<int>(x.size()));
-	mixInit(v, 0, 0x0DC0, 0x7FFF); // only the send bus: the dry path is silent
-	playStart(v, 0x1000);
-	std::vector<s16> delayBuf(2 * kSubframeSamples, 0x5555);
-	FXBuffer& f = r.fx[0];
-	f.unk0      = 1;
-	f.unk2      = 2;
-	f.unk4      = delayBuf.data();
-	f.unk8      = 0x0DC0;
-	f.unkA      = 0x1000; // 4.12: 1.0
-	f.unkC      = hostdsp::kBusLeft;
-	f.unkE      = 0x1000;
-	std::fill(delayBuf.begin(), delayBuf.end(), 0); // setFXLine zeroes the buffer
-	std::vector<s16> l, rr;
-	r.run(bit(0), 5, l, rr);
-	const s16 dc = refResample(x, 0x1000, 50).back();
-	CHECK(l[10] == 0 && l[kSubframeSamples + 70] == 0);               // nothing yet in subframes 0 and 1
-	// then the delayed send: voice volume 1.15 and the (untapped) FIR; the line gains are 4.12 = 1.0
-	CHECK(std::abs(l[2 * kSubframeSamples + 40] - gain(mix(dc, 0x7FFF), 0x7FFF)) <= 3);
-	CHECK(std::abs(l[4 * kSubframeSamples + 40] - l[2 * kSubframeSamples + 40]) <= 1);
-	CHECK(rr[2 * kSubframeSamples + 40] == 0);
+	const std::vector<s16> ref = refResample(x, 0x1000, 5 * kSubframeSamples);
+	for (int fir : { 0, 1 }) {
+		Rig r;
+		for (size_t i = 0; i < x.size(); ++i)
+			putBe16(r, kAramBase + static_cast<u32>(i) * 2, x[i]);
+		DSPBuffer& v = r.voices[0];
+		allocInit(v);
+		setWave(v, 3, kAramBase, static_cast<int>(x.size()));
+		mixInit(v, 0, 0x0DC0, 0x7FFF); // only the send bus of line 0: the dry path is silent
+		playStart(v, 0x1000);
+		std::vector<s16> delayBuf(2 * kSubframeSamples, 0); // setFXLine zeroes the buffer
+		FXBuffer& f = r.fx[0];
+		f.unk0      = fir ? 1 : 4; // on; bit 0 = FIR before the returns
+		f.unk2      = 2;
+		f.unk4      = delayBuf.data();
+		f.unk8      = hostdsp::kBusLeft; // destination 1, volume 0.5
+		f.unkA      = 0x4000;
+		f.unkC      = 0x0F40; // destination 2 (back left), volume 1.0
+		f.unkE      = 0x7FFF;
+		if (fir)
+			f.unk10[7] = 0x7FFF; // tap 7 = newest sample of the 8-sample window
+		std::vector<s16> l, rr;
+		r.run(bit(0), 5, l, rr);
+		auto m = [&](int n) -> s32 { return n < 0 ? 0 : mix(ref[n], 0x7FFF); }; // send sample n
+		for (int n = 0; n < 2 * kSubframeSamples; ++n)
+			CHECK(l[n] == 0 && rr[n] == 0); // the first blocks read are the zeroed buffer
+		// subframe 2 reads the block written in subframe 0, behind the 8 samples kept from the last read (zero):
+		// without FIR the line is 8 samples late, the FIR's newest tap makes it 1 sample late
+		auto u2 = [&](int i) -> s32 { return fir ? q15(i < 1 ? 0 : m(i - 1), 0x7FFF) : (i < 8 ? 0 : m(i - 8)); };
+		for (int i = 0; i < kSubframeSamples; ++i)
+			CHECK(l[2 * kSubframeSamples + i] == q15(u2(i), 0x4000) && rr[2 * kSubframeSamples + i] == 0);
+		// destination 2 = back left: the right output gets it one subframe later at -0.5615
+		for (int i = 0; i < kSubframeSamples; ++i)
+			CHECK(rr[3 * kSubframeSamples + i] == q15(q15(u2(i), 0x7FFF), -0x47E0));
+		if (!fir) { // subframe 4 reads what subframe 2 stored: its window plus the new sends (feedback 1.0)
+			const int i  = 40;
+			const s32 u4 = m(i - 16) + m(2 * kSubframeSamples + i - 8);
+			const s32 bl = q15(m(kSubframeSamples + i - 8), 0x7FFF); // back left of subframe 3
+			CHECK(l[4 * kSubframeSamples + i] == static_cast<s16>(q15(bl, 0x7FFF) + q15(u4, 0x4000)));
+		}
+	}
 }
 
 static void testStreamAndOsc()
@@ -603,6 +708,7 @@ int main(int argc, char** argv)
 	testAdpcmVoice(argv[1]);
 	testMixerStage();
 	testAutoMixer();
+	testOutputMatrix();
 	testFxLine();
 	testStreamAndOsc();
 	std::fprintf(stderr, "dsp_test: ok\n");

@@ -34,7 +34,7 @@ namespace hostdsp {
 inline constexpr int kSubframeSamples = 80;
 inline constexpr int kVoiceCount      = 64;
 inline constexpr int kFxLineCount     = 4;
-inline constexpr int kBusCount        = 11;
+inline constexpr int kBusCount        = 13;
 
 inline constexpr u16 kBusLeft  = 0x0D00;
 inline constexpr u16 kBusRight = 0x0D60;
@@ -82,8 +82,9 @@ public:
 		cfg_.aramSize = size;
 	}
 
-	// Renders one subframe: the voices whose bit is set in `voiceMap` (bit 63 = voice 0), then the effect lines, then
-	// the output stage. Writes kSubframeSamples saturated s16 samples to `left` and `right`.
+	// Renders one subframe: the effect-line returns, the voices whose bit is set in `voiceMap` (bit 63 = voice 0), the
+	// output matrix and the output stage, then the effect lines store their send buses. Writes kSubframeSamples saturated
+	// s16 samples to `left` and `right`.
 	// Voices write their state back into their blocks (positions, histories, volumes, `done`), as the DSP does.
 	void render(u64 voiceMap, u16 masterLevel, s16* left, s16* right);
 
@@ -97,10 +98,12 @@ private:
 		s16 last      = 0;     // last resampled sample of the previous subframe
 	};
 
-	struct FxState { // delay-line write position of an effect line (the block has no field for it)
-		const s16* buffer = nullptr;
-		u32 blocks        = 0;
-		u32 write         = 0;
+	struct FxState { // delay-line position of an effect line (the block has no field for it) and the ucode's FIR window
+		s16* buffer = nullptr;
+		u32 blocks  = 0;
+		u32 write   = 0;
+		s16 hist[8] = {}; // last 8 samples of the previous block read (send bus words 80-87)
+		bool active = false;
 	};
 
 	Kind kindOf(const JASystem::DSPInterface::DSPBuffer& v) const;
@@ -111,7 +114,8 @@ private:
 	void renderVoice(int index, JASystem::DSPInterface::DSPBuffer& v);
 	void filterVoice(JASystem::DSPInterface::DSPBuffer& v, s32* mono);
 	void mixVoice(JASystem::DSPInterface::DSPBuffer& v, const s32* mono);
-	void runFx();
+	void fxReturn(const s32* revBackLeft, const s32* revBackRight);
+	void fxStore();
 	int busSlot(u16 id) const;
 
 	Config cfg_;
