@@ -82,6 +82,7 @@ struct Command {
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
 	float tol = 8.f;        // faceto: accepted angle error in degrees
 	int period = 30;        // mash: press for 2 ticks every `period` ticks
+	bool tpBehind = false;  // chase tp=1: dev crutch, not retail input: every 60 ticks put Mario behind the shadow Mario and spray for 45 of them
 };
 
 struct ButtonName {
@@ -283,6 +284,7 @@ Command parseLine(const std::string& text, int line)
 			const float v = static_cast<float>(std::atof(tok.c_str() + eq + 1));
 			if (key == "timeout") c.maxTicks = static_cast<int>(v);
 			else if (key == "radius") c.radius = v;
+			else if (key == "tp") c.tpBehind = v != 0.f;
 			else fail(line, "unexpected token in chase", tok);
 		}
 		if (c.maxTicks <= 0) fail(line, "chase needs timeout=N (logic ticks)", text);
@@ -425,7 +427,7 @@ void logEMario(const char* tag)
 	TEMario* em = dynamic_cast<TEMario*>(JDrama::TNameRefGen::search(kName));
 	std::printf("[%s-emario] pos=(%.0f,%.0f,%.0f) dist3d=%.0f downWait=%d doing=0x%X frame=%.1f dummyNpc=%d talkOrDemo=%d ground4cm=%d jumping=%d tick=%d\n", tag, e->mPosition.x, e->mPosition.y, e->mPosition.z, std::sqrt(dx * dx + dy * dy + dz * dz),
 	    em ? (int)em->isDownWaitingToTalk() : -1, em ? (unsigned)em->mEnemyMario->mEMDoing : 0u, em ? em->mEnemyMario->getMotionFrameCtrl().getFrame() : -1.0f, JDrama::TNameRefGen::search(kDummy) ? 1 : 0, (int)gpMarDirector->isTalkOrDemoModeNow(), (int)SMS_IsMarioTouchGround4cm(), (int)gpMarioOriginal->checkStatusType(MARIO_STATUS_FLAG_JUMPING), gTick);
-	if (em) std::printf("[%s-emario-take] status=0x%08X held=%p emflags=0x%X timer=%d tick=%d\n", tag, (unsigned)em->mEnemyMario->mStatus, (void*)em->mEnemyMario->mHeldObject, (unsigned)em->mEnemyMario->mEMFlags, (int)em->mEnemyMario->mEMDoingTimer, gTick);
+	if (em) std::printf("[%s-emario-take] status=0x%08X held=%p emflags=0x%X timer=%d waterCt=%d waterHitTimer=%d tick=%d\n", tag, (unsigned)em->mEnemyMario->mStatus, (void*)em->mEnemyMario->mHeldObject, (unsigned)em->mEnemyMario->mEMFlags, (int)em->mEnemyMario->mEMDoingTimer, (int)em->mEnemyMario->mWaterCounter, (int)em->mEnemyMario->mWaterHitTimer, gTick);
 	for (int i = 0; em && i < em->getColNum(); ++i)
 		std::printf("[%s-emario-col] i=%d type=0x%08X name=%s tick=%d\n", tag, i, (unsigned)em->getCollision(i)->getActorType(), typeid(*em->getCollision(i)).name(), gTick);
 	static const char kGateName[] = "Gate";
@@ -886,6 +888,38 @@ void step()
 				gStarted = false;
 				++gCursor;
 				continue;
+			}
+			if (c.tpBehind) { // Mario cannot catch the shadow Mario with the retail-faithful wall test (see ROADMAP 2026-10-12); this variant teleports instead of walking
+				PADStatus pad{};
+				if (THitActor* e = findEMario(); e && gpMarioOriginal) {
+					TEMario* em = dynamic_cast<TEMario*>(e);
+					const bool down = em && (em->mEnemyMario->mEMDoing == 0xE || em->mEnemyMario->mEMDoing == 0xF); // PRE_DOWN / DOWN: the talk window opens when Mario stands close
+					if (gRemaining % 60 == 0) {
+						float vx = em ? em->mEnemyMario->mVel.x : 0.f, vz = em ? em->mEnemyMario->mVel.z : 0.f;
+						float len = std::hypot(vx, vz);
+						if (len < 5.f) { // standing at a node: use his facing
+							const float yaw = (em ? em->mEnemyMario->mFaceAngle.y : 0) * (6.2831853f / 65536.f);
+							vx = std::sin(yaw);
+							vz = std::cos(yaw);
+							len = 1.f;
+						}
+						vx /= len;
+						vz /= len;
+						gpMarioOriginal->mPosition.set(e->mPosition.x - (down ? 100.f : 250.f) * vx, e->mPosition.y + 20.f, e->mPosition.z - (down ? 100.f : 250.f) * vz);
+						gpMarioOriginal->mVel.set(0.f, 0.f, 0.f);
+						gpMarioOriginal->mFaceAngle.y = static_cast<s16>(static_cast<int>(std::atan2(vx, vz) * (65536.0f / 6.2831853f)));
+						std::printf("[devscript] chase tp em=(%.0f,%.0f,%.0f) doing=0x%X waterCt=%d mario=(%.0f,%.0f,%.0f) tick=%d\n", e->mPosition.x, e->mPosition.y, e->mPosition.z, em ? (unsigned)em->mEnemyMario->mEMDoing : 0u, em ? (int)em->mEnemyMario->mWaterCounter : -1, gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.y, gpMarioOriginal->mPosition.z, gTick);
+					}
+					if (gRemaining % 60 < 45 && !down) pad.triggerRight = 255;
+				}
+				if (gRemaining >= c.maxTicks) {
+					std::printf("[devscript] TIMEOUT chase line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
+					std::fflush(stdout);
+					std::exit(3);
+				}
+				setVirtualPad(0, &pad);
+				++gRemaining;
+				return;
 			}
 			PADStatus pad{};
 			if (THitActor* e = findEMario(); e && gpMarioOriginal && gpCamera) {

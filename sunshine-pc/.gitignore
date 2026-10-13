@@ -17,3 +17,5 @@ dist/
 __pycache__/
 *.log
 *.arc
+# Floor grids generated from the game's map.col by tools/nav/col_grid.py: derived game data, never commit.
+tools/nav/*.nav
