@@ -98,8 +98,10 @@ int main(int argc, char* argv[])
 	// Dev hooks for tiling several test windows: SUNSHINE_WINDOW_POS=x,y and SUNSHINE_WINDOW_SIZE=w,h override the saved placement.
 	int posX = 0;
 	int posY = 0;
-	int width = static_cast<int>(s.windowWidth);
-	int height = static_cast<int>(s.windowHeight);
+	// remember_window_size=0: open at the default size; the saved size stays in the INI.
+	const sunshine::Settings def = sunshine::defaultSettings();
+	int width = static_cast<int>(s.rememberWindowSize ? s.windowWidth : def.windowWidth);
+	int height = static_cast<int>(s.rememberWindowSize ? s.windowHeight : def.windowHeight);
 	if (const char* pos = std::getenv("SUNSHINE_WINDOW_POS")) {
 		std::sscanf(pos, "%d,%d", &posX, &posY);
 	}

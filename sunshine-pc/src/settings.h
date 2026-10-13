@@ -16,6 +16,7 @@ struct Settings {
 	bool fullscreen = false;
 	int windowWidth = 1280;
 	int windowHeight = 960;
+	bool rememberWindowSize = true; // false: the window opens at 1280x960 and ignores the saved size
 	bool vsync = true;          // applied at the next start: Aurora only takes vsync at initialization
 	int resolutionScalePct = 0; // 0 = Auto (swapchain size), else percent of the native EFB size
 	int fpsLimit = 30;          // 30 = retail timing (no replay frames); 0 = unlimited; >30 = cap. See framerate.cpp.
@@ -30,6 +31,7 @@ struct Settings {
 	std::map<std::string, int> keys; // PAD input name (see defaultKeys) -> SDL scancode
 	// [interface]
 	GlyphStyle glyphStyle = GlyphStyle::Generic; // applied via glyphsSetStyle() (glyphs/glyphs.h); Generic shows the Xbox set
+	int uiScalePct = 0;             // launcher UI scale in percent; 0 = window scale (aurora::rmlui::set_ui_scale)
 	// [saves]
 	std::string saveDirectory; // empty = default; see resolveSaveDirectory()
 	// [launcher]

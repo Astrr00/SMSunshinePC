@@ -43,6 +43,8 @@ Companion to `ui-gap-dusklight.md`. Row IDs (A1 to H8) refer to that matrix. Thi
 
 Suggested order: UI-1; then UI-2 and UI-3 in parallel; then UI-4, UI-5, UI-6, UI-8, UI-9, UI-10, UI-11; then UI-7, UI-12, UI-13, UI-14, UI-15, UI-16.
 
+**Status (2026-10-12).** UI-1: implemented (`assets/launcher/theme.rcss`, `:focus` and `:active` states); screenshots `build/UiDev/ui1-*.png` at 1280×960 and 640×480. UI-2: implemented (`ui_scale`, `remember_window_size`, aspect row); `settings_test` covers the keys. UI-3: implemented (D-pad, left stick, A, B, Start; `handlePad` in `launcher.cpp`); focus path verified from the pad log (`build/UiDev/ui4/probe.log`). Not verified: the in-launcher aspect round trip and the `remember_window_size` relaunch were not run on the current build (UI-2 is therefore partly verified: parser/writer by `settings_test`, scale by screenshots at 75/100/150 %); no physical gamepad was tested (synthetic events through `onInput` only); the disc step is excluded. The same pad log shows A on Back, B, Start and the left stick reaching the intended controls.
+
 ## Common acceptance standard
 
 1. **Screenshots** at 1280×960 (default `windowWidth`/`windowHeight`, `src/settings.h`; applied at `src/main.cpp:101-102`) and at 640×480 (smallest preset, `src/launcher/launcher.cpp:83-86`). Store them under `sunshine-pc/build/`. No baseline exists in the repo: `docs/platform-notes.md:461` describes launcher screenshots, but none are present. The first run of UI-1 creates the baseline for owner review.

@@ -33,6 +33,8 @@ long gDiagSubframes = 0;
 const bool gDiagOn  = std::getenv("SUNSHINE_DSP_VOICE_LOG") != nullptr;
 long gDiagClip = 0; // DIAG: output samples saturated by sat16, per second
 s64 gDiagPeak  = 0; // DIAG: largest |bus| sample, per second
+// DIAG (temporary): SUNSHINE_DSP_SOLO=<voice> renders only that voice, so its output can be judged alone.
+const int gDiagSolo = std::getenv("SUNSHINE_DSP_SOLO") != nullptr ? std::atoi(std::getenv("SUNSHINE_DSP_SOLO")) : -1;
 
 namespace {
 
@@ -465,7 +467,7 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 	if (!cfg_.voices || !cfg_.resTable || !cfg_.adpcmTable)
 		return;
 	for (int i = 0; i < kVoiceCount; ++i)
-		if (((voiceMap >> (63 - i)) & 1) && !cfg_.voices[i].done)
+		if (((voiceMap >> (63 - i)) & 1) && !cfg_.voices[i].done && (gDiagSolo < 0 || i == gDiagSolo))
 			renderVoice(i, cfg_.voices[i]);
 	if (cfg_.fx)
 		runFx();
@@ -500,10 +502,13 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 				}
 			if (v.useDolbyVolume)
 				gain = static_cast<s16>(v.dolbyVolumeTarget) / 32768.0;
+			const Kind k = kindOf(v);
+			const char* kn = k == Kind::Osc ? "osc" : k == Kind::DirectPcm ? "dpcm" : k == Kind::Afc4 ? "afc4"
+			                 : k == Kind::Afc2 ? "afc2" : k == Kind::Pcm8 ? "pcm8" : k == Kind::Pcm16 ? "pcm16" : "unk";
 			std::fprintf(stderr,
-			             "[dsp-voice] t=%lds v=%d type=0x%x base=0x%llx pos=%d end=%u loop=%d la=%llu ended=%d req=%d "
+			             "[dsp-voice] t=%lds v=%d kind=%s type=0x%x base=0x%llx pos=%d end=%u loop=%d la=%llu ended=%d req=%d "
 			             "ratio=%u flt=0x%x iir=%d,%d,%d,%d lp=%d bus=0x%x gain=%.3f rms=%.0f post=%.0f zc=%ld\n",
-			             gDiagSubframes / 400, i, static_cast<unsigned>(v.samplesSourceType),
+			             gDiagSubframes / 400, i, kn, static_cast<unsigned>(v.samplesSourceType),
 			             static_cast<unsigned long long>(addrOf(v.baseAddress)), v.currentPosition,
 			             static_cast<unsigned>(v.endPosition), v.isLooping ? 1 : 0,
 			             static_cast<unsigned long long>(addrOf(v.loopAddress)), state_[i].ended ? 1 : 0,

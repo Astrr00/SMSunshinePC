@@ -152,6 +152,7 @@ Settings parseSettings(std::string_view text)
 	s.fullscreen = readBool(ini, "video.fullscreen", def.fullscreen);
 	s.windowWidth = readInt(ini, "video.width", def.windowWidth, 320, 7680);
 	s.windowHeight = readInt(ini, "video.height", def.windowHeight, 240, 4320);
+	s.rememberWindowSize = readBool(ini, "video.remember_window_size", def.rememberWindowSize);
 	s.vsync = readBool(ini, "video.vsync", def.vsync);
 	s.resolutionScalePct = readInt(ini, "video.resolution_scale", def.resolutionScalePct, 0, 400);
 	s.fpsLimit = readInt(ini, "video.fps_limit", def.fpsLimit, 0, 1000);
@@ -167,6 +168,7 @@ Settings parseSettings(std::string_view text)
 	for (auto& [name, scancode] : s.keys)
 		scancode = readInt(ini, "keys." + name, scancode, 0, 511);
 	s.glyphStyle = parseGlyph(readString(ini, "interface.glyph_style", glyphName(def.glyphStyle)));
+	s.uiScalePct = readInt(ini, "interface.ui_scale", def.uiScalePct, 0, 400);
 	s.saveDirectory = readString(ini, "saves.directory", def.saveDirectory);
 	s.lastImagePath = readString(ini, "launcher.last_image", def.lastImagePath);
 	return s;
@@ -180,6 +182,7 @@ std::string serializeSettings(const Settings& in)
 	out << "fullscreen=" << (in.fullscreen ? 1 : 0) << '\n';
 	out << "width=" << in.windowWidth << '\n';
 	out << "height=" << in.windowHeight << '\n';
+	out << "remember_window_size=" << (in.rememberWindowSize ? 1 : 0) << '\n';
 	out << "vsync=" << (in.vsync ? 1 : 0) << '\n';
 	out << "resolution_scale=" << in.resolutionScalePct << '\n';
 	out << "fps_limit=" << in.fpsLimit << '\n';
@@ -196,6 +199,7 @@ std::string serializeSettings(const Settings& in)
 		out << name << '=' << scancode << '\n';
 	out << "[interface]\n";
 	out << "glyph_style=" << glyphName(in.glyphStyle) << '\n';
+	out << "ui_scale=" << in.uiScalePct << '\n';
 	out << "[saves]\n";
 	out << "directory=" << in.saveDirectory << '\n';
 	out << "[launcher]\n";

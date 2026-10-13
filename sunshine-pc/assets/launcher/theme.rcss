@@ -1,0 +1,20 @@
+/* Theme tokens for the launcher. Names follow Dusklight's res/rml/theme.rcss; the values are Sunshine's.
+   launcher.rcss reads them with var(). Custom properties inherit, so defining them on body is enough. */
+body {
+	--color-bg: #1b1d2a;
+	--color-surface: #272a3c;
+	--color-text: #f2efe6;
+	--color-text-muted: #b8b6c4;
+	--color-accent: #ffcf3f;
+	--color-accent-strong: #d8a21c;
+	--color-accent-pressed: #b07f12;
+	--color-on-accent: #1b1d2a;
+	--color-control: #33384f;
+	--color-control-hover: #444c6d;
+	--color-control-pressed: #262a3e;
+	--color-focus: #8fd3ff;
+	--color-error: #ff9b8a;
+	--font-size-md: 18dp;
+	--font-size-xl: 36dp;
+	--radius-control: 6dp;
+}

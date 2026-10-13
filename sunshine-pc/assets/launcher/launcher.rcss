@@ -1,84 +1,116 @@
+/* Lengths use dp, not px: aurora scales dp by the UI scale ratio (set_ui_scale). */
 body {
-	font-family: LatoLatin;
-	font-size: 18px;
-	color: #f2efe6;
-	background-color: #1b1d2a;
-	width: 100%;
-	height: 100%;
-	margin: 0;
-	padding: 24px;
-	box-sizing: border-box;
+ font-family: LatoLatin;
+ font-size: var(--font-size-md);
+ color: var(--color-text);
+ background-color: var(--color-bg);
+ width: 100%;
+ height: 100%;
+ margin: 0;
+ padding: 24dp;
+ box-sizing: border-box;
 }
 
-h1, p {
-	display: block;
+h1, p, div {
+ display: block;
 }
 
 h1 {
-	font-size: 36px;
-	font-weight: bold;
-	color: #ffcf3f;
-	margin: 0 0 12px 0;
+ font-size: var(--font-size-xl);
+ font-weight: bold;
+ color: var(--color-accent);
+ margin: 0 0 12dp 0;
 }
 
 .hint {
-	color: #b8b6c4;
-	margin: 0 0 16px 0;
+ color: var(--color-text-muted);
+ margin: 0 0 16dp 0;
 }
 
 .path {
-	background-color: #272a3c;
-	padding: 8px 12px;
-	margin: 6px 0;
+ background-color: var(--color-surface);
+ padding: 8dp 12dp;
+ margin: 6dp 0;
 }
 
 .status {
-	min-height: 24px;
-	color: #ff9b8a;
-	margin: 8px 0;
+ min-height: 24dp;
+ color: var(--color-error);
+ margin: 8dp 0;
 }
 
 .row {
-	margin: 0 0 8px 0;
+ margin: 0 0 8dp 0;
 }
 
 .pane {
-	margin: 12px 0;
+ margin: 12dp 0;
+}
+
+/* The settings page scrolls when it is taller than the window. Navigation scrolls the focused button into view. */
+#page-settings {
+ max-height: 100%;
+ overflow-y: auto;
+}
+
+/* RmlUi collapses the page width when the vertical scrollbar has no size, so it gets one. */
+scrollbarvertical {
+ width: 10dp;
+}
+scrollbarvertical slidertrack {
+ background-color: var(--color-surface);
+}
+scrollbarvertical sliderbar {
+ background-color: var(--color-control);
+ border-radius: var(--radius-control);
 }
 
 button {
-	display: inline-block;
-	background-color: #33384f;
-	color: #f2efe6;
-	padding: 10px 18px;
-	margin: 0 12px 8px 0;
-	border-radius: 6px;
+ display: inline-block;
+ background-color: var(--color-control);
+ color: var(--color-text);
+ padding: 10dp 18dp;
+ margin: 0 12dp 8dp 0;
+ border-radius: var(--radius-control);
 }
 
 button:hover {
-	background-color: #444c6d;
+ background-color: var(--color-control-hover);
+}
+
+/* Focus ring as a box-shadow: it does not change the layout. Controller navigation sets focus. */
+button:focus {
+ box-shadow: 0 0 0 2dp var(--color-focus);
+}
+
+button:active {
+ background-color: var(--color-control-pressed);
 }
 
 button.primary {
-	background-color: #d8a21c;
-	color: #1b1d2a;
-	font-weight: bold;
+ background-color: var(--color-accent-strong);
+ color: var(--color-on-accent);
+ font-weight: bold;
+}
+
+button.primary:active {
+ background-color: var(--color-accent-pressed);
 }
 
 button.tab {
-	padding: 8px 14px;
+ padding: 8dp 14dp;
 }
 
 button.tab.active {
-	background-color: #d8a21c;
-	color: #1b1d2a;
+ background-color: var(--color-accent-strong);
+ color: var(--color-on-accent);
 }
 
 .keys {
-	margin: 8px 0;
+ margin: 8dp 0;
 }
 
 .keys button {
-	width: 230px;
-	text-align: left;
+ width: 230dp;
+ text-align: left;
 }

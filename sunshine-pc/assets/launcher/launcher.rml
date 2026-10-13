@@ -1,6 +1,7 @@
 <rml>
 <head>
 	<title>Super Mario Sunshine</title>
+	<link type="text/rcss" href="theme.rcss"/>
 	<link type="text/rcss" href="launcher.rcss"/>
 </head>
 <body>
@@ -32,12 +33,14 @@
 	<div id="pane-video" class="pane">
 		<div class="row"><button id="window-mode">Window mode</button></div>
 		<div class="row"><button id="window-size">Window size</button></div>
+		<div class="row"><button id="remember-window-size">Remember window size</button></div>
 		<div class="row"><button id="vsync">VSync</button></div>
 		<div class="row"><button id="scale">Resolution scale</button></div>
 		<div class="row"><button id="fsr1">FSR 1 upscale</button></div>
-		<div class="row"><span id="dlss">DLSS: unavailable (docs/dlss-feasibility.md)</span></div>
+		<p id="dlss" class="hint">DLSS: unavailable (docs/dlss-feasibility.md)</p>
 		<div class="row"><button id="fps">FPS limit</button></div>
 		<div class="row"><button id="widescreen">Widescreen</button></div>
+		<div class="row"><button id="aspect">Aspect ratio</button></div>
 	</div>
 
 	<div id="pane-audio" class="pane" style="display: none;">
@@ -76,6 +79,7 @@
 
 	<div id="pane-interface" class="pane" style="display: none;">
 		<div class="row"><button id="glyph-style">Button glyphs</button></div>
+		<div class="row"><button id="ui-scale">UI scale</button></div>
 	</div>
 
 	<div id="pane-cheats" class="pane" style="display: none;">

@@ -25,6 +25,8 @@ int main()
 	s.fpsLimit = 60;
 	s.widescreen = true;
 	s.aspect = "21:9";
+	s.rememberWindowSize = false;
+	s.uiScalePct = 75;
 	s.masterVolumePct = 35;
 	s.stickDeadZonePct = 25;
 	s.substickDeadZonePct = 0;
@@ -37,6 +39,7 @@ int main()
 	assert(back.resolutionScalePct == 200 && back.fpsLimit == 60 && back.widescreen && back.aspect == "21:9");
 	assert(back.masterVolumePct == 35 && back.stickDeadZonePct == 25 && back.substickDeadZonePct == 0);
 	assert(back.keys.at("A") == 26 && back.glyphStyle == GlyphStyle::PlayStation);
+	assert(!back.rememberWindowSize && back.uiScalePct == 75);
 	assert(back.lastImagePath == s.lastImagePath);
 	assert(serializeSettings(back) == text);
 	for (GlyphStyle g : {GlyphStyle::Switch, GlyphStyle::GameCube, GlyphStyle::Generic}) {
@@ -51,6 +54,15 @@ int main()
 	assert(odd.windowWidth == 7680 && odd.windowHeight == def.windowHeight && odd.fpsLimit == 0);
 	assert(odd.masterVolumePct == 100 && odd.stickDeadZonePct == 50);
 	assert(parseSettings("[video]\naspect=5:4\n").aspect == def.aspect);
+	assert(parseSettings("[interface]\nui_scale=999\n").uiScalePct == 400);
+	assert(parseSettings("[interface]\nui_scale=-5\n").uiScalePct == 0);
+	assert(parseSettings("[interface]\nui_scale=abc\n").uiScalePct == def.uiScalePct);
+	assert(parseSettings("[video]\nremember_window_size=7\n").rememberWindowSize);
+	for (const char* a : { "4:3", "16:9", "16:10", "21:9", "32:9", "auto" }) {
+		Settings as;
+		as.aspect = a;
+		assert(parseSettings(serializeSettings(as)).aspect == a);
+	}
 
 	// File round trip through saveSettings / loadSettings.
 	const std::filesystem::path file = std::filesystem::temp_directory_path() / "sunshine_settings_test.ini";
