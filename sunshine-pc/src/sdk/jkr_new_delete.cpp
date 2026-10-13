@@ -11,6 +11,10 @@
 //
 // Plain `new` stays on the CRT; converting those sites to JKR heaps is only needed if a game feature depends on
 // JKR heap statistics or limits, not for correctness.
+//
+// Plain `new` returns zeroed memory. Some game object (not identified) reads memory its
+// constructor never wrote: with CRT heap garbage a bianco/0 start showed a flat-colour screen in 8 of 14 runs, with any
+// uniform fill (0x00/0xAA/0xFF/0x7F) in 0 of 24 (ROADMAP update 2026-10-13, wedge).
 #include <JSystem/JKernel/JKRHeap.hpp>
 #include <dolphin/os.h>
 #include <sunshine_config.h>
@@ -140,10 +144,11 @@ void* operator new(size_t size)
 				Header* h = (Header*)raw;
 				h->magic  = kLiveMagic;
 				h->size   = size;
+				std::memset(raw + kHeader, 0, size); // same zeroed contents as the plain path
 				std::memset(raw + kHeader + size, 0xFD, kFooter);
 				return raw + kHeader;
 			}
-		} else if (void* p = std::malloc(size ? size : 1)) {
+		} else if (void* p = std::calloc(1, size ? size : 1)) {
 			return p;
 		}
 		std::new_handler handler = std::get_new_handler();
