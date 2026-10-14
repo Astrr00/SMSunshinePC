@@ -26,7 +26,8 @@ using Clock              = std::chrono::steady_clock;
 // Interpolation state (J3DModel::interpBlend): g_alpha runs 0..1 over the window's replays after a logic tick.
 bool g_interp = false;
 float g_alpha = 0.0f;
-u32 g_step    = 0;
+u32 g_step    = 0; // interpolation step: one per TMarDirector::direct() tick (sunshineInterpTick)
+u32 g_logicTicks = 0; // one per waitForRetrace, in every director (logs: devscript, launcher)
 u32 g_blends  = 0;
 Clock::time_point g_tickStart;
 }
@@ -40,7 +41,21 @@ bool sunshineInterpEnabled()
 }
 float sunshineInterpAlpha() { return g_interp ? g_alpha : -1.0f; }
 u32 sunshineInterpStep() { return g_step; }
+u32 sunshineLogicTickCount() { return g_logicTicks; }
 void sunshineInterpNoteBlend() { ++g_blends; }
+
+// Called by TMarDirector::direct() (sms/src/System/MarDirectorDirect.cpp) once per tick, right before its entry stage:
+// after the draw lists and the logic sub-steps (sunshineLogicTick runs once per sub-step, four times per tick).
+// The step opens there, not in sunshinePaceWindow: direct()'s entry stage records the new logic state as cur (prev = the
+// last tick) and the window's replays blend that same pair. With the step opened in the window, the replays' first
+// viewCalc moved cur (already this tick) into prev too, so every replay drew the logic state unblended.
+// The draw lists at the start of the next direct() still run in the window's step with the last replay's alpha, so the
+// models they view-calc themselves (mirror scene: TMirrorActor) draw the same blend as the replayed frame they show.
+void sunshineInterpTick()
+{
+	++g_step;
+	g_alpha = 0.0f; // the entry stage of this tick shows the previous logic state until a replay blends
+}
 
 // Called once per logic tick from TVideo::waitForRetrace(), before its own pre-wait (sms/src/JSystem/JDrama/JDRVideo.cpp).
 // Presents the frame drawn by TMarDirector::direct(), then replays on the cap's slot grid until the caller's retrace
@@ -54,7 +69,7 @@ void sunshinePaceWindow(u32 nextRetraceIndex)
 	sunshineHeartbeat();
 	const auto now = Clock::now();
 	++ticks;
-	++g_step;
+	++g_logicTicks;
 	if (now - logStart >= std::chrono::seconds(1)) {
 		std::printf("[framerate] logic %d/s, window presents %d/s, blended draws %u/s, fpsLimit %d\n", ticks, presents,
 		            g_blends, sunshine::settings().fpsLimit);
@@ -97,5 +112,4 @@ void sunshinePaceWindow(u32 nextRetraceIndex)
 		if (t < Clock::now()) // fell behind (slow replay): resync, do not burst to catch up
 			t = Clock::now();
 	}
-	g_alpha = 0.0f; // direct draws of the next tick show the previous logic state
 }

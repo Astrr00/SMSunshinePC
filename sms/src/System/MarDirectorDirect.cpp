@@ -46,6 +46,7 @@ extern OSThread gSetupThread;
 
 #ifdef TARGET_PC
 void sunshineLogicTick(); // sunshine-pc/src/main.cpp: cheats and mods, once per logic step
+void sunshineInterpTick(); // sunshine-pc/src/framerate/framerate.cpp: opens the interpolation step of this tick
 #endif
 
 int TMarDirector::direct()
@@ -182,6 +183,9 @@ int TMarDirector::direct()
 			}
 
 			if (unk4C & 0x4000) {
+#ifdef TARGET_PC
+				sunshineInterpTick(); // the entry stage below records this tick as the replays' blend target
+#endif
 				// asm 0x800ED188: sth r0,0x58(r1), offset 0 = unk0
 				local_140.unk0 = 0;
 				unk34->perform(CUE_ALL, &local_140);

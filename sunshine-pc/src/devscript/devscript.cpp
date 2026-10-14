@@ -72,7 +72,7 @@ extern int gDbgGKCurBck;
 #endif
 // Logic tick count from sunshine-pc/src/framerate/framerate.cpp. Return type must be u32: MSVC mangling includes it,
 // and an `unsigned` declaration links to an undefined symbol (/FORCE:UNRESOLVED turns the call into a bogus address).
-u32 sunshineInterpStep();
+u32 sunshineLogicTickCount();
 
 namespace {
 
@@ -1277,7 +1277,7 @@ void sunshineDevScriptTick()
 	if (gLoaded && !gDone) step();
 	if (std::getenv("SUNSHINE_DEV_STATUS") && gTick % 30 == 0) {
 		logStatus("status");
-		std::printf("[padclock] padreads=%d logic=%u\n", gTick, sunshineInterpStep());
+		std::printf("[padclock] padreads=%d logic=%u\n", gTick, sunshineLogicTickCount());
 	}
 	if (gLoaded || std::getenv("SUNSHINE_DEV_STATUS")) std::fflush(stdout); // harness kills the game; keep lines
 }

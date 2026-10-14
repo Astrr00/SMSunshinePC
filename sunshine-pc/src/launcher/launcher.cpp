@@ -49,7 +49,7 @@ void VISetFrameBufferScale(float scale);
 }
 
 bool sunshineCanReplay();           // sms/src/System/MarDirectorDirect.cpp: gameplay (director state 4), a frame can be redrawn
-u32 sunshineInterpStep();           // src/framerate/framerate.cpp
+u32 sunshineLogicTickCount();      // src/framerate/framerate.cpp
 
 namespace launcher {
 namespace {
@@ -1345,7 +1345,7 @@ void menuPoll() {
 			gMenu.reset();
 			aurora::input::reconcile(); // the game's pad layer regains its sources; keys still held stay hidden from it
 			std::printf("[menu] close (%s) frames=%d logic=%lu->%lu focus=%s\n", why.c_str(), gMenuFrames,
-			            gMenuLogicAtOpen, sunshineInterpStep(), focus.c_str());
+			            gMenuLogicAtOpen, sunshineLogicTickCount(), focus.c_str());
 			std::fflush(stdout);
 		}
 		return;
@@ -1373,7 +1373,7 @@ void menuPoll() {
 		PADControlMotor(port, PAD_MOTOR_STOP); // a rumble running when the game froze would never be stopped by it
 	}
 	gMenuFrames = 0;
-	gMenuLogicAtOpen = sunshineInterpStep();
+	gMenuLogicAtOpen = sunshineLogicTickCount();
 	aurora::input::reconcile(); // capture: the game's pad layer gets Cancelled and drops held buttons
 	std::printf("[menu] open (%s) logic=%lu focus=%s\n", why, gMenuLogicAtOpen, gMenu->focusId().c_str());
 	std::fflush(stdout);
