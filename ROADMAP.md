@@ -60,6 +60,7 @@ Background, not blocking the accepted chain:
 
 | Item | State | Next |
 | --- | --- | --- |
+| Talk balloon text (glyphs and byte order of the 2-byte codes; BFN fonts checked) | DONE (2026-10-14, FontFix: `writeBalloonCodeTo` wrote host-order codes, fixed under TARGET_PC; route `99_talk_text.dev`, 4:3, message 84 of balloon.bmg read in full) | dialog check on the other balloons (boss and NPC texts) with `99_talk_text.dev` as the template |
 | Strict link, no stubs, matching SHA-1 | DONE | keep as gate |
 | Bianco Hills renders (geometry, textures, HUD), Mario controllable, camera follows | DONE (dev start) | none |
 | Bianco flat-colour screen at frame 600 (route 92 probe) | PART (mitigated, cause open): plain `new` returns zeroed memory since 2026-10-13; 8 of 14 runs anomalous before, 0 of 12 after; the object that reads uninitialised memory is not identified; details `sunshine-pc/docs/platform-notes.md` | identify the object (size-range bisection of the fill is the suggested next probe) |

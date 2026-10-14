@@ -274,7 +274,14 @@ static inline void writeBalloonByteTo(JSUOutputStream* stream, u8 value)
 // fabricated
 static inline void writeBalloonCodeTo(JSUOutputStream* stream, u16 value)
 {
+#ifdef TARGET_PC
+	// The balloon text is read back byte by byte (lead, then trail), so the 2-byte code goes out big-endian. &value
+	// would write the host order (0x82C5 as C5 82) and the font then draws the wrong glyphs.
+	u8 bytes[2] = {(u8)(value >> 8), (u8)value};
+	stream->write(bytes, 2);
+#else
 	stream->write(&value, 2);
+#endif
 }
 
 // fabricated
