@@ -1,0 +1,20 @@
+# T5 InputHooks: INI [controls] stick_deadzone -> game, dolpic/0, through an SDL virtual gamepad (SUNSHINE_DEV_VPAD=1).
+# One run per pre-written build/Route/<run>/appdata/Sunshine/settings.ini: "[controls]" + "stick_deadzone=0" vs "=35".
+# Run (from sunshine-pc): python tools/route.py Strict tools/routes/99_stick_deadzone.dev --name <run>
+#   SUNSHINE_DEV_VPAD=1 SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1
+# The stick goes to 40/127 (31.5 % of full travel, between the two dead zones) on the virtual pad's SDL axis, so Aurora's
+# controller binding with the pad's dead zone sees it like a real stick (the devscript's own virtual PAD status bypasses it).
+# Evidence: "[devvpad] ... port0=1"; "[menu] dev vstick:0:40 set (... stickDeadZone=N)" (N = pct * 32767 / 100); the second
+# `log`: at dead zone 0 Mario has moved and pad.stick y > 0, at 35 he stands where the first `log` put him, pad.stick (0,0).
+# SUNSHINE_DEV_VPAD=late: the pad is added only at the game's first event pump (any pad at a --dvd boot, or hot-plug); at 35
+# the vstick line must still read stickDeadZone=11468 (main re-applies the dead zones on AURORA_CONTROLLER_ADDED).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+menu vstick:0:40
+wait frames=60
+log
+menu vstick:0:0
+wait frames=30
+log
+end

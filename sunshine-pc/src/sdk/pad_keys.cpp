@@ -35,6 +35,12 @@ void sunshineInstallKeyboardDefaults()
 	std::memcpy(keys.buttons, buttons, sizeof(buttons));
 	std::memcpy(keys.axes, axes, sizeof(axes));
 	PADSetDefaultKeyBindings(0, &keys);
+	// PADInit now, before applyRuntimeSettings sets the INI [keys] table: Aurora's first PADInit resets the key table to
+	// these defaults, so the game's own first call (JUTGamePad) dropped the INI keys (tools/routes/99_key_rebind.dev).
+	// Later PADInit calls return at once.
+	PADInit();
+	// The INI [keys] (applyRuntimeSettings sets every slot) are the only source of key bindings: this drops the port-0
+	// keys PADInit just read from Aurora's keyboard_bindings.dat. The port never writes it (no PADSerializeMappings).
 	PADRestoreDefaultKeyBindings(0);
 	PADSetKeyboardActive(0, TRUE);
 }

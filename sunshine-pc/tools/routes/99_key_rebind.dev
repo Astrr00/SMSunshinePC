@@ -1,0 +1,21 @@
+# T5 InputHooks: INI [keys] binding -> game, dolpic/0. One run per pre-written build/Route/<run>/appdata/Sunshine/settings.ini:
+#   rebound: "[keys]" + "STICK_UP=23" (T); default: no [keys] section (STICK_UP=26, W).
+# Run (from sunshine-pc): python tools/route.py Strict tools/routes/99_key_rebind.dev --name <run>
+#   SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1
+# Keys go in as `menu key:<SDL scancode name>:down|up` tokens: pushed SDL key events, routed like a real keyboard, so the
+# key -> PAD table that applyPadBindings set from the INI decides what they do.
+# Evidence: Mario's position in the three `log` lines: W moves him only in the default run, T only in the rebound run.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+menu key:W:down
+wait frames=45
+menu key:W:up
+wait frames=15
+log
+menu key:T:down
+wait frames=45
+menu key:T:up
+wait frames=15
+log
+end

@@ -1071,6 +1071,7 @@ u32 gMenuLogicAtOpen = 0;
 std::deque<std::string> gMenuDev; // menuDevQueue tokens
 int gMenuDevWait = 0;
 constexpr int kMenuDevStepFrames = 30;
+SDL_Joystick* gDevVpad = nullptr; // SUNSHINE_DEV_VPAD: SDL virtual gamepad (devVpadAttach), moved by the vstick token
 
 // Open or opening: every source is blocked for the layers below, so the game's pad layer drops held input.
 bool menuCaptures(const aurora::input::InputSource& /*source*/, void* /*userdata*/) {
@@ -1173,6 +1174,22 @@ void runMenuToken(const std::string& token) {
 			pushKey(scancode, edge == "down");
 			std::printf("[menu] dev %s pushed\n", token.c_str());
 		}
+	} else if (token.rfind("vstick:", 0) == 0) { // vstick:<x>:<y>, -127..127, GameCube orientation (y > 0 = up)
+		int x = 0;
+		int y = 0;
+		const PADDeadZones* zones = PADGetDeadZones(0);
+		if (gDevVpad == nullptr || std::sscanf(token.c_str() + 7, "%d:%d", &x, &y) != 2) {
+			std::printf("[menu] dev %s: no SUNSHINE_DEV_VPAD gamepad or bad token\n", token.c_str());
+		} else {
+			x = std::clamp(x, -127, 127);
+			y = std::clamp(y, -127, 127);
+			// SDL's left Y axis grows downwards; Aurora's default mapping turns SDL -Y into PAD up.
+			SDL_SetJoystickVirtualAxis(gDevVpad, SDL_GAMEPAD_AXIS_LEFTX, static_cast<Sint16>(x * 32767 / 127));
+			SDL_SetJoystickVirtualAxis(gDevVpad, SDL_GAMEPAD_AXIS_LEFTY, static_cast<Sint16>(-y * 32767 / 127));
+			std::printf("[menu] dev %s set (port0 pad=%d use=%d stickDeadZone=%d substickDeadZone=%d)\n", token.c_str(),
+			            zones != nullptr ? 1 : 0, zones != nullptr && zones->useDeadzones ? 1 : 0,
+			            zones != nullptr ? zones->stickDeadZone : -1, zones != nullptr ? zones->substickDeadZone : -1);
+		}
 	} else if (gMenu) {
 		gMenu->runPadToken(token);
 	} else {
@@ -1233,6 +1250,18 @@ bool run(const std::filesystem::path& settingsFile) {
 	ui.close();
 	aurora_end_frame();
 	return alive && ui.started();
+}
+
+void applyPadDeadZones() { applyDeadZones(settings()); }
+
+void controllerAdded(std::uint32_t instance) {
+	// Port 0 -> controller index -> SDL gamepad -> joystick instance (public PAD API; Aurora keys its controllers by that
+	// instance, and AURORA_CONTROLLER_ADDED carries it). A pad on another port leaves port 0's zones alone.
+	const auto index = PADGetIndexForPort(0);
+	SDL_Gamepad* pad = index >= 0 ? PADGetSDLGamepadForIndex(static_cast<u32>(index)) : nullptr;
+	if (pad != nullptr && SDL_GetGamepadID(pad) == instance) {
+		applyPadDeadZones();
+	}
 }
 
 void applyRuntimeSettings() {
@@ -1351,6 +1380,39 @@ void menuPoll() {
 }
 
 bool menuOpen() { return gMenu.has_value(); }
+
+void devVpadAttach() {
+	const char* env = std::getenv("SUNSHINE_DEV_VPAD");
+	const bool late = env != nullptr && std::strcmp(env, "late") == 0;
+	if (env == nullptr || (std::strcmp(env, "1") != 0 && !late)) {
+		return; // only 1 or late: any other value (0, false, no, ...) leaves the hook off
+	}
+	// Route windows have no focus, so SDL drops joystick input. Aurora's setter sets the same SDL hint and keeps its
+	// g_config.allowJoystickBackgroundEvents in sync.
+	aurora_set_background_input(true);
+	SDL_VirtualJoystickDesc desc;
+	SDL_INIT_INTERFACE(&desc);
+	desc.type = SDL_JOYSTICK_TYPE_GAMEPAD;
+	desc.naxes = SDL_GAMEPAD_AXIS_COUNT;
+	desc.nbuttons = SDL_GAMEPAD_BUTTON_COUNT;
+	desc.name = "Sunshine dev vpad";
+	const SDL_JoystickID id = SDL_AttachVirtualJoystick(&desc);
+	gDevVpad = id != 0 ? SDL_OpenJoystick(id) : nullptr;
+	if (gDevVpad != nullptr) { // triggers at rest
+		SDL_SetJoystickVirtualAxis(gDevVpad, SDL_GAMEPAD_AXIS_LEFT_TRIGGER, SDL_JOYSTICK_AXIS_MIN);
+		SDL_SetJoystickVirtualAxis(gDevVpad, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER, SDL_JOYSTICK_AXIS_MIN);
+	}
+	// Aurora adds a controller on SDL_EVENT_GAMEPAD_ADDED; pump until it is player 0, so applyDeadZones finds it.
+	// SUNSHINE_DEV_VPAD=late: no pump; the game's first pump adds it, like a pad plugged in at a --dvd boot or later.
+	int pumps = 0;
+	while (!late && gDevVpad != nullptr && PADGetDeadZones(0) == nullptr && pumps < 60) {
+		aurora_update();
+		++pumps;
+	}
+	std::printf("[devvpad] id=%u open=%d port0=%d pumps=%d\n", static_cast<unsigned>(id), gDevVpad != nullptr ? 1 : 0,
+	            PADGetDeadZones(0) != nullptr ? 1 : 0, pumps);
+	std::fflush(stdout);
+}
 
 void menuDevQueue(const char* tokens) {
 	if (gMenuDev.empty()) {

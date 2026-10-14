@@ -1,6 +1,9 @@
 // Dev-only headless gameplay driver. Enabled by env vars, never active by default:
 //   SUNSHINE_DEV_SCRIPT=<file>  pad script, advanced once per logic step (30 Hz)
 //   SUNSHINE_DEV_STATUS=1       status line once per second of game time
+//   SUNSHINE_DEV_VPAD=1         attach an SDL virtual gamepad as player 0 at startup (launcher::devVpadAttach), so the
+//                               [controls] dead zones apply to it; `menu vstick:<x>:<y>` moves its left stick
+//   SUNSHINE_DEV_VPAD=late      same pad, added only at the game's first event pump (after applyRuntimeSettings)
 // Input goes through Aurora's virtual pad status; the game code runs unchanged.
 #include <dolphin/pad.h>
 #include <dolphin/gx.h>
@@ -365,6 +368,7 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "menu") { // menu tok,tok,...: in-game menu dev tokens (launcher::menuDevQueue), one per 30 presented frames
+		// key:<SDL scancode name>:down|up pushes real SDL key events (INI [keys] bindings apply); vstick:<x>:<y> needs SUNSHINE_DEV_VPAD
 		c.op = Op::Menu;
 		if (!(in >> c.path)) fail(line, "menu needs tokens", text);
 		return c;

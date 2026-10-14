@@ -72,6 +72,12 @@ static void presentAndPump()
 				std::fprintf(stderr, "[exit] AURORA_EXIT\n");
 				std::exit(0);
 			}
+			if (e->type == AURORA_CONTROLLER_ADDED) {
+				// A pad Aurora adds after applyRuntimeSettings (any pad at a --dvd boot: no pump before it; hot-plug) would
+				// keep Aurora's own 24 % dead zones (tools/routes/99_stick_deadzone.dev, SUNSHINE_DEV_VPAD=late). Only for the
+				// port-0 pad, so a second pad does not reset port 0's zones.
+				launcher::controllerAdded(e->controller);
+			}
 		}
 		sunshineHeartbeat(); // minimized or paused windows keep pumping events: not a hang
 		if (aurora_begin_frame()) // false while minimized or paused: keep pumping events
@@ -167,6 +173,7 @@ int main(int argc, char* argv[])
 	modsLoad(exeDir, s.mods); // mods/mods_loader.cpp
 
 	sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
+	launcher::devVpadAttach(); // dev hook, SUNSHINE_DEV_VPAD only: virtual gamepad as player 0 before the dead zones apply
 	launcher::applyRuntimeSettings(); // launcher/launcher.cpp: PAD bindings, dead zones, master volume, window
 	launcher::menuInstall(settingsFile); // launcher/launcher.cpp: R+Start / F1 in-game menu layer
 	savesApplyDirectory(s, exeDir); // saves/save_directory.cpp: [saves] directory, before CARDInit in initialize()
@@ -177,6 +184,7 @@ int main(int argc, char* argv[])
 	while (!aurora_begin_frame()) { // GX commands issued during TApplication::initialize need an open frame
 		aurora_update();
 	}
+	launcher::applyPadDeadZones(); // the loop above drops Aurora's events: a pad added there (--dvd) would keep 24 %
 	gpApplication.initialize();
 	gpApplication.proc();
 	gpApplication.finalize();
