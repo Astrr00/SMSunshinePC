@@ -23,6 +23,9 @@
 
 namespace fs = std::filesystem;
 
+extern "C" void sunshineEnterSehGuard();
+extern "C" void sunshineLeaveSehGuard();
+
 namespace {
 
 FILE* gLogFile = nullptr;
@@ -55,23 +58,29 @@ std::vector<mods::OverlayFile> gOverlayCandidates;
 // Only trivially destructible values live in this frame: __try cannot unwind C++ objects.
 template <typename... Args>
 bool guardedVoid(void (*fn)(Args...), unsigned long& code, Args... args) {
+    sunshineEnterSehGuard();
     __try {
         fn(args...);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         code = GetExceptionCode();
+        sunshineLeaveSehGuard();
         return false;
     }
+    sunshineLeaveSehGuard();
     return true;
 }
 
 template <typename R, typename... Args>
 bool guardedRet(R (*fn)(Args...), unsigned long& code, R& result, Args... args) {
+    sunshineEnterSehGuard();
     __try {
         result = fn(args...);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         code = GetExceptionCode();
+        sunshineLeaveSehGuard();
         return false;
     }
+    sunshineLeaveSehGuard();
     return true;
 }
 

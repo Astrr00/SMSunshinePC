@@ -1,0 +1,25 @@
+# Particles check (Phase 1 / Phase 3): active JPA emitter, drawn-emitter and particle counts in bianco/0
+# ([status-jpa] / [shot-jpa] in devscript.cpp: walks gpMarioParticleManager->unk3B8->unk44[0..7] and gpEmitterManager4D2).
+# Env: SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1
+#   settings.ini [video] fsr1=0 widescreen=1 aspect=4:3
+waitfor director mario dirstate=4 camDemo=0 timeout=6000
+cheat infinite_water
+wait frames=60
+log
+shot jpa_idle.png
+hold trig=0,255 frames=60
+log
+shot jpa_spray1.png
+hold trig=0,255 frames=60
+log
+shot jpa_spray2.png
+hold A frames=15
+wait frames=30
+log
+shot jpa_jump.png
+wait frames=45
+log
+shot jpa_land.png
+wait frames=30
+log
+end

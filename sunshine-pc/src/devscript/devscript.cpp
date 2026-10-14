@@ -43,6 +43,11 @@
 #include "System/MarDirector.hpp"
 #include "GC2D/CardLoad.hpp"
 #include "GC2D/ConsoleStr.hpp"
+#include "System/EmitterViewObj.hpp"
+#include "JSystem/JParticle/JPAEmitterManager.hpp"
+#include "JSystem/JParticle/JPAEmitter.hpp"
+
+extern JPAEmitterManager* gpEmitterManager4D2;
 #include "GC2D/GCConsole2.hpp"
 
 // Aurora's virtual pad API. <dolphin/pad.h> resolves to the decomp copy (sms/include/dolphin, earlier on the
@@ -514,11 +519,45 @@ void logBoss(const char* tag)
 	}
 }
 
+void logJpa(const char* tag)
+{
+	JPAEmitterManager* m3d = gpMarioParticleManager ? gpMarioParticleManager->unk3B8 : nullptr;
+	JPAEmitterManager* m2d = gpEmitterManager4D2;
+	if (!m3d && !m2d)
+		return;
+	auto sumMgr = [](JPAEmitterManager* mgr, unsigned& emitters, unsigned& drawn, unsigned& particles, unsigned grpP[4]) {
+		emitters = drawn = particles = 0;
+		for (int g = 0; g < 8; ++g) {
+			unsigned gp = 0;
+			JSUList<JPABaseEmitter>* list = &mgr->unk44[g];
+			for (JSULink<JPABaseEmitter>* link = list->getFirst(); link != list->getEnd(); link = link->getNext()) {
+				JPABaseEmitter* e = link->getObject();
+				if (!e) continue;
+				++emitters;
+				const unsigned n = e->getParticleNumber();
+				particles += n;
+				if (e->isDraw()) {
+					++drawn;
+					gp += n;
+				}
+			}
+			if (g < 4) grpP[g] = gp;
+		}
+	};
+	unsigned e3 = 0, d3 = 0, p3 = 0, g3[4] = {};
+	unsigned e2 = 0, d2 = 0, p2 = 0, g2[4] = {};
+	if (m3d) sumMgr(m3d, e3, d3, p3, g3);
+	if (m2d) sumMgr(m2d, e2, d2, p2, g2);
+	std::printf("[%s-jpa] mgr3d=(emitters=%u drawn=%u particles=%u g0=%u g1=%u g2=%u g3=%u) mgr2d=(emitters=%u drawn=%u particles=%u) tick=%d\n",
+	            tag, e3, d3, p3, g3[0], g3[1], g3[2], g3[3], e2, d2, p2, gTick);
+}
+
 void logStatus(const char* tag)
 {
 	logWash(tag);
 	logEMario(tag);
 	logBoss(tag);
+	logJpa(tag);
 	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
 	if (gpCardLoad)
 		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,

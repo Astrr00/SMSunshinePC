@@ -20,6 +20,10 @@ namespace {
 
 LONG g_reported = 0;
 HANDLE g_log = INVALID_HANDLE_VALUE;
+// Depth of intentional SEH guards (e.g. mods_loader.cpp calling into a third-party mod DLL under __try/__except).
+// While > 0 on the current thread, vectoredHandler lets frame-based SEH handle the fault without logging a false
+// "*** fatal exception" or consuming g_reported.
+thread_local int g_sehGuardedDepth = 0;
 
 void emit(const char* s)
 {
@@ -253,6 +257,8 @@ LONG CALLBACK vectoredHandler(EXCEPTION_POINTERS* info)
 	const DWORD code = info->ExceptionRecord->ExceptionCode;
 	if (!isFatal(code))
 		return EXCEPTION_CONTINUE_SEARCH;
+	if (g_sehGuardedDepth > 0 && code != 0xC0000374 && code != 0xC0000409)
+		return EXCEPTION_CONTINUE_SEARCH;
 	if (code == EXCEPTION_STACK_OVERFLOW) {
 		// The faulting thread has no stack left for dbghelp: report from a fresh thread using the saved context.
 		if (HANDLE t = CreateThread(nullptr, 1 << 20, reportThread, info, 0, nullptr)) {
@@ -321,6 +327,8 @@ DWORD WINAPI armThreads(LPVOID)
 
 void sunshineHeartbeat() { heartbeatImpl(); }
 void sunshineWatchdogStart() { watchdogStartImpl(); }
+extern "C" void sunshineEnterSehGuard() { ++g_sehGuardedDepth; }
+extern "C" void sunshineLeaveSehGuard() { --g_sehGuardedDepth; }
 
 void installCrashHandler()
 {
