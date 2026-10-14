@@ -1,6 +1,6 @@
 // Host-conversion checks for game code built with TARGET_PC (tools/port_tests.cmd compiles this file with the sms include
 // path and links the real JSUInputStream/JSUMemoryStream): typed stream reads keep the preset on a short read,
-// float -> u32 equals the console's __cvt_fp2unsigned.
+// float -> u32 equals the console's __cvt_fp2unsigned, float -> s16 angles keep the low 16 bits.
 #include <JSystem/JSupport/JSUMemoryInputStream.hpp>
 #include <hostfloat.h>
 #include <cmath>
@@ -25,6 +25,10 @@ template <typename T> T readPreset(T preset)
 	return v;
 }
 
+// The (s16)(s32) cast used by the gatekeeper.cpp spawn angle, copied here: this tests the cast, not gatekeeper.cpp
+// itself. noinline so the conversion is not constant-folded.
+__declspec(noinline) u16 gateAngle(int i) { return (u16)(s16)(s32)(182.04445f * (36.0f * (f32)i)); }
+
 } // namespace
 
 void smsHostChecks(void (*check)(bool, const char*))
@@ -45,4 +49,10 @@ void smsHostChecks(void (*check)(bool, const char*))
 	check(SMSCvtFp2Unsigned(2147483648.0) == 0x80000000u, "fp2unsigned: 2^31 -> 0x80000000");
 	check(SMSCvtFp2Unsigned(4294967296.0) == 0xFFFFFFFFu, "fp2unsigned: 2^32 -> 0xFFFFFFFF");
 	check(SMSCvtFp2Unsigned(std::nan("")) == 0xFFFFFFFFu, "fp2unsigned: NaN -> 0xFFFFFFFF");
+
+	static const u16 want[10] = { 0, 6553, 13107, 19660, 26214, 0x8000, 0x9999, 0xB333, 0xCCCC, 0xE666 };
+	bool ok = true;
+	for (int k = 0; k < 10; k++)
+		ok = ok && gateAngle(k) == want[k];
+	check(ok, "angle: (s16)(s32) cast of the 10 gatekeeper 36-degree angles keeps the low 16 bits");
 }

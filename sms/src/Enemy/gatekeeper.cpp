@@ -477,7 +477,13 @@ void TBiancoGateKeeper::launchNamekuri()
 			JGeometry::TVec3<f32> rot = mRotation;
 			JGeometry::TVec3<f32> scale;
 			scale.set(1.0f, 1.0f, 1.0f);
+#ifdef TARGET_PC
+			// asm 0x8030D0A8 fctiwz + 0x8030D0C4 clrlwi: the low 16 bits of the s32 (float -> s16 out of range is UB).
+			// Hardening; in-range results equal the console (here at most 324 deg, far below the s32 limit).
+			s16 angle = (s16)(s32)(182.04445f * (36.0f * (f32)i));
+#else
 			s16 angle = (s16)(182.04445f * (36.0f * (f32)i));
+#endif
 			JGeometry::TVec3<f32> vel;
 			vel.x = 4.0f * JMASSin(angle);
 			vel.y = 12.0f;

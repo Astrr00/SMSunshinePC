@@ -201,8 +201,16 @@ inline f32 MsSqrtf(f32 x)
 
 // NOTE: MsCos is **real**.
 #pragma dont_inline on
+#ifdef TARGET_PC
+// console: fctiwz, low 16 bits; float -> s16 out of range (angle outside +-180 deg) is UB on the host: go via s32.
+// Hardening; in-range results equal the console. For v*182.04 >= 2^31 (never reached) fctiwz saturates (low 16 bits
+// 0xFFFF) while x64 gives 0 (cvttss2si 0x80000000), and float -> s32 is still UB there.
+inline f32 MsSin(f32 v) { return JMASSin((s16)(s32)(v * (65536.0f / 360.0f))); }
+inline f32 MsCos(f32 v) { return JMASCos((s16)(s32)(v * (65536.0f / 360.0f))); }
+#else
 inline f32 MsSin(f32 v) { return JMASSin(v * (65536.0f / 360.0f)); }
 inline f32 MsCos(f32 v) { return JMASCos(v * (65536.0f / 360.0f)); }
+#endif
 #pragma dont_inline off
 
 inline void MsMtxSetRotX(MtxPtr mtx, f32 x)
