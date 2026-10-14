@@ -1,6 +1,7 @@
 # Harness-local state (not project source)
 .claude/
 .cursor/
+.opencode/
 .stateroot/
 
 # Logs and crash output written next to the game

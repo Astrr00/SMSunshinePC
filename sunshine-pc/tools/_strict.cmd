@@ -23,5 +23,6 @@ cmake --build "%BLD%" --target sunshine -j 6 > "%BLD%\_link.log" 2>&1
 set "RC=%ERRORLEVEL%"
 findstr /c:"LNK2019" /c:"LNK2001" /c:"LNK1120" "%BLD%\_link.log" >nul && (echo STRICT: unresolved symbols, see %BLD%\_link.log & exit /b 1)
 if not "%RC%"=="0" (echo STRICT: build failed rc=%RC%, see %BLD%\_link.log & exit /b %RC%)
+if not exist "%BLD%\sunshine.exe" (echo STRICT: FAIL, no sunshine.exe in %BLD% & exit /b 1)
 echo STRICT: 0 unresolved symbols
 exit /b 0

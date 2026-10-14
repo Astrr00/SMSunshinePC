@@ -421,7 +421,8 @@ void TSelectMenu::initData(u8 stage, JKRArchive* pArch,
 	    = new TBoundPane(mMenuScreen, tags[mStage] * 0x100 + 'b');
 	mStageBannerShadow->getPane()->show();
 
-	mScenarioBmg = JKRGetResource("/common/2d/scenarioname.bmg");
+	// asm 0x8023534C: loads @3935 (.rodata:0x134, 0x80393F74) = "/common/2d/stagename.bmg"
+	mScenarioBmg = JKRGetResource("/common/2d/stagename.bmg");
 
 	strncpy(mStageName->getStringPtr(),
 	        SMSGetMessageData(mScenarioBmg, unkArr[mStage] & 0xFFFF), 0x11);

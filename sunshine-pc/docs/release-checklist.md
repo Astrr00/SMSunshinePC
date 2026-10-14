@@ -62,6 +62,12 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 - [ ] Re-check the licence items in `THIRD_PARTY_LICENSES.md` open notes before publishing (Visual C++ redist terms,
       the port's own licence).
 
+## Verified 2026-10-14 (ReleasePkg rebuild + pipeline cache seed)
+
+- Release configure/build in `build/RelPkg` (`CMAKE_BUILD_TYPE=Release`, `SUNSHINE_ALLOW_UNRESOLVED=OFF`): rc 0, 0 `LNK2019/LNK2001/LNK1120` hits, `sunshine.exe` 11 233 280 bytes, `POST_BUILD` materialises `initial_pipeline_cache.db` (484 rows, 2 007 040 bytes) via `tools/pipeline_cache_seed.py`.
+- `python tools/package.py --build-dir build/RelPkg --llvm-bin <LLVM bin>`: `dist/sunshine-0.1.0.zip` (21 252 707 bytes = 20.3 MiB, SHA-256 `cebd582ba708e18f0bb2e7640b9b271d8d5ca92a10a5ec6ce05a3c50e64305a5`), ships `sunshine.exe`, `initial_pipeline_cache.db`, 9 imported DLLs + `dxcompiler.dll`/`dxil.dll` (0 missing imports verified by `llvm-readobj` walk on the unpacked folder), `assets/`, and 16 licence files; 0 game data files.
+- Unpacked smoke test in `%TEMP%\sunshine-pkg2\sunshine-0.1.0` with a private `APPDATA` (`SUNSHINE_ALLOW_CPU_ADAPTER=1` on this GPU-less VM): launcher renders (`launcher.png`); `--dvd` run logs `Seeded pipeline cache from '.../initial_pipeline_cache.db' (484 rows merged, 0 rows skipped)`, reaches the title screen at `logic 30/s`, 0 fatal exceptions, `crash.log` 0 bytes.
+
 ## Verified 2026-10-13 (lead + ReleasePkg worker)
 
 - Release configure/build in a new tile: `python tools\locked.py cmd /c tools\build-alt.cmd ReleasePkg` style build of the `sunshine` target with `SUNSHINE_ALLOW_UNRESOLVED=OFF`: rc 0, 94 s with sccache, `sunshine.exe` 11 104 768 bytes, 0 `LNK2019/LNK2001/LNK1120` hits. `TracyClient.lib` is an 8.7 KB stub, the exe holds no Tracy strings, so no Tracy licence row is shipped.

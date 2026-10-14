@@ -85,7 +85,8 @@ target_include_directories(sunshine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_executable(settings_test tools/settings_test.cpp src/settings.cpp)
 target_include_directories(settings_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_custom_command(TARGET sunshine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:sunshine>/assets)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:sunshine>/assets
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/pipeline_cache_seed.py $<TARGET_FILE_DIR:sunshine>/initial_pipeline_cache.db)
 target_link_libraries(sunshine PRIVATE sms_game
     aurora::core aurora::gx aurora::gd aurora::si aurora::vi aurora::pad aurora::mtx aurora::os
     aurora::dvd aurora::card aurora::main ZLIB::ZLIB)
@@ -151,6 +152,7 @@ if (WIN32)
     endif ()
 endif ()
 install(DIRECTORY assets/ DESTINATION assets OPTIONAL)
+install(FILES "$<TARGET_FILE_DIR:sunshine>/initial_pipeline_cache.db" DESTINATION .)
 install(FILES THIRD_PARTY_LICENSES.md DESTINATION .)
 install(DIRECTORY licenses/ DESTINATION licenses)
 set(CPACK_PACKAGE_NAME "sunshine")

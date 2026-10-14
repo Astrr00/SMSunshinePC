@@ -54,12 +54,13 @@ No installation: keep this folder together and run
     sunshine.exe --dvd "C:\\path\\to\\your\\image"
 
 The image format is whatever the disc reader accepts (iso/rvz/wia/...). Without --dvd,
-sunshine.exe prints the usage line.
+sunshine.exe opens the launcher.
 
 Requirements: Windows 10/11 x64 and a GPU with a current driver.
 
 Contents:
   sunshine.exe               game and port
+  initial_pipeline_cache.db  bundled GX pipeline cache seed
   *.dll                      runtime libraries (see THIRD_PARTY_LICENSES.md)
   assets/                    port assets
   LICENSE                    licence of the decompilation (CC0 1.0)
@@ -187,6 +188,10 @@ def main():
     shutil.copy2(exe, stage)
     if args.with_pdb:
         shutil.copy2(os.path.join(build, "sunshine.pdb"), stage)
+    seed_db = os.path.join(build, "initial_pipeline_cache.db")
+    if not os.path.isfile(seed_db):
+        subprocess.run([sys.executable, os.path.join(ROOT, "tools", "pipeline_cache_seed.py"), seed_db], check=True)
+    shutil.copy2(seed_db, os.path.join(stage, "initial_pipeline_cache.db"))
     for dll_name, src in sorted(dlls.items()):
         shutil.copy2(src, os.path.join(stage, dll_name))
     shutil.copytree(assets, os.path.join(stage, "assets"))
