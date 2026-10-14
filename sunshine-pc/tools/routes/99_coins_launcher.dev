@@ -1,0 +1,12 @@
+# T8 Toggle inventory: Cheats pane "Max coins" (cheat-3 = infinite_coins, assets/cheats.json order) -> INI [cheats] -> game.
+# Run (from sunshine-pc): python tools/route.py Strict tools/routes/99_coins_launcher.dev --no-dvd --name t8_c1 --seconds 150
+#   SUNSHINE_DEV_LAUNCHER_ACTIONS=cheat-3,start SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_DEV_NO_SHELL=1
+# Pre-written build/Route/<run>/appdata/Sunshine/settings.ini: "[launcher] last_image=<rvz>" only.
+# Control t8_c0: the same, with SUNSHINE_DEV_LAUNCHER_ACTIONS=start (no toggle).
+# Evidence: "[cheats-state] ... coins=N" (N = 0 in t8_c0, 99 in t8_c1), "[cheats] infinite_coins = on" in t8_c1 only.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+wait frames=120
+log
+end

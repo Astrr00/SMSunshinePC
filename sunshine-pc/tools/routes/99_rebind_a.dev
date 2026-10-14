@@ -1,0 +1,18 @@
+# T8 Toggle inventory: Controls pane key row "A" (bind-A) captured in the launcher -> INI [keys] A=10 (G) -> game.
+# Capture + game run t8_b1 (the launcher phase takes the pad tokens, the game phase runs this script):
+#   python tools/route.py Strict tools/routes/99_rebind_a.dev --no-dvd --name t8_b1 --seconds 150
+#     SUNSHINE_DEV_LAUNCHER_ACTIONS=bind-A SUNSHINE_DEV_PAD_EVENTS=key:G:down,key:G:up,start SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_DEV_NO_SHELL=1
+# Pre-written build/Route/t8_b1/appdata/Sunshine/settings.ini: "[launcher] last_image=<rvz>" only (the capture writes [keys]).
+# Control t8_b0: SUNSHINE_DEV_LAUNCHER_ACTIONS=start, no [keys] (default A = Space). Null backend: t8_b1n (--appdata-from t8_b1, SUNSHINE_ALLOW_CPU_ADAPTER=0).
+# Evidence: the [status] flag becomes 0x04000470 after the Space tap in t8_b0 only (tick 450) and after the G tap in t8_b1 only
+# (tick 570); Mario's y stays 300.0 in the 30-tick samples, so the flag is the only sign of the A action (partial).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+menu key:Space:down,key:Space:up
+wait frames=120
+log
+menu key:G:down,key:G:up
+wait frames=120
+log
+end

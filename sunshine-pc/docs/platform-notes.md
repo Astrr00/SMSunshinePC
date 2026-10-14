@@ -913,6 +913,13 @@ Same setup as T1 (pre-written `build/Route/<run>/appdata/Sunshine/settings.ini`,
 - Glyphs: `tools/routes/97_glyph_shot.dev`, airport/1 (FLUDD tutorial), `SUNSHINE_RENDER_SCALE=1`. At 60 and 80 ticks after `dirstate=4` the tutorial shows the water-button icon (`water_button_x.bti`, the X glyph) next to the nozzle HUD at about (1200, 670); at +240 it is gone; at +40 the HUD is not settled and differs between runs. 66x66 icon crop vs `t2_g_xbox`, tick +80: generic 0.00, playstation 59.7, switch 82.0, gamecube 42.4 (tick +60: 3.7, 65.5, 79.0, 42.9). Logs: `[glyph] xbox/a,b,x` for generic and xbox, `<style>/a,b,x` for the others. The PlayStation X slot still shows a pink square.
 - Not verified here: scale 67/77/150+ (`render_scale.cpp` ignores env values outside 0.25-1.0; the INI allows 0-400), the A/B/Start glyph slots in a frame.
 
+## Launcher settings in game: toggle gaps (T8, 2026-10-14)
+
+Routes `tools/routes/99_coins_launcher.dev` and `tools/routes/99_rebind_a.dev`, WARP, `route.py --no-dvd`, pre-written `build/Route/<run>/appdata/Sunshine/settings.ini` with `[launcher] last_image` only (the launcher writes the rest). All rc 0. Table of every switch: `docs/ui-plan.md`, T8 Toggle inventory.
+
+- Cheats pane "Max coins" (`cheat-3`, `cheats.infinite_coins`): `t8_c0` (`SUNSHINE_DEV_LAUNCHER_ACTIONS=start`) logs `coins=0` in 58 state lines; `t8_c1` (`cheat-3,start`) logs `[cheats] infinite_coins = on` and `coins=99` in 58 lines, `active=1`.
+- Controls key row A (`bind-A`, `keys.A`): `t8_b1` captures the row in the launcher (`key:G:down,key:G:up`, then `start`); its INI has `A=10`. In game `0x04000470` shows at tick 570 after the G tap and not after the Space tap; control `t8_b0` (default A = Space) shows it at tick 450 after Space; Null backend `t8_b1n` (`SUNSHINE_ALLOW_CPU_ADAPTER=0`, `Device: Null backend (CPU)`) the same as `t8_b1`, rc 0, not fatal. Mario stays at y 300.0 in every sample, so the flag's meaning is not decoded [INFERENCE: A action].
+
 ## Host float -> u32 and typed stream reads (RefDecompFix, 2026-10-13)
 
 Five `TARGET_PC` fixes from the RefDecomp bug list (agent RefDecompFix, `lead-2026-10-13b/RefDecompFix_report.md`): 1 typed JSU stream reads, 2 float -> u32, 3 stack `GXLightObj` zero-init, 4 float -> s16 angle casts, 5 `TGCConsole2` pane slot `unk334[0x17]`. Two rules for new host code:
