@@ -1,0 +1,93 @@
+# FontFix follow-up: the NPC speech balloon of Peach in Delfino Plaza (message 0xE004F of common/2d/balloon.bmg).
+# NpcBase.cpp:133-141 creates the TNpcBalloon only for the Peach NPC (mActorType 0x4000018) and only when
+# getCurrentMap() == 1 and getCurrentStage() == 1, i.e. Delfino Plaza. NpcChange.cpp:242-255: taking her calls
+# peachParasolOut_() and setNextMessage(0xE004F, 0x2EE), so the balloon appears 750 logic ticks (25 s) later.
+# Peach's node in dolpic/0 (/map/scene.bin, name ピーチ): position (5350, 300, 4200), facing 180 deg.
+# The dev start puts Mario at (6500, 300, -3850), about 8050 units away, so this route teleports next to her
+# (a tp, not retail input) and presses A.
+# Run: python tools/route.py Strict2 tools/routes/99_talk_text_peach.dev --name peach_b43 --seconds 300
+#   SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1
+#   settings.ini [video] fsr1=0 widescreen=1 aspect=4:3
+# Evidence: pe_*.png (the balloon text), the talk= field in run.log (1 while she is held), 0 fatal, rc of the run.
+# Measured 2026-10-14, run peach_b43d (rc 0, 0 fatal, 0x2E ticks): Mario takes Peach (she rides on him) and her
+# dialogue banner is fully legible at the top (マリオ! ぶじでよかったわ) - that is the NPC speech path, not the balloon.
+# The balloon 0xE004F (ゆうかい デス！ in common/2d/balloon.bmg) does NOT appear, not even 1800 ticks (30 s) after the
+# take: panel-coloured pixels are 3 in every pe_a*.png, the count of a frame without a balloon.
+# Most likely cause: TBaseNPC::loadAfter (NpcBase.cpp:133-141) creates the TNpcBalloon only when
+# getCurrentMap() == 1 and getCurrentStage() == 1, and a dolpic/0 dev start does not satisfy that (the devscript status
+# prints gpApplication.mCurrArea.getStage() = 1, which is the area, not the director's map/stage).
+# Next attempt, not run: take her during a real entry into Delfino Plaza (route 85 reaches the plaza with the accepted
+# dev aids), not a dev start.
+waitfor director mario dirstate=4 camDemo=0 timeout=6000
+cheat infinite_health
+wait frames=30
+log
+tp x=5350 y=320 z=4400 yaw=180
+wait frames=10
+shot pe_tp000.png
+hold A frames=60
+wait frames=30
+log
+shot pe_taken.png
+wait frames=60
+shot pe_a060.png
+wait frames=60
+shot pe_a120.png
+wait frames=60
+shot pe_a180.png
+wait frames=60
+shot pe_a240.png
+wait frames=60
+shot pe_a300.png
+wait frames=60
+shot pe_a360.png
+wait frames=60
+shot pe_a420.png
+wait frames=60
+shot pe_a480.png
+wait frames=60
+shot pe_a540.png
+wait frames=60
+shot pe_a600.png
+wait frames=60
+shot pe_a660.png
+wait frames=60
+shot pe_a720.png
+wait frames=60
+shot pe_a780.png
+wait frames=60
+shot pe_a840.png
+wait frames=60
+shot pe_a900.png
+wait frames=60
+shot pe_a960.png
+wait frames=60
+shot pe_a1020.png
+wait frames=60
+shot pe_a1080.png
+wait frames=60
+shot pe_a1140.png
+wait frames=60
+shot pe_a1200.png
+wait frames=60
+shot pe_a1260.png
+wait frames=60
+shot pe_a1320.png
+wait frames=60
+shot pe_a1380.png
+wait frames=60
+shot pe_a1440.png
+wait frames=60
+shot pe_a1500.png
+wait frames=60
+shot pe_a1560.png
+wait frames=60
+shot pe_a1620.png
+wait frames=60
+shot pe_a1680.png
+wait frames=60
+shot pe_a1740.png
+wait frames=60
+shot pe_a1800.png
+log
+end
