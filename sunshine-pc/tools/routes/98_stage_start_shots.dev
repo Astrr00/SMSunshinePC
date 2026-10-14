@@ -1,0 +1,28 @@
+# StageStart (lead brief 2026-10-13b): one shot every 8 logic ticks from stage=2 (bianco/0), 7 shots, d_000..d_048.
+# Stage-start partial frames, cold home (16:9 sa169c): tick 112 non-black only in x0..512 y0..312 (window px), ticks 120/128
+# in x0..1414/1406 y0..650, rest black; full from tick 136.
+# Observed in the cold runs sa169c (16:9) and sa169dp (4:3, pass dump on); the same-name reruns sa169 and sa43 are full.
+# A new --name gets a new USERPROFILE home (Aurora pipeline cache and Dawn cache empty); a rerun of the same --name is warm.
+# Evidence and cause: docs/platform-notes.md, Stage start.
+# Run: python tools/route.py Strict tools/routes/98_stage_start_shots.dev --name <new name> --seconds 120
+#   SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1
+# (route.py defaults the render scale to 0.25, so pass SUNSHINE_RENDER_SCALE=1 for window-pixel boxes.)
+# settings.ini (pre-written to build/Route/<name>/appdata/Sunshine): [video] fsr1=0 widescreen=1 aspect=16:9 (4:3 run: aspect=4:3).
+# A trailing `wait` keeps the last shot: without it the game ends before d_048.png is written (async write).
+# Shots with thp=0 in run.log ("[shot-thp] thp=N") are real game frames; thp>0 means a THP film is on screen.
+waitfor stage=2 timeout=1200
+shot d_000.png
+wait frames=8
+shot d_008.png
+wait frames=8
+shot d_016.png
+wait frames=8
+shot d_024.png
+wait frames=8
+shot d_032.png
+wait frames=8
+shot d_040.png
+wait frames=8
+shot d_048.png
+wait frames=2
+end
