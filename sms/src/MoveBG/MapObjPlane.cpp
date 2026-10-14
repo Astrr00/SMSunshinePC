@@ -42,7 +42,14 @@ void TMapObjPlane::initDraw()
 	                  (GXColor) { mAmbColor, mAmbColor, mAmbColor, 0xff });
 	GXSetChanMatColor(GX_COLOR0A0, (GXColor) { 0xff, 0xff, 0xff, 0xff });
 
+#ifdef TARGET_PC
+	// zero-init: retail loads stack garbage as the unset dir and attn words (asm 0x801B7028), which can reach the host
+	// shader as 0*NaN under angle attenuation. The channel above uses GX_AF_NONE, so this draw reads neither (Aurora
+	// shader.cpp: attn = 1.0) and zero gives the console's result.
+	GXLightObj light = {};
+#else
 	GXLightObj light;
+#endif
 	JGeometry::TVec3<f32> pos(20000.0f, 20000.0f, 20000.0f);
 	GXInitLightPos(&light, pos.x, pos.y, pos.z);
 	GXInitLightColor(&light, (GXColor) { 0xff, 0xff, 0xff, 0xff });

@@ -90,7 +90,14 @@ void TSilhouette::loadAfter()
 void TSilhouette::setting(MtxPtr param_1)
 {
 	GXSetChanAmbColor(GX_COLOR0A0, (GXColor) { unk12.r, unk12.g, unk12.b, 0 });
+#ifdef TARGET_PC
+	// zero-init: retail loads stack garbage as the unset dir words (asm 0x800C31B0, SPOT), which can reach the host
+	// shader as 0*NaN. A zero dir gives the console's result: AttnA(1,0,0) makes the coefficients that multiply dir 0
+	// (inference from Aurora shader.cpp:826-827, cos_attn = a0).
+	GXLightObj GStack_54 = {};
+#else
 	GXLightObj GStack_54;
+#endif
 	Vec local_60;
 	Vec local_6C = SMS_GetMarioPos();
 	MTXMultVec(param_1, &local_6C, &local_60);

@@ -94,7 +94,14 @@ void TLightCommon::setLight(const JDrama::TGraphics* gfx, int index)
 	SMS_DrawInit();
 	int lightIndex = index * 2;
 
+#ifdef TARGET_PC
+	// zero-init: retail loads stack garbage as the unset dir words (asm 0x800C4EA4), which can reach the host shader as
+	// 0*NaN. A zero dir gives the console's result: angle attn (1,0,0) makes the coefficients that multiply dir 0
+	// (inference from Aurora shader.cpp:826-827, cos_attn = a0).
+	GXLightObj light = {};
+#else
 	GXLightObj light;
+#endif
 	Vec pos;
 	MTXMultVec(gfx->getViewMtx(), getLightPosition(lightIndex), &pos);
 	GXInitLightPos(&light, pos.x, pos.y, pos.z);
@@ -119,7 +126,14 @@ void TLightCommon::perform(u32 cue, JDrama::TGraphics* graphics)
 	if (cue & CUE_DRAW_INIT) {
 		ReInitializeGX();
 		SMS_DrawInit();
+#ifdef TARGET_PC
+		// zero-init: retail loads stack garbage as the unset dir words (asm 0x800C4D98), which can reach the host shader
+		// as 0*NaN. A zero dir gives the console's result: angle attn (0,0,0) makes the coefficients that multiply dir 0
+		// (inference from Aurora shader.cpp:826-827, cos_attn = a0).
+		GXLightObj light = {};
+#else
 		GXLightObj light;
+#endif
 		char trash[0xc]; // unused stack slot (present in the retail frame)
 		GXInitLightPos(&light, getLightPosition(0)->x, getLightPosition(0)->y,
 		               getLightPosition(0)->z);
@@ -151,7 +165,14 @@ void TLightMario::setLight(const JDrama::TGraphics* gfx, int index)
 	SMS_DrawInit();
 	int lightIndex = index * 2;
 
+#ifdef TARGET_PC
+	// zero-init: retail loads stack garbage as the unset dir words (asm 0x800C4A84), which can reach the host shader as
+	// 0*NaN. A zero dir gives the console's result: angle attn (1,0,0) makes the coefficients that multiply dir 0
+	// (inference from Aurora shader.cpp:826-827, cos_attn = a0).
+	GXLightObj light = {};
+#else
 	GXLightObj light;
+#endif
 	Vec pos;
 	MTXMultVec(gfx->getViewMtx(), getLightPosition(lightIndex), &pos);
 	GXInitLightPos(&light, pos.x, pos.y, pos.z);
