@@ -3,7 +3,7 @@
     "name": "Overlay demo",
     "version": "1.0.0",
     "author": "Sunshine PC port",
-    "description": "Data-only mod: replaces one station name in data/message.szs. Build files/ with tools/mod_pack.py.",
+    "description": "Data-only mod: renames Delfino Plaza in the pause menu (data/common.szs, /2d/stagename.bmg). Build files/ with tools/mod_pack.py.",
     "sunshine_api": "1.0",
     "load_order": 10
 }

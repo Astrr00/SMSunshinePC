@@ -1,6 +1,8 @@
 """Builds the data of the overlay-demo example mod from the user's own disc extract.
 
-Writes <out>/files/data/message.szs: the stock archive with one station name replaced.
+Writes <out>/files/data/common.szs: the stock archive with one stage name replaced (/2d/stagename.bmg entry 1,
+the Delfino Plaza name in the pause menu, PauseMenu2.cpp). The first target, data/message.szs (station.bmg), is never
+opened by the game (no path to it in main.dol or sms/src), so it showed nothing.
 Replacement is same byte length (Shift-JIS), so every RARC offset stays valid.
 The output derives from copyrighted game data: it is generated locally and git-ignored (*.szs).
 
@@ -15,9 +17,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import discfmt  # noqa: E402
 
-REL = "data/message.szs"
-# (old, new) station names, Shift-JIS, equal byte length. old must occur exactly once in the archive.
-PATCHES = [("ドルピックタウン駅", "スーパーマリオ駅前")]
+REL = "data/common.szs"
+MEMBER = "/2d/stagename.bmg"
+# (old, new) stage names, Shift-JIS, equal byte length. old must occur exactly once in MEMBER.
+PATCHES = [("ドルピックタウン", "スーパーマリオズ")]
 DEFAULT_OUT = os.path.normpath(os.path.join(HERE, "..", "mods-example", "overlay-demo"))
 
 
@@ -33,12 +36,15 @@ def yaz0_encode(data):
 
 def build(src, out):
     blob = bytearray(discfmt.yaz0(open(os.path.join(src, REL), "rb").read()))
+    member = discfmt.rarc_files(bytes(blob))[MEMBER]
+    assert blob.count(member) == 1, MEMBER
+    base = blob.index(member)
     for old, new in PATCHES:
         ob, nb = old.encode("shift_jis"), new.encode("shift_jis")
         assert len(ob) == len(nb), (old, new)
-        hits = blob.count(ob)
-        assert hits == 1, "%r found %d times" % (old, hits)
-        i = blob.index(ob)
+        hits = member.count(ob)
+        assert hits == 1, "%r found %d times in %s" % (old, hits, MEMBER)
+        i = base + member.index(ob)
         blob[i:i + len(ob)] = nb
     enc = yaz0_encode(bytes(blob))
     assert discfmt.yaz0(enc) == bytes(blob), "Yaz0 round-trip failed"

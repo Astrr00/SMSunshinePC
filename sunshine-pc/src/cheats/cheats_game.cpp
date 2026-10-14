@@ -53,6 +53,11 @@ public:
         if (flags != nullptr) {
             std::printf("[cheats] flag 0x%X: %d -> %d\n", (unsigned)flag, (int)flags->getFlag(flag), (int)value);
             flags->setFlag(flag, value);
+            // Nozzle unlocks are one-shot and not saved: without the saved copy a game over before the next save
+            // (TFlagManager::restore, MarDirectorDirect.cpp:409) takes them back (observed, run mc_go2).
+            if (flag >= cheats::kNozzleFlagBase && flag < cheats::kNozzleFlagBase + 18) {
+                flags->setSavedCardBool(flag, value);
+            }
         }
     }
 };
@@ -151,10 +156,10 @@ void cheatsTick() {
         const char* v = std::getenv("SUNSHINE_DEV_STATUS");
         return v != nullptr && v[0] != '\0' && v[0] != '0';
     }();
-    // The title map (option map 15) runs the file select. A new file resets the nozzle flags there (observed); that a
-    // loaded save replaces them is [INFERENCE] (TCardLoad runs only on map 15: CardLoad.cpp:95,
-    // MarDirectorSetup2.cpp:107-113). So the cheats wait for the first stage after it; without this a one-shot
-    // picked in the launcher ran on the title and was lost.
+    // The title map (option map 15) runs the file select. A new file resets the nozzle flags there (observed); a
+    // loaded save is read there too (TCardLoad runs only on map 15: CardLoad.cpp:95, MarDirectorSetup2.cpp:107-113).
+    // So the cheats wait for the first stage after it (observed with a new file and a loaded save); without this a
+    // one-shot picked in the launcher ran on the title and was lost.
     if (!SMS_isOptionMap()) {
         registry().tick(world);
     }

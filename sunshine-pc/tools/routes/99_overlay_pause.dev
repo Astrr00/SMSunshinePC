@@ -1,0 +1,12 @@
+# ModCheck: the overlay-demo mod's stage name in the pause menu (common.szs /2d/stagename.bmg entry 1, PauseMenu2.cpp:113).
+# Env: SUNSHINE_DEV_START=dolpic/0 SUNSHINE_RENDER_SCALE=1. Install: python tools/mod_pack.py --out build/Strict/mods/overlay-demo
+# plus mods-example/overlay-demo/mod.json there. Evidence: [mods] overlay in use: ...common.szs, pause.png shows the stage name.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+hold START frames=3
+wait frames=120
+log
+shot pause.png
+wait frames=30
+end

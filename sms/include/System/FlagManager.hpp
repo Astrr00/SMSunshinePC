@@ -44,6 +44,19 @@ public:
 
 	s64 getLastSaveTime() const { return mLastSaveTime; }
 
+#ifdef TARGET_PC
+	// Port cheats: a one-shot unlock also goes into the last-saved copy, so restore() (game over, "continue from the
+	// last save") keeps it. Same bit layout and bound as setFlag's card bools; writes no card and marks nothing saved.
+	void setSavedCardBool(u32 flag, s32 value)
+	{
+		u32 low = flag & 0xFFFF;
+		if ((flag >> 16) == 1 && flag < 0x103B4) {
+			mSavedCardBools[low >> 3] &= ~(1 << (low & 7));
+			mSavedCardBools[low >> 3] |= (value & 1) << (low & 7);
+		}
+	}
+#endif
+
 private:
 	TFlagManager();
 
