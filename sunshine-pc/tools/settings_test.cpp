@@ -36,6 +36,7 @@ int main()
 	s.glyphStyle = GlyphStyle::PlayStation;
 	s.lastImagePath = "C:/games/Super Mario Sunshine (Japan).rvz";
 	s.skipLauncher = true;
+	s.menuSounds = false;
 	const std::string text = serializeSettings(s);
 	const Settings back = parseSettings(text);
 	assert(back.fullscreen && back.windowWidth == 1920 && back.windowHeight == 1080 && !back.vsync);
@@ -45,6 +46,8 @@ int main()
 	assert(back.keys.at("A") == 26 && back.glyphStyle == GlyphStyle::PlayStation);
 	assert(!back.rememberWindowSize && back.uiScalePct == 75);
 	assert(back.lastImagePath == s.lastImagePath && back.skipLauncher);
+	assert(!back.menuSounds && defText.find("menu_sounds=1") != std::string::npos);
+	assert(parseSettings("").menuSounds && !parseSettings("[audio]\nmenu_sounds=0\n").menuSounds);
 	assert(serializeSettings(back) == text);
 	for (GlyphStyle g : {GlyphStyle::Switch, GlyphStyle::GameCube, GlyphStyle::Generic}) {
 		Settings gs;

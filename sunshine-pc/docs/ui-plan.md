@@ -93,6 +93,7 @@ Inventory of every switch the launcher offers (pane, element id, INI key, values
 | Video | open-data | - | button | not testable by route (Explorer) | launcher.cpp:838-847; `[launcher] open data folder:` under SUNSHINE_DEV_NO_SHELL |
 | Audio | volume | audio.master_volume | 100, 75, 50, 25, 0 | observed | T1 `t1_v50`: RMS ratio 0.500, `t1_v0`: 0 non-zero samples; T4 L2 `[dsp-out] level=15360` vs 20480 |
 | Audio | output-device | audio.output_device | Windows default, active endpoints | observed (one endpoint on this host) | UI-6 `uisix_valid3`, `uisix_bogus1`: `[av] audio output device` lines |
+| Audio | menu-sounds | audio.menu_sounds | On/Off | launcher only (launcher tones, no game effect) | UI15Fix `ui15fix2_start`: `sound confirm` unmuted; `ui15_off` (`menu_sounds=0`): no sound line; switching on opens the device: `ui15land_toggle` |
 | Controls | stick-deadzone | controls.stick_deadzone | 0, 5, 10, 20, 30 % | observed | `build/Route/t5_f_d0/run.log`: z -3850.0 -> -3752.1 (tick 510); `t5_f_d35`: stays -3850.0 (stickDeadZone=11468) |
 | Controls | substick-deadzone | controls.substick_deadzone | 0, 5, 10, 20, 30 % | observed | `build/Route/t6_sub0/run.log`: cam z -4533.2 -> -3203.3; `t6_sub35`: cam unchanged |
 | Controls | bind-STICK_UP | keys.STICK_UP | key scancode | observed | T5 `t5_f_k1` (INI STICK_UP=23): T walks Mario to z -2516.2; T7 LauncherKeys `t6_cap`/`t6_ls` |
@@ -113,7 +114,7 @@ Inventory of every switch the launcher offers (pane, element id, INI key, values
 
 Not switches (buttons only): browse (file dialog, not testable per Route), start (seen in every run), quit (confirm page, UI-13), open-settings, back, six tabs, confirm-cancel, confirm-yes. `dlss` is a hint line, not a switch. The Mods rows come from the `mods/` folder next to the exe; `t6_ls` logs `[mods] no mods folder` (this clone has none), so the Mods pane is empty here.
 
-Count: 38 launcher rows (Video 10, Audio 2, Controls 23, Interface 3) plus 5 cheats and 2 mods in the repo: 21 observed, 1 partial (bind-A), 18 code read only, 1 INI only (reset-keys), 3 not testable by route (window-mode, fps, open-data), 1 launcher only (ui-scale), 1 not checked (mod-faulty).
+Count: 39 launcher rows (Video 10, Audio 3, Controls 23, Interface 3) plus 5 cheats and 2 mods in the repo: 21 observed, 1 partial (bind-A), 18 code read only, 1 INI only (reset-keys), 3 not testable by route (window-mode, fps, open-data), 2 launcher only (ui-scale, menu-sounds), 1 not checked (mod-faulty).
 
 **T8 gap runs (2026-10-14, WARP unless marked, `route.py --no-dvd`, `SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1`, all rc 0).**
 
@@ -232,6 +233,8 @@ Each package lists goal, files, depends, closes (gap rows), size per the rubric 
 - Files: in-game menu module, `src/launcher/launcher.cpp`, `src/settings.*`, sound assets if used.
 - Closes: A4, D5.
 - Acceptance: the toggle round trips. With it off, no effect plays. Any shipped sound has a license entry in `THIRD_PARTY_LICENSES.md`.
+
+**Status (2026-10-14, UI15Fix).** UI-15 launcher half (menu sounds): `[audio] menu_sounds` (default on) and the Audio pane's "Menu sounds" button; four synthetic tones (open, close, confirm, cancel; lead decision: not SMS effects, no asset, no licence row) on the Windows default device, not `audio.output_device` (the tones do not read it). Fixes: the device opens in `Launcher::open()` before any action or press (`menu sounds open <ms> ms`, once); switching Menu sounds on opens the device at once and switching it off closes it; `closeUiAudio()` waits until the device has pulled the queued samples (at most 200 ms) before the destroy, so the queue of Start's and Quit's confirm tone is not dropped (the device's own buffer is not waited for; code read, not heard); a failed resume destroys the stream and sets the failed flag; a failed queue call logs once; Escape and B on the confirm page call `uiSound(Cancel)` and `closeConfirm()` directly. Mute rule unchanged (`SUNSHINE_MUTE` only). Observed: the earlier start chain ran muted (`sound confirm (muted)`, clone-3 `build/Route/ui15_start/run.log:43`); now `ui15fix2_start` logs `sound confirm` without `(muted)` after `menu sounds open 133 ms` (run.log:42, :44), rc 0, no fatal; `ui15fix2_on` and `ui15fix2_null` five muted lines each, rc 124 at the 60 s cap. Strict: `STRICT: 0 unresolved symbols`; port_tests: 62 checks, 0 failed. Not verified: nobody has heard them; the drain time; mouse; a physical pad; a Quit-OK run; the failure branches. The in-game half waits for UI-4b. Details: `platform-notes.md`.
 
 **UI-16 Languages** (L)
 - Goal: F2, game-language selection. `[INFERENCE]` GMSJ01 is Japanese only (`launcher.rml:9` "Japanese version"); the disc's language options need confirming. F3, launcher string localization: move inline strings in `launcher.rml` into a string table with keys.

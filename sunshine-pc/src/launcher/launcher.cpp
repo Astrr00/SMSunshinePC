@@ -12,6 +12,7 @@
 #include <SDL3/SDL.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -241,6 +242,136 @@ bool presentFrame() {
 	return alive;
 }
 
+// Menu sounds (UI-15): four tones synthesized once (no asset, so no licence row), played on one SDL3 device stream that
+// opens when the launcher opens (or Menu sounds is switched on) and closes with the launcher. Output is the Windows
+// default device. A dev run
+// (SUNSHINE_DEV_MAX_SECONDS) logs each sound; SUNSHINE_MUTE keeps the log and skips the device.
+enum class UiSound { Open, Close, Confirm, Cancel };
+constexpr const char* kUiSoundNames[] = { "open", "close", "confirm", "cancel" };
+constexpr int kUiSampleRate = 48000;
+constexpr double kTau = 6.283185307179586;
+
+struct UiTone {
+	float fromHz;
+	float toHz;
+	float seconds;
+};
+constexpr UiTone kUiTones[] = {
+	{ 523.f, 784.f, 0.06f },   // open: rises
+	{ 784.f, 523.f, 0.06f },   // close: falls
+	{ 1047.f, 1047.f, 0.05f }, // confirm: high
+	{ 330.f, 330.f, 0.09f },   // cancel: low
+};
+
+// Sine with a linear frequency sweep and a quadratic decay to silence (starts at phase 0, so no click at either end).
+std::vector<float> synthesizeTone(const UiTone& tone) {
+	const auto count = static_cast<size_t>(tone.seconds * kUiSampleRate);
+	std::vector<float> out(count);
+	double phase = 0.0;
+	for (size_t n = 0; n < count; ++n) {
+		const double t = static_cast<double>(n) / kUiSampleRate;
+		phase += kTau * (tone.fromHz + (tone.toHz - tone.fromHz) * t / tone.seconds) / kUiSampleRate;
+		const double left = 1.0 - static_cast<double>(n) / static_cast<double>(count);
+		out[n] = static_cast<float>(0.25 * std::sin(phase) * left * left);
+	}
+	return out;
+}
+
+const std::vector<float>& toneSamples(UiSound which) {
+	static const std::vector<float> tones[] = {
+		synthesizeTone(kUiTones[0]), synthesizeTone(kUiTones[1]), synthesizeTone(kUiTones[2]), synthesizeTone(kUiTones[3]),
+	};
+	return tones[static_cast<size_t>(which)];
+}
+
+SDL_AudioStream* gUiStream = nullptr; // opened by Launcher::openMenuSounds (or a first sound), destroyed by closeUiAudio
+bool gUiAudioInit = false;            // this file holds one SDL_INIT_AUDIO reference
+bool gUiAudioFailed = false;          // the open failed: no further attempts in this run
+bool gUiPutLogged = false;            // the queue-failure line is logged once per run
+
+bool openUiStream() {
+	if (gUiStream != nullptr) {
+		return true;
+	}
+	if (gUiAudioFailed) {
+		return false;
+	}
+	const SDL_AudioSpec spec{ SDL_AUDIO_F32, 1, kUiSampleRate };
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO)) {
+		gUiAudioInit = true;
+		gUiStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr, nullptr);
+		if (gUiStream != nullptr) {
+			if (SDL_ResumeAudioStreamDevice(gUiStream)) { // device streams start paused
+				return true;
+			}
+			SDL_DestroyAudioStream(gUiStream); // a stream that cannot start is not kept
+			gUiStream = nullptr;
+		}
+	}
+	gUiAudioFailed = true;
+	std::fprintf(stderr, "[launcher] menu sounds unavailable: %s\n", SDL_GetError());
+	std::fflush(stderr);
+	return false;
+}
+
+void closeUiAudio() {
+	if (gUiStream != nullptr) {
+		// Start and Quit close the launcher right after their confirm tone. Wait until the device has pulled the queued
+		// samples (at most 200 ms; the longest tone, cancel, is 90 ms), or Destroy drops them. What the device has already
+		// buffered is not waited for; the tones decay to silence at their end.
+		const Uint64 until = SDL_GetTicks() + 200;
+		while (SDL_GetAudioStreamQueued(gUiStream) > 0 && SDL_GetTicks() < until) {
+			SDL_Delay(2);
+		}
+		SDL_DestroyAudioStream(gUiStream);
+		gUiStream = nullptr;
+	}
+	if (gUiAudioInit) {
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
+		gUiAudioInit = false;
+	}
+}
+
+// Plays one tone unless [audio] menu_sounds is off.
+void playUiSound(UiSound which) {
+	const Settings& s = settings();
+	if (!s.menuSounds) {
+		return;
+	}
+	const bool muted = std::getenv("SUNSHINE_MUTE") != nullptr;
+	// Dev log only: route.py sets SUNSHINE_DEV_MAX_SECONDS on every run, so the sound lines appear in route logs. Only
+	// SUNSHINE_MUTE skips the device (the game's own audio is also silent under SUNSHINE_DEV_MAX_SECONDS, av.cpp:115).
+	if (std::getenv("SUNSHINE_DEV_MAX_SECONDS") != nullptr) {
+		std::printf("[launcher] sound %s%s\n", kUiSoundNames[static_cast<size_t>(which)], muted ? " (muted)" : "");
+		std::fflush(stdout);
+	}
+	if (muted || !openUiStream()) {
+		return;
+	}
+	const std::vector<float>& samples = toneSamples(which);
+	SDL_SetAudioStreamGain(gUiStream, static_cast<float>(settings().masterVolumePct) / 100.f);
+	SDL_ClearAudioStream(gUiStream); // drops the unplayed rest of the previous tone (the device's own buffer still plays)
+	if (!SDL_PutAudioStreamData(gUiStream, samples.data(), static_cast<int>(samples.size() * sizeof(float))) && !gUiPutLogged) {
+		gUiPutLogged = true;
+		std::fprintf(stderr, "[launcher] menu sound queue failed: %s\n", SDL_GetError());
+		std::fflush(stderr);
+	}
+}
+
+// Sound for a button press: Open for pages opened, Close for Back, Cancel for the confirm page's Cancel, else Confirm.
+UiSound soundForButton(const std::string& id) {
+	if (id == "open-settings" || id == "quit" || id == "reset-keys") {
+		return UiSound::Open;
+	}
+	if (id == "back") {
+		return UiSound::Close;
+	}
+	if (id == "confirm-cancel") {
+		return UiSound::Cancel;
+	}
+	return UiSound::Confirm;
+}
+
 class Launcher final : public Rml::EventListener {
 public:
 	// inGame: the in-game menu (menuPoll), over the frozen game; otherwise the launcher before the game starts.
@@ -316,6 +447,7 @@ public:
 			imagePath_ = last;
 			validate();
 		}
+		openMenuSounds();
 		// Dev hook for tests: SUNSHINE_DEV_LAUNCHER_ACTIONS=id,id,... runs those actions in order (e.g. fsr1,scale,start).
 		if (const char* actions = std::getenv("SUNSHINE_DEV_LAUNCHER_ACTIONS")) {
 			std::string list = actions;
@@ -358,6 +490,7 @@ public:
 			ctx_->UnloadDocument(doc_);
 			doc_ = nullptr;
 		}
+		closeUiAudio();
 	}
 
 	void poll() {
@@ -404,7 +537,9 @@ public:
 		if (const auto* key = event.payload.get_if<aurora::input::InputEvent::KeyChanged>()) {
 			if (!capture_.empty() && key->pressed && !key->repeat) {
 				// Escape cancels; F1 cancels too: the in-game menu layer consumes F1 in gameplay, so the game never sees it.
-				if (key->scancode != SDL_SCANCODE_ESCAPE && key->scancode != SDL_SCANCODE_F1) {
+				const bool cancelled = key->scancode == SDL_SCANCODE_ESCAPE || key->scancode == SDL_SCANCODE_F1;
+				uiSound(cancelled ? UiSound::Cancel : UiSound::Confirm);
+				if (!cancelled) {
 					settings().keys[capture_] = key->scancode;
 					changed();
 				}
@@ -413,6 +548,7 @@ public:
 				return aurora::input::EventResult::Consume;
 			}
 				if (key->pressed && !key->repeat && key->scancode == SDL_SCANCODE_ESCAPE && confirmShown()) {
+					uiSound(UiSound::Cancel);
 					closeConfirm();
 					return aurora::input::EventResult::Consume;
 				}
@@ -438,6 +574,7 @@ private:
 			}
 			if (!capture_.empty()) { // a rebind waits for a key; B cancels it
 				if (button->button == SDL_GAMEPAD_BUTTON_EAST) {
+					uiSound(UiSound::Cancel);
 					capture_.clear();
 					refresh();
 				}
@@ -622,6 +759,7 @@ private:
 	// B on the settings page; B on the confirm page cancels it.
 	void goBack() {
 		if (confirmShown()) {
+			uiSound(UiSound::Cancel);
 			closeConfirm();
 			return;
 		}
@@ -735,6 +873,20 @@ public:
 	}
 
 private:
+	// UI-15: the device opens before any press can play a tone (at open() and when Menu sounds is switched on), not on
+	// the first sound (a synchronous open there stalls that press). Muted runs (SUNSHINE_MUTE) and menu_sounds=0 do not
+	// open it; the in-game menu never plays sounds, so it does not open it either.
+	void openMenuSounds() {
+		if (inGame_ || !settings().menuSounds || std::getenv("SUNSHINE_MUTE") != nullptr) {
+			return;
+		}
+		const auto began = std::chrono::steady_clock::now();
+		openUiStream();
+		const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - began).count();
+		std::printf("[launcher] menu sounds open %lld ms\n", static_cast<long long>(ms));
+		std::fflush(stdout);
+	}
+
 	void setText(const char* id, const std::string& text) {
 		if (Rml::Element* el = doc_->GetElementById(id)) {
 			el->SetInnerRML(text);
@@ -868,6 +1020,7 @@ private:
 		setText("fsr1", std::string("FSR 1 upscale: ") + (s.fsr1 ? "On" : "Off"));
 		setText("volume", "Master volume: " + std::to_string(s.masterVolumePct) + "%");
 		setText("output-device", "Output device: " + outputDeviceName(s.outputDevice));
+		setText("menu-sounds", std::string("Menu sounds: ") + (s.menuSounds ? "On" : "Off"));
 		setText("stick-deadzone", "Stick dead zone: " + std::to_string(s.stickDeadZonePct) + "%");
 		setText("substick-deadzone", "C-stick dead zone: " + std::to_string(s.substickDeadZonePct) + "%");
 		setText("glyph-style", std::string("Button glyphs: ") + kGlyphNames[static_cast<int>(s.glyphStyle)]);
@@ -915,8 +1068,21 @@ private:
 		finished_ = true;
 	}
 
+	// UI-15: the launcher plays menu sounds; the in-game menu (inGame_) stays silent until its game sounds come (UI-4 follow-up).
+	void uiSound(UiSound which) {
+		if (!inGame_) {
+			playUiSound(which);
+		}
+	}
+
 	void onAction(const std::string& id) {
 		Settings& s = settings();
+		// Button sound before the action, so turning Menu sounds off still clicks. Focus moves and non-buttons are silent.
+		if (doc_ != nullptr) {
+			if (Rml::Element* el = doc_->GetElementById(id); el != nullptr && el->GetTagName() == "button") {
+				uiSound(soundForButton(id));
+			}
+		}
 		if (id == "browse") {
 			chooseImage();
 			return;
@@ -1018,6 +1184,12 @@ private:
 			s.substickDeadZonePct = nextPreset(kDeadZonePresets, s.substickDeadZonePct);
 		} else if (id == "glyph-style") {
 			s.glyphStyle = static_cast<sunshine::GlyphStyle>((static_cast<int>(s.glyphStyle) + 1) % 5);
+		} else if (id == "menu-sounds") {
+			s.menuSounds = !s.menuSounds;
+			if (s.menuSounds)
+				openMenuSounds();
+			else if (!inGame_)
+				closeUiAudio(); // off holds no device
 		} else if (id == "remember-window-size") {
 			s.rememberWindowSize = !s.rememberWindowSize;
 		} else if (id == "aspect") {

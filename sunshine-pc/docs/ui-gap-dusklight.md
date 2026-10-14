@@ -70,7 +70,7 @@ Columns: Dusklight feature (where, how) | Sunshine today (file, state) | Gap | N
 | A1 | Menu opener: R+Start chord, F1, bound menu button (`input.cpp:74-78, 144, 215-218, 230-232`; `ui.cpp:646`; `document.cpp:215-223`) | Missing. `main.cpp:78-79` only pumps events while paused or minimized | L | Chord uses the same PAD names as SMS. SMS's own pause/menu flow in `sms/` was not audited (`[INFERENCE]`: conflict risk). Needs a `#if TARGET_PC` hook. |
 | A2 | Tab shell: Settings, Mods, Cheats (`menu_bar.cpp:74-88`) | Missing | L | Warp/Editor are dev-only (76-78). Achievements (81-86) have no SMS backend. |
 | A3 | Reset and Quit confirmation Modal (`menu_bar.cpp:96-137`) | Missing in game. Launcher Quit is immediate (`launcher.cpp:425-427`) | M | Needs a modal widget in RmlUi. Dusklight `modal.cpp` exists (not read). |
-| A4 | Menu open/close sounds (`document.cpp:215-223`; `menu_bar.cpp:96-137` `kSoundWindowClose`) | Missing. No sound code in launcher | M | Needs playback path and sound assets. No game data may ship in the repo. |
+| A4 | Menu open/close sounds (`document.cpp:215-223`; `menu_bar.cpp:96-137` `kSoundWindowClose`) | Partial. Launcher: four synthetic tones (UI-15 launcher half, runs `ui15fix2_*`, not heard). In-game menu silent (waits for UI-4b) | M | Synthetic tones, no asset (lead decision); SMS's own effects not used. No game data may ship in the repo. |
 | A5 | Menu transitions: bar hides after `Transitionend` (`menu_bar.cpp:60-62`); v2.0 "variable delta time" menus | Partial: launcher pages, panes and the confirm page fade in (UI-14A, `theme.rcss`, `setDisplay`); in-game pane switches fade, opening the menu does not; no in-game close after `Transitionend` (UI-14 part B) | M | Launcher-only transitions are S once the theme (UI-1) exists. |
 
 ### B. Launcher and disc flow
@@ -106,7 +106,7 @@ Columns: Dusklight feature (where, how) | Sunshine today (file, state) | Gap | N
 | D2 | Output mode, reinit on change (1098-1126) | Missing | M | `[INFERENCE]` needs Aurora audio device API (not verified). |
 | D3 | Surround 5.1/7.1 (v2.0 post) | Missing. `sdk/dsp_mixer.cpp:315-316, 329, 342` are "not implemented" warnings | M | Mixer path, not UI, is the main cost. |
 | D4 | Music volume (1157) | Missing. Only master volume exists | M | Depends on whether SMS has a separate BGM bus (`[INFERENCE]`). |
-| D5 | Menu sounds toggle (1184) | Missing | S | Depends on A4. |
+| D5 | Menu sounds toggle (1184) | Done for the launcher (`[audio] menu_sounds`, Audio pane's "Menu sounds" button; UI-15 launcher half) | S | Depends on A4 (launcher part done; in-game part waits for UI-4b). |
 
 ### E. Controls, glyphs, and rebinding
 

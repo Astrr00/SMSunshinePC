@@ -49,6 +49,7 @@
 	<div id="pane-audio" class="pane" style="display: none;">
 		<div class="row"><button id="volume">Master volume</button></div>
 		<div class="row"><button id="output-device">Output device</button></div>
+		<div class="row"><button id="menu-sounds">Menu sounds</button></div>
 	</div>
 
 	<div id="pane-controls" class="pane" style="display: none;">

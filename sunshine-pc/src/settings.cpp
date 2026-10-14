@@ -163,6 +163,7 @@ Settings parseSettings(std::string_view text)
 		s.aspect = def.aspect;
 	s.masterVolumePct = readInt(ini, "audio.master_volume", def.masterVolumePct, 0, 100);
 	s.outputDevice = readString(ini, "audio.output_device", def.outputDevice);
+	s.menuSounds = readBool(ini, "audio.menu_sounds", def.menuSounds);
 	s.stickDeadZonePct = readInt(ini, "controls.stick_deadzone", def.stickDeadZonePct, 0, 50);
 	s.substickDeadZonePct = readInt(ini, "controls.substick_deadzone", def.substickDeadZonePct, 0, 50);
 	s.keys = def.keys;
@@ -210,6 +211,7 @@ std::string serializeSettings(const Settings& in)
 	out << "[audio]\n";
 	out << "master_volume=" << in.masterVolumePct << '\n';
 	out << "output_device=" << in.outputDevice << '\n';
+	out << "menu_sounds=" << (in.menuSounds ? 1 : 0) << '\n';
 	out << "[controls]\n";
 	out << "stick_deadzone=" << in.stickDeadZonePct << '\n';
 	out << "substick_deadzone=" << in.substickDeadZonePct << '\n';
