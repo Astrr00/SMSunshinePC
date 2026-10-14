@@ -1,0 +1,18 @@
+# T7 LauncherKeys: INI [controls] substick_deadzone -> game (C-stick), dolpic/0, through an SDL virtual gamepad (SUNSHINE_DEV_VPAD=1).
+# One run per pre-written build/Route/<run>/appdata/Sunshine/settings.ini: "[controls]" + "substick_deadzone=0" vs "=35".
+# Run (from sunshine-pc): python tools/route.py Strict tools/routes/99_substick_deadzone.dev --name <run>
+#   SUNSHINE_DEV_VPAD=1 SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1
+# The C-stick goes to 40/127 (31.5 % of full travel) on the virtual pad's SDL right-stick axes (vcstick:40:0), so Aurora's
+# substick binding and the pad's substick dead zone see it like a real stick. Evidence: "[menu] dev vcstick:40:0 set (...
+# substickDeadZone=N)" (N = pct * 32767 / 100: 0 or 11468) and cam=(x,y,z) of the status lines before and after the hold:
+# at 0 the camera turns (cam changes), at 35 it stays where the first `log` left it.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+menu vcstick:40:0
+wait frames=120
+log
+menu vcstick:0:0
+wait frames=30
+log
+end

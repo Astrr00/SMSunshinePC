@@ -1,0 +1,9 @@
+# T7 LauncherKeys: a key row is rebound in the launcher with pad events and a key event (no devscript: the launcher phase
+# runs before the game, so the script file is only the route.py argument; the run ends with the wall-clock limit, rc 124).
+# Pre-written build/Route/t6_cap/appdata/Sunshine/settings.ini: "[launcher] last_image=<disc>" and "[controls] stick_deadzone=35".
+# Run (from sunshine-pc): python tools/route.py Strict tools/routes/99_launcher_capture.dev --no-dvd --name t6_cap --seconds 60
+#   SUNSHINE_DEV_LAUNCHER_PAGE=settings/controls SUNSHINE_DEV_NO_SHELL=1
+#   SUNSHINE_DEV_PAD_EVENTS=down,down,down,down,down,down,down,down,down,down,down,down,down,down,down,down,down,a,key:T:down,key:T:up
+#   (17 downs select bind-STICK_UP; the focus=... of each `[launcher] pad` line shows it)
+# Evidence: "[launcher] pad ... focus=bind-STICK_UP", then the INI [keys] line STICK_UP=23 (T, scancode 23; the INI had no [keys] before).
+# Next run: t6_ls (99_launcher_keys.dev) starts from this run's appdata with --appdata-from t6_cap.

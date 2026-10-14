@@ -34,7 +34,7 @@ bool menuOpen();
 // Dev hook (devscript verb `menu`): comma-separated tokens run one per 30 menuPoll calls. chord (synthetic R + Start into
 // the menu layer), f1 and key:<SDL scancode name>:down|up (pushed SDL key events, routed like real ones), and the
 // launcher's pad tokens (up, down, left, right, a, b, start, lstick-*) while the menu is open. vstick:<x>:<y> (-127..127)
-// sets the left stick of the SUNSHINE_DEV_VPAD gamepad, menu open or not.
+// sets the left stick of the SUNSHINE_DEV_VPAD gamepad, vcstick:<x>:<y> its right (C) stick, menu open or not.
 void menuDevQueue(const char* tokens);
 // Dev hook, only with SUNSHINE_DEV_VPAD=1 or late (no-op otherwise): attaches an SDL virtual gamepad and pumps Aurora
 // until it is player 0. main calls it before applyRuntimeSettings, so the [controls] dead zones land on that pad like on

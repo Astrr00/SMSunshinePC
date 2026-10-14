@@ -54,6 +54,8 @@ u32 sunshineLogicTickCount();       // src/framerate/framerate.cpp
 namespace launcher {
 namespace {
 
+bool pushKeyToken(const std::string& token); // defined below with the in-game menu tokens
+
 using sunshine::Settings;
 using sunshine::settings;
 
@@ -676,7 +678,8 @@ private:
 
 public:
 	// Dev hook: runs one synthetic gamepad token through onInput, so it takes the same path as a real pad event.
-	// Tokens: up|down|left|right (D-pad), a|b|start (buttons), lstick-up|lstick-down|lstick-left|lstick-right (left stick).
+	// Tokens: up|down|left|right (D-pad), a|b|start (buttons), lstick-up|lstick-down|lstick-left|lstick-right (left stick),
+	// key:<SDL scancode name>:down|up (SDL key event pushed through the router, e.g. the key a bind-* row captures).
 	void runPadToken(const std::string& token) {
 		using aurora::input::InputEvent;
 		const auto send = [this](InputEvent::Payload payload) {
@@ -716,6 +719,12 @@ public:
 			flick(SDL_GAMEPAD_AXIS_LEFTX, -1.f);
 		} else if (token == "lstick-right") {
 			flick(SDL_GAMEPAD_AXIS_LEFTX, 1.f);
+		} else if (token.rfind("key:", 0) == 0) { // key:<SDL scancode name>:down|up, a real SDL key event (a bind-* row takes it)
+			if (!pushKeyToken(token)) {
+				std::printf("[%s] pad %s: unknown key token\n", inGame_ ? "menu" : "launcher", token.c_str());
+				std::fflush(stdout);
+				return;
+			}
 		} else {
 			std::printf("[%s] pad %s: unknown token\n", inGame_ ? "menu" : "launcher", token.c_str());
 			return;
@@ -1143,6 +1152,18 @@ void pushKey(SDL_Scancode scancode, bool pressed) {
 	SDL_PushEvent(&ev);
 }
 
+// key:<SDL scancode name>:down|up -> pushKey; false (nothing pushed) for an unknown name or edge.
+bool pushKeyToken(const std::string& token) {
+	const size_t colon = token.rfind(':');
+	const std::string name = colon > 4 ? token.substr(4, colon - 4) : "";
+	const std::string edge = token.substr(colon + 1);
+	const SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
+	if (scancode == SDL_SCANCODE_UNKNOWN || (edge != "down" && edge != "up"))
+		return false;
+	pushKey(scancode, edge == "down");
+	return true;
+}
+
 // One dev token (menuDevQueue). chord goes into the menu layer's callback; keys go through SDL and the real router.
 void runMenuToken(const std::string& token) {
 	using aurora::input::InputEvent;
@@ -1164,28 +1185,23 @@ void runMenuToken(const std::string& token) {
 		pushKey(SDL_SCANCODE_F1, false);
 		std::printf("[menu] dev f1 pushed\n");
 	} else if (token.rfind("key:", 0) == 0) { // key:<SDL scancode name>:down|up
-		const size_t colon = token.rfind(':');
-		const std::string name = colon > 4 ? token.substr(4, colon - 4) : "";
-		const std::string edge = token.substr(colon + 1);
-		const SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
-		if (scancode == SDL_SCANCODE_UNKNOWN || (edge != "down" && edge != "up")) {
+		if (!pushKeyToken(token))
 			std::printf("[menu] dev %s: unknown key token\n", token.c_str());
-		} else {
-			pushKey(scancode, edge == "down");
+		else
 			std::printf("[menu] dev %s pushed\n", token.c_str());
-		}
-	} else if (token.rfind("vstick:", 0) == 0) { // vstick:<x>:<y>, -127..127, GameCube orientation (y > 0 = up)
+	} else if (token.rfind("vstick:", 0) == 0 || token.rfind("vcstick:", 0) == 0) { // vstick:<x>:<y> left stick, vcstick:<x>:<y> right (C) stick; -127..127, GameCube orientation (y > 0 = up)
+		const bool cstick = token.rfind("vcstick:", 0) == 0;
 		int x = 0;
 		int y = 0;
 		const PADDeadZones* zones = PADGetDeadZones(0);
-		if (gDevVpad == nullptr || std::sscanf(token.c_str() + 7, "%d:%d", &x, &y) != 2) {
+		if (gDevVpad == nullptr || std::sscanf(token.c_str() + (cstick ? 8 : 7), "%d:%d", &x, &y) != 2) {
 			std::printf("[menu] dev %s: no SUNSHINE_DEV_VPAD gamepad or bad token\n", token.c_str());
 		} else {
 			x = std::clamp(x, -127, 127);
 			y = std::clamp(y, -127, 127);
 			// SDL's left Y axis grows downwards; Aurora's default mapping turns SDL -Y into PAD up.
-			SDL_SetJoystickVirtualAxis(gDevVpad, SDL_GAMEPAD_AXIS_LEFTX, static_cast<Sint16>(x * 32767 / 127));
-			SDL_SetJoystickVirtualAxis(gDevVpad, SDL_GAMEPAD_AXIS_LEFTY, static_cast<Sint16>(-y * 32767 / 127));
+			SDL_SetJoystickVirtualAxis(gDevVpad, cstick ? SDL_GAMEPAD_AXIS_RIGHTX : SDL_GAMEPAD_AXIS_LEFTX, static_cast<Sint16>(x * 32767 / 127));
+			SDL_SetJoystickVirtualAxis(gDevVpad, cstick ? SDL_GAMEPAD_AXIS_RIGHTY : SDL_GAMEPAD_AXIS_LEFTY, static_cast<Sint16>(-y * 32767 / 127));
 			std::printf("[menu] dev %s set (port0 pad=%d use=%d stickDeadZone=%d substickDeadZone=%d)\n", token.c_str(),
 			            zones != nullptr ? 1 : 0, zones != nullptr && zones->useDeadzones ? 1 : 0,
 			            zones != nullptr ? zones->stickDeadZone : -1, zones != nullptr ? zones->substickDeadZone : -1);

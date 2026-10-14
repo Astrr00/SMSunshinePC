@@ -1,0 +1,27 @@
+# T7 LauncherKeys: the launcher-started game takes the INI [keys] binding and the [controls] stick dead zone.
+# Pre-written build/Route/<run>/appdata/Sunshine/settings.ini: "[launcher] last_image=<disc>", "[controls] stick_deadzone=35",
+# "[keys] STICK_UP=23" (T). Made by the capture run t6_cap (99_launcher_capture.dev), so that run is the input here.
+# Run (from sunshine-pc): python tools/route.py Strict tools/routes/99_launcher_keys.dev --no-dvd --appdata-from t6_cap --name t6_ls
+#   SUNSHINE_DEV_LAUNCHER_ACTIONS=start SUNSHINE_DEV_VPAD=1 SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1
+# Evidence: Mario's position in the `log` lines. W (STICK_UP=26 default) must not move him, T (23) must. Then the left stick
+# at 40/127 (31.5 %) with stick_deadzone=35 must not move him (`[menu] dev vstick:0:40 set (... stickDeadZone=11468)`).
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+menu key:W:down
+wait frames=45
+menu key:W:up
+wait frames=15
+log
+menu key:T:down
+wait frames=45
+menu key:T:up
+wait frames=45
+log
+menu vstick:0:40
+wait frames=60
+log
+menu vstick:0:0
+wait frames=30
+log
+end
