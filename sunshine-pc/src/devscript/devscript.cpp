@@ -1264,7 +1264,7 @@ void aimAssist()
 	gpMarioOriginal->mWaterGun->mNozzleList[gpMarioOriginal->mWaterGun->mCurrentNozzle]->unk36E = static_cast<s16>(-best * (65536.0f / 360.0f));
 }
 
-// SUNSHINE_DEV_PAD_TRACE=1 (dev-only): one line per change of port 0's PADStatus as the game reads it (JUTGamePad::mPadStatus[0],
+// SUNSHINE_DEV_PAD_TRACE=1 (dev-only): one line per change of port 0's buttons, sticks, triggers or err (JUTGamePad::mPadStatus[0],
 // filled by PADRead and PADClamp). JUTGamePad::read() calls sunshineDevScriptTick() before PADRead, so the status printed here is
 // the one the previous read delivered: read=N is that read's index (gTick - 1). Hooked here, so sms/ and Aurora stay untouched.
 static void padTrace()

@@ -1,5 +1,5 @@
-# FontFix: talk balloon text at airport/1 (BMG common/2d/balloon.bmg, message 84 "では ためしに / そこの「Ｍ」を /
-# けしてみましょう！ / みずを だすのは / ＞デスよ！"). Shots while the balloon is open; the text is read from the PNGs.
+# FontFix: talk balloon text at airport/1 (message 84 of common/2d/balloon.bmg, five lines). Shots while the balloon
+# is open; the text is read from the PNGs (b_tp120.png shows the whole message).
 # Start as tools/routes/98_shine_save_shots.dev: SUNSHINE_DEV_START=airport/1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1
 # SUNSHINE_RENDER_SCALE=1; settings.ini [video] fsr1=0 widescreen=1 aspect=4:3 (or aspect=16:9 for the 16:9 counterpart).
 # Before the talk: cheats, tpshine. The balloon is on screen from about tick 600 (b_tp120 in run hc_b169).
