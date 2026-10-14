@@ -49,7 +49,7 @@ void VISetFrameBufferScale(float scale);
 }
 
 bool sunshineCanReplay();           // sms/src/System/MarDirectorDirect.cpp: gameplay (director state 4), a frame can be redrawn
-u32 sunshineLogicTickCount();      // src/framerate/framerate.cpp
+u32 sunshineLogicTickCount();       // src/framerate/framerate.cpp
 
 namespace launcher {
 namespace {

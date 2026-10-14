@@ -23,12 +23,13 @@ constexpr int kLogicRate = 30; // logic ticks per second (two retraces each)
 constexpr float kLogicPeriod = 1.0f / kLogicRate;
 using Clock              = std::chrono::steady_clock;
 
-// Interpolation state (J3DModel::interpBlend): g_alpha runs 0..1 over the window's replays after a logic tick.
-bool g_interp = false;
-float g_alpha = 0.0f;
-u32 g_step    = 0; // interpolation step: one per TMarDirector::direct() tick (sunshineInterpTick)
+// Interpolation state (J3DModel::interpBlend): g_alpha runs 0..1 over the window's replays after a logic tick and keeps
+// the last replay's value into the next direct()'s draw lists, until sunshineInterpTick resets it.
+bool g_interp    = false;
+float g_alpha    = 0.0f;
+u32 g_step       = 0; // interpolation step: one per TMarDirector::direct() tick (sunshineInterpTick)
 u32 g_logicTicks = 0; // one per waitForRetrace, in every director (logs: devscript, launcher)
-u32 g_blends  = 0;
+u32 g_blends     = 0;
 Clock::time_point g_tickStart;
 }
 

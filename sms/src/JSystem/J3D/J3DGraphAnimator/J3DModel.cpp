@@ -946,7 +946,7 @@ void J3DModel::entry()
 // Frame-rate interpolation (sunshine-pc/src/framerate/framerate.cpp). viewCalc snapshots the draw matrices once per
 // logic tick; replayed presents blend the last two snapshots in entry(), so the picture moves between logic states.
 float sunshineInterpAlpha();  // -1: draw the logic state as is; 0..1: blend position between prev and cur
-u32 sunshineInterpStep();     // logic ticks so far
+u32 sunshineInterpStep();     // interpolation step: one per TMarDirector::direct() tick
 bool sunshineInterpEnabled(); // fpsLimit above 30, or unlimited
 void sunshineInterpNoteBlend();
 // ponytail: a translation jump above 500 units snaps instead of blending (teleport, camera cut). Ceiling: a legit move
