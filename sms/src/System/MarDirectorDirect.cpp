@@ -45,7 +45,7 @@
 extern OSThread gSetupThread;
 
 #ifdef TARGET_PC
-void sunshineLogicTick(); // sunshine-pc/src/main.cpp: cheats and mods, once per logic step
+void sunshineLogicTick(); // sunshine-pc/src/main.cpp: cheats and mods, once per direct() tick (30 Hz)
 void sunshineInterpTick(); // sunshine-pc/src/framerate/framerate.cpp: opens the interpolation step of this tick
 #endif
 
@@ -172,7 +172,10 @@ int TMarDirector::direct()
 			unk30->perform(~uVar44, &local_140);
 			movement();
 #ifdef TARGET_PC
-			sunshineLogicTick();
+			// Once per direct() tick: 0x4000 marks the last sub-step (the only one that breaks out of the loop and runs
+			// calcAnim), so cheats and mods keep their place after movement and before calcAnim.
+			if (unk4C & 0x4000)
+				sunshineLogicTick();
 #endif
 			if (!(uVar8 & 2)) {
 				// asm 0x800ED130: unk4E & 1 selects 0x48 (mShinePfLstAnm), otherwise 0x2C (mPerformListCalcAnim).

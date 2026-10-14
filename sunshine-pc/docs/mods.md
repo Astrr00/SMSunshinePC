@@ -66,7 +66,7 @@ A mod that fails the check is disabled and logged.
 ## Host ABI 1.0 (summary)
 
 Exports the mod must have: `sunshine_mod_api_version` (required) and `sunshine_mod_init` (required, `0` = ok).
-Optional: `sunshine_mod_shutdown`, `sunshine_mod_on_logic_tick` (30 Hz), `sunshine_mod_on_stage_load`, `sunshine_mod_on_present`.
+Optional: `sunshine_mod_shutdown`, `sunshine_mod_on_logic_tick` (30 Hz: once per logic tick, after the last sub-step's movement), `sunshine_mod_on_stage_load` (called in the first logic tick after the stage id changes), `sunshine_mod_on_present`.
 
 Host table `SunshineHostApi`: `log`, `flag_get`/`flag_set`, `cheat_get`/`cheat_set`, `mario`, `mario_health`/`mario_set_health`, `mario_water`/`mario_set_water`.
 There is no DVD API for mods. Overlays are the data path.

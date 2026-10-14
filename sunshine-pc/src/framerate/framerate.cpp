@@ -46,7 +46,7 @@ u32 sunshineLogicTickCount() { return g_logicTicks; }
 void sunshineInterpNoteBlend() { ++g_blends; }
 
 // Called by TMarDirector::direct() (sms/src/System/MarDirectorDirect.cpp) once per tick, right before its entry stage:
-// after the draw lists and the logic sub-steps (sunshineLogicTick runs once per sub-step, four times per tick).
+// after the draw lists and the logic sub-steps (sunshineLogicTick runs once per tick, after the last sub-step's movement).
 // The step opens there, not in sunshinePaceWindow: direct()'s entry stage records the new logic state as cur (prev = the
 // last tick) and the window's replays blend that same pair. With the step opened in the window, the replays' first
 // viewCalc moved cur (already this tick) into prev too, so every replay drew the logic state unblended.

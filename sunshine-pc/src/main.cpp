@@ -106,7 +106,7 @@ void sunshinePresentFrame()
 	}
 }
 
-// Called from sms MarDirectorDirect.cpp once per game logic step (30 Hz), right after movement().
+// Called from sms MarDirectorDirect.cpp once per direct() tick (30 Hz), after the last logic sub-step's movement().
 void sunshineLogicTick()
 {
 	cheatsTick();
