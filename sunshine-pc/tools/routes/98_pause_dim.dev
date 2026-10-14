@@ -1,0 +1,13 @@
+# HudFix: pause dimming at widescreen (PauseMenu2 'mask'), dolpic/0. Env: SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1
+# SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1. Evidence: u.png (unpaused) and p.png (paused, mask fully faded in): the brightness
+# ratio p/u is the same in the side columns as in the centre.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=240
+log
+shot u.png
+hold START frames=3
+wait frames=120
+log
+shot p.png
+wait frames=30
+end

@@ -1,0 +1,35 @@
+# HudCheck B (agent/hudcheck): Shine-Get display and save question, shots BEFORE the first A press.
+# Evidence: run hc_b169 (16:9, 8 shots thp=0, rc 0; SHINE banner at tick 736 before the first A at tick 796; no save prompt yet)
+# and hc_b43 (4:3, same). Save prompt not reached in this short route, see 98_shine_save_wait.dev.
+# Start as tools/routes/24_shine_after.dev: SUNSHINE_DEV_START=airport/1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1
+# SUNSHINE_RENDER_SCALE=1; settings.ini [video] fsr1=0 widescreen=1 aspect=16:9 (4:3 counterpart: aspect=4:3).
+# Expected at 16:9: the save mask (save.blo 'mask', CardSave !unk18) darkens the full width, texts stay centred.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=90
+killboss
+wait frames=300
+tpshine
+wait frames=30
+shot b_tp030.png
+wait frames=30
+shot b_tp060.png
+wait frames=30
+shot b_tp090.png
+wait frames=30
+shot b_tp120.png
+wait frames=30
+shot b_tp150.png
+wait frames=30
+shot b_tp180.png
+wait frames=60
+shot b_tp240.png
+wait frames=60
+shot b_tp300.png
+log
+mash A period=30 until stage=1 timeout=3000
+log
+wait frames=300
+log
+end

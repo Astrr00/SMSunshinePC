@@ -1,0 +1,56 @@
+# HudCheck A-dense (agent/hudcheck): same as 98_scenario_intro_shots.dev, shots every 8 logic ticks for ~200 ticks after waitfor stage=2
+# Evidence: run hc_a169d (16:9, 25 shots every 8 ticks, thp=0 x25, rc 0). Bars msk1/msk2 full width from ~tick 184 to 296; no black side column after tick 136.
+# to catch the wp_l/wp_r wipes and the msk1/msk2 bar timing. Env as 98_scenario_intro_shots.dev. No A press, thp must read 0.
+waitfor stage=2 timeout=1200
+shot d_000.png
+wait frames=8
+shot d_008.png
+wait frames=8
+shot d_016.png
+wait frames=8
+shot d_024.png
+wait frames=8
+shot d_032.png
+wait frames=8
+shot d_040.png
+wait frames=8
+shot d_048.png
+wait frames=8
+shot d_056.png
+wait frames=8
+shot d_064.png
+wait frames=8
+shot d_072.png
+wait frames=8
+shot d_080.png
+wait frames=8
+shot d_088.png
+wait frames=8
+shot d_096.png
+wait frames=8
+shot d_104.png
+wait frames=8
+shot d_112.png
+wait frames=8
+shot d_120.png
+wait frames=8
+shot d_128.png
+wait frames=8
+shot d_136.png
+wait frames=8
+shot d_144.png
+wait frames=8
+shot d_152.png
+wait frames=8
+shot d_160.png
+wait frames=8
+shot d_168.png
+wait frames=8
+shot d_176.png
+wait frames=8
+shot d_184.png
+wait frames=8
+shot d_192.png
+log
+wait frames=30
+end

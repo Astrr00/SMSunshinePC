@@ -136,8 +136,14 @@ void TCardSave::initData(TMarioGamePad* param_1)
 
 	unk14->setCullBack(GX_CULL_BACK);
 #ifdef TARGET_PC
-	// Widescreen: the full-screen mask also covers the side columns of the wide stage ortho
-	unk14->search('mask')->widenX(SMSGetUIOffsetUnitsX());
+	// Widescreen: the full-screen mask also covers the side columns of the wide stage ortho. Only save.blo: save_end.blo
+	// is drawn in pixels under a 1 unit = 1 px ortho (MovieDirector.cpp), where the stage widening would be wrong.
+	if (!unk18) {
+		J2DPane* mask = unk14->search('mask');
+		const JUTRect mb = mask->getBounds();
+		const s32 d = SMSGetUIOffsetUnitsX();
+		mask->setBounds(JUTRect(mb.x1 - d, mb.y1, mb.x2 + d, mb.y2));
+	}
 #endif
 
 	for (int i = 0; i < 10; ++i) {

@@ -1,0 +1,51 @@
+# HudCheck B-long (agent/hudcheck): like 98_shine_save_shots.dev, but shots every 30 logic ticks for ~480 ticks after
+# Evidence: run hc_b169L (16:9, 16 shots thp=0, rc 0): save prompt visible from ~tick 856 (b_L360) to 976 (b_L480), full-width flat grey (210,210,210).
+# 4:3 counterpart: run hc_b43L.
+# tpshine, still no A press, so a save question that comes late after the Shine-get text is shot before the first A.
+# Start: SUNSHINE_DEV_START=airport/1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1.
+# settings.ini [video] fsr1=0 widescreen=1 aspect=16:9.
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+cheat infinite_health
+cheat infinite_water
+wait frames=90
+killboss
+wait frames=300
+tpshine
+wait frames=30
+shot b_L030.png
+wait frames=30
+shot b_L060.png
+wait frames=30
+shot b_L090.png
+wait frames=30
+shot b_L120.png
+wait frames=30
+shot b_L150.png
+wait frames=30
+shot b_L180.png
+wait frames=30
+shot b_L210.png
+wait frames=30
+shot b_L240.png
+wait frames=30
+shot b_L270.png
+wait frames=30
+shot b_L300.png
+wait frames=30
+shot b_L330.png
+wait frames=30
+shot b_L360.png
+wait frames=30
+shot b_L390.png
+wait frames=30
+shot b_L420.png
+wait frames=30
+shot b_L450.png
+wait frames=30
+shot b_L480.png
+log
+mash A period=30 until stage=1 timeout=3000
+log
+wait frames=300
+log
+end

@@ -1,0 +1,38 @@
+# HudCheck A (agent/hudcheck): scenario intro at stage entry, no A press, THP off.
+# Evidence: runs hc_a169 (16:9, 13 shots, [shot-thp] thp=0 x13, ticks 108-528, rc 0),
+# hc_a43 (4:3, 1280x960, thp=0 x13, rc 0), hc_null169 (16:9 + SUNSHINE_ALLOW_CPU_ADAPTER=0, Null backend, 0 fatal, all shots black, rc 0).
+# Env: SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1
+# settings.ini: [video] fsr1=0 widescreen=1 aspect=16:9 (4:3 counterpart: aspect=4:3, same exe).
+# Shots every 35 logic ticks for ~420 ticks after waitfor stage=2. Each shot logs "[shot-thp] thp=N" in run.log;
+# only thp=0 frames count as scenario intro (thp=1/2 = a THP film is on screen).
+# Expected at 16:9: title band and letterbox bars msk1/msk2 span the full width, the scene shows in the side columns
+# when the centre shows it, and no black side column stays after the wipe (wp_l/wp_r).
+waitfor stage=2 timeout=1200
+shot a_000.png
+wait frames=35
+shot a_035.png
+wait frames=35
+shot a_070.png
+wait frames=35
+shot a_105.png
+wait frames=35
+shot a_140.png
+wait frames=35
+shot a_175.png
+wait frames=35
+shot a_210.png
+wait frames=35
+shot a_245.png
+wait frames=35
+shot a_280.png
+wait frames=35
+shot a_315.png
+wait frames=35
+shot a_350.png
+wait frames=35
+shot a_385.png
+wait frames=35
+shot a_420.png
+log
+wait frames=30
+end

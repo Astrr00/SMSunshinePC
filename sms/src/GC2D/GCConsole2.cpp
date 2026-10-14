@@ -4190,7 +4190,7 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 
 		if (unk44 && !unk43 && !unk42 && unk520->getPane()->isVisible()) {
 #ifdef TARGET_PC
-			// Widescreen: unk544 is in 4:3 EFB px; the centred stage ortho puts the ticker bx px further right
+			// Widescreen: unk544 is the retail 4:3 EFB scissor; the centred stage ortho puts the ticker bx px further right
 			graphics->setScissor(JDrama::TRect(unk544.x1 + SMSGetUIOffsetX(), unk544.y1,
 			                                   unk544.x2 + SMSGetUIOffsetX(), unk544.y2));
 #else

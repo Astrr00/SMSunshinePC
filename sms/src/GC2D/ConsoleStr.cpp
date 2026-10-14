@@ -50,12 +50,6 @@ void TConsoleStr::load(JSUMemoryInputStream& stream)
 	unk10->setCullBack(GX_CULL_BACK);
 	unk14 = new J2DSetScreen("scenario_demo_1.blo", arch);
 	unk14->setCullBack(GX_CULL_BACK);
-#ifdef TARGET_PC
-	// Widescreen: the full-screen background also covers the side columns of the wide stage ortho (retail code never
-	// looks 'BACK' up, so a layout without it is skipped)
-	if (J2DPane* back = unk14->search('BACK'))
-		back->widenX(SMSGetUIOffsetUnitsX());
-#endif
 
 	for (int i = 0; i < 3; ++i) {
 		unk28[i] = new TBoundPane(unk10, 'go00' + i);
@@ -78,6 +72,24 @@ void TConsoleStr::load(JSUMemoryInputStream& stream)
 	SMSMakeTextBuffer(unk2A0[0], 0x80);
 	unk2A0[1] = (J2DTextBox*)unk14->search('stry');
 	SMSMakeTextBuffer(unk2A0[1], 0x80);
+
+#ifdef TARGET_PC
+	// Widescreen: the letterbox bars and the opening wipes sit in the 640 px column of the wide stage ortho; widen them
+	// into the side columns (msk1/msk2 both sides, wp_l its left edge, wp_r its right edge). TExPane records the
+	// bounds when it is built (ExPane.cpp:7), so this comes before the constructors.
+	const s32 uiUnitsX = SMSGetUIOffsetUnitsX();
+	for (int i = 0; i < 2; ++i) {
+		J2DPane* msk = unk14->search('msk1' + i);
+		const JUTRect mb = msk->getBounds();
+		msk->setBounds(JUTRect(mb.x1 - uiUnitsX, mb.y1, mb.x2 + uiUnitsX, mb.y2));
+	}
+	J2DPane* wpL = unk14->search('wp_l');
+	const JUTRect wl = wpL->getBounds();
+	wpL->setBounds(JUTRect(wl.x1 - uiUnitsX, wl.y1, wl.x2, wl.y2));
+	J2DPane* wpR = unk14->search('wp_r');
+	const JUTRect wr = wpR->getBounds();
+	wpR->setBounds(JUTRect(wr.x1, wr.y1, wr.x2 + uiUnitsX, wr.y2));
+#endif
 
 	for (int i = 0; i < 2; ++i) {
 		unk290[i] = new TExPane(unk14, 'msk1' + i);

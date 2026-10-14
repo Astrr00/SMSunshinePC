@@ -88,7 +88,11 @@ void TPauseMenu2::load(JSUMemoryInputStream& pStream)
 	mBackground = mScreen->search('mask');
 #ifdef TARGET_PC
 	// Widescreen: the full-screen dimming mask also covers the side columns of the wide stage ortho
-	mBackground->widenX(SMSGetUIOffsetUnitsX());
+	{
+		const JUTRect mb = mBackground->getBounds();
+		const s32 d      = SMSGetUIOffsetUnitsX();
+		mBackground->setBounds(JUTRect(mb.x1 - d, mb.y1, mb.x2 + d, mb.y2));
+	}
 #endif
 	mMenuPane   = mScreen->search('t_0');
 

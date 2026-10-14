@@ -110,10 +110,6 @@ public:
 	const JUTRect& getScissorBounds() const { return mScissorBounds; }
 
 	void setInfluenceAlpha(bool influence) { mIsInfluencedAlpha = influence; }
-#ifdef TARGET_PC
-	// TARGET_PC widescreen: grow a full-screen pane by dx units on the left and on the right
-	void widenX(int dx) { mBounds = JUTRect(mBounds.x1 - dx, mBounds.y1, mBounds.x2 + dx, mBounds.y2); }
-#endif
 
 public:
 	/* 0x4 */ u16 mInfoTag;

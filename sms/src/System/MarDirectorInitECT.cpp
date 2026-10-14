@@ -258,7 +258,7 @@ void TMarDirector::initECDisp(
 	const f32 uiOffsetX = SMSGetUIOffsetX();
 	JDrama::TOrthoProj* ortho4 = new JDrama::TOrthoProj(
 	    -500.0f, 500.0f, 0.0f - uiOffsetX * 0.9375f, 16.0f,
-	    ((u16)SMSGetGameRenderWidth() - uiOffsetX) * 0.9375f, 464.0f);
+	    (SMSGetGameRenderWidth() - uiOffsetX) * 0.9375f, 464.0f);
 #else
 	JDrama::TOrthoProj* ortho4
 	    = new JDrama::TOrthoProj(-500.0f, 500.0f, 0.0f, 16.0f, 600.0f, 464.0f);
@@ -269,7 +269,14 @@ void TMarDirector::initECDisp(
 	    JDrama::TNameRefGen::search("Group 2D"));
 	param_1->push_back(group2D, CUE_DRAW);
 
+#ifdef TARGET_PC
+	// Widescreen: the guide map keeps the pre-HudFix fixed ortho (stretched over the full width, as before HudFix)
+	JDrama::TOrthoProj* guideOrtho
+	    = new JDrama::TOrthoProj(-500.0f, 500.0f, 0.0f, 16.0f, 600.0f, 464.0f);
+	param_1->push_back(guideOrtho, CUE_SET_PROJECTION);
+#else
 	param_1->push_back(ortho4, CUE_SET_PROJECTION);
+#endif
 	JDrama::TViewObj* guide
 	    = static_cast<JDrama::TViewObj*>(JDrama::TNameRefGen::search("Guide"));
 	param_1->push_back(guide, CUE_DRAW);
