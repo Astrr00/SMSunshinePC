@@ -1,0 +1,63 @@
+# Diagnosis route, no balloon caught yet (2026-10-14, runs gk_b43 and gk_b43b, both rc 0, 0 fatal).
+# Goal: a boss talk balloon of the Delfino GateKeeper (common/2d/balloon.bmg). Source conditions:
+#   gatekeeper.cpp:950-978 TNerveBGKWait2 counts unk288 once per bck 0x11 -> 0xF -> 0x10 loop; at 2 it shows 0xE0000.
+#   gatekeeper.cpp:843-856 TNerveBGKAppear shows 0xE0047 when unk28A (appearance counter) reaches 2.
+#   gatekeeper.cpp:776-784 shows the hint 0xE002E after 160 ticks of bck 7 with unk154 > 0.
+# Measured with this route (dolpic/0 dev start, runs gk_b43, gk_b43b):
+#   Mario spawns at (6500,300,-3850), the boss sits at (12,300,4631) and sleeps in bck 0xA.
+#   A tp next to it does not wake it; a 40-frame spray wakes it for about 30 ticks (bck 0x4, unk154 3, hp stays 3)
+#   and it goes back to sleep. Continuous spray (gk_b43) keeps it in the fight loop (bck 0x7/0x12) with unk154 = 0,
+#   so neither the hint nor the Wait2 loop is reached.
+# Next attempt: walk in like the accepted route 85 (5380,2700 / 4980,3100 / 20,5140, then faceto 12,4631) instead of tp;
+# a raw dev start does not enter the arena the way the route does.
+# Start like tools/routes/76_boss_hp_probe.dev: SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1
+#   SUNSHINE_DEV_SEED=1 SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_RENDER_SCALE=1
+#   settings.ini [video] fsr1=0 widescreen=1 aspect=4:3
+# Run: python tools/route.py Strict tools/routes/99_talk_text_boss.dev --name gk_b43b --seconds 420 SUNSHINE_DEV_AIM_ASSIST=1
+# Evidence when it works: gk_*.png (the balloon text), [status-boss] bck/unk154 lines, 0 fatal, rc of the run.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+cheat infinite_water
+wait frames=60
+log
+tp x=12 y=320 z=5150 yaw=180
+wait frames=2
+shot gk_tp000.png
+hold L trig=255,255 frames=40 # wake the boss (unk154 > 0 -> decHitPoints -> hp 2)
+wait frames=8
+shot gk_tp050.png
+wait frames=40
+shot gk_tp100.png
+wait frames=40
+shot gk_tp150.png
+wait frames=40
+shot gk_tp200.png
+wait frames=40
+shot gk_tp250.png
+wait frames=40
+shot gk_tp300.png
+wait frames=40
+shot gk_tp350.png
+wait frames=40
+shot gk_tp400.png
+wait frames=40
+shot gk_tp450.png
+wait frames=40
+shot gk_tp500.png
+wait frames=40
+shot gk_tp550.png
+wait frames=40
+shot gk_tp600.png
+wait frames=40
+shot gk_tp650.png
+wait frames=40
+shot gk_tp700.png
+wait frames=40
+shot gk_tp750.png
+wait frames=40
+shot gk_tp800.png
+wait frames=40
+shot gk_tp850.png
+wait frames=40
+shot gk_tp900.png
+log
+end

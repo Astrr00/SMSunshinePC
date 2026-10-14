@@ -1,0 +1,41 @@
+# FontFix follow-up: the Delfino Plaza tutorial balloons (stage dolpic/0, "バルーンヘルプ" nodes in /map/scene.bin).
+# They are THelpActor-like: getHelpID() returns the message (0xE0030 + local_10) while Mario is inside the scaled
+# collision and the referenced actor is alive, so walking onto the node opens the balloon.
+# Measured 2026-10-14: runs plaza_b43 (4:3) and plaza_b169 (16:9), both rc 0, 0 fatal. The balloon of node 17
+# (6950,300,-3650) reads "かべを　けって / さんかくとび! / かっこいいデス!" (all glyphs legible after FontFix e0e61b7),
+# box x 847..1248 y 241..648 at 4:3 and x 1059..1460 y 241..648 at 16:9: same size, shifted by 212 px = 2 * bx.
+# The balloon is up from about 20 ticks after the walkto (met at tick 397) through the end of the shots (tick 637+).
+# Node list read from the disc (scene.bin, type "BalloonHelp", 19 nodes, name/pos/scale):
+#   0 (1270,150,-6010)   1 (10,337,2340)    2 (4710,300,-690)   3 (5100,300,1200)   4 (11300,-700,2900)
+#   5 (-8070,0,-480)     6 (-5620,0,-1150)  7 (-850,0,-1470)    8 (810,0,-3690)     9 (770,0,-5610)
+#  10 (-550,-700,-3020) 11 (6450,300,-600) 12 (5404,300,-1160) 13 (5404,300,-3219) 14 (4190,303,-4340)
+#  15 (-4290,300,-700)  16 (-6500,1225,4080) 17 (6950,300,-3650) + "木箱ヘルプ１" (6460,300,1800)
+# Dev start dolpic/0 puts Mario at (6500,300,-3850): node 17 is 492 units away, the closest one.
+# Run: python tools/route.py Strict tools/routes/99_talk_text_npc.dev --name plaza_b43 --seconds 300
+#   SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1
+#   settings.ini [video] fsr1=0 widescreen=1 aspect=4:3 (aspect=16:9 for the wide counterpart)
+# Evidence: pl_*.png (the balloon text), run.log (walkto met, 0 fatal), rc of the run.
+waitfor director mario dirstate=4 camDemo=0 timeout=6000
+log
+shot pl_spawn.png
+walkto x=6950 z=-3650 radius=60 timeout=900
+log
+shot pl_a000.png
+wait frames=30
+shot pl_a030.png
+wait frames=30
+shot pl_a060.png
+wait frames=30
+shot pl_a090.png
+wait frames=30
+shot pl_a120.png
+wait frames=30
+shot pl_a150.png
+wait frames=30
+shot pl_a180.png
+wait frames=30
+shot pl_a210.png
+wait frames=30
+shot pl_a240.png
+log
+end
