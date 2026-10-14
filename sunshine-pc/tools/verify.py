@@ -211,7 +211,9 @@ def headless_tests():
     rc, out = run_cmd(["cmd", "/c", os.path.join(pc, "tools", "port_tests.cmd")], pc, "port-tests")
     if rc != 0:
         return "FAIL", f"exit {rc}: {last_line(out)}"
-    return "PASS", last_line(out)
+    # port_tests.cmd may end with a harmless vswhere "not recognized" line; report the summary instead.
+    summary = [ln.strip() for ln in out.splitlines() if " checks, " in ln]
+    return "PASS", summary[-1] if summary else last_line(out)
 
 
 @step("probe-units")
