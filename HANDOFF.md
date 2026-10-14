@@ -92,7 +92,7 @@ Expected at handoff: 11 317 / 12 881 functions byte-identical, 445 / 736 units M
 
 Aurora note: the old PC's aurora checkout reported HEAD 94431fd (a local commit, not on a known remote branch), but `apply-aurora-patches.py --check` says its files equal upstream 50e5be3 + patches 0001-0007 (0008, the FIFO diagnostics patch, was added on 2026-10-11). On a new PC `git submodule update --init` checks out 50e5be3; then run `python sunshine-pc/tools/apply-aurora-patches.py` (the setup script does) and expect `applied: 13 patches` (the series is 0001-0013). `aurora-worktree/` in the bundle is the already-patched fallback.
 
-## 7. State at handoff and next steps (2026-10-13, HEAD `a49732c`)
+## 7. State at handoff and next steps (2026-10-13, HEAD `6a552da`)
 
 Start here. Details per topic are in the `### Update 2026-10-13 ...` sections at the end of this file, in `ROADMAP.md`
 (Phase 1 and Phase 2 sections) and in `sunshine-pc/docs/platform-notes.md`. Agent reports and patches are not in git
@@ -100,68 +100,71 @@ Start here. Details per topic are in the `### Update 2026-10-13 ...` sections at
 session in `C:/Users/Administrator/Documents/Projekte/lead-2026-10-13b/` (`<Agent>_report.md`, `*.patch`, `TODO.md`,
 UI plans in `uiplans/`).
 
-**State (observed):** origin/main `a49732c`. Landed since `db0844e`: `ec1c0eb` UI-6, `32f3941` exit heap crash +
-per-run `USERPROFILE` + Aurora 0012, `45015f6` THP L/R, `93a9a1c` DSP voice mix, `934ee78` UI-8 + `route.py --no-dvd`,
-`cfe7373` goop readback + Aurora 0013, `a49732c` DSP output matrix + effect lines. Gates recorded in the commit
-messages (agents' clone builds): `ec1c0eb` STRICT 0 unresolved + DOL SHA-1 `9f5a8caf...` unchanged; `32f3941` DOL
-SHA-1 (rebuilt) + STRICT 0 unresolved + Aurora "applied: 12 patches"; `45015f6` DOL SHA-1 unchanged (rebuilt), no
-STRICT; `cfe7373` STRICT 0 unresolved + DOL SHA-1 unchanged + "applied: 13 patches"; `93a9a1c`, `934ee78`, `a49732c`
-STRICT 0 unresolved, no SHA-1 (they touch no `sms/`). Aurora series: 13 patches (0001-0013).
+**State (observed):** origin/main `6a552da`. Landed since `a49732c`: `14f65b1` verify.py line-endings step,
+`26b6a78` Aurora 0014 (copy readback off on the Null backend), `7665296` + `bf86825` UI-4a in-game menu, `3d224da` +
+`bac9d7e` frame-rate replay crash, `f0c4bc6` T1 boot matrix, `c86ed12` routes 85/72 robustness, `080e4fc` + `20c5992`
+GoopCount (counters from the CPU map), `3a61348` DSP overload voice steal skipped on PC, `243b386` master volume at the
+AI output, `b67b438` + `44581e8` AudioRef docs, `b22eec0` replay circle shadows, `6a552da` T4 launcher chain. Gates:
+as recorded in each commit message (agents' clone builds). Aurora series: 14 patches (0001-0014). Branch `agent/docs3`
+(not on origin yet): `ced1fdb` T2 pixel diff, `a205e79` empty `SUNSHINE_RENDER_SCALE` no longer masks the INI scale,
+and the docs commit that follows them.
 
 - **Phase 1: DONE under user-accepted dev aids** (runs accA1/acc86a and accB1/acc86b at `846d81f`; ROADMAP Phase 1).
   Dev aids accepted by the user: `SUNSHINE_DEV_AIM_ASSIST`, `chase tp=1`, `cheat infinite_health`, env
   `SUNSHINE_ALLOW_CPU_ADAPTER=0`. User rule: all dev cheats are allowed in test runs; switch them off only for damage
-  tests. **Since `cfe7373` the chain does not pass** (regression below; runs at `cfe7373`; [INFERENCE] the same at
-  `a49732c`, which changes only the host DSP).
-- **Known regression after `cfe7373` (open, fix in progress; report `Regress85_report.md`).** Observed: on the Null
-  backend (`SUNSHINE_ALLOW_CPU_ADAPTER=0`) the copy readback zeroes the goop maps (airport nonzero texels 6306 -> 0,
-  Delfino 15022 -> 15 and -> 4); route 85 then stalls at the Delfino GateKeeper (boss hp 2, TIMEOUT line 320; runs
-  rg85a/rg85b rc 3). With WARP (rg85w) the goop survives and the boss dies, but the run failed at the gate walk:
-  `walkto` line 345 overshoots, gate `openRatio` stays 0.00 during the sprays (lines 348-352), TIMEOUT `walkto` line
-  356. [INFERENCE] Null renders nothing, so its readback copies zeros. Cause of the WARP gate failure: under
-  investigation (candidate in the report: `faceto x=0 z=4941` before line 348; not applied). Work in progress (not
-  landed): skip the readback on Null, then re-prove route 85/86.
-- **Phase 2: in progress; exit NOT met.** The acceptance runs after the fixes are still to do: 10 minutes each in
-  Bianco and Delfino without crash, goop cleans, BGM and SFX audible to a person. Done before these fixes: audit of the
-  9 scanner hits (all codegen residue); soak Bianco 646 s and Delfino 706 s game time under page heap without crash
-  (after the `HelpActor` fix `eed8045`). The open items of the previous handoff:
-  1. **Goop cleans in game logic: landed (`cfe7373`), on WARP.** Each pollution layer pass renders offscreen at the
-     map's size; Aurora 0013 (`GXSetCopyReadback`) writes the R8 copy back into `mPollutionMap`, 2-4 frames late.
-     Runs goopRB6/7/8 (`tools/routes/95_goop_readback.dev`, dolpic/0): sprayed patch raw 0, `dirty=0` on it, goop
-     outside stays polluted; the unfixed exe stays `dirty=1`. Side effect: goop stages now start with their goop on
-     screen and in logic (before, skipped draws left dolpic nearly clean), so routes tuned to the old state may slip.
-     Not verified: other goop and boss stages, fpsLimit != 30, window resize (`GoopFix_report.md`).
-  2. **Audio: landed (`93a9a1c`, `a49732c`, `45015f6`).** Clipping gone (route 85 59 clip seconds -> 0, bianco/0 idle
-     111 -> 0, title 7 -> 0); levels follow the ucode, so the game is quieter than before (mixer channels -6.02 dB,
-     auto-mixer voices about -18.1 dB); effect returns reach L/R; THP L/R order fixed. The title BGM stop at about
-     21.5 s is retail: the title jingle is one 11 s sequence without a loop (`AudioRest_report.md`). Not verified:
-     nobody has listened; no LLE or console capture. Reports `AudioFix`, `AudioMatrix`, `DspDisasm`, `DspOut`.
-  3. **Logic rate below 30/s: explained, no code change** (`LogicRate2_report.md`). route.py's screenshot monitor
+  tests. The route 85 regression after `cfe7373` is fixed (`26b6a78`, `c86ed12`; item 4 below).
+- **Phase 2: exit met (2026-10-13), except the human listening check (PENDING, owner).** As in Phase 1 this holds under
+  dev aids, not retail input: dev start, scripted walk/spray/jump input with `cheat infinite_health` and `cheat
+  infinite_water`, WARP only (this machine has no hardware GPU). Done items (ROADMAP Phase 2):
+  1. **10-minute soaks.** Bianco (`bf86825`, clone-chase, bianco/0, WARP, page heap `SUNSHINE_CHECK_HEAP=2`,
+     `SoakBianco_report.md`): rc 0, 647.2 game s, 0 fatal/overrun/TIMEOUT, audio 0 clips, 10 s RMS median -24.7 dBFS,
+     dips mostly in the slowest stretch on the shared host ([INFERENCE] host stalls). Delfino Plaza soakD1 (`20c5992`,
+     main tree, dolpic/0, WARP, route `lead-2026-10-13b/soak_walk_spray49.dev`): rc 0, 646.8 game s, 0 fatal, audio
+     median -25.1 dBFS, 0 clips, silent only at boot and stage load. Cleaning was not exercised in the soaks.
+  2. **Goop cleans in game logic (`cfe7373`, Aurora 0013), on a rendering adapter.** Each pollution layer pass renders
+     offscreen at the map's size and the R8 copy is read back into `mPollutionMap`, 2-4 frames late. On the Null
+     backend the readback is off since `26b6a78` (Aurora 0014; Null read back empty copies), so the maps keep their
+     load state there. Counters from the CPU map (`080e4fc`, `20c5992`, `sms/src/Map/PollutionCount.cpp`): route 96
+     (`96_goop_count_bianco.dev`, WARP) raises the Bianco sink building when its goop is cleaned
+     (`GoopCountLand_report.md`). Not verified: hardware GPU, other goop and boss stages, fpsLimit != 30, window resize.
+  3. **Audio.** Clipping fixed (`93a9a1c`, `AudioFix_report.md`), output matrix and effect lines (`a49732c`,
+     `AudioMatrix_report.md`), THP L/R (`45015f6`), DSP overload voice steal skipped on PC (`3a61348`) and master
+     volume at the AI output (`243b386`), docs `44581e8` (`AudioRef_report.md`). The title BGM stop at about 21.5 s is
+     retail: the title jingle is one 11 s sequence without a loop (`AudioRest_report.md`). **PENDING (owner):** a person
+     listens to the WAV excerpts (`listen_bianco_music.wav`, `listen_bianco_spray.wav`). Not verified: no LLE or
+     console capture; ramp shape and the auto-mixer send law are approximations.
+  4. **Route 85 regression after `cfe7373`: fixed.** `26b6a78` (Aurora 0014) brings route 85/86 back on Null (gn85a,
+     gn85b, gn86a); `c86ed12` (ramp waypoints, `waitfor camDemo=0` + `faceto` before the gate sprays) fixes the
+     post-chase fragility (gclN1/gclN2 Null, gclW1 WARP, gclR86 pass). A seeded stepped Null run on `20c5992` showed
+     no divergence vs the baseline in 100 status lines; RefDecompFix also ran route 85 (rc 0, shines=1, on its
+     unlanded branch; `RefDecompFix_report.md`). Not ruled out: exe dependence of the post-chase failures (note in
+     `20c5992`).
+  5. **Logic rate below 30/s: explained, no code change** (`LogicRate2_report.md`). route.py's screenshot monitor
      (`AURORA_SCREENSHOT_EVERY=60:live.png`) is the main cost; with it off WARP holds 30/s at idle (at or above 30/s in
      92.4 % and 93.3 % of samples vs 54.5 % and 54.0 % with it); vsync off (Mailbox) did not raise the rate;
-     [INFERENCE] WARP vs Null is not the cause (8 idle runs). The monitor-off runs used `AURORA_SCREENSHOT_EVERY=0:x`,
-     which Aurora rejects and so disables; timing runs set `AURORA_SCREENSHOT_EVERY=` (empty, also disables it). Not
-     run: a loaded run (host contention half tested). This machine has no hardware GPU, so rates here may not
-     represent a real PC.
-  4. **Exit-time heap crash: fixed (`32f3941`).** The muted AI pump buffer is `thread_local` (`std::exit` freed the
+     [INFERENCE] WARP vs Null is not the cause (8 idle runs). Timing runs set `AURORA_SCREENSHOT_EVERY=` (empty); since
+     `ced1fdb` route.py removes an empty `KEY=` from the game's environment, and Aurora treats unset as off too
+     (`extern/aurora/lib/gfx/screenshot.cpp:58-60`). Not run: a loaded run (host contention half tested).
+  6. **Exit-time heap crash: fixed (`32f3941`).** The muted AI pump buffer is `thread_local` (`std::exit` freed the
      static under the detached pump); forced interleaving 4 of 4 faults before, 0 of 4 after; 18 of 18 natural TIMEOUT
      runs clean (`HeapCrash2_report.md`). Still open: host threads are not joined at exit; window close,
      `OSResetSystem` and launcher quit not run.
-  5. **GoopCount (pixel counts): in progress** (CPU count; design `GoopCountDesign.md`). The pixel metric still gives
-     0/1 only.
-- **Next, in this order:** land the Null-backend readback fix and re-prove route 85 + 86; the Phase 2 acceptance runs
-  (and a person listens to the audio); GoopCount; UI track A (plans in `lead-2026-10-13b/uiplans/`: UI-4, UI-14A,
-  UI-15, UI-11, UI-7, UI-12, UI-16; owner questions: UI-11 hash table, UI-12 network); Phase 3 after the Phase 2
-  acceptance: proof plan per launcher toggle with tasks T1-T5 (`ToggleMatrix.md`; the launcher row "Unlock all
-  nozzles" had no in-game effect, fixed in T4: observed with a new file on WARP; loading an existing save NOT
-  verified, and a game over before the first save returns the nozzles to 0x00000, code read).
-- UI packages: done UI-1..3, 5, 6, 8, 9, 10, 13; open UI-4 (in-game menu, needs `main.cpp`, a new module and a
-  `TARGET_PC` pause hook in `sms/src/System/MarDirectorDirect.cpp`), UI-7, 11, 12, 14-16. Music volume (D4) is folded
-  into the master volume row (the BGM level lives in `sms/src/MSound/MSoundBGM.cpp:8`, `MSBgm::smMainVolume`).
+  7. **Frame-rate replay:** the abort at `fpsLimit > 30` is fixed (`3d224da`, `bac9d7e`), circle shadows are drawn
+     once per frame (`b22eec0`); details in `sunshine-pc/docs/platform-notes.md`.
+- **Next: Phase 3** (ToggleMatrix `ToggleMatrix.md`: T1, T2 and T4 done). In this order: T3 Pacing + Fullscreen
+  (timing runs, so on an idle machine with `AURORA_SCREENSHOT_EVERY=` empty); T5 InputHooks; FSR1 fix in progress
+  (agent FSR1Fix, a new Aurora patch 0015 on top of `0005-fsr1-render-scale.patch`; T2 found FSR1 softer than bilinear
+  and shifted up-left); UI track A: UI-4b, UI-14A, UI-15, UI-7, UI-16 (plans in `lead-2026-10-13b/uiplans/`). Owner
+  decisions needed first: UI-11 hash table, UI-12 network. Owner: listen to the audio excerpts (the last Phase 2
+  check). Known gap of T4: "Unlock all nozzles" with a loaded save NOT verified, and a game over before the first save
+  returns the nozzles to 0x00000 (code read).
+- UI packages: done UI-1..3, 4a (in-game menu: R+Start or F1 opens the settings page over the frozen game), 5, 6, 8,
+  9, 10, 13; open UI-4b, UI-7, 11, 12, 14-16. Music volume (D4) is folded into the master volume row (the BGM level
+  lives in `sms/src/MSound/MSoundBGM.cpp:8`, `MSBgm::smMainVolume`).
 - Decomp: 16 units / 34 functions open (hard leftovers: koopajr 9, GCConsole2 7, elecNokonoko 3, ...), all claims free.
   Ledger cleaned (`40999a3`).
-- Main tree at `a49732c`: no uncommitted tracked changes except the patched Aurora submodule; 11 untracked scratch
-  routes in `sunshine-pc/tools/routes/` (76-82, 90, 94).
+- Main tree at `6a552da`: `git status` at the start of the Docs3 session showed no uncommitted tracked changes and
+  11 untracked scratch routes in `sunshine-pc/tools/routes/` (76-82, 90, 94).
 
 **Not done / known gaps:** Delfino GateKeeper cannot be killed with pad input only (Mario stands on goop in OIL_RUN and
 cannot squat; three attempts failed, see platform-notes; not retried since the goop logic changed), so `AIM_ASSIST`
@@ -188,9 +191,9 @@ and a Bianco Shine are not proven.
   tools/routes/85_accept_no_shine2.dev --name <n> --seconds 330 SUNSHINE_DEV_STEP_RETRACE=1 SUNSHINE_DEV_SKIP_MOVIES=1
   SUNSHINE_DEV_AIM_ASSIST=1 SUNSHINE_ALLOW_CPU_ADAPTER=0`) plus one WARP run of the affected spot (route.py's default
   adapter, `SUNSHINE_ALLOW_CPU_ADAPTER=1`; a full route 85 on WARP took 646 s wall in rg85w, so raise `--seconds`).
-  Current baseline until the Null-backend readback fix lands: route 85 on Null fails at line 320 (rg85a/rg85b:
-  TIMEOUT, boss hp 2), on WARP at line 356 (rg85w: TIMEOUT `walkto`); a change must not make it worse. The `cfe7373`
-  regression was found only after the push.
+  Current baseline: route 85 passes on Null and WARP since `26b6a78` + `c86ed12` (gclN1/gclN2, gclW1; seeded runs
+  with `SUNSHINE_DEV_SEED=1` compare state lines with `lead-2026-10-13b/gcl_diverge.py`). The `cfe7373` regression
+  was found only after the push.
 
 ## 8. Repo hygiene notes
 
@@ -336,7 +339,8 @@ Open items:
 - Route 86: `waitfor thp=0` was met at tick ~6564, but status samples show thp=2 until ~8670. Not explained. Before the fix, runs accA2/accB2 pressed A during the Delfino load movie (thp=2) and failed with rc 3.
 - Route 86 line 1 says "Stepped env as fg85"; stale, not edited. Route 85 header lines 5-6 still describe the step-retrace chain; not edited.
 - Reload count: acc86a/acc86b record `shines 0->1 after load`; the route-85 section above records `fg85reload` as `stage=1 shines=1`. Not reconciled; check `build/Route/acc86a/run.log`.
-- Exit fatal after a TIMEOUT run: see platform-notes "Exit fatal after a TIMEOUT run (open, 2026-10-13)".
+- Exit fatal after a TIMEOUT run: fixed in `32f3941`; see platform-notes "Exit fatal after a TIMEOUT run (fixed in
+  `32f3941`)".
 - Delfino GateKeeper without aim assist: see platform-notes "Delfino GateKeeper without aim assist (open, 2026-10-13)".
 - walkto stall (route 72 line 292): cause not found; see ROADMAP Phase 1, background (b).
 - accA1 ran its first minutes with two orphan `cygpath.exe` processes (load 54 %); killed afterwards. Measurement caveat.

@@ -662,7 +662,8 @@ Dev switches for this path:
 omp is byte-exact.
 - `sunshine-pc/src/sdk/av.cpp` lines 101-102 feed `av::AudioWrite` as 16-bit stereo; the slot-to-channel mapping there is not yet traced in detail.
 
-Title BGM (open):
+Title BGM (closed 2026-10-13: retail behaviour, report `AudioRest_report.md`; the items below are the earlier open state):
+- Result: the title track (`0x80010010`, BARC entry 0x10 = `k_title.com`; the enum names in `BackgroundMusic.hpp` are shifted by one) is a one-shot jingle: 4 tracks of 2640 ticks that end in `FF finish`, no loop, end at 11.0 s at 240 ticks/s (sequence data read, not a run). That fits one play from about 11 s to the last nonzero sample at about 21.5 s in the skip run, and one play after `Entrance.thp` in the movie run. Retail then plays no BGM on the title until the attract movies (`CardLoad.cpp:702-711`). [INFERENCE] The silence after the jingle is retail; not compared with a console capture.
 - Title music is started by the scene script via `startBGM(MSD_BGM_MAIN_TITLE)` (0x8001000F, `MS_WAVE_CLEAR` 0x209 in `MSoundBGM.cpp`). `MarioMove.cpp:1951` plays `MSD_BGM_TITLEBACK` (0x8001001B, `MS_WAVE_UNK210`) and stops it at 1955 on visibility change.
 - The length differs between movie and skip runs (about 101 s vs about 20 s). The sequence data is the same, so the skip path is a candidate for a missing transition or a changed start point. Not yet decided whether the sequence ends by design.
 - Next: compare root tick rates (root1 2.5x) against the retail sequence data, and check the sequence end (`cmdFinish` vs loop) and whether any retail trigger (movie end, event) starts or extends it.
@@ -827,11 +828,11 @@ Mechanism search for out-of-line header helpers (HeaderLab, ~38 probes in a temp
 - The `headHits` log field sums `unk154` increases (`unk154` is reset by `CUE_MOVE`); it is not a hit count.
 - The airport boss dies with pad input only (`fightboss`, `tools/routes/76b_airport_boss_fight.dev`). The Delfino boss has not died that way in three attempts.
 
-## Exit fatal after a TIMEOUT run (open, 2026-10-13)
+## Exit fatal after a TIMEOUT run (fixed in `32f3941`, 2026-10-13)
 
 - 3 of 170 TIMEOUT runs end with a fatal at exit: 2x `0xc0000005` (access violation) in `RtlFreeHeap`, 1x `0xc0000374` (heap corruption).
-- The teardown-order hypothesis is ruled out. Cause open.
-- Next probe (not run): `SUNSHINE_CHECK_HEAP=2`. In `sunshine-pc/src/sdk/jkr_new_delete.cpp`, line 58 tests only that the variable is set (`=1` and `=2` both enable the checks); the page-heap mode for `=2` is in `pageHeap()` (lines 62-71). The header comment at line 38 documents only `=1`.
+- The teardown-order hypothesis is ruled out. Cause and fix: see "Rare exit fault 2026-10-13" in the section "Exit after a devscript TIMEOUT (rc 0xC0000409)" above (the detached AI pump wrote into the muted path's function-local static buffer after `std::exit` freed it; the buffer is `thread_local` since `32f3941`, report `HeapCrash2_report.md`). The forced interleaving reproduced all three signatures (both `0xc0000005` stacks under `RtlFreeHeap+0x51`, and `0xc0000374`) without the fix and none with it. [INFERENCE] The three original runs had this fault; their binaries had no probe, so this is not proven for those runs.
+- Earlier next probe (superseded, not run): `SUNSHINE_CHECK_HEAP=2`. In `sunshine-pc/src/sdk/jkr_new_delete.cpp`, line 58 tests only that the variable is set (`=1` and `=2` both enable the checks); the page-heap mode for `=2` is in `pageHeap()` (lines 62-71). The header comment at line 38 documents only `=1`.
 
 ## Pipeline cache per run; corrupt cache (2026-10-13)
 
