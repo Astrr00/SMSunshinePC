@@ -2,7 +2,7 @@
 # build/Route/<name>/appdata/Sunshine/settings.ini: [video] fps_limit=60).
 # Env: SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1.
 # Idle (idle animation still moves the joints), then walks towards the lake, so the source matrices change every tick.
-# Evidence: run.log [framerate] window presents N/s; temporary mirror-matrix log lines; m_*.png.
+# Evidence: run.log [framerate] window presents N/s; m_*.png (the mirror-matrix log lines were a temporary ReplayFix2 log, not in the tree).
 waitfor director mario dirstate=4 camDemo=0 timeout=3000
 wait frames=90
 cheat infinite_health

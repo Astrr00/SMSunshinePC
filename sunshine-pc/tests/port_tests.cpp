@@ -2,6 +2,7 @@
 // of the game code (tests/sms_host_checks.cpp, built with the sms include path).
 // Build and run with tools/port_tests.cmd. Exit code is the number of failed checks.
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -163,7 +164,8 @@ void testWidescreen() {
     check(widescreenRenderWidthForAspect(32.0 / 9.0) == 1708, "widescreen: 32:9 -> 1708");
     check(widescreenRenderWidthForAspect(16.0 / 10.0) == 768, "widescreen: 16:10 -> 768");
 
-    sunshine::Settings s;  // widescreenInit reads only .widescreen and .aspect (and SUNSHINE_ASPECT, unset here)
+    _putenv("SUNSHINE_ASPECT=");  // the override would win over s.aspect
+    sunshine::Settings s;  // widescreenInit reads only .widescreen and .aspect (and SUNSHINE_ASPECT, cleared above)
     s.widescreen = true;
     s.aspect = "auto";
     check(widescreenInit(s, 1281, 960) == 1281 && sunshineRenderWidth() == 640 && sunshineUIOffsetX() == 0,

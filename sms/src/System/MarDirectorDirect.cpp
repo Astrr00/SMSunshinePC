@@ -1341,7 +1341,8 @@ void sunshineReplayFrame()
 	typedef JDrama::TViewObjPtrListT<JDrama::TViewObj> SunshineMirrorScene;
 	SunshineMirrorScene* const mirrorScene
 	    = static_cast<SunshineMirrorScene*>(JDrama::TNameRefGen::search("鏡シーン"));
-	if (mirrorScene)
+	// Same gate as the scene's own testPerform in the 0x206 link: a scene with CALC_ANIM masked copies nothing.
+	if (mirrorScene && !mirrorScene->unkC.check(CUE_CALC_ANIM))
 		for (JGadget::TList_pointer<JDrama::TViewObj*>::iterator it = mirrorScene->getChildren().begin();
 		     it != mirrorScene->getChildren().end(); ++it)
 			if (TMirrorActor* mirror = dynamic_cast<TMirrorActor*>(*it))
