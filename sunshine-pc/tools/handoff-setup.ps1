@@ -86,10 +86,10 @@ foreach ($f in "decomp_queue.json","triage.json") { $src = Join-Path $bundle "st
 if (Test-Path (Join-Path $bundle "state\build-evidence")) { New-Item -ItemType Directory -Force -Path (Join-Path $repo "sunshine-pc\build") | Out-Null; Copy-Item -Recurse -Force (Join-Path $bundle "state\build-evidence\*") (Join-Path $repo "sunshine-pc\build") }
 
 # 9. stateroot memory (optional)
-if (Test-Path (Join-Path $bundle "state\stateroot")) { Write-Host "StateRoot: in the repo run  stateroot resume  (handoff written by the CLI, see HANDOFF.md); raw snapshot in state\stateroot is for reference only (never edit .stateroot by hand)" }
+if (Test-Path (Join-Path $bundle "state\stateroot")) { Write-Host "StateRoot: in the repo run  stateroot resume  (handoff written by the CLI); raw snapshot in state\stateroot is for reference only (never edit .stateroot by hand)" }
 if (Test-Path (Join-Path $bundle "state\progress.log")) { Copy-Item -Force (Join-Path $bundle "state\progress.log") (Join-Path $repo "sunshine-pc\build\progress.log") -ErrorAction SilentlyContinue }
 
-if ($SkipGates) { Write-Host "Done (gates skipped). See HANDOFF.md section 4."; exit 0 }
+if ($SkipGates) { Write-Host "Done (gates skipped). See README.md, Build."; exit 0 }
 
 # 10. gates
 Push-Location (Join-Path $repo "sms")
@@ -101,4 +101,4 @@ Pop-Location
 Push-Location (Join-Path $repo "sunshine-pc")
 python tools\apply-aurora-patches.py --check
 Pop-Location
-Write-Host "Next: strict link (see HANDOFF.md section 4)."
+Write-Host "Next: strict link (see README.md, Build)."

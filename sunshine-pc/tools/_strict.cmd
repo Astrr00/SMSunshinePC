@@ -1,6 +1,6 @@
 @echo off
 rem Strict link gate: builds sunshine.exe into build\Strict WITHOUT /FORCE:UNRESOLVED, so any missing symbol is an LNK2019/LNK1120 error.
-rem Usage (HANDOFF.md section 4): python tools\locked.py cmd /c tools\_strict.cmd      (run from sunshine-pc)
+rem Usage: python tools\locked.py cmd /c tools\_strict.cmd      (run from sunshine-pc)
 rem Needs LLVM_BIN (folder with clang-cl.exe). Exit code 0 = 0 unresolved symbols.
 set "PATH=%PATH:"=%"
 set "VCVARS=%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
