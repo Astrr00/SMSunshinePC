@@ -1,0 +1,14 @@
+# Phase 3 T2 PixelDiff glyphs: airport/1 (FLUDD tutorial) frames per pre-written settings.ini interface.glyph_style.
+# Env: SUNSHINE_DEV_START=airport/1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1.
+# Evidence: [glyph] <style>/{a,b,x} lines; g40/g60/g80.png. The tutorial shows the water-button icon (water_button_x.bti,
+# the X glyph) next to the nozzle HUD at bottom right about 60 ticks after dirstate=4; at +240 it is gone (probe t2_gprobe).
+waitfor stage=0 scen=1 director mario dirstate=4 timeout=3000
+wait frames=40
+shot g40.png
+wait frames=20
+log
+shot g60.png
+wait frames=20
+shot g80.png
+wait frames=30
+end

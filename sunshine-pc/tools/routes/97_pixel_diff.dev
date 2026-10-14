@@ -1,0 +1,10 @@
+# Phase 3 T2 PixelDiff: one dolpic/0 frame at a fixed tick per pre-written build/Route/<name>/appdata/Sunshine/settings.ini.
+# Env: SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1; SUNSHINE_RENDER_SCALE=0.5 (env scale) or
+# SUNSHINE_RENDER_SCALE= (route.py removes it: the INI resolution_scale decides).
+# Evidence: p.png (window size; FSR1/bilinear output of the internal frame), [render] upscaler=, log line at the shot tick.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=240
+log
+shot p.png
+wait frames=30
+end

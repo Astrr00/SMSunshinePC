@@ -851,7 +851,7 @@ Proof that a saved setting reaches the game: a pre-written `build/Route/<run>/ap
 | `video.width/height=960/720` | `t1_b1` | `[launcher] window: size 960x720`, `boot.png` 960x720 | 1280x960, PNG 1280x960 |
 | `video.remember_window_size=0` (+ 960x720 saved) | `t1_b2` | window and PNG 1280x960 | - |
 | `video.vsync=0` | `t1_b1` | `present mode Mailbox` | `present mode Fifo` (WARP offers no FifoRelaxed) |
-| `video.fsr1=1` | `t1_b1` | `[render] upscaler=fsr1` (log only; pixel effect is task T2) | `upscaler=bilinear` |
+| `video.fsr1=1` | `t1_b1` | `[render] upscaler=fsr1` (log only; pixel effect is task T2, see T2 below) | `upscaler=bilinear` |
 | `video.widescreen=1 aspect=32:9` | `t1_b3` | `render width 1594`, window and PNG 3416x960 (wider than the 1920x1200 desktop, not clamped), scene fills the width, HUD at the edges | `widescreen: off ... render width 640` |
 | `widescreen=1 aspect=auto`, `SUNSHINE_WINDOW_SIZE=1280,720` | `t1_b4` | `render width 796` (from the first window size), window and PNG 1706x960 (INI default size) | - |
 | `widescreen=1 aspect=4:3` | `t1_b5` | `render width 640`, window and PNG 1280x960 | - |
@@ -866,4 +866,23 @@ Pitfalls found on the way:
 - PNG width is the window width (`widescreenWindowWidth`: 960 x render width / 448, rounded even), not the render width; the PNG aspect equals render width / 448.
 - `[cheats] N cheats loaded, M active` is printed by `cheatsLoad` before `applyRuntimeSettings` applies the INI, so it reads `0 active` with `infinite_water=1` too; `[cheats-state] active=` shows the applied state.
 - Fixed-window RMS (2-20 s) does not measure the volume: after about 3 s the audio of two runs drifts apart (cause not measured; logic rate and startup timing differ per run), so `t1_v50/t1_b0` gives 0.624 and `t1_b1/t1_b0` 0.197. Compare aligned prefixes instead.
-- Not verified here: fullscreen, FPS limit, resolution scale, dead zones, key bindings, the FSR1 and glyph pixel effect, whether the spray ran in `t1_b1` (the refill hides the drop).
+- Not verified here: fullscreen, FPS limit, resolution scale, dead zones, key bindings, the FSR1 and glyph pixel effect (resolution scale, FSR1 and glyphs: see T2 below), whether the spray ran in `t1_b1` (the refill hides the drop).
+
+## Launcher settings in game: pixel diff (T2, 2026-10-13)
+
+Same setup as T1 (pre-written `build/Route/<run>/appdata/Sunshine/settings.ini`, `route.py --dvd`, WARP), plus `SUNSHINE_DEV_SEED=1`. `route.py` now treats `KEY=` with an empty value as "remove KEY from the game's environment", so `SUNSHINE_RENDER_SCALE=` lets the INI `resolution_scale` decide (route.py's default 0.25 otherwise overrides it, `launcher.cpp` `applyRuntimeSettings`). Metrics: scratch script `pixeldiff_metrics.py` (MAD over RGB; Laplacian variance and gradient energy of the luma). The script and the PNGs live outside the repo, as with AudioRef: the script in the lead's report folder (`lead-2026-10-13b/pixeldiff_metrics.py`), the PNGs (game frames) in the run folders `clone-3/sunshine-pc/build/Route/t2_*`. So the numbers below cannot be reproduced from the repo alone.
+
+- Scale and FSR1: `tools/routes/97_pixel_diff.dev`, dolpic/0, `shot` 240 ticks after `dirstate=4` (tick 607/608), window 1280x960. [code read: Aurora `lib/window.cpp` `get_window_size` / `scale_frame_buffer_to_aspect`] `resolution_scale` is a fraction of the EFB size (640x480), not of the window: 50 renders 320x240, 100 renders 640x480, both upscaled to 1280x960. Observed in the runs: only `Using framebuffer size 640x480 scale 1` (in every run log) and 1280x960 PNGs; no run logs the internal size.
+
+| Run | Config | Laplacian variance | Gradient energy |
+| --- | --- | --- | --- |
+| `t2_p0` | env 0.5, bilinear | 25.2 | 69.8 |
+| `t2_p1` | env 0.5, `fsr1=1` | 15.3 | 34.4 |
+| `t2_p2` | `t2_p0` rerun | 25.2 | 69.8 |
+| `t2_p3` | INI `resolution_scale=50`, env removed | 24.6 | 68.3 |
+| `t2_p4` | INI `resolution_scale=100`, env removed | 83.0 | 126.3 |
+| `t2_p5` | env 0.5, `fsr1=1`, `SUNSHINE_UPSCALE_SHARPNESS=1` | 37.5 | 42.3 |
+
+- MAD p0/p2 0.00 (bit-identical rerun), p0/p1 6.61, p0/p3 0.64 (only the lower part of the frame, y > 490; the sky and buildings are identical, so env 0.5 and INI 50 give the same frame size; cause of the lower-part difference not checked [INFERENCE: scene state]). Scale: p3/p4 Laplacian variance 0.30 (pass < 0.6). FSR1: the frame changes (6.61 > 3 x 0.00) but it is softer than bilinear (fail "P1 sharper"), and its content sits up and left of the bilinear frame: the best whole-pixel shift is dx -2, dy -1 (ad-hoc search, borders excluded, not in `pixeldiff_metrics.py`; MAD 6.75 unshifted -> 4.15 shifted on the searched region; the full-frame MAD is 6.61). [INFERENCE from code] Aurora's `sample_easu` (`extern/aurora/lib/webgpu/gpu.cpp`) maps pixels with `(frag - 0.5) * ratio` instead of `frag * ratio - 0.5`: 0.375 source px = about 1.5 output px at 4x, up and left, consistent with the measured whole-pixel shift. It also blends 4x4 Gaussian taps (sigma 0.6-1.3 source px), and the default RCAS strength is k = 0.05.
+- Glyphs: `tools/routes/97_glyph_shot.dev`, airport/1 (FLUDD tutorial), `SUNSHINE_RENDER_SCALE=1`. At 60 and 80 ticks after `dirstate=4` the tutorial shows the water-button icon (`water_button_x.bti`, the X glyph) next to the nozzle HUD at about (1200, 670); at +240 it is gone; at +40 the HUD is not settled and differs between runs. 66x66 icon crop vs `t2_g_xbox`, tick +80: generic 0.00, playstation 59.7, switch 82.0, gamecube 42.4 (tick +60: 3.7, 65.5, 79.0, 42.9). Logs: `[glyph] xbox/a,b,x` for generic and xbox, `<style>/a,b,x` for the others. The PlayStation X slot still shows a pink square.
+- Not verified here: FSR1 at other scales or on a real GPU, scale 67/77/150+ (`render_scale.cpp` ignores env values outside 0.25-1.0; the INI allows 0-400), the A/B/Start glyph slots in a frame.

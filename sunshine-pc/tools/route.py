@@ -9,6 +9,10 @@
   --appdata-from N  copy build/Route/N/appdata into this run before the start (reload a saved game)
   --no-dvd   start sunshine.exe without --dvd <disc>: the launcher runs (or [launcher] skip_launcher starts last_image)
   KEY=VAL    extra environment variables (SUNSHINE_DEV_MAX_SECONDS is set to the limit)
+  KEY=       empty value: remove KEY from the game's environment, also route.py's defaults (SUNSHINE_RENDER_SCALE= lets
+             the run's settings.ini resolution_scale decide); for presence-only flags (e.g. SUNSHINE_DEV_SKIP_MOVIES,
+             SUNSHINE_DEV_STATUS) KEY= now means off; SUNSHINE_DEV_SEED= and SUNSHINE_WATCHDOG_SECONDS= fall back to
+             their defaults
 
 Rules kept here: CREATE_NO_WINDOW + BELOW_NORMAL priority, window parked off screen, muted, temporary APPDATA
 (settings and card saves live in build/Route/<name>/appdata), temporary USERPROFILE (SDL pref path: pipeline and Dawn
@@ -106,7 +110,9 @@ def main():
     env.setdefault("SUNSHINE_RENDER_SCALE", "0.25")
     env.setdefault("SUNSHINE_DEV_EXIT_ON_END", "1")  # the game ends right after the script's `end` (keep a `wait` after the last `shot`)
     env.update(extra)
-    print(f"[route] render scale {env['SUNSHINE_RENDER_SCALE']} (SUNSHINE_RENDER_SCALE=1 for a sharp frame), cpu adapter {env['SUNSHINE_ALLOW_CPU_ADAPTER']}")
+    for k in [k for k, v in extra.items() if v == ""]:
+        env.pop(k, None)
+    print(f"[route] render scale {env.get('SUNSHINE_RENDER_SCALE', 'unset (settings.ini)')} (SUNSHINE_RENDER_SCALE=1 for a sharp frame), cpu adapter {env.get('SUNSHINE_ALLOW_CPU_ADAPTER', 'unset')}")
     # ROUTE_NOLOCK=1: skip the run lock for functional diagnosis runs in parallel (6 cores). Never for timing measurements.
     use_lock = os.environ.get("ROUTE_NOLOCK", "") in ("", "0")
     if use_lock and lock("acquire") != "LOCKED":
