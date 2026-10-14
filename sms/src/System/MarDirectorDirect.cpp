@@ -1237,6 +1237,9 @@ JStage::TObject* TMarDirector::JSGFindObject(const char* param_1,
 #include <Map/MapDraw.hpp>
 #include <MarioUtil/ShadowUtil.hpp>
 #include <MarioUtil/ScreenUtil.hpp>
+#include <Strategic/MirrorActor.hpp>
+#include <JSystem/JDrama/JDRViewObjPtrList.hpp>
+#include <stddef.h>
 #include <string.h>
 
 // Presentation replay (sunshine-pc/src/framerate/framerate.cpp): draws the current game frame again without advancing
@@ -1324,10 +1327,25 @@ void sunshineReplayFrame()
 	const u8 consoleFlash = console ? console->unk30C : 0;
 	TMapDrawWall* const wall = static_cast<TMapDrawWall*>(JDrama::TNameRefGen::search("カメラ食い込み壁"));
 	const int wallAlpha = wall ? wall->unk18 : 0;
-	static u8 sSavedAfterEffect[sizeof(TAfterEffect)];
+	// The blur state from unk14 to the end (the vtable and the name ref stay as they are). The null test is no real guard
+	// (gpAfterEffect is never cleared, scenecmn sets it per stage).
+	const size_t afterEffectAt = offsetof(TAfterEffect, unk14);
+	u8 savedAfterEffect[sizeof(TAfterEffect) - offsetof(TAfterEffect, unk14)];
 	if (gpAfterEffect)
-		memcpy(sSavedAfterEffect, gpAfterEffect, sizeof(TAfterEffect));
+		memcpy(savedAfterEffect, reinterpret_cast<u8*>(gpAfterEffect) + afterEffectAt, sizeof(savedAfterEffect));
 	const bool silhouette = (gpSilhouetteManager->unk48 > 0.0f ? true : false) || gpCamera->unk2C8 != -1;
+	// Mirror actors (TMirrorActor; Mario's マリオin鏡 exists on every stage) copy their source model's animation matrices,
+	// and check whether they are in the mirror, only on CUE_CALC_ANIM, which the mask below takes from the mirror scene's
+	// link. direct() runs that link before the logic, so the replay would draw this tick's models with mirror images of
+	// the last tick. Run the copy here: it reads only this tick's state, so the next direct() repeats it unchanged.
+	typedef JDrama::TViewObjPtrListT<JDrama::TViewObj> SunshineMirrorScene;
+	SunshineMirrorScene* const mirrorScene
+	    = static_cast<SunshineMirrorScene*>(JDrama::TNameRefGen::search("鏡シーン"));
+	if (mirrorScene)
+		for (JGadget::TList_pointer<JDrama::TViewObj*>::iterator it = mirrorScene->getChildren().begin();
+		     it != mirrorScene->getChildren().end(); ++it)
+			if (TMirrorActor* mirror = dynamic_cast<TMirrorActor*>(*it))
+				mirror->testPerform(CUE_CALC_ANIM, &local);
 	// Logic cues masked as on the entry stage: PerformList GX runs the mirror scene with CUE_CALC_ANIM (link 0x206 from
 	// PerformLists.bin), and each such perform steps the animation of TMapStaticObj 太陽in鏡 (MActor::frameUpdate).
 	for (int i = 0; i < 3; ++i) {
@@ -1343,7 +1361,7 @@ void sunshineReplayFrame()
 	if (wall)
 		wall->unk18 = wallAlpha;
 	if (gpAfterEffect)
-		memcpy(gpAfterEffect, sSavedAfterEffect, sizeof(TAfterEffect));
+		memcpy(reinterpret_cast<u8*>(gpAfterEffect) + afterEffectAt, savedAfterEffect, sizeof(savedAfterEffect));
 	for (int i = 0; i < shadowReqs; ++i)
 		shadows->mRequests[i] = sSavedShadowReqs[i];
 	if (shadows) {
