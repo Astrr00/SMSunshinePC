@@ -15,7 +15,7 @@ struct Settings;
 // Returns the logical window width to create: unchanged at 4:3, otherwise windowHeight * EFB width / 480.
 uint32_t widescreenInit(const sunshine::Settings& s, uint32_t windowWidth, uint32_t windowHeight);
 
-// EFB width in pixels (640 while 480 * aspect < 648, otherwise 480 * aspect rounded to a multiple of 4; the EFB stays 448 high).
+// EFB width in pixels (640 while 480 * aspect < 648, otherwise 480 * aspect rounded to a multiple of 4, at most 3752; the EFB stays 448 high).
 // Used by sms/src/System/Resolution.cpp.
 uint32_t sunshineRenderWidth();
 // Left edge of the centred 640-wide 4:3 UI column inside sunshineRenderWidth() (even; 0 at 4:3).

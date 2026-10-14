@@ -163,6 +163,7 @@ void testWidescreen() {
     check(widescreenRenderWidthForAspect(21.0 / 9.0) == 1120, "widescreen: 21:9 -> 1120");
     check(widescreenRenderWidthForAspect(32.0 / 9.0) == 1708, "widescreen: 32:9 -> 1708");
     check(widescreenRenderWidthForAspect(16.0 / 10.0) == 768, "widescreen: 16:10 -> 768");
+    check(widescreenRenderWidthForAspect(10.0) == 3752, "widescreen: 10:1 clamped to 3752 (Aurora scissor limit)");
 
     _putenv("SUNSHINE_ASPECT=");  // the override would win over s.aspect
     sunshine::Settings s;  // widescreenInit reads only .widescreen and .aspect (and SUNSHINE_ASPECT, cleared above)

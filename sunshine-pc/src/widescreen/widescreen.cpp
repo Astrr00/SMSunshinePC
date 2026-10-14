@@ -2,6 +2,7 @@
 
 #include "../settings.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -24,7 +25,8 @@ uint32_t widescreenRenderWidthForAspect(double aspect)
 	const uint32_t w = static_cast<uint32_t>(wide + 0.5);
 	// Multiple of 4: TEfbCtrl aligns copy rects to 2 px, and the 640 UI column needs an even offset on both sides
 	// ((W - 640) / 2 even), otherwise it sits 1 px off centre (854 gave 106 px left, 108 px right).
-	return (w + 2) & ~3u;
+	// Aurora's scissor fields hold right edges up to 3753 (342 + W - 1, patch 0016); wider would wrap to a black frame.
+	return std::min((w + 2) & ~3u, 3752u);
 }
 
 uint32_t widescreenInit(const sunshine::Settings& s, uint32_t windowWidth, uint32_t windowHeight)
