@@ -115,4 +115,30 @@ int ChGlobal::releaseAll(TChannelMgr* mgr)
 	return 0;
 }
 
+#ifdef TARGET_PC
+void ChGlobal::countChannelsPC(u32 counts[10])
+{
+	for (int i = 0; i < 10; ++i)
+		counts[i] = 0;
+	if (!CHANNEL)
+		return;
+	for (int i = 0; i < 256; ++i) {
+		TChannel* channel = &CHANNEL[i];
+		TChannelMgr* mgr  = channel->unk4;
+		u32 list          = 4;
+		if (mgr) {
+			if (channel->unk8 == &mgr->unk8)
+				list = 0;
+			else if (channel->unk8 == &mgr->unkC)
+				list = 1;
+			else if (channel->unk8 == &mgr->unk10)
+				list = 2;
+			else if (channel->unk8 == &mgr->unk14)
+				list = 3;
+		}
+		++counts[(mgr == GLOBAL_CHANNEL ? 0 : 5) + list];
+	}
+}
+#endif
+
 } // namespace JASystem

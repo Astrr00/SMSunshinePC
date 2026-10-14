@@ -73,6 +73,7 @@ constexpr double kHz32 = 32028.5;
 constexpr double kHz48 = 48042.75;
 
 std::atomic<int> g_volumePct { 100 }; // av::AudioSetVolumePct
+std::atomic<u32> g_aiRepeats { 0 };   // sunshineAiRepeats
 
 // The decomp hands the DMA buffer to AIInitDMA as a 32-bit value (`AIInitDMA(u32(dac[2]), ...)` in JASAiCtrl.cpp), which
 // drops the upper half of a 64-bit host pointer. Recover it as the address with these low 32 bits that lies nearest to
@@ -130,6 +131,8 @@ void AiPump()
 	av::BoostThreadPriority();
 
 	bool playing = false; // false until the first block started: no block has ended yet, so no interrupt is due
+	bool programmed = false; // set by the first address change after playing; boot repeats before it are not counted
+	u32 lastAddr = 0;
 	auto next    = Clock::now();
 	while (!g_stopping) {
 		u32 addr, bytes, rate;
@@ -150,6 +153,16 @@ void AiPump()
 		// callback programs plays one block later. JAudio triple-buffers on exactly that assumption.
 		const double hz = rate == AI_SAMPLERATE_32KHZ ? kHz32 : kHz48;
 		PlayBlock(addr, bytes, hz);
+		// JAudio rotates three DAC buffers, so the same address twice in a row means no new block was programmed in time
+		// and the pump plays the previous one again (SUNSHINE_DEV_AUDIO_STATS ai_repeat). This also counts a late pump:
+		// when next has already passed, the read below follows the last callback at once. Boot: initSystem programs dac[2]
+		// (JASAiCtrl.cpp:45-46) and the first updateDac does not call AIInitDMA (JASAiCtrl.cpp:111-124), so the start
+		// block repeats at the first boundaries. Count only after the game's first address change.
+		if (playing && addr != lastAddr)
+			programmed = true;
+		else if (playing && programmed && addr == lastAddr)
+			g_aiRepeats.fetch_add(1, std::memory_order_relaxed);
+		lastAddr = addr;
 		if (playing) {
 			InterruptLock lock;
 			if (ai.dmaCallback)
@@ -417,6 +430,9 @@ void VISetBlack(BOOL black) { g_black = black; }
 // Bit 0 of the DTV status register is the component-cable (progressive scan capable) sense line. A PC has no console
 // video cable, so it is reported as absent: the game then never offers its progressive-scan prompt (GCLogoDir).
 u32 VIGetDTVStatus(void) { return 0; }
+
+// AI periods that replayed the previous block (AiPump); read by the SUNSHINE_DEV_AUDIO_STATS line (sms JASDSPBuf.cpp).
+u32 sunshineAiRepeats() { return g_aiRepeats.load(std::memory_order_relaxed); }
 
 // SUNSHINE_DEV_SEED=<n> (dev harness): fixed srand() seed so runs reproduce; unset keeps the boot-tick seed.
 u32 sunshineRandSeed(u32 fallback)

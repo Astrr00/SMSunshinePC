@@ -1,0 +1,14 @@
+# Audio stage change (AudioLeak, AudioFix2): bianco/0 dev start, idle, `shine 2` (100-coin shine, route 37), back to
+# Delfino, idle. python tools/route.py Strict tools/routes/99_audio_b2d.dev --name <n> --seconds 240
+#   SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SEED=1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_AUDIO_STATS=5
+waitfor stage=2 scen=0 director mario dirstate=4 camDemo=0 timeout=3000
+log
+wait frames=450
+log
+shine 2
+wait frames=300
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=2400
+log
+wait frames=900
+log
+end

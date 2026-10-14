@@ -1,0 +1,9 @@
+# Audio measurement (AudioFix2): idle after a dev start, 150 s of play, no input.
+# python tools/route.py Strict tools/routes/99_audio_idle150.dev --name <n> --seconds 280 SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SEED=1 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_AUDIO_STATS=5
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+log
+wait frames=2250
+log
+wait frames=2250
+log
+end
