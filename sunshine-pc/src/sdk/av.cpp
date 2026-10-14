@@ -72,6 +72,8 @@ struct {
 constexpr double kHz32 = 32028.5;
 constexpr double kHz48 = 48042.75;
 
+std::atomic<int> g_volumePct { 100 }; // av::AudioSetVolumePct
+
 // The decomp hands the DMA buffer to AIInitDMA as a 32-bit value (`AIInitDMA(u32(dac[2]), ...)` in JASAiCtrl.cpp), which
 // drops the upper half of a 64-bit host pointer. Recover it as the address with these low 32 bits that lies nearest to
 // the OS arena, which holds the game's heap (a 24 MB-class block, so well within +-2 GB of any pointer in it).
@@ -98,6 +100,15 @@ void PlayBlock(u32 addr, u32 bytes, double hz)
 			             static_cast<unsigned long>(bytes));
 		}
 		return;
+	}
+	// Master volume after the game's own saturation (DSP output stage, THP mix clamp), like a volume knob behind the
+	// console's DAC. A copy: the block is the game's DAC buffer.
+	if (const int pct = g_volumePct.load(std::memory_order_relaxed); pct < 100) {
+		thread_local std::vector<s16> scaled;
+		scaled.resize(bytes / 2);
+		for (size_t i = 0; i < scaled.size(); ++i)
+			scaled[i] = static_cast<s16>(src[i] * pct / 100);
+		src = scaled.data();
 	}
 	av::DumpWrite(src, bytes / 4, hz);
 	// SUNSHINE_MUTE=1: the device gets silence (same timing, so the AI clock is unchanged); the dump above keeps the mix.
@@ -234,6 +245,8 @@ std::atomic<u32> g_dspMail { 0 };
 namespace av {
 
 void DspPostMailFromDsp(uint32_t mail) { g_dspMail.store(mail | 0x80000000u); }
+
+void AudioSetVolumePct(int pct) { g_volumePct.store(pct < 0 ? 0 : pct > 100 ? 100 : pct, std::memory_order_relaxed); }
 
 } // namespace av
 

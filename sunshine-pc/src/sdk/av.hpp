@@ -33,6 +33,11 @@ void AudioWrite(const int16_t* stereo, uint32_t frames, double hz);
 // with one log line. Any thread.
 void AudioSetDevice(const std::string& id);
 
+// Launcher master volume, percent 0..100 (av.cpp). The AI pump scales every DAC block by it before the dump and the
+// device: the block holds the DSP mix plus the THP movie audio that JASAiCtrl mixes in after the DSP, so both follow it.
+// 100 passes the block through unchanged. Any thread.
+void AudioSetVolumePct(int pct);
+
 struct AudioDevice {
 	std::string id;   // endpoint id (UTF-8); empty for the Windows default entry
 	std::string name; // friendly name (UTF-8)

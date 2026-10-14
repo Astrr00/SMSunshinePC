@@ -48,11 +48,6 @@ void VISetWindowSize(uint32_t width, uint32_t height);
 void VISetFrameBufferScale(float scale);
 }
 
-// Master volume lives in sdk/dsp_mixer.cpp.
-namespace hostdsp {
-void setOutputVolumePct(int pct);
-}
-
 bool sunshineCanReplay();           // sms/src/System/MarDirectorDirect.cpp: gameplay (director state 4), a frame can be redrawn
 u32 sunshineInterpStep();           // src/framerate/framerate.cpp
 
@@ -1243,7 +1238,7 @@ void applyRuntimeSettings() {
 		glyphsSetStyle(::GlyphStyle::Xbox);
 		break;
 	}
-	hostdsp::setOutputVolumePct(s.masterVolumePct);
+	av::AudioSetVolumePct(s.masterVolumePct);
 	av::AudioSetDevice(s.outputDevice);
 	// Window calls only when the values differ from the last applied ones: every settings change (a cheat toggled in the
 	// in-game menu too) runs this, and VISetWindowSize un-maximizes (SDL_RestoreWindow) and resizes the window.

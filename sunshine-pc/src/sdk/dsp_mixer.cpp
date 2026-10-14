@@ -17,9 +17,6 @@ namespace hostdsp {
 using JASystem::DSPInterface::DSPBuffer;
 using JASystem::DSPInterface::FXBuffer;
 
-// Launcher master volume, percent 0..100 (src/settings.h audio.master_volume).
-int gOutputVolumePct = 100;
-
 // DIAG (temporary; remove when the audio investigation closes): SUNSHINE_DSP_VOICE_LOG=1 prints the RMS and zero
 // crossings of every voice once per second of output (400 subframes).
 struct VoiceDiag {
@@ -576,8 +573,9 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 	mixQ15(R + 40, bus_[kSlotBackRight], 40, kQ15One);
 	mixQ15(R, bus_[kSlotMinusRight], kSubframeSamples, kQ15Minus);
 
-	// Output stage (0x0d22): master level (4.12), saturate.
-	const s64 level = (static_cast<s64>(masterLevel) * gOutputVolumePct) / 100;
+	// Output stage (0x0d22): master level (4.12), saturate. The launcher volume is applied after this, to the whole DAC
+	// block (av.cpp PlayBlock), so it reaches the THP audio mixed in after the DSP too.
+	const s64 level = masterLevel;
 	for (int i = 0; i < kSubframeSamples; ++i) {
 		const s64 l = (static_cast<s64>(bus_[0][i]) * level) >> 12;
 		const s64 r = (static_cast<s64>(bus_[1][i]) * level) >> 12;
@@ -627,11 +625,6 @@ void Mixer::render(u64 voiceMap, u16 masterLevel, s16* left, s16* right)
 		gDiagClip = 0;
 		gDiagPeak = 0;
 	}
-}
-
-void setOutputVolumePct(int pct)
-{
-	gOutputVolumePct = std::clamp(pct, 0, 100);
 }
 
 } // namespace hostdsp
