@@ -12,6 +12,8 @@
 #include <cstdlib>
 #include <filesystem>
 
+bool SMS_isOptionMap(); // sms/src/System/StageUtil.cpp
+
 namespace {
 
 class GameWorld : public cheats::World {
@@ -149,7 +151,13 @@ void cheatsTick() {
         const char* v = std::getenv("SUNSHINE_DEV_STATUS");
         return v != nullptr && v[0] != '\0' && v[0] != '0';
     }();
-    registry().tick(world);
+    // The title map (option map 15) runs the file select. A new file resets the nozzle flags there (observed); that a
+    // loaded save replaces them is [INFERENCE] (TCardLoad runs only on map 15: CardLoad.cpp:95,
+    // MarDirectorSetup2.cpp:107-113). So the cheats wait for the first stage after it; without this a one-shot
+    // picked in the launcher ran on the title and was lost.
+    if (!SMS_isOptionMap()) {
+        registry().tick(world);
+    }
     ticks++;
     if (!statusLog || ticks % 30 != 0 || gpMarioOriginal == nullptr) {
         return;

@@ -1,0 +1,18 @@
+# T4: a one-shot cheat picked in the launcher must survive the title map (stage 15, file select) and run in the first stage.
+# title -> new game -> airport0 (first part of 12_tutorial_full.dev); [cheats-state] logs the nozzle mask every second.
+# Run: python tools/route.py Strict tools/routes/97_title_nozzle.dev --no-dvd --name <n> --seconds 300 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_DEV_NO_SHELL=1 SUNSHINE_DEV_LAUNCHER_ACTIONS=cheat-4,start
+# (pre-write build/Route/<n>/appdata/Sunshine/settings.ini with [launcher] last_image=<disc>). Pass: nozzles=0x3FFFF on stage 0.
+waitfor stage=15 dirstate=4 timeout=6000
+log
+wait frames=240
+mash A period=30 until cardprog=19 timeout=900
+log
+walkto x=1080 z=-1000 radius=20 timeout=600
+mash A period=24 until cardprog=27 timeout=900
+log
+mash A period=30 until stage=0 timeout=2400
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=5400
+log
+wait frames=90
+log
+end

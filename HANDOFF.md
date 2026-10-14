@@ -152,8 +152,9 @@ STRICT 0 unresolved, no SHA-1 (they touch no `sms/`). Aurora series: 13 patches 
 - **Next, in this order:** land the Null-backend readback fix and re-prove route 85 + 86; the Phase 2 acceptance runs
   (and a person listens to the audio); GoopCount; UI track A (plans in `lead-2026-10-13b/uiplans/`: UI-4, UI-14A,
   UI-15, UI-11, UI-7, UI-12, UI-16; owner questions: UI-11 hash table, UI-12 network); Phase 3 after the Phase 2
-  acceptance: proof plan per launcher toggle with tasks T1-T5 (`ToggleMatrix.md`; bug found by code reading: the
-  launcher row "Unlock all nozzles" has no in-game effect, the one-shot is not saved).
+  acceptance: proof plan per launcher toggle with tasks T1-T5 (`ToggleMatrix.md`; the launcher row "Unlock all
+  nozzles" had no in-game effect, fixed in T4: observed with a new file on WARP; loading an existing save NOT
+  verified, and a game over before the first save returns the nozzles to 0x00000, code read).
 - UI packages: done UI-1..3, 5, 6, 8, 9, 10, 13; open UI-4 (in-game menu, needs `main.cpp`, a new module and a
   `TARGET_PC` pause hook in `sms/src/System/MarDirectorDirect.cpp`), UI-7, 11, 12, 14-16. Music volume (D4) is folded
   into the master volume row (the BGM level lives in `sms/src/MSound/MSoundBGM.cpp:8`, `MSBgm::smMainVolume`).

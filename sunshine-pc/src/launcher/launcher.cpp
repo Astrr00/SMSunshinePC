@@ -264,8 +264,9 @@ public:
 		doc_->AddEventListener("click", this);
 		doc_->Show();
 		if (inGame_) {
-			// In game the cheat registry main loaded is live (cheatsLoad would reset it), the disc stays open (no
-			// validate), the menu layer (menuInstall) routes input here, and only the settings page is shown.
+			// In game the cheat registry is live (loaded by the launcher before the game, or by main.cpp when it was
+			// empty; cheatsLoad would reset it), the disc stays open (no validate), the menu layer (menuInstall)
+			// routes input here, and only the settings page is shown.
 			const char* base = SDL_GetBasePath();
 			buildCheatList();
 			buildModList(base != nullptr ? base : ".");
@@ -276,7 +277,9 @@ public:
 			refresh();
 			return true;
 		}
-		// Cheats are listed from assets/cheats.json next to the exe. main loads them again after the launcher returns.
+		// Cheats are listed from assets/cheats.json next to the exe. main keeps this registry (main.cpp loads only
+		// when it is empty, cheatCount() == 0), so the one-shots picked here reach the game.
+		// main.cpp uses argv[0]'s parent instead of SDL_GetBasePath(); they match when argv[0] is absolute [INFERENCE].
 		const char* base = SDL_GetBasePath();
 		cheatsLoad(base != nullptr ? base : ".");
 		applyCheats(settings());

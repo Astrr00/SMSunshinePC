@@ -158,7 +158,12 @@ int main(int argc, char* argv[])
 
 	// Cheats and mods read files next to the exe and register disc overlays, so they need the disc open.
 	const std::string exeDir = std::filesystem::path(argv[0]).parent_path().string();
-	cheatsLoad(exeDir); // cheats/cheats_game.cpp
+	// The launcher path loaded the registry already: it holds the one-shot cheats picked there (actions, not saved to the
+	// INI), and cheatsTick runs them once in the first stage after the title. A reload would drop them. --dvd and
+	// skip_launcher start with an empty registry.
+	if (cheatCount() == 0) {
+		cheatsLoad(exeDir); // cheats/cheats_game.cpp
+	}
 	modsLoad(exeDir, s.mods); // mods/mods_loader.cpp
 
 	sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp

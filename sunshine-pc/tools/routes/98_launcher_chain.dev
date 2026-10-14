@@ -1,0 +1,13 @@
+# T4 LauncherChain: in-game evidence for settings the launcher wrote (docs/ui-plan.md, T4 section).
+# Run: python tools/route.py Strict tools/routes/98_launcher_chain.dev --no-dvd --name <n> --seconds 200 SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_DEV_NO_SHELL=1
+# with build/Route/<n>/appdata/Sunshine/settings.ini pre-written ([launcher] last_image=<disc>) and SUNSHINE_DEV_LAUNCHER_ACTIONS=...
+# Evidence lines: [launcher] action, [render] upscaler, widescreen: ... render width, [glyph], [cheats] ... loaded, [cheats-state] (water, nozzles).
+waitfor director mario dirstate=4 timeout=3000
+wait frames=90
+log
+hold trig=0,255 frames=60
+log
+shot lc.png
+wait frames=60
+log
+end
