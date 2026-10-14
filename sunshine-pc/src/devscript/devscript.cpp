@@ -1264,9 +1264,28 @@ void aimAssist()
 	gpMarioOriginal->mWaterGun->mNozzleList[gpMarioOriginal->mWaterGun->mCurrentNozzle]->unk36E = static_cast<s16>(-best * (65536.0f / 360.0f));
 }
 
+// SUNSHINE_DEV_PAD_TRACE=1 (dev-only): one line per change of port 0's PADStatus as the game reads it (JUTGamePad::mPadStatus[0],
+// filled by PADRead and PADClamp). JUTGamePad::read() calls sunshineDevScriptTick() before PADRead, so the status printed here is
+// the one the previous read delivered: read=N is that read's index (gTick - 1). Hooked here, so sms/ and Aurora stay untouched.
+static void padTrace()
+{
+	static const bool enabled = std::getenv("SUNSHINE_DEV_PAD_TRACE") != nullptr;
+	static PADStatus last{};
+	if (!enabled) return;
+	const PADStatus& s = JUTGamePad::mPadStatus[0];
+	if (s.button == last.button && s.stickX == last.stickX && s.stickY == last.stickY && s.substickX == last.substickX &&
+	    s.substickY == last.substickY && s.triggerLeft == last.triggerLeft && s.triggerRight == last.triggerRight && s.err == last.err)
+		return;
+	last = s;
+	std::printf("[padtrace] read=%d buttons=0x%04x stick=%d,%d sub=%d,%d trig=%d,%d err=%d\n", gTick - 1, s.button, s.stickX,
+	            s.stickY, s.substickX, s.substickY, s.triggerLeft, s.triggerRight, s.err);
+	std::fflush(stdout);
+}
+
 void sunshineDevScriptTick()
 {
 	++gTick;
+	padTrace();
 	aimAssist();
 	static const char* const scriptPath = std::getenv("SUNSHINE_DEV_SCRIPT");
 	if (scriptPath && !gLoaded) {

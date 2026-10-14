@@ -1325,9 +1325,11 @@ void pushKey(SDL_Scancode scancode, bool pressed) {
 }
 
 // key:<SDL scancode name>:down|up -> pushKey; false (nothing pushed) for an unknown name or edge.
+// A token has no spaces, so "_" stands for one: key:Left_Shift:down is SDL's "Left Shift" (the standard L key).
 bool pushKeyToken(const std::string& token) {
 	const size_t colon = token.rfind(':');
-	const std::string name = colon > 4 ? token.substr(4, colon - 4) : "";
+	std::string name = colon > 4 ? token.substr(4, colon - 4) : "";
+	std::replace(name.begin(), name.end(), '_', ' ');
 	const std::string edge = token.substr(colon + 1);
 	const SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
 	if (scancode == SDL_SCANCODE_UNKNOWN || (edge != "down" && edge != "up"))
