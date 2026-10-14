@@ -47,6 +47,13 @@ h1 {
  margin: 12dp 0;
 }
 
+/* Hidden pages and panes: setDisplay in launcher.cpp sets the class (page-confirm starts with it in launcher.rml).
+   Hiding is instant, no exit fade; removing the class fades in with the transition in theme.rcss. */
+.page.hidden, .pane.hidden {
+ opacity: 0;
+ transition: none;
+}
+
 /* The settings page scrolls when it is taller than the window. Navigation scrolls the focused button into view. */
 #page-settings {
  max-height: 100%;

@@ -18,3 +18,10 @@ body {
 	--font-size-xl: 36dp;
 	--radius-control: 6dp;
 }
+
+/* Page and pane fade-in (UI-14); the duration is this rule's one value. It is not a custom property: RmlUi starts no
+   transition whose value holds var() (ElementStyle::TransitionPropertyChanges reads the value before substitution).
+   launcher.rcss hides with ".hidden" (opacity 0, no transition), so only showing fades. */
+.page, .pane {
+	transition: opacity 0.15s cubic-out;
+}

@@ -154,7 +154,7 @@ and the docs commit that follows them.
 - **Next: Phase 3** (ToggleMatrix `ToggleMatrix.md`: T1, T2 and T4 done). In this order: T3 Pacing + Fullscreen
   (timing runs, so on an idle machine with `AURORA_SCREENSHOT_EVERY=` empty); T5 InputHooks; FSR1 fix in progress
   (agent FSR1Fix, a new Aurora patch 0015 on top of `0005-fsr1-render-scale.patch`; T2 found FSR1 softer than bilinear
-  and shifted up-left); UI track A: UI-4b, UI-14A, UI-15, UI-7, UI-16 (plans in `lead-2026-10-13b/uiplans/`). Owner
+  and shifted up-left); UI track A: UI-4b, UI-14B, UI-15, UI-7, UI-16 (plans in `lead-2026-10-13b/uiplans/`). Owner
   decisions needed first: UI-11 hash table, UI-12 network. Owner: listen to the audio excerpts (the last Phase 2
   check). Known gap of T4: "Unlock all nozzles" with a loaded save NOT verified, and a game over before the first save
   returns the nozzles to 0x00000 (code read).

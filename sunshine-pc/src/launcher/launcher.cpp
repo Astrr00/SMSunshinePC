@@ -262,6 +262,9 @@ public:
 			return false;
 		}
 		doc_->AddEventListener("click", this);
+		doc_->AddEventListener(Rml::EventId::Transitionend, this); // page and pane fade-in (theme.rcss)
+		// Dev log of each finished fade, for runs driven by the pad hook or a devscript (in-game menu tokens).
+		logTransitions_ = std::getenv("SUNSHINE_DEV_PAD_EVENTS") != nullptr || std::getenv("SUNSHINE_DEV_SCRIPT") != nullptr;
 		doc_->Show();
 		if (inGame_) {
 			// In game the cheat registry is live (loaded by the launcher before the game, or by main.cpp when it was
@@ -349,6 +352,7 @@ public:
 		}
 		if (doc_ != nullptr) {
 			doc_->RemoveEventListener("click", this);
+			doc_->RemoveEventListener(Rml::EventId::Transitionend, this);
 			ctx_->UnloadDocument(doc_);
 			doc_ = nullptr;
 		}
@@ -382,6 +386,13 @@ public:
 
 	void ProcessEvent(Rml::Event& event) override {
 		Rml::Element* target = event.GetTargetElement();
+		if (event.GetId() == Rml::EventId::Transitionend) { // not an action; the dev log only
+			if (logTransitions_ && target != nullptr) {
+				std::printf("[%s] transition end %s\n", inGame_ ? "menu" : "launcher", target->GetId().c_str());
+				std::fflush(stdout);
+			}
+			return;
+		}
 		if (target != nullptr) {
 			onAction(target->GetId());
 		}
@@ -721,9 +732,12 @@ private:
 		}
 	}
 
+	// Pages and panes fade in when shown: removing "hidden" starts the opacity transition (theme.rcss). Hiding is
+	// instant. Pad targets follow display (IsVisible), not opacity, so a fading page takes input at once.
 	void setDisplay(const std::string& id, bool shown) {
 		if (Rml::Element* el = doc_->GetElementById(id)) {
 			el->SetProperty("display", shown ? "block" : "none");
+			el->SetClass("hidden", !shown);
 		}
 	}
 
@@ -1031,6 +1045,7 @@ private:
 	static constexpr int kPadStepFrames = 30; // frames between synthetic gamepad tokens (dev hook)
 	bool stickHeld_[4] = {};                  // left stick: up, down, left, right; one step per crossing of the neutral band
 	std::vector<std::string> padScript_;      // SUNSHINE_DEV_PAD_EVENTS tokens
+	bool logTransitions_ = false;             // dev: print "transition end <id>" (open())
 	size_t padNext_ = 0;
 	int padWait_ = 0;
 	bool finished_ = false;

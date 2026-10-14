@@ -100,7 +100,7 @@
 	<p id="settings-status" class="status"></p>
 	<div class="row"><button id="back">Back</button></div>
 </div>
-<div id="page-confirm" class="page" style="display: none;">
+<div id="page-confirm" class="page hidden" style="display: none;">
 	<h1>Confirm</h1>
 	<p id="confirm-text" class="hint"></p>
 	<div class="row">

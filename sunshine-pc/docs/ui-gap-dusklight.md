@@ -71,7 +71,7 @@ Columns: Dusklight feature (where, how) | Sunshine today (file, state) | Gap | N
 | A2 | Tab shell: Settings, Mods, Cheats (`menu_bar.cpp:74-88`) | Missing | L | Warp/Editor are dev-only (76-78). Achievements (81-86) have no SMS backend. |
 | A3 | Reset and Quit confirmation Modal (`menu_bar.cpp:96-137`) | Missing in game. Launcher Quit is immediate (`launcher.cpp:425-427`) | M | Needs a modal widget in RmlUi. Dusklight `modal.cpp` exists (not read). |
 | A4 | Menu open/close sounds (`document.cpp:215-223`; `menu_bar.cpp:96-137` `kSoundWindowClose`) | Missing. No sound code in launcher | M | Needs playback path and sound assets. No game data may ship in the repo. |
-| A5 | Menu transitions: bar hides after `Transitionend` (`menu_bar.cpp:60-62`); v2.0 "variable delta time" menus | Missing (grep `animat\|transition` in `src/`: none) | M | Launcher-only transitions are S once the theme (UI-1) exists. |
+| A5 | Menu transitions: bar hides after `Transitionend` (`menu_bar.cpp:60-62`); v2.0 "variable delta time" menus | Partial: launcher pages, panes and the confirm page fade in (UI-14A, `theme.rcss`, `setDisplay`); in-game pane switches fade, opening the menu does not; no in-game close after `Transitionend` (UI-14 part B) | M | Launcher-only transitions are S once the theme (UI-1) exists. |
 
 ### B. Launcher and disc flow
 
