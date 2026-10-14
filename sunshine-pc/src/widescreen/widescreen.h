@@ -11,10 +11,11 @@ struct Settings;
 
 // Reads settings.widescreen and settings.aspect (or SUNSHINE_ASPECT=16:9, a test override that also enables widescreen).
 // windowWidth/windowHeight feed "auto". Call once at startup, before the first render mode is configured.
-// Returns the logical window width to create: unchanged at 4:3, otherwise windowHeight * EFB width / 448.
+// Returns the logical window width to create: unchanged at 4:3, otherwise windowHeight * EFB width / 480.
 uint32_t widescreenInit(const sunshine::Settings& s, uint32_t windowWidth, uint32_t windowHeight);
 
-// EFB width in pixels (640 at 4:3, otherwise 448 * aspect rounded to even). Used by sms/src/System/Resolution.cpp.
+// EFB width in pixels (640 at 4:3, otherwise 480 * aspect rounded to even; the EFB stays 448 high).
+// Used by sms/src/System/Resolution.cpp.
 uint32_t sunshineRenderWidth();
 // Left edge of the centred 640-wide 4:3 UI column inside sunshineRenderWidth() (even; 0 at 4:3).
 uint32_t sunshineUIOffsetX();

@@ -8,13 +8,16 @@
 
 namespace {
 constexpr uint32_t kGameWidth = 640; // GameCube 4:3 EFB and UI width
-constexpr uint32_t kGameHeight = 448;
+// 4:3 output shows the 448-line EFB over 480 display lines (Aurora stretches 448 -> 480), so one EFB pixel is
+// 480/448 taller than wide. The wide EFB keeps that pixel shape: W = 480 * aspect, window = height * W / 480.
+// With 448 here the 3D view and the HUD came out 480/448 = 1.071x wider than at 4:3 (WideCheck, platform-notes.md).
+constexpr uint32_t kDisplayHeight = 480;
 uint32_t g_renderWidth = kGameWidth;
 } // namespace
 
 uint32_t widescreenRenderWidthForAspect(double aspect)
 {
-	const double wide = kGameHeight * aspect;
+	const double wide = kDisplayHeight * aspect;
 	const uint32_t w = wide > kGameWidth ? static_cast<uint32_t>(wide + 0.5) : kGameWidth;
 	return (w + 1) & ~1u; // even: TEfbCtrl aligns copy rects to 2 px
 }
@@ -41,7 +44,7 @@ uint32_t widescreenInit(const sunshine::Settings& s, uint32_t windowWidth, uint3
 		g_renderWidth = widescreenRenderWidthForAspect(ratio);
 	}
 	std::printf("widescreen: %s aspect=%s render width %u\n", on ? "on" : "off", aspect.c_str(), g_renderWidth);
-	// The logical window keeps the EFB aspect (W/448), so Aurora's FIT does not letterbox the widened image.
+	// The logical window keeps the display aspect W/480 (EFB W x 448 stretched to 480 lines, as at 4:3).
 	return widescreenWindowWidth(windowWidth, windowHeight);
 }
 
@@ -53,5 +56,5 @@ uint32_t widescreenWindowWidth(uint32_t windowWidth, uint32_t windowHeight)
 {
 	if (g_renderWidth == kGameWidth)
 		return windowWidth;
-	return ((windowHeight * g_renderWidth) / kGameHeight + 1) & ~1u;
+	return ((windowHeight * g_renderWidth) / kDisplayHeight + 1) & ~1u;
 }
