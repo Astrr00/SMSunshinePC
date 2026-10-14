@@ -1,0 +1,108 @@
+# FontFix follow-up (boss side, run 3): the Delfino Plaza GateKeeper talk balloon 0xE0047.
+#   sms/src/Enemy/gatekeeper.cpp:848-857 TNerveBGKAppear: unk28A++ on every appearance; at unk28A == 2 it fires
+#   startAppearBalloon(0xE0047, true). unk28A is 0 at boot, so the SECOND appearance is the one that shows text.
+# Wake-up mechanic (measured in run gk2_b): TGateKeeperBase::perform (gatekeeper.cpp:188-189) zeroes unk154 every
+#   CUE_MOVE and unk17C only advances on ticks with unk154 > 0 (gatekeeper.cpp:725-732). ~100-150 ticks of continuous
+#   spray on the sleeping body (mVulnerable in bck 0xA/0x4, gatekeeper.cpp:684-689) drive unk17C to 0xFF and
+#   TNerveBGKSleep (gatekeeper.cpp:824) pushes TNerveBGKAppear. gk2_b reached unk28A=1 / bck 0 at tick 506.
+# gk2_b also showed that a talk window (a non-GateKeeper plaza message that opens on the first appearance) takes
+#   Mario's input, so the spray stops and unk17C never rises again; `mash A until talk=0` clears it before each ramp.
+#   The boss then dives (TNerveBGKDive) and sleeps again in bck 0xA at the same spot, so the ramp can be repeated.
+# Not reachable here: 0xE0000 (gatekeeper.cpp:977) needs TNerveBGKWait2, i.e. gpMarDirector->getCurrentMap() == 0;
+#   at dolpic/0 the boss takes the TNerveBGKWait branch instead (bck 0x11 -> 0xB, gatekeeper.cpp:918) and unk288 stays 0.
+# Dev aids (NOT retail input): dev start dolpic/0, `tp`, cheat infinite_health / infinite_water,
+#   SUNSHINE_DEV_SKIP_MOVIES=1, SUNSHINE_DEV_SEED=1, SUNSHINE_DEV_HIT_LOG=1 (log lines only).
+#   No AIM_ASSIST (it aims at the head and swallows the spray while the body is the vulnerable part), no STEP_RETRACE.
+# Run: python tools/route.py Strict tools/routes/99_talk_text_boss2.dev --name gk2_c --seconds 330
+#   SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1
+#   SUNSHINE_DEV_HIT_LOG=1 SUNSHINE_RENDER_SCALE=1
+#   appdata/Sunshine/settings.ini: [video] fsr1=0 widescreen=1 aspect=4:3
+# Evidence: gk2c_*.png (the balloon text), [*-wake] unk17C/unk288/unk28A, [*-boss] bck, 0 fatal, rc.
+waitfor director mario dirstate=4 camDemo=0 timeout=9000
+log
+shot gk2c_000.png
+cheat infinite_health
+cheat infinite_water
+wait frames=30
+tp x=12 y=320 z=5150 yaw=180
+wait frames=10
+log
+shot gk2c_010.png
+hold L trig=255,255 frames=80
+log
+shot gk2c_100.png
+hold L trig=255,255 frames=80
+log
+shot gk2c_180.png
+mash A period=30 until talk=0 timeout=2400
+log
+shot gk2c_250.png
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_340.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_430.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_520.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_610.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_700.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_790.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_880.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_970.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_1060.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_1150.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_1240.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_1330.png
+mash A period=30 until talk=0 timeout=2400
+tp x=12 y=320 z=5150 yaw=180
+hold L trig=255,255 frames=80
+log
+shot gk2c_1420.png
+mash A period=30 until talk=0 timeout=2400
+wait frames=60
+log
+shot gk2c_1500.png
+end

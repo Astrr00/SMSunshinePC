@@ -2754,6 +2754,13 @@ bool TGCConsole2::startAppearBalloon(u32 messageID, bool autoClose)
 	TMessageLoader::EntryInfo* entry
 	    = unk3D0->getMessageEntry(messageID & 0xffff);
 
+#ifdef TARGET_PC
+	// getMessageEntry returns null for an id past the entry count (MessageLoader.cpp:111), and the next line
+	// dereferences it. Retail does the same, so the guard is host-only.
+	if (entry == nullptr)
+		return false;
+#endif
+
 	if (entry->unk4 <= unk3F0)
 		return false;
 
