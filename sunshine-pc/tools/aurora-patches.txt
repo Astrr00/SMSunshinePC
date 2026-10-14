@@ -16,3 +16,5 @@ texture side channel opcodes | include/dolphin/gx/GXAurora.h | ^#define GX_AUROR
 texture side channel emit | lib/dolphin/gd/GDTexture.cpp | GDWriteAuroraCmd\(GX_AURORA_SET_TEX_DATA\)
 copy readback | include/dolphin/gx/GXAurora.h | ^void GXSetCopyReadback\(
 copy readback off on Null | lib/gfx/depth_peek.cpp | Copy readback off: Null backend
+scissor 12-bit fields encode | lib/dolphin/gx/GXCull.cpp | SET_REG_FIELD\(0, __gx->suScis1, 12, 12, rt & 0xFFF\);
+scissor 12-bit fields decode | lib/gx/regs.cpp | reg_get\(scis1, 12, 12\)

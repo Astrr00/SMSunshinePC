@@ -1,8 +1,8 @@
 # Aurora patch series
 
-`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as fifteen patches so the submodule can be pinned to upstream and the changes re-applied.
+`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as sixteen patches so the submodule can be pinned to upstream and the changes re-applied.
 
-Series base: `50e5be3`. Applying all fifteen to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
+Series base: `50e5be3`. Applying all sixteen to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
 
 ## Apply
 
@@ -21,7 +21,7 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 66 file entries over 40 distinct files, +2143 / -169 (recounted with 0015).
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 69 file entries over 43 distinct files, +2160 / -181 (recounted with 0016).
 
 | file | topic | files | +/- |
 |---|---|---|---|
@@ -40,6 +40,7 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0013-gx-copy-readback.patch` | `GXSetCopyReadback(dest, w, h)`: an exact 1:1 `GX_CTF_R8` copy into a registered `dest` is read back (texture-to-buffer copy after the conversion, async map in `depth_peek::after_submit`, one readback in flight per dest) and written into `dest` as GX I8 tiles on the game thread inside the next `GXCopyTex(dest)`, like a GameCube EFB copy writes main RAM; registering destroys the old copy texture of `dest`, `dest == NULL` drops all registrations; one log line on the first apply (bytes changed against the CPU copy, latency) and one after 300 applies (latency range). GX draws inside offscreen passes (`GXCreateFrameBuffer`) compile their pipeline blocking instead of being skipped (a skipped pollution base pass at stage start wiped the goop maps). Used by the pollution maps (`MarDirectorInitECT.cpp`, TARGET_PC), so `isPolluted` sees sprayed goop | 12 | +299 / -8 |
 | `0014-gx-copy-readback-off-null-backend.patch` | `register_copy_readback` ignores every registration when the adapter is Dawn's Null backend (`SUNSHINE_ALLOW_CPU_ADAPTER=0` without a GPU) and logs once "Copy readback off: Null backend": Null renders nothing, so its R8 copies are empty and the readback of 0013 wiped the goop maps (airport nonzero 6306 -> 0), which stalled the Delfino boss in route 85; the maps keep their load state as before 0013. Other backends unchanged | 1 | +9 / -0 |
 | `0015-fsr1-sharp-easu-rcas-limiter.patch` | FSR1 rework (own implementation): EASU maps output pixel centres like the bilinear sampler (`pos * scale - 0.5`; before `(pos - 0.5) * scale`, a 1.5 px shift at 4x), Lanczos-2 weight rotated to the 2x2 luma edge and stretched along it up to 1.8x instead of the 4x4 Gaussian, result clamped to the min/max of the nearest 2x2 texels (no ringing); RCAS (`k = 0.25 * sharpness`, unchanged) limited to the min/max of its 4-neighbour cross (no halos); default sharpness 0.8 (k 0.2; before 0.2, k 0.05), `aurora.h` doc comment updated; `SUNSHINE_UPSCALE_SHARPNESS` keeps its scale (1 = k 0.25). Bilinear and area paths unchanged; measurements in `sunshine-pc/docs/platform-notes.md` (T2 section) | 2 | +38 / -20 |
+| `0016-gx-scissor-12bit-fields.patch` | scissor BP registers 0x20/0x21 use 12-bit coordinate fields (hardware: 11) in `GXSetScissor`, `GXGetScissor` and the `bp_scissor` decode, values masked to 12 bits: with the +342 offset an 11-bit field ends at a right edge of 1705, so a widescreen EFB of 1708 px (32:9) encoded rt 2049, decoded as 1, the scissor came out empty and every frame was black; now right edges up to 3753 work, all values below 2048 encode as before; see `sunshine-pc/docs/platform-notes.md`, "Widescreen pixel checks" | 3 | +17 / -12 |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
 

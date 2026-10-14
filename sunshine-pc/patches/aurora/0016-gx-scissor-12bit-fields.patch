@@ -1,0 +1,59 @@
+diff --git a/lib/dolphin/gx/GXCull.cpp b/lib/dolphin/gx/GXCull.cpp
+--- a/lib/dolphin/gx/GXCull.cpp
++++ b/lib/dolphin/gx/GXCull.cpp
+@@ -9,10 +9,13 @@ void GXSetScissor(u32 left, u32 top, u32 width, u32 height) {
+   const u32 bm = tp + height - 1;
+   const u32 rt = lf + width - 1;
+ 
+-  SET_REG_FIELD(0, __gx->suScis0, 11, 0, tp);
+-  SET_REG_FIELD(0, __gx->suScis0, 11, 12, lf);
+-  SET_REG_FIELD(0, __gx->suScis1, 11, 0, bm);
+-  SET_REG_FIELD(0, __gx->suScis1, 11, 12, rt);
++  // Hardware fields are 11 bits (coord + 342 <= 2047, right edge <= 1705). A port EFB wider than 1706 px overflowed
++  // the right edge (rt 2049 decoded as 1 -> empty scissor, black frame); use the unused bits 11/23 as a 12th bit
++  // (right edge <= 3753) and mask so a value never spills into the next field or the register id.
++  SET_REG_FIELD(0, __gx->suScis0, 12, 0, tp & 0xFFF);
++  SET_REG_FIELD(0, __gx->suScis0, 12, 12, lf & 0xFFF);
++  SET_REG_FIELD(0, __gx->suScis1, 12, 0, bm & 0xFFF);
++  SET_REG_FIELD(0, __gx->suScis1, 12, 12, rt & 0xFFF);
+ 
+   GX_WRITE_RAS_REG(__gx->suScis0);
+   GX_WRITE_RAS_REG(__gx->suScis1);
+diff --git a/lib/dolphin/gx/GXGet.cpp b/lib/dolphin/gx/GXGet.cpp
+--- a/lib/dolphin/gx/GXGet.cpp
++++ b/lib/dolphin/gx/GXGet.cpp
+@@ -237,10 +237,11 @@ void GXGetProjectionv(f32* p) {
+ void GXGetScissor(u32* left, u32* top, u32* wd, u32* ht) {
+   CHECK(left != nullptr && top != nullptr && wd != nullptr && ht != nullptr, "null scissor output");
+ 
+-  const u32 tp = GET_REG_FIELD(__gx->suScis0, 11, 0);
+-  const u32 lf = GET_REG_FIELD(__gx->suScis0, 11, 12);
+-  const u32 bm = GET_REG_FIELD(__gx->suScis1, 11, 0);
+-  const u32 rt = GET_REG_FIELD(__gx->suScis1, 11, 12);
++  // 12-bit fields, see GXSetScissor (GXCull.cpp).
++  const u32 tp = GET_REG_FIELD(__gx->suScis0, 12, 0);
++  const u32 lf = GET_REG_FIELD(__gx->suScis0, 12, 12);
++  const u32 bm = GET_REG_FIELD(__gx->suScis1, 12, 0);
++  const u32 rt = GET_REG_FIELD(__gx->suScis1, 12, 12);
+ 
+   *left = lf - 342;
+   *top = tp - 342;
+diff --git a/lib/gx/regs.cpp b/lib/gx/regs.cpp
+--- a/lib/gx/regs.cpp
++++ b/lib/gx/regs.cpp
+@@ -133,10 +133,11 @@ void bp_tev_ind(u8 reg, u32 value) noexcept {
+ void bp_scissor(u8, u32) noexcept {
+   const u32 scis0 = g_gxState.bpRegCache[0x20];
+   const u32 scis1 = g_gxState.bpRegCache[0x21];
+-  const s32 tp = static_cast<s32>(reg_get(scis0, 11, 0)) - 342;
+-  const s32 lf = static_cast<s32>(reg_get(scis0, 11, 12)) - 342;
+-  const s32 bm = static_cast<s32>(reg_get(scis1, 11, 0)) - 342;
+-  const s32 rt = static_cast<s32>(reg_get(scis1, 11, 12)) - 342;
++  // 12-bit fields (hardware: 11), so wide port EFBs (right edge > 1705) keep their scissor; see GXSetScissor.
++  const s32 tp = static_cast<s32>(reg_get(scis0, 12, 0)) - 342;
++  const s32 lf = static_cast<s32>(reg_get(scis0, 12, 12)) - 342;
++  const s32 bm = static_cast<s32>(reg_get(scis1, 12, 0)) - 342;
++  const s32 rt = static_cast<s32>(reg_get(scis1, 12, 12)) - 342;
+   const s32 wd = std::max(rt - lf + 1, 0);
+   const s32 ht = std::max(bm - tp + 1, 0);
+   set_logical_scissor({lf, tp, wd, ht});
