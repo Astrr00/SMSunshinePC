@@ -1,5 +1,5 @@
 @echo off
-rem Headless checks for the JSON reader, cheat registry, mod manifest and game-code host conversions (no game, no Aurora).
+rem Headless checks for the JSON reader, cheat registry, mod manifest and game-code host conversions (no game run, no Aurora library; the game code needs ..\sms\include and extern\aurora\include).
 set "PATH=%PATH:"=%"
 set "VCVARS=%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 if not exist "%VCVARS%" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"

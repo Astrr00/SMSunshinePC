@@ -16,7 +16,7 @@ Runs these steps in order and prints one line each (`PASS` / `FAIL` / `SKIP`, se
 | aurora-patches | Each patch in `tools/aurora-patches.txt` (name, file, regex) is present | always |
 | matching-sha | `sms/build/GMSJ01/mario.dol` hashes to `sms/config/GMSJ01/build.sha1` | always (SKIP if the dol is not built) |
 | strict-link | `tools\_strict.cmd` builds `build/strict`; 0 unresolved `LNK2019` | `--build` |
-| headless-tests | `tools\port_tests.cmd` | always |
+| headless-tests | `tools\port_tests.cmd`; it also compiles `../sms` game code under `TARGET_PC` (`tests/sms_host_checks.cpp` with the real `JSUInputStream`/`JSUMemoryStream`), so it needs `../sms/include` and `extern/aurora/include` (headers only) | always |
 | probe-units | Syntax-only probe over decomp sources | `--full` (slow; rewrites `tools/probe-results.json`) |
 | boot-smoke | `build/strict/sunshine.exe --dvd <rvz>` stays alive for `--boot-secs`, no `*** fatal exception` in the log | always (SKIP if the exe is missing) |
 
