@@ -2943,7 +2943,15 @@ void TGCConsole2::drawWaterBack()
 		drawGaugeQuadF32(bounds, bounds.y1, bounds.y2, 0.0f, 1.0f);
 	}
 
+#ifdef TARGET_PC
+	// unk330 starts at 0x17: unk334[23] is past the end of unk334[22] and is unk390 on both targets (all are pointers;
+	// asm 0x8020AF0C). What differs is J2DPane::mVisible inside it: console 0xC is the BE high byte of the zero
+	// unk390->unk4.x2, x64 0x10 is the low byte of that same field, so the old hide() overwrote x2. Skip the
+	// out-of-range slot (a no-op on retail).
+	if (unk330 < 22 && unk334[unk330]->isVisible())
+#else
 	if (unk334[unk330]->isVisible())
+#endif
 		unk334[unk330]->hide();
 }
 
@@ -3859,7 +3867,13 @@ void TGCConsole2::drawJuice(J2DOrthoGraph& graph, u32 color)
 
 	graph.setup2D();
 
+#ifdef TARGET_PC
+	// asm 0x8020753C: unk330 == 0x17 reaches unk334[23] = unk390, where hide() clears a zero byte on the console and
+	// the low byte of unk390->unk4.x2 on x64 (see drawWaterBack)
+	if (unk330 != selected - 1 && unk330 < 22)
+#else
 	if (unk330 != selected - 1)
+#endif
 		unk334[unk330]->hide();
 
 	if (selected < 0x17) {
