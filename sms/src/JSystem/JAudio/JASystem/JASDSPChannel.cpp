@@ -247,9 +247,19 @@ void TDSPChannel::updateAll()
 		old_time      = time;
 		u32 var2      = 7 - AudioThread::getDSPSyncCount();
 		history[var2] = delta;
+#ifdef TARGET_PC
+		// DSP overload guard skipped. On the console a small history[0] (the gap before the frame's first subframe)
+		// against a subframe gap means frames run back to back because the DSP renders slower than real time, and a
+		// voice is stolen. The host DSP (sunshine-pc/src/sdk/dsp_glue.cpp) answers a subframe request within
+		// microseconds; its back-to-back frames come from the audio thread waiting for the baton (os_thread.cpp), so
+		// these gaps are host scheduling and the guard stole sustained notes and ambient loops (platform-notes.md,
+		// "Host DSP").
+		(void)var2;
+#else
 		if (var2)
 			if (f32(history[0]) / delta < DSP_LIMIT_RATIO)
 				breakLowerActive(126);
+#endif
 	}
 
 	for (u32 i = 0; i < 64; i++) {
