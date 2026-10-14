@@ -22,7 +22,7 @@ No game data and no PowerPC code are tracked in git. The disc image lives under 
 - LLVM/clang-cl 23.1.3 (bundled as `toolchain/llvm.tar.xz`; extract and set `LLVM_BIN` to its `bin` folder).
 - Git.
 - Internet on the first port configure: aurora's CMake FetchContent downloads abseil, xxhash, fmt, zlib-ng, libpng, freetype (twilitrealm.dev), SDL3, dawn etc.
-- Optional: sccache (build-alt.cmd uses it via winget path), Dolphin (not usable, see below).
+- Optional: sccache (`_strict.cmd`/`build-alt.cmd` use it only with `SUNSHINE_SCCACHE=1`: cache hits across checkouts leave ninja deps on the other checkout's headers), Dolphin (not usable, see below).
 
 ## 3. Restore (automated)
 
@@ -37,7 +37,7 @@ Run `sunshine-pc/tools/handoff-setup.ps1` from the bundle root (it clones the re
 7. Optional: `git apply wip-uncommitted.patch` (see section 7).
 8. `sms/build/triage.json` + `decomp_queue.json` (bundle `state/`) are needed by `decomp_queue.py`; the setup copies them. To regenerate triage after a full `ninja`: `python sunshine-pc/tools/decomp_triage.py` (writes `sms/build/triage.json`).
 9. Set `origin` to `https://github.com/Astrr00/SMSunshinePC.git` (the setup does this; a bundle clone points at the bundle file).
-10. sccache is optional (`winget install Mozilla.sccache`); `build-alt.cmd` finds it if present.
+10. sccache is optional (`winget install Mozilla.sccache`); `_strict.cmd` and `build-alt.cmd` find it and use it only with `SUNSHINE_SCCACHE=1` (a hit from another checkout replays its `/showIncludes`, so header edits would not rebuild those objects).
 
 ## 4. Gates (run these to confirm the new PC reproduces the state)
 
