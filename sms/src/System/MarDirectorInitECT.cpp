@@ -252,8 +252,17 @@ void TMarDirector::initECDisp(
 	    JDrama::TNameRefGen::search("Group 2D 2"));
 	param_1->push_back(group2D2, CUE_DRAW);
 
+#ifdef TARGET_PC
+	// Widescreen: 1 unit stays 16/15 px as at 4:3 and the 600-unit layout is centred in the wide viewport
+	// (left edge -bx px, right edge W - bx px); at 4:3 (bx 0, W 640) this is exactly 0 / 600.
+	const f32 uiOffsetX = SMSGetUIOffsetX();
+	JDrama::TOrthoProj* ortho4 = new JDrama::TOrthoProj(
+	    -500.0f, 500.0f, 0.0f - uiOffsetX * 0.9375f, 16.0f,
+	    ((u16)SMSGetGameRenderWidth() - uiOffsetX) * 0.9375f, 464.0f);
+#else
 	JDrama::TOrthoProj* ortho4
 	    = new JDrama::TOrthoProj(-500.0f, 500.0f, 0.0f, 16.0f, 600.0f, 464.0f);
+#endif
 	param_1->push_back(ortho4, CUE_SET_PROJECTION);
 
 	JDrama::TViewObj* group2D = static_cast<JDrama::TViewObj*>(

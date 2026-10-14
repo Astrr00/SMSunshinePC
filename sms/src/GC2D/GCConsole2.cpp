@@ -19,6 +19,9 @@
 #include <System/Application.hpp>
 #include <System/FlagManager.hpp>
 #include <System/MarDirector.hpp>
+#ifdef TARGET_PC
+#include <System/Resolution.hpp>
+#endif
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <JSystem/JKernel/JKRFileLoader.hpp>
 #include <JSystem/JDrama/JDRNameRefGen.hpp>
@@ -4186,8 +4189,14 @@ void TGCConsole2::perform(u32 flags, JDrama::TGraphics* graphics)
 		unkB0->draw(0, 0, &graph);
 
 		if (unk44 && !unk43 && !unk42 && unk520->getPane()->isVisible()) {
+#ifdef TARGET_PC
+			// Widescreen: unk544 is in 4:3 EFB px; the centred stage ortho puts the ticker bx px further right
+			graphics->setScissor(JDrama::TRect(unk544.x1 + SMSGetUIOffsetX(), unk544.y1,
+			                                   unk544.x2 + SMSGetUIOffsetX(), unk544.y2));
+#else
 			graphics->setScissor(
 			    JDrama::TRect(unk544.x1, unk544.y1, unk544.x2, unk544.y2));
+#endif
 			graph.setup2D();
 			unk528->show();
 			unk52C->show();

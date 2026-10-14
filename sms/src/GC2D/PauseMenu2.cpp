@@ -25,6 +25,9 @@
 #include <System/MarDirector.hpp>
 #include <System/MarDirector.hpp>
 #include <System/MarioGamePad.hpp>
+#ifdef TARGET_PC
+#include <System/Resolution.hpp>
+#endif
 #include <System/StageUtil.hpp>
 #include <stdio.h>
 
@@ -83,6 +86,10 @@ void TPauseMenu2::load(JSUMemoryInputStream& pStream)
 	}
 
 	mBackground = mScreen->search('mask');
+#ifdef TARGET_PC
+	// Widescreen: the full-screen dimming mask also covers the side columns of the wide stage ortho
+	mBackground->widenX(SMSGetUIOffsetUnitsX());
+#endif
 	mMenuPane   = mScreen->search('t_0');
 
 	for (s32 i = 0; i < 5; i++) {

@@ -4,6 +4,9 @@
 #include <GC2D/MessageUtil.hpp>
 #include <System/Application.hpp>
 #include <System/MarDirector.hpp>
+#ifdef TARGET_PC
+#include <System/Resolution.hpp>
+#endif
 #include <System/StageUtil.hpp>
 #include <System/FlagManager.hpp>
 #include <JSystem/J2D/J2DPicture.hpp>
@@ -47,6 +50,12 @@ void TConsoleStr::load(JSUMemoryInputStream& stream)
 	unk10->setCullBack(GX_CULL_BACK);
 	unk14 = new J2DSetScreen("scenario_demo_1.blo", arch);
 	unk14->setCullBack(GX_CULL_BACK);
+#ifdef TARGET_PC
+	// Widescreen: the full-screen background also covers the side columns of the wide stage ortho (retail code never
+	// looks 'BACK' up, so a layout without it is skipped)
+	if (J2DPane* back = unk14->search('BACK'))
+		back->widenX(SMSGetUIOffsetUnitsX());
+#endif
 
 	for (int i = 0; i < 3; ++i) {
 		unk28[i] = new TBoundPane(unk10, 'go00' + i);

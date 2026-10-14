@@ -13,6 +13,8 @@ u16 SMSGetGameRenderHeight();
 u16 SMSGetGameRenderWidth();
 #ifdef TARGET_PC
 u16 SMSGetUIOffsetX(); // TARGET_PC widescreen: left edge of the centred 640-wide UI column in the wide EFB
+// TARGET_PC widescreen: SMSGetUIOffsetX() in stage 2D units (600 units = 640 px), rounded up so a widened pane reaches the edge
+inline int SMSGetUIOffsetUnitsX() { return (SMSGetUIOffsetX() * 15 + 15) / 16; }
 #endif
 u16 SMSGetTitleVideoWidth();
 s32 SMSGetDisplayHeightMax();

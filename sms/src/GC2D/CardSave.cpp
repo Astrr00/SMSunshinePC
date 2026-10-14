@@ -14,6 +14,9 @@
 #include <System/FlagManager.hpp>
 #include <System/MarioGamePad.hpp>
 #include <System/MarDirector.hpp>
+#ifdef TARGET_PC
+#include <System/Resolution.hpp>
+#endif
 #include <GC2D/MessageUtil.hpp>
 #include <GC2D/PauseMenu2.hpp>
 #include <GC2D/ExPane.hpp>
@@ -132,6 +135,10 @@ void TCardSave::initData(TMarioGamePad* param_1)
 	}
 
 	unk14->setCullBack(GX_CULL_BACK);
+#ifdef TARGET_PC
+	// Widescreen: the full-screen mask also covers the side columns of the wide stage ortho
+	unk14->search('mask')->widenX(SMSGetUIOffsetUnitsX());
+#endif
 
 	for (int i = 0; i < 10; ++i) {
 		char acStack_48[0x28];
