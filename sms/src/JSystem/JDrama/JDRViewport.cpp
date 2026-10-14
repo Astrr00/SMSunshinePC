@@ -31,6 +31,13 @@ void TViewport::perform(u32 cue, TGraphics* graphics)
 void TViewport::load(JSUMemoryInputStream& stream)
 {
 	TNameRef::load(stream);
+#ifdef TARGET_PC
+	// presets into disc order first: a failed raw read keeps the buffer (retail 0x8000E590)
+	swapInPlace32(&unk10.x1);
+	swapInPlace32(&unk10.y1);
+	swapInPlace32(&unk10.x2);
+	swapInPlace32(&unk10.y2);
+#endif
 	stream.read(&unk10.x1, sizeof(int));
 	stream.read(&unk10.y1, sizeof(int));
 	stream.read(&unk10.x2, sizeof(int));

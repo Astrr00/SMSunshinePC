@@ -27,44 +27,54 @@ public:
 	// read16b/read32b, operator>>, and the u16 length prefix of the string readers) converts from the big-endian
 	// disc order to host order. Raw reads (read(void*, n), readData, peek, skip) return the bytes untouched; a caller
 	// that reads a multi-byte scalar or an array of them raw must convert it itself.
+	// The preset is swapped into disc order before the read and back after it: retail 0x8000E590/0x8000F098: failed
+	// read keeps buffer, so a short or failed read leaves the caller's preset (or its untouched low bytes) intact.
+	// The readXX helpers below zero their local first, so that pre-swap never reads an uninitialised value.
 	u32 read(s16& p)
 	{
+		swapInPlace16(&p);
 		u32 r = read(&p, sizeof(s16));
 		swapInPlace16(&p);
 		return r;
 	}
 	u32 read(u16& p)
 	{
+		swapInPlace16(&p);
 		u32 r = read(&p, sizeof(u16));
 		swapInPlace16(&p);
 		return r;
 	}
 	u32 read(s32& p)
 	{
+		swapInPlace32(&p);
 		u32 r = read(&p, sizeof(s32));
 		swapInPlace32(&p);
 		return r;
 	}
 	u32 read(u32& p)
 	{
+		swapInPlace32(&p);
 		u32 r = read(&p, sizeof(u32));
 		swapInPlace32(&p);
 		return r;
 	}
 	u32 read(s64& p)
 	{
+		p = (s64)HOST_BSWAP64((u64)p);
 		u32 r = read(&p, sizeof(s64));
 		p     = (s64)HOST_BSWAP64((u64)p);
 		return r;
 	}
 	u32 read(u64& p)
 	{
+		p = HOST_BSWAP64(p);
 		u32 r = read(&p, sizeof(u64));
 		p     = HOST_BSWAP64(p);
 		return r;
 	}
 	u32 read(f32& p)
 	{
+		swapInPlace32(&p);
 		u32 r = read(&p, sizeof(f32));
 		swapInPlace32(&p);
 		return r;
@@ -89,6 +99,7 @@ public:
 	{
 		u16 s;
 #ifdef TARGET_PC
+		s = 0;
 		read(s);
 #else
 		read(&s, sizeof(u16));
@@ -100,6 +111,7 @@ public:
 	{
 		u32 i;
 #ifdef TARGET_PC
+		i = 0;
 		read(i);
 #else
 		read(&i, sizeof(u32));
@@ -126,6 +138,7 @@ public:
 	{
 		s16 s;
 #ifdef TARGET_PC
+		s = 0;
 		read(s);
 #else
 		read(&s, sizeof(s16));
@@ -137,6 +150,7 @@ public:
 	{
 		u16 s;
 #ifdef TARGET_PC
+		s = 0;
 		read(s);
 #else
 		read(&s, sizeof(u16));
@@ -148,6 +162,7 @@ public:
 	{
 		s32 i;
 #ifdef TARGET_PC
+		i = 0;
 		read(i);
 #else
 		read(&i, sizeof(s32));
@@ -159,6 +174,7 @@ public:
 	{
 		u32 i;
 #ifdef TARGET_PC
+		i = 0;
 		read(i);
 #else
 		read(&i, sizeof(u32));
@@ -170,6 +186,7 @@ public:
 	{
 		u64 i;
 #ifdef TARGET_PC
+		i = 0;
 		read(i);
 #else
 		read(&i, sizeof(u64));
@@ -182,6 +199,7 @@ public:
 	{
 		f32 f;
 #ifdef TARGET_PC
+		f = 0;
 		read(f);
 #else
 		read(&f, sizeof(f32));

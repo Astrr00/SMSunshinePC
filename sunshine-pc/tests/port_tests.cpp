@@ -1,4 +1,5 @@
-// Headless checks for the pure port logic: JSON reader, cheat registry, mod manifest.
+// Headless checks for the pure port logic: JSON reader, cheat registry, mod manifest, and the TARGET_PC host conversions
+// of the game code (tests/sms_host_checks.cpp, built with the sms include path).
 // Build and run with tools/port_tests.cmd. Exit code is the number of failed checks.
 #include <cstdio>
 #include <string>
@@ -155,11 +156,14 @@ void testManifest() {
 
 }  // namespace
 
+void smsHostChecks(void (*check)(bool, const char*));
+
 int main() {
     testJson();
     testRegistry();
     testTick();
     testManifest();
+    smsHostChecks(check);
     std::printf("%d checks, %d failed\n", gChecks, gFailures);
     return gFailures;
 }
