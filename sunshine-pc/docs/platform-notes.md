@@ -843,3 +843,29 @@ Mechanism search for out-of-line header helpers (HeaderLab, ~38 probes in a temp
 ## Goop copy readback off on the Null backend (2026-10-13)
 
 - `GXSetCopyReadback` (Aurora patch 0013) writes the goop layers' R8 copies back into `mPollutionMap`; patch 0014 turns it off (one log line `Copy readback off: Null backend`) when the adapter is Dawn's Null backend (e.g. `SUNSHINE_ALLOW_CPU_ADAPTER=0` without a GPU). Null renders nothing, so the copies are empty and wiped the maps (airport nonzero 6306 -> 0, Delfino 15022 -> 15), and route 85 stalled at the Delfino boss (agent Regress85). On Null the maps keep their load state, as before 0013; spraying cleans the goop in game logic only on a rendering adapter (a GPU, or WARP with `SUNSHINE_ALLOW_CPU_ADAPTER=1`).
+
+## Launcher settings in game: boot matrix (T1, 2026-10-13)
+
+Proof that a saved setting reaches the game: a pre-written `build/Route/<run>/appdata/Sunshine/settings.ini`, `route.py --dvd` (so the launcher does not run; `main.cpp` still loads the INI and `launcher::applyRuntimeSettings` applies it), `tools/routes/96_boot_matrix.dev` (wait for gameplay, `shot boot.png`, spray 90 frames, `log`), env `SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1`, WARP. The launcher -> INI step is covered by `settings_test` and the UI runs. All runs rc=0 at build `bf86825`; the INI files were not rewritten by the game.
+
+| Setting (INI) | Run | Observed | Baseline (B0, empty INI) |
+| --- | --- | --- | --- |
+| `video.width/height=960/720` | `t1_b1` | `[launcher] window: size 960x720`, `boot.png` 960x720 | 1280x960, PNG 1280x960 |
+| `video.remember_window_size=0` (+ 960x720 saved) | `t1_b2` | window and PNG 1280x960 | - |
+| `video.vsync=0` | `t1_b1` | `present mode Mailbox` | `present mode Fifo` (WARP offers no FifoRelaxed) |
+| `video.fsr1=1` | `t1_b1` | `[render] upscaler=fsr1` (log only; pixel effect is task T2) | `upscaler=bilinear` |
+| `video.widescreen=1 aspect=32:9` | `t1_b3` | `render width 1594`, window and PNG 3416x960 (wider than the 1920x1200 desktop, not clamped), scene fills the width, HUD at the edges | `widescreen: off ... render width 640` |
+| `widescreen=1 aspect=auto`, `SUNSHINE_WINDOW_SIZE=1280,720` | `t1_b4` | `render width 796` (from the first window size), window and PNG 1706x960 (INI default size) | - |
+| `widescreen=1 aspect=4:3` | `t1_b5` | `render width 640`, window and PNG 1280x960 | - |
+| `audio.master_volume=50` | `t1_v50`, `t1_b1` | dumps aligned at the first non-zero sample: `b0 * 0.5` matches within 1 LSB for 3.1 s (`t1_v50`) and 3.4 s (`t1_b1`), RMS ratio 0.500 | `t1_b0/b0.wav` |
+| `audio.master_volume=0` | `t1_v0` | 33.1 s dump, 0 non-zero samples | - |
+| `interface.glyph_style=playstation` | `t1_b1` | `[glyph] playstation/a`, `/b`, `/x` (log only) | `[glyph] xbox/a` (generic shows the Xbox set) |
+| `cheats.infinite_water=1` | `t1_b1` | `[cheats-state] water=10000 ... active=1` in all 98 lines, also during the spray | `water=10000` -> `9720` after the spray, `active=0` |
+| no `[cheats]` keys (defaults) | `t1_b0` | `[cheats] 5 cheats loaded, 0 active`, `active=0` in all 98 state lines | - |
+
+Pitfalls found on the way:
+- The saved window size wins over route.py's `SUNSHINE_WINDOW_SIZE=640,480`: `applyRuntimeSettings` resizes to the INI size (default 1280x960) after start. `SUNSHINE_WINDOW_SIZE` still sets the first window, which `aspect=auto` reads.
+- PNG width is the window width (`widescreenWindowWidth`: 960 x render width / 448, rounded even), not the render width; the PNG aspect equals render width / 448.
+- `[cheats] N cheats loaded, M active` is printed by `cheatsLoad` before `applyRuntimeSettings` applies the INI, so it reads `0 active` with `infinite_water=1` too; `[cheats-state] active=` shows the applied state.
+- Fixed-window RMS (2-20 s) does not measure the volume: after about 3 s the audio of two runs drifts apart (cause not measured; logic rate and startup timing differ per run), so `t1_v50/t1_b0` gives 0.624 and `t1_b1/t1_b0` 0.197. Compare aligned prefixes instead.
+- Not verified here: fullscreen, FPS limit, resolution scale, dead zones, key bindings, the FSR1 and glyph pixel effect, whether the spray ran in `t1_b1` (the refill hides the drop).
