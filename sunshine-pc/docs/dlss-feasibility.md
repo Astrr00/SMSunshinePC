@@ -35,15 +35,15 @@ The Streamline repository (`https://github.com/NVIDIA-RTX/Streamline`) was not v
 
 An FSR1-style spatial upscaler, written from scratch (no AMD FidelityFX code copied):
 
-- `SAMPLER_FSR1` resampler mode in Aurora's present chain (`extern/aurora/lib/webgpu/gpu.cpp`): `sample_easu` (edge-adaptive 4x4 gaussian gather) followed by `fs_rcas` (unsharp-mask sharpen) as a second pass through an intermediate target.
+- `SAMPLER_FSR1` resampler mode in Aurora's present chain (`extern/aurora/lib/webgpu/gpu.cpp`): `sample_easu` (edge-adaptive: a 4x4 Lanczos-2 gather rotated to the local luma edge and stretched along it, clamped to the min/max of the nearest 2x2 texels) followed by `fs_rcas` (unsharp-mask sharpen on the 4-neighbour cross, limited to the cross min/max) as a second pass through an intermediate target. The current kernel is Aurora patch `0015-fsr1-sharp-easu-rcas-limiter.patch` on top of `0005-fsr1-render-scale.patch` (`sunshine-pc/patches/aurora/`).
 - Enum and API: `extern/aurora/include/aurora/aurora.h` (`SAMPLER_FSR1`, `aurora_set_upscale_sharpness`).
 - Render scale uses Aurora's existing `VISetFrameBufferScale` (`extern/aurora/lib/dolphin/vi/vi.cpp`).
 - Env configuration: `sunshine-pc/src/render/render_scale.cpp` (`SUNSHINE_UPSCALER=bilinear|area|fsr1`, `SUNSHINE_UPSCALE_SHARPNESS`, `SUNSHINE_RENDER_SCALE` 0.25–1.0), called from `main.cpp` after `aurora_initialize`.
 
 Limits:
-- When an RmlUI overlay is active, Aurora bypasses the resample pass (`extern/aurora/lib/aurora.cpp`, `end_frame()`), so the upscaler is not applied to that frame.
-- RCAS has no local min/max halo limiter (`ponytail:` comment in `gpu.cpp`); halos are possible on high-contrast edges.
-- Not verified visually in game. The title-screen render is still being fixed by another agent.
+- RmlUI frames with a backdrop filter bypass the resample pass (`extern/aurora/lib/aurora.cpp`, `end_frame()`: `rmlBindGroup && !rmlOverlay`; `lib/rmlui.cpp` sets `overlay = !needsBackdrop`), so the upscaler is not applied to those frames. RmlUI overlay frames are resampled.
+- Halos: EASU and RCAS clamp to the local min/max (nearest 2x2 texels, 4-neighbour cross), so neither can overshoot the local range; no halo or ringing was seen, in one scene on WARP only.
+- Measured in game frames on WARP only (one scene, dolpic/0, scales 0.5 and 1.0: more fine detail than bilinear, no shift; on WARP the FSR1 runs ran at about 10-14 logic frames/s vs 25-30 for bilinear). FSR1 also alters 1:1 frames [INFERENCE from code]. Real GPU, 1:1 and downscale frames and a native reference NOT verified. Measurements: `sunshine-pc/docs/platform-notes.md`, T2 section, "FSR1 fix".
 
 ## Upgrade path to DLSS
 

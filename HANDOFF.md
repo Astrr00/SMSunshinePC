@@ -152,9 +152,9 @@ and the docs commit that follows them.
   7. **Frame-rate replay:** the abort at `fpsLimit > 30` is fixed (`3d224da`, `bac9d7e`), circle shadows are drawn
      once per frame (`b22eec0`); details in `sunshine-pc/docs/platform-notes.md`.
 - **Next: Phase 3** (ToggleMatrix `ToggleMatrix.md`: T1, T2 and T4 done). In this order: T3 Pacing + Fullscreen
-  (timing runs, so on an idle machine with `AURORA_SCREENSHOT_EVERY=` empty); T5 InputHooks; FSR1 fix in progress
-  (agent FSR1Fix, a new Aurora patch 0015 on top of `0005-fsr1-render-scale.patch`; T2 found FSR1 softer than bilinear
-  and shifted up-left); UI track A: UI-4b, UI-14B, UI-15, UI-7, UI-16 (plans in `lead-2026-10-13b/uiplans/`). Owner
+  (timing runs, so on an idle machine with `AURORA_SCREENSHOT_EVERY=` empty); T5 InputHooks; FSR1 follow-ups (the fix
+  landed as Aurora patch 0015, measured on WARP in one scene; real GPU, 1:1 frames and a native reference open); UI
+  track A: UI-4b, UI-14B, UI-15, UI-7, UI-16 (plans in `lead-2026-10-13b/uiplans/`). Owner
   decisions needed first: UI-11 hash table, UI-12 network. Owner: listen to the audio excerpts (the last Phase 2
   check). Known gap of T4: "Unlock all nozzles" with a loaded save NOT verified, and a game over before the first save
   returns the nozzles to 0x00000 (code read).
