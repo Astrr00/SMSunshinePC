@@ -4,6 +4,9 @@
 #include <Player/ModelWaterManager.hpp>
 #include <Player/MarioAccess.hpp>
 #include <macros.h>
+#ifdef TARGET_PC
+#include <hostfloat.h>
+#endif
 
 TObjHitCheck* gpObjHitCheck;
 
@@ -140,8 +143,15 @@ u32 TObjHitCheck::getTableIndex(const JGeometry::TVec3<f32>& pos,
 {
 	f32 fVar1 = abs(pos.x) + abs(pos.y) + abs(pos.z);
 
+#ifdef TARGET_PC
+	// Console: bl __cvt_fp2unsigned (asm 0x8011560C/0x801157D8/0x80115A88, inlined in the three callers), so a negative
+	// low edge gives cell 0. x64 wrapped it (-22.5 -> cell 234: 22 extra cells, nodes taken from the 7000-node pool).
+	u32 i = SMSCvtFp2Unsigned((fVar1 - entry_radius) * (10.f / 700.f));
+	*out  = SMSCvtFp2Unsigned((fVar1 + entry_radius) * (10.f / 700.f));
+#else
 	u32 i = (fVar1 - entry_radius) * (10.f / 700.f);
 	*out  = (fVar1 + entry_radius) * (10.f / 700.f);
+#endif
 	if (i == *out)
 		*out += 1;
 	*out &= 0xff;

@@ -26,16 +26,12 @@ enum JAISoundState {
 };
 
 #ifdef TARGET_PC
-// Console float->u32: saturates to 0xFFFFFFFF above 2^32 and to 0x80000000 below -2^31 (fctiwz); x86-64 wraps modulo
-// 2^32 instead (e.g. a far sound's huge squared distance would become a tiny priority).
-static inline u32 JAIF32ToU32(f32 v)
-{
-	if (v >= 4294967296.0f)
-		return 0xFFFFFFFFu;
-	if (v < -2147483648.0f)
-		return 0x80000000u;
-	return v < 0.0f ? (u32)(s32)v : (u32)v;
-}
+#include <hostfloat.h>
+// Console float->u32 is bl __cvt_fp2unsigned (asm 0x80056764/0x800567AC in JAISound, 0x8004FD6C.. in checkNextFrameSe):
+// negative -> 0, >= 2^32 or NaN -> 0xFFFFFFFF. The old host body differed in two cases: a negative input wrapped where
+// the console gives 0 (e.g. setSeInterPitch with param_4 < 0), and NaN gave 0 where the console gives 0xFFFFFFFF
+// (e.g. 0/0 in checkNextFrameSe when the squared distance fVar1 is 0).
+static inline u32 JAIF32ToU32(f32 v) { return SMSCvtFp2Unsigned(v); }
 #endif
 
 class JAISound {
