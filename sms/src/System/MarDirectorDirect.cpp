@@ -1234,6 +1234,7 @@ JStage::TObject* TMarDirector::JSGFindObject(const char* param_1,
 #include <JSystem/JDrama/JDRDrawBufObj.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DDrawBuffer.hpp>
 #include <Map/PollutionManager.hpp>
+#include <MarioUtil/ShadowUtil.hpp>
 
 // Presentation replay (sunshine-pc/src/framerate/framerate.cpp): draws the current game frame again without advancing
 // logic. DRAW_INIT clears the draw buffers, so the entry stage is re-run first with logic (MOVE) and animation (CALC_ANIM)
@@ -1282,6 +1283,27 @@ void sunshineReplayFrame()
 		for (SunshineLinkIt it = draws[i]->getChildren().begin(); it != draws[i]->getChildren().end(); it++)
 			if (sunshineIsPostDrawClear(draws, 3, *it))
 				static_cast<JDrama::TDrawBufObj*>(it->mPerformer)->getDrawBuffer()->frameInit();
+	// Circle shadows: the entry stage requests them (CUE_CALC_VIEW/CUE_ENTRY: TLiveActor::requestShadow; Mario's
+	// TMBindShadowBody on CUE_ENTRY) and the draw lists consume them: TMBindShadowManager's CUE_CALC_VIEW link
+	// (0x4000000e) runs calcVtx, which rewrites the requests in place (radius * 0.8, position put on the ground, square
+	// shadows moved along the light, ship radius 1), then its draw link (0x20000008) draws them and reset()s. direct()
+	// draws at the start of the next call what the last entry stage requested, so this tick's requests are still pending
+	// here, not yet processed. Set them aside and reset, so the replay's entry stage requests them once and its draw lists
+	// process and clear that copy; afterwards put the unprocessed requests and the counters (the six fields reset()
+	// clears) back, so the next direct() processes and draws them once, as retail does.
+	// The null test is no real guard: gpBindShadowManager is never cleared, it only covers boot before the first manager.
+	static TCircleShadowRequest sSavedShadowReqs[0x200]; // capacity of mRequests (TMBindShadowManager ctor)
+	TMBindShadowManager* const shadows = gpBindShadowManager;
+	const int shadowReqs = shadows ? shadows->mRequestNum : 0;
+	const int shadowQuadArys = shadows ? shadows->mQuadAryNum : 0;
+	const int shadowSquares = shadows ? shadows->mSquareShadowNum : 0;
+	const u16 shadowModels = shadows ? shadows->mModelShadowNum : 0;
+	const u8 shadowUnk49 = shadows ? shadows->unk49 : 0;
+	const bool shadowUnk65 = shadows ? shadows->unk65 : false;
+	for (int i = 0; i < shadowReqs; ++i)
+		sSavedShadowReqs[i] = shadows->mRequests[i];
+	if (shadows)
+		shadows->reset();
 	d->unk34->perform(CUE_ALL & ~(CUE_MOVE | CUE_CALC_ANIM), &local);
 	d->unk40->perform(CUE_ALL, &local);
 	// On a stage with pollution layers unk38/unk3C are the pollution passes (initECTGft): they count goop, apply the
@@ -1300,6 +1322,16 @@ void sunshineReplayFrame()
 				it->perform(CUE_ALL, &local);
 	}
 	GXInvalidateTexAll();
+	for (int i = 0; i < shadowReqs; ++i)
+		shadows->mRequests[i] = sSavedShadowReqs[i];
+	if (shadows) {
+		shadows->mRequestNum      = shadowReqs;
+		shadows->mQuadAryNum      = shadowQuadArys;
+		shadows->mSquareShadowNum = shadowSquares;
+		shadows->mModelShadowNum  = shadowModels;
+		shadows->unk49            = shadowUnk49;
+		shadows->unk65            = shadowUnk65;
+	}
 
 	// Same overlay as TApplication::gameLoop (Application.cpp), without advancing the fader or the sound mixer.
 	JDrama::TVideo* video = gpApplication.mDisplay->unk60;
