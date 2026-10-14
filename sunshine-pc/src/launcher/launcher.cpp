@@ -1263,8 +1263,9 @@ void applyRuntimeSettings() {
 		std::printf("[launcher] window: size %ux%u\n", size.first, size.second);
 	}
 	std::fflush(stdout);
-	// SUNSHINE_RENDER_SCALE (render/render_scale.cpp) overrides the saved scale.
-	if (std::getenv("SUNSHINE_RENDER_SCALE") == nullptr) {
+	// SUNSHINE_RENDER_SCALE (render/render_scale.cpp) overrides the saved scale; an empty value counts as unset there and here.
+	const char* envScale = std::getenv("SUNSHINE_RENDER_SCALE");
+	if (envScale == nullptr || *envScale == '\0') {
 		VISetFrameBufferScale(static_cast<float>(s.resolutionScalePct) / 100.f);
 	}
 	sunshineApplyUpscaler(s.fsr1); // render/render_scale.cpp: FSR 1 or bilinear, unless SUNSHINE_UPSCALER is set

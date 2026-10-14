@@ -42,7 +42,9 @@ void sunshineApplyRenderSettings()
 	if (readFloatEnv("SUNSHINE_UPSCALE_SHARPNESS", sharpness))
 		aurora_set_upscale_sharpness(sharpness);
 
-	// Internal framebuffer size as a fraction of the window. Unset keeps Aurora's default (window size).
+	// Internal framebuffer size as a fraction of the 640x480 EFB frame, not of the window: Aurora's window.cpp
+	// (get_window_size) scales vi::configured_fb_size() and widens it to the window aspect. Unset or empty: the INI
+	// resolution_scale decides (launcher.cpp applyRuntimeSettings); scale 0 (Auto) renders at the window's pixel size.
 	float scale = 0.f;
 	if (readFloatEnv("SUNSHINE_RENDER_SCALE", scale)) {
 		if (scale < 0.25f || scale > 1.f)
