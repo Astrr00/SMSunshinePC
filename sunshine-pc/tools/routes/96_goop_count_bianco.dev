@@ -1,5 +1,5 @@
 # Pollution object counter (CPU footprint count, PollutionCount.cpp TARGET_PC), bianco/0: spray the footprint of object O1
-# (joint bounds x 1422..3066, z 5062..5605, [hplog-objreg]) on a teleport grid: rows facing +z, then from the north facing -z,
+# (joint bounds x 1422..3066, z 5062..5605) on a teleport grid: rows facing +z, then from the north facing -z,
 # then from the south facing +z. Expect [hplog-obj] O1 deg below 30 (map 2) -> cleaned=1 -> [hplog-event] sink building 1 rises.
 # Env: SUNSHINE_DEV_START=bianco/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_HPLOG=1. About 280 s on WARP (route.py --seconds 320).
 waitfor director mario dirstate=4 camDemo=0 timeout=3000

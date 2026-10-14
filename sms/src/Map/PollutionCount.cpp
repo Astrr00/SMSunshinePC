@@ -242,7 +242,8 @@ static void pcBuildFootprint(TPollutionObj* obj, u32** outList, u32* outNum)
 				vtxSize += size;
 			}
 			if (posOff < 0 || texOff < 0) {
-				std::printf("[pollution] object footprint: shape without indexed POS/TEX0 skipped\n");
+				if (fill == 0)
+					std::printf("[pollution] object footprint: shape without indexed POS/TEX0 skipped\n");
 				continue;
 			}
 			for (u16 k = 0; k < shape->getMtxGroupNum(); ++k) {
