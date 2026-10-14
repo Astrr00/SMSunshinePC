@@ -1,0 +1,120 @@
+diff --git a/include/aurora/aurora.h b/include/aurora/aurora.h
+--- a/include/aurora/aurora.h
++++ b/include/aurora/aurora.h
+@@ -137,7 +137,7 @@ void aurora_set_log_level(AuroraLogLevel level);
+ void aurora_set_pause_on_focus_lost(bool value);
+ void aurora_set_background_input(bool value);
+ void aurora_set_resampler(AuroraSampler sampler);
+-/** Sets RCAS sharpening strength for SAMPLER_FSR1. Range 0.0f (off) - 1.0f (strongest). Default 0.2f. */
++/** Sets RCAS sharpening strength for SAMPLER_FSR1. Range 0.0f (off) - 1.0f (strongest). Default 0.8f. */
+ void aurora_set_upscale_sharpness(float sharpness);
+ /** Sets the clock timescale. Default 1.0f. 0.0f is paused. Range 0.0f-16.0f. */
+ void aurora_set_timescale(float scale);
+diff --git a/lib/webgpu/gpu.cpp b/lib/webgpu/gpu.cpp
+--- a/lib/webgpu/gpu.cpp
++++ b/lib/webgpu/gpu.cpp
+@@ -62,7 +62,7 @@ static wgpu::RenderPipeline g_RcasPipeline;
+ static wgpu::Buffer g_ResampleUniformBuffer;
+ static TextureWithSampler g_resampledFrameBuffer;
+ static TextureWithSampler g_upscaledFrameBuffer;
+-static float g_upscaleSharpness = 0.2f;
++static float g_upscaleSharpness = 0.8f;
+ 
+ static wgpu::Adapter g_adapter;
+ wgpu::Instance g_instance;
+@@ -193,21 +193,39 @@ fn luma(c: vec3<f32>) -> f32 {
+     return dot(c, vec3<f32>(0.2126, 0.7152, 0.0722));
+ }
+ 
+-// EASU-style upscale: 4x4 gaussian gather whose kernel is stretched along the local luma edge
+-// (edge tangent taken from the 2x2 luma gradient), so edges stay straight instead of blurring.
+-// Own implementation of the technique; not AMD FidelityFX code.
++fn lanczos2(x: f32) -> f32 {
++    let ax = abs(x);
++    if (ax >= 2.0) {
++        return 0.0;
++    }
++    if (ax < 1e-4) {
++        return 1.0;
++    }
++    let px = 3.14159265 * ax;
++    return 2.0 * sin(px) * sin(0.5 * px) / (px * px);
++}
++
++// EASU-style upscale. Own implementation of the technique; not AMD FidelityFX code.
++// Output pixel centres map to source texel space like the bilinear sampler (texel i's centre is at i + 0.5).
++// 4x4 gather with a Lanczos-2 weight in a frame rotated to the local luma edge (from the 2x2 gradient): across the
++// edge the full Lanczos-2 width keeps it sharp, along the edge the kernel is stretched up to 1.8x to smooth stairs.
++// The negative lobes may overshoot, so the result is clamped to the min/max of the nearest 2x2 texels (no ringing).
+ fn sample_easu(frag_position: vec4<f32>) -> vec4<f32> {
+     let source_size = vec2<f32>(textureDimensions(t));
+     let target_size = max(vec2<f32>(uniforms.frame_width, uniforms.frame_height), vec2<f32>(1.0, 1.0));
+-    let src = (frag_position.xy - vec2<f32>(0.5, 0.5)) * (source_size / target_size);
++    let src = frag_position.xy * (source_size / target_size) - vec2<f32>(0.5, 0.5);
+     let base = floor(src);
+     let f_pos = src - base;
+     let ip = vec2<i32>(base);
+ 
+-    let l00 = luma(sample_by_pixel(ip).rgb);
+-    let l10 = luma(sample_by_pixel(ip + vec2<i32>(1, 0)).rgb);
+-    let l01 = luma(sample_by_pixel(ip + vec2<i32>(0, 1)).rgb);
+-    let l11 = luma(sample_by_pixel(ip + vec2<i32>(1, 1)).rgb);
++    let c00 = sample_by_pixel(ip);
++    let c10 = sample_by_pixel(ip + vec2<i32>(1, 0));
++    let c01 = sample_by_pixel(ip + vec2<i32>(0, 1));
++    let c11 = sample_by_pixel(ip + vec2<i32>(1, 1));
++    let l00 = luma(c00.rgb);
++    let l10 = luma(c10.rgb);
++    let l01 = luma(c01.rgb);
++    let l11 = luma(c11.rgb);
+     let grad = vec2<f32>((l10 + l11) - (l00 + l01), (l01 + l11) - (l00 + l10));
+     let grad_len = length(grad);
+     var along = vec2<f32>(1.0, 0.0);
+@@ -215,27 +233,25 @@ fn sample_easu(frag_position: vec4<f32>) -> vec4<f32> {
+         along = vec2<f32>(-grad.y, grad.x) / grad_len;
+     }
+     let across = vec2<f32>(-along.y, along.x);
+-    let edge = clamp(grad_len * 2.0, 0.0, 1.0);
+-    let sigma_along = 0.7 + 0.6 * edge;
+-    let sigma_across = 0.6;
++    let stretch = 1.0 + 0.8 * clamp(grad_len * 4.0, 0.0, 1.0);
+ 
+     var color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+     var total_weight = 0.0;
+     for (var oy: i32 = -1; oy <= 2; oy = oy + 1) {
+         for (var ox: i32 = -1; ox <= 2; ox = ox + 1) {
+             let d = vec2<f32>(f32(ox), f32(oy)) - f_pos;
+-            let a = dot(d, along) / sigma_along;
+-            let b = dot(d, across) / sigma_across;
+-            let weight = exp(-0.5 * (a * a + b * b));
++            let weight = lanczos2(dot(d, along) / stretch) * lanczos2(dot(d, across));
+             color += weight * sample_by_pixel(ip + vec2<i32>(ox, oy));
+             total_weight += weight;
+         }
+     }
+-    return color / total_weight;
++    color = color / max(total_weight, 1e-4);
++    return clamp(color, min(min(c00, c10), min(c01, c11)), max(max(c00, c10), max(c01, c11)));
+ }
+ 
+-// RCAS-style sharpen (unsharp-mask form) over the EASU output. Own implementation.
+-// ponytail: no FSR-style local min/max halo limiter; output is clamped to [0,1] only. Upgrade if halos show.
++// RCAS-style sharpen (unsharp mask on the 4-neighbour cross) over the EASU output. Own implementation.
++// k = 0.25 * sharpness (default sharpness 0.8 -> k 0.2). The result is limited to the min/max of the cross, so the
++// sharpening steepens edges but cannot overshoot past the local range (no halos).
+ @fragment
+ fn fs_rcas(in: VertexOutput) -> @location(0) vec4<f32> {
+     let p = vec2<i32>(in.position.xy);
+@@ -244,9 +260,11 @@ fn fs_rcas(in: VertexOutput) -> @location(0) vec4<f32> {
+     let south = sample_by_pixel(p + vec2<i32>(0, 1)).rgb;
+     let east = sample_by_pixel(p + vec2<i32>(1, 0)).rgb;
+     let west = sample_by_pixel(p + vec2<i32>(-1, 0)).rgb;
+     let k = 0.25 * clamp(uniforms.sharpness, 0.0, 1.0);
+     let sharpened = (1.0 + 4.0 * k) * center - k * (north + south + east + west);
+-    return vec4<f32>(clamp(sharpened, vec3<f32>(0.0), vec3<f32>(1.0)), 1.0);
++    let lo = min(center, min(min(north, south), min(east, west)));
++    let hi = max(center, max(max(north, south), max(east, west)));
++    return vec4<f32>(clamp(sharpened, lo, hi), 1.0);
+ }
+ 
+ 

@@ -9,6 +9,7 @@ card base path | lib/dolphin/card.cpp | ^std::array<std::filesystem::path, 2> ca
 TEV alpha R8 compare | lib/gx/shader.cpp | case GX_TEV_COMP_R8_GT:
 FSR1 RCAS shader | lib/webgpu/gpu.cpp | ^fn fs_rcas\(
 FSR1 sharpness API | lib/aurora.cpp | ^void aurora_set_upscale_sharpness\(
+FSR1 Lanczos EASU + RCAS limiter | lib/webgpu/gpu.cpp | ^fn lanczos2\( && let hi = max\(center, max\(max\(north, south\), max\(east, west\)\)\); && let src = frag_position\.xy \* \(source_size / target_size\) - vec2<f32>\(0\.5, 0\.5\);
 pass dump | lib/gfx/pass_dump.hpp | ^void write_frame\(
 screenshot | lib/gfx/screenshot.hpp | ^void finish\(
 texture side channel opcodes | include/dolphin/gx/GXAurora.h | ^#define GX_AURORA_SET_TEX_DATA 0x0045 && ^#define GX_AURORA_SET_TLUT_DATA 0x0046 && ^#define GX_AURORA_SET_TEX_TLUT 0x0047
