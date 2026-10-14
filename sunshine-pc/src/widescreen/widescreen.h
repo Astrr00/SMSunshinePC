@@ -1,6 +1,7 @@
 // Widescreen render width for the PC port (Port.md section 5). The GameCube EFB is 640x448 (4:3). Widescreen widens
-// the EFB (3D view, EFB copies, and the window, since Aurora's FIT policy follows the render size). 2D UI stays 640
-// units wide and is centred in it. Vertical size and the 4:3 output are unchanged.
+// the EFB (3D view, EFB copies) to W = 480 * aspect and the window to the same display aspect W/480: Aurora scales the
+// EFB to the window in X and Y separately (window FIT is never enabled, aurora lib/window.cpp), so 448 lines fill 480
+// as at 4:3. 2D UI stays 640 units wide and is centred in it. Vertical size and the 4:3 output are unchanged.
 #pragma once
 
 #include <cstdint>
@@ -14,7 +15,7 @@ struct Settings;
 // Returns the logical window width to create: unchanged at 4:3, otherwise windowHeight * EFB width / 480.
 uint32_t widescreenInit(const sunshine::Settings& s, uint32_t windowWidth, uint32_t windowHeight);
 
-// EFB width in pixels (640 at 4:3, otherwise 480 * aspect rounded to even; the EFB stays 448 high).
+// EFB width in pixels (640 while 480 * aspect < 648, otherwise 480 * aspect rounded to a multiple of 4; the EFB stays 448 high).
 // Used by sms/src/System/Resolution.cpp.
 uint32_t sunshineRenderWidth();
 // Left edge of the centred 640-wide 4:3 UI column inside sunshineRenderWidth() (even; 0 at 4:3).

@@ -1,4 +1,4 @@
-// Headless checks for the pure port logic: JSON reader, cheat registry, mod manifest, and the TARGET_PC host conversions
+// Headless checks for the pure port logic: JSON reader, cheat registry, mod manifest, widescreen widths, and the TARGET_PC host conversions
 // of the game code (tests/sms_host_checks.cpp, built with the sms include path).
 // Build and run with tools/port_tests.cmd. Exit code is the number of failed checks.
 #include <cstdio>
@@ -8,6 +8,8 @@
 #include "cheats/cheats_core.h"
 #include "json/json_lite.h"
 #include "mods/mod_manifest.h"
+#include "settings.h"
+#include "widescreen/widescreen.h"
 
 namespace {
 
@@ -154,6 +156,28 @@ void testManifest() {
     check(mods::overlayDvdPath("sb/x.bin") == "/sb/x.bin", "overlay: DVD path form");
 }
 
+void testWidescreen() {
+    check(widescreenRenderWidthForAspect(4.0 / 3.0) == 640, "widescreen: 4:3 -> 640");
+    check(widescreenRenderWidthForAspect(16.0 / 9.0) == 852, "widescreen: 16:9 -> 852 (multiple of 4)");
+    check(widescreenRenderWidthForAspect(21.0 / 9.0) == 1120, "widescreen: 21:9 -> 1120");
+    check(widescreenRenderWidthForAspect(32.0 / 9.0) == 1708, "widescreen: 32:9 -> 1708");
+    check(widescreenRenderWidthForAspect(16.0 / 10.0) == 768, "widescreen: 16:10 -> 768");
+
+    sunshine::Settings s;  // widescreenInit reads only .widescreen and .aspect (and SUNSHINE_ASPECT, unset here)
+    s.widescreen = true;
+    s.aspect = "auto";
+    check(widescreenInit(s, 1281, 960) == 1281 && sunshineRenderWidth() == 640 && sunshineUIOffsetX() == 0,
+          "widescreen: auto 1281x960 stays on the 640 path");
+    s.aspect = "16:9";
+    check(widescreenInit(s, 1280, 960) == 1704 && sunshineRenderWidth() == 852, "widescreen: 16:9 window 1704x960");
+    check(sunshineUIOffsetX() == 106 && sunshineRenderWidth() - 640 - sunshineUIOffsetX() == 106,
+          "widescreen: 16:9 UI column 106 px from both edges");
+    s.aspect = "21:9";
+    check(widescreenInit(s, 1280, 960) == 2240, "widescreen: 21:9 window 2240x960");
+    s.widescreen = false;
+    check(widescreenInit(s, 1280, 960) == 1280 && sunshineRenderWidth() == 640, "widescreen: off -> 640, window unchanged");
+}
+
 }  // namespace
 
 void smsHostChecks(void (*check)(bool, const char*));
@@ -163,6 +187,7 @@ int main() {
     testRegistry();
     testTick();
     testManifest();
+    testWidescreen();
     smsHostChecks(check);
     std::printf("%d checks, %d failed\n", gChecks, gFailures);
     return gFailures;
