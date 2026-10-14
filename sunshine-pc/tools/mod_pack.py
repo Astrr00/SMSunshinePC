@@ -1,8 +1,7 @@
 """Builds the data of the overlay-demo example mod from the user's own disc extract.
 
 Writes <out>/files/data/common.szs: the stock archive with one stage name replaced (/2d/stagename.bmg entry 1,
-the Delfino Plaza name in the pause menu, PauseMenu2.cpp). The first target, data/message.szs (station.bmg), is never
-opened by the game (no path to it in main.dol or sms/src), so it showed nothing.
+the Delfino Plaza name, shown e.g. in the pause menu, PauseMenu2.cpp).
 Replacement is same byte length (Shift-JIS), so every RARC offset stays valid.
 The output derives from copyrighted game data: it is generated locally and git-ignored (*.szs).
 

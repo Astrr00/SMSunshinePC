@@ -73,7 +73,8 @@ There is no DVD API for mods. Overlays are the data path.
 
 ## Example: `overlay-demo`
 
-`mods-example/overlay-demo/` is a data-only mod. It renames Delfino Plaza in the pause menu: `data/common.szs`,
+`mods-example/overlay-demo/` is a data-only mod. It renames Delfino Plaza wherever `stagename.bmg` is shown (observed only in the pause
+menu; also read by the stage-entry banner, `ConsoleStr.cpp:83`, and the guide map, `Guide.cpp:897`): `data/common.szs`,
 `/2d/stagename.bmg` entry 1 (read by `PauseMenu2.cpp:113`). The first target, `data/message.szs` (`station.bmg`), is
 never opened by the game (no path to it in `main.dol` or `sms/src`), so it showed nothing.
 The archive is not committed. It is built from your own disc extract:
@@ -103,6 +104,6 @@ path. Copy a folder into `<exe dir>/mods/` to enable it.
   Name-bar crop (340,835)-(920,895) MAD: mod against disabled 14.60, mod against the old message.szs build 14.27, disabled
   against old build 0.47. The old message.szs build (run `mc_ov0`): `1 overlay file(s) active`, no `overlay in use`.
 - Earlier note (before ModCheck): overlay effect in-game NOT verified. No `[mods] overlay in use` and no `[mods] overlay replaced` line appears in any mod-on run (`src/mods/mods_loader.cpp:170,248`). The bianco stage (`SUNSHINE_DEV_START=bianco/0`) shows `ビアンコヒルズ`, not the replaced station name. Delfino was not run in this session.
-- Carried over from an earlier session, not re-run: `mod_pack.py` output round-trips through `tools/discfmt.py` (only `/station.bmg` differs).
+- Carried over from an earlier session, not re-run: `mod_pack.py` output round-trips through `tools/discfmt.py` (only `/station.bmg` differed: the old `message.szs` target).
 - Not exercised: unload of a faulted DLL mod.
 - Disable switch: with `hello=0` in `[mods]`, a disc start logs `[mods] hello disabled by settings` (`build/UiDev/ui_pages3/mods_disc`, run before the 04:46:20 rebuild). `mods_disc_on` had no INI and no skip line. Not checked: a DLL mod that runs when disabled and enabled.

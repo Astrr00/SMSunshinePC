@@ -54,8 +54,9 @@ public:
             std::printf("[cheats] flag 0x%X: %d -> %d\n", (unsigned)flag, (int)flags->getFlag(flag), (int)value);
             flags->setFlag(flag, value);
             // Nozzle unlocks are one-shot and not saved: without the saved copy a game over before the next save
-            // (TFlagManager::restore, MarDirectorDirect.cpp:409) takes them back (observed, run mc_go2).
-            if (flag >= cheats::kNozzleFlagBase && flag < cheats::kNozzleFlagBase + 18) {
+            // (TFlagManager::restore, MarDirectorDirect.cpp:409) takes them back (observed, run mc_go2). Keyed on the
+            // flag range, so any later writer of nozzle flags through this world also updates the saved copy.
+            if (flag >= cheats::kNozzleFlagBase && flag < cheats::kNozzleFlagBase + cheats::kNozzleFlagCount) {
                 flags->setSavedCardBool(flag, value);
             }
         }
@@ -168,7 +169,7 @@ void cheatsTick() {
         return;
     }
     int nozzleMask = 0;
-    for (uint32_t i = 0; i < 18; i++) {
+    for (uint32_t i = 0; i < cheats::kNozzleFlagCount; i++) {
         if (world.getFlag(cheats::kNozzleFlagBase + i) != 0) {
             nozzleMask |= 1 << i;
         }

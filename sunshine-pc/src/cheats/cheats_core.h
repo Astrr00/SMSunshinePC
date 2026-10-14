@@ -35,6 +35,7 @@ constexpr int32_t kMaxCoins = 99;
 // Nozzle-unlocked flags: one per (shine stage 1..9, nozzle 0..1), index = base + (stage-1)*2 + nozzle.
 // Same indices as sms TFlagManager::getNozzleRight/setNozzleRight (sms/src/System/FlagManager.cpp).
 constexpr uint32_t kNozzleFlagBase = 0x10366;
+constexpr uint32_t kNozzleFlagCount = 18; // nine Shine stages, two nozzles each
 
 struct Cheat {
     std::string id;

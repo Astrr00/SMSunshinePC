@@ -244,9 +244,8 @@ void Registry::tick(World& world) {
                 for (uint8_t stage = kFirstStage; stage <= kLastStage; stage++) {
                     for (uint8_t nozzle = 0; nozzle < kNozzleCount; nozzle++) {
                         const uint32_t flag = kNozzleFlagBase + (uint32_t(stage) - kFirstStage) * kNozzleCount + nozzle;
-                        if (world.getFlag(flag) == 0) {
-                            world.setFlag(flag, 1);
-                        }
+                        // Also flags already 1: the game side copies each one into the saved flags (game over).
+                        world.setFlag(flag, 1);
                     }
                 }
                 break;
