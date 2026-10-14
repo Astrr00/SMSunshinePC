@@ -1234,11 +1234,14 @@ JStage::TObject* TMarDirector::JSGFindObject(const char* param_1,
 #include <JSystem/JDrama/JDRDrawBufObj.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DDrawBuffer.hpp>
 #include <Map/PollutionManager.hpp>
+#include <Map/MapDraw.hpp>
 #include <MarioUtil/ShadowUtil.hpp>
+#include <MarioUtil/ScreenUtil.hpp>
+#include <string.h>
 
 // Presentation replay (sunshine-pc/src/framerate/framerate.cpp): draws the current game frame again without advancing
 // logic. DRAW_INIT clears the draw buffers, so the entry stage is re-run first with logic (MOVE) and animation (CALC_ANIM)
-// masked out; then the draw lists and the post-direct overlay run as in direct() and gameLoop.
+// masked out; then the draw lists (same mask) and the post-direct overlay run as in direct() and gameLoop.
 // Only in gameplay: other states (menus, movies, title) keep the single present.
 bool sunshineCanReplay()
 {
@@ -1313,15 +1316,34 @@ void sunshineReplayFrame()
 	// pre-pass and its GXCopyTex for the bath water draw), so the replay runs it as direct() does.
 	if (gpPollution->getJointModelNum() == 0)
 		d->unk3C->perform(CUE_ALL, &local);
+	// Draw code that steps state once per drawn frame (retail draws once per tick): the console's rocket nozzle pressure
+	// flash (TGCConsole2::drawWaterBack, ++unk30C), the camera-in-wall overlay fade (TMapDrawWall::perform, unk18) and
+	// the screen blur easing (TAfterEffect::perform on CUE_SET_PROJECTION). Their state is put back after the draw lists,
+	// so it steps once per tick and the next direct() draws the frame the replay drew.
+	TGCConsole2* const console = d->mConsole;
+	const u8 consoleFlash = console ? console->unk30C : 0;
+	TMapDrawWall* const wall = static_cast<TMapDrawWall*>(JDrama::TNameRefGen::search("カメラ食い込み壁"));
+	const int wallAlpha = wall ? wall->unk18 : 0;
+	static u8 sSavedAfterEffect[sizeof(TAfterEffect)];
+	if (gpAfterEffect)
+		memcpy(sSavedAfterEffect, gpAfterEffect, sizeof(TAfterEffect));
 	const bool silhouette = (gpSilhouetteManager->unk48 > 0.0f ? true : false) || gpCamera->unk2C8 != -1;
+	// Logic cues masked as on the entry stage: PerformList GX runs the mirror scene with CUE_CALC_ANIM (link 0x206 from
+	// PerformLists.bin), and each such perform steps the animation of TMapStaticObj 太陽in鏡 (MActor::frameUpdate).
 	for (int i = 0; i < 3; ++i) {
 		if (i == 1 && !silhouette)
 			continue;
 		for (SunshineLinkIt it = draws[i]->getChildren().begin(); it != draws[i]->getChildren().end(); it++)
 			if (!sunshineIsPostDrawClear(draws, 3, *it))
-				it->perform(CUE_ALL, &local);
+				it->perform(CUE_ALL & ~(CUE_MOVE | CUE_CALC_ANIM), &local);
 	}
 	GXInvalidateTexAll();
+	if (console)
+		console->unk30C = consoleFlash;
+	if (wall)
+		wall->unk18 = wallAlpha;
+	if (gpAfterEffect)
+		memcpy(gpAfterEffect, sSavedAfterEffect, sizeof(TAfterEffect));
 	for (int i = 0; i < shadowReqs; ++i)
 		shadows->mRequests[i] = sSavedShadowReqs[i];
 	if (shadows) {
