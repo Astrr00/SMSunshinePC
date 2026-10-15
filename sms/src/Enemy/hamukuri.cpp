@@ -1269,6 +1269,20 @@ void THamuKuri::isAttackToHam() { }
 
 void THamuKuri::isSerialWallDie() { }
 
+// Retail copies the by-value argument into a temp, scales it and assigns that
+// temp straight into the destination (no return temp), which is what returning
+// a reference to the by-value parameter gives. clang-cl treats the parameter as
+// dead on return and drops the scale, so the PC build returns the value.
+#ifdef TARGET_PC
+static inline JGeometry::TVec3<f32> scaledVec(JGeometry::TVec3<f32> v, f32 s)
+#else
+static inline const JGeometry::TVec3<f32>& scaledVec(JGeometry::TVec3<f32> v, f32 s)
+#endif
+{
+	v *= s;
+	return v;
+}
+
 void THamuKuri::forceRoll(JGeometry::TVec3<f32> param_1, bool param_2)
 {
 	JGeometry::TVec3<f32> local_20(mPosition.x - param_1.x, 10.0f,
@@ -1277,9 +1291,9 @@ void THamuKuri::forceRoll(JGeometry::TVec3<f32> param_1, bool param_2)
 	MsVECNormalize(&local_20, &local_20);
 
 	if (mSpine->getCurrentNerve() == &TNerveWalkerAttack::theNerve()) {
-		local_20 = local_20 * unk1F4->mSLWaterAttackCoeff.get();
+		local_20 = scaledVec(local_20, unk1F4->mSLWaterAttackCoeff.get());
 	} else {
-		local_20 = local_20 * unk1F4->mSLWaterCoeff.get();
+		local_20 = scaledVec(local_20, unk1F4->mSLWaterCoeff.get());
 	}
 
 	onLiveFlag(LIVE_FLAG_AIRBORNE);
@@ -2129,6 +2143,7 @@ void TBossDangoHamuKuri::genEventCoin()
 void TBossDangoHamuKuri::generateBody()
 {
 	s32 numArray = unk23C->mSLNumArray.get();
+	char trash[16];
 	if (unk238 >= numArray)
 		return;
 
