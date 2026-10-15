@@ -2009,7 +2009,7 @@ s8 TCardLoad::selectFunction()
 				JGeometry::TVec3<f32> pos(rect.x1 + rect.getWidth() / 2.0f,
 				                          rect.y1 + rect.getHeight() / 2.0f,
 				                          0.0f);
-				char trash[0xa0];
+				char trash[0x98]; // pad: selectFunction frame 0x498 = retail stwu, asm 0x80225BEC
 				gpEmitterManager4D2->createEmitter(pos, 0x1FA, nullptr,
 				                                   nullptr);
 				unkAC = gpEmitterManager4D2->unkC8[0][0];
