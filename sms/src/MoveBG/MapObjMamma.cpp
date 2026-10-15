@@ -196,10 +196,10 @@ u32 TSandBomb::touchWater(THitActor*)
 	char trash[0x30];
 	f32 speed = TSandBombBase::mFiringFrameSpeed;
 	f32 frame = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
+	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(frame + speed);
 	speed = TSandBombBase::mFiringFrameSpeed;
 	frame = getMActor()->getFrameCtrl(ANM_TYPE_BRK)->getFrame();
-	getMActor()->getFrameCtrl(ANM_TYPE_BRK)->setFrame(speed + frame);
+	getMActor()->getFrameCtrl(ANM_TYPE_BRK)->setFrame(frame + speed);
 	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 
 	soundBas(0x289A, 7.0f, TSandBombBase::mFiringFrameSpeed);
@@ -232,9 +232,9 @@ void TSandBombBase::expanded()
 {
 	char trash[0x10];
 	TSandLeaf* leaf = mLeaf;
-	f32 speed       = mExpandFrameSpeed;
-	f32 frame       = leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-	leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
+	f32 speed = mExpandFrameSpeed;
+	f32 frame = leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+	leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(frame + speed);
 
 	SMSGetMSound()->startSoundActor(0x20C6, &mLeaf->mPosition, 0, nullptr, 0,
 	                                4);
@@ -247,11 +247,11 @@ void TSandBombBase::exploding()
 	char trash[0x14];
 	f32 speed = mExplodeFrameSpeed;
 	f32 frame = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
+	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(frame + speed);
 	TSandLeaf* leaf = mLeaf;
 	speed           = mExplodeFrameSpeed;
 	frame = leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-	leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
+	leaf->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(frame + speed);
 
 	f32 dist = getDistanceXZ(*gpMarioPos);
 	if (!(isActorType(0x400000CE) ? true : false)) {
@@ -294,6 +294,7 @@ void TSandBombBase::explode()
 
 void TSandBombBase::waitBeforeExplode()
 {
+	JDrama::TFlagT<u16> flag(0);
 	mState      = STATE_WAIT_BEFORE_EXPLODE;
 	mStateTimer = mExplodeWaitTime;
 }
@@ -319,15 +320,15 @@ void TSandBombBase::control()
 	case STATE_FIRING: {
 		f32 speed = mExplodeFrameSpeed;
 		f32 frame = bomb->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-		bomb->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
+		bomb->getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(frame + speed);
 		TSandLeaf* leaf = mLeaf;
 		speed           = mExplodeFrameSpeed;
 		frame = leaf->getMActor()->getFrameCtrl(ANM_TYPE_BRK)->getFrame();
-		leaf->getMActor()->getFrameCtrl(ANM_TYPE_BRK)->setFrame(speed + frame);
+		leaf->getMActor()->getFrameCtrl(ANM_TYPE_BRK)->setFrame(frame + speed);
 		leaf  = mLeaf;
 		speed = mExplodeFrameSpeed;
 		frame = leaf->getMActor()->getFrameCtrl(ANM_TYPE_BTP)->getFrame();
-		leaf->getMActor()->getFrameCtrl(ANM_TYPE_BTP)->setFrame(speed + frame);
+		leaf->getMActor()->getFrameCtrl(ANM_TYPE_BTP)->setFrame(frame + speed);
 		if (mLeaf->animIsFinished())
 			waitBeforeExplode();
 		break;
@@ -417,10 +418,10 @@ bool TSandCastle::withering()
 	char trash[0x28];
 	f32 speed = mWitherSpeed;
 	f32 frame = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
-	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(speed + frame);
+	getMActor()->getFrameCtrl(ANM_TYPE_BCK)->setFrame(frame + speed);
 	speed = mWitherSpeed;
 	frame = getMActor()->getFrameCtrl(ANM_TYPE_BRK)->getFrame();
-	getMActor()->getFrameCtrl(ANM_TYPE_BRK)->setFrame(speed + frame);
+	getMActor()->getFrameCtrl(ANM_TYPE_BRK)->setFrame(frame + speed);
 
 	frame   = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 	f32 end = getMActor()->getFrameCtrl(ANM_TYPE_BCK)->getEnd();
@@ -438,9 +439,20 @@ bool TSandCastle::withering()
 	return false;
 }
 
+#pragma dont_inline on
+static MActor* castleLeafActor(TLiveActor* a) { return a->getMActor(); }
+#pragma dont_inline reset
+
 void TSandCastle::expanded()
 {
-	TSandBombBase::expanded();
+	char trash[0x10];
+	TSandLeaf* leaf = mLeaf;
+	f32 speed       = mExpandFrameSpeed;
+	f32 frame       = castleLeafActor(leaf)->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+	castleLeafActor(leaf)->getFrameCtrl(ANM_TYPE_BCK)->setFrame(frame + speed);
+	SMSGetMSound()->startSoundActor(0x20C6, &mLeaf->mPosition, 0, nullptr, 0, 4);
+	if (mLeaf->animIsFinished())
+		mState = 2;
 	if (mLeaf->animIsFinished()) {
 		mState = 2;
 		startControlAnim(2);
@@ -738,13 +750,14 @@ void TLeanMirror::controlShake()
 	if (!mShake.isZero()) {
 		mShake.scale(mShakeDamping);
 
+		TMtx34f rot;
 		MtxPtr nodeMtx = getModel()->getAnmMtx(0);
 		JGeometry::TVec3<f32> axis(mShake.x, 0.0f, mShake.z);
+		char pad38[0x38];
 		TMapObjBase::rotateVecByAxisY(&axis, 1.5707963f);
 		f32 mag = MsSqrtf(mShake.x * mShake.x + mShake.z * mShake.z)
 		          * mShakeSoundRate;
 
-		TMtx34f rot;
 		rot.identity();
 		makeMtxRotByAxis(axis, mag, rot);
 		concatOnlyRotFromLeft(rot, nodeMtx, nodeMtx);
@@ -753,7 +766,8 @@ void TLeanMirror::controlShake()
 		    && mShake.x * getModel()->getAnmMtx(0)[0][1]
 		               + mShake.z * getModel()->getAnmMtx(0)[2][1]
 		           > 0.0f) {
-			f32 speed = fabsf(mShake.length());
+			f32 speed = mShake.length();
+		speed = fabsf(speed);
 			if (gpMSound->gateCheck(0x3849)) {
 				MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 				    0x3849, &mPosition, nullptr, speed, 0, 0, nullptr, 0, 4);
@@ -771,12 +785,14 @@ void TLeanMirror::controlShake()
 
 void TLeanMirror::control()
 {
+	char trash[0x18];
 	TMapObjBase::control();
 
 	switch (mState) {
 	case STATE_SHAKE: {
 		controlShake();
-		f32 speed = fabsf(mShake.length());
+		f32 speed = mShake.length();
+		speed = fabsf(speed);
 		if (gpMSound->gateCheck(0x3048)) {
 			MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 			    0x3048, &mPosition, nullptr, speed, 0, 0, nullptr, 0, 4);
@@ -785,7 +801,8 @@ void TLeanMirror::control()
 	}
 	case STATE_GO_TARGET: {
 		controlGoTarget();
-		f32 speed = fabsf(mShake.length());
+		f32 speed = mShake.length();
+		speed = fabsf(speed);
 		if (gpMSound->gateCheck(0x304A)) {
 			MSoundSESystem::MSoundSE::startSoundActorWithInfo(
 			    0x304A, &mPosition, nullptr, speed, 0, 0, nullptr, 0, 4);
@@ -1239,7 +1256,7 @@ void TGoalWatermelon::touchActor(THitActor* actor)
 		mWatermelon->mVelocity = zero;
 
 		// Translated: "Watermelon goal camera"
-		gpMarDirector->fireStartDemoCamera(
+		SMSGetMarDirector()->fireStartDemoCamera(
 		    "スイカゴールカメラ", &mWatermelon->mPosition, -1, 0.0f, true,
 		    nullptr, 0, nullptr, JDrama::TFlagT<u16>(0));
 		mState = 2;
