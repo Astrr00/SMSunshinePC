@@ -6,6 +6,38 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-15: matching refresh and bath-water reserve-drop correction
+
+Source `bf1ea15`; full `sms/` build and `changes_all`: 11 323/12 881 byte-identical functions (87.90467 %),
+62.6544 % matched code, 98.66045 % fuzzy, 87.469604 % data, 445/736 complete units.
+The DOL SHA-1 remains `9f5a8caf56f5356aeac9d3ed28bf8de976a03625`.
+Six more functions match than in the 2026-10-12 full report.
+
+The targeted audit confirms `TTailRubber::adjust` (its two ledger spellings are consolidated).
+Bath-water `calcWaterModel` now enters its first collision pair before checking the inner bound, matching both retail
+call sites; all 500 slots are initialized, while stock wave parameters activate 160 drops with stride 1.
+This restores an interaction with reserve slot 160.
+`perform` improves 93.91747 -> 94.09952 %; `initializeIfYet_` drops 94.67607 -> 94.61472 % for the same required logic fix.
+No byte-identical function was lost.
+Their whole-function statuses remain partial: spawn-position FP boundaries and initializer re-review are open.
+
+Observed validation: strict Windows link with zero unresolved symbols, 62 headless checks with zero failures,
+45-second WARP title boot with no fatal exception or WebGPU error.
+A fresh clone of `bf1ea15` also builds and links with unresolved symbols disabled, reusing cached dependency sources
+and packages; Aurora was checked out separately and the tracked patch series applied.
+No Corona fight comparison was performed.
+Route 85 regression: `bath_audit85_nostatus_20261015` on Null, step-retrace, skipped movies and aim assist, automatic
+status output and screenshot monitor off: rc 0 after 230 s wall, Bianco stage 2/0, one Shine, GCI checker PASS.
+With automatic status output on, the first run crashed in `logJpa` at `devscript.cpp:539` during airport scene teardown;
+this diagnostic failure remains open and is distinct from the passing route without periodic output.
+The pre-fix bath-water control also faults at that transition (invalid read, rc 0xc0000005, 120 s wall; no control debug
+symbols). Tracked in [issue #12](https://github.com/Astrr00/SMSunshinePC/issues/12).
+Ledger counts by status prefix: 1 975 logic-verified, 149 matched, 254 partial; three malformed legacy rows excluded.
+Details: [`decomp-rounds.md`](decomp-rounds.md).
+
+The following undated lead notes and dated updates describe earlier observations; use README and ROADMAP for the
+current combined feature state.
+
 Observed by the lead with `AURORA_SCREENSHOT` and `SUNSHINE_DEV_STATUS` logs (dev start `SUNSHINE_DEV_START=bianco/0`):
 
 - Strict link: 0 unresolved symbols. Matching DOL SHA-1 unchanged. TEMP-DEBUG grep: 0.

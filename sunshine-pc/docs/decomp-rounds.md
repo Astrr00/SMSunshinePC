@@ -47,8 +47,8 @@ found nothing. Medium effort gave 1-9 functions per unit, high gave more on the 
 
 ## Open (from the reports)
 
-- Ledger rows to re-review: `TTailRubber::adjust` (frame 0xc0 retail vs 0xa8, row says logic-verified) and
-  `TBathWaterManager::perform` (frame 0x480 vs 0x418).
+- Ledger re-review completed on 2026-10-15: `TTailRubber::adjust` confirmed; `TBathWaterManager::perform` downgraded
+  to `partial (equivalence gaps found)`; see the audit below.
 - `bossgesso`: `TBossGesso::perform` frame 0x2c8 vs 0x218, `TBGBinder::bind` 86.96 (out-of-line `TVec3::sub` per call
   site), `changeAttackMode` frame 0xa8 vs 0x90.
 - `EventWatcher`: `evWarpFrontToMario` retail re-reads the angle with `lhz`; `dispatchBuiltin` function-pointer register.
@@ -61,6 +61,73 @@ found nothing. Medium effort gave 1-9 functions per unit, high gave more on the 
   expressions, reference locals); nothing was run through it in these rounds.
 - `decomp_queue.py claim` needs `sms/build/triage.json` (a full `decomp_triage.py` run); agents skipped the claim.
 
+## Ledger audit (2026-10-15)
+
+Rebuilt both units with `decomp_triage.py --build`, ran `--check`, `--branchscan` and `--immscan`, and read both complete
+function diffs with `decomp-diff.py --no-collapse` against their source, inlined helpers and retail assembly.
+This initial audit changed only documentation; the source correction and validation are recorded in the follow-up below.
+
+- `TTailRubber::adjust()` (94.12251 %): `logic-verified` confirmed.
+  Interior-node loop, head and tail updates preserve all arithmetic, operand order and stores; there are no calls.
+  Every referenced local stack word maps from retail offset `s` to `s - 0x18`; the frame gap is 0xc0 vs 0xa8.
+  The twelve additional loads reload position xyz and the bound rate once per inlined body, without intervening writes.
+  The old DFire (mangled name) and BR1 (demangled name) rows are consolidated under the full demangled function name.
+- `TBathWaterManager::perform(unsigned long, JDrama::TGraphics*)` (93.91747 %): downgraded from `logic-verified` to
+  `partial (equivalence gaps found)`.
+  In the inlined `calcWaterModel`, retail falls from 0x801F8C64 directly into the first pair calculation at 0x801F8C68;
+  it tests the inner-loop bound only at 0x801F8E70, after advancing the second drop pointer.
+  Our inner `for` checks the bound before its first calculation.
+  For example, one active drop and stride 1 cause retail to read a second drop slot while ours skips the pair entirely.
+  This is a control-flow difference; whether that slot is allocated/initialised, and the gameplay effect, remain unproven.
+  Do not restore the verification status from a matching score or a clean branch scan alone.
+  Also pending: final spawn-position FP boundary equivalence (15 vs 13 fused ops, constant up-vector folded in our build).
+  The old factor-10 random-velocity correction is still present.
+  Correct frame sizes: retail 0x418, ours 0x480; the original open note had these reversed.
+
+No runtime validation was performed by the initial audit.
+
+## Bath-water reserve-drop correction (2026-10-15, `bf1ea15`)
+
+Retail reserves 500 drops (`TBathWaterManager` constructor, 0x801FC000-0x801FC02C).
+`initializeIfYet_` sets the active count from `numDrops`, then resets every allocated slot up to the capacity of 500
+(0x801FACF0-0x801FADA8), including positions, velocity, collision boxes and age.
+The first pair beyond the active count therefore accesses initialized reserve state for the stock wave settings.
+Read-only parsing of the local disc's `data/params.szs` gives wave `numDrops=160`, `intersects=1`, overflow `0/0`,
+and attack `0/0`; `data/scene/coronaBoss.szs` contains no bath-water parameter overrides.
+No game data is included in the change.
+
+Changed the shared inner loop to `do/while`, retaining the outer bound and stride update.
+Both retail call sites enter the first pair before testing the inner bound: `perform` at 0x801F8C64-0x801F8C68,
+and `initializeIfYet_` at 0x801FB108-0x801FB10C.
+With 160 active drops and stride 1, this restores the last active drop's interaction with reserve slot 160.
+The rebuilt objects were checked against both retail entry sequences, including an assert-based check.
+`changes_all` reports only the two users of the shared helper: `perform` 93.91747 -> 94.09952,
+`initializeIfYet_` 94.67607 -> 94.61472 (the small score drop is accepted for the same asm-proven logic correction).
+No byte-identical function was lost.
+
+Validation: full matching build and reference SHA-1 PASS, strict Windows link with zero unresolved symbols PASS,
+62 headless checks PASS, 45-second title boot on WARP PASS (no fatal exception or WebGPU error).
+Fresh local clone of `bf1ea15` with a separately checked-out Aurora submodule and its 16 tracked patches builds and
+links with `SUNSHINE_ALLOW_UNRESOLVED=OFF`; dependency sources and prebuilt packages were reused from the local cache.
+Full report: 11 323 / 12 881 byte-identical functions (87.90467 %), 62.6544 % code bytes, 98.66045 % fuzzy,
+87.469604 % data, 445 / 736 complete units.
+These checks do not prove the Corona fight's visible behaviour.
+`perform` remains partial for the spawn-position FP boundaries; the old `initializeIfYet_` whole-function claim is also
+withheld pending renewed review, since its prior review missed the same loop.
+
+Route regression: `bath_audit85_nostatus_20261015` runs route 85 on Null with `SUNSHINE_DEV_STEP_RETRACE=1`,
+`SUNSHINE_DEV_SKIP_MOVIES=1`, `SUNSHINE_DEV_AIM_ASSIST=1`, `SUNSHINE_ALLOW_CPU_ADAPTER=0`,
+`SUNSHINE_DEV_STATUS=` and `AURORA_SCREENSHOT_EVERY=` (empty values remove those variables).
+Result: rc 0 after 230 s wall, script completes at tick 22434, stage 2/0, one Shine; `gci_check.py` PASS on the temporary card.
+The first run, `bath_audit85_20261015`, kept the default automatic status logger and crashed after 50 s, during the
+airport Shine-to-next-stage transition: `logJpa` at `devscript.cpp:539` reads address `FFFFFFFFFFFFFFFF` (0xc0000005).
+The passing rerun does not resolve that diagnostic crash; it only demonstrates route completion without periodic status output.
+Control `bath_control85_ready_20261015` rebuilt the fresh checkout with bath-water source byte-identical to `35e0090`:
+it also exits 0xc0000005 reading `FFFFFFFFFFFFFFFF` during the same airport transition, after 120 s wall, last periodic
+tick 8520. The control lacks debug symbols, so its exact faulting object remains unidentified.
+The transition failure exists with pre-fix bath-water source too; tracked in
+[issue #12](https://github.com/Astrr00/SMSunshinePC/issues/12).
+
 ## Process notes
 
 - Agents work in clones (`clone-3`, `clone-chase`, `fresh-gate-2`) on `agent/<name>` branches and never push; the lead
@@ -68,5 +135,5 @@ found nothing. Medium effort gave 1-9 functions per unit, high gave more on the 
 - Boot smoke needs `SUNSHINE_ALLOW_CPU_ADAPTER=1` in a fresh shell (WARP); without it the run fails with "No supported
   adapters".
 - A stopped agent leaves its partial edit in the clone; the next brief restores that one file first.
-- Decompiled-function totals in README (87.9 %) come from the last full `ninja` + `changes_all` (2026-10-12); the
-  rounds above are not yet reflected in `report.json` or the status treemap until that is rerun.
+- Decompiled-function totals were refreshed by full `ninja` + `changes_all` on 2026-10-15; the residue rounds and
+  reserve-drop correction are now reflected in `report.json`, README and the regenerated status treemap.
