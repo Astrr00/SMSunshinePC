@@ -840,6 +840,12 @@ int TApplication::drawDVDErr()
 		GXSetCullMode(GX_CULL_BACK);
 		GXSetNumTexGens(1);
 		GXSetNumTevStages(1);
+#ifdef TARGET_PC
+		// Stage 0 defaults to REPLACE of texmap 0 (ReInitializeGX binds the all-zero NullTexData, alpha 0), so the
+		// band's vertex colour never reaches the framebuffer. Pass the rasterised colour through instead.
+		GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+		GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+#endif
 		GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA,
 		               GX_LO_NOOP);
 		GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_U16, 0);
