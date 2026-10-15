@@ -235,6 +235,11 @@ The wrapper uses `functionRelocDiffs=data_value` and reports `94.083336`; the fu
 Both inspect the same objects, not stale or alternate paths.
 Lead validation: full matching/reference SHA-1 PASS, Strict zero unresolved, 62 headless checks PASS,
 45-second WARP boot PASS; logs in `build/bath-fp-verification.log` and `build/verify/`.
+The final `cd552f5` source also passes a separate isolated fresh-checkout Strict rebuild with zero unresolved symbols.
+Status-enabled Null route `bath_sound_fix85_20261015` finishes at tick 17790 (368 s wall) in Bianco 2/0
+with one Shine; 531 ready-scene JPA status samples have no overlap with 61 not-ready status samples.
+The saved seven-block GCI passes independent block checksum validation.
+This route does not enter Corona, so it checks progression, scene diagnostics and persistence, not audible sound.
 
 Native Corona smoke was attempted against the before-fix `3c10554` fresh-checkout build.
 The real scenario is stage 60/0, archive `coronaBoss.arc`; the normal dev-start prefix resolver cannot select a name

@@ -103,6 +103,10 @@ The rebuilt matching object changes exactly one branch target; its fuzzy score r
 Finite spawn-FP/RNG equivalence is reviewed; NaN-payload/FP-state equivalence remains partial.
 EventWatcher warp review is confirmed, and the already byte-identical Appear8 function now has a corrected ledger row.
 Matching SHA-1, strict zero-unresolved link, 62 checks and a 45-second WARP boot pass.
+The final `cd552f5` source also passes a separate clean-source-checkout Strict rebuild with zero unresolved symbols.
+Status-enabled route `bath_sound_fix85_20261015` completes on Null (368 s wall, tick 17790,
+Bianco 2/0, one Shine); live particle status remains available and the seven-block GCI checker passes.
+This route does not enter Corona and cannot prove the bath-water sound audibly.
 The earlier diagnostic fix is published as [`3c10554`](https://github.com/Astrr00/SMSunshinePC/commit/3c10554);
 [issue #12](https://github.com/Astrr00/SMSunshinePC/issues/12) is closed, including a fresh-checkout build gate.
 A pre-fix Corona dev-start probe reaches stage 60/0 but aborts on texture format 22 before sound observation

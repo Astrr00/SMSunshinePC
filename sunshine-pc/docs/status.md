@@ -22,6 +22,10 @@ Ledger prefixes: 1 976 logic-verified, 150 matched, 252 partial; three legacy ma
 Full matching totals remain 11 323/12 881 byte-identical, reference SHA-1 unchanged.
 `verify --build --matching`: 7 PASS, 0 FAIL, 1 SKIP (optional probe-units); strict zero unresolved, 62 headless checks,
 45-second WARP boot without fatal exception or WebGPU error.
+The final `cd552f5` source rebuilds and links in the isolated fresh checkout with zero unresolved symbols.
+Status-enabled Null route `bath_sound_fix85_20261015` completes at tick 17790 (368 s wall):
+Bianco 2/0, one Shine, live particle status; its seven-block GCI checksum checker passes.
+The route does not reach Corona, so this is a progression/save regression check, not an audible sound check.
 
 An isolated pre-fix Corona dev-start smoke reaches stage 60/0 at tick 109, then aborts on unknown texture format 22,
 before any sound-cadence observation. Temporary exact-archive-name and logging hooks were removed and are not shipped.
