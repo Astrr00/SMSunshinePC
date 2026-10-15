@@ -103,6 +103,9 @@ not a broken archive texture. Aurora patch 0017 sizes and decodes its 64-byte ti
 `SUNSHINE_DEV_START=coronaBoss/0` now resolves the exact archive basename.
 The pre-fix Null run aborted at tick 109; the patched Null probe completes at tick 705.
 The WARP probe completes at tick 375 and captures a visible Corona boss and HUD frame.
+Regression route `tools/routes/98_corona_depth.dev` also reaches live gameplay and captures a WARP boss frame
+(rc 0, tick 393). Full verification: 7 PASS, 0 FAIL, 1 optional SKIP; the updated isolated fresh checkout
+builds and links the current source with all 17 Aurora patches.
 This proves scene entry and rendering, not correct depth readback, fight completion or audible bath-water cadence.
 
 ### Update 2026-10-15: bath-water sound cadence and EventWatcher reviews

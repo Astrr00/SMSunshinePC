@@ -51,12 +51,17 @@ Each patch applies on top of the previous one. Topic boundaries are per line, so
 
 ## Verification (run when the series was regenerated)
 
+Current 0017 (2026-10-15): `tools/apply-aurora-patches.py --check` reports 17 applied patches over
+44 files, and `verify --build --matching --boot-secs 45` reports 7 PASS, 0 FAIL, 1 optional SKIP.
+An isolated fresh checkout updated to `21e2b60` applied 0017 separately and rebuilt both texture sources
+and the Strict executable with zero unresolved symbols. Earlier checks below describe older series snapshots.
+
 - `git archive 50e5be3` into a scratch dir, then `git apply --check` and `git apply` of 0001..0007 in order: all seven apply cleanly (0008 was added later and is checked by `tools/apply-aurora-patches.py --check`, "applied: 8 patches").
 - `diff -r -x .git` between that scratch tree and `extern/aurora`: no differences (exit 0).
 - Tool on a scratch clone reset to `50e5be3`: `--check` exit 2 (pristine); apply exit 0; `--check` exit 0 and reapply exit 0 (applied, 33 files match).
 - `tools/aurora-patches.txt` regexes: 15 of 15 match the worktree (same check as the `aurora-patches` step of `verify.py`; that step was not run as a whole).
 
-Not verified: compiling any stage. No build was run against the series, so intermediate stages and the final tree are unbuilt.
+Intermediate series stages were not built; the current 17-patch final tree builds and links as recorded above.
 
 ## Regenerating
 

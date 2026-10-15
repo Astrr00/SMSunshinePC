@@ -287,6 +287,10 @@ The tests use isolated saves and dev aids
 CPU depth-copy readback/height-field accuracy, audible bath-water cadence or hardware GPU behavior.
 The DOL SHA-1 is unchanged and Strict links with zero unresolved symbols; see the latest
 `build/verify/` logs for matching, 62 headless checks and the 45-second WARP boot.
+Full `verify --build --matching --boot-secs 45` at `21e2b60`: 7 PASS, 0 FAIL, 1 optional SKIP;
+Aurora checker confirms 17 tracked patches on 44 files, strict zero unresolved, 62 headless checks PASS.
+The existing isolated fresh checkout fast-forwards to this commit, applies patch 0017 separately, then
+rebuilds Application.cpp, both Aurora texture files and the Strict executable with zero unresolved symbols.
 
 ## Process notes
 

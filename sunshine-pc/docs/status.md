@@ -17,6 +17,10 @@ Before: Null aborted at tick 109 on unknown format 22. After: Null stage 60/0 co
 status samples); WARP completes at tick 375 and captures the Corona boss/HUD in a real rendered frame.
 No format coercion or suppressed error was used. Strict zero-unresolved link, unchanged reference SHA-1,
 62 headless checks and a 45-second WARP boot pass; the patch-series checker sees 17 applied patches.
+`verify --build --matching`: 7 PASS, 0 FAIL, 1 optional SKIP, including the 17-patch tracking gate.
+The separate fresh checkout fast-forwards to `21e2b60`, applies patch 0017 and rebuilds Application.cpp,
+both Aurora texture files and the Strict executable with zero unresolved symbols.
+Permanent route `tools/routes/98_corona_depth.dev` passes on WARP (rc 0, tick 393, visible boss frame).
 No depth-copy CPU readback, water height accuracy, complete boss fight, audible sound or hardware-GPU result is claimed.
 
 ### Update 2026-10-15: published lifetime fix, bath-water sound and EventWatcher
