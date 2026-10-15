@@ -170,15 +170,6 @@ J2DPane::~J2DPane()
 	}
 }
 
-#ifdef TARGET_PC
-// Widescreen: the 640-unit layout is centred in the widescreen ortho (ortho.x1 == -bx). A top-level pane
-// left of centre shifts by ortho.x1 (-bx), right of centre by -ortho.x1 (+bx), so it hugs that screen edge.
-static int widescreenAnchor(const JUTRect& bounds, const JUTRect& ortho)
-{
-	return bounds.x1 + bounds.x2 < ortho.x1 + ortho.x2 ? ortho.x1 : -ortho.x1;
-}
-#endif
-
 void J2DPane::draw(int x, int y, J2DGrafContext const* p_grafCtx,
                    bool isOrthoGraf)
 {
@@ -196,23 +187,13 @@ void J2DPane::draw(int x, int y, J2DGrafContext const* p_grafCtx,
 	if (mVisible && !mBounds.isEmpty()) {
 		mGlobalBounds = mBounds;
 		mClipRect     = mBounds;
-#ifdef TARGET_PC
-		// Widescreen: a top-level pane hugs the screen edge nearest its centre; nested panes follow their parent.
-		int anchor = 0;
-		if (isOrthoGraf && parent != nullptr && parentTree->getParent() == nullptr)
-			anchor = widescreenAnchor(mBounds, ((J2DOrthoGraph*)p_grafCtx)->getOrtho());
-#else
-		const int anchor = 0;
-#endif
 
-		makeMatrix(mBounds.x1 + x + anchor, mBounds.y1 + y);
+		makeMatrix(mBounds.x1 + x, mBounds.y1 + y);
 		if (parent != nullptr) {
-			mGlobalBounds.add(parent->mGlobalBounds.x1 + anchor,
-			                  parent->mGlobalBounds.y1);
+			mGlobalBounds.add(parent->mGlobalBounds.x1, parent->mGlobalBounds.y1);
 			MTXConcat(parent->mGlobalMtx, mPositionMtx, mGlobalMtx);
 
-			mClipRect.add(parent->mGlobalBounds.x1 + anchor,
-			              parent->mGlobalBounds.y1);
+			mClipRect.add(parent->mGlobalBounds.x1, parent->mGlobalBounds.y1);
 			mClipRect.intersect(parent->mClipRect);
 
 			mColorAlpha = mAlpha;
@@ -223,11 +204,6 @@ void J2DPane::draw(int x, int y, J2DGrafContext const* p_grafCtx,
 			mGlobalBounds.add(x, y);
 			MTXCopy(mPositionMtx, mGlobalMtx);
 			mClipRect.add(x, y);
-#ifdef TARGET_PC
-			// Widescreen: the root clip spans the widescreen ortho so shifted panes are not cut at 640.
-			if (isOrthoGraf && ((J2DOrthoGraph*)p_grafCtx)->getOrtho().x1 != 0)
-				mClipRect = ((J2DOrthoGraph*)p_grafCtx)->getOrtho();
-#endif
 			mColorAlpha = mAlpha;
 		}
 

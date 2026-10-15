@@ -745,6 +745,31 @@ void J3DModel::calcWeightEnvelopeMtx()
 		*pScale      = 1;
 		weightAnmMtx = mWeightEvlpMatrices[i];
 
+#ifdef TARGET_PC
+		f32 acc[3][4] = {};
+		j             = 0;
+		mixNum        = mModelData->getWEvlpMixMtxNum(i);
+		do {
+			idx      = *++indices;
+			invMtx   = mModelData->getInvJointMtx((u16)idx);
+			worldMtx = &mNodeMatrices[idx];
+			weight   = *++weights;
+			for (int r = 0; r < 3; ++r) {
+				const f32 w0 = (*worldMtx)[r][0];
+				const f32 w1 = (*worldMtx)[r][1];
+				const f32 w2 = (*worldMtx)[r][2];
+				const f32 w3 = (*worldMtx)[r][3];
+				acc[r][0] += (invMtx[0][0] * w0 + invMtx[1][0] * w1 + invMtx[2][0] * w2) * weight;
+				acc[r][1] += (invMtx[0][1] * w0 + invMtx[1][1] * w1 + invMtx[2][1] * w2) * weight;
+				acc[r][2] += (invMtx[0][2] * w0 + invMtx[1][2] * w1 + invMtx[2][2] * w2) * weight;
+				acc[r][3] += (invMtx[0][3] * w0 + invMtx[1][3] * w1 + invMtx[2][3] * w2 + w3) * weight;
+			}
+			*pScale &= mScaleFlagArr[idx];
+		} while (++j < mixNum);
+		for (int r = 0; r < 3; ++r)
+			for (int c = 0; c < 4; ++c)
+				weightAnmMtx[r][c] = acc[r][c];
+#else
 #ifdef __MWERKS__ // clang-format off
 		asm {
 			ps_merge00 var_f9, var_f27, var_f27
@@ -828,6 +853,7 @@ void J3DModel::calcWeightEnvelopeMtx()
 			ps_merge00 var_f31, var_f27, var_f27
 		}
 #endif // clang-format on
+#endif
 	}
 }
 

@@ -67,7 +67,13 @@ void* TMessageLoader::parseBlock(u32 param_1, u32 param_2, void* param_3)
 	int local_70;
 	JSUMemoryInputStream local_5c(param_3, param_1);
 
+#ifdef TARGET_PC
+	// A BMG without a DAT1 block must return null: loadMessageData (line 44) tests the result against 0 and
+	// the callers dereference getMessageData(). Retail returns the uninitialised stack slot here.
+	void* result = nullptr;
+#else
 	void* result;
+#endif
 
 	for (int i = 0; i < param_2; ++i) {
 		local_5c.read(&local_74, 4);

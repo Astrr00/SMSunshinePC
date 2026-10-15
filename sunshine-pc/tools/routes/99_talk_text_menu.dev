@@ -1,0 +1,38 @@
+# Measured 2026-10-14 (run menu_b43, dolpic/0 dev start, 4:3, WARP, rc 0, 0 fatal): m_down2 shows PAUSE, the items
+# つづける (selected, white) and セーブ (green), and the stage name ドルピニックタウン in the purple bubble;
+# m_down4 shows the cursor back on つづける with the attention rays. Every glyph, including the small kana, is
+# legible, so the console-string path (SMSGetMessageData bytes, not the balloon writer) is correct on the host.
+# DOWN is the d-pad token; D_DOWN is not a token and makes the script stop.
+# FontFix follow-up: the console strings of the pause menu (TConsoleStr path, not the talk balloon).
+# The balloon writer is TGCConsole2::writeBalloonCodeTo; the pause menu text goes through the console string class,
+# so it is the other 2D text path that a host-order bug would hit. dolpic/0, START opens the menu.
+# Env: SUNSHINE_DEV_START=dolpic/0 SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1 SUNSHINE_RENDER_SCALE=1
+#   settings.ini [video] fsr1=0 widescreen=1 aspect=4:3
+# Run: python tools/route.py Strict tools/routes/99_talk_text_menu.dev --name menu_b43 --seconds 240
+# Evidence: m_*.png (menu text read from the PNG), 0 fatal, rc of the run.
+waitfor director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=120
+log
+shot m_open.png
+hold START frames=3
+wait frames=90
+log
+shot m_p090.png
+wait frames=30
+shot m_p120.png
+hold DOWN frames=3
+wait frames=30
+shot m_down1.png
+hold DOWN frames=3
+wait frames=30
+shot m_down2.png
+hold DOWN frames=3
+wait frames=30
+shot m_down3.png
+hold DOWN frames=3
+wait frames=30
+shot m_down4.png
+hold START frames=3
+wait frames=60
+log
+end

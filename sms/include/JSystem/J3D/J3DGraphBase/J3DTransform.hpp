@@ -73,6 +73,11 @@ inline void J3DPSMulMtxVec(register MtxPtr mtx, register Vec* vec,
         ps_sum0 f6, f5, f6, f5
         psq_st f6, 8(dst), 1, 0
     }
+#else
+    const f32 x = vec->x, y = vec->y, z = vec->z;
+    dst->x = (mtx[0][0] * x + mtx[0][2] * z) + (mtx[0][1] * y + mtx[0][3]);
+    dst->y = (mtx[1][0] * x + mtx[1][2] * z) + (mtx[1][1] * y + mtx[1][3]);
+    dst->z = (mtx[2][0] * x + mtx[2][2] * z) + (mtx[2][1] * y + mtx[2][3]);
 #endif // clang-format on
 }
 
@@ -102,6 +107,11 @@ inline void J3DPSMulMtxVec(register MtxPtr mtx, register S16Vec* vec,
         ps_sum0 f6, f5, f6, f5
         psq_st f6, 4(dst), 1, 7
     }
+#else
+    const f32 x = (f32)vec->x, y = (f32)vec->y, z = (f32)vec->z;
+    dst->x = (s16)((mtx[0][0] * x + mtx[0][2] * z) + (mtx[0][1] * y + mtx[0][3]));
+    dst->y = (s16)((mtx[1][0] * x + mtx[1][2] * z) + (mtx[1][1] * y + mtx[1][3]));
+    dst->z = (s16)((mtx[2][0] * x + mtx[2][2] * z) + (mtx[2][1] * y + mtx[2][3]));
 #endif // clang-format on
 }
 
@@ -135,6 +145,11 @@ inline void J3DPSMulMtxVec(register ROMtxPtr mtx, register Vec* vec,
         ps_sum0 f6, f5, f6, f5
         psq_st f6, 8(dst), 1, 0
     }
+#else
+    const f32 x = vec->x, y = vec->y, z = vec->z;
+    dst->x = (mtx[0][0] * x + mtx[0][2] * z) + mtx[0][1] * y;
+    dst->y = (mtx[1][0] * x + mtx[1][2] * z) + mtx[1][1] * y;
+    dst->z = (mtx[2][0] * x + mtx[2][2] * z) + mtx[2][1] * y;
 #endif // clang-format on
 }
 
@@ -168,6 +183,11 @@ inline void J3DPSMulMtxVec(register ROMtxPtr mtx, register S16Vec* vec,
         ps_sum0 f6, f5, f6, f5
         psq_st f6, 4(dst), 1, 7
     }
+#else
+    const f32 x = (f32)vec->x, y = (f32)vec->y, z = (f32)vec->z;
+    dst->x = (s16)((mtx[0][0] * x + mtx[0][2] * z) + mtx[0][1] * y);
+    dst->y = (s16)((mtx[1][0] * x + mtx[1][2] * z) + mtx[1][1] * y);
+    dst->z = (s16)((mtx[2][0] * x + mtx[2][2] * z) + mtx[2][1] * y);
 #endif // clang-format on
 }
 

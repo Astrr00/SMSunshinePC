@@ -1797,6 +1797,37 @@ TGCConsole2::TGCConsole2(const char* name)
 	unk90 = new THelpActor*[32];
 }
 
+#ifdef TARGET_PC
+// Widescreen (HUD edge anchoring): the Group 2D ortho (MarDirectorInitECT.cpp) keeps the 600-unit HUD
+// layout centred in the wide EFB, so the whole HUD sits bx px further right than at 4:3. Move the
+// top-level panes of standard_1.blo back by bx px when their marker is in the left stack and forward by
+// bx px when it is in the right stack, so the two stacks hug the screen edges at 16:9 / 21:9 while every
+// pane keeps its 4:3 size and its 4:3 offset from its own edge. At 4:3 bx is 0 and nothing moves at all.
+//
+// The comparison below uses bounds.x1 + bounds.x2 (twice the marker centre) against 600 (twice the
+// 600-unit column centre). A +-100 unit dead band (107 px) leaves the shine-get banner m_0 (centre 228)
+// and the telop ticker te_0 (centre 299) centred, as at 4:3.
+#define HUD_ANCHOR_BAND 200
+
+static void anchorWidescreenHUD(J2DPane* p_root)
+{
+	const int shift = (SMSGetUIOffsetX() * 15 + 8) / 16; // HUD units of bx (1 unit = 16/15 px)
+	if (shift == 0)
+		return;
+
+	const JSUTree<J2DPane>* tree = p_root->getPaneTree();
+	for (JSUTreeIterator<J2DPane> iter = tree->getFirstChild();
+	     iter != tree->getEndChild(); ++iter) {
+		J2DPane* pane = iter.getObject();
+		const JUTRect bounds = pane->getBounds();
+		if (bounds.x1 + bounds.x2 < 600 - HUD_ANCHOR_BAND)
+			pane->move(bounds.x1 - shift, bounds.y1);
+		else if (bounds.x1 + bounds.x2 > 600 + HUD_ANCHOR_BAND)
+			pane->move(bounds.x1 + shift, bounds.y1);
+	}
+}
+#endif
+
 void TGCConsole2::load(JSUMemoryInputStream& stream)
 {
 	JDrama::TViewObj::load(stream);
@@ -1804,6 +1835,12 @@ void TGCConsole2::load(JSUMemoryInputStream& stream)
 	JKRArchive* arch = (JKRArchive*)JKRFileLoader::getVolume("game_6");
 	unkB0            = new J2DSetScreen("standard_1.blo", arch);
 	unkB0->setCullBack(GX_CULL_BACK);
+#ifdef TARGET_PC
+	// Before the TBoundPane / TExPane wrappers below read mBounds, so their animation baselines and
+	// their getPaneBounds() carry the anchored position too.
+	if (J2DPane* rootPane = unkB0->search('ROOT'))
+		anchorWidescreenHUD(rootPane);
+#endif
 
 	unkC8  = new TBoundPane(unkB0, 'c_ba');
 	unkCC  = new TBoundPane(unkB0, 'c_ic');
@@ -2753,6 +2790,13 @@ bool TGCConsole2::startAppearBalloon(u32 messageID, bool autoClose)
 	char trash[0x20];
 	TMessageLoader::EntryInfo* entry
 	    = unk3D0->getMessageEntry(messageID & 0xffff);
+
+#ifdef TARGET_PC
+	// getMessageEntry returns null for an id past the entry count (MessageLoader.cpp:111), and the next line
+	// dereferences it. Retail does the same, so the guard is host-only.
+	if (entry == nullptr)
+		return false;
+#endif
 
 	if (entry->unk4 <= unk3F0)
 		return false;
