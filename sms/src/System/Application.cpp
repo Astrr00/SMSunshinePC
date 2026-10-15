@@ -825,7 +825,15 @@ int TApplication::drawDVDErr()
 		GXSetViewport(0.0f, 0.0f, video->mNextRenderMode.fbWidth,
 		              rm->efbHeight, 0.0f, 1.0f);
 		Mtx afStack_260;
+#ifdef TARGET_PC
+		// Widescreen: the 600-unit screen sits in the 4:3 column at bx px (1 unit = 16/15 px, as HudFix does for the HUD);
+		// at 4:3 (bx 0, fbWidth 640) this is exactly 0 / 600.
+		const f32 uiOffsetX = SMSGetUIOffsetX();
+		C_MTXOrtho(afStack_260, 16.0f, 464.0f, 0.0f - uiOffsetX * 0.9375f,
+		           (video->mNextRenderMode.fbWidth - uiOffsetX) * 0.9375f, -1.0f, 1.0f);
+#else
 		C_MTXOrtho(afStack_260, 16.0f, 464.0f, 0.0f, 600.0f, -1.0f, 1.0f);
+#endif
 		GXSetProjection(afStack_260, GX_ORTHOGRAPHIC);
 		MTXIdentity(afStack_260);
 		GXLoadPosMtxImm(afStack_260, GX_PNMTX0);

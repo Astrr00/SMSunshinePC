@@ -67,6 +67,7 @@ static void setVirtualPad(u32 port, const PADStatus* status)
 }
 extern "C" void PADClearVirtualStatus(u32 port);
 extern "C" void aurora_screenshot_next(const char* path);
+extern "C" void aurora_dvd_close(void);
 extern "C" s32 THPPlayerGetState();
 
 #ifdef TARGET_PC
@@ -81,7 +82,7 @@ u32 sunshineLogicTickCount();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu };
+enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr };
 
 struct Command {
 	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck };
@@ -379,6 +380,7 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "log") { c.op = Op::Log; return c; }
+	if (verb == "discerr") { c.op = Op::DiscErr; return c; }
 	if (verb == "end") { c.op = Op::End; return c; }
 	fail(line, "unknown command", verb);
 }
@@ -1243,6 +1245,16 @@ void step()
 			aurora_screenshot_next(c.path.c_str());
 		}
 		if (c.op == Op::Log) logStatus("devscript");
+		if (c.op == Op::DiscErr) {
+			// SUNSHINE_DEV_DISC_ERR=1 (dev-only): close the disc here, so DVDGetDriveStatus() reports no disc and
+			// TApplication::drawDVDErr shows its error screen (sms Application.cpp)
+			if (std::getenv("SUNSHINE_DEV_DISC_ERR")) {
+				aurora_dvd_close();
+				std::printf("[devscript] discerr: disc closed tick=%d\n", gTick);
+			} else {
+				std::printf("[devscript] discerr: skipped, needs SUNSHINE_DEV_DISC_ERR=1 tick=%d\n", gTick);
+			}
+		}
 		if (c.op == Op::Menu) {
 			std::printf("[devscript] menu %s tick=%d\n", c.path.c_str(), gTick);
 			launcher::menuDevQueue(c.path.c_str());

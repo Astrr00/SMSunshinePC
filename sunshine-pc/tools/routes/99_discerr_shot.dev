@@ -1,0 +1,15 @@
+# Disc error screen (GitHub issue #4): one stage frame, then the error screen from a closed disc.
+# Env: SUNSHINE_DEV_DISC_ERR=1 (the `discerr` verb closes the disc; without it the verb is skipped), SUNSHINE_DEV_START=dolpic/0
+# SUNSHINE_DEV_SKIP_MOVIES=1 SUNSHINE_DEV_SEED=1, SUNSHINE_RENDER_SCALE=1. settings.ini [video] decides the width (widescreen/aspect).
+# Evidence: pre.png (stage frame before the close), d.png (error screen, the first presented frame after the close), run.log
+# lines `[devscript] discerr: disc closed`.
+waitfor director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=240
+log
+shot pre.png
+wait frames=30
+discerr
+wait frames=60
+shot d.png
+wait frames=30
+end
