@@ -751,7 +751,7 @@ void TBossManta::updateAttractor()
 			if (sq <= JGeometry::TUtil<f32>::epsilon())
 				delta.zero();
 			else
-				delta.scale(1.0f * calcInvSqrt(sq), delta);
+				delta.scale(JGeometry::TUtil<f32>::one() * calcInvSqrt(sq), delta);
 			delta *= getSaveParams()->mSLPusherPower.get() / delta.length();
 			local_108 += delta;
 		}
@@ -768,6 +768,7 @@ void TBossManta::updateAttractor()
 
 	local_108.y = 0.0f;
 	JGeometry::TVec3<f32> graphVec;
+	char trash2[0x1c];
 	if (getIntoGraphVec(&graphVec)) {
 		graphVec.y = 0.0f;
 		graphVec *= 10000.0f;
