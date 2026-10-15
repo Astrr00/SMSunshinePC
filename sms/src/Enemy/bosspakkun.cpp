@@ -626,9 +626,10 @@ void TBossPakkunMtxCalc::calcBellyScale(u16 jointIndex)
 	} else {
 		s32 limit = mOwner->getBossPakkunParams()->mSLWaterMarkLimit.get();
 		s32 mark = mOwner->unk178;
-		if (mark > limit)
-			mark = limit;
-		progress = static_cast<f32>(mark) / static_cast<f32>(limit);
+		s32 cap = limit;
+		if (mark > cap)
+			mark = cap;
+		progress = static_cast<f32>(mark) / static_cast<f32>(cap);
 	}
 
 	f32 blend = JMAHermiteInterpolation(progress, 0.0f, 0.0f, 10.0f, 1.0f, 1.0f,
@@ -639,15 +640,17 @@ void TBossPakkunMtxCalc::calcBellyScale(u16 jointIndex)
 	if (jointIndex == 36) {
 		static JGeometry::TVec3<f32> goal(1.4f, 1.4f, 1.6f);
 		static JGeometry::TVec3<f32> start(1.0f, 0.8f, 0.8f);
-		MTXScale(scaleMtx, blend * (goal.x - start.x) + start.x,
-		         blend * (goal.y - start.y) + start.y,
-		         blend * (goal.z - start.z) + start.z);
+		f32 sx = blend * (goal.x - start.x) + start.x;
+		f32 sy = blend * (goal.y - start.y) + start.y;
+		f32 sz = blend * (goal.z - start.z) + start.z;
+		MTXScale(scaleMtx, sx, sy, sz);
 	} else {
 		static JGeometry::TVec3<f32> goal(1.3f, 1.7f, 1.7f);
 		static JGeometry::TVec3<f32> start(1.0f, 0.9f, 0.9f);
-		MTXScale(scaleMtx, blend * (goal.x - start.x) + start.x,
-		         blend * (goal.y - start.y) + start.y,
-		         blend * (goal.z - start.z) + start.z);
+		f32 sx = blend * (goal.x - start.x) + start.x;
+		f32 sy = blend * (goal.y - start.y) + start.y;
+		f32 sz = blend * (goal.z - start.z) + start.z;
+		MTXScale(scaleMtx, sx, sy, sz);
 	}
 
 	MTXConcat(jointMtx, scaleMtx, jointMtx);
