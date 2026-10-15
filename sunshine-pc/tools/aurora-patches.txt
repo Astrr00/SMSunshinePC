@@ -18,3 +18,5 @@ copy readback | include/dolphin/gx/GXAurora.h | ^void GXSetCopyReadback\(
 copy readback off on Null | lib/gfx/depth_peek.cpp | Copy readback off: Null backend
 scissor 12-bit fields encode | lib/dolphin/gx/GXCull.cpp | SET_REG_FIELD\(0, __gx->suScis1, 12, 12, rt & 0xFFF\);
 scissor 12-bit fields decode | lib/gx/regs.cpp | reg_get\(scis1, 12, 12\)
+static Z24X8 source size | lib/gx/texture.cpp | ^    case GX_TF_Z24X8:
+static Z24X8 decoder | lib/gfx/texture_convert.cpp | ^  case GX_TF_Z24X8:

@@ -6,6 +6,19 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-15: Corona static Z24X8 blocker
+
+Two independent source investigations traced the format-22/4×4/one-mip failure to bath-water's valid static
+`clear_z_TX[64]` object (`GX_TF_Z24X8`), not to a malformed archive BTI. Its logged pointer was not symbolized;
+the exact tuple, unique constructor and correction's observed effect support that ownership.
+Aurora patch 0017 now computes 64-byte 4×4 tiles and uses the existing RGBA8 tile decoder for static Z24X8 input.
+The dev-start stage resolver also accepts an exact archive basename (`coronaBoss.arc`), without test-only hooks.
+Before: Null aborted at tick 109 on unknown format 22. After: Null stage 60/0 completes at tick 705 (15 ready
+status samples); WARP completes at tick 375 and captures the Corona boss/HUD in a real rendered frame.
+No format coercion or suppressed error was used. Strict zero-unresolved link, unchanged reference SHA-1,
+62 headless checks and a 45-second WARP boot pass; the patch-series checker sees 17 applied patches.
+No depth-copy CPU readback, water height accuracy, complete boss fight, audible sound or hardware-GPU result is claimed.
+
 ### Update 2026-10-15: published lifetime fix, bath-water sound and EventWatcher
 
 The verified lifetime fix and previous initializer review are published in `3c10554`; issue #12 is closed.

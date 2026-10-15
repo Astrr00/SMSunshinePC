@@ -1,0 +1,6 @@
+# Regression for static GX_TF_Z24X8: SUNSHINE_DEV_START=coronaBoss/0 must reach live gameplay.
+waitfor stage=60 scen=0 director mario dirstate=4 timeout=1800
+wait frames=90
+shot corona.png
+wait frames=60
+end

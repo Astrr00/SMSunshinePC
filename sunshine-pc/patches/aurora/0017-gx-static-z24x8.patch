@@ -1,0 +1,22 @@
+diff --git a/lib/gx/texture.cpp b/lib/gx/texture.cpp
+--- a/lib/gx/texture.cpp
++++ b/lib/gx/texture.cpp
+@@ -554,6 +554,7 @@ size_t texture_source_size(u32 format, u32 width, u32 height, u32 mipCount) noex
+       total += div_ceil(static_cast<u32>(mipWidth), 4) * div_ceil(static_cast<u32>(mipHeight), 4) * 32;
+       break;
+     case GX_TF_RGBA8:
++    case GX_TF_Z24X8:
+       total += div_ceil(static_cast<u32>(mipWidth), 4) * div_ceil(static_cast<u32>(mipHeight), 4) * 64;
+       break;
+     default:
+diff --git a/lib/gfx/texture_convert.cpp b/lib/gfx/texture_convert.cpp
+--- a/lib/gfx/texture_convert.cpp
++++ b/lib/gfx/texture_convert.cpp
+@@ -627,6 +627,7 @@ ConvertedTexture convert_texture(u32 format, uint32_t width, uint32_t height, ui
+     converted = DecodeTiled<TextureDecoderRGB5A3>(width, height, mips, data);
+     break;
+   case GX_TF_RGBA8:
++  case GX_TF_Z24X8:
+     converted = BuildRGBA8FromGCN(width, height, mips, data);
+     break;
+   case GX_TF_CMPR:

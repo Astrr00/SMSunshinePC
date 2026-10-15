@@ -262,6 +262,32 @@ The whole-function ledger stays `logic-verified`; its stale score is corrected t
 Appear8 is already byte-identical: all 122 instructions, eight-coin loop, particle arguments and timer/push paths agree.
 Its stale `partial` row becomes `matched` at 100%; this is a ledger correction, not an additional matched function.
 
+## Corona static depth texture (2026-10-15, issue #13)
+
+Two independent read-only investigations traced the pre-fix `fmt=22 4x4 mips=1 sourceBytes=0` log to
+`GX_TF_Z24X8` (`0x16`), not an unknown disc/BTI format. The mesh renderer's constructor creates a
+4×4, no-mipmap `GXTexObj` from its 64-byte static `clear_z_TX` array in `BathWaterManager.cpp:1027-1038`;
+the prerender loads that object at line 1111. The logged host pointer was not symbolized, so its
+identity remains an inference from the unique constructor tuple and the successful post-fix probe.
+Aurora's `texture_source_size` returned zero for depth format 22; `convert_texture` then fatally
+rejected it. Patch 0017 adds that format to the existing 64-byte tiled RGBA8-sized/decode paths,
+preserving its GX format and full texture source bytes. The static array is not an archive resource.
+
+The port dev-start stage resolver now accepts an exact `.arc` basename in addition to numbered
+stage prefixes, so `SUNSHINE_DEV_START=coronaBoss/0` selects retail stage 60/0 without a probe-only hook.
+Pre-fix `bath_sound_before_20261015` aborted at tick 109 on Null (`0xC0000409`).
+Post-fix `corona_z24x8_after_20261015` completes on Null (rc 0, 14 s, tick 705;
+15 stage-ready status samples); `corona_z24x8_warp_shot_20261015` completes on WARP
+(rc 0, 15 s, tick 375; four ready status samples). Its `corona.png` visibly shows
+Corona's boss, arena and HUD. The permanent `tools/routes/98_corona_depth.dev` checks a live stage-60/0 director
+and captures a later boss frame; its WARP run `corona_depth_regression_20261015` completes (rc 0, 16 s, tick 393).
+Neither run reports unknown textures, fatal exceptions, WebGPU validation errors or a script timeout.
+The tests use isolated saves and dev aids
+(step-retrace, movie skips, muted audio); they do not demonstrate a completed boss fight,
+CPU depth-copy readback/height-field accuracy, audible bath-water cadence or hardware GPU behavior.
+The DOL SHA-1 is unchanged and Strict links with zero unresolved symbols; see the latest
+`build/verify/` logs for matching, 62 headless checks and the 45-second WARP boot.
+
 ## Process notes
 
 - Agents work in clones (`clone-3`, `clone-chase`, `fresh-gate-2`) on `agent/<name>` branches and never push; the lead

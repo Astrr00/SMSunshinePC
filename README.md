@@ -10,12 +10,12 @@ A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The gam
 
 Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. % is the lead's estimate of how much of the item works, not a measurement. Updated with every milestone. Matching, link and boot checks refreshed 2026-10-15; feature rows last measured 2026-10-14; the launcher, cheats/mods, audio, widescreen, particles and settings rows are synced to main after the KeyMatrix, Toggles2, FontFix, StageStart, T3 and HudAnchor landings, the other rows to `52c10f7` or earlier; runs on builds of main or of agent branches before landing.
 
-**Decompilation progress (measured 2026-10-15, full `ninja` + `changes_all`, including the bath-water sound-cadence correction):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %** (by bytes); fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical. Six more functions match than in the 2026-10-12 report; this continuation adds no matching gain. Bath-water sound now follows retail on every move cue. Initializer review and finite spawn-FP/RNG review are complete; unconditional NaN-payload/FP-state equivalence and Corona runtime comparison remain open. Details: [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
+**Decompilation progress (measured 2026-10-15, full `ninja` + `changes_all`, including the bath-water sound-cadence correction):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %** (by bytes); fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical. Six more functions match than in the 2026-10-12 report; this continuation adds no matching gain. Bath-water sound now follows retail on every move cue. Initializer review and finite spawn-FP/RNG review are complete; unconditional NaN-payload/FP-state and audible Corona comparison remain open. Aurora's static Z24X8 correction now permits a Corona stage smoke on Null and WARP. Details: [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
-| Decomp logic correctness (non-matching functions) | partial | 55 | Measured 2026-10-15: 11 323/12 881 functions byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger rows by status prefix: 1 976 `logic-verified`, 150 `matched`, 252 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere still possible. Bath-water initializer review complete; `perform` sound cadence corrected, finite spawn-FP/RNG gaps closed, unconditional NaN-payload/FP-state equivalence still partial. EventWatcher warp aliasing/reload review confirmed; Appear8's stale partial row is corrected to its existing 100 % match, not a new matching gain. Several hundred game functions still lack a finished equivalence review. Corona runtime probe is blocked by texture format 22 ([#13](https://github.com/Astrr00/SMSunshinePC/issues/13)). See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
+| Decomp logic correctness (non-matching functions) | partial | 55 | Measured 2026-10-15: 11 323/12 881 functions byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger rows by status prefix: 1 976 `logic-verified`, 150 `matched`, 252 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere still possible. Bath-water initializer review complete; `perform` sound cadence corrected, finite spawn-FP/RNG gaps closed, unconditional NaN-payload/FP-state equivalence still partial. EventWatcher warp aliasing/reload review confirmed; Appear8's stale partial row is corrected to its existing 100 % match, not a new matching gain. Several hundred game functions still lack a finished equivalence review. Corona dev-start now survives the former static Z24X8 abort on Null and WARP (stage 60/0); no audible bath-water or hardware-GPU comparison. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
 | Units compiled (clang-cl) | done | 100 | 583/583 built units, 149 excluded with 27 prefix rules and reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
@@ -95,6 +95,15 @@ Bug found and fixed on the way: `JAIData::initSeqParameter` left `mSeqHandle` 0 
 - [`sunshine-pc/docs/decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md): decomp residue rounds (per-unit results, techniques, open items)
 - [`sunshine-pc/docs/nm-operand-audit.md`](sunshine-pc/docs/nm-operand-audit.md): NonMatching units ranked by operand-diff hits
 - [`Port.md`](Port.md), [`Goal-Port.md`](Goal-Port.md): work orders
+
+### Update 2026-10-15: Corona static depth texture
+
+The stage-60/0 format-22 abort was a valid, code-defined `GX_TF_Z24X8` 4×4 depth texture,
+not a broken archive texture. Aurora patch 0017 sizes and decodes its 64-byte tiles.
+`SUNSHINE_DEV_START=coronaBoss/0` now resolves the exact archive basename.
+The pre-fix Null run aborted at tick 109; the patched Null probe completes at tick 705.
+The WARP probe completes at tick 375 and captures a visible Corona boss and HUD frame.
+This proves scene entry and rendering, not correct depth readback, fight completion or audible bath-water cadence.
 
 ### Update 2026-10-15: bath-water sound cadence and EventWatcher reviews
 

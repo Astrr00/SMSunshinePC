@@ -508,9 +508,9 @@ bool TApplication::checkAdditionalMovie()
 #ifdef TARGET_PC
 bool sunshineDevStart(char* stageName, unsigned stageNameSize, int* scenario); // sunshine-pc/src/devstart/devstart.cpp
 
-// Resolves SUNSHINE_DEV_START=<stage>/<scenario> against the game's scenario table: the stage group whose archive names
-// start with <stage> and a digit (e.g. "bianco" -> bianco0.arc) gives the retail stage index. Consumed once, on the first
-// DONE after the logo, so leaving a stage later does not redirect again.
+// Resolves SUNSHINE_DEV_START=<stage>/<scenario> against the game's scenario table: a stage prefix followed by
+// a digit (e.g. "bianco" -> bianco0.arc), or an exact archive basename (e.g. "coronaBoss" -> coronaBoss.arc).
+// Consumed once, on the first DONE after the logo, so leaving a stage later does not redirect again.
 static bool devStartArea(TNameRefPtrAryT<TNameRefAryT<TScenarioArchiveName> >& tmp, TGameSequence& area)
 {
 	static bool consumed = false;
@@ -526,7 +526,9 @@ static bool devStartArea(TNameRefPtrAryT<TNameRefAryT<TScenarioArchiveName> >& t
 		if (tmp[i].size() == 0)
 			continue;
 		const char* name = tmp[i][0].unkC;
-		if (strncmp(name, stage, len) != 0 || name[len] < '0' || name[len] > '9')
+		if (strncmp(name, stage, len) != 0
+		    || ((name[len] < '0' || name[len] > '9')
+		        && strcmp(name + len, ".arc") != 0))
 			continue;
 		if (scenario < 0 || scenario >= (int)tmp[i].size()) {
 			printf("[devstart] %s has %d scenarios; scenario %d is out of range\n", stage, (int)tmp[i].size(), scenario);
