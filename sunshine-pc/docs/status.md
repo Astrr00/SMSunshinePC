@@ -23,6 +23,14 @@ unsprayed point remains dirty. The new real geometry host test fails with the ol
 Measured readback latency remains 2–4 render copies, not same-frame retail synchronization.
 Ledger prefixes now count 1 975 logic-verified, 150 matched, 253 partial: the old `setLookDir` equivalence claim
 was false; its corrected algorithm is reviewed but post-fix compiled FP equivalence remains unverified.
+Final source `b1392e5`: full verification 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks, zero-unresolved Strict
+link, unchanged matching SHA-1 and 45-second WARP boot. A separate isolated checkout applies patch 0018
+on the earlier 17-patch tree and completes 481 build steps, including affected header users, with zero unresolved symbols.
+Optional GX FIFO tests are blocked by a vendored googletest warning-as-error, not reported as passing.
+Uninstrumented final-source routes pass: WARP Corona `corona_depth_final98_20261015` (37 s, tick 1023);
+status-enabled Null `corona_depth_final85_20261015` (471 s, tick 22436, Bianco 2/0, one Shine,
+seven-block GCI checksum PASS); reload `corona_depth_final86_20261015` (16 s, tick 1674, Delfino 1/0,
+Shines 0 -> 1). Scene-ready JPA samples remain live; none overlap unavailable-scene samples.
 Full Corona fight, audible sound, hardware GPU, forced map/lifetime races and exact same-frame timing remain open.
 
 ### Update 2026-10-15: Corona static Z24X8 blocker

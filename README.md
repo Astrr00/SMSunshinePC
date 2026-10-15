@@ -107,6 +107,12 @@ Independent decoding verifies 28 224 generated heights at scales 0.5 and 0.25, i
 0.75 and 0.875; the existing R8 goop-cleaning route also passes.
 Readback deliberately retains the port's previous-copy transport (observed 2–4-copy latency).
 The host regression fails before the cross fix; the final FP instruction-equivalence claim remains partial.
+At `b1392e5`, full verification passes: 7 PASS, 0 FAIL, 1 optional SKIP; Strict links with zero unresolved,
+63 host checks pass, matching SHA-1 is unchanged, and the 45-second WARP boot passes.
+The separate isolated checkout applies all 18 Aurora patches and rebuilds/links the affected header users successfully.
+The final uninstrumented executable also passes Corona route 98 on WARP (37 s, tick 1023), status-enabled
+route 85 on Null (471 s, Bianco 2/0, one Shine, seven-block GCI PASS) and route-86 reload
+(16 s, Delfino 1/0, Shines 0 -> 1). These are dev-assisted runs, not a complete Corona fight.
 
 ### Update 2026-10-15: Corona static depth texture
 

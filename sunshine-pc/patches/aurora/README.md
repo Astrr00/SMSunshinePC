@@ -52,6 +52,11 @@ Each patch applies on top of the previous one. Topic boundaries are per line, so
 
 ## Verification (run when the series was regenerated)
 
+Current 0018 source `b1392e5` (2026-10-15): checker reports 18 applied/tracked patches over 45 files.
+Full verification: 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks and 45-second WARP boot pass.
+The isolated checkout applies 0018 and rebuilds/links the affected sources successfully.
+Real WARP depth copies reach the CPU mesh at render scales 0.5/0.25; R8 goop cleaning also passes.
+
 Earlier 0017 snapshot (2026-10-15): `tools/apply-aurora-patches.py --check` reports 17 applied patches over
 44 files, and `verify --build --matching --boot-secs 45` reports 7 PASS, 0 FAIL, 1 optional SKIP.
 An isolated fresh checkout updated to `21e2b60` applied 0017 separately and rebuilt both texture sources
@@ -62,7 +67,7 @@ and the Strict executable with zero unresolved symbols. Earlier checks below des
 - Tool on a scratch clone reset to `50e5be3`: `--check` exit 2 (pristine); apply exit 0; `--check` exit 0 and reapply exit 0 (applied, 33 files match).
 - `tools/aurora-patches.txt` regexes: 15 of 15 match the worktree (same check as the `aurora-patches` step of `verify.py`; that step was not run as a whole).
 
-Intermediate series stages were not built; the current 17-patch final tree builds and links as recorded above.
+Intermediate series stages were not built; the current 18-patch final tree builds and links as recorded above.
 
 ## Regenerating
 

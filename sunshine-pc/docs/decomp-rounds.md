@@ -332,7 +332,17 @@ sprayed point `d0=0/0`, separate dirty point `d300=65/1`; no clear-all pollution
 The optional Aurora `gx_fifo_tests` target cannot build with this toolchain: vendored googletest
 `gtest-printers.h:528` fails `-Werror,-Wcharacter-conversion` on char8_t to char32_t.
 No dependency warning policy was changed to bypass that failure; the GX suite was not run.
+Final source `b1392e5` passes `verify --build --matching --boot-secs 45`: 7 PASS, 0 FAIL, 1 optional SKIP;
+63 host checks, unchanged SHA-1, Strict zero unresolved, 18 tracked patches on 45 Aurora files, 45-second WARP boot.
+The isolated checkout fast-forwards to this source, applies 0018 on top of the earlier 17 patches,
+and completes 481 build steps (affected header users, Aurora and Strict executable) with zero unresolved symbols.
 Temporary pixel/height dump and geometry logging, plus the cull-off discriminator, are not shipped.
+Uninstrumented `b1392e5` regression chain: WARP route 98 `corona_depth_final98_20261015`
+(rc 0, 37 s, tick 1023, visible waves); Null status-enabled route 85 `corona_depth_final85_20261015`
+(rc 0, 471 s, tick 22436, Bianco 2/0, one Shine); independent seven-block GCI checker PASS.
+Route 86 `corona_depth_final86_20261015` loads that run's isolated card (rc 0, 16 s, tick 1674,
+Delfino 1/0, Shines 0 -> 1). Route 85 has 686 live JPA status samples and 61 not-ready samples
+with no tick overlap. No temporary probe text, script timeout, fatal exception or WebGPU error appears.
 Full fight, audible sound, hardware GPU, forced registration/map races and same-frame timing remain unverified.
 
 ## Process notes
