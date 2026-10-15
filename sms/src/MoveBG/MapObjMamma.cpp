@@ -294,7 +294,6 @@ void TSandBombBase::explode()
 
 void TSandBombBase::waitBeforeExplode()
 {
-	JDrama::TFlagT<u16> flag(0);
 	mState      = STATE_WAIT_BEFORE_EXPLODE;
 	mStateTimer = mExplodeWaitTime;
 }
