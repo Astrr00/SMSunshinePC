@@ -378,8 +378,9 @@ public:
 				f32 twoR       = 2.0f * dropRadius;
 				f32 sep2       = 4.0f * (dropRadius * dropRadius);
 				for (TDrop* a = bw->unk88; a < end2; a++) {
-					for (TDrop* b = a + bw->unk8C->intersects.get(); b < end2;
-					     b += bw->unk8C->intersects.get()) {
+					TDrop* b = a + bw->unk8C->intersects.get();
+					// asm 0x801F8C64-0x801F8C68: first pair includes an initialised reserve drop.
+					do {
 						JGeometry::TVec3<f32> local_2D8;
 						local_2D8.sub(b->unk0, a->unk0);
 						(void)&local_2D8;
@@ -417,7 +418,8 @@ public:
 							local_2E4.negate();
 							a->unk30.extend(local_2E4);
 						}
-					}
+						b += bw->unk8C->intersects.get();
+					} while (b < end2);
 				}
 			}
 
