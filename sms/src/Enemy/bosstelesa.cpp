@@ -112,6 +112,11 @@ static inline void setBossTelesaBck(TBossTelesa* self, int idx)
 	self->setAnmSound(!table ? nullptr : table[idx]);
 }
 
+static inline void telesaToMario(TBossTelesa* boss)
+{
+	(void)(boss->mPosition - *gpMarioPos);
+}
+
 // True when the spat-out slot items are all gone (or there are none).
 static inline bool isAllSlotItemDead(TBossTelesa* self)
 {
@@ -2071,7 +2076,7 @@ DEFINE_NERVE(TNerveBossTelesaHideWait, TLiveActor)
 		boss->mMActor->getFrameCtrl(ANM_TYPE_BRK)->setFrame(
 		    boss->mMActor->getFrameCtrl(ANM_TYPE_BRK)->getEnd());
 	} else {
-		JGeometry::TVec3<f32> toMario(boss->mPosition - *gpMarioPos);
+		telesaToMario(boss);
 		if (spine->getTime() > 400 && boss->mKillSmallEnemy->unk6C == 0) {
 			spine->pushAfterCurrent(&TNerveBossTelesaAppear::theNerve());
 			boss->offLiveFlag(LIVE_FLAG_HIDDEN);
@@ -2291,7 +2296,7 @@ DEFINE_NERVE(TNerveBossTelesaFallDemo, TLiveActor)
 	}
 
 	if (boss->rouletteFall()) {
-		JGeometry::TVec3<f32> toMario(boss->mPosition - *gpMarioPos);
+		telesaToMario(boss);
 		if (boss->slotFall()) {
 			boss->offHitFlag(HIT_FLAG_NO_COLLISION);
 			boss->mBody->offHitFlag(HIT_FLAG_NO_COLLISION);
