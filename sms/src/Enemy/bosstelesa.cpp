@@ -465,18 +465,25 @@ void TBossTelesaManager::perform(u32 flags, JDrama::TGraphics* graphics)
 	TEnemyManager::perform(flags, graphics);
 }
 
+// The pushed nerve's theNerve() sits inside an inline helper in the original
+// (retail calls TNerveBase::TNerveBase out of line for these statics).
+template <class N> static inline void pushTelesaNerve(TBossTelesa* owner)
+{
+	owner->mSpine->pushNerve(&N::theNerve());
+}
+
 BOOL TBossTelesaBody::receiveMessage(THitActor* sender, u32 message)
 {
 	TBossTelesa* owner = mOwner;
 	if (message == HIT_MESSAGE_TRAMPLE && !sender->isActorType(0x80000001)) {
 		if (owner->mSpine->getCurrentNerve()
 		    == &TNerveBossTelesaPrepareSlot::theNerve())
-			owner->mSpine->pushNerve(&TNerveBossTelesaSpit::theNerve());
+			pushTelesaNerve<TNerveBossTelesaSpit>(owner);
 	}
 	if (message == HIT_MESSAGE_SPRAYED_BY_WATER) {
 		if (owner->mSpine->getCurrentNerve()
 		    == &TNerveBossTelesaPrepareSlot::theNerve())
-			owner->mSpine->pushNerve(&TNerveBossTelesaFreeze::theNerve());
+			pushTelesaNerve<TNerveBossTelesaFreeze>(owner);
 	}
 	return true;
 }
@@ -487,7 +494,7 @@ BOOL TBossTelesaTongue::receiveMessage(THitActor* sender, u32 message)
 		TBossTelesa* owner = mOwner;
 		if (owner->mSpine->getCurrentNerve()
 		    == &TNerveBossTelesaAppear::theNerve())
-			owner->mSpine->pushNerve(&TNerveBossTelesaSlotStart::theNerve());
+			pushTelesaNerve<TNerveBossTelesaSlotStart>(owner);
 	}
 	return true;
 }
@@ -2027,7 +2034,7 @@ DEFINE_NERVE(TNerveBossTelesaSpit, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaHide, TLiveActor)
 {
-	char trash[0x10];
+	char trash[0x8];
 	TBossTelesa* boss = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (!boss->mMActor->checkCurBckFromIndex(4)) {
