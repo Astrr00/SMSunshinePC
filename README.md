@@ -92,6 +92,8 @@ Bug found and fixed on the way: `JAIData::initSeqParameter` left `mSeqHandle` 0 
 - [`sunshine-pc/docs/platform-notes.md`](sunshine-pc/docs/platform-notes.md): technical notes for the port
 - [`sunshine-pc/patches/aurora/README.md`](sunshine-pc/patches/aurora/README.md): Aurora patch series
 - [`sunshine-pc/docs/publishing.md`](sunshine-pc/docs/publishing.md): publishing runbook
+- [`sunshine-pc/docs/decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md): decomp residue rounds (per-unit results, techniques, open items)
+- [`sunshine-pc/docs/nm-operand-audit.md`](sunshine-pc/docs/nm-operand-audit.md): NonMatching units ranked by operand-diff hits
 - [`Port.md`](Port.md), [`Goal-Port.md`](Goal-Port.md): work orders
 
 ### Update 2026-10-12 (later): route 70, fewer dev crutches
