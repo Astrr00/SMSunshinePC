@@ -713,7 +713,10 @@ f32 TBossGesso::lenFromToeToMario()
 		JGeometry::TVec3<f32> tipPos
 		    = mTentacles[i]->getLastNode()->getPosition();
 
-		f32 len = tipPos.length();
+		// asm 0x80288EF0: retail fuses x*x + y*y into fmadds; named locals fuse, tipPos.length()/dot() does not. pad4 puts tipPos at 0x30.
+		f32 pad4;
+		f32 dx = tipPos.x, dy = tipPos.y, dz = tipPos.z;
+		f32 len = JGeometry::TUtil<f32>::sqrt(dx * dx + dy * dy + dz * dz);
 		if (len < min)
 			min = len;
 	}
@@ -772,6 +775,27 @@ BOOL TBossGesso::is2ndFightNow() const
 	return FALSE;
 }
 
+// asm 0x80286000 (TNerveBGPolDrop::execute), 0x8028B744 (changeAttackMode),
+// 0x8028BD68 (stopIfRoll): retail's inlined copies of changeAllTentacleState
+// test state 5, 6, then (state - 3) <= 1u. The out-of-line copy (moveObject
+// calls it) keeps the isThing() chain 4, 6, 3.
+static inline void changeAllTentacleStateInl(TBossGesso* self, int state)
+{
+	for (int i = 0; i < TBossGesso::TENTACLE_NUM; ++i) {
+		TBGTentacle* tentacle = self->mTentacles[i];
+		if (tentacle->mState != 5) {
+			int s = tentacle->mState;
+			BOOL thing;
+			if (s == 6 || (u32)(s - 3) <= 1)
+				thing = true;
+			else
+				thing = false;
+			if (!thing)
+				tentacle->changeStateAndFixNodes(state);
+		}
+	}
+}
+
 void TBossGesso::stopIfRoll()
 {
 	if (mAttackMode != 7)
@@ -782,7 +806,7 @@ void TBossGesso::stopIfRoll()
 	mSpine->reset();
 	mSpine->setNext(&TNerveBGWait::theNerve());
 
-	changeAllTentacleState(0);
+	changeAllTentacleStateInl(this, 0);
 }
 
 void TBossGesso::changeAttackMode(int new_mode)
@@ -806,7 +830,7 @@ void TBossGesso::changeAttackMode(int new_mode)
 	}
 
 	case ASTATE_UNISON:
-		changeAllTentacleState(0);
+		changeAllTentacleStateInl(this, 0);
 		break;
 
 	case ASTATE_ROLL:
@@ -814,7 +838,7 @@ void TBossGesso::changeAttackMode(int new_mode)
 			unk1A1 = true;
 		else
 			unk1A1 = false;
-		changeAllTentacleState(0x8);
+		changeAllTentacleStateInl(this, 0x8);
 		mSpine->reset();
 		mSpine->setNext(&TNerveBGRoll::theNerve());
 		mSpine->pushAfterCurrent(&TNerveBGWait::theNerve());
@@ -829,7 +853,7 @@ void TBossGesso::changeAttackMode(int new_mode)
 			mSpine->reset();
 			mSpine->setNext(&TNerveBGPolDrop::theNerve());
 			mSpine->pushAfterCurrent(&TNerveBGWait::theNerve());
-			changeAllTentacleState(0x8);
+			changeAllTentacleStateInl(this, 0x8);
 		}
 		break;
 
@@ -1649,7 +1673,7 @@ DEFINE_NERVE(TNerveBGEyeDamage, TLiveActor)
 
 		if (self->mBeak->mHolder == nullptr && self->mAttackMode != 2) {
 			self->changeAttackMode(TBossGesso::ASTATE_UNISON);
-			self->changeAllTentacleState(1);
+			changeAllTentacleStateInl(self, 1);
 		}
 
 		self->getMActor()->setBtpFromIndex(1);
@@ -1693,7 +1717,7 @@ DEFINE_NERVE(TNerveBGBeakDamage, TLiveActor)
 	if (spine->getTime() == 0) {
 		self->changeBck(7);
 		self->getMActor()->setBtkFromIndex(0);
-		self->changeAllTentacleState(8);
+		changeAllTentacleStateInl(self, 8);
 
 		J3DFrameCtrl* ctrl4 = self->getMActor()->getFrameCtrl(ANM_TYPE_BTK);
 		ctrl4->setRate(1.0f);
@@ -1934,7 +1958,7 @@ DEFINE_NERVE(TNerveBGDie, TLiveActor)
 	    && self->getMActor()->curAnmEndsNext()) {
 
 		self->changeBck(6);
-		self->changeAllTentacleState(8);
+		changeAllTentacleStateInl(self, 8);
 
 		JGeometry::TVec3<f32> local_24;
 		local_24.x = self->mPosition.x;
@@ -1963,7 +1987,7 @@ DEFINE_NERVE(TNerveBGDie, TLiveActor)
 
 	if (self->isReachedToGoal() && gpMarDirector->unk124 != 3) {
 
-		self->changeAllTentacleState(0);
+		changeAllTentacleStateInl(self, 0);
 		self->kill();
 
 		THitActor* block = static_cast<THitActor*>(
@@ -1989,7 +2013,7 @@ DEFINE_NERVE(TNerveBGPollute, TLiveActor)
 		self->changeBck(10);
 		self->unk178->setBckFromIndex(4);
 		self->unk17C = 1;
-		self->changeAllTentacleState(0);
+		changeAllTentacleStateInl(self, 0);
 		self->getMActor()->setBtpFromIndex(2);
 
 		J3DFrameCtrl* ctrl3 = self->getMActor()->getFrameCtrl(ANM_TYPE_BTP);
@@ -2031,7 +2055,7 @@ DEFINE_NERVE(TNerveBGPolDrop, TLiveActor)
 
 	if (spine->getTime() == 0) {
 		self->changeBck(1);
-		self->changeAllTentacleState(0);
+		changeAllTentacleStateInl(self, 0);
 		self->getMActor()->setBtpFromIndex(2);
 
 		J3DFrameCtrl* ctrl3 = self->getMActor()->getFrameCtrl(ANM_TYPE_BTP);
