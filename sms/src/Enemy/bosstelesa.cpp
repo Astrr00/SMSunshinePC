@@ -103,8 +103,9 @@ static inline void setBossTelesaBck(TBossTelesa* self, int idx)
 	self->mPrevBck       = self->mMActor->getCurAnmIdx(ANM_TYPE_BCK);
 	self->mCurBck        = idx;
 	self->mBckBlendRatio = 1.0f;
-	MActor* actor        = self->mMActor;
-	actor->setBckOldMotionBlendAnmPtr(actor->getBckAnm());
+	MActor* actor = self->mMActor;
+	J3DAnmTransformKey* oldAnm = actor->getBckAnm();
+	self->mMActor->setBckOldMotionBlendAnmPtr(oldAnm);
 	self->mMActor->setBckFromIndex(idx);
 	self->mMActor->setMotionBlendRatioForBck(self->mBckBlendRatio);
 	const char** table = self->getBasNameTable();
