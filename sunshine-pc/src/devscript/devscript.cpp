@@ -404,6 +404,13 @@ void loadScript(const char* path)
 	std::printf("[devscript] loaded %zu commands from %s\n", gScript.size(), path);
 }
 
+bool sceneReady()
+{
+	// PAD reads precede direct(): scene globals survive freeAll(), and unk260 is set only after the setup-thread join and setupObjects().
+	return gpApplication.mAppState == TApplication::APP_STATE_GAMEPLAY && gpMarDirector
+	    && gpApplication.mDirector == gpMarDirector && gpMarDirector->unk260 == 1;
+}
+
 int shineCount()
 {
 	return TFlagManager::smInstance->getFlag(0x40000);
@@ -556,11 +563,16 @@ void logJpa(const char* tag)
 
 void logStatus(const char* tag)
 {
+	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
+	if (!sceneReady()) {
+		std::printf("[%s] tick=%d t=%.2fs stage=%u scen=%u (scene not ready)\n", tag, gTick, gTick / 30.0,
+		            gpApplication.mCurrArea.getStage(), gpApplication.mCurrArea.getScenario());
+		return;
+	}
 	logWash(tag);
 	logEMario(tag);
 	logBoss(tag);
 	logJpa(tag);
-	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
 	if (gpCardLoad)
 		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,
 		            static_cast<int>(gpCardLoad->unk1C));
@@ -683,17 +695,17 @@ bool condHolds(const Command& c)
 		switch (kind) {
 		case Command::Cond::Stage: ok = static_cast<int>(gpApplication.mCurrArea.getStage()) == val; break;
 		case Command::Cond::Scen: ok = static_cast<int>(gpApplication.mCurrArea.getScenario()) == val; break;
-		case Command::Cond::Mario: ok = gpMarioOriginal != nullptr; break;
-		case Command::Cond::Director: ok = gpMarDirector != nullptr; break;
-		case Command::Cond::DirState: ok = gpMarDirector && static_cast<int>(gpMarDirector->mState) == val; break;
+		case Command::Cond::Mario: ok = sceneReady() && gpMarioOriginal != nullptr; break;
+		case Command::Cond::Director: ok = sceneReady(); break;
+		case Command::Cond::DirState: ok = sceneReady() && static_cast<int>(gpMarDirector->mState) == val; break;
 		case Command::Cond::Flag: ok = TFlagManager::smInstance->getFlag(val) != 0; break;
 		case Command::Cond::Thp: ok = THPPlayerGetState() == val; break;
-		case Command::Cond::CardMode: ok = gpCardLoad && gpCardLoad->unk14 == val; break;
-		case Command::Cond::CardProg: ok = gpCardLoad && static_cast<int>(gpCardLoad->unk1C) == val; break;
-		case Command::Cond::CamDemo: ok = gpCamera && gpCamera->isDemoCamera() == (val != 0); break;
-		case Command::Cond::Washed: ok = washedCount() >= val; break;
-		case Command::Cond::Talk: ok = gpMarDirector && gpMarDirector->isTalkModeNow() == (val != 0); break;
-		case Command::Cond::Bck: ok = gDbgGKCurBck == val; break;
+		case Command::Cond::CardMode: ok = sceneReady() && gpCardLoad && gpCardLoad->unk14 == val; break;
+		case Command::Cond::CardProg: ok = sceneReady() && gpCardLoad && static_cast<int>(gpCardLoad->unk1C) == val; break;
+		case Command::Cond::CamDemo: ok = sceneReady() && gpCamera && gpCamera->isDemoCamera() == (val != 0); break;
+		case Command::Cond::Washed: ok = sceneReady() && washedCount() >= val; break;
+		case Command::Cond::Talk: ok = sceneReady() && gpMarDirector->isTalkModeNow() == (val != 0); break;
+		case Command::Cond::Bck: ok = sceneReady() && gDbgGKCurBck == val; break;
 		default: break;
 		}
 		if (!ok) return false;
@@ -1285,7 +1297,7 @@ void aimAssist()
 {
 	static const bool enabled = std::getenv("SUNSHINE_DEV_AIM_ASSIST") != nullptr;
 	gAssistNoSpray = false;
-	if (!enabled || !gpMarioOriginal || !gpMarioOriginal->mWaterGun || !gpMarDirector) return; // the director is gone while a stage is torn down
+	if (!enabled || !sceneReady() || !gpMarioOriginal || !gpMarioOriginal->mWaterGun) return; // the director is gone while a stage is torn down
 	// The slippery goop floor turns every crouch into OIL_RUN again; while L is held and Mario stands still on it, keep him crouching.
 	const u32 st = gpMarioOriginal->mStatus;
 	const TMarioGamePad* pad = gpApplication.mGamePads[0];

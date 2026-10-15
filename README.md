@@ -10,12 +10,12 @@ A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The gam
 
 Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. % is the lead's estimate of how much of the item works, not a measurement. Updated with every milestone. Matching, link and boot checks refreshed 2026-10-15; feature rows last measured 2026-10-14; the launcher, cheats/mods, audio, widescreen, particles and settings rows are synced to main after the KeyMatrix, Toggles2, FontFix, StageStart, T3 and HudAnchor landings, the other rows to `52c10f7` or earlier; runs on builds of main or of agent branches before landing.
 
-**Decompilation progress (measured 2026-10-15, full `ninja` + `changes_all`, source `bf1ea15`):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %** (by bytes); fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical. Six more functions match than in the 2026-10-12 report. The bath-water reserve-drop loop now follows retail at both call sites; whole-function FP equivalence remains open. Details: [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
+**Decompilation progress (measured 2026-10-15, full `ninja` + `changes_all`, source `bf1ea15`):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %** (by bytes); fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical. Six more functions match than in the 2026-10-12 report. The bath-water reserve-drop loop now follows retail at both call sites; initializer whole-function review is complete, while `perform` spawn-position FP equivalence remains open. Details: [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
-| Decomp logic correctness (non-matching functions) | partial | 55 | Measured 2026-10-15: 11 323/12 881 functions byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger rows by status prefix: 1 975 `logic-verified`, 149 `matched`, 254 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere still possible. Targeted audit confirmed `TTailRubber::adjust` and consolidated its duplicate; bath-water `perform` remains partial for FP boundaries, `initializeIfYet_` needs renewed whole-function review. Their shared first-pair loop is corrected from retail asm; `perform` 93.92 -> 94.10 %, initializer 94.68 -> 94.61 % (accepted logic fix). Several hundred game functions still lack a finished equivalence review. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
+| Decomp logic correctness (non-matching functions) | partial | 55 | Measured 2026-10-15: 11 323/12 881 functions byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger rows by status prefix: 1 976 `logic-verified`, 149 `matched`, 253 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere still possible. Targeted audit confirmed `TTailRubber::adjust` and consolidated its duplicate; renewed whole-function review confirms bath-water `initializeIfYet_`, while `perform` remains partial for spawn-position FP boundaries. Their shared first-pair loop is corrected from retail asm; `perform` 93.92 -> 94.10 %, initializer 94.68 -> 94.61 % (accepted logic fix). Several hundred game functions still lack a finished equivalence review. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
 | Units compiled (clang-cl) | done | 100 | 583/583 built units, 149 excluded with 27 prefix rules and reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
@@ -104,9 +104,12 @@ Matching SHA-1, strict link, 62 headless checks and 45-second WARP title boot pa
 A fresh checkout also builds and links with unresolved symbols disabled, using cached dependency sources and packages.
 Route 85 also passes on Null with step-retrace, skipped movies, aim assist and automatic status logging disabled:
 Bianco stage 2/0, one Shine saved, GCI checker PASS (230 s wall).
-The first route attempt with automatic particle-status output crashed; the pre-fix control also faults during that
-transition. Tracked separately in [issue #12](https://github.com/Astrr00/SMSunshinePC/issues/12).
-The remaining FP review stays open; [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) records the evidence and limits.
+The earlier automatic particle-status crash ([issue #12](https://github.com/Astrr00/SMSunshinePC/issues/12)) is corrected
+locally by checking scene ownership and post-setup readiness before diagnostic reads.
+Status-enabled route 85 now passes on Null (364 s, 650 s limit, Bianco 2/0, one Shine, GCI PASS), followed by route-86
+reload (17 s, Delfino 1/0, Shines 0 -> 1). The first 330-second attempt timed out without crashing.
+Renewed whole-function review confirms `initializeIfYet_`; `perform` spawn-position FP review and Corona comparison
+remain open. [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) records the evidence and limits.
 
 ### Update 2026-10-12 (later): route 70, fewer dev crutches
 

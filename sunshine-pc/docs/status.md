@@ -6,6 +6,33 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-15: takeover, scene lifetime and initializer review
+
+Last source work was `bf1ea15` (bath-water first-pair collision correction), followed by the `88d7c5d` status refresh.
+Two independent tasks were delegated: TransitionLifetime fixed the diagnostic lifecycle error; BathInitializer
+completed the renewed whole-function initializer review without changing its source.
+`initializeIfYet_` is now `logic-verified`; `perform` spawn-position FP equivalence and Corona runtime comparison remain open.
+Ledger status prefixes now count 1 976 `logic-verified`, 149 `matched` and 253 `partial`, excluding three legacy malformed rows.
+
+The lifecycle fix in `src/devscript/devscript.cpp` gates scene-object readers on the active gameplay director and its
+existing `unk260` post-setup marker; this covers status logging, scene-object route conditions and aim assist.
+It preserves transition-safe tick/stage/movie status and resumes particle statistics in each live scene.
+The first status-enabled route-85 run, `takeover_lifetime85_20261015`, survives the former airport crash and reaches
+Delfino 1/1 with one Shine; it ends at the 330-second wall limit (rc 124), not at route completion.
+The extended run, `takeover_lifetime85_long_20261015`, completes with status enabled: rc 0 after 364 s wall
+(650 s limit), tick 18210, Bianco 2/0 and one Shine; independent GCI checking passes all seven block checksums.
+Route 86 (`takeover_lifetime86_20261015`) reloads that card: rc 0 after 17 s, tick 1675, Delfino 1/0, Shines 0 -> 1.
+Assert-based checks confirm live JPA statistics in airport, Delfino and Bianco and no JPA traversal on the 61 sampled
+unavailable-scene ticks of the completed run.
+Both routes use Null, step-retrace, skipped movies and aim assist; they do not prove switch-free or hardware rendering.
+
+Lead checks: strict link with zero unresolved symbols, 62 headless checks with zero failures,
+matching DOL SHA-1 unchanged and `ninja changes_all` empty; rebuilt-binary WARP boot stays alive for 45 seconds
+without a fatal exception or WebGPU error.
+The initial verification invocation could not find `clang-cl`; setting `LLVM_BIN` to the already installed compiler
+made the strict and headless checks pass without installing anything.
+See `decomp-rounds.md` for the initializer branch/FP evidence and diagnostic ownership chain.
+
 ### Update 2026-10-15: matching refresh and bath-water reserve-drop correction
 
 Source `bf1ea15`; full `sms/` build and `changes_all`: 11 323/12 881 byte-identical functions (87.90467 %),

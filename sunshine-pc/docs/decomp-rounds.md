@@ -128,6 +128,80 @@ tick 8520. The control lacks debug symbols, so its exact faulting object remains
 The transition failure exists with pre-fix bath-water source too; tracked in
 [issue #12](https://github.com/Astrr00/SMSunshinePC/issues/12).
 
+## Bath-water initializer re-review (2026-10-15, takeover)
+
+BathInitializer reviewed the complete retail `initializeIfYet_` range `0x801FAC00-0x801FB8B8`, its source and embedded
+`initialize`, `calcWaterModel` and drop helpers using the complete `decomp-diff.py --no-collapse` output.
+No additional source correction was justified; the initializer ledger entry is restored to `logic-verified`.
+This supersedes the pending initializer review above, not the separate `perform` spawn-position FP gap.
+
+| Retail range | Checked path |
+| --- | --- |
+| `0x801FAC48-0x801FAC98` | Already initialized return; bathtub name lookup, null check and readiness field |
+| `0x801FACDC-0x801FAE00` | Two actors; active count from parameters; reset all 500 allocated drops; hit-actor arguments and flags |
+| `0x801FAE04-0x801FAFF0` | Both gravity paths; position integration, box clearing and bathtub collision; active-end pretests |
+| `0x801FAFF4-0x801FB0CC` | `count*30 > activeCount`; average, square root and upper clamp; zero-height alternative |
+| `0x801FB0D0-0x801FB324` | Intersection gate; unconditional first pair; stride reload, distance comparison and b-before-a box writes |
+| `0x801FB328-0x801FB6A0` | Normal/lowered threshold, replenishment gates, reset or swap-delete and replacement-drop integration |
+| `0x801FB6A4-0x801FB778` | Positive-lifetime gate, increment-before-compare, `age > lifeTime`; local end shrinks each iteration even without deletion |
+| `0x801FB77C-0x801FB870` | At most one replenishment or excess-count clamp; 200 steps per actor; publish manager pointer after both actors |
+
+Used FP dependencies retain all three `fnmsubs` boundaries (`0x801FB098`, `0x801FB184`, `0x801FB340`) and division order.
+The two square-root sequences preserve `frsqrte`, `frsp`, multiply and correction rounding.
+Retail's extra `half*normalY` multiply (`0x801FB1DC` / `0x801FB1F0`) only feeds a temporary overwritten before any reader;
+the current object computes the same used value once.
+The extra radius reload sees unchanged parameters across the checked helpers.
+Constants and the Japanese lookup name are byte-identical in the object comparison.
+The frame differs (`0x280` retail, `0x2b8` current), but live stack objects remain separate:
+gravity `0x148/0x154` maps to `0x180/0x18c`, count `0x178` to `0x198`, accumulator `0x17c` to `0x19c`,
+pair delta `0x160` to `0x1a8`, pair normal `0x16c` to `0x1b8`, and return objects
+`0x188/0x194/0x1a0/0x1ac` to `0x1c4/0x1d0/0x1dc/0x1e8`.
+Complete `getGravityDir` and `calcBathtub` diffs were also reviewed; used arithmetic, branches and writes agree.
+
+Lead validation: `ninja -k 0` retains the reference DOL SHA-1; `ninja changes_all` reports no changes.
+The full `report.json` retains `94.61472` for the initializer.
+The direct per-object comparison reported `94.59019`; this score difference is not a source change or a matching gain.
+No Corona fight comparison was run; modified drop-count/stride parameters remain subject to retail's unchecked capacity.
+
+## Devscript scene lifetime correction (2026-10-15, takeover)
+
+TransitionLifetime traced issue #12 to scene-heap ownership, not a corrupt-node condition needing a null check.
+`MarDirectorLoadResource.cpp` allocates particle managers in the scene heap.
+`TMarDirector::~TMarDirector` clears `gpEmitterManager4D2` and `gpMarDirector`, but the old 3D manager and several other
+scene globals remain non-null when `Application.cpp` frees the scene heap.
+The following PAD read invokes devscript before the next director's `direct()` has joined the setup thread.
+Even the new director pointer alone is insufficient: its constructor publishes it before setup completes.
+
+`devscript.cpp::sceneReady()` now requires gameplay state, the application's active director, and `unk260 == 1`.
+That existing marker is set only after the setup-thread join and `setupObjects()`.
+Status logging, scene-object route conditions and aim assist use this shared boundary before dereferencing scene data.
+Live JPA traversal is unchanged; unavailable scenes still report THP state, tick and stage/scenario.
+No retail director-state special case, pointer-address heuristic or Aurora change was added.
+
+Lead validation: Strict link has zero unresolved symbols and all 62 headless checks pass.
+The first route run, `takeover_lifetime85_20261015`, uses Null, step-retrace, skipped movies, aim assist,
+`SUNSHINE_DEV_STATUS=1` and no periodic screenshot monitor.
+It survives the airport Shine teardown and reaches Delfino 1/1 with one Shine; the 330-second wall limit stops it at
+tick 15510 while starting the gate waypoint at route line 347 (rc 124).
+An assert-based log check verifies JPA statistics in airport 0/1, Delfino 1/0 and 1/1, with no JPA traversal on ticks
+marked `(scene not ready)` and no fatal exception.
+This proves the corrected transition path, not completion of the full acceptance route within 330 seconds.
+
+The extended fresh-profile run, `takeover_lifetime85_long_20261015`, keeps the same environment and raises only
+the wall limit to 650 seconds: rc 0 after 364 seconds, done at tick 18210, Bianco 2/0, director state 4, one Shine.
+`gci_check.py` independently validates the temporary card and all seven block checksums.
+An assert-based check confirms that every sampled live-scene status retains JPA statistics, including airport 0/1,
+Delfino 1/0 and Bianco 2/0, and excludes JPA traversal on all 61 sampled unavailable-scene ticks.
+There is no fatal exception or route TIMEOUT in the completed run.
+Route 86 with that card (`takeover_lifetime86_20261015`) returns rc 0 after 17 seconds, tick 1675:
+the pre-load option-map count is zero and the loaded, controllable Delfino scene 1/0 has one Shine.
+The historical expectation of scenario 5 is not part of the save-count contract.
+The rebuilt binary also passes a separate 45-second WARP boot smoke with isolated APPDATA/USERPROFILE,
+no fatal exception and no WebGPU error.
+Evidence lives under `build/Route/takeover_lifetime*`, `build/takeover-strict.log`, `build/takeover-headless.log`
+and `build/verify/boot.log`; no user save directory was used.
+No fresh-clone or hardware-GPU check was repeated, and no remote issue state was changed.
+
 ## Process notes
 
 - Agents work in clones (`clone-3`, `clone-chase`, `fresh-gate-2`) on `agent/<name>` branches and never push; the lead
