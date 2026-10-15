@@ -234,19 +234,18 @@ static void evIsNearActors(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 
 	if (arg_num >= 3) {
 		THitActor* which = (THitActor*)getNameRefPtr(
-		    interp->mProcessStack.getFromTop(arg_num - 1));
+		    interp->mProcessStack.mData[interp->mProcessStack.mSize - arg_num]);
 		if (which) {
 			f32 dist
 			    = interp->mProcessStack.getFromTop(arg_num - 2).getDataFloat();
+			u32 i = 2;
 			count = 1;
 
-			for (u32 i = 2; i < arg_num; ++i) {
+			for (; i < arg_num; ++i) {
 				THitActor* other = (THitActor*)getNameRefPtr(
-				    interp->mProcessStack.getFromTop(arg_num - 1 - i));
+				    interp->mProcessStack.mData[interp->mProcessStack.mSize - (arg_num - i)]);
 				if (other) {
-					JGeometry::TVec3<f32> diff = which->mPosition;
-					diff -= other->mPosition;
-					if (evLength(diff) <= dist)
+					if (evLength(which->mPosition - other->mPosition) <= dist)
 						count++;
 				}
 			}
@@ -486,9 +485,11 @@ static void evSetPollutionIncreaseCount(TSpcTypedInterp<TEventWatcher>* interp,
 
 static void evGetRestTime(TSpcTypedInterp<TEventWatcher>* interp, u32 arg_num)
 {
+	SLICE_SLOT;
 	char trash[8];
 	interp->verifyArgNum(0, &arg_num);
-	interp->push(SMSGetMarDirector()->getRestTime());
+	int rest = SMSGetMarDirector()->getRestTime();
+	SLICE_PUSH(interp, rest);
 }
 
 static void evGetPollutionLevel(TSpcTypedInterp<TEventWatcher>* interp,
@@ -554,8 +555,8 @@ static void evSetGraffitoMultiplied(TSpcTypedInterp<TEventWatcher>* interp,
 	interp->verifyArgNum(1, &arg_num);
 	int enable = TSpcSlice(interp->pop()).getDataInt();
 
-	TPollutionManager* pollution = gpPollution;
 	int i                        = 0;
+	TPollutionManager* pollution = gpPollution;
 	if (enable) {
 		for (; i < pollution->getJointModelNum(); ++i)
 			pollution->getLayer(i)->startSpread();
@@ -1295,10 +1296,9 @@ static void evAppear8RedCoinsAndTimer(TSpcTypedInterp<TEventWatcher>* interp,
 
 JGeometry::TVec3<f32> rotateY(JGeometry::TVec3<f32> vec, s16 angleY)
 {
-	f32 x = vec.x * JMASCos(angleY) + vec.z * JMASSin(angleY);
-	f32 z = -vec.x * JMASSin(angleY) + vec.z * JMASCos(angleY);
-	vec.x = x;
-	vec.z = z;
+	f32 x = vec.x;
+	vec.x = x * JMASCos(angleY) + vec.z * JMASSin(angleY);
+	vec.z = -x * JMASSin(angleY) + vec.z * JMASCos(angleY);
 	return JGeometry::TVec3<f32>(static_cast<const Vec&>(vec));
 }
 
@@ -1312,7 +1312,7 @@ static void evWarpFrontToMario(TSpcTypedInterp<TEventWatcher>* interp,
 
 	actor->mPosition = SMS_GetMarioPos()
 	                   + rotateY(JGeometry::TVec3<f32>(0.0f, 0.0f, 400.0f),
-	                             SMS_GetMarioAngleY());
+	                             *gpMarioAngleY);
 	actor->mRotation.y = SHORTANGLE2DEG((s16)(angleY - 0x8000));
 
 	interp->push();
