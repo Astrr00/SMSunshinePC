@@ -300,6 +300,14 @@ static f32 collisionHeightOffsetOutOfLine(const TMapObjBase* obj)
 }
 #pragma dont_inline off
 
+#ifndef TARGET_PC
+// Dead 0x98-byte expression temp that sits below bind()'s last live temp and
+// brings the frame to retail's 0x270.
+struct BindPad {
+	int w[0x26];
+};
+#endif
+
 void TMuddyBoat::bind()
 {
 	if (checkLiveFlag(LIVE_FLAG_UNK10))
@@ -310,7 +318,8 @@ void TMuddyBoat::bind()
 	pos.x += mtx[0][2] * unk140;
 	pos.z += mtx[2][2] * unk140;
 
-	int cubeNo = gpCubeStream->getInCubeNo(*gpMarioPos);
+	const Vec& marioPos = *gpMarioPos;
+	int cubeNo          = gpCubeStream->getInCubeNo(marioPos);
 	if (cubeNo != -1) {
 		TCubeStreamInfo* info
 		    = (TCubeStreamInfo*)gpCubeStream->unk14->begin()[cubeNo];
@@ -323,6 +332,9 @@ void TMuddyBoat::bind()
 		unk140 += 0.0001f * (dot * info->unk40);
 	}
 
+	// Named slots with no code, in retail's order: 0x18 above the ground
+	// pointer, 0x30 + 0xc + 0xc between center and the three wall records.
+	char gap[0x18];
 	const TBGCheckData* ground;
 	f32 groundY = gpMap->checkGroundIgnoreWaterSurface(pos, &ground);
 	if (groundY > mPosition.y - mYOffset - 100.0f
@@ -333,29 +345,41 @@ void TMuddyBoat::bind()
 		return;
 	}
 
-	if (!bindToWall(JGeometry::TVec3<f32>(pos.x + mtx[0][2] * unk160,
-	                                      mPosition.y - mYOffset,
-	                                      pos.z + mtx[2][2] * unk160),
-	                unk158, &pos)) {
-		if (!bindToWall(JGeometry::TVec3<f32>(pos.x - mtx[0][2] * unk164,
-		                                      mPosition.y - mYOffset,
-		                                      pos.z - mtx[2][2] * unk164),
-		                unk15C, &pos)) {
-			if (!bindToWall(JGeometry::TVec3<f32>(pos.x, mPosition.y - mYOffset,
-			                                      pos.z),
-			                unk154, &pos)) {
-				mLinearVelocity = pos - mPosition;
-			}
-		}
+	JGeometry::TVec3<f32> center;
+	char gap2[0x30];
+	TBGWallCheckRecord rec1;
+	char d2[0xc];
+	TBGWallCheckRecord rec2;
+	char d3[0xc];
+	TBGWallCheckRecord rec3;
+	char gap4[0x10];
+	center.set(pos.x + mtx[0][2] * unk160, mPosition.y - mYOffset,
+	           pos.z + mtx[2][2] * unk160);
+	if (bindToWall(rec1, center, unk158, &pos))
+		return;
+	center.set(pos.x - mtx[0][2] * unk164, mPosition.y - mYOffset,
+	           pos.z - mtx[2][2] * unk164);
+	if (bindToWall(rec2, center, unk15C, &pos))
+		return;
+	center.set(pos.x, mPosition.y - mYOffset, pos.z);
+	if (bindToWall(rec3, center, unk154, &pos))
+		return;
+	mLinearVelocity = pos - mPosition;
+#ifndef TARGET_PC
+	if (0) {
+		(void)(BindPad){ { 0 } };
 	}
-	char trash[0xF0];
+#endif
 }
 
-inline bool TMuddyBoat::bindToWall(const JGeometry::TVec3<f32>& center,
+inline bool TMuddyBoat::bindToWall(TBGWallCheckRecord& record,
+                                   const JGeometry::TVec3<f32>& center,
                                    f32 radius, JGeometry::TVec3<f32>* pos)
 {
-	TBGWallCheckRecord record(center, radius, 4,
-	                          TBGWallCheckRecord::DONT_MOVE_XZ);
+	record.mCenter     = center;
+	record.mRadius     = radius;
+	record.mMaxResults = 4;
+	record.mFlags      = TBGWallCheckRecord::DONT_MOVE_XZ;
 	if (gpMap->isTouchedWallsAndMoveXZ(&record)) {
 		touchWall(pos, record);
 		return true;

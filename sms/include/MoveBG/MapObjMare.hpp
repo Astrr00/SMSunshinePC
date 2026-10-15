@@ -156,7 +156,8 @@ public:
 	void moveByWater();
 	// both inlined into bind()
 	void touchWall(JGeometry::TVec3<f32>* pos, const TBGWallCheckRecord& record);
-	bool bindToWall(const JGeometry::TVec3<f32>& center, f32 radius,
+	bool bindToWall(TBGWallCheckRecord& record,
+	                const JGeometry::TVec3<f32>& center, f32 radius,
 	                JGeometry::TVec3<f32>* pos);
 
 public:
