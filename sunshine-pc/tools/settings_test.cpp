@@ -49,10 +49,16 @@ int main()
 	assert(!back.menuSounds && defText.find("menu_sounds=1") != std::string::npos);
 	assert(parseSettings("").menuSounds && !parseSettings("[audio]\nmenu_sounds=0\n").menuSounds);
 	assert(serializeSettings(back) == text);
-	for (GlyphStyle g : {GlyphStyle::Switch, GlyphStyle::GameCube, GlyphStyle::Generic}) {
+	for (GlyphStyle g : {GlyphStyle::Switch, GlyphStyle::GameCube, GlyphStyle::Keyboard, GlyphStyle::Generic}) {
 		Settings gs;
 		gs.glyphStyle = g;
 		assert(parseSettings(serializeSettings(gs)).glyphStyle == g);
+	}
+	{ // the INI name is the one the glyph loader's style directory and the launcher row use
+		Settings ks;
+		ks.glyphStyle = GlyphStyle::Keyboard;
+		assert(serializeSettings(ks).find("glyph_style=keyboard\n") != std::string::npos);
+		assert(parseSettings("[interface]\nglyph_style=keyboard\n").glyphStyle == GlyphStyle::Keyboard);
 	}
 
 	// Out-of-range values are clamped; garbage and unknown keys fall back or are ignored.

@@ -94,6 +94,7 @@ const char* glyphName(GlyphStyle style)
 	case GlyphStyle::PlayStation: return "playstation";
 	case GlyphStyle::Switch:      return "switch";
 	case GlyphStyle::GameCube:    return "gamecube";
+	case GlyphStyle::Keyboard:    return "keyboard";
 	case GlyphStyle::Generic:     break;
 	}
 	return "generic";
@@ -109,6 +110,8 @@ GlyphStyle parseGlyph(const std::string& s)
 		return GlyphStyle::Switch;
 	if (s == "gamecube")
 		return GlyphStyle::GameCube;
+	if (s == "keyboard")
+		return GlyphStyle::Keyboard;
 	return GlyphStyle::Generic;
 }
 

@@ -12,7 +12,7 @@ GlyphStyle g_glyphStyle = GlyphStyle::Xbox;
 
 namespace {
 
-constexpr const char* kStyleDir[] = {"xbox", "playstation", "switch", "gamecube"};
+constexpr const char* kStyleDir[] = {"xbox", "playstation", "switch", "gamecube", "keyboard"};
 constexpr const char* kButtonFile[] = {"a", "b", "x", "y", "z", "start", "l", "r",
                                        "dpad_up", "dpad_down", "dpad_left", "dpad_right",
                                        "c_up", "c_down", "c_left", "c_right", "stick_l", "stick_r"};

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Generate original flat-vector controller button glyphs.
 
-Output: assets/glyphs/<set>/<button>.png, 128x128 RGBA8, sets xbox, playstation, switch, gamecube.
+Output: assets/glyphs/<set>/<button>.png, 128x128 RGBA8, sets xbox, playstation, switch, gamecube, keyboard.
 Geometry is generic (discs, squares, triangles, stroke letters); no vendor artwork is copied.
+The keyboard set draws keycaps labelled with the default key of each pad input (src/sdk/pad_keys.cpp).
 Shapes are signed-distance fields evaluated on a 2x2 supersample grid per pixel.
-Run: python tools/gen_glyphs.py
+Run: python tools/gen_glyphs.py [style ...]   (no argument: every set; a style name rewrites only that set)
 """
 import functools
 import math
 import os
 import struct
+import sys
 import zlib
 
 SIZE = 128
@@ -34,6 +36,21 @@ STYLES = {
                    util=(70, 70, 78), ink=WHITE, cdisc=(70, 70, 78), z=GREY),
     "gamecube": dict(face="gc", col=dict(a=(40, 160, 110), b=(200, 60, 60), x=(90, 80, 170), y=(90, 80, 170)),
                      util=(90, 80, 170), ink=WHITE, cdisc=(230, 200, 60), z=(90, 80, 170)),
+    "keyboard": dict(face="keycap", col={}, util=(70, 70, 78), ink=(44, 44, 50), cdisc=(242, 242, 244), z=GREY),
+}
+
+# Keycap colours (keyboard set only).
+KEY_TOP = (242, 242, 244)
+KEY_EDGE = (150, 150, 160)
+KEY_LEGEND = (44, 44, 50)
+KEY_BG = (70, 70, 78)
+
+# Default keyboard key per pad input, from src/sdk/pad_keys.cpp: A Space, B E, X Q, Y F, Start Enter, Z Z,
+# L Left Shift, R Left Ctrl, D-pad arrows, C-stick IJKL, left stick WASD (cluster), stick_r IJKL (cluster).
+KEYBOARD_KEYS = {
+    "a": "SPACE", "b": "E", "x": "Q", "y": "F", "start": "ENTER", "z": "Z", "l": "SHIFT", "r": "CTRL",
+    "dpad_up": "UP", "dpad_down": "DOWN", "dpad_left": "LEFT", "dpad_right": "RIGHT",
+    "c_up": "I", "c_down": "K", "c_left": "J", "c_right": "L",
 }
 
 # Stroke letters in normalized coords (u right, v down), each polyline in [-1, 1].
@@ -47,6 +64,17 @@ LETTERS = {
     "Z": [[(-0.9, -1), (0.9, -1), (-0.9, 1), (0.9, 1)]],
     "L": [[(-0.5, -1), (-0.5, 1), (0.7, 1)]],
     "R": [[(-0.7, 1), (-0.7, -1), (0.25, -1), (0.6, -0.6), (0.25, -0.1), (-0.7, -0.1)], [(-0.1, -0.1), (0.7, 1)]],
+    "C": [[(0.8, -0.75), (0.4, -1), (-0.4, -1), (-0.8, -0.5), (-0.8, 0.5), (-0.4, 1), (0.4, 1), (0.8, 0.75)]],
+    "D": [[(-0.8, -1), (-0.8, 1), (0.2, 1), (0.8, 0.5), (0.8, -0.5), (0.2, -1), (-0.8, -1)]],
+    "E": [[(0.8, -1), (-0.8, -1), (-0.8, 1), (0.8, 1)], [(-0.8, 0), (0.4, 0)]],
+    "F": [[(0.8, -1), (-0.8, -1), (-0.8, 1)], [(-0.8, 0), (0.4, 0)]],
+    "I": [[(-0.5, -1), (0.5, -1)], [(0, -1), (0, 1)], [(-0.5, 1), (0.5, 1)]],
+    "J": [[(0.5, -1), (0.5, 0.5), (0, 1), (-0.5, 1), (-0.6, 0.5)]],
+    "K": [[(-0.7, -1), (-0.7, 1)], [(0.7, -1), (-0.7, 0.1)], [(-0.2, -0.2), (0.7, 1)]],
+    "Q": [[(-0.8, -1), (0.8, -1), (0.8, 1), (-0.8, 1), (-0.8, -1)], [(0.2, 0.2), (0.9, 1.1)]],
+    "S": [[(0.8, -0.9), (0.4, -1), (-0.4, -1), (-0.8, -0.5), (-0.4, 0), (0.4, 0), (0.8, 0.5), (0.4, 1), (-0.4, 1), (-0.8, 0.9)]],
+    "T": [[(-0.9, -1), (0.9, -1)], [(0, -1), (0, 1)]],
+    "W": [[(-1, -1), (-0.5, 1), (0, -0.1), (0.5, 1), (1, -1)]],
 }
 
 
@@ -103,6 +131,13 @@ def letter_segs(ch, cx, cy, hh):
 
 def letter(ch, cx, cy, hh, w):
     return functools.partial(sd_strokes, segs=letter_segs(ch, cx, cy, hh), w=w)
+
+
+def key_text(text, cx, cy, hh, w):
+    # letters side by side, centred on cx
+    adv = hh * 0.8 * 2.5
+    x0 = cx - (len(text) - 1) * adv / 2
+    return [letter(ch, x0 + i * adv, cy, hh, w) for i, ch in enumerate(text)]
 
 
 def arrow(dx, dy, cx=C, cy=C, size=30):
@@ -170,7 +205,45 @@ def util_layers(style, btn):
             (letter(btn[-1].upper(), C, C, 22, 10), WHITE)]
 
 
+def keycap(cx, cy, s, legend):
+    # keycap body of half-size s: darker edge shifted down, lighter top, legend layers on top
+    r = s * 0.36
+    layers = [(functools.partial(sd_rbox, cx=cx, cy=cy + s * 0.06, hw=s, hh=s, r=r), KEY_EDGE),
+              (functools.partial(sd_rbox, cx=cx, cy=cy - s * 0.04, hw=s - 3, hh=s - 4, r=r - 2), KEY_TOP)]
+    return layers + [(fn, KEY_LEGEND) for fn in legend]
+
+
+def keyboard_layers(btn):
+    if btn in ("stick_l", "stick_r"):
+        # four keys in a cross: up, left, down, right
+        keys = "WASD" if btn == "stick_l" else "IJKL"
+        layers = [(functools.partial(sd_rbox, cx=C, cy=C, hw=56, hh=56, r=24), KEY_BG)]
+        for ch, (ox, oy) in zip(keys, ((0, -27), (-27, 0), (0, 27), (27, 0))):
+            layers += keycap(C + ox, C + oy, 17, [letter(ch, C + ox, C + oy, 11, 7)])
+        return layers
+    key = KEYBOARD_KEYS[btn]
+    if key in ("UP", "DOWN", "LEFT", "RIGHT"):
+        d = {"UP": (0, -1), "DOWN": (0, 1), "LEFT": (-1, 0), "RIGHT": (1, 0)}[key]
+        legend = [arrow(*d, cx=C, cy=C, size=30)]
+    elif key == "SPACE":
+        legend = [functools.partial(sd_rbox, cx=C, cy=C + 6, hw=40, hh=6, r=5)]
+    elif key == "ENTER":
+        segs = [((C + 22, C - 24), (C + 22, C + 8)), ((C + 22, C + 8), (C - 20, C + 8))]
+        legend = [functools.partial(sd_strokes, segs=segs, w=10),
+                  functools.partial(sd_poly, pts=[(C - 34, C + 8), (C - 18, C - 4), (C - 18, C + 20)])]
+    elif key == "SHIFT":
+        legend = [arrow(0, -1, cx=C, cy=C - 4, size=30),
+                  functools.partial(sd_rbox, cx=C, cy=C + 26, hw=11, hh=12, r=3)]
+    elif len(key) == 1:
+        legend = key_text(key, C, C, 30, 11)
+    else:
+        legend = key_text(key, C, C, 12, 8)
+    return keycap(C, C, 54, legend)
+
+
 def layers_for(style, btn):
+    if style == "keyboard":
+        return keyboard_layers(btn)
     if btn in FACE:
         return face_layers(style, btn)
     return util_layers(style, btn)
@@ -217,10 +290,11 @@ def write_png(path, rgba):
         f.write(png)
 
 
-def main():
+def main(argv):
     root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "glyphs")
+    styles = argv or list(STYLES)
     count = 0
-    for style in STYLES:
+    for style in styles:
         for btn in BUTTONS:
             write_png(os.path.join(root, style, btn + ".png"), render(layers_for(style, btn)))
             count += 1
@@ -228,4 +302,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

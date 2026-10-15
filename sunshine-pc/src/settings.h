@@ -9,7 +9,7 @@
 
 namespace sunshine {
 
-enum class GlyphStyle : int { Generic = 0, Xbox, PlayStation, Switch, GameCube };
+enum class GlyphStyle : int { Generic = 0, Xbox, PlayStation, Switch, GameCube, Keyboard };
 
 struct Settings {
 	// [video]

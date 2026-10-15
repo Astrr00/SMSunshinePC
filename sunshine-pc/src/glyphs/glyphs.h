@@ -10,6 +10,7 @@ enum class GlyphStyle : uint8_t {
     PlayStation,
     Switch,
     GameCube,
+    Keyboard,
     Count,
 };
 
