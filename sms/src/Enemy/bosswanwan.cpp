@@ -597,14 +597,15 @@ void TBWHit::perform(u32 flags, JDrama::TGraphics* graphics)
 void TBWBinder::bind(TLiveActor* actor)
 {
 	TBossWanwan* boss = static_cast<TBossWanwan*>(actor);
-	char trash[0xa8]; // stack padding to match the retail frame size
 
 	JGeometry::TVec3<f32> velocity = boss->mLinearVelocity;
 	JGeometry::TVec3<f32> nextPos  = boss->mPosition;
+	JGeometry::TVec3<f32> fall;
+	char trash[0xa8]; // stack padding to match the retail frame size
 	nextPos += velocity;
 
 	if (boss->isAirborne()) {
-		JGeometry::TVec3<f32> fall = boss->mVelocity;
+		fall = boss->mVelocity;
 		nextPos += fall;
 		fall.y -= boss->getGravityY();
 		if (fall.y < TLiveActor::mVelocityMinY)
