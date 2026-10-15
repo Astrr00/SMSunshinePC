@@ -60,12 +60,14 @@ def rect(x, y, w, h, fill, extra=""):
     return f'<rect x="{x:.1f}" y="{y:.1f}" width="{max(w,0):.1f}" height="{max(h,0):.1f}" fill="{fill}"{extra}/>'
 
 
-def label(x, y, w, h, text, size=11, color="#fff"):
-    n = int((w - 6) / (size * 0.58))
+def label(x, y, w, h, text, size=11, color="#fff", bold=False):
+    n = int((w - 6) / (size * 0.6))
     if n < 3 or h < size + 4:
         return ""
     t = text if len(text) <= n else text[: n - 1] + "…"
-    return f'<text x="{x+3:.1f}" y="{y+size+1:.1f}" font-size="{size}" fill="{color}">{escape(t)}</text>'
+    wt = ' font-weight="700"' if bold else ""
+    return (f'<text x="{x+4:.1f}" y="{y+size+2:.1f}" font-size="{size}"{wt} fill="{color}" '
+            f'stroke="#000" stroke-opacity=".55" stroke-width="3" paint-order="stroke">{escape(t)}</text>')
 
 
 def decomp_panel(x0, y0, w, h):
@@ -85,8 +87,8 @@ def decomp_panel(x0, y0, w, h):
             frac = mt / t if t else 1.0
             s.append(rect(ux + CELL_GAP, uy + CELL_GAP, uw - 2 * CELL_GAP, uh - 2 * CELL_GAP, GREY))
             s.append(rect(ux + CELL_GAP, uy + CELL_GAP, (uw - 2 * CELL_GAP) * frac, uh - 2 * CELL_GAP, GREEN))
-        s.append(rect(gx, gy, gw, gh, "none", ' stroke="#0d1117" stroke-width="2"'))
-        s.append(label(gx, gy, gw, gh, k, 11))
+        s.append(rect(gx, gy, gw, gh, "none", ' stroke="#0d1117" stroke-width="3"'))
+        s.append(label(gx, gy, gw, gh, k, 15, "#fff", True))
     return "".join(s), tot["matched_functions"], tot["total_functions"]
 
 
@@ -116,22 +118,34 @@ def port_panel(x0, y0, w, h):
     s = []
     for (name, state, pct), x, y, cw, ch in squarify(items, x0, y0, w, h):
         s.append(rect(x + 1, y + 1, cw - 2, ch - 2, port_color(state, pct)))
-        s.append(label(x + 1, y + 1, cw - 2, ch - 2, name, 11))
-        s.append(label(x + 1, y + 15, cw - 2, ch - 15, f"{pct} %", 11, "#eee"))
+        words, lines, cur = re.split(r"[,(]", name)[0].split(), [], ""
+        per = max(int((cw - 10) / 9.0), 4)
+        for wd in words:
+            if cur and len(cur) + 1 + len(wd) > per:
+                lines.append(cur)
+                cur = wd
+            else:
+                cur = (cur + " " + wd).strip()
+        lines.append(cur)
+        for i, ln in enumerate(lines[:3]):
+            s.append(label(x + 1, y + 1 + i * 17, cw - 2, ch - 2, ln, 15, "#fff", True))
+        s.append(label(x + 1, y + 1 + min(len(lines), 3) * 17, cw - 2, ch - 2, f"{pct} %", 20, "#fff"))
     mean = sum(p for _, _, p in rows) / max(len(rows), 1)
     return "".join(s), mean, len(rows)
 
 
 def main():
-    W, H, top, pw = 1200, 470, 70, 560
-    dp, mf, tf = decomp_panel(10, top, pw, H - top - 10)
-    pp, mean, n = port_panel(10 + pw + 20, top, W - pw - 40, H - top - 10)
+    W, H, pw = 1000, 1060, 980
+    dh, ph = 540, 400
+    dp, mf, tf = decomp_panel(10, 70, pw, dh)
+    py = 70 + dh + 50
+    pp, mean, n = port_panel(10, py, pw, ph)
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
         f'font-family="Segoe UI,Helvetica,Arial,sans-serif">{rect(0,0,W,H,BG)}'
-        f'<text x="10" y="24" font-size="18" font-weight="700" fill="#fff">Status</text>'
-        f'<text x="10" y="50" font-size="14" fill="#c9d1d9">Decompiled functions: {100*mf/tf:.1f}% ({mf}/{tf}), cell = unit, green = byte-identical share</text>'
-        f'<text x="{10+pw+20}" y="50" font-size="14" fill="#c9d1d9">Port rows: mean {mean:.0f}% ({n} rows), colour = percent</text>'
+        f'<text x="10" y="28" font-size="22" font-weight="700" fill="#fff">Status</text>'
+        f'<text x="10" y="54" font-size="16" fill="#c9d1d9">Decompiled functions: {100*mf/tf:.1f}% ({mf}/{tf}), cell = unit, green = byte-identical share</text>'
+        f'<text x="10" y="{py-14}" font-size="16" fill="#c9d1d9">Port rows: mean {mean:.0f}% ({n} rows), colour = percent</text>'
         f"{dp}{pp}</svg>"
     )
     OUT.parent.mkdir(parents=True, exist_ok=True)
