@@ -2160,7 +2160,7 @@ DEFINE_NERVE(TNerveBossTelesaSlotStart, TLiveActor)
 
 DEFINE_NERVE(TNerveBossTelesaSpitSlotItem, TLiveActor)
 {
-	char trash[0x20];
+	char trash[0x18];
 	TBossTelesa* boss = static_cast<TBossTelesa*>(spine->getBody());
 
 	if (!boss->mMActor->checkCurBckFromIndex(14)
