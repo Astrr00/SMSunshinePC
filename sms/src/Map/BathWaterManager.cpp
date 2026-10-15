@@ -1873,15 +1873,17 @@ void TBathWaterManager::perform(u32 cue, JDrama::TGraphics* graphics)
 					unk20[1]->addDrop(vel, 10.0f * unk10.get_float01());
 			}
 
-			TBathWater* soundBw = unk20[0];
-			JGeometry::TVec3<f32> avg;
-			avg.set(soundBw->unk78);
-			f32 tmp = soundBw->unk84;
-			if (tmp > 0.0f)
-				SMSGetMSound()->startSoundActorWithInfo(MSD_SE_BS_KOOPA_FLOOD,
-				                                        &avg, nullptr, tmp, 0,
-				                                        0, nullptr, 0, 4);
 		}
+
+		// asm 0x801F8920 -> 0x801F971C -> 0x801F9AD0: sound runs on every move cue.
+		TBathWater* soundBw = unk20[0];
+		JGeometry::TVec3<f32> avg;
+		avg.set(soundBw->unk78);
+		f32 tmp = soundBw->unk84;
+		if (tmp > 0.0f)
+			SMSGetMSound()->startSoundActorWithInfo(MSD_SE_BS_KOOPA_FLOOD,
+			                                        &avg, nullptr, tmp, 0,
+			                                        0, nullptr, 0, 4);
 	}
 
 	if (cue & CUE_DRAW)

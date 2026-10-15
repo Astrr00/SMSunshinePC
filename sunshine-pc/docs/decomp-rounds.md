@@ -202,6 +202,61 @@ Evidence lives under `build/Route/takeover_lifetime*`, `build/takeover-strict.lo
 and `build/verify/boot.log`; no user save directory was used.
 No fresh-clone or hardware-GPU check was repeated, and no remote issue state was changed.
 
+## Bath-water sound cadence and FP closure (2026-10-15, continuation)
+
+BathSpawnFP reviewed the complete `perform` range `0x801F887C-0x801F9BC8` and found a sound-control-flow defect.
+Retail's non-quartertick path branches at `0x801F8920` through the spawn test to sound at `0x801F9AD0`.
+Source incorrectly put sound inside the quartertick physics/hit block.
+For an initialized manager, `CUE_MOVE`, old counter zero and positive amplitude, retail attempts sound while old source
+does not.
+The sound block now sits outside the quartertick block, still inside `CUE_MOVE`.
+Spawn remains correctly gated: `(counter & 7) == 4` implies `(counter & 3) == 0`.
+
+The rebuilt complete object differs by exactly one instruction: source `.text+0x150` now branches to sound `0x12fc`
+instead of draw `0x1370`.
+The fast path initializes every register it uses; live stack objects retain the reviewed injective mapping,
+including sound position `retail 0x328 -> source 0x38c`, frames `0x418 / 0x480`.
+
+The previous finite spawn-FP and random-wrapper gaps are closed analytically:
+- All used fused arithmetic boundaries agree; the two extra retail X/Z fusions multiply exact zero by finite radius.
+- Y retains `fma(1, radius, axis.y)`; final center additions retain finite rounding and signed-zero behavior.
+- The folded up setter only writes `(0,1,0)` and has no hidden effect.
+- Random conversion uses exact dyadic values from the same LCG state; range/velocity wrappers and RNG consumption agree.
+- Lead CRT `fmaf` versus separate f32 assertions pass for zeros, signed zeros, normal/subnormal extrema and RNG
+  endpoint/cancellation samples.
+
+The ledger deliberately remains partial for unconditional NaN-payload/FP-state equivalence:
+the final center additions swap operands (`retail 0x801F99C0/C4/C8`, source `.text+0x11e8/ec/f0`).
+No remaining finite FMA-rounding mismatch was found; no assertion of NaN-payload bit identity is made.
+
+Matching report remains `94.09952`, with `changes_all` empty: the corrected branch operand scores as a mismatch both
+before and after, despite the important semantic change.
+The wrapper uses `functionRelocDiffs=data_value` and reports `94.083336`; the full report uses default comparison.
+Both inspect the same objects, not stale or alternate paths.
+Lead validation: full matching/reference SHA-1 PASS, Strict zero unresolved, 62 headless checks PASS,
+45-second WARP boot PASS; logs in `build/bath-fp-verification.log` and `build/verify/`.
+
+Native Corona smoke was attempted against the before-fix `3c10554` fresh-checkout build.
+The real scenario is stage 60/0, archive `coronaBoss.arc`; the normal dev-start prefix resolver cannot select a name
+without the trailing digit it expects.
+An isolated clone temporarily accepted an exact archive basename and logged sound-block entry; neither hook is shipped.
+Run `bath_sound_before_20261015` reaches stage 60/0 at tick 109, then aborts on `convert_texture: unknown texture format 22`
+before any sound observation (`0xC0000409`, about two seconds).
+This pre-fix failure is tracked in [issue #13](https://github.com/Astrr00/SMSunshinePC/issues/13).
+Both temporary source hooks and the throwaway route were removed.
+No audible cadence or Corona-fight comparison is claimed.
+
+## EventWatcher whole-function reviews (2026-10-15, continuation)
+
+EventWarpAudit reviewed complete `evWarpFrontToMario` and `evAppear8RedCoinsAndTimer` plus their helpers.
+No source change was justified.
+Warp's retail yaw reload has no intervening aliasing store or call; register masking gives the same table index.
+For `actor == Mario`, face yaw (`+0x96`) is distinct from rotation (`+0x34`), and position is copied before actor writes.
+The whole-function ledger stays `logic-verified`; its stale score is corrected to the full report's `94.98582`
+(wrapper `94.950356`).
+Appear8 is already byte-identical: all 122 instructions, eight-coin loop, particle arguments and timer/push paths agree.
+Its stale `partial` row becomes `matched` at 100%; this is a ledger correction, not an additional matched function.
+
 ## Process notes
 
 - Agents work in clones (`clone-3`, `clone-chase`, `fresh-gate-2`) on `agent/<name>` branches and never push; the lead

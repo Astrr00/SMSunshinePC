@@ -6,6 +6,28 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-15: published lifetime fix, bath-water sound and EventWatcher
+
+The verified lifetime fix and previous initializer review are published in `3c10554`; issue #12 is closed.
+A fresh local clone of that commit builds with unresolved symbols disabled, using cached dependency source packages
+and separately checked-out Aurora `50e5be3` with all 16 tracked patches; project objects were rebuilt.
+
+The next two delegated tasks found/corrected bath-water sound being gated to every fourth move tick and confirmed
+both EventWatcher warp and Appear8 whole-function reviews.
+The rebuilt matching object contains exactly the intended sound-branch target change.
+Finite spawn-FP/signed-zero/RNG gaps are analytically closed and CRT f32 edge assertions pass; unconditional
+NaN-payload/FP-state equivalence remains partial.
+Appear8 was already byte-identical; its stale partial ledger row is now matched, not a new matching gain.
+Ledger prefixes: 1 976 logic-verified, 150 matched, 252 partial; three legacy malformed rows excluded.
+Full matching totals remain 11 323/12 881 byte-identical, reference SHA-1 unchanged.
+`verify --build --matching`: 7 PASS, 0 FAIL, 1 SKIP (optional probe-units); strict zero unresolved, 62 headless checks,
+45-second WARP boot without fatal exception or WebGPU error.
+
+An isolated pre-fix Corona dev-start smoke reaches stage 60/0 at tick 109, then aborts on unknown texture format 22,
+before any sound-cadence observation. Temporary exact-archive-name and logging hooks were removed and are not shipped.
+This runtime blocker is tracked in [issue #13](https://github.com/Astrr00/SMSunshinePC/issues/13).
+No audible Corona or hardware-GPU result is claimed; detailed branch/FP evidence is in `decomp-rounds.md`.
+
 ### Update 2026-10-15: takeover, scene lifetime and initializer review
 
 Last source work was `bf1ea15` (bath-water first-pair collision correction), followed by the `88d7c5d` status refresh.
