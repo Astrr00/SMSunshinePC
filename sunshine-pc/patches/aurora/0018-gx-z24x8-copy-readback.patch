@@ -1,0 +1,344 @@
+diff --git a/lib/gfx/tex_copy_conv.cpp b/lib/gfx/tex_copy_conv.cpp
+--- a/lib/gfx/tex_copy_conv.cpp
++++ b/lib/gfx/tex_copy_conv.cpp
+@@ -260,6 +260,14 @@ static constexpr std::string_view FragZ16 = R"(
+ }
+ )"sv;
+ 
++// GX_TF_Z24X8: RGBA holds the depth bytes (HH, MM, LL, 0).
++static constexpr std::string_view FragZ24X8 = R"(
++@fragment fn fs_main(in: VertexOutput) -> @location(0) vec4f {
++    let z24 = gx_z24(in.uv);
++    return vec4f(f32((z24 >> 16u) & 0xFFu), f32((z24 >> 8u) & 0xFFu), f32(z24 & 0xFFu), 0.0) / 255.0;
++}
++)"sv;
++
+ // Depth -> R32Float (no scaling)
+ static constexpr std::string_view DepthSnapshotShader = R"(
+ @group(0) @binding(0) var src: texture_depth_2d;
+@@ -326,6 +334,7 @@ static constexpr std::array ConvPipelines{
+ static constexpr std::array DepthConvPipelines{
+     ConvPipeline{GX_TF_Z8, FragZ8, wgpu::TextureFormat::RGBA8Unorm, "TexCopyConv Z8"},
+     ConvPipeline{GX_TF_Z16, FragZ16, wgpu::TextureFormat::RGBA8Unorm, "TexCopyConv Z16"},
++    ConvPipeline{GX_TF_Z24X8, FragZ24X8, wgpu::TextureFormat::RGBA8Unorm, "TexCopyConv Z24X8"},
+ };
+ 
+ static wgpu::BindGroupLayout g_bindGroupLayout;
+@@ -453,7 +462,18 @@ static wgpu::RenderPipeline create_pipeline(const ConvPipeline& conv, const std:
+   return g_device.CreateRenderPipeline(&pipelineDescriptor);
+ }
+ 
+-bool needs_conversion(const GXTexFmt fmt) { return g_pipelines.contains(fmt); }
++bool needs_conversion(const GXTexFmt fmt) {
++  const bool available = g_pipelines.contains(fmt);
++  if (gx::is_depth_format(fmt)) {
++    if (!webgpu::g_hasCoreFeatures) {
++      Log.fatal("Depth tex copies are not supported in compatibility mode");
++    }
++    if (!available) {
++      Log.fatal("No depth copy conversion pipeline for format {}", static_cast<int>(fmt));
++    }
++  }
++  return available;
++}
+ 
+ void initialize() {
+   static constexpr std::array bindGroupLayoutEntries{
+@@ -525,7 +545,7 @@ void initialize() {
+       Log.fatal("Output format mismatch for {}", conv.fmt);
+     }
+   }
+-  // Skip depth copies in compatibility mode
++  // Depth copies require core features; needs_conversion rejects unsupported requests.
+   if (webgpu::g_hasCoreFeatures) {
+     for (const auto& conv : DepthConvPipelines) {
+       g_pipelines[conv.fmt] = create_pipeline(conv, DepthShaderPreamble, g_depthBindGroupLayout);
+@@ -570,15 +590,18 @@ void shutdown() {
+ }
+ 
+ static void execute(const wgpu::CommandEncoder& cmd, const ConvRequest& req, const wgpu::RenderPipeline& pipeline) {
++  const bool isDepth = gx::is_depth_format(req.fmt);
++  if (isDepth && !webgpu::g_hasCoreFeatures) {
++    Log.fatal("Depth tex copies are not supported in compatibility mode");
++  }
+   if (!pipeline) {
++    if (isDepth) {
++      Log.fatal("Depth copy conversion pipeline unavailable for format {}", static_cast<int>(req.fmt));
++    }
+     return;
+   }
+   wgpu::BindGroup bindGroup;
+-  if (gx::is_depth_format(req.fmt)) {
+-    // Skip depth copies in compatibility mode
+-    if (!webgpu::g_hasCoreFeatures) {
+-      return;
+-    }
++  if (isDepth) {
+     const std::array bindGroupEntries{
+         wgpu::BindGroupEntry{
+             .binding = 0,
+diff --git a/lib/gfx/depth_peek.cpp b/lib/gfx/depth_peek.cpp
+--- a/lib/gfx/depth_peek.cpp
++++ b/lib/gfx/depth_peek.cpp
+@@ -99,6 +99,10 @@ struct CopyReadback {
+   uint32_t width = 0;
+   uint32_t height = 0;
+   uint64_t gen = 0;
++  // Latest game-thread format: queued work must not stage bytes for an obsolete layout.
++  uint32_t fmt = UINT32_MAX;
++  uint32_t inflightFmt = UINT32_MAX;
++  uint32_t stagedFmt = UINT32_MAX;
+   wgpu::Buffer buffer;
+   uint32_t rowPitch = 0;
+   SlotState state = SlotState::Available;
+@@ -124,12 +128,61 @@ bool g_copyLoggedNull = false;
+ struct PendingCopyMap {
+   const void* dest = nullptr;
+   uint64_t gen = 0;
++  uint32_t fmt = UINT32_MAX;
+   wgpu::Buffer buffer;
+   uint64_t byteSize = 0;
+ };
+ 
+-// Map callback: RGBA8 rows (r = the R8 copy value) -> GX I8 tiles (8x4 texels, 32 bytes per tile), the inverse of
+-// DecodeTiled<I8>.
++constexpr void pack_z24x8(const uint8_t* mapped, uint32_t width, uint32_t height, uint32_t rowPitch,
++                         uint8_t* tiled) {
++  for (uint32_t y = 0; y < height; ++y) {
++    const uint8_t* row = mapped + static_cast<size_t>(y) * rowPitch;
++    for (uint32_t x = 0; x < width; ++x) {
++      const size_t tile = (static_cast<size_t>(y / 4) * (width / 4) + x / 4) * 64;
++      const size_t pixel = ((y & 3) * 4 + (x & 3)) * 2;
++      tiled[tile + pixel] = 0;
++      tiled[tile + pixel + 1] = row[x * 4];
++      tiled[tile + 32 + pixel] = row[x * 4 + 1];
++      tiled[tile + 32 + pixel + 1] = row[x * 4 + 2];
++    }
++  }
++}
++
++template <uint32_t Width, uint32_t Height, uint32_t RowPitch>
++constexpr bool check_z24x8_packing() {
++  std::array<uint8_t, RowPitch * Height> rgba{};
++  std::array<uint8_t, Width * Height * 4> tiled{};
++  for (auto& byte : rgba) {
++    byte = 0xA5; // Padding and alpha must never enter either depth plane.
++  }
++  for (uint32_t i = 0; i < Width * Height; ++i) {
++    const uint32_t z = i == 0 ? 0x123456 : i == 1 ? 0 : i == 2 ? 0xFFFFFF : (i * 0x12345) & 0xFFFFFF;
++    const size_t offset = static_cast<size_t>(i / Width) * RowPitch + (i % Width) * 4;
++    rgba[offset] = static_cast<uint8_t>(z >> 16);
++    rgba[offset + 1] = static_cast<uint8_t>(z >> 8);
++    rgba[offset + 2] = static_cast<uint8_t>(z);
++  }
++  pack_z24x8(rgba.data(), Width, Height, RowPitch, tiled.data());
++  size_t tile = 0;
++  for (uint32_t tileY = 0; tileY < Height; tileY += 4) {
++    for (uint32_t tileX = 0; tileX < Width; tileX += 4, tile += 64) {
++      for (uint32_t p = 0; p < 16; ++p) {
++        const uint32_t i = (tileY + p / 4) * Width + tileX + p % 4;
++        const uint32_t expected = i == 0 ? 0x123456 : i == 1 ? 0 : i == 2 ? 0xFFFFFF : (i * 0x12345) & 0xFFFFFF;
++        const uint32_t z = (uint32_t{tiled[tile + p * 2 + 1]} << 16) |
++                           (uint32_t{tiled[tile + 32 + p * 2]} << 8) | tiled[tile + 32 + p * 2 + 1];
++        if (tiled[tile + p * 2] != 0 || z != expected) {
++          return false;
++        }
++      }
++    }
++  }
++  return true;
++}
++static_assert(check_z24x8_packing<4, 4, 256>());
++static_assert(check_z24x8_packing<84, 8, 512>());
++
++// Map callback: RGBA8 rows -> GX I8 tiles for R8, or canonical 4x4 two-plane Z24X8 tiles.
+ void complete_copy_readback(const PendingCopyMap& pending, wgpu::MapAsyncStatus status, wgpu::StringView message) {
+   std::lock_guard lock{g_mutex};
+   const auto it = g_copyReadbacks.find(pending.dest);
+@@ -137,17 +190,24 @@ void complete_copy_readback(const PendingCopyMap& pending, wgpu::MapAsyncStatus
+                      it->second.buffer.Get() == pending.buffer.Get();
+   if (status == wgpu::MapAsyncStatus::Success) {
+     const auto* mapped = static_cast<const uint8_t*>(pending.buffer.GetConstMappedRange(0, pending.byteSize));
+-    if (alive && mapped != nullptr) {
++    if (alive && mapped != nullptr && pending.fmt == it->second.fmt &&
++        pending.fmt == it->second.inflightFmt && (pending.fmt == GX_CTF_R8 || pending.fmt == GX_TF_Z24X8)) {
+       auto& entry = it->second;
+       const uint32_t w = entry.width;
+       const uint32_t h = entry.height;
+-      entry.staged.resize(static_cast<size_t>(w) * h);
+-      for (uint32_t t = 0; t < h; ++t) {
+-        const uint8_t* row = mapped + static_cast<size_t>(t) * entry.rowPitch;
+-        for (uint32_t s = 0; s < w; ++s) {
+-          entry.staged[((t >> 2) * (w >> 3) + (s >> 3)) * 32 + (t & 3) * 8 + (s & 7)] = row[s * 4];
++      if (pending.fmt == GX_TF_Z24X8) {
++        entry.staged.resize(static_cast<size_t>(w) * h * 4);
++        pack_z24x8(mapped, w, h, entry.rowPitch, entry.staged.data());
++      } else {
++        entry.staged.resize(static_cast<size_t>(w) * h);
++        for (uint32_t t = 0; t < h; ++t) {
++          const uint8_t* row = mapped + static_cast<size_t>(t) * entry.rowPitch;
++          for (uint32_t s = 0; s < w; ++s) {
++            entry.staged[((t >> 2) * (w >> 3) + (s >> 3)) * 32 + (t & 3) * 8 + (s & 7)] = row[s * 4];
++          }
+         }
+       }
++      entry.stagedFmt = pending.fmt;
+       entry.hasStaged = true;
+       entry.stagedSeq = entry.inflightSeq;
+     }
+@@ -585,6 +645,7 @@ void after_submit() noexcept {
+       copyMaps.push_back({
+           .dest = dest,
+           .gen = entry.gen,
++          .fmt = entry.inflightFmt,
+           .buffer = entry.buffer,
+           .byteSize = static_cast<uint64_t>(entry.rowPitch) * entry.height,
+       });
+@@ -678,7 +739,7 @@ bool copy_readback_gen(const void* dest, uint32_t dstWidth, uint32_t dstHeight,
+ }
+ 
+ void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture& texture, wgpu::Extent3D size,
+-                          const void* dest, uint64_t gen) noexcept {
++                          uint32_t fmt, const void* dest, uint64_t gen) noexcept {
+   std::lock_guard lock{g_mutex};
+   const auto it = g_copyReadbacks.find(dest);
+   if (it == g_copyReadbacks.end() || it->second.gen != gen) {
+@@ -686,8 +747,9 @@ void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture&
+   }
+   auto& entry = it->second;
+   const uint32_t seq = ++entry.encodedCopies;
+-  if (entry.state != SlotState::Available || size.width != entry.width || size.height != entry.height ||
+-      (entry.width & 7) != 0 || (entry.height & 3) != 0) {
++  if ((fmt != GX_CTF_R8 && fmt != GX_TF_Z24X8) || fmt != entry.fmt || entry.state != SlotState::Available ||
++      size.width != entry.width || size.height != entry.height || entry.width == 0 || entry.height == 0 ||
++      (entry.width & (fmt == GX_TF_Z24X8 ? 3u : 7u)) != 0 || (entry.height & 3) != 0) {
+     return;
+   }
+   if (!entry.buffer) {
+@@ -715,23 +777,28 @@ void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture&
+   cmd.CopyTextureToBuffer(&src, &dst, &extent);
+   entry.state = SlotState::CopySubmitted;
+   entry.inflightSeq = seq;
++  entry.inflightFmt = fmt;
+ }
+ 
+ void apply_copy_readback(void* dest, uint32_t width, uint32_t height, uint32_t fmt) noexcept {
+-  if (fmt != GX_CTF_R8) {
+-    return;
+-  }
+   std::lock_guard lock{g_mutex};
+   const auto it = g_copyReadbacks.find(dest);
+   if (it == g_copyReadbacks.end()) {
+     return;
+   }
+   auto& entry = it->second;
++  if (entry.fmt != fmt) {
++    entry.fmt = fmt;
++    entry.hasStaged = false;
++  }
++  if (fmt != GX_CTF_R8 && fmt != GX_TF_Z24X8) {
++    return;
++  }
+   if (entry.width != width || entry.height != height) {
+     return;
+   }
+   const uint32_t seq = ++entry.gameCopies; // this GXCopyTex is copy #seq of the registration
+-  if (!entry.hasStaged) {
++  if (!entry.hasStaged || entry.stagedFmt != fmt) {
+     return;
+   }
+   const uint32_t latency = seq - entry.stagedSeq; // frames between the copy read back and this write (0 on GameCube)
+diff --git a/lib/gfx/depth_peek.hpp b/lib/gfx/depth_peek.hpp
+--- a/lib/gfx/depth_peek.hpp
++++ b/lib/gfx/depth_peek.hpp
+@@ -19,15 +19,15 @@ void encode_frame_snapshot(const wgpu::CommandEncoder& cmd, const wgpu::TextureV
+                            uint32_t msaaSamples) noexcept;
+ void after_submit() noexcept;
+ 
+-// GXSetCopyReadback: GX_CTF_R8 copies into a registered dest are read back and written into dest as GX I8 tiles,
+-// like a GameCube EFB copy writes main RAM. Game thread: register/clear/apply. FIFO thread: copy_readback_gen.
++// GXSetCopyReadback: registered GX_CTF_R8 / GX_TF_Z24X8 copies write canonical GX I8 / Z24X8 tiles into dest.
++// Like a GameCube EFB copy writes main RAM. Game thread: register/clear/apply. FIFO thread: copy_readback_gen.
+ // Render worker: encode_copy_readback.
+ void register_copy_readback(const void* dest, uint32_t width, uint32_t height) noexcept;
+ std::vector<const void*> clear_copy_readbacks() noexcept;
+ bool copy_readback_gen(const void* dest, uint32_t dstWidth, uint32_t dstHeight, uint32_t srcWidth,
+                        uint32_t srcHeight, uint64_t& gen) noexcept;
+ void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture& texture, wgpu::Extent3D size,
+-                          const void* dest, uint64_t gen) noexcept;
++                          uint32_t fmt, const void* dest, uint64_t gen) noexcept;
+ void apply_copy_readback(void* dest, uint32_t width, uint32_t height, uint32_t fmt) noexcept;
+ 
+ namespace testing {
+diff --git a/lib/gfx/encoding.cpp b/lib/gfx/encoding.cpp
+--- a/lib/gfx/encoding.cpp
++++ b/lib/gfx/encoding.cpp
+@@ -315,8 +315,8 @@ void render(wgpu::CommandEncoder& cmd, FramePacket& frame, RenderPass& passInfo,
+       cmd.CopyTextureToTexture(&src, &dst, &size);
+     }
+     if (passInfo.readbackDest != nullptr) {
+-      depth_peek::encode_copy_readback(cmd, passInfo.resolveTarget->texture, dstSize, passInfo.readbackDest,
+-                                       passInfo.readbackGen);
++      depth_peek::encode_copy_readback(cmd, passInfo.resolveTarget->texture, dstSize, passInfo.resolveFormat,
++                                       passInfo.readbackDest, passInfo.readbackGen);
+     }
+   }
+ 
+diff --git a/lib/gfx/frame_packet.hpp b/lib/gfx/frame_packet.hpp
+--- a/lib/gfx/frame_packet.hpp
++++ b/lib/gfx/frame_packet.hpp
+@@ -102,7 +102,7 @@ struct RenderPass {
+   GXPixelFmt resolveSourceFormat = GX_PF_RGBA6_Z24;
+   ClipRect resolveRect;
+   Range resolveUniformRange;
+-  // GXSetCopyReadback: dest of a registered R8 copy (read back after the conversion), and its registration gen.
++  // GXSetCopyReadback: registered R8/Z24X8 dest and registration gen; resolveFormat records the copy layout.
+   const void* readbackDest = nullptr;
+   uint64_t readbackGen = 0;
+   wgpu::Texture snapshotColorDst;
+diff --git a/lib/dolphin/gx/GXFrameBuffer.cpp b/lib/dolphin/gx/GXFrameBuffer.cpp
+--- a/lib/dolphin/gx/GXFrameBuffer.cpp
++++ b/lib/dolphin/gx/GXFrameBuffer.cpp
+@@ -60,9 +60,9 @@ void copy_tex(const void* dest, GXBool clear) noexcept {
+   const auto clearColor = clear && g_gxState.colorUpdate;
+   const auto clearAlpha = clear && g_gxState.alphaUpdate && efb_has_alpha(g_gxState.pixelFmt);
+   const auto clearDepth = clear && g_gxState.depthUpdate;
+-  // GXSetCopyReadback: an exact 1:1 R8 copy into a registered dest is read back into dest (GameCube writes main RAM).
++  // GXSetCopyReadback: exact 1:1 R8/Z24X8 copies into a registered dest write back canonical GX tiles.
+   uint64_t readbackGen = 0;
+-  const bool readback = texCopyFmt == GX_CTF_R8 &&
++  const bool readback = (texCopyFmt == GX_CTF_R8 || texCopyFmt == GX_TF_Z24X8) &&
+                         gfx::depth_peek::copy_readback_gen(dest, dstWidth, dstHeight, static_cast<uint32_t>(rect.width),
+                                                            static_cast<uint32_t>(rect.height), readbackGen);
+   gfx::resolve_pass_into(handle.handle, rect, clearColor, clearAlpha, clearDepth, g_gxState.clearColor,
+diff --git a/include/dolphin/gx/GXAurora.h b/include/dolphin/gx/GXAurora.h
+--- a/include/dolphin/gx/GXAurora.h
++++ b/include/dolphin/gx/GXAurora.h
+@@ -211,9 +211,12 @@ void GXRestoreFrameBuffer(void);
+ 
+ /**
+  * Opt-in CPU write-back of texture copies, like a GameCube EFB copy writes main RAM.
+- * After this call, every GX_CTF_R8 copy into dest with a source rect and destination of exactly width x height
+- * (1:1, e.g. rendered with GXCreateFrameBuffer(width, height)) is read back from the GPU and written into dest as
+- * GX I8 tiles. The write lands on the calling thread inside a later GXCopyTex(dest), a few frames after the copy.
++ * After this call, every GX_CTF_R8 or GX_TF_Z24X8 copy into dest with a source rect and destination of exactly
++ * width x height (1:1, e.g. rendered with GXCreateFrameBuffer(width, height)) is read back from the GPU.
++ * R8 writes GX I8 8x4 tiles (width divisible by 8, height by 4), requiring width * height bytes.
++ * Z24X8 writes canonical big-endian 4x4 tiles (width/height divisible by 4), requiring 4 * width * height bytes:
++ * for depth 0xHHMMLL, plane 0 stores (0, HH), plane 1 stores (MM, LL). Depth copies require core GPU features.
++ * The write lands on the calling thread inside a later GXCopyTex(dest), a few frames after the copy.
+  * The call also destroys any existing copy texture of dest. dest == NULL drops every registration (and destroys
+  * their copy textures).
+  */
+diff --git a/tests/gx_test_stubs.cpp b/tests/gx_test_stubs.cpp
+--- a/tests/gx_test_stubs.cpp
++++ b/tests/gx_test_stubs.cpp
+@@ -256,7 +256,7 @@ bool copy_readback_gen(const void* dest, uint32_t dstWidth, uint32_t dstHeight,
+   return false;
+ }
+ void encode_copy_readback(const wgpu::CommandEncoder& cmd, const wgpu::Texture& texture, wgpu::Extent3D size,
+-                          const void* dest, uint64_t gen) noexcept {}
++                          uint32_t fmt, const void* dest, uint64_t gen) noexcept {}
+ void apply_copy_readback(void* dest, uint32_t width, uint32_t height, uint32_t fmt) noexcept {}
+ 
+ bool read_latest(uint16_t x, uint16_t y, uint32_t& z) noexcept {

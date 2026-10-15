@@ -112,7 +112,8 @@ public:
 		fVar432.normalize(param_1);
 		fVar432.negate();
 		fVar958.cross(param_2, fVar432);
-		fVar1076.cross(fVar958, fVar432);
+		// asm 0x801FE330-0x801FE33C: row 1 is Z cross X, not X cross Z.
+		fVar1076.cross(fVar432, fVar958);
 		fVar958.normalize();
 		fVar1076.normalize();
 

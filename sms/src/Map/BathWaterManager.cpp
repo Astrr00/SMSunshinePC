@@ -21,6 +21,9 @@
 #include <dolphin/gx.h>
 #include <dolphin/gd/GDBase.h>
 #include <dolphin/gx/GXCommandList.h>
+#ifdef TARGET_PC
+#include <string.h>
+#endif
 
 #include <MSound/MSound.hpp>
 
@@ -998,6 +1001,10 @@ public:
 		unk80134 = params;
 		unk80138 = screen_tex;
 		unk800AE = 0;
+#ifdef TARGET_PC
+		unk800AC = 0;
+		mReadbackWidth = 0;
+#endif
 		unk80150 = new (0x20) char[0x55668];
 		unk80154 = new (0x20) char[0x30023];
 		unk800A4 = new (0x20) char[0x10000];
@@ -1036,10 +1043,21 @@ public:
 		             GX_REPEAT, 0);
 		GXInitTexObjLOD(&unk80114, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE,
 		                GX_FALSE, GX_ANISO_1);
+#ifdef TARGET_PC
+		clearDepthMap();
+#endif
 		clearHeightMap();
 	}
 
 	void clearEFB(GXColor, u16, u16, bool) { }
+#ifdef TARGET_PC
+	void clearDepthMap()
+	{
+		const void* clear = GXGetTexObjData(&unk80114);
+		for (int offset = 0; offset < 0x10000; offset += 64)
+			memcpy((u8*)unk800A4 + offset, clear, 64);
+	}
+#endif
 
 	void makeHeightMap(f32 h);
 	void makeNormalMap();
@@ -1053,7 +1071,21 @@ public:
 		f32 negR = -data.unk3C;
 		f32 R3   = 3.0f * data.unk3C;
 
+#ifdef TARGET_PC
+		s32 width = unk80134->meshTexWidth.get() & ~3;
+		if (width < 4 || width > 128)
+			OSPanic(__FILE__, __LINE__, "Bath water mesh width %d exceeds [4, 128]\n", width);
+		unk800AC = width;
+		if (mReadbackWidth != unk800AC) {
+			if (mReadbackWidth != 0)
+				clearDepthMap();
+			// Stage setup clears registrations after this renderer is constructed.
+			GXSetCopyReadback(unk800A4, unk800AC, unk800AC);
+			mReadbackWidth = unk800AC;
+		}
+#else
 		unk800AC = unk80134->meshTexWidth.get() & ~3;
+#endif
 		unk800B0 = 1.0f / (f32)unk800AC;
 
 		// Half-stripped crap
@@ -1082,11 +1114,20 @@ public:
 
 		MtxPtr projMtx = gpCamera->unk16C;
 		j3dSys.drawInit();
+#ifdef TARGET_PC
+		GXCreateFrameBuffer(unk800AC, unk800AC);
+		GXSetViewport(0.0f, 0.0f, (f32)unk800AC, (f32)unk800AC, 0.0f, 1.0f);
+#else
 		GXSetViewport(0.0f, 0.0f, (f32)SMSGetGameRenderWidth(),
 		              (f32)SMSGetGameRenderHeight(), 0.0f, 1.0f);
+#endif
 
 		TProjection3f proj;
 		f32 halfW = 0.5f * unk80134->meshWidth.get();
+#ifdef TARGET_PC
+		// The retail expanded projection maps only the top-left N*N EFB region.
+		proj.orthographic(halfW, -halfW, -halfW, halfW, 0.0f, R3 - negR);
+#else
 		f32 top = halfW
 		          - unk800B0
 		                * (unk80134->meshWidth.get()
@@ -1096,6 +1137,7 @@ public:
 		                    * (f32)SMSGetGameRenderWidth())
 		             - halfW;
 		proj.orthographic(halfW, top, -halfW, bottom, 0.0f, R3 - negR);
+#endif
 
 		GXSetProjection(proj.mMtx, GX_ORTHOGRAPHIC);
 		GXSetScissor(0, 0, unk800AC, unk800AC);
@@ -1199,6 +1241,11 @@ public:
 		GXSetTexCopySrc(0, 0, unk800AC, unk800AC);
 		GXSetTexCopyDst(unk800AC, unk800AC, GX_TF_Z24X8, GX_FALSE);
 		GXCopyTex(unk800A4, GX_FALSE);
+#ifdef TARGET_PC
+		GXRestoreFrameBuffer();
+		GXSetViewport(0.0f, 0.0f, (f32)SMSGetGameRenderWidth(),
+		              (f32)SMSGetGameRenderHeight(), 0.0f, 1.0f);
+#endif
 		GXSetPixelFmt(GX_PF_RGBA6_Z24, GX_ZC_LINEAR);
 		GXSetProjection(projMtx, GX_PERSPECTIVE);
 		GXSetScissor(0, 0, SMSGetGameRenderWidth(), SMSGetGameRenderHeight());
@@ -1532,6 +1579,9 @@ public:
 	/* 0x80154 */ void* unk80154;
 	/* 0x80158 */ int unk80158;
 	/* 0x8015C */ char unk8015C[4];
+#ifdef TARGET_PC
+	s16 mReadbackWidth;
+#endif
 };
 
 TBathWaterPreprocessor::TBathWaterPreprocessor(TBathWaterManager* manager)
@@ -1590,15 +1640,27 @@ void TBathWaterMeshRenderer::makeHeightMap(f32 h)
 	// GX_TF_Z24X8 depth texture (unk800AC^2 texels, 0x10000 buf): prerender
 	// copies the drop-ball Z-buffer here; makeHeightMap decodes it (raw 4x4
 	// GX tile layout: 64B/tile, two u16 planes) into the height field.
+#ifdef TARGET_PC
+	// shortcut: latest completed GPU depth has async lag; use synchronized readback when same-frame hardware equivalence is required.
+#endif
 
 	s16 n = unk800AC >> 2;
 	for (s16 br = 0; br < n; ++br) {
 		for (s16 bc = 0; bc < n; ++bc) {
+#ifdef TARGET_PC
+			const u8* block = (const u8*)unk800A4 + ((br + bc * n) << 6);
+#else
 			u16* block = (u16*)unk800A4 + ((br + bc * n) << 5);
+#endif
 			for (s16 sr = 0; sr < 4; ++sr) {
 				for (s16 sc = 0; sc < 4; ++sc) {
+#ifdef TARGET_PC
+					const u8* pixel = block + ((sr + sc * 4) << 1);
+					s32 v = (pixel[1] << 16) | (pixel[32] << 8) | pixel[33];
+#else
 					s32 v = (((block + sr + sc * 4)[0] << 16) & 0xFF0000)
 					        | (block + sr + sc * 4)[0x10];
+#endif
 					unk20[sr + br * 4][sc + bc * 4].y
 					    = h * ((f32)v * (1.0f / 16777216.0f));
 				}

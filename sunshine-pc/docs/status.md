@@ -6,6 +6,25 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-15: Corona GPU depth reaches the height field
+
+The previous scene-entry smoke did not produce CPU depth. A temporary probe on `cb28330` observes 900
+renders at stock width 84 with all-zero depth bytes and heights. Aurora 0018 now converts actual depth
+to Z24X8 and stages canonical 4×4/two-plane bytes through the existing guarded readback transport.
+Bath water registers lazily after stage setup, uses a native-sized single-sample offscreen pass, initializes
+valid far-depth tiles and decodes their big-endian bytes explicitly.
+An additional assembly-proven decomp bug reversed the second `setLookDir` cross product; the corrected
+right-handed view preserves backface culling and restores visible waves.
+WARP runs `corona_depth_fixed_half_20261015` and `corona_depth_fixed_quarter_20261015` complete at
+ticks 1023/1024. Four captured fields contain 28 224 heights, all equal to independent canonical depth decoding;
+known cap depths 0xC00000 and 0xE00000 match the world-to-depth calibration. Results change over time.
+The R8 regression `corona_depth_goop_r8_20261015` completes at tick 879: the sprayed point is clean and an
+unsprayed point remains dirty. The new real geometry host test fails with the old cross order.
+Measured readback latency remains 2–4 render copies, not same-frame retail synchronization.
+Ledger prefixes now count 1 975 logic-verified, 150 matched, 253 partial: the old `setLookDir` equivalence claim
+was false; its corrected algorithm is reviewed but post-fix compiled FP equivalence remains unverified.
+Full Corona fight, audible sound, hardware GPU, forced map/lifetime races and exact same-frame timing remain open.
+
 ### Update 2026-10-15: Corona static Z24X8 blocker
 
 Two independent source investigations traced the format-22/4×4/one-mip failure to bath-water's valid static

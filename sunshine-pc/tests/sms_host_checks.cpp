@@ -2,6 +2,7 @@
 // path and links the real JSUInputStream/JSUMemoryStream): typed stream reads keep the preset on a short read,
 // float -> u32 equals the console's __cvt_fp2unsigned, float -> s16 angles keep the low 16 bits.
 #include <JSystem/JSupport/JSUMemoryInputStream.hpp>
+#include <JSystem/JGeometry/JGRotation3.hpp>
 #include <hostfloat.h>
 #include <cmath>
 #include <cstring>
@@ -55,4 +56,12 @@ void smsHostChecks(void (*check)(bool, const char*))
 	for (int k = 0; k < 10; k++)
 		ok = ok && gateAngle(k) == want[k];
 	check(ok, "angle: (s16)(s32) cast of the 10 gatekeeper 36-degree angles keeps the low 16 bits");
+
+	JGeometry::TRotation3<JGeometry::TMatrix34<JGeometry::SMatrix34C<f32>>> basis;
+	basis.setLookDir(JGeometry::TVec3<f32>(0.0f, -12000.0f, 0.0f),
+	                 JGeometry::TVec3<f32>(0.0f, 0.0f, -1.0f));
+	check(std::fabs(basis.ref(0, 0) - 1.0f) < 0.000001f
+	          && std::fabs(basis.ref(1, 2) + 1.0f) < 0.000001f
+	          && std::fabs(basis.ref(2, 1) - 1.0f) < 0.000001f,
+	      "look direction: downward bath view preserves retail orientation, not reflected cap winding");
 }

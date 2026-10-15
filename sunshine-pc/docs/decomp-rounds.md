@@ -292,6 +292,49 @@ Aurora checker confirms 17 tracked patches on 44 files, strict zero unresolved, 
 The existing isolated fresh checkout fast-forwards to this commit, applies patch 0017 separately, then
 rebuilds Application.cpp, both Aurora texture files and the Strict executable with zero unresolved symbols.
 
+## Corona GPU depth and reflected basis (2026-10-15, issue #14)
+
+`cb28330` with a temporary read-only probe runs Corona on WARP for 900 mesh renders at stock width 84,
+but all CPU depth bytes and generated heights stay zero (`corona_depth_before_20261015`, rc 0, tick 1024).
+Two independent audits find missing Z24X8 conversion/readback and a native-endian consumer of raw GX bytes.
+Aurora 0018 reuses the R8 transport: actual depth becomes RGBA `(HH,MM,LL,0)`, then canonical 4×4
+two-plane GX tiles. Registered copies retain generation/buffer/format guards; callbacks stage bytes,
+and only the game thread applies a previously completed result. R8 packing is unchanged.
+Compile-time packer checks cover 0x123456, zero/full depth, tile boundaries, width 4/84 and padded GPU rows.
+Bath water registers on first prerender after stage reset, re-registers only on width change,
+initializes valid far-depth tiles, uses an unscaled single-sample offscreen prepass and decodes big-endian bytes.
+Square projection plus N×N viewport reproduces retail's top-left N×N mapping; no world-to-texel scaling change.
+
+The first real readback still returned only 0xFFFFFF. Pass dumps prove 160 sphere draws plus a cap,
+active depth writes and a correctly preserved offscreen depth attachment, ruling out missing transport.
+A temporary cull-off control produces varied depths. Retail assembly `0x801FE320-0x801FE33C` then proves
+`setLookDir` must form row 1 as `Z cross unnormalized X`, not `X cross Z`.
+The old header reflected the view (determinant -1) and reversed cap winding; the one-line root fix
+restores determinant +1 with backface culling enabled. Its only production caller is bath water.
+The old BR20 ledger claim was false and is downgraded to partial pending corrected compiled FP review.
+Whole source/retail algorithm review covers direction normalize/negate, both cross products,
+independent epsilon guards/normalizations, row stores and unchanged translation.
+Matching score falls from about 97.57 to 97.48333 despite fixing behavior; no byte-identical function is lost.
+Full matching SHA-1 remains `9f5a8caf56f5356aeac9d3ed28bf8de976a03625`.
+
+Real GPU/consumer proof: WARP `corona_depth_fixed_half_20261015` (scale 0.5, rc 0, 36 s, tick 1023)
+and `corona_depth_fixed_quarter_20261015` (scale 0.25, rc 0, 39 s, tick 1024).
+Captured fields at render counts 120/600 contain 28 224 heights. Independent canonical tile decoding
+agrees exactly with every generated local Y, including `[x][y]` orientation and f32 scaling.
+Fields vary over time; the half-scale captures contain 1 411/1 437 distinct depths.
+Known cap depths are exactly 0xC00000 and 0xE00000 (0.75/0.875 for center Y=4800, R=3000,
+view eye Y=13800 and far=12000); untouched background is 0xFFFFFF. Waves are visible in `depth.png`.
+The existing transport reports 300 applies with 2–4-render-copy lag, not same-copy GameCube synchronization.
+The permanent host geometry test calls real `setLookDir`; old cross order fails (63 checks, one failure).
+R8 regression `corona_depth_goop_r8_20261015` completes (rc 0, 34 s, tick 879): applied bytes,
+sprayed point `d0=0/0`, separate dirty point `d300=65/1`; no clear-all pollution regression.
+
+The optional Aurora `gx_fifo_tests` target cannot build with this toolchain: vendored googletest
+`gtest-printers.h:528` fails `-Werror,-Wcharacter-conversion` on char8_t to char32_t.
+No dependency warning policy was changed to bypass that failure; the GX suite was not run.
+Temporary pixel/height dump and geometry logging, plus the cull-off discriminator, are not shipped.
+Full fight, audible sound, hardware GPU, forced registration/map races and same-frame timing remain unverified.
+
 ## Process notes
 
 - Agents work in clones (`clone-3`, `clone-chase`, `fresh-gate-2`) on `agent/<name>` branches and never push; the lead

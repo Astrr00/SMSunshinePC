@@ -1,8 +1,8 @@
 # Aurora patch series
 
-`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as seventeen patches so the submodule can be pinned to upstream and the changes re-applied.
+`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as eighteen patches so the submodule can be pinned to upstream and the changes re-applied.
 
-Series base: `50e5be3`. Applying all seventeen to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
+Series base: `50e5be3`. Applying all eighteen to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
 
 ## Apply
 
@@ -21,7 +21,7 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 71 file entries over 44 distinct files, +2162 / -181 (recounted with 0017).
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 79 file entries over 45 distinct files, +2289 / -215 (recounted with 0018).
 
 | file | topic | files | +/- |
 |---|---|---|---|
@@ -42,6 +42,7 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0015-fsr1-sharp-easu-rcas-limiter.patch` | FSR1 rework (own implementation): EASU maps output pixel centres like the bilinear sampler (`pos * scale - 0.5`; before `(pos - 0.5) * scale`, a 1.5 px shift at 4x), Lanczos-2 weight rotated to the 2x2 luma edge and stretched along it up to 1.8x instead of the 4x4 Gaussian, result clamped to the min/max of the nearest 2x2 texels (no ringing); RCAS (`k = 0.25 * sharpness`, unchanged) limited to the min/max of its 4-neighbour cross (no halos); default sharpness 0.8 (k 0.2; before 0.2, k 0.05), `aurora.h` doc comment updated; `SUNSHINE_UPSCALE_SHARPNESS` keeps its scale (1 = k 0.25). Bilinear and area paths unchanged; measurements in `sunshine-pc/docs/platform-notes.md` (T2 section) | 2 | +38 / -20 |
 | `0016-gx-scissor-12bit-fields.patch` | scissor BP registers 0x20/0x21 use 12-bit coordinate fields (hardware: 11) in `GXSetScissor`, `GXGetScissor` and the `bp_scissor` decode, values masked to 12 bits: with the +342 offset an 11-bit field ends at a right edge of 1705, so a widescreen EFB of 1708 px (32:9) encoded rt 2049, decoded as 1, the scissor came out empty and every frame was black; now right edges up to 3753 work (from code; run at W 1708 only), all values below 2048 encode as before; see `sunshine-pc/docs/platform-notes.md`, "Widescreen pixel checks" | 3 | +17 / -12 |
 | `0017-gx-static-z24x8.patch` | size and decode static `GX_TF_Z24X8` depth textures using the existing 64-byte 4×4 tile decoder; required by bath-water's `clear_z_TX` at Corona stage 60/0 | 2 | +2 / -0 |
+| `0018-gx-z24x8-copy-readback.patch` | genuine Z24X8 depth conversion and canonical 4×4/two-plane CPU readback through the existing generation-guarded transport; preserves R8 layout, records copy formats, rejects unsupported depth conversion; constexpr packing checks include width 84 and padded rows | 8 | +127 / -34 |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
 
@@ -51,7 +52,7 @@ Each patch applies on top of the previous one. Topic boundaries are per line, so
 
 ## Verification (run when the series was regenerated)
 
-Current 0017 (2026-10-15): `tools/apply-aurora-patches.py --check` reports 17 applied patches over
+Earlier 0017 snapshot (2026-10-15): `tools/apply-aurora-patches.py --check` reports 17 applied patches over
 44 files, and `verify --build --matching --boot-secs 45` reports 7 PASS, 0 FAIL, 1 optional SKIP.
 An isolated fresh checkout updated to `21e2b60` applied 0017 separately and rebuilt both texture sources
 and the Strict executable with zero unresolved symbols. Earlier checks below describe older series snapshots.

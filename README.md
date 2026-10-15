@@ -10,12 +10,12 @@ A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The gam
 
 Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. % is the lead's estimate of how much of the item works, not a measurement. Updated with every milestone. Matching, link and boot checks refreshed 2026-10-15; feature rows last measured 2026-10-14; the launcher, cheats/mods, audio, widescreen, particles and settings rows are synced to main after the KeyMatrix, Toggles2, FontFix, StageStart, T3 and HudAnchor landings, the other rows to `52c10f7` or earlier; runs on builds of main or of agent branches before landing.
 
-**Decompilation progress (measured 2026-10-15, full `ninja` + `changes_all`, including the bath-water sound-cadence correction):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %** (by bytes); fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical. Six more functions match than in the 2026-10-12 report; this continuation adds no matching gain. Bath-water sound now follows retail on every move cue. Initializer review and finite spawn-FP/RNG review are complete; unconditional NaN-payload/FP-state and audible Corona comparison remain open. Aurora's static Z24X8 correction now permits a Corona stage smoke on Null and WARP. Details: [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
+**Decompilation progress (measured 2026-10-15, full `ninja` + `changes_all`):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %** (by bytes); fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical. This continuation adds no matching gain. Bath-water collision/sound and the reflected `setLookDir` basis are corrected. Corona now receives real GPU depth into its CPU height field on WARP, with visible waves; measured async readback latency is 2–4 render copies, not same-frame retail equivalence. Unconditional FP equivalence, audible sound, full fight and hardware GPU remain open. Details: [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
-| Decomp logic correctness (non-matching functions) | partial | 55 | Measured 2026-10-15: 11 323/12 881 functions byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger rows by status prefix: 1 976 `logic-verified`, 150 `matched`, 252 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere still possible. Bath-water initializer review complete; `perform` sound cadence corrected, finite spawn-FP/RNG gaps closed, unconditional NaN-payload/FP-state equivalence still partial. EventWatcher warp aliasing/reload review confirmed; Appear8's stale partial row is corrected to its existing 100 % match, not a new matching gain. Several hundred game functions still lack a finished equivalence review. Corona dev-start now survives the former static Z24X8 abort on Null and WARP (stage 60/0); no audible bath-water or hardware-GPU comparison. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
+| Decomp logic correctness (non-matching functions) | partial | 55 | Measured 2026-10-15: 11 323/12 881 byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger prefixes: 1 975 `logic-verified`, 150 `matched`, 253 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere possible. Bath-water initializer and finite spawn-FP/RNG review complete; unconditional `perform` FP-state claim remains partial. A falsely verified `setLookDir` cross order is corrected from retail assembly; its post-fix FP/codegen review remains partial. Aurora 0018 supplies genuine Z24X8 depth readback into Corona's mesh; 28 224 captured heights agree with independent tile decoding across WARP scales 0.5/0.25. EventWatcher reviews remain complete. No full Corona fight, audible sound, same-frame GPU timing or hardware-GPU claim. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
 | Units compiled (clang-cl) | done | 100 | 583/583 built units, 149 excluded with 27 prefix rules and reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
@@ -95,6 +95,18 @@ Bug found and fixed on the way: `JAIData::initSeqParameter` left `mSeqHandle` 0 
 - [`sunshine-pc/docs/decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md): decomp residue rounds (per-unit results, techniques, open items)
 - [`sunshine-pc/docs/nm-operand-audit.md`](sunshine-pc/docs/nm-operand-audit.md): NonMatching units ranked by operand-diff hits
 - [`Port.md`](Port.md), [`Goal-Port.md`](Goal-Port.md): work orders
+
+### Update 2026-10-15: Corona water depth and reflected view basis
+
+Before this correction, 900 water renders leave the CPU depth buffer and generated heights all zero.
+Aurora patch 0018 adds genuine Z24X8 conversion and guarded canonical tile readback; bath water now uses
+an unscaled single-sample prepass, valid initial far-depth tiles and explicit big-endian decoding.
+Assembly review also found a real `setLookDir` bug: `X cross Z` reflected the view; retail uses `Z cross X`.
+Backface culling remains enabled after that root fix. WARP now renders visible waves.
+Independent decoding verifies 28 224 generated heights at scales 0.5 and 0.25, including expected cap depths
+0.75 and 0.875; the existing R8 goop-cleaning route also passes.
+Readback deliberately retains the port's previous-copy transport (observed 2–4-copy latency).
+The host regression fails before the cross fix; the final FP instruction-equivalence claim remains partial.
 
 ### Update 2026-10-15: Corona static depth texture
 

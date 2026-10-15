@@ -20,3 +20,5 @@ scissor 12-bit fields encode | lib/dolphin/gx/GXCull.cpp | SET_REG_FIELD\(0, __g
 scissor 12-bit fields decode | lib/gx/regs.cpp | reg_get\(scis1, 12, 12\)
 static Z24X8 source size | lib/gx/texture.cpp | ^    case GX_TF_Z24X8:
 static Z24X8 decoder | lib/gfx/texture_convert.cpp | ^  case GX_TF_Z24X8:
+Z24X8 depth-copy shader | lib/gfx/tex_copy_conv.cpp | ConvPipeline\{GX_TF_Z24X8, FragZ24X8,
+Z24X8 canonical readback | lib/gfx/depth_peek.cpp | constexpr void pack_z24x8\( && static_assert\(check_z24x8_packing<84, 8, 512>\(\)\);
