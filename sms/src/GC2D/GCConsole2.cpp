@@ -739,23 +739,6 @@ static inline void updateMarioLifeCounter(TGCConsole2* console)
 	((J2DPicture*)(pane)->getPane())->changeTexture((textures)[(digit)]->getTexInfo(), 0)
 
 // fabricated
-// macros instead of static inline: retail has these expanded at every call site
-// (mwcc leaves the static inline versions out of line)
-#define setCounterDigits(panes_, textures_, value_)                          \
-	do {                                                                     \
-		int cdValue = (value_);                                              \
-		if (cdValue < 100) {                                                 \
-			SET_DIGIT_PANE((panes_)[0], textures_, (int)(cdValue * 0.1f));   \
-			SET_DIGIT_PANE((panes_)[1], textures_, cdValue % 10);            \
-		} else {                                                             \
-			SET_DIGIT_PANE((panes_)[0], textures_, (int)(cdValue * 0.01f));  \
-			int cdRemainder = cdValue - (int)(cdValue * 0.01f) * 100;        \
-			SET_DIGIT_PANE((panes_)[1], textures_, (int)(cdRemainder * 0.1f)); \
-			SET_DIGIT_PANE((panes_)[2], textures_, cdRemainder % 10);        \
-		}                                                                    \
-	} while (0)
-
-// fabricated
 #define setBlueCoinDigits(panes_, textures_, value_)                         \
 	do {                                                                     \
 		int bcValue = (value_);                                              \
@@ -773,25 +756,6 @@ static inline void updateMarioLifeCounter(TGCConsole2* console)
 				(panes_)[2]->getPane()->show();                              \
 		}                                                                    \
 	} while (0)
-
-// fabricated
-static inline void setShineDigits(TBlendPane** panes, JUTTexture** textures,
-                                  int value)
-{
-	if (value < 100) {
-		setDigitPane(panes[0], textures, (int)(value * 0.1f));
-		setDigitPane(panes[1], textures, value % 10);
-	} else {
-		if (!panes[2]->getPane()->isVisible())
-			panes[2]->getPane()->show();
-
-		setDigitPane(panes[0], textures, (int)(value * 0.01f));
-
-		int remainder = value - (int)(value * 0.01f) * 100;
-		setDigitPane(panes[1], textures, (int)(remainder * 0.1f));
-		setDigitPane(panes[2], textures, remainder % 10);
-	}
-}
 
 // fabricated
 static inline void emitCounterParticle(TBoundPane* pane)
@@ -2068,16 +2032,16 @@ void TGCConsole2::loadAfter()
 
 	unk168 = TFlagManager::smInstance->getFlag(0x40001);
 
-	int spentBlueCoins = 0;
+	int blueCoinValue = 0;
 	for (int flag = 0x46; flag < 0x56; ++flag)
 		if (TFlagManager::smInstance->getFlag(0x10000 + flag) != 0)
-			++spentBlueCoins;
+			++blueCoinValue;
 
 	for (int flag = 0x6C; flag <= 0x73; ++flag)
 		if (TFlagManager::smInstance->getFlag(0x10000 + flag) != 0)
-			++spentBlueCoins;
+			++blueCoinValue;
 
-	int blueCoinValue = unk168 - spentBlueCoins * 10;
+	blueCoinValue = unk168 - blueCoinValue * 10;
 	if (blueCoinValue < 0)
 		blueCoinValue = 0;
 	setBlueCoinDigits(unk154, unkE0, blueCoinValue);
@@ -2089,7 +2053,15 @@ void TGCConsole2::loadAfter()
 	else if (unk20 < 0)
 		unk20 = 0;
 	unk6C = unk20;
-	setCounterDigits(unkD4, unkE0, unk20);
+	if (unk20 < 100) {
+		SET_DIGIT_PANE(unkD4[0], unkE0, (int)(unk20 * 0.1f));
+		SET_DIGIT_PANE(unkD4[1], unkE0, unk20 % 10);
+	} else {
+		SET_DIGIT_PANE(unkD4[0], unkE0, (int)(unk20 * 0.01f));
+		int remainder = unk20 - (int)(unk20 * 0.01f) * 100;
+		SET_DIGIT_PANE(unkD4[1], unkE0, (int)(remainder * 0.1f));
+		SET_DIGIT_PANE(unkD4[2], unkE0, remainder % 10);
+	}
 
 	unk24 = TFlagManager::smInstance->getFlag(0x40000);
 	if (unk24 > 999)
@@ -2097,7 +2069,17 @@ void TGCConsole2::loadAfter()
 	else if (unk24 < 0)
 		unk24 = 0;
 	unk64 = unk24;
-	setShineDigits(unk134, unkE0, unk24);
+	if (unk24 < 100) {
+		SET_DIGIT_PANE(unk134[0], unkE0, (int)(unk24 * 0.1f));
+		SET_DIGIT_PANE(unk134[1], unkE0, unk24 % 10);
+	} else {
+		if (!unk134[2]->getPane()->isVisible())
+			unk134[2]->getPane()->show();
+		SET_DIGIT_PANE(unk134[0], unkE0, (int)(unk24 * 0.01f));
+		int remainder = unk24 - (int)(unk24 * 0.01f) * 100;
+		SET_DIGIT_PANE(unk134[1], unkE0, (int)(remainder * 0.1f));
+		SET_DIGIT_PANE(unk134[2], unkE0, remainder % 10);
+	}
 
 	int lives = TFlagManager::smInstance->getFlag(0x20001);
 	if (lives > 99)
@@ -2124,13 +2106,13 @@ void TGCConsole2::loadAfter()
 	unk52C->resize(gpSystemFont->getWidth() << 10, fontRect.getHeight());
 
 	JUTRect telopBounds(unk524->getPane()->mBounds);
-	PodRect telopPaneBounds = *(PodRect*)&unk520->getPane()->mBounds;
-	telopBounds.add(telopPaneBounds.x1, telopPaneBounds.y1 - 3);
+	waterBounds = unk520->getPane()->mBounds;
+	telopBounds.add(waterBounds.x1, waterBounds.y1 - 3);
 	unk544.set(telopBounds.x1 + 8, telopBounds.y1 + 8, telopBounds.x2 - 8,
 	           telopBounds.y2 - 8);
 
 	// asm 0x8020FD7C: retail does NOT copy the box bounds into unk534; add() runs on the ctor value (0,0,0,0)
-	unk534.add(unk544.x2, unk544.y1 + unk528->mBounds.getHeight());
+	unk534.add(unk544.x2, unk544.y1 + unk528->getHeight());
 
 	unk544.resize(unk544.getWidth() * (16.0f / 15.0f), unk544.getHeight());
 	unk544.add(0, -16);

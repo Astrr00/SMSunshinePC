@@ -686,8 +686,8 @@ s8 TCardSave::waitForChoiceBM(TEProgress param_1, TEProgress param_2,
 					score -= 100;
 					unk140->changeTexture(unk1C[score / 10]->getTexInfo(), 0);
 					unk144->changeTexture(unk1C[score % 10]->getTexInfo(), 0);
-					unk134->show();
 					unk138->hide();
+					unk134->show();
 				}
 			} else {
 				if (getBookmarkInfo().unk0 == 1) {

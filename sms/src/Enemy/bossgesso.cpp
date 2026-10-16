@@ -433,8 +433,9 @@ void TBGBinder::bind(TLiveActor* param_1)
 {
 	TBossGesso* gesso = (TBossGesso*)param_1;
 
-	JGeometry::TVec3<f32> local_3c = gesso->mLinearVelocity;
-	local_3c += gesso->mPosition;
+	JGeometry::TVec3<f32> linearVelocity = gesso->mLinearVelocity;
+	JGeometry::TVec3<f32> local_3c = gesso->mPosition;
+	local_3c += linearVelocity;
 
 	if (gesso->isAirborne()) {
 		JGeometry::TVec3<f32> local_48 = gesso->mVelocity;
@@ -1395,7 +1396,23 @@ void TBossGesso::calcRootMatrix()
 	TSpineEnemy::calcRootMatrix();
 }
 
-void TBossGesso::performInContainer(u32, JDrama::TGraphics*) { }
+void TBossGesso::performInContainer(u32 cue, JDrama::TGraphics* graphics)
+{
+	if (cue & CUE_CALC_ANIM) {
+		if (static_cast<THitActor*>(
+		        JDrama::TNameRefGen::search("container"))
+		    == nullptr) {
+			changeAttackMode(0);
+		} else if (mTentacles[0]->mState != 4) {
+			JGeometry::TVec3<f32> pos(11603.0f, 2114.3f, 2411.4f);
+			mTentacles[0]->mNodes[0].setPosition(pos);
+			pos.x = 11510.0f;
+			mTentacles[0]->mNodes[1].setPosition(pos);
+		}
+	}
+
+	mTentacles[0]->testPerform(cue, graphics);
+}
 
 void TBossGesso::perform(u32 cue, JDrama::TGraphics* graphics)
 {
@@ -1435,25 +1452,12 @@ void TBossGesso::perform(u32 cue, JDrama::TGraphics* graphics)
 	}
 
 	if (mAttackMode == 6) {
-		if (cue & CUE_CALC_ANIM) {
-			if (static_cast<THitActor*>(
-			        JDrama::TNameRefGen::search("container"))
-			    == nullptr) {
-				changeAttackMode(0);
-			} else if (mTentacles[0]->mState != 4) {
-				JGeometry::TVec3<f32> pos(11603.0f, 2114.3f, 2411.4f);
-				mTentacles[0]->mNodes[0].setPosition(pos);
-				pos.x = 11510.0f;
-				mTentacles[0]->mNodes[1].setPosition(pos);
-			}
-		}
-
-		mTentacles[0]->testPerform(cue, graphics);
+		performInContainer(cue, graphics);
 		return;
 	}
 
 	if (cue & CUE_ENTRY) {
-		if (mSpine->getLatestNerve() == &TNerveBGBeakDamage::theNerve()) {
+		if (getLatestNerve() == &TNerveBGBeakDamage::theNerve()) {
 			SMS_AddDamageFogEffect(mMActor->getModel()->getModelData(),
 			                       mPosition, graphics);
 		} else {
@@ -1487,8 +1491,11 @@ void TBossGesso::perform(u32 cue, JDrama::TGraphics* graphics)
 		TCircleShadowRequest request;
 
 		MtxPtr joint = mMActor->getModel()->getAnmMtx(1);
-		request.mPosition
-		    = JGeometry::TVec3<f32>(joint[0][3], mPosition.y, joint[2][3]);
+		JGeometry::TVec3<f32> position;
+		position.x = joint[0][3];
+		position.y = mPosition.y;
+		position.z = joint[2][3];
+		request.mPosition = position;
 
 		JGeometry::TVec3<f32> right(joint[0][0], joint[1][0], joint[2][0]);
 		JGeometry::TVec3<f32> front(joint[0][2], joint[1][2], joint[2][2]);
@@ -1514,8 +1521,8 @@ void TBossGesso::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	if (unk17C) {
 		if (cue & CUE_CALC_ANIM) {
-			MTXCopy(mMActor->getModel()->getBaseTRMtx(),
-			        unk178->getModel()->getBaseTRMtx());
+			unk178->getModel()->setBaseTRMtx(
+			    mMActor->getModel()->getBaseTRMtx());
 			unk178->calcAnm();
 		}
 
@@ -1545,7 +1552,7 @@ void TBossGesso::perform(u32 cue, JDrama::TGraphics* graphics)
 
 	for (int i = 0; i < TENTACLE_NUM; ++i) {
 		if (cue & CUE_ENTRY) {
-			if (mSpine->getLatestNerve() == &TNerveBGBeakDamage::theNerve()) {
+			if (getLatestNerve() == &TNerveBGBeakDamage::theNerve()) {
 				mTentacles[i]->unk2C->offMakeDL();
 				SMS_AddDamageFogEffect(
 				    mTentacles[i]->unk2C->getModel()->getModelData(), mPosition,

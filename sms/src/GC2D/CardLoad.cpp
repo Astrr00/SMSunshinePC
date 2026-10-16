@@ -2077,7 +2077,7 @@ s8 TCardLoad::selectFunction()
 		if (done) {
 			unk33C[unkB0]->getPane()->hide();
 			for (int i = 0; i < 3; ++i)
-				if (unkB0 == i && unkB6 != -1 && unkB6 != 1)
+				if (i == unkB0 && unkB6 != -1 && unkB6 != 1)
 					unk2A4[i]->getPane()->hide();
 			unk10 = 5;
 		}
