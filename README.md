@@ -105,6 +105,8 @@ The verified developer Strict build can be opened from the repository root:
 
 The redesign does not add the reference launcher's online installer/updater, HD downloads or GMSE01-only features. Existing game and settings functions remain the base.
 
+Packaging safety also rejects supported WIA/GCZ images, including mixed-case names, from both the staged folder and ZIP. `python sunshine-pc/tools/package_test.py` passes; an actual isolated packaging smoke refuses synthetic contamination and leaves no ZIP. This is not Release/licence/clean-PC approval.
+
 
 ## Matching decompilation
 

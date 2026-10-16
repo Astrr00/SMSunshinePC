@@ -25,6 +25,12 @@ cmake --build sunshine-pc/build/windows-clang-release --target sunshine
 ```
 
 ## 4. Package
+Run the small packaging-safety regression before creating an archive:
+
+```
+python sunshine-pc/tools/package_test.py
+```
+
 
 ```
 python sunshine-pc/tools/package.py --build-dir sunshine-pc/build/windows-clang-release --version x.y.z --llvm-bin "C:/llvm-dl/t/clang+llvm-23.1.3-x86_64-pc-windows-msvc/bin"
@@ -43,7 +49,7 @@ Extra VC runtime location, if the default Visual Studio redist path is not found
 ```
 
 The script prints each shipped DLL with its source path and the zip SHA-256. It fails on a missing DLL, a missing
-licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nkit`).
+licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nkit .wia .gcz`).
 
 ## 5. Verify the artifact
 
@@ -61,6 +67,14 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 - [ ] Keep the release notes free of game data and download links to game data.
 - [ ] Re-check the licence items in `THIRD_PARTY_LICENSES.md` open notes before publishing (Visual C++ redist terms,
       the port's own licence).
+
+## Package exclusion regression (2026-10-16)
+
+The shared staged-folder/ZIP filter previously missed WIA and GCZ, although the launcher supports both. Both extensions are now blocked case-insensitively. The stdlib regression covers the observed pre-fix escape among legitimate port artwork/licences and passes on the corrected filter.
+
+An actual `package.py` main-path smoke uses the current Strict binary and real PE/DLL/licence/cache resolution with copied port assets in an isolated temporary root. Clean packaging creates a 21.1 MiB ZIP; adding synthetic `accidental.WIA`/`accidental.gcz` fixtures makes the command refuse the package and leave no ZIP. No real game image or original save is used, and all temporary output is removed.
+
+The build correctly warns that it is RelWithDebInfo, not Release. This is packaging-safety evidence, not current Release, redistribution, full-game or clean-PC approval. Those gates remain open.
 
 ## Verified 2026-10-14 (ReleasePkg rebuild + pipeline cache seed)
 

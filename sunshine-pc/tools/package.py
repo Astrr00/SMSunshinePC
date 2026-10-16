@@ -20,7 +20,7 @@ import zipfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # sunshine-pc
 SMS_LICENSE = os.path.join(ROOT, "..", "sms", "LICENSE")  # decompilation licence (CC0 1.0)
 SYSTEM32 = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32")
-FORBIDDEN_EXT = (".rvz", ".iso", ".dol", ".szs", ".gcm", ".wbfs", ".ciso", ".nkit")
+FORBIDDEN_EXT = (".rvz", ".iso", ".dol", ".szs", ".gcm", ".wbfs", ".ciso", ".nkit", ".wia", ".gcz")
 EXTRA_DLLS = ("dxcompiler.dll", "dxil.dll")  # Dawn LoadLibrary()s these; they are in no import table
 CRT_PREFIXES = ("vcruntime140", "msvcp140", "concrt140", "vcomp140")  # redistributable, not in System32 on a clean PC
 
