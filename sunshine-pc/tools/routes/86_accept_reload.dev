@@ -15,12 +15,12 @@ log
 hold A frames=4
 wait frames=26
 log
-# Bumps 4-6 pressed A during the load movie (thp=2); route 85 presses nothing during its movie, so wait it out.
+# Allow the load movie to start before confirming any later save/continue prompt with real PAD input.
 waitfor thp=2 timeout=1500
 wait frames=600
-waitfor thp=0 timeout=15000
+# Plaza loops a TV THP; first-time load movies can also stop at a save/continue prompt.
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
 log
-mash A period=30 until director mario dirstate=4 camDemo=0 timeout=3000
 wait frames=120
 log
 shot reload_loaded.png

@@ -9,8 +9,9 @@ The diagnostic lifetime fix is published in `3c10554`; [issue #12](https://githu
 Status-enabled route 85 and route-86 reload pass under documented dev aids; the fresh-checkout build gate also passes.
 Bath-water sound cadence and the reflected `setLookDir` basis are corrected. Aurora 0018 now delivers genuine
 Z24X8 depth to Corona's height field on WARP (scales 0.5/0.25, measured 2–4-copy lag); unconditional FP equivalence,
-same-frame timing and audible sound remain open. Five genuine rocket/ground-pound hits now trigger Corona's ending
-and movie handoff with diagnostic travel assistance; unassisted combat/navigation and credits/save completion remain open.
+same-frame timing and audible sound remain open. Diagnostic Corona combat now reaches naturally completed
+epilogue/credits/normal ending, final save and a new-process reload of the earned completion Shine.
+Unassisted combat/navigation and the 120-Shine alternate ending remain open.
 
 ## Working rules (apply to every phase)
 
@@ -136,7 +137,7 @@ Exit criterion: every toggle in the launcher has an observed effect in game.
 
 ## Order of work
 
-1. **Corona completion and sound (#10):** real analog-R rocket launches and L attacks now break all five weak platforms and start the ending/movie handoff on WARP, repeated without source probes or movie skipping. Diagnostic teleports supply travel, not damage or attack altitude; cheats and step-retrace remain on. Verify unassisted combat/navigation, complete epilogue/credits/save and audible sound. Depth readback retains measured 2–4-copy lag; do not claim same-frame retail equivalence.
+1. **Corona unassisted combat and sound (#10):** diagnostic platform travel plus real rocket/L attacks now reach natural epilogue/credits/normal ending, final save and real completion-flag reload on WARP. No forced victory flags or developer movie skip supplies that proof. Verify unassisted combat/navigation, the 120-Shine ending on a legitimately qualifying save, and audible sound. Keep ending-bit/checksum/reload evidence; global THP state 0 is invalid for Plaza readiness because its TV loops a movie. Depth readback retains measured 2–4-copy lag, not same-frame retail equivalence.
 2. **Bath-water equivalence (#10):** initializer and finite spawn-FP/RNG review complete. Corrected `setLookDir` cross order matches the retail algorithm, but compiled FP equivalence is partial; `perform` remains partial for unconditional NaN-payload/FP-state equivalence.
 3. **Remaining decomp units (#10):** EventWatcher warp/Appear8 reviews complete; claim further whole units and prioritize gameplay-path operand/branch differences. Diagnostic lifetime regression #12 is published/closed; keep status-enabled route85/GCI/route86 as gates.
 4. **Owner/hardware checks (#9):** listening, physical input, native Browse dialog and real-GPU FPS verification remain separate from automated evidence; collect these results before claiming those feature rows complete.

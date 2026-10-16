@@ -6,6 +6,54 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-15: natural ending and persisted completion
+
+Two independent read-only reviews trace the real MovieDirector/CardSave/FlagManager contract.
+Local THP headers measure epilogue at 4301 frames, credits at 3000, and either final movie at 360,
+all at 29.9699993 fps. The correct sequence is 14 -> 15 -> 16 for this save, not all four alternatives.
+The 120-Shine branch selects movie 17 and was not manufactured or exercised.
+Independent `thp_ref` decoding confirms that the earlier six-second blue-sky image is genuine film content.
+
+The first passive run, `corona_ending_natural_20261015`, exits 0 after 304 seconds at tick 9502;
+it captures visible epilogue/credits and earns the completion Shine, but stops just after movie 16 starts.
+It is not evidence of a completed save. The complete run is `corona_ending_save_20261015`:
+417 seconds, rc 0, tick 13167. Temporary read-only boundary probes observe THP state 3, not error state 5,
+for films 14, 15 and 16; film 9 also ends naturally on the subsequent return to the option map.
+Screenshots show epilogue content, scrolling credits and the normal "THE END" scene.
+No buttons or developer movie-skip switch advance the three ending films.
+
+Dev-start selects file A without loading a bookmark; copying a card does not select its file B.
+The copied baseline has a genuinely empty A. LEFT, release, A selects Yes in the default-No endsave prompt.
+Observed save progress is 0x15 -> 0x16 -> 0x17 -> 0x01, with card status READY and no timestamp-protection bypass.
+Independent `gci_check.py` passes all seven sectors. New A sector 2 has write count 1, save count 1,
+magic 4, one preview/live-bitmap Shine and completion `sector[0x6E] & 0x80`.
+The GCI completion byte is at `0x40AE`: the stream starts at sector+4 and writes a 0x5C-byte header before
+the bitmap at sector+0x60. File B's two sectors and the original baseline file remain byte-identical.
+
+All three source probes are removed before the fresh-process reload.
+`corona_ending_reload_fixed_20261015` loads A by ordinary file-select movement and head bumps,
+with no dev-start, card-test, aim-assist, cheats or developer movie skipping: rc 0 after 147 seconds,
+tick 4456, live Delfino 1/2, one Shine and an explicit `flag=0x10077` condition met at tick 4396.
+This proves the earned final Shine survives disk serialization and real game loading.
+
+The first reload attempt times out at 651 seconds on `thp=0` despite live Plaza gameplay.
+`TMarDirector::thpInit()` opens `/data/ex128x144_q0.thp` with looping enabled, so global THP-idle is not a
+gameplay-readiness invariant. Replacing it with a passive gameplay wait proves A, but a general first-time
+reload can also need normal confirmation after load movies. Route 86 now uses existing A-input confirmation
+until the live stage-1 gameplay owner, Mario, director state 4 and a free camera are ready.
+This reload input may advance previously watched load movies; it does not alter the natural-ending proof above.
+The passive-only B attempt times out at 451 seconds before gameplay. The final general route passes on WARP:
+`corona_reload_b_pad_20261015`, rc 0 after 317 seconds, tick 10009, Delfino 1/0, one Shine,
+no dev-start/card-test/aim-assist/cheat/movie-skip switches. Real A confirmation finishes at tick 9889.
+Final `verify --build --matching --boot-secs 45`: 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks,
+zero unresolved symbols, unchanged matching SHA-1 and a successful 45-second WARP boot.
+The compiled game source remains `b1392e5`, so its previous isolated-checkout build proof is reused;
+no new fresh-clone build is claimed for this route/documentation-only change.
+Game source and decomp ledger remain unchanged; only reload synchronization and documentation change.
+Fight aids remain diagnostic platform travel, health/water cheats and step-retrace.
+Unassisted combat/navigation, a full-game playthrough, the 120-Shine ending, sound listening, hardware GPU,
+forced races and same-frame retail depth timing remain unverified.
+
 ### Update 2026-10-15: Corona five-platform ending progression
 
 Two independent read-only reviews compare the critical Mario landing, fragile/hard forwarding and bathtub ending
