@@ -13,15 +13,24 @@ The active user goal is a fully playable native Windows port, including normal n
 The [playability matrix](playability-matrix.tsv) assigns concrete early blockers, reproduction paths, owners and acceptance conditions.
 Historical developer-assisted achievements below do not certify unassisted progression.
 
-The four already pending pane/boss source-form candidates are preserved locally in `154d9f5`; no further codegen-only matching work is prioritized.
+The four already pending pane/boss source-form candidates are preserved in `154d9f5`; no further codegen-only matching work is prioritized.
 Current `verify --build --matching --boot-secs 45` passes 7 gates and 63 host checks, with zero unresolved symbols and the unchanged reference SHA.
 `ninja changes_all` reports fuzzy-only improvements; the complete set of 11 323 exact function identities and sizes is preserved.
 Matched code remains 2 249 348 of 3 590 088 bytes; matched data remains 560 095 of 640 331 bytes.
 No new byte-identical function, code-byte total or data-byte total is claimed.
 
-The existing isolated `FreshTakeover_3c10554` checkout fast-forwards to `154d9f5` and independently rebuilds Strict.
+The earlier isolated `FreshTakeover_3c10554` checkout fast-forwards to `154d9f5` and independently rebuilds Strict.
 Its Aurora check confirms 18 patches and 45 already-matching files; third-party source downloads/caches include the main `build/Strict/_deps` tree.
 This is an isolated project-source build, not a fresh dependency download or clean Windows machine.
+Canonical integrated source `2702e9b` subsequently builds from a fresh detached `pg2-final-2702e9b` checkout and a clean Aurora `50e5be3` clone with all 18 tracked patches applied.
+The 15 explicit dependency-source overrides reuse the main `build/Strict/_deps` downloads; no existing game binary is reused.
+The first isolated Strict build passes in 193.73 seconds with zero unresolved symbols.
+After removal of the temporary configuration helpers, the unchanged cached end-state build also passes in 7.07 seconds.
+Private `build/PortGoal_20261016/canonical-isolated.json` records the source, caches and actual matching PE/PDB identity for read-only investigation.
+This remains a development-host build, not clean-PC, real-GPU or full-gameplay acceptance.
+The next independent ordinary-input slices are owned by `GatekeeperInput` and `ShadowInput`.
+Private game-thread observation of scene1/1 now captures the live unheld `TResetFruit` in Mario's actual contact list while the pursuit waypoint lies inside its combined 130-unit collision envelope.
+The capture records grounded Mario, real forward input/velocity and no held actor or spray; it is a diagnosis, not a completed chase, normal unlocking or a demonstrated engine defect.
 
 The actual native intro window is observed with `computer` screenshot and accessibility helpers.
 `build/PortGoal_20261016/native-ui.png` and `native-ui.log` retain the private evidence; the adapter is D3D12 Microsoft Basic Render Driver (CPU/WARP).

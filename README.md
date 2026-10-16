@@ -16,8 +16,8 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 100% PowerPC byte matching is not a playability prerequisite.
 The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) tracks concrete blockers and acceptance evidence; historical dev-assisted runs do not certify this goal.
 
-**Current gameplay-first verification (baseline `154d9f5`, 2026-10-16):** full verification passes 7 gates and 63 host checks.
-An isolated checkout independently rebuilds Strict with zero unresolved symbols, reusing cached dependencies and the 18-patch Aurora series.
+**Current gameplay-first verification (source `2702e9b`, 2026-10-16):** full verification passes 7 gates and 63 host checks.
+A fresh isolated checkout independently builds Strict with zero unresolved symbols from clean Aurora `50e5be3` plus the 18 tracked patches; 15 existing dependency-source caches are reused.
 Native computer capture observes the actual intro on D3D12 WARP; normal window close exits with code 0 using an isolated user profile.
 These checks do not prove an unassisted playthrough, physical-controller/audio/hardware-GPU acceptance or a clean-PC package.
 

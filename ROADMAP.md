@@ -21,6 +21,9 @@ The shared native SmallEnemy table now has an explicit terminator; unmodified Ri
 Actual native captures and normal Close pass at both diagnostic quarter scale and Auto/window resolution; quarter scale is not graphical-quality acceptance.
 The two independent implementation slices are integrated: format-1/2-bit voices decode in real Ricco, and the original map1 shine-shadow volume reads validated geometry from the supported user DOL.
 The integrated Auto-resolution map1 surface is observed, its unchanged 3-degree FaceTo condition passes, and native Close exits0; listening, retail-pixel equivalence and real-GPU performance remain open.
+Canonical source `2702e9b` builds independently from a fresh checkout and clean Aurora `50e5be3` plus all 18 tracked patches, with zero unresolved symbols.
+The isolated build reuses 15 dependency-source caches, not an existing game binary; own configuration scaffolds are removed and the cached end-state build also passes.
+`GatekeeperInput` and `ShadowInput` now own independent ordinary-input progression slices; authenticated canonical symbols are shared read-only.
 
 **Published background, not a connected-playthrough certificate:**
 
