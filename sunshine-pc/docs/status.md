@@ -14,21 +14,36 @@ The [playability matrix](playability-matrix.tsv) assigns concrete early blockers
 Historical developer-assisted achievements below do not certify unassisted progression.
 
 The four already pending pane/boss source-form candidates are preserved in `154d9f5`; no further codegen-only matching work is prioritized.
-Compiled source `08b8c30` passes `verify --build --matching --boot-secs 45`: 7 gates, 63 host checks, zero unresolved symbols and the unchanged reference SHA.
+Source `16d1c13` passes `verify --build --matching --boot-secs 45`: 7 gates, 63 host checks, zero unresolved symbols, 45-second boot and the unchanged reference SHA. Clean-Aurora core source `0570182` builds in 1282 steps/407.70 seconds; its independent checkout fast-forwards to the launcher source and rebuilds four steps/6.69 seconds using its own earlier objects and documented dependency-content caches, never Main game objects/binary.
 `ninja changes_all` reports fuzzy-only improvements; the complete set of 11 323 exact function identities and sizes is preserved.
 Matched code remains 2 249 348 of 3 590 088 bytes; matched data remains 560 095 of 640 331 bytes.
 No new byte-identical function, code-byte total or data-byte total is claimed.
+
+The user's immediate native-launcher request is implemented in `16d1c13`, inspired by [chasem-dev/sms-launcher](https://github.com/chasem-dev/sms-launcher) while keeping C++/RmlUi/SDL, GMSJ01 validation and existing settings. Original coastal art, a gold Choose/Play action, real readiness/error states, six grouped panes and Cancel-first confirmation are actually rendered. Native picker/Cancel, invalid `&` path, valid image and disappeared owned hardlink, cold volume75%, 640×480/UI150% focus scrolling, normal Nintendo Presents startup and native Close0 pass in isolated profiles. Input replays and dialog AX are not physical mouse/gamepad/hearing acceptance; foreground-control approval timed out, no grant was assumed and no takeover occurred.
+
+Current core fixes distinguish desired/height-panned/smoothed camera positions, restore the shared Walker `candidateY <= ground+0.05` landing predicate, and retain the native console Mono bit through orderly exit.
+Corrected core `38338b4` passes the full ordinary earned-file route through Delfino/Shadow/natural Bianco entry/mission0/event0/save/return: `pg7_main_normal_bianco_20261016`, rc0/936.15 seconds, live Delfino1/5 at20042/end20102. The card has exactly IDs0/86/save2, all seven checksums valid, SHA-256 `ef990d01385c306f7182c2690f1b40833159e0908614eb3bc9e008616599ec22`. This is quarter-WARP functional proof before the UI-only change, not a performance or physical-input result.
+Main Auto-resolution `pg6_main_camera_auto_20261016` passes descent/jump/settle in 121.55 seconds; actual and requested target Y agree at 2922.7 for Mario Y2762.7. This is diagnostic scene control, not normal unlocking.
+Actual original Options and native Close pass on the preceding two-fix Main snapshot in `pg6_main_options_mono_20261016` (64 seconds); cold original Options, normal earned File B load and native Close pass in `pg6_main_options_cold_load_20261016` (151 seconds, including observer interaction).
+The original Mono/Rumble-off UI and live Delfino surface are captured through native computer helpers. Precisely earned IDs 0/86, save count 2, all persistent flags/21 saved integers and native preferences survive; only option offsets 0x1888/0x203C/0x203E change from the pre-options card. Cold GCI/INI remain byte-identical.
+Script `end` is diagnostic `std::_Exit`, not an orderly-exit proof. The above native Close uses the exact owned titlebar control and observes exit 0/AURORA_EXIT; no original saves or unrelated windows are touched.
+The three-fix Main carrier SHA-256 is `47c88ea6e637499868f213458cef87ef68c333e37e8633e11700fe7fa189111a`. Ordinary earned File B reaches actual STORY2, exercises LEFT/STORY1/RIGHT/STORY2/A, and enters controllable raw 2/1 at tick 2767 (`pg7_bianco_episode2_entry_20261016`, exit 0, 138.40 seconds, end 3127).
+That run preserves GCI SHA-256 `b16fc7f868f8a63dace6ca99a72cb47c2d7c1e767d71a8cdf3640f148f796c94`, every earned flag/integer and the native INI. It proves next-episode selection/entry, not Petey victory/reward.
+Walker private before/after evidence restores live airborne fall and landing instead of an above-floor snap/death. The subsequent diagnostic arena run reaches real HP3 to0, collects reward1, saves and returns at7940; harness rc124/331s occurs during its final post-return wait, so no passing full-route/native-Close claim. Its diagnostic File A has only ID1; genuine File B IDs0/86 remain unchanged, not a three-Shine checkpoint. Normal windmill/intro connection and whole-function camera/Walker PPC/FP equivalence remain open; both ledger rows stay partial, with no exact-byte promotion.
+The added memory scout does not identify a responsible uninitialized read. The next bounded discriminator compares producer/FIFO/staged geometry bytes with allocation ownership; global zero filling remains an explicit mitigation.
+No typed Main process reads are made under an adjacent unauthenticated PDB. The previous two-fix Main PE has no CodeView directory; source-consistent private diagnostic carriers authenticate actual PE/PDB/live GUIDs separately.
+
 
 The earlier isolated `FreshTakeover_3c10554` checkout fast-forwards to `154d9f5` and independently rebuilds Strict.
 Its Aurora check confirms 18 patches and 45 already-matching files; third-party source downloads/caches include the main `build/Strict/_deps` tree.
 This is an isolated project-source build, not a fresh dependency download or clean Windows machine.
 Canonical integrated source `2702e9b` subsequently builds from a fresh detached `pg2-final-2702e9b` checkout and a clean Aurora `50e5be3` clone with all 18 tracked patches applied.
-The 15 explicit dependency-source overrides reuse the main `build/Strict/_deps` downloads; no existing game binary is reused.
+The 15 explicit dependency-content overrides reuse main `build/Strict/_deps` directories, including prebuilt Dawn/SDL3/nod packages; no existing game objects or binary are reused.
 The first isolated Strict build passes in 193.73 seconds with zero unresolved symbols.
 After removal of the temporary configuration helpers, the unchanged cached end-state build also passes in 7.07 seconds.
 Private `build/PortGoal_20261016/canonical-isolated.json` records the source, caches and actual matching PE/PDB identity for read-only investigation.
 This remains a development-host build, not clean-PC, real-GPU or full-gameplay acceptance.
-The subsequent independent `pg3-final-08b8c30` checkout also builds from clean Aurora50e5be3 plus18patches and the same15explicit dependency-source overrides.
+The subsequent independent `pg3-final-08b8c30` checkout also builds from clean Aurora `50e5be3` plus 18 patches and the same 15 explicit dependency-content overrides, including those prebuilt packages.
 The initial1282-step build uses2compiler jobs and takes434.37seconds; after removal of own configuration helpers, the final house Strict rebuilds1269steps in162.84seconds and reports0unresolved.
 This second run is not reported as a cache hit or measured speedup. Final actual PE/PDB GUID1A81F619-1B4D-52C7-4C4C-44205044422E/age1 agrees; the previous intermediate GUID is not used for typed observation.
 The normal earned-save Delfino boss route is now verified on canonical production source `2702e9b`: private `pg3_gate_earnedload_20261016` exits0 after431seconds.

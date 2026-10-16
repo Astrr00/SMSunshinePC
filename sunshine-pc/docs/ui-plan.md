@@ -1,4 +1,4 @@
-# UI plan: Sunshine launcher and in-game menu toward Dusklight polish
+# Sunshine launcher UI plan and verification
 
 Companion to `ui-gap-dusklight.md`. Row IDs (A1 to H8) refer to that matrix. This document is a plan only. No code, asset, or INI change is made by it. Dusklight facts cite its repo (`TwilitRealm/dusklight`, `main`) or site. Sunshine facts cite this repo. `[INFERENCE]` marks an unverified assumption that the package must confirm first.
 
@@ -10,6 +10,18 @@ Companion to `ui-gap-dusklight.md`. Row IDs (A1 to H8) refer to that matrix. Thi
 - Game runs go through the run lock (`tools/runlock.py`, used by `tools/route.py`).
 - Build output goes under `sunshine-pc/build/`. `sunshine-pc/.gitignore:1` ignores `build/`.
 - Each shipped font or sound needs a license entry in `sunshine-pc/THIRD_PARTY_LICENSES.md`. Dusklight's font licenses were not verified, so its fonts are not copied.
+
+## Native SMS-style launcher redesign (2026-10-16)
+
+The user's current reference is [chasem-dev/sms-launcher](https://github.com/chasem-dev/sms-launcher), whose MIT licence and ready-screen screenshot were inspected. Source `16d1c13` keeps the existing C++/RmlUi/SDL launcher, not Electron or the upstream GMSE01 setup pipeline.
+
+- Home now uses original `assets/launcher/ocean.png`, a blue brand bar, a readable disc card, a large gold primary action and Settings. No upstream/Nintendo image or game data is included.
+- The primary action opens the native chooser until a supported GMSJ01 image is validated, then becomes Play. The selected path refreshes immediately; Play reopens the actual image and removes stale readiness if that file disappeared.
+- All six settings panes, existing control IDs, twenty key bindings, generated Cheats/Mods, confirmation and in-game Resume are retained. Narrow layouts scroll; visible native capture at 640×480/UI150% shows focus reaching the B binding through ordinary application-controller events.
+- Main native captures observe missing, invalid, valid and subsequently missing images, the real native picker/Cancel, all six panes, Cancel-first Quit confirmation, cold volume 75%, actual normal Nintendo Presents startup and native Close with exit 0. Tests use isolated profiles and an owned hardlink; the original image and user saves are not modified.
+- This is bounded WARP/Auto-resolution evidence. Application-level synthetic input and native dialog AX do not certify physical mouse/gamepad operation, hearing or hardware-GPU performance. A requested foreground-control grant timed out and was not assumed; no foreground takeover occurred.
+
+The earlier Dusklight-based architecture notes and historical verification below remain separate evidence, not new claims of full-game acceptance.
 
 ## Verified API facts used here
 

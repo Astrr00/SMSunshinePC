@@ -16,25 +16,28 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 100% PowerPC byte matching is not a playability prerequisite.
 The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) tracks concrete blockers and acceptance evidence; historical dev-assisted runs do not certify this goal.
 
-**Current gameplay-first verification (compiled source `08b8c30`, 2026-10-16):** full verification passes 7 gates and 63 host checks.
-A fresh isolated checkout independently builds Strict with zero unresolved symbols from clean Aurora `50e5be3` plus the 18 tracked patches; 15 existing dependency-source caches are reused.
-Native computer capture observes the actual intro on D3D12 WARP; normal window close exits with code 0 using an isolated user profile.
+**Native launcher (`16d1c13`):** an ocean-themed home inspired by [chasem-dev/sms-launcher](https://github.com/chasem-dev/sms-launcher), with original coastal art, a large Choose disc image/Play action, real disc readiness and six grouped settings pages. The existing C++/RmlUi stack remains; no Electron or upstream/Nintendo images are added. Native picker, invalid/valid/stale images, cold preferences, high-DPI focus scrolling and normal game startup are observed through application input replays and native AX; physical mouse/gamepad acceptance remains separate.
+
+**Current verified source `16d1c13` (2026-10-16):** full verification passes 7 gates and 63 host checks, Strict zero unresolved and a 45-second boot. The independent source checkout also builds the launcher after fast-forward.
+Aurora remains `50e5be3` plus 18 tracked patches. The isolated core builds in 1282 steps/407.70 seconds; its later launcher-only rebuild takes four steps/6.69 seconds. Fifteen dependency-content directories, including prebuilt Dawn/SDL3/nod, are reused; no Main game objects or binary are copied. These are not fresh-download, clean-PC or speedup claims.
+Native computer capture observes Auto-resolution original Options and live Delfino; ordinary native window Close exits 0 and a new process preserves Mono, Rumble-off and the genuinely earned two-Shine File B.
 These checks do not prove an unassisted playthrough, physical-controller/audio/hardware-GPU acceptance or a clean-PC package.
 
 **New bounded gameplay evidence (2026-10-16):** a fresh input-only file earns the airport Shine. Its legitimate saved continuation now defeats Delfino and Shadow Mario, enters Bianco normally, defeats the real first mission boss, collects event 0 and saves/returns to Delfino 1/5 with two Shines.
-On compiled source `08b8c30`, `pc_early_bianco_unassisted.dev` passes with exit 0 in 853.08 seconds. A new process using `86_accept_reload.dev` passes in 147.48 seconds with both earned identities 0/86 and the entire GCI unchanged. No gameplay aids, devstart, seed, direct state writes, movie skipping or timing overrides are used.
-The [content inventory](sunshine-pc/docs/content-coverage.tsv) derives 120 Shine identities and 240 observed persistent blue-coin identities. Every runtime row stays open; this is not all-content playability proof.
+Corrected core `38338b4` completes `pc_early_bianco_unassisted.dev` in 936.15 seconds, end tick 20102, with precisely earned IDs 0/86, save count 2 and all seven GCI checksums valid. The preceding snapshot's cold-load/native-Close evidence remains separate. No gameplay aids, devstart, seed, direct state writes, movie skipping or timing overrides count as normal progression; concurrent WARP runs are not timing benchmarks.
+The [content inventory](sunshine-pc/docs/content-coverage.tsv) derives 120 Shine identities and 240 observed persistent blue-coin identities. Generated runtime rows remain open; selected executed paths are recorded in the playability matrix, not treated as all-content proof.
 Ricco's native SmallEnemy model-table overread is fixed: diagnostic scene loading, ordinary walk/jump/return and normal window close pass on WARP. Developer scene selection is not normal unlocking or boss-victory proof.
 For visual checks use launcher `Resolution scale: Auto`, or remove the route tool's `SUNSHINE_RENDER_SCALE=0.25` override with `SUNSHINE_RENDER_SCALE=`. Auto/window rendering is visibly sharper; the diagnostic quarter-scale image is not representative of normal display quality.
 Format-1/2-bit ADPCM now decodes real game voices instead of ending them as silence. The original map1 shine-shadow volume loads its validated geometry from the user's supported DOL; no game bytes are embedded.
-Known risks remain explicit: later normal progression, confirmed camera-target field errors and volatile console sound mode under independent fixes, an early WARP watchdog, unverified full-game audio/graphics and an uncaptured initialization cause behind broad zero-allocation mitigation.
-Both cards pass all seven checksums; every persistent flag and all 21 saved integers agree before/after cold load. Original saves remain untouched. Functional quarter scale is not visual-quality or timing acceptance.
-Script `end` uses `std::_Exit`, not orderly application shutdown. Native Close, non-default Mono/Rumble persistence and repeated lifecycle acceptance remain separate; `CameraHeight` and `OriginalOptions` own the two independent fixes.
+Known remaining risks include later normal progression, full shared-system coverage, an early WARP watchdog, unverified full-game audio/graphics and the unidentified cause behind broad zero-allocation mitigation.
+The camera now keeps desired, height-panned and smoothed positions distinct. The shared Walker clamp no longer snaps falling enemies down from above the floor. Private diagnostic Petey combat reaches HP3 to0, reward1 and save/return, but its harness ends rc124 during the final wait; normal windmill/intro connection remains unproven.
+Original Options now retains the missing native console sound bit through ordinary native Close. Script `end` still uses `std::_Exit` and bypasses that orderly write; abrupt termination, repeated lifecycle and human/device acceptance remain separate.
+Normal earned File B also reaches the actual Bianco STORY2 selector and controllable raw scene 2/1 on the three-fix candidate (exit 0, 138.40 seconds). The card and native preferences remain byte-identical. This proves selection/entry, not Petey's reward or the whole game.
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
-| Decomp logic correctness (non-matching functions) | partial | 55 | Full report measured 2026-10-16: 11 323/12 881 byte-identical (62.65 % code, 98.67 % fuzzy), 445/736 complete units. Ledger prefixes checked 2026-10-16: 1 976 `logic-verified`, 150 `matched`, 252 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere possible. Bath-water initializer reviewed; spawn NaN/FI/FR and collision-square sticky exceptions corrected. Compiled `getGravityDir` and corrected `calcBathtub` reviews are complete under bounded masked-exception PPC assumptions; final whole-`perform` integration remains partial. Corrected `setLookDir` has 120/120 normalized compiled-PPC rows plus 13/13 actual callee rows verified, not a byte-match gain or universal host-FP certification. Aurora 0018 supplies genuine Z24X8 depth; 28 224 captured heights agree with independent tile decoding at WARP scales 0.5/0.25. EventWatcher reviews remain complete. Diagnostic Corona combat, natural ending/save/reload are observed, not an unassisted fight or whole-unit equivalence proof. Sound listening, same-frame timing and hardware GPU remain unverified. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
+| Decomp logic correctness (non-matching functions) | partial | 55 | Full report measured 2026-10-16: 11 323/12 881 byte-identical (62.65 % code, 98.67 % fuzzy), 445/736 complete units. Ledger prefixes: 1 974 `logic-verified`, 150 `matched`, 254 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere possible. Obsolete whole-function camera/Walker claims are withdrawn after real member-target and floor-predicate errors were proved and corrected; bounded native behavior is not whole-function equivalence. Bath-water initializer reviewed; spawn NaN/FI/FR and collision-square sticky exceptions corrected. Compiled `getGravityDir` and corrected `calcBathtub` reviews are complete under bounded masked-exception PPC assumptions; final whole-`perform` integration remains partial. Corrected `setLookDir` has 120/120 normalized compiled-PPC rows plus 13/13 actual callee rows verified, not a byte-match gain or universal host-FP certification. Aurora 0018 supplies genuine Z24X8 depth; 28 224 captured heights agree with independent tile decoding at WARP scales 0.5/0.25. EventWatcher reviews remain complete. Diagnostic Corona combat, natural ending/save/reload are observed, not an unassisted fight or whole-unit equivalence proof. Sound listening, same-frame timing and hardware GPU remain unverified. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
 | Units compiled (clang-cl) | done | 100 | 583/583 built units, 149 excluded with 27 prefix rules and reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
@@ -93,6 +96,15 @@ Steps:
 Run with your own disc image:
 
     sunshine-pc\build\windows-clang-relwithdebinfo\sunshine.exe --dvd "path\to\Super Mario Sunshine (Japan).rvz"
+
+To open the native launcher, omit `--dvd`. Choose your own Japanese image, wait for **Ready to play**, then choose **Play**. Settings are saved automatically. If Skip launcher is enabled, hold Shift at startup to show it.
+
+The verified developer Strict build can be opened from the repository root:
+
+    sunshine-pc\build\Strict\sunshine.exe
+
+The redesign does not add the reference launcher's online installer/updater, HD downloads or GMSE01-only features. Existing game and settings functions remain the base.
+
 
 ## Matching decompilation
 
