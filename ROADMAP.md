@@ -14,16 +14,16 @@ The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) records concre
 Historical dev-assisted acceptances below remain valid only within their stated scope; they do not satisfy the new unassisted criteria.
 
 **New bounded checkpoint (2026-10-16):** an input-only fresh file defeats the airport boss, earns Shine `0x56` and reaches live Delfino 1/0 without gameplay aids; a new process restores that earned Shine from a copied isolated test profile. Later unlocks, settings and repeated lifecycle cases remain open.
-The native `FaceTo` deadzone correction passes its real 3-degree scene condition; the floor-grid generator now preserves ramp heights and excludes ceilings, with two failing-before/passing-after regressions. Shadow Mario pursuit still times out.
+The native `FaceTo` condition and corrected floor grid pass; contact-aware ordinary-input pursuit now completes in the actual connected earned-save path, followed by natural gate opening and controllable Bianco2/0.
 The [content inventory](sunshine-pc/docs/content-coverage.tsv) derives 120 Shine identities and 240 observed blue-coin identities from actual sources/resources, not helper capacity. All runtime rows remain open; unresolved resources/fields are retained.
-Delfino stance/combat, the walking chase and Bianco are still the next normal-progression gates. An early WARP presentation watchdog and the existing broad allocation colour-screen mitigation require separate root-cause evidence; neither is hidden by a gameplay fallback.
+The connected source08b8c30 route exits0 after752seconds without gameplay aids, devstart, seed or movie/timing overrides. A real first Bianco mission, later connected progression and settings/lifecycle acceptance remain open. The WARP watchdog and broad allocation mitigation remain separate unresolved risks.
 The shared native SmallEnemy table now has an explicit terminator; unmodified Ricco3/0 loads and its ordinary walk/jump/return regression passes on WARP after the previous loader AV.
 Actual native captures and normal Close pass at both diagnostic quarter scale and Auto/window resolution; quarter scale is not graphical-quality acceptance.
 The two independent implementation slices are integrated: format-1/2-bit voices decode in real Ricco, and the original map1 shine-shadow volume reads validated geometry from the supported user DOL.
 The integrated Auto-resolution map1 surface is observed, its unchanged 3-degree FaceTo condition passes, and native Close exits0; listening, retail-pixel equivalence and real-GPU performance remain open.
-Canonical source `2702e9b` builds independently from a fresh checkout and clean Aurora `50e5be3` plus all 18 tracked patches, with zero unresolved symbols.
-The isolated build reuses 15 dependency-source caches, not an existing game binary; own configuration scaffolds are removed and the cached end-state build also passes.
-`GatekeeperInput` and `ShadowInput` now own independent ordinary-input progression slices; authenticated canonical symbols are shared read-only.
+Compiled source `08b8c30` passes all7 publication gates/63host checks and independently builds Strict from clean Aurora `50e5be3` plus18tracked patches.
+Fifteen dependency-source caches are reused, not an existing game binary. Own configuration helpers are removed; final isolated Strict reports zero unresolved after a1269-step rebuild, not a cache-hit claim.
+`GateEntry` completed the component continuation and the lead verified the actual normal chain. `BiancoFirstShine` proved the real event0 reward/save/return in a separate component; the next connected mission run remains lead-owned.
 
 **Published background, not a connected-playthrough certificate:**
 
@@ -166,7 +166,7 @@ Exit criterion: every toggle in the launcher has an observed effect in game.
 
 ## Order of work
 
-1. **Secure the current baseline:** preserve user changes and paused matching worktrees; maintain Strict zero unresolved, the reference SHA and existing regressions. Canonical source `2702e9b` passes all 7 gates/63 host checks and an isolated clean-Aurora build with documented dependency caches. Actual D3D12 WARP output and normal window close are observed; this is not full gameplay or clean-PC evidence.
+1. **Secure the current baseline:** preserve user changes and paused matching worktrees; maintain Strict zero unresolved, the reference SHA and existing regressions. Compiled source `08b8c30` passes all7 gates/63host checks and an isolated clean-Aurora build with documented dependency caches. Actual WARP surface/normal-close evidence and connected earned-save Bianco entry are bounded proofs, not full gameplay or clean-PC acceptance.
 2. **Remove early-flow dependencies on developer aids:** complete new game, airport Shine, Delfino GateKeeper, Shadow Mario and Bianco entry with ordinary inputs. Distinguish bot/navigation failures and Null-backend limitations from real engine bugs. No forced crouch, aiming, teleportation, health/water cheat or direct progress write counts as acceptance.
 3. **Complete normal progression and content:** close each reproducible blocker through the required episodes, final boss, credits and postgame, then cover all original episodes, secret stages, 120 Shines, 240 blue coins and the corresponding ending. Reconcile earned progress before save and after a fresh-process load. Existing diagnostic Corona completion is supplementary evidence only.
 4. **Qualify shared systems and hardware:** exercise real graphics/effects, keyboard/controller and analog triggers, listen to music/SFX/movies, measure original gameplay speed without competing jobs, and run at least 30 minutes with transitions/save/load and lifecycle checks. WARP, Null and hardware-GPU results remain distinct; unavailable human/device checks stay open.

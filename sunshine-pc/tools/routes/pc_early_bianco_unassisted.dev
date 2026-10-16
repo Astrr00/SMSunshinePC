@@ -1,0 +1,119 @@
+# Earned airport checkpoint -> ordinary fileB load -> Delfino boss -> Shadow Mario -> live Bianco episode0.
+# First earn the profile with pc_airport_unassisted.dev, then use route.py --appdata-from <earned-run>.
+# SUNSHINE_DEV_NAV must name the locally generated corrected dolpic1 grid; no devstart or gameplay aids.
+# All actions are controller inputs. Natural game scripts may move Mario during normal demos/transitions.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+log
+waitfor stage=1 scen=0 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+walkto x=5380 z=2700 radius=150 timeout=1200
+walkto x=4980 z=3100 radius=150 timeout=600
+# Wash before crossing the pollution boundary; A clears OilRun horizontal velocity.
+walkto x=1600 z=5800 radius=80 spray=1 timeout=900
+walkto x=12 z=5450 radius=45 spray=1 timeout=600
+log
+hold A frames=1
+log
+# Keep L released in flight: its edge is ground-pound.
+wait frames=45
+log
+faceto x=12 z=4631 tol=3 timeout=180
+hold L frames=10
+log
+hold L trig=0,255 until bck=0 timeout=600
+log
+waitfor camDemo=0 timeout=900
+wait frames=1
+hold L frames=10
+log
+# Goop initially turns Mario instead of the nozzle. Clean, then reacquire facing and squat.
+hold R stick=0,-127 frames=28
+hold R frames=240
+log
+faceto x=12 z=4631 tol=3 timeout=180
+hold L frames=15
+log
+hold R stick=0,-127 frames=28
+# Source/trace: seven dry forward-stick L ticks lower the sampled overshot pitch.
+hold L stick=0,127 frames=7
+hold L frames=3
+log
+# shortcut: sixteen pad ticks enter the real throat window at current pacing; resample if pacing changes.
+hold L until bck=18 timeout=900
+hold L frames=16
+hold R until bck=3 timeout=300
+log
+hold L until bck=18 timeout=900
+hold L frames=16
+hold R until bck=3 timeout=300
+log
+hold L until bck=18 timeout=900
+hold L frames=16
+hold R until bck=5 timeout=300
+log
+waitfor stage=1 scen=1 director mario dirstate=4 camDemo=0 timeout=3000
+log
+shot gatekeeper_defeated.png
+waitfor stage=1 scen=1 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=60
+walkto x=5020 z=3060 radius=150 timeout=2400
+walkto x=5540 z=300 radius=150 timeout=2400
+log
+chase timeout=5000 radius=900
+log
+shot shadow_dialogue.png
+mash A period=30 until talk=0 timeout=2400
+wait frames=300
+log
+# Return through the physically verified lower corridor, not the old upper-ramp wall.
+walkto x=5700 z=-4000 radius=100 timeout=900
+walkto x=5700 z=300 radius=100 timeout=900
+walkto x=5020 z=3060 radius=150 timeout=2400
+walkto x=2340 z=3220 radius=100 timeout=1800
+log
+walkto x=340 z=5020 radius=60 timeout=1800 spray=1
+wait frames=30
+waitfor camDemo=0 timeout=900
+waitfor flag=0x10385 timeout=3000
+waitfor camDemo=0 timeout=900
+log
+faceto x=0 z=4941 timeout=600
+hold trig=0,255 frames=120
+log
+hold trig=0,255 frames=120
+log
+hold trig=0,255 frames=120
+log
+wait frames=300
+walkto x=0 z=4800 radius=200 timeout=600
+log
+shot gate.png
+hold A stick=0,127 frames=120
+log
+waitfor stage=2 timeout=1200
+wait frames=400
+mash A period=40 until stage=2 scen=0 director mario dirstate=4 camDemo=0 timeout=2400
+wait frames=120
+log
+hold stick=0,127 frames=60
+log
+hold A stick=0,127 frames=30
+wait frames=60
+log
+shot bianco_controllable.png
+wait frames=180
+end

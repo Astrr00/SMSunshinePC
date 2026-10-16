@@ -14,7 +14,7 @@ The [playability matrix](playability-matrix.tsv) assigns concrete early blockers
 Historical developer-assisted achievements below do not certify unassisted progression.
 
 The four already pending pane/boss source-form candidates are preserved in `154d9f5`; no further codegen-only matching work is prioritized.
-Current `verify --build --matching --boot-secs 45` passes 7 gates and 63 host checks, with zero unresolved symbols and the unchanged reference SHA.
+Compiled source `08b8c30` passes `verify --build --matching --boot-secs 45`: 7 gates, 63 host checks, zero unresolved symbols and the unchanged reference SHA.
 `ninja changes_all` reports fuzzy-only improvements; the complete set of 11 323 exact function identities and sizes is preserved.
 Matched code remains 2 249 348 of 3 590 088 bytes; matched data remains 560 095 of 640 331 bytes.
 No new byte-identical function, code-byte total or data-byte total is claimed.
@@ -28,9 +28,24 @@ The first isolated Strict build passes in 193.73 seconds with zero unresolved sy
 After removal of the temporary configuration helpers, the unchanged cached end-state build also passes in 7.07 seconds.
 Private `build/PortGoal_20261016/canonical-isolated.json` records the source, caches and actual matching PE/PDB identity for read-only investigation.
 This remains a development-host build, not clean-PC, real-GPU or full-gameplay acceptance.
-The next independent ordinary-input slices are owned by `GatekeeperInput` and `ShadowInput`.
-Private game-thread observation of scene1/1 now captures the live unheld `TResetFruit` in Mario's actual contact list while the pursuit waypoint lies inside its combined 130-unit collision envelope.
-The capture records grounded Mario, real forward input/velocity and no held actor or spray; it is a diagnosis, not a completed chase, normal unlocking or a demonstrated engine defect.
+The subsequent independent `pg3-final-08b8c30` checkout also builds from clean Aurora50e5be3 plus18patches and the same15explicit dependency-source overrides.
+The initial1282-step build uses2compiler jobs and takes434.37seconds; after removal of own configuration helpers, the final house Strict rebuilds1269steps in162.84seconds and reports0unresolved.
+This second run is not reported as a cache hit or measured speedup. Final actual PE/PDB GUID1A81F619-1B4D-52C7-4C4C-44205044422E/age1 agrees; the previous intermediate GUID is not used for typed observation.
+The normal earned-save Delfino boss route is now verified on canonical production source `2702e9b`: private `pg3_gate_earnedload_20261016` exits0 after431seconds.
+Ordinary fileB load restores Shine0x56; boss HP3 reaches0 at10428, health6/water8230, then the game naturally reaches controllable stage1/scenario1 at11523 with one Shine.
+Maintained `tools/routes/pc_gatekeeper_unassisted.dev` uses only controller inputs, washed footing and source-backed throat windows; the documented16-tick shortcut must be resampled if native input pacing changes.
+Private game-thread observation proves the grounded live unheld `TResetFruit` contact while a pursuit waypoint lies inside its130-unit envelope; no physics defect is inferred.
+The observer-free pursuit candidate then downs Shadow after3065/5000ticks at3945, waterCt0/downWait1/doing0xF, and ordinary A closes the natural dialogue after65ticks.
+Its diagnostic `dolpic/1` start does not prove normal unlocking: at4310 Shadow is naturally gateward doing0x11, but the gate remains flags0x2/noCollision1.
+Integrated source `08b8c30` passes Main Strict, the actual native clear-corridor/missing-cell/100-unit-drop self-check and the final7-gate aggregate; no temporary observer remains.
+Generate the private grid with `python tools/nav/col_grid.py dolpic1 build/PortGoal_20261016/dolpic1-corrected.nav 200 750`, then set `SUNSHINE_DEV_NAV` to its absolute path; no grid or game assets are published.
+The lead's continuous normal run `pg4_normal_bianco_20261016` now exits0 after751.93seconds on the final isolated source08b8c30 executable, using an owned copy of the normally earned airport profile.
+It restores the earned Shine by ordinary fileB input, defeats Delfino at10438, downs Shadow after3065/5000ticks at15056, closes dialogue through ordinary A after65ticks, and naturally draws/opens the gate.
+Bianco2/0 is controllable at18634; real walk/jump reaches(-7306,3161,17362), and the route ends18964 with shines1/health8/water10000.
+All seven GCI checksums pass and the card remains byte-identical to the earned airport source; no new Bianco Shine is claimed in this connected run.
+The run uses no devstart, cheats, aim assist, seed, direct state/resource writes, movie skipping or step-retrace. Quarter scale and concurrent host activity make it functional evidence, not quality/performance acceptance.
+`BiancoFirstShine` separately proves generic boss death, natural terrain/reward flight, event0 collection and normal save/return in canonical2702e9b diagnosticbianco/0 (rc0/325s); normal-chain mission connection and cold reload remain next.
+No retail source, matching mark or ledger promotion changes in this replay-tool wave; the complete11323exact identity/size set is checked again with0lost/0added.
 Execution now reuses the canonical immutable compiler artifacts for private single-translation-unit candidates and copied normally earned profiles for local route checks.
 The current host exposes 6 logical processors and about 16 GiB RAM; the existing maximum of 3 native build/run owners is retained rather than adding competing workers.
 Complete publication gates remain per completed source wave; documentation-only changes do not trigger another unchanged game build.
