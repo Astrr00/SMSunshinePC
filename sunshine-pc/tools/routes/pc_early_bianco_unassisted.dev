@@ -1,7 +1,8 @@
-# Earned airport checkpoint -> ordinary fileB load -> Delfino boss -> Shadow Mario -> live Bianco episode0.
+# Earned airport checkpoint -> ordinary fileB load -> Delfino boss -> Shadow Mario -> live Bianco episode0 -> real mission Shine -> save/return.
 # First earn the profile with pc_airport_unassisted.dev, then use route.py --appdata-from <earned-run>.
 # SUNSHINE_DEV_NAV must name the locally generated corrected dolpic1 grid; no devstart or gameplay aids.
 # All actions are controller inputs. Natural game scripts may move Mario during normal demos/transitions.
+# Script end uses diagnostic _Exit; normal native Close and non-default settings require separate checks.
 waitfor stage=15 dirstate=4 timeout=6000
 wait frames=240
 mash A period=30 until cardmode=0 timeout=900
@@ -115,5 +116,86 @@ hold A stick=0,127 frames=30
 wait frames=60
 log
 shot bianco_controllable.png
-wait frames=180
+# Continue the actual event0 mission; the 100-coin reward is not a substitute.
+walkto x=-5900 z=16260 radius=30 timeout=1361
+walkto x=-2740 z=11660 radius=30 timeout=1735
+walkto x=-1140 z=10060 radius=30 timeout=739
+walkto x=-880 z=9420 radius=30 timeout=268
+walkto x=-560 z=8920 radius=30 timeout=239
+walkto x=-440 z=8820 radius=30 timeout=107
+walkto x=-380 z=8780 radius=50 timeout=82
+log
+# Spin jump (MarioMove.cpp:1602) gives the lift needed for the walkway.
+hold X frames=1
+wait frames=1
+hold stick=127,0 frames=1
+hold stick=90,-90 frames=1
+hold stick=0,-127 frames=1
+hold stick=-90,-90 frames=1
+hold stick=-127,0 frames=1
+hold stick=-90,90 frames=1
+hold stick=0,127 frames=1
+hold A stick=45,119 frames=14
+log
+hold A R stick=45,119 frames=32
+log
+walkto x=500 z=7800 radius=80 timeout=400
+walkto x=500 z=7400 radius=50 timeout=250
+walkto x=750 z=7100 radius=50 timeout=250
+walkto x=1000 z=6800 radius=50 timeout=250
+log
+shot bianco_walkway.png
+# Stay on the main bridge; the eastward spur ends over water.
+walkto x=1160 z=4960 radius=30 timeout=615
+walkto x=920 z=3480 radius=30 timeout=510
+walkto x=840 z=3320 radius=30 timeout=114
+walkto x=880 z=3280 radius=30 timeout=177
+walkto x=5840 z=1080 radius=50 timeout=1688
+walkto x=6040 z=800 radius=50 timeout=264
+hold X frames=1
+wait frames=1
+walkto x=7050 z=-300 radius=50 spray=1 timeout=742
+hold A frames=1
+wait frames=45
+faceto x=7050 z=-1250 tol=3 timeout=180
+hold L frames=10
+log
+shot bianco_boss_approach.png
+# Wake the actual generic Bianco boss through body-water hits.
+hold L trig=0,255 until bck=0 timeout=900
+waitfor camDemo=0 timeout=1200
+hold L frames=10
+log
+shot bianco_boss_awake.png
+# Squat-pitch calibration uses only the ordinary main stick.
+hold L stick=0,-127 frames=10
+hold L frames=2
+log
+# The first throat is already open when the appearance camera releases control.
+hold R until bck=3 timeout=300
+log
+hold L until bck=18 timeout=900
+# shortcut: sixteen pad ticks enter the 50..160 throat window at current pacing; resample after pacing changes.
+hold L frames=16
+hold R until bck=3 timeout=300
+log
+hold L until bck=18 timeout=900
+hold L frames=16
+hold R until bck=5 timeout=300
+log
+waitfor flag=0x50000 timeout=3000
+waitfor camDemo=0 timeout=3000
+waitfor dirstate=4 timeout=1200
+log
+shot bianco_event0_reveal.png
+# The reward rises at (7170,3675,-185), then flies to its real resting point.
+walkto x=7170 z=-185 radius=70 timeout=900
+walkto x=7065 z=-1200 radius=50 timeout=600
+hold A until flag=0x10000 timeout=900
+log
+shot bianco_event0_collected.png
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=9000
+log
+shot bianco_normal_return.png
+wait frames=60
 end

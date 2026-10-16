@@ -39,13 +39,21 @@ The observer-free pursuit candidate then downs Shadow after3065/5000ticks at3945
 Its diagnostic `dolpic/1` start does not prove normal unlocking: at4310 Shadow is naturally gateward doing0x11, but the gate remains flags0x2/noCollision1.
 Integrated source `08b8c30` passes Main Strict, the actual native clear-corridor/missing-cell/100-unit-drop self-check and the final7-gate aggregate; no temporary observer remains.
 Generate the private grid with `python tools/nav/col_grid.py dolpic1 build/PortGoal_20261016/dolpic1-corrected.nav 200 750`, then set `SUNSHINE_DEV_NAV` to its absolute path; no grid or game assets are published.
-The lead's continuous normal run `pg4_normal_bianco_20261016` now exits0 after751.93seconds on the final isolated source08b8c30 executable, using an owned copy of the normally earned airport profile.
+The lead's earlier entry-only `pg4_normal_bianco_20261016` exits0 after751.93seconds on final isolated source08b8c30, using an owned normally earned airport profile; checkpointa02a111 records its bounded route.
 It restores the earned Shine by ordinary fileB input, defeats Delfino at10438, downs Shadow after3065/5000ticks at15056, closes dialogue through ordinary A after65ticks, and naturally draws/opens the gate.
 Bianco2/0 is controllable at18634; real walk/jump reaches(-7306,3161,17362), and the route ends18964 with shines1/health8/water10000.
 All seven GCI checksums pass and the card remains byte-identical to the earned airport source; no new Bianco Shine is claimed in this connected run.
 The run uses no devstart, cheats, aim assist, seed, direct state/resource writes, movie skipping or step-retrace. Quarter scale and concurrent host activity make it functional evidence, not quality/performance acceptance.
-`BiancoFirstShine` separately proves generic boss death, natural terrain/reward flight, event0 collection and normal save/return in canonical2702e9b diagnosticbianco/0 (rc0/325s); normal-chain mission connection and cold reload remain next.
-No retail source, matching mark or ledger promotion changes in this replay-tool wave; the complete11323exact identity/size set is checked again with0lost/0added.
+`BiancoFirstShine` first proved generic boss death, natural terrain/reward flight, event 0 collection and normal save/return in canonical `2702e9b` diagnostic `bianco/0` (exit 0, 325 seconds). That component alone did not prove normal unlocking.
+The subsequent connected mission `pg5_normal_bianco_shine_20261016` passes with exit 0 in 853.08 seconds on the same immutable compiled source `08b8c30`, with no new engine/game code.
+Ordinary inputs reach Bianco death animation at tick 20522, natural event 0 appearance at 20911, collection at 21160 and controllable Delfino 1/5 with two Shines at 21663; the route ends at 21723.
+Independent complete GCI decoding finds precisely IDs 0/86, save count 2 and no 100-coin reward. Compared with the earned airport baseline, no flag is lost and the only changed saved integer is save count 1 to 2.
+New-process `pg5_normal_bianco_reload_20261016` passes ordinary File B input with exit 0 in 147.48 seconds, reaching controllable Delfino 1/5 with two Shines at tick 4192.
+Both standard `gci_check.py` runs pass all seven sectors. Whole GCI SHA-256 is `bd42d75d65d3e4a1c19cfad3a005ac71bf789ff24ef30de94acb36aa8bec5fa0`; every persistent flag, all 21 saved integers and the option sector remain byte-identical across cold load.
+Actual script end is `std::_Exit` and bypasses orderly application callbacks; do not infer native sound-mode persistence or normal Close from that exit 0.
+Independent workers now correct confirmed camera target/desired-position member errors and reproduce/fix the volatile native console Mono bit. Their candidate normal-Close/non-default settings proofs are not borrowed into this unchanged-source mission certificate.
+The seven-gate/63-check and isolated Strict evidence above is reused for unchanged compiled source `08b8c30`; no duplicate build or new matching gain is claimed for this route/documentation-only wave.
+No retail source, matching mark or ledger promotion changes in this replay-tool wave. The complete 11,323 exact identity/size set was checked again, with zero functions lost or added.
 Execution now reuses the canonical immutable compiler artifacts for private single-translation-unit candidates and copied normally earned profiles for local route checks.
 The current host exposes 6 logical processors and about 16 GiB RAM; the existing maximum of 3 native build/run owners is retained rather than adding competing workers.
 Complete publication gates remain per completed source wave; documentation-only changes do not trigger another unchanged game build.

@@ -13,17 +13,17 @@ Last updated from observed state (see `sunshine-pc/docs/status.md` section 0 for
 The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) records concrete reproductions, owners, acceptance conditions and evidence limits.
 Historical dev-assisted acceptances below remain valid only within their stated scope; they do not satisfy the new unassisted criteria.
 
-**New bounded checkpoint (2026-10-16):** an input-only fresh file defeats the airport boss, earns Shine `0x56` and reaches live Delfino 1/0 without gameplay aids; a new process restores that earned Shine from a copied isolated test profile. Later unlocks, settings and repeated lifecycle cases remain open.
-The native `FaceTo` condition and corrected floor grid pass; contact-aware ordinary-input pursuit now completes in the actual connected earned-save path, followed by natural gate opening and controllable Bianco2/0.
+**New bounded checkpoint (2026-10-16):** a fresh input-only file earns airport Shine `0x56`. Its legitimate saved continuation now defeats Delfino, Shadow Mario and the real Bianco episode 0 boss, collects event 0 and saves/returns to Delfino 1/5 with two Shines.
+On compiled source `08b8c30`, the mission passes in 853.08 seconds and fresh-process File B reload passes in 147.48 seconds. Earned identities 0/86, all persistent flags, all 21 saved integers, the option sector and the entire GCI remain unchanged after load.
 The [content inventory](sunshine-pc/docs/content-coverage.tsv) derives 120 Shine identities and 240 observed blue-coin identities from actual sources/resources, not helper capacity. All runtime rows remain open; unresolved resources/fields are retained.
-The connected source08b8c30 route exits0 after752seconds without gameplay aids, devstart, seed or movie/timing overrides. A real first Bianco mission, later connected progression and settings/lifecycle acceptance remain open. The WARP watchdog and broad allocation mitigation remain separate unresolved risks.
+No gameplay aids, devstart, seed or movie/timing overrides are used. Script end is diagnostic `std::_Exit`; orderly native Close/non-default settings, later progression and repeated lifecycle remain separate. Shared camera-field and volatile sound-mode defects are confirmed and under independent correction; the WARP watchdog/allocation mitigation remain unresolved.
 The shared native SmallEnemy table now has an explicit terminator; unmodified Ricco3/0 loads and its ordinary walk/jump/return regression passes on WARP after the previous loader AV.
 Actual native captures and normal Close pass at both diagnostic quarter scale and Auto/window resolution; quarter scale is not graphical-quality acceptance.
 The two independent implementation slices are integrated: format-1/2-bit voices decode in real Ricco, and the original map1 shine-shadow volume reads validated geometry from the supported user DOL.
 The integrated Auto-resolution map1 surface is observed, its unchanged 3-degree FaceTo condition passes, and native Close exits0; listening, retail-pixel equivalence and real-GPU performance remain open.
 Compiled source `08b8c30` passes all7 publication gates/63host checks and independently builds Strict from clean Aurora `50e5be3` plus18tracked patches.
 Fifteen dependency-source caches are reused, not an existing game binary. Own configuration helpers are removed; final isolated Strict reports zero unresolved after a1269-step rebuild, not a cache-hit claim.
-`GateEntry` completed the component continuation and the lead verified the actual normal chain. `BiancoFirstShine` proved the real event0 reward/save/return in a separate component; the next connected mission run remains lead-owned.
+`CameraHeight` owns the shared retail-backed camera-field correction and its changed ordinary-input calibration. `OriginalOptions` owns native Mono persistence and genuine normal-Close/cold UI proof on copies of the newly earned two-Shine profile; Main retains headers/integration/publication.
 
 **Published background, not a connected-playthrough certificate:**
 
