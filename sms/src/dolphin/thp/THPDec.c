@@ -512,6 +512,9 @@ void __THPDecompressYUV(void* tileY, void* tileU, void* tileV)
 	while (currentY < targetY) {
 		__THPDecompressiMCURowNxN();
 		currentY += 16;
+		// The console preempts this thread (priority 20) the moment the audio thread is woken; the port's scheduler only
+		// switches at an OS call, so a whole frame decode (~12 ms) delayed every DSP subframe. A row is ~0.4 ms.
+		OSRestoreInterrupts(OSDisableInterrupts());
 	}
 }
 #else

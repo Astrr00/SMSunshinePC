@@ -1,0 +1,16 @@
+diff --git a/lib/thread.cpp b/lib/thread.cpp
+index 348b0ec..de02e22 100644
+--- a/lib/thread.cpp
++++ b/lib/thread.cpp
+@@ -238,7 +238,10 @@ void pin_shared_cache() noexcept {
+   std::lock_guard lock{sDomainMutex};
+   if (!sDomainConfigured) {
+     auto domain = find_cache_domain();
+-    if (domain && apply_cache_domain(*domain)) {
++    // Main, FIFO worker and render worker all pin to this one domain. A domain of a single processor (virtual machines
++    // report one L3 per vCPU) would run all three on one core and starve the game thread behind the workers.
++    constexpr size_t kMinPinnedProcessors = 4;
++    if (domain && domain->processors.size() >= kMinPinnedProcessors && apply_cache_domain(*domain)) {
+       sDomain = std::move(domain);
+     }
+     sDomainConfigured = true;

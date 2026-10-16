@@ -76,6 +76,7 @@ struct Rec {
 	std::condition_variable cv; // signalled when the baton is handed to this thread or the thread is killed
 	bool started = false;       // native thread exists
 	bool dead = false;          // exited/cancelled: the native thread must end instead of running
+	bool hostWait = false;      // inside a host call (hostWaitBegin/End): a better-priority wake may take the CPU
 };
 
 std::mutex gM;                     // the "interrupts disabled" lock; also protects everything below
@@ -361,8 +362,16 @@ void selectThread(bool yield)
 	if (sReschedule > 0 && !dying)
 		return;
 	if (!inThread) {
-		if (!cur)
+		if (!cur) {
 			dispatch();
+		} else if (recOf(cur)->hostWait && sRunQueueBits && static_cast<s32>(__cntlzw(sRunQueueBits)) < cur->priority) {
+			// cur is blocked in a host call that touches no game state: the better thread takes the CPU now, like an
+			// interrupt return on the console. cur is READY and resumes in hostWaitEnd.
+			cur->state = OS_THREAD_STATE_READY;
+			setRun(cur);
+			gCurrent.store(nullptr, std::memory_order_release);
+			dispatch();
+		}
 		return;
 	}
 	if (cur->state == OS_THREAD_STATE_RUNNING) {
@@ -884,6 +893,33 @@ int OSReceiveMessage(OSMessageQueue* mq, void* msg, long flags)
 	OSWakeupThread(&mq->queueSend);
 	OSRestoreInterrupts(enabled);
 	return 1;
+}
+
+// Bracket a call into host code that touches no game state and can block for many milliseconds (Aurora's frame
+// present waits for its FIFO worker). The console blocks or is interrupted there; a thread of better priority that a
+// host event wakes meanwhile (the audio thread) takes the CPU at once instead of at this thread's next OS call.
+void sunshineHostWaitBegin(void)
+{
+	if (!tlsSelf)
+		return;
+	BOOL enabled = OSDisableInterrupts();
+	reschedule(); // a wake that is already pending
+	tlsSelf->hostWait = true;
+	OSRestoreInterrupts(enabled);
+}
+
+void sunshineHostWaitEnd(void)
+{
+	if (!tlsSelf)
+		return;
+	BOOL enabled = OSDisableInterrupts();
+	Rec* self    = tlsSelf;
+	self->hostWait = false;
+	while (gCurrent.load(std::memory_order_acquire) != self->os && !self->dead)
+		waitBaton(self); // preempted during the call: wait until the dispatcher hands the CPU back
+	if (self->dead)
+		endNativeThread();
+	OSRestoreInterrupts(enabled);
 }
 
 } // extern "C"

@@ -11,6 +11,7 @@
 #include "launcher/launcher.hpp"
 #include "settings.h"
 #include "saves/saves.hpp"
+#include "sdk/os_host.hpp"
 
 #include <System/Application.hpp>
 
@@ -66,7 +67,10 @@ bool sunshineDevSkipMovies()
 // Present the open frame, pump window events, open the next frame.
 static void presentAndPump()
 {
-	aurora_end_frame();
+	{
+		HostWait host; // end_frame waits for Aurora's FIFO worker; the audio thread must not starve meanwhile
+		aurora_end_frame();
+	}
 	for (;;) {
 		for (const AuroraEvent* e = aurora_update(); e != nullptr && e->type != AURORA_NONE; ++e) {
 			if (e->type == AURORA_EXIT) {
@@ -81,6 +85,7 @@ static void presentAndPump()
 			}
 		}
 		sunshineHeartbeat(); // minimized or paused windows keep pumping events: not a hang
+		HostWait host;
 		if (aurora_begin_frame()) // false while minimized or paused: keep pumping events
 			break;
 	}
