@@ -1,0 +1,67 @@
+# Earned IDs 0/86 in File B -> ordinary Delfino 1/5 JellyGate -> Bianco STORY2 -> controllable raw 2/1.
+# Use an owned copy of the earned profile; no devstart, seed, movie/timing overrides or gameplay aids.
+# StageArc maps raw 1/5 to dolpic5 and raw 2/1 to bianco1; the real selector proves the selected episode.
+# Every action is ordinary PAD input. Diagnostic _Exit does not prove native Close or the mission reward.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 scen=5 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+# Actual dolpic5 JellyGate is (0.02115,300,4941.4707); earned flag 0x10385 activates it on load.
+waitfor flag=0x10385 timeout=60
+walkto x=340 z=5650 radius=60 spray=1 timeout=900
+faceto x=0 z=4941 tol=3 timeout=300
+hold trig=0,255 frames=120
+log
+shot episode2_gate_sprayed.png
+wait frames=30
+# Nearness opens the unlocked gate; its entry box still requires an ordinary jump.
+walkto x=0 z=4800 radius=200 timeout=600
+log
+hold A stick=0,127 frames=120
+waitfor stage=2 scen=255 timeout=1200
+wait frames=400
+log
+shot episode2_selector_default.png
+wait frames=30
+# Earned episode 0 unlocks episode 1 and selects it by default (SelectMenu.cpp:440-461).
+# Exercise both real selector directions, then confirm STORY2 with A.
+hold LEFT frames=4
+wait frames=90
+shot episode2_selector_previous.png
+wait frames=30
+hold RIGHT frames=4
+wait frames=90
+shot episode2_selector_selected.png
+wait frames=30
+hold A frames=4
+waitfor stage=2 scen=1 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=120
+log
+shot episode2_controllable_before.png
+wait frames=30
+hold stick=0,127 frames=60
+log
+hold A stick=0,127 frames=30
+wait frames=60
+waitfor stage=2 scen=1 director mario dirstate=4 camDemo=0 timeout=300
+log
+shot episode2_controllable_after.png
+wait frames=60
+end

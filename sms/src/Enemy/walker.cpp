@@ -140,6 +140,7 @@ void TWalker::bind(TLiveActor* param_1)
 			unk20 = 30;
 		}
 
+		// asm 0x80282CE8: clamp only at/below the floor; airborne positions must keep falling.
 		if (local_30.y <= fVar1 + 0.05f
 		    && !local_40->checkFlag(BG_CHECK_FLAG_ILLEGAL)
 		    && !local_40->isEnemyThrough()) {

@@ -797,7 +797,7 @@ void CPolarSubCamera::calcPosAndAt_()
 						}
 					}
 				}
-				// Height pan filters desired Y into the target position before final smoothing.
+				// asm 0x80354230-0x8035465C: keep desired and height-panned positions distinct before final smoothing.
 				mCurrentTarget.mPosition.x = mCurrentTarget.unk18.x;
 				mCurrentTarget.mPosition.z = mCurrentTarget.unk18.z;
 				execHeightPan_();
