@@ -256,12 +256,14 @@ public:
 			delta.sub(unk0, data.mPos);
 			f32 outerR = data.unk40 + radius;
 			f32 innerR = data.unk3C - radius;
+			// asm 0x801F9F24: square on every path to preserve sticky FP exceptions.
+			f32 innerRSq = innerR * innerR;
 			f32 distSq = delta.squared();
 			f32 proj   = m.dot(delta);
 
 			if (distSq <= outerR * outerR) {
 				if (proj < 0.0f) {
-					if (distSq >= innerR * innerR) {
+					if (distSq >= innerRSq) {
 						f32 dist = JGeometry::TUtil<f32>::sqrt(distSq);
 						f32 pen  = dist - innerR;
 						f32 inv  = -1.0f / dist;
@@ -301,7 +303,7 @@ public:
 				unk30.extend(grav1);
 			} else {
 				if (proj > 0.0f && proj < radius + data.unk48
-				    && distSq > innerR * innerR && distSq < outerR * outerR) {
+				    && distSq > innerRSq && distSq < outerR * outerR) {
 					JGeometry::TVec3<f32> point;
 					point.scale((radius + data.unk48) - proj, m);
 					unk18.extend(point);
