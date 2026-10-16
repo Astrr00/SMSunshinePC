@@ -1,6 +1,8 @@
 # Roadmap
 
-**Paused at the user's request, 2026-10-16.** All owned experiments and agents are stopped. The [session handoff](sunshine-pc/docs/session-2026-10-16.md) preserves the complete unfinished goal, evidence, private work and ordered next actions.
+**Resumed at the user's request, 2026-10-16.** The [session handoff](sunshine-pc/docs/session-2026-10-16.md) preserves the preceding stop state, complete unfinished goal and private evidence.
+The fourteen user-paused tasks are open again; the separate clean-Windows prerequisite remains externally blocked.
+Current work separates normal Bianco/Petey inputs, the intermittent enemy wrap watchdog and ordinary death/restart verification.
 
 Goal: a fully playable native Windows x86-64 port of Super Mario Sunshine (GMSJ01), using `sms/` as source and Aurora as the GameCube SDK replacement.
 Normal progression from a new save through credits/postgame, all original content including 120 Shines and 240 blue coins, reliable cold save/load and a reproducible Windows package are required.

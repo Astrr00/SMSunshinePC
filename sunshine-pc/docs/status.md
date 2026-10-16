@@ -6,11 +6,23 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
-**Session paused at the user's request (2026-10-16).** Read [session-2026-10-16.md](session-2026-10-16.md) for the complete retained goal, source/binary identities, private evidence, all outstanding tasks and exact restart instructions. All owned native tests/observers and agents are stopped; desktop control is released. No full-port completion is claimed.
+**Development resumed at the user's request (2026-10-16).** The complete [session handoff](session-2026-10-16.md) remains an unchanged historical stop-state record.
+The fourteen user-paused tasks are open again; the external clean-Windows blocker is retained.
+At resumption, Main is `cd1e3e8`; the existing dirty Aurora gitlink and untracked matching worklist are preserved.
+The current Strict executable again hashes to `447ae21f0520f8027b172a692821c607bd142904c53332bd69850d28d0e136e0`, and the matching DOL to SHA1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625`.
+Native sources, headers, CMake inputs, Strict build script and Aurora patches have no committed difference from runtime source `16d1c13`; no new native build or gate run is claimed.
+Independent ordinary-input work resumes the normal Bianco/Petey path and corrected death/restart replay in new private profiles.
+Ordinary death/restart is now observed end to end in a fresh empty profile (`build/Route/pg10_death_run11_20261016`, frozen `447ae21f` carrier, route `normal-death-restart-v8.dev` SHA256 `d1b67bd7c1ea9bfc56e4d4d9f97b0fbb78973331ad9e09e4fc173cf2e6608bbd`, input only, rc0/416 s).
+Mario moves on the airport goop, health 8 to 0, lives 3 to 2, director state 7; the original restart returns to stage0/scenario0 with health 8, and the stick then moves Mario from (819.2, 500, 1246.2) to (1717.6, 500, 366.3).
+Standing still on the goop does not kill; movement in it does. In run10b the restart state was `MARIO_STATUS_READ_BILLBOARD` (0x10001308) and one A press did not end it; run11 differed from run10b at the same tick, so the two have not been reconciled.
+The script exits at its end (diagnostic exit), so this is not a native-Close proof, and no GCI checksum was taken. The earlier run9 "Mario stays" reading was a route-generation error (the restart stick hold had been deleted) and is withdrawn.
+The repeatable Bianco ramp timeouts are goop-slope slides, not a proven wall or engine defect: on graffito with ground normal y at or below `mSlopeAngle`, `checkGraffitoSlip` enters `OIL_SLOPE`, and `oilSlope` then falls into `CATCH`/`CATCH_LOST`.
+Private probes `build/Route/pg11_ramp_spray1..5_20261016` (frozen `447ae21f`, canonical File B copy) show: walking with R held while the hover nozzle is selected hovers off the west edge; walking with the spray nozzle barely sprays (water 8640 to 8612); standing, spraying ahead and then walking climbs to z -1039 / y 3924. The uncleaned goop just above that point still slides Mario back; the ramp head (z -1700, y about 4096) is not reached yet. The attached frozen-context observer returned 7 in all five runs (no wrap stall manifested).
+The enemy wrap watchdog still requires actual failing arguments; ramp goop/input failures remain a separate problem, not a presumed wall defect.
 
 ### Update 2026-10-16: gameplay-first goal and current-source baseline
 
-The retained user goal is a fully playable native Windows port, including normal new-save progression through credits/postgame and all original content; development is paused, not completed.
+The retained user goal is a fully playable native Windows port, including normal new-save progression through credits/postgame and all original content; development has resumed, not completed.
 100% byte-identical PowerPC matching is no longer the primary goal or a release prerequisite.
 The [playability matrix](playability-matrix.tsv) assigns concrete early blockers, reproduction paths, owners and acceptance conditions.
 Historical developer-assisted achievements below do not certify unassisted progression.

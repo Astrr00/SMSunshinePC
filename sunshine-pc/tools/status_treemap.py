@@ -2,7 +2,7 @@
 """Render the README status treemap (docs/img/status.svg).
 
 Left: decomp functions per library/unit from the objdiff report (green = byte-identical share).
-Right: port rows from the README status table (colour by percent).
+Bottom: playability rows from docs/playability-matrix.tsv (colour by acceptance status).
 Usage (repo root): python sunshine-pc/tools/status_treemap.py [report.json] [out.svg]
 Stdlib only; reads no game data.
 """
@@ -92,32 +92,23 @@ def decomp_panel(x0, y0, w, h):
     return "".join(s), tot["matched_functions"], tot["total_functions"]
 
 
+MATRIX = ROOT / "sunshine-pc/docs/playability-matrix.tsv"
+STATE_COLOR = {"passed-bounded": GREEN, "open": "rgb(200,80,50)"}  # anything else (external-check-required): grey
+
+
 def port_rows():
-    rows = []
-    for line in (ROOT / "README.md").read_text(encoding="utf-8").splitlines():
-        c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) >= 4 and re.fullmatch(r"\d+", c[2]) and c[1] in ("done", "partial", "open", "blocked"):
-            rows.append((c[0], c[1], int(c[2])))
-    return rows
-
-
-def port_color(state, pct):
-    if state == "blocked":
-        return "#8b949e"
-    if pct >= 100:
-        return GREEN
-    # partial/open: red-orange (0) to yellow-green (99)
-    r = int(200 - pct * 1.0)
-    g = int(80 + pct * 1.2)
-    return f"rgb({r},{g},50)"
+    lines = MATRIX.read_text(encoding="utf-8").splitlines()
+    head = lines[0].split("\t")
+    ia, ist = head.index("area"), head.index("status")
+    return [(c[ia], c[ist]) for c in (l.split("\t") for l in lines[1:] if l.strip())]
 
 
 def port_panel(x0, y0, w, h):
     rows = port_rows()
     items = [(1.0, r) for r in rows]
     s = []
-    for (name, state, pct), x, y, cw, ch in squarify(items, x0, y0, w, h):
-        s.append(rect(x + 1, y + 1, cw - 2, ch - 2, port_color(state, pct)))
+    for (name, state), x, y, cw, ch in squarify(items, x0, y0, w, h):
+        s.append(rect(x + 1, y + 1, cw - 2, ch - 2, STATE_COLOR.get(state, GREY)))
         words, lines, cur = re.split(r"[,(]", name)[0].split(), [], ""
         per = max(int((cw - 10) / 9.0), 4)
         for wd in words:
@@ -129,9 +120,9 @@ def port_panel(x0, y0, w, h):
         lines.append(cur)
         for i, ln in enumerate(lines[:3]):
             s.append(label(x + 1, y + 1 + i * 17, cw - 2, ch - 2, ln, 15, "#fff", True))
-        s.append(label(x + 1, y + 1 + min(len(lines), 3) * 17, cw - 2, ch - 2, f"{pct} %", 20, "#fff"))
-    mean = sum(p for _, _, p in rows) / max(len(rows), 1)
-    return "".join(s), mean, len(rows)
+        s.append(label(x + 1, y + 1 + min(len(lines), 3) * 17, cw - 2, ch - 2, state, 13, "#fff"))
+    passed = sum(st == "passed-bounded" for _, st in rows)
+    return "".join(s), passed, len(rows)
 
 
 def main():
@@ -139,18 +130,18 @@ def main():
     dh, ph = 540, 400
     dp, mf, tf = decomp_panel(10, 70, pw, dh)
     py = 70 + dh + 50
-    pp, mean, n = port_panel(10, py, pw, ph)
+    pp, passed, n = port_panel(10, py, pw, ph)
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
         f'font-family="Segoe UI,Helvetica,Arial,sans-serif">{rect(0,0,W,H,BG)}'
         f'<text x="10" y="28" font-size="22" font-weight="700" fill="#fff">Status</text>'
         f'<text x="10" y="54" font-size="16" fill="#c9d1d9">Decompiled functions: {100*mf/tf:.1f}% ({mf}/{tf}), cell = unit, green = byte-identical share</text>'
-        f'<text x="10" y="{py-14}" font-size="16" fill="#c9d1d9">Port rows: mean {mean:.0f}% ({n} rows), colour = percent</text>'
+        f'<text x="10" y="{py-14}" font-size="16" fill="#c9d1d9">Playability matrix: {passed} of {n} rows passed (bounded), green = passed, red = open, grey = external check</text>'
         f"{dp}{pp}</svg>"
     )
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(svg, encoding="utf-8", newline="\n")
-    print(f"wrote {OUT} ({len(svg)//1024} KiB): decomp {mf}/{tf}, port mean {mean:.1f} over {n} rows")
+    print(f"wrote {OUT} ({len(svg)//1024} KiB): decomp {mf}/{tf}, playability {passed}/{n} passed")
 
 
 if __name__ == "__main__":
