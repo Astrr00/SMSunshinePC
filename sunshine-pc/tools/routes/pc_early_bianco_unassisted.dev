@@ -128,18 +128,20 @@ log
 # Spin jump (MarioMove.cpp:1602) gives the lift needed for the walkway.
 hold X frames=1
 wait frames=1
-hold stick=127,0 frames=1
-hold stick=90,-90 frames=1
-hold stick=0,-127 frames=1
-hold stick=-90,-90 frames=1
-hold stick=-127,0 frames=1
-hold stick=-90,90 frames=1
-hold stick=0,127 frames=1
+# Small stick circle records spin input without walking off the takeoff ledge.
+hold stick=40,0 frames=1
+hold stick=28,-28 frames=1
+hold stick=0,-40 frames=1
+hold stick=-28,-28 frames=1
+hold stick=-40,0 frames=1
+hold stick=-28,28 frames=1
+hold stick=0,40 frames=1
+hold stick=28,28 frames=1
 hold A stick=45,119 frames=14
 log
-hold A R stick=45,119 frames=32
-log
-walkto x=500 z=7800 radius=80 timeout=400
+walkto x=500 z=7800 radius=250 spray=1 timeout=400
+walkto x=500 z=7800 radius=60 timeout=200
+wait frames=30
 walkto x=500 z=7400 radius=50 timeout=250
 walkto x=750 z=7100 radius=50 timeout=250
 walkto x=1000 z=6800 radius=50 timeout=250
@@ -162,16 +164,17 @@ hold L frames=10
 log
 shot bianco_boss_approach.png
 # Wake the actual generic Bianco boss through body-water hits.
-hold L trig=0,255 until bck=0 timeout=900
+hold L trig=0,255 until bck=17 timeout=900
 waitfor camDemo=0 timeout=1200
-hold L frames=10
-log
-shot bianco_boss_awake.png
+wait frames=30
+faceto x=7050 z=-1250 tol=3 timeout=180
+hold L until bck=18 timeout=900
 # Squat-pitch calibration uses only the ordinary main stick.
 hold L stick=0,-127 frames=10
-hold L frames=2
+hold L frames=16
 log
-# The first throat is already open when the appearance camera releases control.
+shot bianco_boss_aim.png
+# Camera release alone is not a ready throat; observe the awake and mouth phases before pitching.
 hold R until bck=3 timeout=300
 log
 hold L until bck=18 timeout=900

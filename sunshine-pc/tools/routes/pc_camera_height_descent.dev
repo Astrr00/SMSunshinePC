@@ -1,0 +1,26 @@
+# Camera target/height regression: ordinary Bianco arrival -> dry descent.
+# Standalone SUNSHINE_DEV_START=bianco/0 diagnoses this component, not unlocking.
+# Observe camera_descent.png: terrain/Mario must remain in view after descending;
+# camera target Y must chase currentTarget.mTarget.y, not the spawn camera height.
+# The jump at the end also exercises normal height-pan release without bypassing it.
+waitfor stage=2 scen=0 timeout=1200
+wait frames=400
+mash A period=40 until stage=2 director mario dirstate=4 camDemo=0 timeout=2400
+wait frames=120
+log
+shot camera_arrival.png
+hold stick=0,127 frames=60
+hold A stick=0,127 frames=30
+wait frames=60
+walkto x=-5900 z=16260 radius=30 timeout=1361
+walkto x=-2740 z=11660 radius=30 timeout=1735
+walkto x=-1140 z=10060 radius=30 timeout=739
+wait frames=180
+log
+shot camera_descent.png
+hold A frames=1
+wait frames=180
+log
+shot camera_jump_settled.png
+wait frames=60
+end

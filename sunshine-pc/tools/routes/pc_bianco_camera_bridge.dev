@@ -1,0 +1,41 @@
+# Bianco corrected-camera ordinary-input bridge regression and migration fragment.
+# Standalone SUNSHINE_DEV_START=bianco/0 is component diagnosis, not unlocking.
+waitfor stage=2 scen=0 timeout=1200
+wait frames=400
+mash A period=40 until stage=2 director mario dirstate=4 camDemo=0 timeout=2400
+wait frames=120
+hold stick=0,127 frames=60
+hold A stick=0,127 frames=30
+wait frames=60
+walkto x=-5900 z=16260 radius=30 timeout=1361
+walkto x=-2740 z=11660 radius=30 timeout=1735
+walkto x=-1140 z=10060 radius=30 timeout=739
+walkto x=-880 z=9420 radius=30 timeout=268
+walkto x=-560 z=8920 radius=30 timeout=239
+walkto x=-440 z=8820 radius=30 timeout=107
+walkto x=-380 z=8780 radius=50 timeout=82
+log
+hold X frames=1
+wait frames=1
+# Small stick circle records spin input without walking off the takeoff ledge.
+hold stick=40,0 frames=1
+hold stick=28,-28 frames=1
+hold stick=0,-40 frames=1
+hold stick=-28,-28 frames=1
+hold stick=-40,0 frames=1
+hold stick=-28,28 frames=1
+hold stick=0,40 frames=1
+hold stick=28,28 frames=1
+hold A stick=45,119 frames=14
+log
+# Release hover before landing, then let Mario brake on the real bridge.
+walkto x=500 z=7800 radius=250 spray=1 timeout=400
+walkto x=500 z=7800 radius=60 timeout=200
+wait frames=30
+walkto x=500 z=7400 radius=50 timeout=250
+walkto x=750 z=7100 radius=50 timeout=250
+walkto x=1000 z=6800 radius=50 timeout=250
+log
+shot bianco_walkway.png
+wait frames=60
+end

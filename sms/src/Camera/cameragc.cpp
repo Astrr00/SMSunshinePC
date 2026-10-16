@@ -712,7 +712,7 @@ void CPolarSubCamera::calcPosAndAt_()
 							f32 cushDist = cushion * nDist;
 							if (cushDist > cushion * dist) {
 								unk64 |= CAMERA_FLAG_UNK100;
-								mCurrentTarget.mPosition = newPos;
+								mCurrentTarget.unk18 = newPos;
 							} else {
 								f32 minDist
 								    = cushion
@@ -744,32 +744,32 @@ void CPolarSubCamera::calcPosAndAt_()
 										useMid = true;
 								}
 								if (useMid) {
-									mCurrentTarget.mPosition.set(base);
+									mCurrentTarget.unk18.set(base);
 								} else {
 									CLBPolarToCross(saveAt,
-									                mCurrentTarget.mPosition,
+									                mCurrentTarget.unk18,
 									                nDist, nVA, yAngle);
 								}
-								mCurrentTarget.mPosition.y = newPos.y;
+								mCurrentTarget.unk18.y = newPos.y;
 							}
 						} else {
-							mCurrentTarget.mPosition = newPos;
+							mCurrentTarget.unk18 = newPos;
 						}
 
 						f32 sY = JMASSin(yAngle);
 						f32 cY = JMASCos(yAngle);
 
 						if (fabricatedInline3()) {
-							f32 dx = gpMarioPos->x - mCurrentTarget.mPosition.x;
-							f32 dz = gpMarioPos->z - mCurrentTarget.mPosition.z;
+							f32 dx = gpMarioPos->x - mCurrentTarget.unk18.x;
+							f32 dz = gpMarioPos->z - mCurrentTarget.unk18.z;
 							f32 d  = MsSqrtf(dx * dx + dz * dz);
 							f32 minD = mSaveEx->mSLMinCushionXZ.get();
 							f32 mD2
 							    = minD < dist * cushion ? minD : dist * cushion;
 							if (d < mD2) {
 								f32 add = mD2 - d;
-								mCurrentTarget.mPosition.x += sY * add;
-								mCurrentTarget.mPosition.z += cY * add;
+								mCurrentTarget.unk18.x += sY * add;
+								mCurrentTarget.unk18.z += cY * add;
 							}
 						}
 
@@ -778,10 +778,10 @@ void CPolarSubCamera::calcPosAndAt_()
 						case CAMERA_MODE_MARE_UNDER_GROUND:
 							break;
 						default:
-							mCurrentTarget.mPosition.x = -(
-							    unk2AC->unk4 * sY - mCurrentTarget.mPosition.x);
-							mCurrentTarget.mPosition.z = -(
-							    unk2AC->unk4 * cY - mCurrentTarget.mPosition.z);
+							mCurrentTarget.unk18.x = -(
+							    unk2AC->unk4 * sY - mCurrentTarget.unk18.x);
+							mCurrentTarget.unk18.z = -(
+							    unk2AC->unk4 * cY - mCurrentTarget.unk18.z);
 							break;
 						}
 
@@ -797,21 +797,22 @@ void CPolarSubCamera::calcPosAndAt_()
 						}
 					}
 				}
-				mPosition.x = mCurrentTarget.mPosition.x;
-				mPosition.z = mCurrentTarget.mPosition.z;
+				// Height pan filters desired Y into the target position before final smoothing.
+				mCurrentTarget.mPosition.x = mCurrentTarget.unk18.x;
+				mCurrentTarget.mPosition.z = mCurrentTarget.unk18.z;
 				execHeightPan_();
-				finalAt.y = mCurrentTarget.unk18.y;
+				finalAt.y = mCurrentTarget.mTarget.y;
 				Vec posCpy;
-				posCpy = mPosition;
+				posCpy = mCurrentTarget.mPosition;
 				if (isNeedWallCheck_() && execWallCheck_(&posCpy)) {
-					f32 dxw = mPosition.x - mCurrentTarget.mTarget.x;
-					f32 dzw = mPosition.z - mCurrentTarget.mTarget.z;
+					f32 dxw = mCurrentTarget.mPosition.x - mCurrentTarget.mTarget.x;
+					f32 dzw = mCurrentTarget.mPosition.z - mCurrentTarget.mTarget.z;
 					mCurrentTarget.mPitch
 					    = matan(sqrtOOL(dxw * dxw + dzw * dzw),
-					            mPosition.y - mCurrentTarget.mTarget.y);
+					            mCurrentTarget.mPosition.y - mCurrentTarget.mTarget.y);
 					mCurrentTarget.mYaw
-					    = matan(mPosition.z - mCurrentTarget.mTarget.z,
-					            mPosition.x - mCurrentTarget.mTarget.x);
+					    = matan(mCurrentTarget.mPosition.z - mCurrentTarget.mTarget.z,
+					            mCurrentTarget.mPosition.x - mCurrentTarget.mTarget.x);
 					mCurrentTarget.unk28 = mCurrentTarget.unk30;
 				}
 				if (isNeedRoofCheck_()) {
