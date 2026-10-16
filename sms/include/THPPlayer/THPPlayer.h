@@ -24,7 +24,14 @@ extern "C" {
 #endif
 
 #define THP_AUDIO_BUFFER_COUNT 3
+#ifdef TARGET_PC
+// A video frame can take hundreds of ms on the host (software rasterizer, loaded machine). Read buffers are only freed
+// by the video decoder and the audio decoder shares them, so 10 buffers starved the movie audio for ~0.4 s every few
+// seconds. 40 buffers (1.3 s) keep the audio decoder fed while the video catches up.
+#define THP_READ_BUFFER_COUNT  40
+#else
 #define THP_READ_BUFFER_COUNT  10
+#endif
 #define THP_TEXTURE_SET_COUNT  3
 
 typedef struct THPPlayer {
@@ -60,7 +67,7 @@ typedef struct THPPlayer {
 	s32 curAudioNumber;
 	THPTextureSet* dispTextureSet;
 	THPAudioBuffer* playAudioBuffer;
-	THPReadBuffer readBuffer[10];
+	THPReadBuffer readBuffer[THP_READ_BUFFER_COUNT];
 	THPTextureSet textureSet[THP_TEXTURE_SET_COUNT];
 	THPAudioBuffer audioBuffer[THP_AUDIO_BUFFER_COUNT];
 } THPPlayer; // Size: 0x1d0

@@ -250,7 +250,7 @@ u32 THPPlayerCalcNeedMemory()
 		if (ActivePlayer.onMemory)
 			size = ALIGN_NEXT(ActivePlayer.header.movieDataSize, 32);
 		else
-			size = ALIGN_NEXT(ActivePlayer.header.bufsize, 32) * 10;
+			size = ALIGN_NEXT(ActivePlayer.header.bufsize, 32) * THP_READ_BUFFER_COUNT;
 
 		size += ALIGN_NEXT(ActivePlayer.videoInfo.xSize
 		                       * ActivePlayer.videoInfo.ySize,
