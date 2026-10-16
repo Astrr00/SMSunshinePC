@@ -18,7 +18,7 @@ The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) tracks concret
 
 **Native launcher (`16d1c13`):** an ocean-themed home inspired by [chasem-dev/sms-launcher](https://github.com/chasem-dev/sms-launcher), with original coastal art, a large Choose disc image/Play action, real disc readiness and six grouped settings pages. The existing C++/RmlUi stack remains; no Electron or upstream/Nintendo images are added. Native picker, invalid/valid/stale images, cold preferences, high-DPI focus scrolling and normal game startup are observed through application input replays and native AX; physical mouse/gamepad acceptance remains separate.
 
-**Current verified source `16d1c13` (2026-10-16):** full verification passes 7 gates and 63 host checks, Strict zero unresolved and a 45-second boot. The independent source checkout also builds the launcher after fast-forward.
+**Current verified native runtime `16d1c13` (2026-10-16):** full verification passes 7 gates and 63 host checks, Strict zero unresolved and a 45-second boot. The independent source checkout also builds the launcher after fast-forward. Packaging-only `11a1304` preserves these native sources/binaries and passes its focused regression in both checkouts.
 Aurora remains `50e5be3` plus 18 tracked patches. The isolated core builds in 1282 steps/407.70 seconds; its later launcher-only rebuild takes four steps/6.69 seconds. Fifteen dependency-content directories, including prebuilt Dawn/SDL3/nod, are reused; no Main game objects or binary are copied. These are not fresh-download, clean-PC or speedup claims.
 Native computer capture observes Auto-resolution original Options and live Delfino; ordinary native window Close exits 0 and a new process preserves Mono, Rumble-off and the genuinely earned two-Shine File B.
 These checks do not prove an unassisted playthrough, physical-controller/audio/hardware-GPU acceptance or a clean-PC package.
@@ -33,6 +33,9 @@ Known remaining risks include later normal progression, full shared-system cover
 The camera now keeps desired, height-panned and smoothed positions distinct. The shared Walker clamp no longer snaps falling enemies down from above the floor. Private diagnostic Petey combat reaches HP3 to0, reward1 and save/return, but its harness ends rc124 during the final wait; normal windmill/intro connection remains unproven.
 Original Options now retains the missing native console sound bit through ordinary native Close. Script `end` still uses `std::_Exit` and bypasses that orderly write; abrupt termination, repeated lifecycle and human/device acceptance remain separate.
 Normal earned File B also reaches the actual Bianco STORY2 selector and controllable raw scene 2/1 on the three-fix candidate (exit 0, 138.40 seconds). The card and native preferences remain byte-identical. This proves selection/entry, not Petey's reward or the whole game.
+
+**Next progress blocker:** the ordinary next-episode route reaches the windmill bank, then hits a native no-frame watchdog. Actual PE/COFF bytes uniquely bind the caller to `TSpineEnemy::zigzagToCurPathNode`, inside its `MsWrap<float>` call; the actual float inputs and upstream cause are still under investigation. No wrap guard, route bypass or unauthenticated PDB field read is used.
+Normal scene-cycle calibration also passes: earned File B enters real Bianco STORY2, uses the original pause ExitArea action, saves in Delfino, returns to title and reloads (exit 0, 393.60 seconds, exact IDs0/86/save3, all seven checksums). This diagnostic-exit calibration is not the separate 30-minute/native-Close or death/restart acceptance.
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |

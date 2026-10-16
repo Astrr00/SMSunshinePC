@@ -6,7 +6,7 @@ of the release zip. Versions marked "pinned" are fixed in the CMake build; other
 
 | Component | Used for | Version | Licence | File in `licenses/` |
 |---|---|---|---|---|
-| Aurora | GameCube SDK replacement | upstream `50e5be3` (submodule pin) + 11 port patches (`patches/aurora`) | MIT | `aurora-LICENSE` |
+| Aurora | GameCube SDK replacement | upstream `50e5be3` (submodule pin) + 18 port patches (`patches/aurora`) | MIT | `aurora-LICENSE` |
 | Dawn / Tint (`webgpu_dawn.dll`) | WebGPU renderer | `v20260807.225922` (pinned) | BSD-3-Clause | `dawn-LICENSE.txt` |
 | DirectX Shader Compiler (`dxcompiler.dll`, `dxil.dll`) | Shader compilation | from Dawn prebuilt | NCSA / LLVM Release License (plus Miniz notice) | `dxc-LICENSE.txt` |
 | SDL3 (`SDL3.dll`) | Window, input, audio | `3.4.10` (pinned) | Zlib | `SDL3-LICENSE.txt` |
