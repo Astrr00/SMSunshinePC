@@ -1,0 +1,79 @@
+# Earned-airport profile -> ordinary file-menu load -> input-only Delfino boss defeat.
+# route.py --appdata-from pg1_airport_reload_20261016; use a unique owned --name, no devstart.
+# MarioMove.cpp:1591-1598 derives squat input from digital L/R; L alone does not spray.
+# Analog-only R washes while walking. OilRun cannot squat; its A edge clears horizontal velocity.
+# No aimhead/aimboss, cheats, teleports, state/resource writes, seeds or timing overrides.
+# Load earned file B through the same ordinary menu/head-bump inputs as 86_accept_reload.dev.
+waitfor stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+log
+waitfor stage=1 scen=0 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+log
+walkto x=5380 z=2700 radius=150 timeout=1200
+walkto x=4980 z=3100 radius=150 timeout=600
+# Wash the approach before crossing the pollution boundary rather than entering it dry.
+walkto x=1600 z=5800 radius=80 spray=1 timeout=900
+walkto x=12 z=5450 radius=45 spray=1 timeout=600
+log
+hold A frames=1
+log
+# A clears OilRun horizontal velocity. Keep L released in flight: its edge is ground-pound.
+wait frames=45
+log
+faceto x=12 z=4631 tol=3 timeout=180
+hold L frames=10
+log
+shot washed_approach.png
+# Remain stationary and spray the sleeping body until the normal appear animation.
+hold L trig=0,255 until bck=0 timeout=600
+log
+shot boss_awake.png
+waitfor camDemo=0 timeout=900
+wait frames=1
+hold L frames=10
+log
+# On goop the first back-stick R phase turns Mario, not the nozzle (typed tick1247).
+# Keep spraying at rest until the observed rear cleanup completes, then reacquire the boss.
+hold R stick=0,-127 frames=28
+hold R frames=240
+log
+faceto x=12 z=4631 tol=3 timeout=180
+hold L frames=15
+log
+# Raise through the head to provoke bck7, then dry-adjust down from sampled pitch-11207.
+hold R stick=0,-127 frames=28
+# Source/trace: full stick adds about720 pitch units per pad tick before clamping.
+hold L stick=0,127 frames=7
+hold L frames=3
+log
+# gatekeeper.cpp:590-605: bck0x12 throat accepts damage only at animation frames50..160.
+# shortcut: sixteen pad ticks enter that window at current native pacing; resample if pacing changes.
+hold L until bck=18 timeout=900
+hold L frames=16
+hold R until bck=3 timeout=300
+log
+hold L until bck=18 timeout=900
+hold L frames=16
+hold R until bck=3 timeout=300
+log
+hold L until bck=18 timeout=900
+hold L frames=16
+hold R until bck=5 timeout=300
+log
+waitfor stage=1 scen=1 director mario dirstate=4 camDemo=0 timeout=3000
+log
+shot gatekeeper_defeated.png
+end

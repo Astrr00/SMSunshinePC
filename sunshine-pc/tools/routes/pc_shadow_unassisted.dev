@@ -1,0 +1,16 @@
+# Ordinary-controller pursuit regression; SUNSHINE_DEV_NAV must name the corrected 99506-cell dolpic1 grid.
+# dolpic/1 devstart is component-only, not proof of normal GateKeeper progression.
+# Pre-fix: actual grounded RedPepper contact blocked the static path near (5359,300,-365), then chase timed out at 5000.
+waitfor stage=1 scen=1 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=60
+walkto x=5020 z=3060 radius=150 timeout=2400
+walkto x=5540 z=300 radius=150 timeout=2400
+log
+chase timeout=5000 radius=900
+log
+shot shadow_dialogue.png
+mash A period=30 until talk=0 timeout=2400
+wait frames=300
+log
+shot shadow_transition.png
+end

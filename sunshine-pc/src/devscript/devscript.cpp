@@ -8,6 +8,7 @@
 #include <dolphin/pad.h>
 #include <dolphin/gx.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -737,9 +738,11 @@ std::unordered_map<long long, short> gNav;
 bool gNavLoaded = false;
 
 long long navKey(int cx, int cz) { return static_cast<long long>(cx + 100000) * 200000LL + (cz + 100000); }
+void navTest();
 
 void navLoad()
 {
+	if (std::getenv("SUNSHINE_DEV_NAV_TEST")) { navTest(); std::exit(0); }
 	gNavLoaded = true;
 	const char* path = std::getenv("SUNSHINE_DEV_NAV");
 	if (!path) {
@@ -768,8 +771,17 @@ bool navNearest(float x, float z, int& cx, int& cz)
 }
 
 // Cell and all 8 neighbours are floor at about the same height: keeps the path off cliff bases and water edges (the grid has no walls).
-bool navSafe(int cx, int cz, short y)
+bool navSafe(int cx, int cz, short y, const std::vector<THitActor*>& contacts)
 {
+	const float x = (cx + 0.5f) * kNavCell, z = (cz + 0.5f) * kNavCell;
+	for (const THitActor* actor : contacts) {
+		if (actor->checkHitFlag(HIT_FLAG_NO_COLLISION) || y > actor->mPosition.y + actor->getDamageHeight()
+		    || y + gpMarioOriginal->getAttackHeight() < actor->mPosition.y) continue;
+		// The four-cell lookahead needs one player-radius clearance beyond keepDistance's separation circle.
+		const float radius = actor->getDamageRadius() + 2.f * gpMarioOriginal->unk15C;
+		const float dx = x - actor->mPosition.x, dz = z - actor->mPosition.z;
+		if (dx * dx + dz * dz < radius * radius) return false;
+	}
 	for (int dx = -1; dx <= 1; ++dx)
 		for (int dz = -1; dz <= 1; ++dz) {
 			auto it = gNav.find(navKey(cx + dx, cz + dz));
@@ -778,8 +790,47 @@ bool navSafe(int cx, int cz, short y)
 	return true;
 }
 
+// When the nearby target has a safe direct floor corridor, face him rather than a grid corner while spraying.
+bool navDirect(float mx, float my, float mz, float tx, float tz, const std::vector<THitActor*>& contacts)
+{
+	const int steps = std::max(1, static_cast<int>(std::ceil(std::hypot(tx - mx, tz - mz) / (kNavCell * 0.5f))));
+	float y = my;
+	for (int i = 0; i <= steps; ++i) {
+		const float t = static_cast<float>(i) / steps;
+		const int cx = static_cast<int>(std::floor((mx + (tx - mx) * t) / kNavCell));
+		const int cz = static_cast<int>(std::floor((mz + (tz - mz) * t) / kNavCell));
+		auto it = gNav.find(navKey(cx, cz));
+		if (it == gNav.end() || std::fabs(it->second - y) >= 45.f || !navSafe(cx, cz, it->second, contacts)) return false;
+		y = it->second;
+	}
+	return true;
+}
+
+// Maintained native regression: actual navigation, own floor fixtures, no game objects or input/state writes.
+void navTest()
+{
+	std::unordered_map<long long, short> saved;
+	gNav.swap(saved);
+	const bool loaded = gNavLoaded;
+	for (int x = -2; x <= 10; ++x)
+		for (int z = -2; z <= 2; ++z) gNav[navKey(x, z)] = 300;
+	const std::vector<THitActor*> contacts;
+	const bool floor = navDirect(20.f, 300.f, 20.f, 340.f, 20.f, contacts);
+	gNav.erase(navKey(4, 0));
+	const bool hole = navDirect(20.f, 300.f, 20.f, 340.f, 20.f, contacts);
+	gNav[navKey(4, 0)] = 200;
+	const bool drop = navDirect(20.f, 300.f, 20.f, 340.f, 20.f, contacts);
+	gNav.swap(saved);
+	gNavLoaded = loaded;
+	if (!floor || hole || drop) {
+		std::fprintf(stderr, "[devscript] nav TEST FAILED floor=%d hole=%d drop=%d\n", floor, hole, drop);
+		std::exit(2);
+	}
+	std::printf("[devscript] nav TEST PASS: clear corridor accepted, missing cell and 100-unit drop rejected; driver grid restored\n");
+}
+
 // Point `look` cells ahead of (mx,mz) on the shortest floor path to (tx,tz); false when either end is off the grid or unreachable.
-bool navAhead(float mx, float mz, float tx, float tz, int look, float& ox, float& oz)
+bool navAhead(float mx, float mz, float tx, float tz, int look, const std::vector<THitActor*>& contacts, float& ox, float& oz)
 {
 	int mcx, mcz, tcx, tcz;
 	if (!navNearest(mx, mz, mcx, mcz) || !navNearest(tx, tz, tcx, tcz)) return false;
@@ -795,7 +846,7 @@ bool navAhead(float mx, float mz, float tx, float tz, int look, float& ox, float
 			for (int dz = -1; dz <= 1; ++dz) {
 				const long long k = navKey(cx + dx, cz + dz);
 				auto it = gNav.find(k);
-				if ((dx || dz) && it != gNav.end() && !toward.count(k) && (navSafe(cx + dx, cz + dz, it->second) || (cx + dx == mcx && cz + dz == mcz))) {
+				if ((dx || dz) && it != gNav.end() && !toward.count(k) && (navSafe(cx + dx, cz + dz, it->second, contacts) || (cx + dx == mcx && cz + dz == mcz))) {
 					toward[k] = navKey(cx, cz);
 					q.emplace_back(cx + dx, cz + dz);
 				}
@@ -1062,9 +1113,18 @@ void step()
 			return;
 		}
 		if (c.op == Op::Chase) {
+			static std::vector<THitActor*> contacts;
+			static int stalled = 0;
+			static float refX = 0.f, refZ = 0.f;
+			static TMarDirector* contactScene = nullptr;
 			if (!gStarted) {
 				gStarted = true;
 				gRemaining = 0;
+				contacts.clear();
+				stalled = 0;
+				refX = gpMarioOriginal ? gpMarioOriginal->mPosition.x : 0.f;
+				refZ = gpMarioOriginal ? gpMarioOriginal->mPosition.z : 0.f;
+				contactScene = gpMarDirector;
 				std::printf("[devscript] chase start line=%d tick=%d\n", c.line, gTick);
 			}
 			if (gpMarDirector && gpMarDirector->isTalkModeNow()) {
@@ -1075,7 +1135,7 @@ void step()
 				++gCursor;
 				continue;
 			}
-			if (c.tpBehind) { // Mario cannot catch the shadow Mario with the retail-faithful wall test (see ROADMAP 2026-10-12); this variant teleports instead of walking
+			if (c.tpBehind) { // Legacy teleport diagnosis (ROADMAP 2026-10-12), never ordinary-input progression evidence.
 				PADStatus pad{};
 				if (THitActor* e = findEMario(); e && gpMarioOriginal) {
 					TEMario* em = dynamic_cast<TEMario*>(e);
@@ -1109,6 +1169,30 @@ void step()
 			}
 			PADStatus pad{};
 			if (THitActor* e = findEMario(); e && gpMarioOriginal && gpCamera) {
+				if (contactScene != gpMarDirector) { contacts.clear(); contactScene = gpMarDirector; }
+				if (std::hypot(gpMarioOriginal->mPosition.x - refX, gpMarioOriginal->mPosition.z - refZ) > kNavCell) {
+					refX = gpMarioOriginal->mPosition.x;
+					refZ = gpMarioOriginal->mPosition.z;
+					stalled = 0;
+				} else if (++stalled >= 30 && SMS_IsMarioTouchGround4cm() && !gpMarioOriginal->mWallPlane
+				           && gpMarioOriginal->mIntendedMag > 16.f) {
+					const float yaw = gpMarioOriginal->mIntendedYaw * (6.2831853f / 65536.f);
+					const float sinYaw = std::sin(yaw), cosYaw = std::cos(yaw);
+					for (int i = 0; i < gpMarioOriginal->getColNum(); ++i) {
+						THitActor* actor = gpMarioOriginal->getCollision(i);
+						if (actor == e || actor->checkHitFlag(HIT_FLAG_NO_COLLISION)) continue;
+						const float dx = gpMarioOriginal->mPosition.x - actor->mPosition.x;
+						const float dz = gpMarioOriginal->mPosition.z - actor->mPosition.z;
+						const float px = gpMarioOriginal->mPrevPosition.x - actor->mPosition.x;
+						const float pz = gpMarioOriginal->mPrevPosition.z - actor->mPosition.z;
+						const float radius = actor->getDamageRadius() + gpMarioOriginal->unk15C;
+						// Observe repeated outward separation while the stick pushes inward, not mere trigger overlap.
+						if (dx * sinYaw + dz * cosYaw < 0.f && dx * dx + dz * dz <= radius * radius
+						    && px * px + pz * pz < dx * dx + dz * dz
+						    && std::find(contacts.begin(), contacts.end(), actor) == contacts.end())
+							contacts.push_back(actor);
+					}
+				}
 				Command t = c;
 				t.pos[0] = e->mPosition.x;
 				t.pos[2] = e->mPosition.z;
@@ -1122,7 +1206,9 @@ void step()
 				}
 				if (!gNavLoaded) navLoad();
 				float wx, wz;
-				if (direct > 150.f && !gNav.empty() && navAhead(gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.z, e->mPosition.x, e->mPosition.z, 4, wx, wz)) {
+				if (direct > 150.f && !gNav.empty()
+				    && !(direct < c.radius && navDirect(gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.y, gpMarioOriginal->mPosition.z, e->mPosition.x, e->mPosition.z, contacts))
+				    && navAhead(gpMarioOriginal->mPosition.x, gpMarioOriginal->mPosition.z, e->mPosition.x, e->mPosition.z, 4, contacts, wx, wz)) {
 					t.pos[0] = wx;
 					t.pos[2] = wz;
 				}
