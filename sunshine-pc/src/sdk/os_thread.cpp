@@ -76,7 +76,7 @@ struct Rec {
 	std::condition_variable cv; // signalled when the baton is handed to this thread or the thread is killed
 	bool started = false;       // native thread exists
 	bool dead = false;          // exited/cancelled: the native thread must end instead of running
-	bool hostWait = false;      // inside a host call (hostWaitBegin/End): a better-priority wake may take the CPU
+	int hostWait = 0;           // nesting depth of host calls (hostWaitBegin/End): a better-priority wake may take the CPU
 };
 
 std::mutex gM;                     // the "interrupts disabled" lock; also protects everything below
@@ -364,7 +364,7 @@ void selectThread(bool yield)
 	if (!inThread) {
 		if (!cur) {
 			dispatch();
-		} else if (recOf(cur)->hostWait && sRunQueueBits && static_cast<s32>(__cntlzw(sRunQueueBits)) < cur->priority) {
+		} else if (recOf(cur)->hostWait > 0 && sRunQueueBits && static_cast<s32>(__cntlzw(sRunQueueBits)) < cur->priority) {
 			// cur is blocked in a host call that touches no game state: the better thread takes the CPU now, like an
 			// interrupt return on the console. cur is READY and resumes in hostWaitEnd.
 			cur->state = OS_THREAD_STATE_READY;
@@ -904,7 +904,7 @@ void sunshineHostWaitBegin(void)
 		return;
 	BOOL enabled = OSDisableInterrupts();
 	reschedule(); // a wake that is already pending
-	tlsSelf->hostWait = true;
+	tlsSelf->hostWait++;
 	OSRestoreInterrupts(enabled);
 }
 
@@ -914,7 +914,10 @@ void sunshineHostWaitEnd(void)
 		return;
 	BOOL enabled = OSDisableInterrupts();
 	Rec* self    = tlsSelf;
-	self->hostWait = false;
+	if (--self->hostWait > 0) {
+		OSRestoreInterrupts(enabled); // nested: only the outermost end waits for the CPU
+		return;
+	}
 	while (gCurrent.load(std::memory_order_acquire) != self->os && !self->dead)
 		waitBaton(self); // preempted during the call: wait until the dispatcher hands the CPU back
 	if (self->dead)

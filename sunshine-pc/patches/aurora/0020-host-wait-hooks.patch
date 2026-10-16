@@ -1,0 +1,130 @@
+diff --git a/include/aurora/aurora.h b/include/aurora/aurora.h
+--- a/include/aurora/aurora.h
++++ b/include/aurora/aurora.h
+@@ -132,6 +132,8 @@ void aurora_shutdown();
+ const AuroraEvent* aurora_update();
+ bool aurora_begin_frame();
+ void aurora_end_frame();
++/** Optional: called around every wait on an Aurora worker thread (FIFO drain, pipeline compile, DVD read), on the waiting thread. */
++void aurora_set_host_wait_hooks(void (*begin)(void), void (*end)(void));
+ 
+ void aurora_set_log_level(AuroraLogLevel level);
+ void aurora_set_pause_on_focus_lost(bool value);
+diff --git a/lib/aurora.cpp b/lib/aurora.cpp
+--- a/lib/aurora.cpp
++++ b/lib/aurora.cpp
+@@ -462,6 +462,7 @@ void aurora_shutdown() { aurora::shutdown(); }
+ const AuroraEvent* aurora_update() { return aurora::update(); }
+ bool aurora_begin_frame() { return aurora::begin_frame(); }
+ void aurora_end_frame() { aurora::end_frame(); }
++void aurora_set_host_wait_hooks(void (*begin)(void), void (*end)(void)) { aurora::thread::set_host_wait_hooks(begin, end); }
+ SDL_Window* aurora_get_window() { return aurora::window::get_sdl_window(); }
+ AuroraWindowSize aurora_get_window_size() {
+   return aurora::window::get_sdl_window() != nullptr ? aurora::window::get_window_size() : AuroraWindowSize{};
+diff --git a/lib/thread.hpp b/lib/thread.hpp
+--- a/lib/thread.hpp
++++ b/lib/thread.hpp
+@@ -22,6 +22,15 @@ struct Options {
+ // Applies thread options to the current thread
+ void set_current(const Options& options) noexcept;
+ 
++// Brackets a wait on another thread (FIFO worker, pipeline compile, DVD worker). The embedding application registers the
++// hooks with aurora_set_host_wait_hooks so that, while this thread waits, it can run other threads of its own.
++void set_host_wait_hooks(void (*begin)(), void (*end)()) noexcept;
++
++struct HostWaitScope {
++  HostWaitScope() noexcept;
++  ~HostWaitScope() noexcept;
++};
++
+ class Thread {
+ public:
+   Thread() noexcept = default;
+diff --git a/lib/thread.cpp b/lib/thread.cpp
+--- a/lib/thread.cpp
++++ b/lib/thread.cpp
+@@ -4,6 +4,7 @@
+ #include <tracy/Tracy.hpp>
+ 
+ #include <algorithm>
++#include <atomic>
+ #include <charconv>
+ #include <cstdint>
+ #include <fstream>
+@@ -298,4 +299,27 @@ void set_current(const Options& options) noexcept {
+   }
+ }
+ 
++
++namespace {
++std::atomic<void (*)()> sHostWaitBegin{nullptr};
++std::atomic<void (*)()> sHostWaitEnd{nullptr};
++} // namespace
++
++void set_host_wait_hooks(void (*begin)(), void (*end)()) noexcept {
++  sHostWaitBegin.store(begin);
++  sHostWaitEnd.store(end);
++}
++
++HostWaitScope::HostWaitScope() noexcept {
++  if (auto* begin = sHostWaitBegin.load()) {
++    begin();
++  }
++}
++
++HostWaitScope::~HostWaitScope() noexcept {
++  if (auto* end = sHostWaitEnd.load()) {
++    end();
++  }
++}
++
+ } // namespace aurora::thread
+diff --git a/lib/gx/fifo.cpp b/lib/gx/fifo.cpp
+--- a/lib/gx/fifo.cpp
++++ b/lib/gx/fifo.cpp
+@@ -260,6 +260,7 @@ void drain() {
+ 
+     uint64_t processed = sProcessed.load(std::memory_order_acquire);
+     if (processed < target) {
++      thread::HostWaitScope hostWait;
+       do {
+         sProcessed.wait(processed, std::memory_order_acquire);
+         processed = sProcessed.load(std::memory_order_acquire);
+diff --git a/lib/gfx/pipeline_cache.cpp b/lib/gfx/pipeline_cache.cpp
+--- a/lib/gfx/pipeline_cache.cpp
++++ b/lib/gfx/pipeline_cache.cpp
+@@ -6,6 +6,7 @@
+ #include "hash.hpp"
+ #include "../gx/pipeline.hpp"
+ #include "../io.hpp"
++#include "../thread.hpp"
+ #ifdef AURORA_ENABLE_RMLUI
+ #include "../rmlui/pipeline.hpp"
+ #endif
+@@ -519,6 +520,7 @@ static PipelineRef find_pipeline_impl(PipelineRef runtimeKey, NewPipelineCallbac
+   }
+ 
+   if (blocking && !pipelineReady) {
++    aurora::thread::HostWaitScope hostWait; // declared first: released after the lock
+     std::unique_lock lock{g_pipelineMutex};
+     g_pipelineReadyCv.wait(lock, [=] { return g_pipelines.contains(runtimeKey) || g_pipelineThreadEnd; });
+   }
+diff --git a/lib/dolphin/dvd/dvd.cpp b/lib/dolphin/dvd/dvd.cpp
+--- a/lib/dolphin/dvd/dvd.cpp
++++ b/lib/dolphin/dvd/dvd.cpp
+@@ -3,6 +3,7 @@
+ 
+ #include <algorithm>
+ #include <dolphin/os.h>
++#include "../../thread.hpp"
+ #include <nod.h>
+ #include <SDL3/SDL_iostream.h>
+ #include <tracy/Tracy.hpp>
+@@ -483,6 +484,7 @@ public:
+     if (block == nullptr) {
+       return;
+     }
++    aurora::thread::HostWaitScope hostWait; // declared first: released after the lock
+     std::unique_lock lk{m_mutex};
+     m_doneCv.wait(lk, [&] {
+       const s32 state = atomic_load_acquire(block->state);

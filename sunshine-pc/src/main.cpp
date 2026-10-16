@@ -154,6 +154,7 @@ int main(int argc, char* argv[])
 		                          .windowHeight = static_cast<uint32_t>(height), .logCallback = &log_callback,
 		                          .mem1Size = kSunshineMem1Size, .mem2Size = kSunshineMem2Size };
 	aurora_initialize(argc, argv, &config);
+	aurora_set_host_wait_hooks(sunshineHostWaitBegin, sunshineHostWaitEnd); // blocking waits on Aurora's workers (sdk/os_host.hpp)
 	// One ordered teardown for every orderly exit (return from main, OSResetSystem, AURORA_EXIT).
 	// Aurora's pipeline worker is a static std::thread that only aurora_shutdown() joins. A std::exit without it runs the
 	// static destructors with the thread still joinable: std::terminate, exit code 0xC0000409.
