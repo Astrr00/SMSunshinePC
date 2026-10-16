@@ -345,6 +345,64 @@ Delfino 1/0, Shines 0 -> 1). Route 85 has 686 live JPA status samples and 61 not
 with no tick overlap. No temporary probe text, script timeout, fatal exception or WebGPU error appears.
 Full fight, audible sound, hardware GPU, forced registration/map races and same-frame timing remain unverified.
 
+## Corrected `setLookDir` compiled FP review (2026-10-16)
+
+This closes the corrected helper's compiled-PPC review, not the historical pre-fix BR20 claim.
+No source change is needed. The helper remains 480 bytes / 120 instructions, score 97.48333.
+Existing read-only commands reproduce the disassembly:
+
+    python tools/decomp-diff.py -u mario/Map/BathWaterManager -d setLookDir --no-collapse
+    python tools/decomp-diff.py -u mario/JSystem/JParticle/JPAEmitter -d inv_sqrt --no-collapse
+
+Run from `sms/`. A lead-run comparison reads current objdiff JSON with `functionRelocDiffs=data_value`.
+For the helper at retail `0x801FE23C-0x801FE418`, all 120 rows agree after these explicit transformations:
+
+- Body FPR mapping, retail to compiled: `23:25, 24:26, 25:27, 26:30, 27:29, 28:28, 29:24, 30:31, 31:23`.
+  Volatile `f0-f6` and body `r29-r31` are unchanged; ABI saves/restores preserve the same physical registers.
+- Stack frames are 0xD8 versus 0xC0. Convert accesses to caller-SP-relative offsets; save/restore slots then agree.
+  Frame allocation/deallocation is ABI bookkeeping, not an arithmetic difference.
+- Convert local branch destinations to instruction-row indices. The three `fcmpo/cror/bne` groups are rows
+  27/28/29, 65/66/67 and 82/83/84, with branch destinations 34, 72 and 89.
+- Resolve constant relocations by bytes: `00000000` (+0), `3F800000` (1), `36800000` (2^-18).
+  Different pool labels do not change the loaded values.
+
+This preserves every rounded multiply/add, fused multiply-add/subtract operand position and ordering.
+Direction length uses separate squares and adds; X/Y lengths use their retail fused chains.
+Y is formed from Z and unnormalized X before the independent X/Y guards.
+All direction/up reads precede the first destination store at `0x801FE3B8`.
+Stores remain `00/04/08,10/14/18,20/24/28`; translation `0C/1C/2C` remains untouched.
+Ordinary input overlap has no machine-level read/write hazard; invalid C++ lifetime/alignment,
+callee-reserved stack pointers, concurrent mutation and MMIO are not part of the ABI contract.
+
+The lead also compares the actual weak `inv_sqrt` in the current BathWater source object, not only a report score,
+against retail JPAEmitter `0x8006CD70-0x8006CDA0`: all 13 instructions and constant bytes agree.
+The callee guards `mag <= +0`, executes `frsqrte`, rounds the estimate with `frsp`, computes rounded
+square/half-root, applies fused `fnmsubs`, then multiplies. Constants are `00000000/3F000000/40400000`.
+It only clobbers volatile `f0-f4` and CR0, with no stack/output-memory writes.
+
+The resulting proof covers values, signed zeros, NaN operand propagation and FPSCR updates under identical
+non-trapping PPC execution controls. It does not assert identical enabled-trap handler context
+(physical registers, PCs and stack frames differ), scratch/paired-single state or execution timing.
+It is not a universal host-x64 rounding, NaN-payload or exception-state certificate.
+The current Strict unit has no explicit optimization, fast-math or FMA-policy flag; the permanent host checks use `/O1`.
+An accurate host `frsqrte` estimate alone does not establish the rest of the fused arithmetic policy.
+
+A throwaway program calls the real production header: 37 invariant checks pass at `/O2` and under current
+unoptimized Strict-style flags. It exercises axial/skew handedness, inclusive direction cutoff at 1/512,
+zero/parallel and aliased input vectors, robust near-parallel brackets, NaN class propagation and translation.
+An initial assertion incorrectly assumed a nominal one-ULP-above up component guarantees a nonzero basis.
+Observed Z.y is `0.99999994`; its rounded cross magnitude can still meet the epsilon guard.
+The diagnostic retains that observation and uses twice the cutoff for a genuinely nondegenerate assertion.
+No source fix, arbitrary tolerance increase or permanent incidental-output test is introduced.
+
+WARP route 98 `lookdir_fp_corona_20261016` passes (rc 0, 36 s, tick 1024), with visible water geometry.
+Full verification passes 7 gates with 0 failures and 1 optional skip, 63 host checks, Strict zero unresolved,
+unchanged matching SHA-1 and a 45-second WARP boot. The compiled game source remains unchanged;
+its existing isolated-checkout build proof applies, with no new fresh-clone claim.
+The corrected helper's ledger row becomes `logic-verified`; prefix counts are 1 976/150/252
+(logic-verified/matched/partial), excluding the same three malformed legacy rows.
+Unconditional bath-water `perform` FP-state equivalence remains open.
+
 ## Process notes
 
 - Agents work in clones (`clone-3`, `clone-chase`, `fresh-gate-2`) on `agent/<name>` branches and never push; the lead

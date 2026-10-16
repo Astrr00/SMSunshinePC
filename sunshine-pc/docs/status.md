@@ -6,6 +6,32 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-16: corrected `setLookDir` compiled FP review
+
+Two independent read-only reviews and a lead-run canonical instruction comparison close the corrected helper's PPC review.
+Retail `0x801FE23C-0x801FE418` and current MWCC source each contain 120 instructions; all rows agree after
+explicit FPR permutation, caller-relative ABI-stack offsets, local branch targets and relocation-data normalization.
+The actual weak `inv_sqrt` emitted into the current BathWater source object also agrees directly with all 13
+retail JPAEmitter instructions/constants, including `frsp` and fused `fnmsubs`. No score-only certification is used.
+This establishes output and FP-operation equivalence for valid ABI memory and identical non-trapping PPC controls,
+not identical trap-handler register/PC/stack context or universal host-x64 bit/exception behavior.
+The old pre-fix BR20 claim remains false historically; this new review certifies the corrected function.
+
+Real production-header smoke passes 37 invariant checks in an `/O2` build and the current unoptimized Strict-style
+host configuration: axial/skew orientation, handedness, zero/epsilon direction, parallel input aliasing,
+cross-product cutoff, NaN propagation class and translation preservation. These are invariants, not a retail-bit oracle.
+One-ULP-above nominal near-parallel input can still collapse: normalized Z is approximately `0.99999994`,
+so the guard must be evaluated on the rounded cross magnitude, not the nominal up-vector component.
+The smoke uses a robust twice-cutoff bracket for its nondegenerate-basis assertion; no production fix or test repinning.
+The throwaway smoke source is removed.
+
+WARP `lookdir_fp_corona_20261016` passes route 98 (rc 0, 36 s, tick 1024) with visible water geometry.
+`verify --build --matching --boot-secs 45`: 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks, zero unresolved,
+unchanged reference SHA-1 and a successful 45-second WARP boot. Compiled game source is unchanged,
+so the existing isolated-checkout build proof is reused; no new fresh-clone run or matching gain is claimed.
+Ledger prefixes are now 1 976 logic-verified, 150 matched, 252 partial; three malformed legacy rows remain excluded.
+Unconditional bath-water `perform` FP-state equivalence, universal host FP behavior, human listening and hardware GPU remain open.
+
 ### Update 2026-10-15: natural ending and persisted completion
 
 Two independent read-only reviews trace the real MovieDirector/CardSave/FlagManager contract.
