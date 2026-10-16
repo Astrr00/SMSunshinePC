@@ -1,0 +1,31 @@
+# Cold process: observe actual original Options, return normally, load earned File B by PAD only.
+# Use SUNSHINE_DEV_EXIT_ON_END=; normal native Close after options_earned_loaded.png.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+walkto x=1720 z=-1000 radius=35 timeout=300
+waitfor cardmode=2 timeout=300
+hold stick=0,-127 frames=8
+wait frames=60
+log
+shot options_cold.png
+wait frames=60
+walkto x=1080 z=-1000 radius=25 timeout=600
+waitfor cardmode=0 timeout=300
+wait frames=120
+walkto x=1080 z=-1000 radius=25 timeout=300
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot options_earned_loaded.png
+wait frames=60
+end

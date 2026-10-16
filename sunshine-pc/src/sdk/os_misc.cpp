@@ -3,6 +3,7 @@
 // Threads, interrupts, mutexes and message queues are in os_thread.cpp.
 #include <dolphin/base/PPCArch.h>
 #include <dolphin/os.h>
+#include "../settings.h"
 
 #include <atomic>
 #include <cstdarg>
@@ -93,13 +94,18 @@ long long OSCheckStopwatch(OSStopwatch* sw)
 
 void OSResetStopwatch(OSStopwatch* sw) { OSInitStopwatch(sw, sw->name); }
 
-// ---- SRAM flags (decomp OSRtc.c): kept in memory for the process lifetime, the game saves them in its own options ----
+// ---- SRAM flags (decomp OSRtc.c): main persists the console sound bit; progressive mode stays process-local ----
 
 static std::atomic<u32> sSoundMode{ OS_SOUND_MODE_STEREO }; // console default
 static std::atomic<u32> sProgressiveMode{ 0 };
 
 u32 OSGetSoundMode(void) { return sSoundMode; }
-void OSSetSoundMode(u32 mode) { sSoundMode = mode & 1; }
+void OSSetSoundMode(u32 mode)
+{
+	mode &= 1;
+	sSoundMode = mode;
+	sunshine::settings().consoleSoundMode = static_cast<int>(mode);
+}
 u32 OSGetProgressiveMode(void) { return sProgressiveMode; }
 void OSSetProgressiveMode(u32 mode) { sProgressiveMode = mode & 1; }
 

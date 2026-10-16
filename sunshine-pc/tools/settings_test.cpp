@@ -37,6 +37,7 @@ int main()
 	s.lastImagePath = "C:/games/Super Mario Sunshine (Japan).rvz";
 	s.skipLauncher = true;
 	s.menuSounds = false;
+	s.consoleSoundMode = 0;
 	const std::string text = serializeSettings(s);
 	const Settings back = parseSettings(text);
 	assert(back.fullscreen && back.windowWidth == 1920 && back.windowHeight == 1080 && !back.vsync);
@@ -46,9 +47,12 @@ int main()
 	assert(back.keys.at("A") == 26 && back.glyphStyle == GlyphStyle::PlayStation);
 	assert(!back.rememberWindowSize && back.uiScalePct == 75);
 	assert(back.lastImagePath == s.lastImagePath && back.skipLauncher);
-	assert(!back.menuSounds && defText.find("menu_sounds=1") != std::string::npos);
-	assert(parseSettings("").menuSounds && !parseSettings("[audio]\nmenu_sounds=0\n").menuSounds);
+	assert(!back.menuSounds);
 	assert(serializeSettings(back) == text);
+	assert(back.consoleSoundMode == 0);
+	for (const char* value : { "-1", "2", "4294967296", "0junk", "" })
+		assert(parseSettings(std::string("[audio]\nconsole_sound_mode=") + value + "\n").consoleSoundMode == 1);
+	assert(parseSettings("[audio]\nconsole_sound_mode= 0 \n").consoleSoundMode == 0);
 	for (GlyphStyle g : {GlyphStyle::Switch, GlyphStyle::GameCube, GlyphStyle::Keyboard, GlyphStyle::Generic}) {
 		Settings gs;
 		gs.glyphStyle = g;
@@ -111,6 +115,13 @@ int main()
 	missing.masterVolumePct = 7;
 	assert(!loadSettings(missing, file));
 	assert(missing.masterVolumePct == def.masterVolumePct);
+
+	// A non-directory parent is a real persistence failure, not a successful in-memory round trip.
+	assert(saveSettings(s, file));
+	assert(!saveSettings(def, file / "settings.ini"));
+	assert(loadSettings(fromFile, file) && fromFile.consoleSoundMode == 0);
+	assert(serializeSettings(fromFile) == text);
+	std::filesystem::remove(file, ec);
 
 	std::printf("settings_test: ok\n");
 	return 0;

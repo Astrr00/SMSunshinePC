@@ -1,0 +1,36 @@
+# Original Options only: ordinary PAD inputs, normal card option save. Start from a copied earned profile.
+# Use SUNSHINE_DEV_EXIT_ON_END=, then close the owned native window normally after options_saved.png.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+walkto x=1720 z=-1000 radius=35 timeout=300
+waitfor cardmode=2 timeout=300
+wait frames=60
+log
+shot options_before.png
+wait frames=60
+hold stick=0,127 frames=8
+wait frames=30
+hold A frames=4
+wait frames=80
+log
+shot options_rumble_changed.png
+hold stick=0,-127 frames=8
+wait frames=30
+hold A frames=4
+wait frames=80
+log
+shot options_surround.png
+hold A frames=4
+wait frames=80
+log
+shot options_mono.png
+wait frames=60
+walkto x=1080 z=-1000 radius=35 timeout=600
+waitfor cardmode=0 timeout=300
+wait frames=180
+log
+shot options_saved.png
+wait frames=60
+end

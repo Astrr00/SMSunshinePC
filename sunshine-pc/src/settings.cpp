@@ -167,6 +167,9 @@ Settings parseSettings(std::string_view text)
 	s.masterVolumePct = readInt(ini, "audio.master_volume", def.masterVolumePct, 0, 100);
 	s.outputDevice = readString(ini, "audio.output_device", def.outputDevice);
 	s.menuSounds = readBool(ini, "audio.menu_sounds", def.menuSounds);
+	if (const auto mode = ini.find("audio.console_sound_mode");
+	    mode != ini.end() && (mode->second == "0" || mode->second == "1"))
+		s.consoleSoundMode = mode->second[0] - '0';
 	s.stickDeadZonePct = readInt(ini, "controls.stick_deadzone", def.stickDeadZonePct, 0, 50);
 	s.substickDeadZonePct = readInt(ini, "controls.substick_deadzone", def.substickDeadZonePct, 0, 50);
 	s.keys = def.keys;
@@ -199,7 +202,7 @@ Settings parseSettings(std::string_view text)
 std::string serializeSettings(const Settings& in)
 {
 	std::ostringstream out;
-	out << "# Sunshine settings. Written by the launcher; edit with care.\n";
+	out << "# Sunshine settings. Written by the game; edit with care.\n";
 	out << "[video]\n";
 	out << "fullscreen=" << (in.fullscreen ? 1 : 0) << '\n';
 	out << "width=" << in.windowWidth << '\n';
@@ -215,6 +218,7 @@ std::string serializeSettings(const Settings& in)
 	out << "master_volume=" << in.masterVolumePct << '\n';
 	out << "output_device=" << in.outputDevice << '\n';
 	out << "menu_sounds=" << (in.menuSounds ? 1 : 0) << '\n';
+	out << "console_sound_mode=" << in.consoleSoundMode << '\n';
 	out << "[controls]\n";
 	out << "stick_deadzone=" << in.stickDeadZonePct << '\n';
 	out << "substick_deadzone=" << in.substickDeadZonePct << '\n';
@@ -264,6 +268,7 @@ bool saveSettings(const Settings& in, const std::filesystem::path& file)
 	if (!out)
 		return false;
 	out << serializeSettings(in);
+	out.close();
 	return static_cast<bool>(out);
 }
 

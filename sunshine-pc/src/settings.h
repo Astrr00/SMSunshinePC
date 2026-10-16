@@ -27,6 +27,7 @@ struct Settings {
 	int masterVolumePct = 100;  // 0..100
 	std::string outputDevice; // [audio] output_device: endpoint id, empty = Windows default
 	bool menuSounds = true;   // [audio] menu_sounds: launcher button sounds (launcher.cpp playUiSound), on the Windows default device
+	int consoleSoundMode = 1; // [audio] console_sound_mode: 0 = Mono, 1 = Stereo (console SRAM)
 	// [controls]
 	int stickDeadZonePct = 10;     // 0..50, percent of full stick travel
 	int substickDeadZonePct = 10;  // 0..50

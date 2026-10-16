@@ -5,6 +5,7 @@
 #include <sunshine_config.h>
 #include <aurora/event.h>
 #include <aurora/main.h>
+#include <SDL3/SDL_messagebox.h>
 #include "render/render_scale.h"
 #include "widescreen/widescreen.h"
 #include "launcher/launcher.hpp"
@@ -117,9 +118,12 @@ int main(int argc, char* argv[])
 {
 	installCrashHandler();
 	// Settings load before Aurora starts: window and VSync options are part of Aurora's startup config.
-	const std::filesystem::path settingsFile = sunshine::settingsPath(std::filesystem::path(argv[0]).parent_path());
+	static const std::filesystem::path settingsFile
+	    = std::filesystem::absolute(sunshine::settingsPath(std::filesystem::path(argv[0]).parent_path()));
 	sunshine::loadSettings(sunshine::settings(), settingsFile);
 	const sunshine::Settings& s = sunshine::settings();
+	static const int initialSoundMode = s.consoleSoundMode;
+	OSSetSoundMode(static_cast<u32>(initialSoundMode));
 	// Dev hooks for tiling several test windows: SUNSHINE_WINDOW_POS=x,y and SUNSHINE_WINDOW_SIZE=w,h override the saved placement.
 	int posX = 0;
 	int posY = 0;
@@ -145,10 +149,20 @@ int main(int argc, char* argv[])
 		                          .windowHeight = static_cast<uint32_t>(height), .logCallback = &log_callback,
 		                          .mem1Size = kSunshineMem1Size, .mem2Size = kSunshineMem2Size };
 	aurora_initialize(argc, argv, &config);
-	// One ordered teardown for every way out (return from main, std::exit from the devscript, OSResetSystem, AURORA_EXIT):
+	// One ordered teardown for every orderly exit (return from main, OSResetSystem, AURORA_EXIT).
 	// Aurora's pipeline worker is a static std::thread that only aurora_shutdown() joins. A std::exit without it runs the
 	// static destructors with the thread still joinable: std::terminate, exit code 0xC0000409.
-	std::atexit([] { aurora_shutdown(); });
+	// The settings path and singleton were constructed before this handler; report any write failure while SDL is live.
+	// shortcut: abrupt termination skips this write; use immediate persistence if crash-safe console settings are required.
+	std::atexit([] {
+		if (sunshine::settings().consoleSoundMode != initialSoundMode
+		    && !sunshine::saveSettings(sunshine::settings(), settingsFile)) {
+			const std::string error = "Could not write " + settingsFile.string() + "\nThe console sound mode was not saved.";
+			std::fprintf(stderr, "[settings] %s\n", error.c_str());
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Sunshine settings", error.c_str(), nullptr);
+		}
+		aurora_shutdown();
+	});
 	sunshineApplyRenderSettings();
 
 	const char* disc = findDvdArg(argc, argv);
