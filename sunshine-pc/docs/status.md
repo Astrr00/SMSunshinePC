@@ -6,6 +6,35 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-15: Corona five-platform ending progression
+
+Two independent read-only reviews compare the critical Mario landing, fragile/hard forwarding and bathtub ending
+branches against retail assembly. No divergence is found in these sections; this is not a new whole-unit ledger claim.
+Real damage is message 3 from a state-3 L ground-pound landing on a fragile `b` piece. Hard `c` pieces intentionally
+downgrade that message to 1. The ending checks four already-broken grips before accepting the fifth distinct hit;
+`demo=1` and the movie handoff are stronger evidence than requiring a final count of five.
+
+Runtime proof uses WARP, isolated saves, dev start, step-retrace, health/water cheats and diagnostic platform travel.
+`corona_five_pounds_20261015` observes an ordinary message-1 hit without progress; its fixed high-altitude sequence
+misses other platforms, loses a life and ends with only one broken grip. Exit code 0 is not victory.
+`corona_rocket_pound_20261015` proves an actual analog-R launch and L attack without supplied attack altitude.
+The first five-rocket timing probe reaches four broken grips, not the ending.
+After calibrating the initial landing/charge timing, `corona_five_rockets_b_20261015` records five distinct
+message-3 landings at grip angles -144, -72, 72, 144 and 0 degrees; the pre-hit count advances 0, 1, 2, 3, 4.
+The final hit sets `demo=1`, takes Mario and transitions to stage 15/0 with THP state 2 (rc 0, tick 1824).
+No direct message injection, damage, nerve or victory-state mutation supplies that result.
+
+After removing both source probes, `corona_finale_uninstrumented_20261015` repeats the transition with movie skipping
+disabled: its explicit stage-15/THP-2 condition passes at tick 1612, and the run exits 0 at tick 1852.
+The early movie screenshot shows blue sky and letterboxing; complete epilogue content, credits and ending save are
+not verified. Teleports only handle travel; every damaging rocket launch follows a neutral landing on the platform.
+The final game source is unchanged from `b1392e5`; no bug fix or matching gain is claimed.
+`verify --build --matching --boot-secs 45`: 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks, zero unresolved,
+unchanged reference SHA-1 and 45-second WARP boot. The existing isolated-checkout build proof for this same game
+source remains applicable. Temporary diagnostic code/routes were removed; logs and game-derived images stay local.
+Unassisted navigation/combat, complete credits/save flow, sound listening, hardware GPU, forced races and
+same-frame retail depth synchronization remain open.
+
 ### Update 2026-10-15: Corona GPU depth reaches the height field
 
 The previous scene-entry smoke did not produce CPU depth. A temporary probe on `cb28330` observes 900

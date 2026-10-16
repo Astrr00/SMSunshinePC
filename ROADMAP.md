@@ -9,7 +9,8 @@ The diagnostic lifetime fix is published in `3c10554`; [issue #12](https://githu
 Status-enabled route 85 and route-86 reload pass under documented dev aids; the fresh-checkout build gate also passes.
 Bath-water sound cadence and the reflected `setLookDir` basis are corrected. Aurora 0018 now delivers genuine
 Z24X8 depth to Corona's height field on WARP (scales 0.5/0.25, measured 2–4-copy lag); unconditional FP equivalence,
-same-frame timing, full fight and audible sound remain open.
+same-frame timing and audible sound remain open. Five genuine rocket/ground-pound hits now trigger Corona's ending
+and movie handoff with diagnostic travel assistance; unassisted combat/navigation and credits/save completion remain open.
 
 ## Working rules (apply to every phase)
 
@@ -135,7 +136,7 @@ Exit criterion: every toggle in the launcher has an observed effect in game.
 
 ## Order of work
 
-1. **Corona fight and sound (#10):** static Z24X8 upload and depth-copy/height-field path now work on WARP at scales 0.5/0.25, including calibrated cap depths and visible waves. Existing readback has measured 2–4-copy lag; verify boss progression and audible sound, without claiming same-frame retail equivalence.
+1. **Corona completion and sound (#10):** real analog-R rocket launches and L attacks now break all five weak platforms and start the ending/movie handoff on WARP, repeated without source probes or movie skipping. Diagnostic teleports supply travel, not damage or attack altitude; cheats and step-retrace remain on. Verify unassisted combat/navigation, complete epilogue/credits/save and audible sound. Depth readback retains measured 2–4-copy lag; do not claim same-frame retail equivalence.
 2. **Bath-water equivalence (#10):** initializer and finite spawn-FP/RNG review complete. Corrected `setLookDir` cross order matches the retail algorithm, but compiled FP equivalence is partial; `perform` remains partial for unconditional NaN-payload/FP-state equivalence.
 3. **Remaining decomp units (#10):** EventWatcher warp/Appear8 reviews complete; claim further whole units and prioritize gameplay-path operand/branch differences. Diagnostic lifetime regression #12 is published/closed; keep status-enabled route85/GCI/route86 as gates.
 4. **Owner/hardware checks (#9):** listening, physical input, native Browse dialog and real-GPU FPS verification remain separate from automated evidence; collect these results before claiming those feature rows complete.
