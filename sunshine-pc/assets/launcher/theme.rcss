@@ -1,22 +1,25 @@
 /* Theme tokens for the launcher. Names follow Dusklight's res/rml/theme.rcss; the values are Sunshine's.
    launcher.rcss reads them with var(). Custom properties inherit, so defining them on body is enough. */
 body {
-	--color-bg: #1b1d2a;
-	--color-surface: #272a3c;
-	--color-text: #f2efe6;
-	--color-text-muted: #b8b6c4;
-	--color-accent: #ffcf3f;
-	--color-accent-strong: #d8a21c;
-	--color-accent-pressed: #b07f12;
-	--color-on-accent: #1b1d2a;
-	--color-control: #33384f;
-	--color-control-hover: #444c6d;
-	--color-control-pressed: #262a3e;
-	--color-focus: #8fd3ff;
-	--color-error: #ff9b8a;
+	--color-bg: #092b43;
+	--color-surface: #123e57;
+	--color-text: #f4f8fa;
+	--color-text-muted: #bed9e6;
+	--color-accent: #ffcf70;
+	--color-accent-strong: #ffcf70;
+	--color-accent-hover: #ffdf96;
+	--color-accent-pressed: #e8ad43;
+	--color-on-accent: #173b50;
+	--color-control: #20536d;
+	--color-control-hover: #2c6b87;
+	--color-control-pressed: #163e56;
+	--color-focus: #fff3c9;
+	--color-error: #ffb7a7;
+	--color-success: #adf0d3;
+	--color-border: #3c7089;
 	--font-size-md: 18dp;
-	--font-size-xl: 36dp;
-	--radius-control: 6dp;
+	--font-size-xl: 40dp;
+	--radius-control: 8dp;
 }
 
 /* Page and pane fade-in (UI-14); the duration is this rule's one value. It is not a custom property: RmlUi starts no

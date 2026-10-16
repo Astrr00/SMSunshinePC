@@ -5,108 +5,184 @@
 	<link type="text/rcss" href="launcher.rcss"/>
 </head>
 <body>
-<div id="page-main" class="page">
-	<h1>Super Mario Sunshine</h1>
-	<p class="hint">Choose your disc image: Japanese version, GMSJ01 (NTSC-J). Supported formats: ISO, RVZ, WIA, GCZ, CISO, WBFS.</p>
-	<p id="image-path" class="path">No image selected</p>
-	<p id="image-status" class="status"></p>
-	<div class="row">
-		<button id="browse">Choose image...</button>
-	</div>
-	<div class="row">
-		<button id="start" class="primary">Start</button>
-		<button id="open-settings">Settings</button>
-		<button id="quit">Quit</button>
+<div id="page-main" class="page needs-image">
+	<div class="home-layout">
+		<div class="brand-bar">
+			<div class="brand"><span class="brand-mark">S</span><span>Sunshine</span><span class="brand-detail">Native launcher</span></div>
+			<button id="quit" class="quiet">Quit</button>
+		</div>
+		<div class="home-content">
+			<div class="hero-title">
+				<p class="eyebrow">YOUR NEXT ISLAND ESCAPE</p>
+				<h1>Super Mario Sunshine</h1>
+				<p id="launch-summary">Choose your own Japanese disc image to get started.</p>
+			</div>
+			<div class="launch-panel">
+				<div class="disc-card">
+					<div class="disc-heading">
+						<p class="eyebrow">YOUR DISC IMAGE</p>
+						<p id="launch-state" class="state">Disc required</p>
+					</div>
+					<p id="image-path" class="path">No image selected</p>
+					<p id="image-status" class="status"></p>
+					<div class="disc-details">
+						<p class="hint">Japanese version &#183; GMSJ01 (NTSC-J)<br/>ISO, RVZ, WIA, GCZ, CISO, WBFS</p>
+						<button id="browse" class="quiet">Change image</button>
+					</div>
+				</div>
+				<div class="launch-dock">
+					<button id="start" class="primary">Choose disc image</button>
+					<button id="open-settings">Settings</button>
+				</div>
+			</div>
+		</div>
+		<div class="home-footer">Bring your own disc image. No game data included.</div>
 	</div>
 </div>
 
 <div id="page-settings" class="page" style="display: none;">
-	<h1>Settings</h1>
-	<div class="row">
-		<button id="tab-video" class="tab">Video</button>
-		<button id="tab-audio" class="tab">Audio</button>
-		<button id="tab-controls" class="tab">Controls</button>
-		<button id="tab-interface" class="tab">Interface</button>
-		<button id="tab-cheats" class="tab">Cheats</button>
-		<button id="tab-mods" class="tab">Mods</button>
+	<div class="brand-bar">
+		<div class="brand"><span class="brand-mark">S</span><span>Sunshine</span><span class="brand-detail">Settings</span></div>
 	</div>
-
-	<div id="pane-video" class="pane">
-		<div class="row"><button id="window-mode">Window mode</button></div>
-		<div class="row"><button id="window-size">Window size</button></div>
-		<div class="row"><button id="remember-window-size">Remember window size</button></div>
-		<div class="row"><button id="vsync">VSync</button></div>
-		<div class="row"><button id="scale">Resolution scale</button></div>
-		<div class="row"><button id="fsr1">FSR 1 upscale</button></div>
-		<p id="dlss" class="hint">DLSS: unavailable (docs/dlss-feasibility.md)</p>
-		<div class="row"><button id="fps">FPS limit</button></div>
-		<p class="hint">FPS overlay: not implemented yet.</p>
-		<div class="row"><button id="widescreen">Widescreen</button></div>
-		<div class="row"><button id="aspect">Aspect ratio</button></div>
-		<div class="row"><button id="open-data">Open data folder</button></div>
-	</div>
-
-	<div id="pane-audio" class="pane" style="display: none;">
-		<div class="row"><button id="volume">Master volume</button></div>
-		<div class="row"><button id="output-device">Output device</button></div>
-		<div class="row"><button id="menu-sounds">Menu sounds</button></div>
-	</div>
-
-	<div id="pane-controls" class="pane" style="display: none;">
-		<div class="row">
-			<button id="stick-deadzone">Stick dead zone</button>
-			<button id="substick-deadzone">C-stick dead zone</button>
+	<div class="settings-layout">
+		<div class="settings-nav">
+			<p class="eyebrow">PREFERENCES</p>
+			<div class="settings-tabs">
+				<button id="tab-video" class="tab">Video</button>
+				<button id="tab-audio" class="tab">Audio</button>
+				<button id="tab-controls" class="tab">Controls</button>
+				<button id="tab-interface" class="tab">Interface</button>
+				<button id="tab-cheats" class="tab">Cheats</button>
+				<button id="tab-mods" class="tab">Mods</button>
+			</div>
+			<button id="back" class="nav-back">Back</button>
+			<p class="hint nav-hint">Changes are saved automatically.</p>
 		</div>
-		<div class="keys">
-			<button id="bind-A">A</button>
-			<button id="bind-B">B</button>
-			<button id="bind-X">X</button>
-			<button id="bind-Y">Y</button>
-			<button id="bind-START">START</button>
-			<button id="bind-Z">Z</button>
-			<button id="bind-L">L</button>
-			<button id="bind-R">R</button>
-			<button id="bind-DPAD_UP">DPAD_UP</button>
-			<button id="bind-DPAD_DOWN">DPAD_DOWN</button>
-			<button id="bind-DPAD_LEFT">DPAD_LEFT</button>
-			<button id="bind-DPAD_RIGHT">DPAD_RIGHT</button>
-			<button id="bind-STICK_UP">STICK_UP</button>
-			<button id="bind-STICK_DOWN">STICK_DOWN</button>
-			<button id="bind-STICK_LEFT">STICK_LEFT</button>
-			<button id="bind-STICK_RIGHT">STICK_RIGHT</button>
-			<button id="bind-CSTICK_UP">CSTICK_UP</button>
-			<button id="bind-CSTICK_DOWN">CSTICK_DOWN</button>
-			<button id="bind-CSTICK_LEFT">CSTICK_LEFT</button>
-			<button id="bind-CSTICK_RIGHT">CSTICK_RIGHT</button>
+		<div class="settings-content">
+			<h1>Settings</h1>
+			<div id="pane-video" class="pane">
+				<h2>Video</h2>
+				<p class="hint">Make the island feel at home on your display.</p>
+				<div class="settings-columns">
+					<div class="settings-section">
+						<h3>Window</h3>
+						<div class="row"><button id="window-mode">Window mode</button></div>
+						<div class="row"><button id="window-size">Window size</button></div>
+						<div class="row"><button id="remember-window-size">Remember window size</button></div>
+					</div>
+					<div class="settings-section">
+						<h3>Rendering &amp; performance</h3>
+						<div class="row"><button id="vsync">VSync</button></div>
+						<div class="row"><button id="scale">Resolution scale</button></div>
+						<div class="row"><button id="fsr1">FSR 1 upscale</button></div>
+						<div class="row"><button id="fps">FPS limit</button></div>
+						<p id="dlss" class="hint unavailable">DLSS: unavailable (docs/dlss-feasibility.md)</p>
+						<p class="hint unavailable">FPS overlay: not implemented yet.</p>
+					</div>
+					<div class="settings-section">
+						<h3>Picture</h3>
+						<div class="row"><button id="widescreen">Widescreen</button></div>
+						<div class="row"><button id="aspect">Aspect ratio</button></div>
+					</div>
+					<div class="settings-section">
+						<h3>Local files</h3>
+						<p class="hint">Find your settings and application data.</p>
+						<div class="row"><button id="open-data">Open data folder</button></div>
+					</div>
+				</div>
+			</div>
+
+			<div id="pane-audio" class="pane" style="display: none;">
+				<h2>Audio</h2>
+				<p class="hint">Game audio and launcher feedback.</p>
+				<div class="settings-section">
+					<h3>Sound</h3>
+					<div class="row"><button id="volume">Master volume</button></div>
+					<div class="row"><button id="output-device">Output device</button></div>
+					<div class="row"><button id="menu-sounds">Menu sounds</button></div>
+				</div>
+			</div>
+
+			<div id="pane-controls" class="pane" style="display: none;">
+				<h2>Controls</h2>
+				<p class="hint">Select a binding, then press a key. Escape cancels.</p>
+				<div class="settings-section">
+					<h3>Controller sensitivity</h3>
+					<div class="row"><button id="stick-deadzone">Stick dead zone</button></div>
+					<div class="row"><button id="substick-deadzone">C-stick dead zone</button></div>
+				</div>
+				<div class="settings-section">
+					<h3>Keyboard &#183; actions</h3>
+					<div class="keys">
+						<button id="bind-A">A</button>
+						<button id="bind-B">B</button>
+						<button id="bind-X">X</button>
+						<button id="bind-Y">Y</button>
+						<button id="bind-START">START</button>
+						<button id="bind-Z">Z</button>
+						<button id="bind-L">L</button>
+						<button id="bind-R">R</button>
+					</div>
+					<h3>Keyboard &#183; D-pad</h3>
+					<div class="keys">
+						<button id="bind-DPAD_UP">DPAD_UP</button>
+						<button id="bind-DPAD_DOWN">DPAD_DOWN</button>
+						<button id="bind-DPAD_LEFT">DPAD_LEFT</button>
+						<button id="bind-DPAD_RIGHT">DPAD_RIGHT</button>
+					</div>
+					<h3>Keyboard &#183; sticks</h3>
+					<div class="keys">
+						<button id="bind-STICK_UP">STICK_UP</button>
+						<button id="bind-STICK_DOWN">STICK_DOWN</button>
+						<button id="bind-STICK_LEFT">STICK_LEFT</button>
+						<button id="bind-STICK_RIGHT">STICK_RIGHT</button>
+						<button id="bind-CSTICK_UP">CSTICK_UP</button>
+						<button id="bind-CSTICK_DOWN">CSTICK_DOWN</button>
+						<button id="bind-CSTICK_LEFT">CSTICK_LEFT</button>
+						<button id="bind-CSTICK_RIGHT">CSTICK_RIGHT</button>
+					</div>
+					<div class="row"><button id="reset-keys">Restore default keys</button></div>
+				</div>
+			</div>
+
+			<div id="pane-interface" class="pane" style="display: none;">
+				<h2>Interface</h2>
+				<p class="hint">A launcher that fits the way you play.</p>
+				<div class="settings-section">
+					<h3>Appearance &amp; startup</h3>
+					<div class="row"><button id="glyph-style">Button glyphs</button></div>
+					<div class="row"><button id="ui-scale">UI scale</button></div>
+					<div class="row"><button id="skip-launcher">Skip launcher</button></div>
+				</div>
+			</div>
+
+			<div id="pane-cheats" class="pane" style="display: none;">
+				<h2>Cheats</h2>
+				<p class="hint">Cheats apply during play. Changes are saved at once.</p>
+				<div class="settings-section"><div id="cheats-list"></div></div>
+			</div>
+
+			<div id="pane-mods" class="pane" style="display: none;">
+				<h2>Mods</h2>
+				<p class="hint">Mods load when a game starts. Changes are saved at once.</p>
+				<div class="settings-section"><div id="mods-list"></div></div>
+			</div>
+
+			<p id="settings-status" class="status"></p>
 		</div>
-		<div class="row"><button id="reset-keys">Restore default keys</button></div>
 	</div>
-
-	<div id="pane-interface" class="pane" style="display: none;">
-		<div class="row"><button id="glyph-style">Button glyphs</button></div>
-		<div class="row"><button id="ui-scale">UI scale</button></div>
-		<div class="row"><button id="skip-launcher">Skip launcher</button></div>
-	</div>
-
-	<div id="pane-cheats" class="pane" style="display: none;">
-		<p class="hint">Cheats apply during play. Changes are saved at once.</p>
-		<div id="cheats-list"></div>
-	</div>
-
-	<div id="pane-mods" class="pane" style="display: none;">
-		<p class="hint">Mods load when a game starts. Changes are saved at once.</p>
-		<div id="mods-list"></div>
-	</div>
-
-	<p id="settings-status" class="status"></p>
-	<div class="row"><button id="back">Back</button></div>
 </div>
 <div id="page-confirm" class="page hidden" style="display: none;">
-	<h1>Confirm</h1>
-	<p id="confirm-text" class="hint"></p>
-	<div class="row">
-		<button id="confirm-cancel" class="primary">Cancel</button>
-		<button id="confirm-yes">OK</button>
+	<div class="confirm-layout">
+		<div class="confirm-card">
+			<p class="eyebrow">SUNSHINE</p>
+			<h1>Confirm</h1>
+			<p id="confirm-text" class="hint"></p>
+			<div class="confirm-actions">
+				<button id="confirm-cancel" class="primary">Cancel</button>
+				<button id="confirm-yes">OK</button>
+			</div>
+		</div>
 	</div>
 </div>
 </body>

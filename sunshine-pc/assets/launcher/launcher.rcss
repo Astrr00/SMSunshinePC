@@ -2,41 +2,235 @@
 body {
  font-family: LatoLatin;
  font-size: var(--font-size-md);
+ line-height: 1.35;
  color: var(--color-text);
  background-color: var(--color-bg);
  width: 100%;
  height: 100%;
  margin: 0;
- padding: 24dp;
- box-sizing: border-box;
 }
 
-h1, p, div {
+h1, h2, h3, p, div {
  display: block;
+}
+
+div, button {
+ box-sizing: border-box;
 }
 
 h1 {
  font-size: var(--font-size-xl);
  font-weight: bold;
+ margin: 0 0 10dp 0;
+}
+
+h2 {
+ font-size: 28dp;
+ font-weight: bold;
+ margin: 0 0 6dp 0;
+}
+
+h3 {
+ font-size: 18dp;
+ font-weight: bold;
  color: var(--color-accent);
- margin: 0 0 12dp 0;
+ margin: 0 0 14dp 0;
+}
+
+p {
+ margin: 0;
 }
 
 .hint {
  color: var(--color-text-muted);
+ font-size: 16dp;
  margin: 0 0 16dp 0;
+ word-break: break-word;
+}
+
+.eyebrow {
+ color: var(--color-accent);
+ font-size: 13dp;
+ font-weight: bold;
+ letter-spacing: 1dp;
+ margin: 0 0 8dp 0;
+}
+
+.page {
+ width: 100%;
+ height: 100%;
+ overflow-y: auto;
+}
+
+.brand-bar {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-shrink: 0;
+ padding: 12dp 28dp;
+ background-color: rgba(7, 36, 55, 230);
+ border-bottom: 1dp #467a92;
+}
+
+.brand {
+ display: flex;
+ align-items: center;
+ gap: 12dp;
+ font-size: 20dp;
+ font-weight: bold;
+}
+
+.brand-mark {
+ display: inline-block;
+ width: 34dp;
+ height: 34dp;
+ line-height: 34dp;
+ text-align: center;
+ color: var(--color-on-accent);
+ background-color: var(--color-accent);
+ border-radius: 10dp;
+}
+
+.brand-detail {
+ color: var(--color-text-muted);
+ font-size: 14dp;
+ font-weight: normal;
+ margin-left: 6dp;
+}
+
+#page-main {
+ decorator: image(ocean.png cover);
+}
+
+.home-layout {
+ display: flex;
+ flex-direction: column;
+ height: 100%;
+}
+
+.home-content {
+ display: flex;
+ flex-direction: column;
+ justify-content: space-between;
+ flex: 1 0 auto;
+ padding: 28dp 36dp 24dp;
+}
+
+.hero-title {
+ align-self: flex-start;
+ max-width: 760dp;
+ padding: 18dp 22dp;
+ margin-bottom: 72dp;
+ background-color: rgba(7, 36, 55, 205);
+ border-left: 3dp var(--color-accent);
+ border-radius: 8dp;
+}
+
+#launch-summary {
+ color: var(--color-text-muted);
+}
+
+.launch-panel {
+ width: 100%;
+ max-width: 860dp;
+ align-self: center;
+}
+
+.disc-card {
+ background-color: rgba(9, 43, 63, 238);
+ border: 1dp var(--color-border);
+ border-radius: 12dp;
+ padding: 18dp 22dp;
+ margin-bottom: 12dp;
+}
+
+.disc-heading, .disc-details {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: 8dp 16dp;
+}
+
+.disc-heading .eyebrow {
+ margin: 0;
+}
+
+.state {
+ color: var(--color-accent);
+ font-size: 15dp;
+ font-weight: bold;
 }
 
 .path {
- background-color: var(--color-surface);
- padding: 8dp 12dp;
- margin: 6dp 0;
+ padding: 10dp 12dp;
+ margin: 12dp 0 0 0;
+ background-color: rgba(3, 25, 40, 160);
+ border-radius: 6dp;
+ word-break: break-all;
 }
 
 .status {
- min-height: 24dp;
- color: var(--color-error);
+ color: var(--color-text-muted);
  margin: 8dp 0;
+ word-break: break-all;
+ white-space: pre-wrap;
+}
+
+#image-status {
+ font-size: 16dp;
+}
+
+#page-main.ready .state, #page-main.ready #image-status {
+ color: var(--color-success);
+}
+
+#page-main.error .state, #page-main.error #image-status {
+ color: var(--color-error);
+}
+
+#page-main.error .disc-card {
+ border-color: var(--color-error);
+}
+
+.disc-details .hint {
+ flex: 1 1 260dp;
+ margin: 0;
+ font-size: 14dp;
+}
+
+.launch-dock {
+ display: flex;
+ gap: 12dp;
+ padding: 12dp;
+ background-color: rgba(14, 73, 95, 235);
+ border: 1dp #6ea7ba;
+ border-radius: 12dp;
+}
+
+.launch-dock button {
+ margin: 0;
+ min-height: 66dp;
+ font-size: 21dp;
+ font-weight: bold;
+}
+
+#start {
+ flex: 3 1 320dp;
+ font-size: 27dp;
+}
+
+#open-settings {
+ flex: 1 1 140dp;
+}
+
+.home-footer {
+ flex-shrink: 0;
+ padding: 10dp 28dp;
+ background-color: rgba(7, 36, 55, 230);
+ color: var(--color-text-muted);
+ font-size: 13dp;
+ text-align: center;
 }
 
 .row {
@@ -44,7 +238,7 @@ h1 {
 }
 
 .pane {
- margin: 12dp 0;
+ margin: 18dp 0;
 }
 
 /* Hidden pages and panes: setDisplay in launcher.cpp sets the class (page-confirm starts with it in launcher.rml).
@@ -60,15 +254,105 @@ h1 {
  overflow-y: auto;
 }
 
+.settings-layout {
+ display: flex;
+ align-items: flex-start;
+ gap: 28dp;
+ padding: 28dp;
+}
+
+.settings-nav {
+ flex: 0 0 180dp;
+ padding: 18dp 12dp;
+ background-color: var(--color-surface);
+ border: 1dp var(--color-border);
+ border-radius: 10dp;
+}
+
+.settings-nav .eyebrow {
+ margin: 0 10dp 16dp;
+}
+
+.settings-tabs button, .nav-back {
+ display: block;
+ width: 100%;
+ text-align: left;
+ margin: 0 0 8dp;
+}
+
+.settings-nav .nav-back {
+ margin-top: 20dp;
+ border-color: var(--color-border);
+}
+
+.nav-hint {
+ font-size: 13dp;
+ margin: 12dp 8dp 0;
+}
+
+.settings-content {
+ flex: 1 1 0dp;
+ min-width: 0;
+}
+
+.settings-content > h1 {
+ color: var(--color-text-muted);
+ font-size: 16dp;
+ font-weight: normal;
+ margin-bottom: 0;
+}
+
+.settings-columns {
+ display: flex;
+ flex-wrap: wrap;
+ align-items: flex-start;
+ gap: 16dp;
+}
+
+.settings-section {
+ min-width: 0;
+ padding: 20dp;
+ margin: 0 0 16dp;
+ background-color: var(--color-surface);
+ border: 1dp var(--color-border);
+ border-radius: 10dp;
+}
+
+.settings-columns .settings-section {
+ flex: 1 1 340dp;
+ margin: 0;
+}
+
+.settings-section .row button {
+ display: block;
+ width: 100%;
+ text-align: left;
+ margin: 0;
+}
+
+.settings-section .hint {
+ margin-bottom: 12dp;
+}
+
+.unavailable {
+ padding: 8dp 10dp;
+ background-color: var(--color-bg);
+ border-radius: 6dp;
+}
+
+#settings-status {
+ padding: 4dp 0 16dp;
+}
+
 /* RmlUi collapses the page width when the vertical scrollbar has no size, so it gets one. */
 scrollbarvertical {
- width: 10dp;
+ width: 12dp;
 }
 scrollbarvertical slidertrack {
- background-color: var(--color-surface);
+ background-color: var(--color-bg);
 }
 scrollbarvertical sliderbar {
- background-color: var(--color-control);
+ background-color: #6b9bb0;
  border-radius: var(--radius-control);
 }
 
@@ -76,18 +360,25 @@ button {
  display: inline-block;
  background-color: var(--color-control);
  color: var(--color-text);
- padding: 10dp 18dp;
- margin: 0 12dp 8dp 0;
+ font-size: var(--font-size-md);
+ line-height: 1.35;
+ min-height: 44dp;
+ padding: 11dp 16dp;
+ margin: 0;
+ border: 1dp transparent;
  border-radius: var(--radius-control);
+ word-break: break-word;
 }
 
 button:hover {
  background-color: var(--color-control-hover);
+ border-color: #7eb5cd;
 }
 
 /* Focus ring as a box-shadow: it does not change the layout. Controller navigation sets focus. */
 button:focus {
- box-shadow: 0 0 0 2dp var(--color-focus);
+ box-shadow: 0 0 0 3dp var(--color-focus);
+ border-color: var(--color-focus);
 }
 
 button:active {
@@ -98,26 +389,109 @@ button.primary {
  background-color: var(--color-accent-strong);
  color: var(--color-on-accent);
  font-weight: bold;
+ border-bottom: 4dp #bc8935;
+}
+
+button.primary:hover {
+ background-color: var(--color-accent-hover);
 }
 
 button.primary:active {
  background-color: var(--color-accent-pressed);
 }
 
+button.quiet {
+ background-color: rgba(26, 74, 96, 190);
+ border-color: var(--color-border);
+}
+
+button.quiet:hover {
+ background-color: var(--color-control-hover);
+}
+
 button.tab {
- padding: 8dp 14dp;
+ padding: 12dp 14dp;
+ border-left: 3dp transparent;
 }
 
 button.tab.active {
- background-color: var(--color-accent-strong);
- color: var(--color-on-accent);
+ background-color: var(--color-control-hover);
+ color: var(--color-accent);
+ border-left-color: var(--color-accent);
+ font-weight: bold;
 }
 
 .keys {
- margin: 8dp 0;
+ display: flex;
+ flex-wrap: wrap;
+ gap: 10dp;
+ margin: 8dp 0 24dp;
 }
 
 .keys button {
- width: 230dp;
+ flex: 1 1 220dp;
+ min-width: 0;
  text-align: left;
+}
+
+.confirm-layout {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ min-height: 100%;
+ padding: 28dp;
+}
+
+.confirm-card {
+ width: 100%;
+ max-width: 600dp;
+ padding: 32dp;
+ background-color: var(--color-surface);
+ border: 1dp var(--color-border);
+ border-radius: 12dp;
+}
+
+.confirm-actions {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 12dp;
+ margin-top: 24dp;
+}
+
+.confirm-actions button {
+ flex: 1 1 150dp;
+}
+
+@media (max-width: 700dp) {
+ .brand-bar { padding: 10dp 16dp; }
+ .brand-detail { display: none; }
+ .home-content { padding: 20dp 16dp; }
+ .hero-title { padding: 14dp 16dp; margin-bottom: 36dp; }
+ .hero-title h1 { font-size: 32dp; }
+ .disc-card { padding: 14dp; }
+ .launch-dock { flex-wrap: wrap; }
+ #start { flex-basis: 100%; }
+ #open-settings { flex-basis: 100%; }
+ .settings-layout { display: block; padding: 16dp; }
+ .settings-nav { padding: 12dp; margin-bottom: 22dp; }
+ .settings-tabs { display: flex; flex-wrap: wrap; gap: 8dp; }
+ .settings-tabs button { flex: 1 1 100dp; width: auto; margin: 0; }
+ .settings-nav .nav-back { margin-top: 12dp; }
+ .nav-hint { margin-top: 8dp; }
+ .settings-section { padding: 14dp; }
+ .settings-columns .settings-section { flex-basis: 100%; }
+ .keys button { flex-basis: 190dp; }
+ .confirm-layout { padding: 16dp; }
+ .confirm-card { padding: 22dp; }
+}
+
+@media (min-width: 1280dp) {
+ .home-content { padding: 40dp 56dp 32dp; }
+ .hero-title h1 { font-size: 50dp; }
+ .launch-panel { max-width: 1040dp; }
+ .launch-dock button { min-height: 78dp; font-size: 24dp; }
+ #start { font-size: 32dp; }
+ .settings-layout { padding: 36dp; gap: 36dp; }
+ .settings-nav { flex-basis: 210dp; }
+ .settings-section .row button { min-height: 52dp; }
 }

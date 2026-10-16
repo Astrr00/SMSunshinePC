@@ -12,6 +12,7 @@
 #include <SDL3/SDL.h>
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -442,11 +443,8 @@ public:
 				}
 			}
 		}
-		const std::string& last = settings().lastImagePath;
-		if (!last.empty()) {
-			imagePath_ = last;
-			validate();
-		}
+		imagePath_ = settings().lastImagePath;
+		validate();
 		openMenuSounds();
 		// Dev hook for tests: SUNSHINE_DEV_LAUNCHER_ACTIONS=id,id,... runs those actions in order (e.g. fsr1,scale,start).
 		if (const char* actions = std::getenv("SUNSHINE_DEV_LAUNCHER_ACTIONS")) {
@@ -474,8 +472,13 @@ public:
 				begin = end + 1;
 			}
 		}
-		ensureFocus();
 		refresh();
+		ctx_->Update();
+		if (Rml::Element* start = doc_->GetElementById("start"); start != nullptr && start->IsVisible(true)) {
+			focusTarget(start);
+		} else {
+			ensureFocus();
+		}
 		return true;
 	}
 
@@ -502,6 +505,12 @@ public:
 		if (pick) {
 			imagePath_ = *pick;
 			validate();
+			if (imageValid_) {
+				ctx_->Update();
+				if (Rml::Element* start = doc_->GetElementById("start"); start != nullptr && start->IsVisible(true)) {
+					focusTarget(start);
+				}
+			}
 		}
 		// Dev hook: one synthetic gamepad token every kPadStepFrames frames (poll runs once per frame).
 		if (padNext_ < padScript_.size() && ++padWait_ >= kPadStepFrames) {
@@ -1006,7 +1015,6 @@ private:
 		int width = s.windowWidth;
 		int height = s.windowHeight;
 
-		setText("image-path", imagePath_.empty() ? "No image selected" : escapeRml(imagePath_));
 		setText("window-mode", std::string("Window mode: ") + (s.fullscreen ? "Fullscreen" : "Windowed"));
 		setText("window-size", "Window size: " + std::to_string(width) + " x " + std::to_string(height));
 		setText("vsync", std::string("VSync: ") + (s.vsync ? "On" : "Off") + " (applies at next start)");
@@ -1036,15 +1044,31 @@ private:
 		refreshMods();
 	}
 
+	void refreshImage(const std::string& error) {
+		assert(!imageValid_ || (!imagePath_.empty() && error.empty()));
+		const bool missing = imagePath_.empty();
+		setText("image-path", missing ? "No image selected" : escapeRml(imagePath_));
+		setText("launch-summary", missing ? "Choose your own Japanese disc image to get started." :
+		                         imageValid_ ? "Ready when you are." : "Choose a supported Japanese disc image to continue.");
+		setText("launch-state", missing ? "Disc required" : imageValid_ ? "Ready to play" : "Image not supported");
+		setText("image-status", missing ? "Choose your own Super Mario Sunshine disc image (GMSJ01, NTSC-J)." :
+		                       imageValid_ ? "Valid: Super Mario Sunshine (GMSJ01, NTSC-J)." : escapeRml(error));
+		setText("start", imageValid_ ? "Play" : "Choose disc image");
+		if (Rml::Element* page = doc_->GetElementById("page-main")) {
+			page->SetClass("needs-image", missing);
+			page->SetClass("ready", imageValid_);
+			page->SetClass("error", !missing && !imageValid_);
+		}
+	}
+
 	// Reads the picked file's header; leaves the disc closed (Start reopens it).
 	void validate() {
 		std::string error;
-		if (!launcher::openDisc(imagePath_, error)) {
-			setText("image-status", escapeRml(error));
-			return;
+		imageValid_ = !imagePath_.empty() && launcher::openDisc(imagePath_, error);
+		if (imageValid_) {
+			aurora_dvd_close();
 		}
-		aurora_dvd_close();
-		setText("image-status", "Valid: Super Mario Sunshine (GMSJ01, NTSC-J).");
+		refreshImage(error);
 	}
 
 	void chooseImage() {
@@ -1053,13 +1077,14 @@ private:
 	}
 
 	void startGame() {
-		if (imagePath_.empty()) {
-			setText("image-status", "Choose a disc image first.");
+		if (!imageValid_) {
+			chooseImage();
 			return;
 		}
 		std::string error;
 		if (!launcher::openDisc(imagePath_, error)) {
-			setText("image-status", escapeRml(error));
+			imageValid_ = false;
+			refreshImage(error);
 			return;
 		}
 		settings().lastImagePath = imagePath_;
@@ -1220,6 +1245,7 @@ private:
 	Rml::ElementDocument* doc_ = nullptr;
 	aurora::input::LayerId layer_ = aurora::input::kInvalidLayerId;
 	std::string imagePath_;
+	bool imageValid_ = false;
 	std::string capture_; // settings key waiting for the next key press
 	std::string confirmAction_;          // action waiting for OK on the confirm page
 	bool confirmReturnSettings_ = false; // the page the confirm page replaced
