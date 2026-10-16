@@ -1883,11 +1883,13 @@ static inline bool fakeCalcPos(const TBathtubData& data, f32 radius, f32 rnd1,
 	nAxis.setLength(h);
 
 	JGeometry::TVec3<f32> up2(0.0f, 1.0f, 0.0f);
+	// Preserve retail's pre-center evaluation order and NaN operand priority.
+	f32 x = up2.x * radius + nAxis.x;
+	f32 y = up2.y * radius + nAxis.y;
+	f32 z = up2.z * radius + nAxis.z;
 	JGeometry::TVec3<f32> center;
 	center.set(data.getThing());
-	out->set(up2.x * radius + nAxis.x + center.x,
-	         up2.y * radius + nAxis.y + center.y,
-	         up2.z * radius + nAxis.z + center.z);
+	out->set(x + center.x, y + center.y, z + center.z);
 	return true;
 }
 
@@ -1932,7 +1934,7 @@ void TBathWaterManager::perform(u32 cue, JDrama::TGraphics* graphics)
 				if (fakeCalcPos(data, unk14[1]->dropRadius.get(),
 				                unk10.get_float(-1.0f, 1.0f), &vel))
 					// asm 0x801F9A08-0x801F9ABC: 0.0f + 10.0f * u (@3413, @3424) is stored inline
-					unk20[1]->addDrop(vel, 10.0f * unk10.get_float01());
+					unk20[1]->addDrop(vel, unk10.get_float(0.0f, 10.0f));
 			}
 
 		}
