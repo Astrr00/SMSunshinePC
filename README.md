@@ -10,12 +10,12 @@ A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The gam
 
 Not playable end to end yet. Legend: done = observed in a run or check, partial = works with gaps or unverified, open = not working. % is the lead's estimate of how much of the item works, not a measurement. Updated with every milestone. Matching, link and boot checks refreshed 2026-10-16; feature rows last measured 2026-10-14 with dated updates below; the launcher, cheats/mods, audio, widescreen, particles and settings rows are synced to main after the KeyMatrix, Toggles2, FontFix, StageStart, T3 and HudAnchor landings, the other rows to `52c10f7` or earlier; runs on builds of main or of agent branches before landing.
 
-**Decompilation progress (measured 2026-10-15, full `ninja` + `changes_all`; SHA-1 rechecked 2026-10-16):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %**; fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical; no matching gain in this continuation. The corrected `setLookDir` now has a complete compiled-PPC FP review: 120 helper instructions and 13 inverse-square-root instructions agree after register/ABI normalization. Corona has real GPU depth, diagnostic five-platform victory, natural ending/credits and a persisted completion-Shine reload. Platform travel/health/water assistance remains explicit. Unassisted combat/navigation, the 120-Shine ending, unconditional `perform` FP-state equivalence, universal host FP equivalence, sound listening and hardware GPU remain open. Depth readback retains measured 2–4-copy latency, not same-frame retail equivalence. Details: [`status.md`](sunshine-pc/docs/status.md), [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
+**Decompilation progress (measured 2026-10-16, full `ninja` + `changes_all`):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %**; fuzzy match **98.66 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical; no byte-match gain. Bath-water spawn center NaN priority, velocity `FI/FR` boundaries and an unconditional collision-radius square are corrected. `perform` fuzzy score decreases from 94.09952 to 93.910194; `calcBathtub` increases from 95.36346 to 95.55992. Corrected `setLookDir` has 120 helper instructions and 13 inverse-square-root instructions verified after register/ABI normalization. Corona has real GPU depth, diagnostic five-platform victory, natural ending/credits and a persisted completion-Shine reload. Platform travel/health/water assistance remains explicit. Unassisted combat/navigation, the 120-Shine ending, whole-`perform` FP-state integration, universal host FP equivalence, sound listening and hardware GPU remain open. Depth readback retains measured 2–4-copy latency, not same-frame retail equivalence. Details: [`status.md`](sunshine-pc/docs/status.md), [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
 | Matching decomp build (SHA-1 `9f5a8caf…`) | done | 100 | `ninja` in `sms/` |
-| Decomp logic correctness (non-matching functions) | partial | 55 | Full report measured 2026-10-15: 11 323/12 881 byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger prefixes checked 2026-10-16: 1 976 `logic-verified`, 150 `matched`, 252 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere possible. Bath-water initializer and finite spawn-FP/RNG review complete; unconditional `perform` FP-state claim remains partial. Corrected `setLookDir` has 120/120 normalized compiled-PPC rows plus 13/13 actual callee rows verified, not a byte-match gain or universal host-FP certification. Aurora 0018 supplies genuine Z24X8 depth; 28 224 captured heights agree with independent tile decoding at WARP scales 0.5/0.25. EventWatcher reviews remain complete. Diagnostic Corona combat, natural ending/save/reload are observed, not an unassisted fight or whole-unit equivalence proof. Sound listening, same-frame timing and hardware GPU remain unverified. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
+| Decomp logic correctness (non-matching functions) | partial | 55 | Full report measured 2026-10-16: 11 323/12 881 byte-identical (62.65 % code, 98.66 % fuzzy), 445/736 complete units. Ledger prefixes checked 2026-10-16: 1 976 `logic-verified`, 150 `matched`, 252 `partial`; three malformed legacy rows excluded, duplicate spellings elsewhere possible. Bath-water initializer reviewed; spawn NaN/FI/FR and collision-square sticky exceptions corrected. Compiled `getGravityDir` and corrected `calcBathtub` reviews are complete under bounded masked-exception PPC assumptions; final whole-`perform` integration remains partial. Corrected `setLookDir` has 120/120 normalized compiled-PPC rows plus 13/13 actual callee rows verified, not a byte-match gain or universal host-FP certification. Aurora 0018 supplies genuine Z24X8 depth; 28 224 captured heights agree with independent tile decoding at WARP scales 0.5/0.25. EventWatcher reviews remain complete. Diagnostic Corona combat, natural ending/save/reload are observed, not an unassisted fight or whole-unit equivalence proof. Sound listening, same-frame timing and hardware GPU remain unverified. See [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md) |
 | Strict link, 0 unresolved symbols | done | 100 | `tools/_strict.cmd` |
 | Units compiled (clang-cl) | done | 100 | 583/583 built units, 149 excluded with 27 prefix rules and reasons (`sunshine-pc/excluded-units.txt`, `docs/platform-notes.md`) |
 | Boot: logo, intro movies | done | 100 | normal `--dvd` boot |
@@ -96,6 +96,37 @@ Bug found and fixed on the way: `JAIData::initSeqParameter` left `mSeqHandle` 0 
 - [`sunshine-pc/docs/nm-operand-audit.md`](sunshine-pc/docs/nm-operand-audit.md): NonMatching units ranked by operand-diff hits
 - [`Port.md`](Port.md), [`Goal-Port.md`](Goal-Port.md): work orders
 
+### Update 2026-10-16: collision-square exceptions and compiled helper reviews
+
+Two additional independent agents complete the bounded `getGravityDir`/`calcBathtub` compiled-PPC reviews.
+`getGravityDir` needs no correction: all 143 instructions preserve the live operand graph and returned FP status,
+assuming the same PPC estimate and math-library implementations.
+Source [`d33c1ef`](https://github.com/Astrr00/SMSunshinePC/commit/d33c1ef) fixes `calcBathtub`'s conditionally skipped inner-radius square.
+A plain reused local restores retail's unconditional operation; no volatile access or extra wrapper is needed.
+Real production-method fixtures reproduce missing inexact/underflow flags before and restore them after;
+the exact control, count and accumulated position remain unchanged.
+Final probe-free WARP Corona route 98 passes (37 s); full verification passes 7 gates and 63 host checks.
+The isolated checkout also rebuilds `d33c1ef` with zero unresolved symbols.
+Status-enabled Null progression reaches Bianco with one Shine; independent seven-block GCI validation and real fresh-process reload pass.
+All 681 ready-scene status ticks include JPA statistics, with no overlap with 61 unavailable-scene ticks.
+These progression/reload regressions use documented dev aids, not an unassisted acceptance claim.
+These bounded IEEE/masked-exception proofs do not certify physical Gekko execution, host-wide FP equivalence or whole-`perform` integration.
+Next: compose the corrected helpers and both initialization paths into a final whole-`perform` FP review.
+
+### Update 2026-10-16: bath-water spawn FP corrections
+
+Source [`3d095fa`](https://github.com/Astrr00/SMSunshinePC/commit/3d095fa) fixes two independently reviewed spawn gaps.
+Three pre-center scalar calculations preserve retail's NaN operand priority without an extra helper call.
+The existing `get_float(0.0f, 10.0f)` wrapper restores multiplication followed by an exact addition,
+clearing `FI/FR` as retail does even when drop capacity rejects the spawn.
+Actual emitted-PPC instruction replay passes 18 NaN payload/sign/signaling cases; the previous object differs in 12.
+Two exact finite rounding witnesses establish the velocity status gap; these are architecture-model checks, not PPC hardware execution.
+Null and WARP probes observe two successful position calculations and capacity rejection (`active=0`, `capacity=0`);
+their velocities match independent LCG decoding bit-for-bit. Final probe-free WARP combat smoke passes (29 s, tick 812).
+Full verification passes 7 gates and 63 host checks; the isolated checkout of `3d095fa` rebuilds with zero unresolved symbols.
+The shared X/Z zero product needs no new wrapper; whole-function transitive FP equivalence remains partial.
+Next: compiled `getGravityDir` and `calcBathtub` reviews under identical masked-exception PPC controls.
+
 ### Update 2026-10-16: compiled `setLookDir` FP review
 
 Two independent reviews plus an instruction-level check close the corrected helper's PPC review.
@@ -107,7 +138,7 @@ This proof assumes valid ABI memory, identical PPC FP controls and non-trapping 
 It does not certify physical trap-handler context or universal x64 rounding, NaN-payload and exception-state behavior.
 Real production-header smoke passes 37 invariant checks in both optimized and Strict-style host builds.
 WARP Corona route 98 passes (36 s, tick 1024); full verification passes 7 gates, 63 host checks and the 45-second boot.
-Unconditional bath-water `perform` FP-state equivalence remains the next targeted decomp review.
+That helper-only milestone left unconditional bath-water `perform` FP-state equivalence open; the later spawn correction is above.
 
 ### Update 2026-10-15: natural ending, final save and real reload
 

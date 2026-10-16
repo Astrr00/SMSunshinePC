@@ -6,6 +6,66 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-16: additional compiled helper audits and collision-square fix
+
+Two further independent agents complete bounded current-object `getGravityDir` and `calcBathtub` reviews.
+`getGravityDir`'s 143 retail/current instructions preserve ordered operands, fused graph and returned defined FP status,
+assuming the same PPC estimate and ABI-conforming trigonometric implementations.
+No helper/header change is justified there; the earlier numerical-only ledger explanation is replaced.
+
+Source [`d33c1ef`](https://github.com/Astrr00/SMSunshinePC/commit/d33c1ef) restores retail's unconditional `innerR*innerR`
+in `calcBathtub` with one reused plain local. A conditional multiplication had omitted sticky inexact/underflow flags.
+The real production method is called in temporary WARP fixtures with exact, inexact and underflow square inputs:
+before inexact/underflow flags are `0/0,0/0,0/0`; after they are `0/0,1/0,1/1`.
+All three calls retain count 1 and accumulated position `(0,1,0)`; each fixture saves/restores the native FP environment.
+Both before/after runs finish in 37 seconds. This is native-host evidence plus a compiled-PPC proof, not physical Gekko execution.
+
+The complete corrected helper review finds no further reachable operand, NaN, branch, write or final-status mismatch.
+Its outer rim body is unreachable under unchanged valid inputs; no dead-code cleanup is made.
+After fixture/include removal, final WARP route 98 passes (rc 0, 37 s), with visible water/arena.
+Full final-source verification: 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks, zero unresolved, unchanged SHA-1, WARP boot 45 s.
+The isolated checkout fast-forwards to `d33c1ef` and independently rebuilds Strict.
+Normalized source streams for `perform` (1 240), `getGravityDir` (143) and `inv_sqrt` (13) are unchanged by this helper fix.
+`calcBathtub` score rises `95.36346 -> 95.55992`; `perform` retains the earlier correction's `93.910194`.
+Full fuzzy total is 98.66029%; byte-identical totals and ledger prefixes remain unchanged.
+Final `bath_square_final85_20261016` passes on Null (503 s, tick 22280, Bianco 2/0, one Shine).
+All 681 ready status ticks retain JPA statistics; none overlap the 61 unavailable-scene ticks.
+The isolated seven-block GCI passes independent checksums; fresh-process `bath_square_final86_20261016`
+reloads it successfully (Null, 17 s, tick 1675, Delfino 1/0, one Shine).
+Progression uses step-retrace, skipped movies, aim assist and health/water cheats;
+reload retains step-retrace/movie skip but no dev start, aim assist, scripted cheat or teleport.
+
+These helper certificates assume production-valid ABI objects, unchanged inputs, IEEE mode, masked exception enables,
+the same PPC estimate/math implementations and no concurrent/MMIO mutation.
+They do not certify intermediate FPSCR scheduling, enabled-trap context, unspecified NI behavior or universal host FP.
+Whole-`perform` remains partial for final integration across initialized and initialization paths; listening and hardware GPU remain open.
+
+### Update 2026-10-16: bath-water spawn NaN and FP-status correction
+
+Source [`3d095fa`](https://github.com/Astrr00/SMSunshinePC/commit/3d095fa) fixes two independently reviewed `perform` spawn defects.
+Precomputing scalar world offsets before the center setter restores retail's three NaN operand priorities.
+The existing `get_float(0.0f, 10.0f)` restores multiplication followed by exact addition, clearing velocity `FI/FR`.
+Actual emitted-instruction replay checks 18 NaN payload/sign/signaling cases (old object differs in 12);
+two exact finite rounding witnesses prove the old status gap. These are architecture-model checks, not PPC hardware results.
+The existing shared X/Z zero product analytically preserves values and accumulated invalid exceptions;
+no added setter, wrapper, volatile access, dependency or compiler change is needed.
+
+Null and D3D12 WARP read-only probes each observe two successful spawn-position calculations and capacity rejection:
+active count and capacity are both 0. Independent LCG decoding confirms velocity bits `0x40324864`/`0x40D5B7A6`;
+the manager advances exactly two draws between observations.
+After removing probes, WARP `bath_perform_spawn_final_20261016` passes (rc 0, 29 s, tick 812) with visible arena/HUD.
+Dev start, diagnostic platform travel, real analog-R/L attacks, health/water cheats, step-retrace and entry movie skip remain explicit.
+No new accepted nonzero-capacity drop, unassisted fight or native PPC FPSCR measurement is claimed.
+
+Full verification: 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks, Strict zero unresolved, unchanged SHA-1 and WARP boot 45 s.
+The existing isolated checkout fast-forwards to `3d095fa` and independently rebuilds Strict with cached dependencies.
+Full report: 11 323/12 881 byte-identical, 445/736 complete units; no byte-identical function lost.
+`perform` score falls `94.09952 -> 93.910194` (data-value wrapper `93.89401`) for the assembly-proven semantic correction.
+Ledger prefixes remain 1 976 logic-verified / 150 matched / 252 partial, excluding the same three malformed legacy rows.
+Whole-function transitive equivalence remains partial pending actual compiled `getGravityDir`/`calcBathtub` reviews.
+Proof assumes identical masked-exception PPC controls, valid ABI memory and no concurrent/MMIO mutation;
+enabled-trap context, universal host-x64 FP behavior, listening and hardware GPU remain unverified.
+
 ### Update 2026-10-16: corrected `setLookDir` compiled FP review
 
 Two independent read-only reviews and a lead-run canonical instruction comparison close the corrected helper's PPC review.

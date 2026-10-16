@@ -403,6 +403,167 @@ The corrected helper's ledger row becomes `logic-verified`; prefix counts are 1 
 (logic-verified/matched/partial), excluding the same three malformed legacy rows.
 Unconditional bath-water `perform` FP-state equivalence remains open.
 
+## Bath-water spawn FP corrections (2026-10-16, `3d095fa`)
+
+Two independent read-only audits found a NaN-payload defect and a separate finite-input FP-status defect.
+The source fix changes only `fakeCalcPos`'s evaluation boundary and `perform`'s existing RNG wrapper call.
+No exported API, SDK/JSystem implementation, compiler policy, dependency, fixture or save format changes.
+
+### Center NaN priority
+
+Retail's final additions at `0x801F99C0/C4/C8` use world offsets as `frA`, center components as `frB`.
+The previous object used center first, despite the C++ expression spelling offset first.
+Merely reversing the source expression generated the same incorrect object.
+Computing the three scalar offsets before `center.set(data.getThing())` restores the actual operand positions:
+source `.text+0x11E8/EC/F0` uses `f18/f17/f16` first and `f2/f1/f0` second.
+The source retains its original up-vector constructor; no new out-of-line setter or volatile workaround is needed.
+
+[IBM/Motorola PEM](https://yurichev.com/mirrors/PowerPC/6xx_pem.pdf), §3.3.1.7, printed page 3-22,
+selects NaNs in `frA`, then `frB`, then `frC` order.
+Distinct quiet NaNs `world=0x7FC00011`, `center=0x7FC00022` therefore produced `0x7FC00022` before,
+but retail and corrected code select `0x7FC00011`.
+An assert-based replay of the actual emitted `fadds` instructions checks 18 payload/sign/signaling-NaN cases:
+all corrected results and signaling-invalid conditions match retail; the old object differs in 12 cases.
+This is architecture-model evidence, not native x64 or physical Gekko NaN execution.
+
+### Velocity FI/FR boundary
+
+The former `10.0f * get_float01()` ends with multiplication; retail ends with `+0` after the rounded product.
+The existing `get_float(0.0f, 10.0f)` emits retail's `fmuls` followed by `fadds`, before the capacity branch.
+Exact arithmetic clears nonsticky `FI/FR` (PEM §3.3.5, printed page 3-27).
+
+| Next LCG state | Prior seed | Velocity bits | Old FI/FR | Retail and corrected FI/FR |
+| --- | --- | --- | --- | --- |
+| `0x80000200` | `0x668799E5` | `0x40A00002` | 1/0 | 0/0 |
+| `0x80000600` | `0xE7EAADE5` | `0x40A00008` | 1/1 | 0/0 |
+
+Exact rational assert checks establish these RN=nearest finite witnesses; values and sticky inexact agree.
+The status difference can survive capacity rejection and a nonpositive sound amplitude on move-only cues.
+This corrects the earlier review's incomplete finite-FP-state claim, not its equal finite values or RNG counts.
+The latest object inlines the same modulo-32-bit LCG; its state update, top-23-bit conversion and two-draw order agree.
+
+### Shared zero products and scope
+
+Current X/Z code retains one `fmuls(+0,radius)` reused by two `fadds(axis,product)` operations.
+It does not eliminate every zero product.
+Finite products are exact signed zeros; for NaNs, retail FMA's `frB=axis` precedes `frC=radius`,
+matching the split addition's `frA=axis` before its product.
+PEM §4.2.2.2 sets fused invalid-operation bits as if multiplication and addition were separate,
+including infinity-times-zero even with a NaN addend.
+Sharing the product does not change accumulated invalid bits; no intervening operation clears them.
+Final component additions restore the relevant nonsticky status.
+
+The contract requires valid ABI memory, no concurrent mutation/MMIO, identical PPC controls and masked FP exception enables.
+Disabling trap delivery alone does not suffice: enabled invalid operations can suppress destination writes.
+Physical trap-handler context, scratch state and universal host-x64 equivalence are excluded.
+The ledger remains partial: `getGravityDir` and `calcBathtub` need their own current compiled operand/status reviews.
+Historical numerical or finite reviews and match percentages do not certify those transitive arbitrary-bit-pattern paths.
+
+### Actual execution and gates
+
+Temporary read-only probes follow diagnostic platform travel, a real analog-R rocket launch and real PAD L attack.
+`bath_perform_spawn_probe_20261016` uses Null (16 s); `bath_perform_spawn_warp_probe_20261016` uses D3D12 WARP (29 s).
+Both finish at tick 812 and observe two successful position calculations with active count 0 and capacity 0.
+Observed manager states `0x47502932` and `0xAAF95334` differ by exactly two LCG draws.
+Velocities `2.78566837` and `6.67866802` match independent LCG decoding at binary32 bits `0x40324864`/`0x40D5B7A6`.
+The second actual state also has an inexact times-ten product under RN=nearest; its PPC FI difference is inferred, not measured.
+No count, position, NaN, damage or victory state is forced by the probes.
+After removing the probe, `bath_perform_spawn_final_20261016` repeats on WARP: rc 0, 29 s, tick 812, visible arena/HUD.
+Health/water cheats, dev start, step-retrace, skipped entry movies and diagnostic travel remain explicit.
+Capacity-zero rejection is exercised; accepted nonzero-capacity insertion is not newly demonstrated.
+
+Final-source `verify --build --matching --boot-secs 45`: 7 PASS, 0 FAIL, 1 optional SKIP;
+63 host checks, Strict zero unresolved, unchanged reference SHA-1 and successful 45-second WARP boot.
+The existing isolated checkout fast-forwards to `3d095fa` and independently rebuilds Strict with zero unresolved symbols;
+cached dependencies are reused, not a newly cloned or from-scratch dependency build.
+Full `ninja` and final `changes_all` retain 11 323/12 881 byte-identical functions and 445/736 complete units.
+`perform` fuzzy score decreases `94.09952 -> 93.910194` (data-value wrapper `93.89401`);
+the semantic corrections take precedence over inlining/register-allocation score.
+Ledger prefixes remain 1 976 logic-verified, 150 matched, 252 partial; the same three malformed legacy rows are excluded.
+
+## Collision-square and compiled helper closure (2026-10-16, `d33c1ef`)
+
+The user's request for more delegation adds two independent read-only helper audits.
+Both consume freshly generated current-object comparisons and actual constant bytes, not old match percentages.
+
+### `getGravityDir`: no correction needed
+
+All 143 retail and 143 current instructions preserve the live graph: cross products, y/x/z squared accumulation,
+ordered square-root/epsilon gates, `frsqrte`/`frsp` refinement, half-angle and trigonometric argument slots,
+and quaternion fused operands with explicit NaN signs.
+Independent early multiplies move, but no branch/call observes their temporary status;
+the same final Z operation supplies returned FI/FR/FPRF before the stores.
+The `unk65` branch returns `(0,1,0)` without changing FPSCR.
+This uses identical IEEE PPC controls with all exception enables masked, the same estimate semantics,
+and the same ABI-conforming `atan2f`/`sinf`/`cosf` implementations and data.
+It is a compiled-graph certificate, not a new numerical quaternion check or recursive host-libm proof.
+
+### `calcBathtub`: unconditional square restored
+
+Retail always executes `innerR*innerR` at `0x801F9F24`; the previous source performs it only inside deeper branches.
+For positive projection, the helper can therefore return identical positions/counts but omit sticky exception history.
+Source `d33c1ef` materializes one plain `innerRSq` before the branches and reuses it in both comparisons.
+MWCC emits the unconditional multiply; no volatile materialization, header change or new wrapper is required.
+
+A temporary game-side fixture calls the real production method with position `(0,1,0)`, origin `(0,0,0)`,
+normal `(0,1,0)`, radius 0, outer radius 2, zero gravity/boxes/accumulator and the inner radii below.
+It saves/restores the native FP environment; each call returns count 1 and accumulator `(0,1,0)`.
+
+| Inner-radius bits | Meaning | Native flags before (inexact/underflow) | Native flags after |
+| --- | --- | --- | --- |
+| `0x3F800000` | exact square, 1 | 0/0 | 0/0 |
+| `0x3F800001` | `(1+2^-23)^2` rounds inexactly | 0/0 | 1/0 |
+| `0x17800000` | `(2^-80)^2` rounds to zero | 0/0 | 1/1 |
+
+WARP runs `bath_square_before_20261016` and `bath_square_after_20261016` both complete in 37 seconds.
+These are actual native-host production-method observations, not physical Gekko FPSCR measurements.
+The separate PPC argument establishes missing XX/FX and UX/XX/FX in the old helper.
+The complete post-fix comparison covers 509 retail versus 507 source instructions.
+Reachable arithmetic/NaN operand roles, fused boundaries, unordered branches and inclusive extension stores agree.
+Prefix scheduling differs; the next projection comparison restores equal defined FPSCR before observation.
+The outer rim body remains unreachable: entering its arm requires `not(S<=O²)`,
+while its collision body requires ordered `S<O²` for the same unchanged values.
+No dead-body rewrite is needed or made.
+
+The bounded helper proof assumes production-valid objects/ABI, no concurrent/MMIO mutation,
+unchanged inputs except corresponding writes, defined IEEE mode and masked FP exception enables.
+It excludes unspecified NI behavior, intermediate FPSCR scheduling, enabled-trap context, scratch state and timing.
+It does not extend to universal host-x64 bit/exception behavior.
+Both helper ledger spellings are updated; `perform` remains partial for final whole-caller integration,
+including its initialized and initialization paths, rather than falsely listing these helper audits as still missing.
+
+### Final source and score
+
+After fixture and `<fenv.h>` removal, WARP `bath_square_final98_20261016` completes (rc 0, 37 s), with visible water/arena.
+Final `d33c1ef` passes 7 verification gates, 63 host checks, Strict zero unresolved, unchanged reference SHA-1 and WARP boot 45 s.
+The isolated checkout fast-forwards to the exact source commit and independently rebuilds Strict with cached dependencies.
+All 1 240 `perform`, 143 `getGravityDir` and 13 `inv_sqrt` source instructions remain unchanged after
+function-relative branch and actual-constant normalization; only the collision helper changes.
+
+| Function | Full-report score before | Final score |
+| --- | --- | --- |
+| `perform` | 94.09952 | 93.910194 |
+| `calcBathtub` | 95.36346 | 95.55992 |
+
+Full report remains 11 323/12 881 byte-identical, 445/736 complete units; final fuzzy total is 98.66029%.
+Ledger prefixes remain 1 976 logic-verified, 150 matched, 252 partial, excluding the same malformed legacy rows.
+No temporary probes, fixture source, fenv include, compiler-policy changes, dependencies or game-derived artifacts are published.
+
+### Progression, diagnostics and persistence gates
+
+| Final-source run | Backend | Wall time | Final tick | Observed state |
+| --- | --- | --- | --- | --- |
+| `bath_square_final85_20261016` | Null | 503 s | 22280 | rc 0, Bianco 2/0, one Shine |
+| `bath_square_final86_20261016` | Null | 17 s | 1675 | rc 0, Delfino 1/0, one loaded Shine |
+
+The route-85 isolated card independently passes all seven GCI block checksums.
+All 681 ready-scene status ticks have JPA statistics; the 61 unavailable-scene ticks have no JPA overlap.
+This retains the scene-lifetime diagnostic regression coverage, not merely a successful exit code.
+Route 85 uses step-retrace, developer movie skip, aim assist and health/water cheats.
+Route 86 copies only that isolated profile and uses ordinary file-select input with step-retrace/movie skip;
+no dev-start, aim-assist, scripted cheat or teleport supplies its loaded Shine.
+Neither regression is an unassisted/full-game acceptance claim; original saves and game-derived artifacts are not published.
+
 ## Process notes
 
 - Agents work in clones (`clone-3`, `clone-chase`, `fresh-gate-2`) on `agent/<name>` branches and never push; the lead
