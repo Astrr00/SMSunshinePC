@@ -1,8 +1,16 @@
 # Goal: Super Mario Sunshine runs natively on Windows (Dusklight architecture)
 
-Keep working autonomously and without questions until all acceptance criteria in §6 are met.
-Work in this order: smallest step that demonstrably improves the build or the parse count, then measure, then `stateroot checkpoint`.
-Rules, architecture and feature scope are in `Port.md`. This file only defines starting state, order and acceptance.
+## Current user goal (2026-10-16)
+
+Complete the native Windows port through an unassisted new-save playthrough, credits and postgame, all original content including 120 Shines and 240 blue coins, reliable cold save/load, and an independently built and packaged Windows application.
+100% byte-identical PowerPC matching is not a prerequisite; preserve existing matches and fix demonstrated gameplay behavior instead of pursuing register/stack cosmetics.
+The current order, evidence limits and owners are in `ROADMAP.md` and `sunshine-pc/docs/playability-matrix.tsv`.
+Preserve existing optional features; installer, signing, DLSS and new convenience work do not block the core port.
+Human listening, physical-controller/GPU checks, a suitable clean Windows machine and licence decisions remain explicit external prerequisites when unavailable.
+
+The starting measurements, original package order and acceptance records below are historical.
+They do not supersede the current unassisted full-game criteria or turn developer-assisted routes into a completed playthrough.
+Architecture and compatibility rules in `Port.md` still apply unless superseded by the current user goal.
 
 ## 1. Starting state (measured, verify against the files before starting work)
 

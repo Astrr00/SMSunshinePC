@@ -121,6 +121,24 @@ inline s16 tableSample(const u32* table, int idx)
 	return static_cast<s16>((idx & 1) ? w : w >> 16);
 }
 
+// jdsp[] 0x07ef-0x080e unpacks MSB-first signed pairs into bits 15:14. The shared predictor (0x081e-0x0825)
+// shifts by scale - 17, adds the doubled Q11 history products, then shifts left 5: the 2-bit residual has scale + 2.
+void adpcm2Frame(const u8* frame, const u32* coefTable, s16 out[16], s16 y1, s16 y2)
+{
+	const u32 pair = coefTable[frame[0] & 0xF];
+	const s32 c1   = static_cast<s16>(pair >> 16);
+	const s32 c2   = static_cast<s16>(pair);
+	const s32 scale = 1 << ((frame[0] >> 4) + 2);
+	for (int i = 0; i < 16; ++i) {
+		const u8 bits = (frame[1 + i / 4] >> (6 - 2 * (i % 4))) & 3;
+		const s32 n   = bits < 2 ? bits : static_cast<s32>(bits) - 4;
+		const s16 s   = clamp16(n * scale + ((c1 * y1 + c2 * y2) >> 11));
+		out[i]        = s;
+		y2            = y1;
+		y1            = s;
+	}
+}
+
 // Oscillator waveform sample (JASBankMgr::noteOnOsc: instrument 0xF0 + n selects waveform n, 64 samples per cycle).
 // Sine and triangle come from DSPRES_FILTER; the others are synthesized. Amplitudes of the synthesized ones follow
 // Dusklight's RenderOscChannel (approximation).
@@ -235,19 +253,24 @@ s16 Mixer::fetch(DSPBuffer& v, VoiceState& st, Kind kind)
 		return s;
 	}
 
-	case Kind::Afc4: {
+	case Kind::Afc4:
+	case Kind::Afc2: {
 		if (!endOrLoop(v, st, pos, true))
 			return 0;
 		if (v.afcRemainingDecodedSamples >= 16) {
-			const size_t off = static_cast<size_t>(base) + static_cast<size_t>(pos / 16) * 9;
-			if (!aram || off + 9 > cfg_.aramSize) {
+			const size_t frameBytes = kind == Kind::Afc2 ? 5 : 9;
+			const size_t off = static_cast<size_t>(base) + static_cast<size_t>(pos / 16) * frameBytes;
+			if (!aram || off + frameBytes > cfg_.aramSize) {
 				DSP_WARN_ONCE("ADPCM voice reads outside ARAM (address 0x%x); voice stopped", static_cast<unsigned>(off));
 				return endSource(v, st);
 			}
 			s16 y1 = static_cast<s16>(v.afcRemainingSamples[15]);
 			s16 y2 = static_cast<s16>(v.afcRemainingSamples[14]);
 			s16 out[16];
-			adpcm4Frame(aram + off, cfg_.adpcmTable, out, y1, y2);
+			if (kind == Kind::Afc2)
+				adpcm2Frame(aram + off, cfg_.adpcmTable, out, y1, y2);
+			else
+				adpcm4Frame(aram + off, cfg_.adpcmTable, out, y1, y2);
 			for (int i = 0; i < 16; ++i)
 				v.afcRemainingSamples[i] = static_cast<u16>(out[i]);
 			v.afcRemainingDecodedSamples = static_cast<s16>(pos % 16); // a loop start inside a frame skips its head
@@ -271,10 +294,6 @@ s16 Mixer::fetch(DSPBuffer& v, VoiceState& st, Kind kind)
 		return wide ? static_cast<s16>((aram[off] << 8) | aram[off + 1]) : static_cast<s16>(aram[off] << 8);
 	}
 
-	case Kind::Afc2:
-		DSP_WARN_ONCE("2-bit ADPCM (wave format 1) is not implemented (silence)");
-		return endSource(v, st);
-
 	case Kind::Unknown:
 	default:
 		DSP_WARN_ONCE("voice with source type 0x%x is not implemented (silence)", static_cast<unsigned>(v.samplesSourceType));
@@ -288,7 +307,7 @@ void Mixer::resetVoice(DSPBuffer& v, VoiceState& st, Kind kind)
 {
 	v.resetVpb = 0;
 	st         = VoiceState();
-	if (kind == Kind::Afc4) { // the CPU already did this (setWaveInfo); the DSP must not trust a reused block
+	if (kind == Kind::Afc4 || kind == Kind::Afc2) { // the CPU already did this (setWaveInfo); the DSP must not trust a reused block
 		std::memset(v.afcRemainingSamples, 0, sizeof(v.afcRemainingSamples));
 		v.afcRemainingDecodedSamples = 16;
 	}

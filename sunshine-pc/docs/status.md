@@ -6,6 +6,135 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+### Update 2026-10-16: gameplay-first goal and current-source baseline
+
+The active user goal is a fully playable native Windows port, including normal new-save progression through credits/postgame and all original content.
+100% byte-identical PowerPC matching is no longer the primary goal or a release prerequisite.
+The [playability matrix](playability-matrix.tsv) assigns concrete early blockers, reproduction paths, owners and acceptance conditions.
+Historical developer-assisted achievements below do not certify unassisted progression.
+
+The four already pending pane/boss source-form candidates are preserved locally in `154d9f5`; no further codegen-only matching work is prioritized.
+Current `verify --build --matching --boot-secs 45` passes 7 gates and 63 host checks, with zero unresolved symbols and the unchanged reference SHA.
+`ninja changes_all` reports fuzzy-only improvements; the complete set of 11 323 exact function identities and sizes is preserved.
+Matched code remains 2 249 348 of 3 590 088 bytes; matched data remains 560 095 of 640 331 bytes.
+No new byte-identical function, code-byte total or data-byte total is claimed.
+
+The existing isolated `FreshTakeover_3c10554` checkout fast-forwards to `154d9f5` and independently rebuilds Strict.
+Its Aurora check confirms 18 patches and 45 already-matching files; third-party source downloads/caches include the main `build/Strict/_deps` tree.
+This is an isolated project-source build, not a fresh dependency download or clean Windows machine.
+
+The actual native intro window is observed with `computer` screenshot and accessibility helpers.
+`build/PortGoal_20261016/native-ui.png` and `native-ui.log` retain the private evidence; the adapter is D3D12 Microsoft Basic Render Driver (CPU/WARP).
+APPDATA and USERPROFILE both point into the owned test profile; logs show zero active cheats/mods and the isolated card path.
+The native Close button removes the window and the process returns 0.
+Intro rendering and this normal-close case do not prove complete gameplay, listening, a physical controller or a hardware GPU.
+
+### Update 2026-10-16: unassisted airport checkpoint, cold load and replay-tool repairs
+
+`pc_airport_unassisted.dev` uses ordinary virtual-controller input only, with an empty owned profile and no aim assist, cheats, developer stage start, teleportation, direct aim/progress writes, movie skip or step-retrace.
+On main source `154d9f5`, WARP run `pg1_airport_unassisted_20261016` returns 0 after 598 seconds.
+The airport boss reaches HP 0/dead 1 at tick 10080; health 7 and water 8552 remain.
+The genuinely earned Shine leads through normal transitions to live Delfino 1/0, one Shine and director state 4, at tick 17532.
+An actual native computer capture also observes the running movie surface; this is not physical-controller or audible-output verification.
+
+The newly earned GCI independently decodes to sole Shine `0x56`, save count 1 and stored Shine count 1, with no blue-coin flags.
+All seven sector checksums pass.
+A new process loading a copy of that owned test profile through `86_accept_reload.dev` returns 0 after 320 seconds: live Delfino 1/0, one Shine, director state 4 and camera demo 0 at tick 9290.
+The pre-reload snapshot, original test card and copied/reloaded card remain byte-identical; original user saves are untouched.
+Private `build/PortGoal_20261016/airport-save-before.json` and `airport-cold-reload.json` record the bounded evidence.
+This does not certify later mission/nozzle unlocks, non-default settings or repeated lifecycle cases.
+
+The native replay helper `FaceTo` now compensates the actual PADClamp/Mario deadzones instead of losing its minor stick axis.
+`pc_faceto_deadzone.dev` passes on main at the unchanged 3-degree tolerance: error -0.9 degrees after 14 ticks.
+Its isolated candidate also passes; the linked controller harness covers 3600 bearings but retains a source-equivalent Mario arithmetic tail, not a whole-controller certificate.
+The integrated helper passes all 7 verification gates/63 host checks; the reference SHA and existing exact-match set/totals do not change.
+An actual native computer screenshot observes its Delfino scene; developer scene selection remains diagnostic, not normal reachability.
+
+`tools/nav/col_grid.py` now samples each triangle plane at the cell centre and excludes downward ceilings.
+Both maintained `.col`-to-`.nav` regressions fail against the old main generator and pass after the correction.
+The real `dolpic1` conversion produces 99,506 cells in height band 200-750.
+The independent native pursuit using this grid still times out after 5000 chase ticks, rc 3, with Shadow Mario's water counter 64 to 59.
+Static ramp connectivity is repaired; live dynamic-fruit contact and controller-bearing explanations are not yet proven.
+The retail-correct wall flag `0x8` remains unchanged; no replay-index fallback is added.
+
+The [content inventory](content-coverage.tsv) now contains 4714 technical-metadata rows: 154 ordered scenarios, 120 source-identified Shine identities and 240 observed persistent blue-coin identities.
+`content_inventory.py --self-check` and the full actual-data generation pass after independent review; all cited decoder/semantic inputs are among 440 provenance hashes.
+Repeated archives retain scenario order; 44 unresolved resource references and 144 unresolved object/script records remain visible.
+Every runtime status stays open: presence is not collectibility, mission completion, connected progression or a 120/240 playthrough.
+No game assets, localized text, scripts or saves are emitted.
+
+Remaining early blockers are Delfino GateKeeper, Shadow Mario and normal Bianco progression.
+WARP really clears reachable floor, but the attempted stance slides back into goop; no physics defect is established.
+Digital R maps to analog pressure in the native adapter, so the private "R pre-aim without spray" and always-R windowed bot assumptions are invalid and are not integrated.
+A typed brake repetition is interrupted by an ordinary enemy before reaching A; it does not establish the pre-jump state or explain the observed drift.
+Separately, the first Ricco/Gesso smoke hits a WARP presentation-progress watchdog before developer scene selection, not inside Gesso.
+The old broad zero-allocation colour-screen mitigation still has no identified root cause; private draw/allocation diagnostics remain separate from accepted production code.
+Null, WARP and real-GPU acceptance remain distinct.
+
+### Update 2026-10-16: native Ricco table contract and diagnostic display quality
+
+The actual Ricco loader failure is a shared producer/consumer contract violation, not a missing model to ignore.
+`TSmallEnemyManager::createModelData` supplies one scalar entry to `createModelDataArrayBase`, which scans until a null model name.
+Private before/after instrumentation observes 54 entries before the fix and exactly one intended entry after an explicit native-only null terminator.
+The old run reaches a garbage model-name pointer and faults in `sprintf`; the corrected real managers load successfully.
+The original PowerPC producer remains unchanged.
+
+All own temporary model/boss probes and the invalid Delfino fight policy are removed from the isolated checkout.
+The resulting isolated Strict rebuild reports zero unresolved symbols.
+On unmodified main, `pc_ricco_scene.dev` reaches live Ricco 3/0, director state 4/camera demo 0, walks to the first target, jumps and returns using ordinary virtual-pad input.
+The recorded clean WARP run returns 0 after 43 seconds, including a diagnostic idle hold.
+A separate visible WARP run finishes the maintained route at tick 535 and exits 0 through the native Close button.
+The private Gesso probe also confirms `performInContainer` executes its CalcAnim path with tentacle state 9; this is not a complete boss fight or normal Ricco unlocking.
+
+The user's pixelation observation is caused by the route runner's diagnostic `SUNSHINE_RENDER_SCALE=0.25`, relative to the native 640x480 EFB, not the window.
+Production settings already default to `Resolution scale: Auto`; they are not changed.
+`SUNSHINE_RENDER_SCALE=` removes the route override and uses the fresh profile's Auto/window resolution.
+The actual native Auto capture shows substantially sharper HUD, edges and crane geometry; its maintained input route also completes at tick 535 and normal Close exits 0.
+Private captures are `build/PortGoal_20261016/ricco-native-ui.png` and `ricco-native-auto-ui.png`.
+This is D3D12 Microsoft Basic Render Driver/CPU evidence, not hardware-GPU performance, HD assets or full graphical correctness.
+
+Before the following integration, the same real scene logs expose two implementation gaps: format 1/2-bit ADPCM is silenced, and the original shine-volume data are not loaded on PC.
+The original shine-volume draw condition is map 1; a warning while in Ricco does not prove that Ricco needs this effect.
+Independent agents implement the host mixer and game-rendering translation unit; the lead retains shared headers, integration and final gates.
+
+The historical J3D envelope method's absent native matrix writes are separately proven using actual compiled before/after methods and the real matrix/vertex consumer.
+The earlier method leaves all 12 poisoned coefficients unchanged and produces consumer point `(5,-7,9)`; the already-fixed method produces `(7.5,-10.5,30.5)`.
+The existing load harness now retains this deterministic regression and supplies the real Aurora configuration context required by its standalone OS address checks.
+This does not certify the uncaptured historical flat-colour frame's cause or justify removing global zero-filled allocation.
+The production allocator and JSystem implementation bodies remain untouched.
+The rebuilt main harness also passes the actual corpus: 698 models, 23 material tables, 1244 BCK, 138 BTK, 56 BRK, 161 BTP and 11 BPK files, with zero failures.
+It retains `/FORCE:UNRESOLVED` for unused game/graphics references; the exercised real methods resolve, but this is not the separate production Strict-link gate.
+
+### Update 2026-10-16: real AFC2 voices and original map1 shine volume
+
+The host mixer now decodes format-1/AFC2 frames: one header and four payload bytes contain 16 MSB-first signed 2-bit residuals.
+Actual retail DSP instructions at `0x07EF..0x080E` and `0x081E..0x0825` establish the residual gain `2^(scale+2)` and the existing Q11 predictor/saturated-history behavior.
+The existing AFC4 cache, source progression, loop restoration and ARAM checks are reused; no exported decoder API, compiler option or third-party dependency is added.
+An independent review identifies one history-reset test gap; the maintained regression now starts with a nonzero predictor, dirty history and unsaturated zero-history expected samples.
+Main `dsp_test.cmd` passes all 10 mixer sections and the mailbox protocol case, including the new reset case and the old 200272 identical AFC4 reference samples.
+Private additional checks cover 152 real format-1 assets and 256 synthetic headers: 3338783 source samples and 6692320 stereo-channel output samples match the equivalent AFC4-reference expansion.
+That reference comparison is not physical DSP execution.
+
+The unmodified integrated native Ricco route returns 0 after 39 seconds and completes at tick 535.
+Existing voice diagnostics show actual `kind=afc2/type=0x5` source decoding with positive RMS, rather than merely an absent warning.
+These muted diagnostic runs do not prove final bus gain, audio-device output or human listening.
+
+`drawShineShadowVolume` now reuses the original map1-only draw body on PC.
+Existing `DVDGetDOLLocation` supplies the borrowed executable; only its native declaration and the Windows system `bcrypt` link are needed.
+The loader validates GMSJ01 revision 0, the full reference DOL SHA1, bounded big-endian section mapping and display-list/index bounds.
+It owns a static copy of the original BE bytes, binds the exact position extent as BE, and aborts explicitly on invalid data.
+The 0x10CC-byte blob contains a 0x760-byte display list and 402 signed-16 XYZ positions; nothing from the original blob is embedded or published.
+An independent source review finds no issue; compile-time boundary/endian checks and a private actual-DOL/malformed-data helper harness pass.
+
+Main Strict builds the integrated source with zero unresolved symbols.
+Actual WARP run `pg2_shine_volume_live_20261016` logs the loaded retail sphere, reaches map1/scenario0 and passes the unchanged FaceTo tolerance at tick 924, error -0.9 degrees.
+The native computer capture observes the actual Auto-resolution surface and the native Close button exits 0 after 158 seconds.
+Private `build/PortGoal_20261016/shine-volume-integrated-ui.png` retains the surface evidence.
+Developer scene selection is still diagnostic, not normal progression; no retail-image equivalence, hardware GPU or full graphical/audio acceptance is claimed.
+
+
+
+
 ### Update 2026-10-16: additional compiled helper audits and collision-square fix
 
 Two further independent agents complete bounded current-object `getGravityDir` and `calcBathtub` reviews.

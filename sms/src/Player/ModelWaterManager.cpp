@@ -29,6 +29,15 @@
 #include <MSound/MSoundBGM.hpp>
 #include <M3DUtil/InfectiousStrings.hpp>
 
+#ifdef TARGET_PC
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <bcrypt.h>
+#include <dolphin/dvd.h>
+#include <hostendian.h>
+#endif
+
 TModelWaterManager* gpModelWaterManager;
 TWaterHitActor TModelWaterManager::mStaticHitActor;
 GXColor gModelWaterManagerWaterColor[4] = {
@@ -1408,24 +1417,126 @@ static void* sphere_glist_p;
 static void* sphere_pos_t;
 
 #ifdef TARGET_PC
-// OPEN: the sphere display list (0x760 bytes) and the position array live in the original DOL's .data (tmp_data, 0x10CC
-// bytes at 0x803B6F20) and are not part of the decomp sources. Until the port reads such blobs from the disc's main.dol
-// at startup, this shadow volume is skipped. Logged once; listed in sunshine-pc/docs/platform-notes.md.
-void TModelWaterManager::drawShineShadowVolume(MtxPtr)
+static constexpr bool validShineSphere(const u8* data, u32 size)
 {
-	static bool warned = false;
-	if (!warned) {
-		warned = true;
-		OSReport("drawShineShadowVolume: sphere data from the DOL is not available on PC yet, effect skipped\n");
+	if (!data || size != 0x10CC)
+		return false;
+	u32 cursor = 0;
+	u32 draws = 0;
+	while (cursor < 0x760) {
+		const u8 command = data[cursor++];
+		if (command == 0)
+			continue;
+		if (command != 0x98 || 0x760 - cursor < 2)
+			return false;
+		const u32 count = (u32(data[cursor]) << 8) | data[cursor + 1];
+		cursor += 2;
+		if (count < 3 || count > (0x760 - cursor) / 2)
+			return false;
+		for (u32 i = 0; i < count; ++i, cursor += 2) {
+			const u32 index = (u32(data[cursor]) << 8) | data[cursor + 1];
+			if (index >= (size - 0x760) / 6)
+				return false;
+		}
+		++draws;
 	}
+	return draws != 0;
 }
-#else
+
+static constexpr bool shineSphereBoundsSelfCheck()
+{
+	u8 data[0x10CC] = {};
+	if (validShineSphere(data, sizeof(data)) || validShineSphere(nullptr, sizeof(data))
+	    || validShineSphere(data, sizeof(data) - 1))
+		return false;
+	data[0] = 0x98;
+	data[2] = 3;
+	data[7] = 1;
+	data[8] = 0x91; // Last valid position index, 401, in big endian.
+	if (!validShineSphere(data, sizeof(data)))
+		return false;
+	data[7] = 0x91;
+	data[8] = 1;
+	if (validShineSphere(data, sizeof(data)))
+		return false;
+	data[7] = 1;
+	data[8] = 0x92;
+	if (validShineSphere(data, sizeof(data)))
+		return false;
+	data[8] = 0x91;
+	data[1] = 0xFF;
+	if (validShineSphere(data, sizeof(data)))
+		return false;
+	data[1] = 0;
+	data[0x75F] = 0x98;
+	return !validShineSphere(data, sizeof(data));
+}
+static_assert(shineSphereBoundsSelfCheck(), "shine sphere bounds/endian checks");
+
+static const u8* shineSphereInDol(const u8* dol, u32 dolSize)
+{
+	if (!dol || dolSize < 0x100)
+		return nullptr;
+	const u8* sphere = nullptr;
+	for (u32 i = 0; i < 18; ++i) {
+		const u32 offset = rdbe32(dol + i * 4);
+		const u32 address = rdbe32(dol + 0x48 + i * 4);
+		const u32 size = rdbe32(dol + 0x90 + i * 4);
+		if (size == 0)
+			continue;
+		if (offset < 0x100 || offset > dolSize || size > dolSize - offset
+		    || address > 0xFFFFFFFFu - size)
+			return nullptr;
+		if (i >= 7 && address <= 0x803B6F20 && 0x803B6F20 - address <= size
+		    && sizeof(tmp_data) <= size - (0x803B6F20 - address)) {
+			if (sphere)
+				return nullptr;
+			sphere = dol + offset + (0x803B6F20 - address);
+		}
+	}
+	return sphere;
+}
+
+static bool loadShineSphere()
+{
+	const DVDDiskID* id = DVDGetCurrentDiskID();
+	if (!id || memcmp(id->gameName, "GMSJ", 4) != 0 || memcmp(id->company, "01", 2) != 0
+	    || id->diskNumber != 0 || id->gameVersion != 0)
+		return false;
+	s32 dolSize = 0;
+	const u8* dol = DVDGetDOLLocation(&dolSize);
+	if (!dol || dolSize < 0x100)
+		return false;
+	static const u8 expectedSha1[20] = {
+		0x9F, 0x5A, 0x8C, 0xAF, 0x56, 0xF5, 0x35, 0x6A, 0xEA, 0xC9,
+		0xD3, 0xED, 0x28, 0xBF, 0x8D, 0xE9, 0x76, 0xA0, 0x36, 0x25,
+	};
+	u8 sha1[sizeof(expectedSha1)];
+	if (!BCRYPT_SUCCESS(BCryptHash(BCRYPT_SHA1_ALG_HANDLE, nullptr, 0, const_cast<u8*>(dol),
+	                               dolSize, sha1, sizeof(sha1)))
+	    || memcmp(sha1, expectedSha1, sizeof(sha1)) != 0)
+		return false;
+	const u8* sphere = shineSphereInDol(dol, dolSize);
+	if (!validShineSphere(sphere, sizeof(tmp_data)))
+		return false;
+	// GX consumes indexed arrays asynchronously; own the unchanged BE bytes beyond the DVD metadata's lifetime.
+	memcpy(tmp_data, sphere, sizeof(tmp_data));
+	return true;
+}
+#endif
 void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 {
 
 	if (gpMarDirector->getCurrentMap() == 1) {
 		static bool initialized = false;
 		if (!initialized) {
+#ifdef TARGET_PC
+			if (!loadShineSphere()) {
+				OSPanic(__FILE__, __LINE__, "drawShineShadowVolume: cannot load valid retail GMSJ01 sphere data\n");
+				return;
+			}
+			OSReport("drawShineShadowVolume: loaded retail GMSJ01 sphere (0x760-byte BE display list, 402 BE s16 positions)\n");
+#endif
 			sphere_glist_p = &tmp_data;
 			initialized    = 1;
 			sphere_pos_t   = (u8*)sphere_glist_p + 0x760;
@@ -1500,7 +1611,7 @@ void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 		GXClearVtxDesc();
 		GXSetVtxDesc(GX_VA_POS, GX_INDEX16);
 		GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_CLR_RGBA, GX_RGBA4, 15);
-		GXSetArray(GX_VA_POS, sphere_pos_t, 6);
+		GXSETARRAY(GX_VA_POS, sphere_pos_t, sizeof(tmp_data) - 0x760, 6, false);
 		int iVar5 = 0;
 		do {
 			local_c8[0][0] = iVar5 * f30 + f31;
@@ -1552,7 +1663,6 @@ void TModelWaterManager::drawShineShadowVolume(MtxPtr param_1)
 		GXSetDstAlpha(GX_FALSE, 0);
 	}
 }
-#endif
 
 void TModelWaterManager::drawRefracAndSpec() const
 {

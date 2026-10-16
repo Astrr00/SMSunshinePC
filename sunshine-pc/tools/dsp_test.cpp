@@ -5,7 +5,7 @@
 //  1. ADPCM: the decoder is compared sample for sample with tools/dsp_ref.py, an independent transcription of the format
 //     (real frames from the disc's wave banks + random frames that exercise the saturation).
 //  2. Mixer on synthetic voices built the way JASDSPInterface.cpp's DSPBuffer methods build them (the helpers below mirror
-//     allocInit/setWaveInfo/playStart/setMixerInitVolume/setBusConnect): PCM16/PCM8/ADPCM sources, pitch, loops, end of
+//     allocInit/setWaveInfo/playStart/setMixerInitVolume/setBusConnect): PCM16/PCM8/AFC4/AFC2 sources, pitch, loops, end of
 //     sample, volume ramp, panning buses, master level, output matrix, effect line, stream ring buffer, oscillator, pause,
 //     forced stop.
 //     Expected values come from a direct (random access) formulation of the resampler, not from the mixer's window code.
@@ -92,7 +92,7 @@ static void allocInit(DSPBuffer& d) // DSPBuffer::allocInit + initFilter
 	d.lowPassCoeff          = 0;
 }
 
-// DSPBuffer::setWaveInfo: format 0 = ADPCM4, 2 = PCM8, 3 = PCM16
+// DSPBuffer::setWaveInfo: format 0 = ADPCM4, 1 = ADPCM2, 2 = PCM8, 3 = PCM16
 static void setWave(DSPBuffer& d, int format, u32 aramAddr, int sampleCount, int loop = 0, int loopStart = 0, int loopEnd = 0,
                     s16 last = 0, s16 penult = 0)
 {
@@ -391,6 +391,102 @@ static void testAdpcmVoice(const char* path)
 		for (s16& s : ref)
 			s = mix(s, 0x7FFF);
 		CHECK(sameSamples(l, ref, 0, 6 * kSubframeSamples));
+	}
+}
+
+static void testAdpcm2Voice()
+{
+	section("AFC2 voice: signed pairs, scale, saturation, predictor history, reset, loop and ARAM frame boundary");
+	// Synthetic frames, not disc data. jdsp[] 0x07ef-0x0825: signed pairs 0,1,-2,-1, residual * 2^(scale+2), Q11 history.
+	const u8 frames[] = { 0xF0, 0x55, 0xAA, 0x1B, 0xE4, 0x04, 0, 0, 0, 0, 0x01, 0x55, 0xAA, 0x1B, 0xE4 };
+	const std::vector<s16> pcm = {
+		32767, 32767, 32767, 32767, -32768, -32768, -32768, -32768, 0, 32767, -32768, -32768, -32768, -32768, 32767, 0,
+		-32767, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768,
+		-32768, -32768,
+		-32764, -32760, -32756, -32752, -32760, -32768, -32768, -32768, -32768, -32764, -32768, -32768, -32768, -32768,
+		-32764, -32764,
+	};
+	for (u16 ratio : { 0x1000, 0x13A7 }) {
+		Rig r;
+		std::memcpy(&r.aram[kAramBase], frames, sizeof(frames));
+		DSPBuffer& v = r.voices[9];
+		allocInit(v);
+		setWave(v, 1, kAramBase, static_cast<int>(pcm.size()));
+		// A reused parameter block must not leak the previous voice's decoded frame/history.
+		v.afcRemainingDecodedSamples = 0;
+		for (u16& s : v.afcRemainingSamples)
+			s = 12345;
+		mixInit(v, 0, hostdsp::kBusLeft, 0x7FFF);
+		playStart(v, ratio);
+		std::vector<s16> l, rr;
+		r.run(bit(9), 1, l, rr);
+		std::vector<s16> ref = refResample(pcm, ratio, kSubframeSamples);
+		for (s16& s : ref)
+			s = mix(s, 0x7FFF);
+		CHECK(sameSamples(l, ref, 0, ref.size()));
+		CHECK(v.endReached == 1 && v.done == 1);
+		CHECK(v.currentPosition == static_cast<int>(pcm.size()));
+	}
+	{
+		Rig r;
+		const u8 resetFrame[] = { 0x01, 0x55, 0, 0, 0 };
+		std::memcpy(&r.aram[kAramBase], resetFrame, sizeof(resetFrame));
+		DSPBuffer& v = r.voices[9];
+		allocInit(v);
+		setWave(v, 1, kAramBase, 16);
+		v.afcRemainingDecodedSamples = 16;
+		for (u16& s : v.afcRemainingSamples)
+			s = 12345;
+		mixInit(v, 0, hostdsp::kBusLeft, 0x7FFF);
+		playStart(v, 0x1000);
+		std::vector<s16> l, rr;
+		r.run(bit(9), 1, l, rr);
+		// Predictor 1 carries y1: dirty history must not alter this unsaturated zero-history sequence.
+		const std::vector<s16> seq = { 4, 8, 12, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16 };
+		std::vector<s16> ref = refResample(seq, 0x1000, kSubframeSamples);
+		for (s16& s : ref)
+			s = mix(s, 0x7FFF);
+		CHECK(sameSamples(l, ref, 0, ref.size()));
+	}
+	{
+		Rig r;
+		std::memcpy(&r.aram[kAramBase], frames, sizeof(frames));
+		DSPBuffer& v = r.voices[9];
+		allocInit(v);
+		setWave(v, 1, kAramBase, static_cast<int>(pcm.size()), 1, 19, 32, 1234, -4321);
+		mixInit(v, 0, hostdsp::kBusLeft, 0x7FFF);
+		playStart(v, 0x13A7);
+		std::vector<s16> l, rr;
+		r.run(bit(9), 4, l, rr);
+		// Predictor 4: 2*y1-y2, so the restored history yields this whole frame before skipping its first 3 samples.
+		const s16 loop[] = { 23454, 29009, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767 };
+		std::vector<s16> seq(pcm.begin(), pcm.begin() + 32);
+		for (int k = 0; k < 40; ++k)
+			seq.insert(seq.end(), loop, loop + 13);
+		std::vector<s16> ref = refResample(seq, 0x13A7, 4 * kSubframeSamples);
+		for (s16& s : ref)
+			s = mix(s, 0x7FFF);
+		CHECK(sameSamples(l, ref, 0, ref.size()));
+		CHECK(v.done == 0 && v.endReached == 0);
+	}
+	for (u32 available : { 4u, 5u }) {
+		Rig r;
+		const u32 base = static_cast<u32>(r.aram.size()) - available;
+		std::memcpy(&r.aram[base], frames, available);
+		DSPBuffer& v = r.voices[9];
+		allocInit(v);
+		setWave(v, 1, base, 32); // the second frame is outside ARAM; a four-byte first frame is also incomplete
+		mixInit(v, 0, hostdsp::kBusLeft, 0x7FFF);
+		playStart(v, 0x1000);
+		std::vector<s16> l, rr;
+		r.run(bit(9), 1, l, rr);
+		const std::vector<s16> seq(pcm.begin(), pcm.begin() + (available == 5 ? 16 : 0));
+		std::vector<s16> ref = refResample(seq, 0x1000, kSubframeSamples);
+		for (s16& s : ref)
+			s = mix(s, 0x7FFF);
+		CHECK(sameSamples(l, ref, 0, ref.size()));
+		CHECK(v.endReached == 1 && v.done == 1);
+		CHECK(v.currentPosition == (available == 5 ? 16 : 0));
 	}
 }
 
@@ -706,6 +802,7 @@ int main(int argc, char** argv)
 	testPcm16Pitch();
 	testPcm8AndLoop();
 	testAdpcmVoice(argv[1]);
+	testAdpcm2Voice();
 	testMixerStage();
 	testAutoMixer();
 	testOutputMatrix();

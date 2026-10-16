@@ -139,6 +139,9 @@ BOOL DVDOpenDir(char* dirName, DVDDir* dir);
 BOOL DVDReadDir(DVDDir* dir, DVDDirEntry* dirent);
 BOOL DVDCloseDir(DVDDir* dir);
 void* DVDGetFSTLocation();
+#ifdef TARGET_PC
+const u8* DVDGetDOLLocation(s32* out_size);
+#endif
 BOOL DVDPrepareStreamAsync(DVDFileInfo* fileInfo, u32 length, u32 offset,
                            DVDCallback callback);
 s32 DVDPrepareStream(DVDFileInfo* fileInfo, u32 length, u32 offset);

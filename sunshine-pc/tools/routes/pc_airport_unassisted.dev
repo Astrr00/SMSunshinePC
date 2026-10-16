@@ -1,0 +1,53 @@
+# Gameplay-first acceptance candidate: fresh file, airport boss, earned Shine, Delfino.
+# Uses only ordinary virtual-controller input and read-only state observations.
+# Based on route 76b's input-only airport fight and route 85's normal Shine exit.
+# No cheats, developer stage start, teleport, direct aim, progress writes or movie/timing overrides.
+# faceto and walkto steer with the main stick; fightboss changes only pad buttons/sticks/triggers.
+# Run on WARP with an empty isolated profile and all SUNSHINE_DEV_* gameplay aids absent.
+waitfor stage=15 dirstate=4 timeout=30000
+wait frames=240
+mash A period=30 until cardprog=19 timeout=4500
+walkto x=1080 z=-1000 radius=20 timeout=3000
+mash A period=24 until cardprog=27 timeout=4500
+mash A period=30 until stage=0 timeout=12000
+waitfor stage=0 scen=0 director mario dirstate=4 timeout=27000
+log
+shot airport_start.png
+wait frames=90
+hold A frames=4
+wait frames=60
+walkto x=-1198 z=167 radius=150 timeout=3000
+walkto x=-5876 z=976 radius=150 timeout=4500
+walkto x=-6630 z=1600 radius=250 timeout=3000
+waitfor thp=2 timeout=3000
+log
+wait frames=600
+waitfor thp=0 timeout=15000
+mash A period=30 until stage=0 scen=1 director mario dirstate=4 timeout=15000
+log
+wait frames=30
+walkto x=-5876 z=976 radius=150 timeout=4500
+walkto x=-4005 z=652 radius=150 timeout=4500
+walkto x=-2700 z=1500 radius=120 timeout=4500
+walkto x=-2000 z=1500 radius=100 timeout=4500
+walkto x=-1400 z=1034 radius=60 timeout=4500
+log
+faceto x=-1500 z=1500 tol=5 timeout=600
+hold L trig=255,255 frames=20
+hold L R trig=255,255 stick=0,127 until camDemo=1 timeout=3000
+waitfor camDemo=0 timeout=15000
+faceto x=-1500 z=1500 tol=5 timeout=600
+hold L trig=255,255 frames=20
+fightboss timeout=6000
+log
+shot airport_boss_defeated.png
+wait frames=600
+walkto x=-1500 z=1500 radius=80 timeout=900
+wait frames=600
+log
+shot earned_airport_shine.png
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=9000
+log
+shot delfino_arrival.png
+wait frames=60
+end

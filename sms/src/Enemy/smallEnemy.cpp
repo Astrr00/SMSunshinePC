@@ -109,12 +109,24 @@ TSmallEnemyManager::TSmallEnemyManager(const char* name)
 
 void TSmallEnemyManager::createModelData()
 {
+#ifdef TARGET_PC
+	// Native iteration must stop after one model, not read adjacent static data.
+	static const TModelDataLoadEntry entry[] = {
+		{ "default.bmd",
+		  J3DMLF_MaterialPEFull | J3DMLF_UseUniqueMaterials
+		      | (2 << J3DMLF_TevStageNumShift),
+		  0 },
+		{ nullptr, 0, 0 },
+	};
+	createModelDataArray(entry);
+#else
 	static TModelDataLoadEntry entry
 	    = { "default.bmd",
 		    J3DMLF_MaterialPEFull | J3DMLF_UseUniqueMaterials
 		        | (2 << J3DMLF_TevStageNumShift),
 		    0 };
 	createModelDataArray(&entry);
+#endif
 }
 
 void TSmallEnemyManager::load(JSUMemoryInputStream& stream)

@@ -1,0 +1,12 @@
+# Native input regression: the old 0.4 stick scaling loses the minor axis at PADClamp/Mario deadzones.
+# Diagnostic setup SUNSHINE_DEV_START=dolpic/0 is not evidence of normal scene reachability.
+# No aim assist, cheats, direct aim/state writes, movie skipping or step-retrace overrides.
+waitfor stage=1 scen=0 director mario dirstate=4 camDemo=0 timeout=600
+wait frames=60
+walkto x=5380 z=2700 radius=150 timeout=1200
+walkto x=4980 z=3100 radius=150 timeout=600
+walkto x=712 z=5631 radius=60 timeout=1500
+faceto x=712 z=4631 tol=3 timeout=120
+log
+shot faceto_deadzone.png
+end

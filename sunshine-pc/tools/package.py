@@ -47,7 +47,7 @@ LICENSES = [
 README = """Sunshine {version} - Super Mario Sunshine (GMSJ01) port for Windows
 
 NO GAME DATA IS INCLUDED. Sunshine does not contain, download or decrypt Super Mario
-Sunshine. Supply your own legally obtained GameCube disc image of GMSJ01 (NTSC-U).
+Sunshine. Supply your own legally obtained GameCube disc image of GMSJ01 (NTSC-J).
 
 No installation: keep this folder together and run
 

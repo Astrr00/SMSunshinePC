@@ -37,6 +37,7 @@ set_source_files_properties(${SMS_CXX_C_SOURCES} PROPERTIES LANGUAGE CXX) # THPP
 # Port-side SDK layer (OS threads, AI/VI/DSP glue, GX leftovers): compiled with the game flags so it sees the decomp's headers.
 file(GLOB SDK_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/*.cpp)
 add_library(sms_game STATIC ${SMS_GAME_SOURCES} ${SDK_SOURCES})
+target_link_libraries(sms_game PUBLIC bcrypt)
 
 # Shift-JIS string literals: the decomp sources are UTF-8, the disc data is Shift-JIS, and clang-cl cannot emit a
 # Shift-JIS execution charset. tools/sjis_overlay.py writes copies with octal-escaped CP932 literals and a clang VFS

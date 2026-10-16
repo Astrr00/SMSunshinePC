@@ -1048,8 +1048,9 @@ void step()
 				}
 				float dist = 0.f;
 				walkStick(c, pad.stickX, pad.stickY, dist);
-				pad.stickX = static_cast<s8>(pad.stickX * 0.4f); // small deflection: turns more than it walks
-				pad.stickY = static_cast<s8>(pad.stickY * 0.4f);
+				// shortcut: calibrated for native PADClamp/Mario deadzones; recalibrate if that input pipeline changes.
+				pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f)); // small deflection: turns more than it walks
+				pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
 			}
 			if (gRemaining >= c.maxTicks) {
 				std::printf("[devscript] TIMEOUT faceto line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);

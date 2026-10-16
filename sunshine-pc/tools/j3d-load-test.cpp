@@ -11,6 +11,12 @@
 #include <filesystem>
 #include <new>
 #include <windows.h>
+#include <aurora/aurora.h>
+
+// Standalone OS address checks need configuration even without an initialized Aurora renderer.
+namespace aurora {
+AuroraConfig g_config{};
+}
 
 #define protected public
 #define private public
@@ -20,6 +26,7 @@
 #include <JSystem/J3D/J3DGraphLoader/J3DAnmLoader.hpp>
 #include <JSystem/J3D/J3DGraphAnimator/J3DAnimation.hpp>
 #include <JSystem/J3D/J3DGraphAnimator/J3DJoint.hpp>
+#include <JSystem/J3D/J3DGraphAnimator/J3DModel.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DMaterial.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DShape.hpp>
 #include <JSystem/J3D/J3DGraphBase/J3DTexture.hpp>
@@ -288,6 +295,59 @@ static void checkBck(const std::vector<u8>& raw, J3DAnmBase* a)
 		}
 }
 
+static void checkWeightedEnvelopeTransform()
+{
+	g_file = "weighted envelope transform";
+	J3DModelData data;
+	u8 mixCounts[] = { 2 };
+	u16 indices[] = { 0, 1 };
+	f32 weights[] = { 0.25f, 0.75f };
+	Mtx inverse[] = {
+		{ { 1, 0, 0, -2 }, { 0, 1, 0, 0 }, { 0, 0, 1, 1 } },
+		{ { 1, 0, 0, 1 }, { 0, 1, 0, -2 }, { 0, 0, 1, 3 } },
+	};
+	Mtx nodes[] = {
+		{ { 1, 0, 0, 10 }, { 0, 1, 0, 20 }, { 0, 0, 1, 30 } },
+		{ { 2, 0, 0, -6 }, { 0, 3, 0, 8 }, { 0, 0, 4, 2 } },
+	};
+	data.mJointNum = 2;
+	data.mWEvlpMtxNum = 1;
+	data.unk88 = mixCounts;
+	data.unk8C = indices;
+	data.unk90 = weights;
+	data.unk94 = inverse;
+
+	Mtx envelope;
+	for (auto& row : envelope)
+		for (f32& value : row)
+			value = -17.0f; // The method must replace every coefficient, not depend on zeroed allocation.
+	u8 scaleFlags[] = { 1, 0 };
+	u8 envelopeScale[] = { 0xA5 };
+	J3DModel model;
+	model.mModelData = &data;
+	model.mScaleFlagArr = scaleFlags;
+	model.mEvlpScaleFlagArr = envelopeScale;
+	model.mNodeMatrices = nodes;
+	model.mWeightEvlpMatrices = &envelope;
+	model.calcWeightEnvelopeMtx();
+
+	const Mtx expected = { { 1.75f, 0, 0, -1 }, { 0, 2.5f, 0, 6.5f }, { 0, 0, 3.25f, 18.25f } };
+	for (int row = 0; row < 3; ++row)
+		for (int column = 0; column < 4; ++column)
+			CHECK(envelope[row][column] == expected[row][column], "matrix[%d][%d] %g != %g",
+			      row, column, envelope[row][column], expected[row][column]);
+	CHECK(envelopeScale[0] == 0, "mixed scale flag %u != 0", envelopeScale[0]);
+
+	Mtx view = { { 1, 0, 0, 5 }, { 0, 1, 0, -7 }, { 0, 0, 1, 9 } };
+	Mtx draw;
+	J3DPSMtxArrayConcat(view, model.getWeightAnmMtx(0), draw, 1);
+	Vec point = { 2, -4, 1 }, visible;
+	MTXMultVec(draw, &point, &visible);
+	CHECK(visible.x == 7.5f && visible.y == -10.5f && visible.z == 30.5f,
+	      "consumer point (%g,%g,%g) != (7.5,-10.5,30.5)", visible.x, visible.y, visible.z);
+	printf("weighted envelope: consumer point (%g,%g,%g)\n", visible.x, visible.y, visible.z);
+}
+
 int main(int argc, char** argv)
 {
 	if (argc < 2) {
@@ -301,6 +361,7 @@ int main(int argc, char** argv)
 	int maxBck = argc > 3 ? atoi(argv[3]) : 100000;
 	int models = 0, bcks = 0, btks = 0, brks = 0, btps = 0, bpks = 0, tables = 0;
 	newHeap();
+	checkWeightedEnvelopeTransform();
 	for (auto& e : std::filesystem::directory_iterator(argv[1])) {
 		std::string ext = e.path().extension().string();
 		bool isModel = ext == ".bmd", isBck = ext == ".bck";

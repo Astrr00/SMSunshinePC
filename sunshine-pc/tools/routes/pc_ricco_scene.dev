@@ -1,0 +1,12 @@
+# Native Ricco model-table regression: the shared SmallEnemy table must end after its intended model.
+# SUNSHINE_DEV_START=ricco/0 isolates scene loading; this does not prove normal unlocking or boss victory.
+# Use an owned empty profile with gameplay aids absent; Null is logic-only, WARP is a separate visual check.
+waitfor stage=3 scen=0 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=60
+walkto x=-13200 z=2700 radius=40 timeout=600
+hold A frames=2
+wait frames=60
+walkto x=-13400 z=2700 radius=40 timeout=600
+log
+shot ricco_scene_ready.png
+end

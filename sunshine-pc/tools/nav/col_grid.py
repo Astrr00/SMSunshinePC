@@ -1,8 +1,8 @@
 """Floor cells (40 units) from a stage's /map/map.col, for the devscript nav file (SUNSHINE_DEV_NAV).
 
 Usage: python tools/nav/col_grid.py <stage> <out.nav> [ylo yhi]
-Writes little-endian int16 triples (cx, cz, y) per cell, one per walkable floor triangle centre cell (|normal.y| >= 0.7).
-ylo/yhi (world units) keep only triangles whose mean height lies in the band, to pick one storey of a multi-level stage.
+Writes little-endian int16 triples (cx, cz, y) per cell, one per upward-facing floor triangle centre cell (normal.y >= 0.7).
+ylo/yhi (world units) keep only sampled floor heights inside the band, to pick one storey of a multi-level stage.
 Where several triangles share a cell inside the band, the highest one wins.
 """
 import math
@@ -75,14 +75,16 @@ def main():
     grid = {}
     for tri in tris:
         _bg, A, B, C = tri
-        if abs(normal(A, B, C)[1]) < 0.7:
+        nx, ny, nz = normal(A, B, C)
+        if ny < 0.7:
             continue
-        ymid = (A[1] + B[1] + C[1]) / 3.0
-        if not (ylo <= ymid <= yhi):
+        if max(A[1], B[1], C[1]) < ylo or min(A[1], B[1], C[1]) > yhi:
             continue
         for cell in cells_of(tri):
-            if cell not in grid or grid[cell] < ymid:
-                grid[cell] = ymid
+            x, z = ((c + 0.5) * CELL for c in cell)
+            y = A[1] - (nx * (x - A[0]) + nz * (z - A[2])) / ny
+            if ylo <= y <= yhi and (cell not in grid or grid[cell] < y):
+                grid[cell] = y
     # Walls have no floor cell: drop floor cells within one cell of any wall that reaches the band (the chase must not steer into cliffs).
     blocked = set()
     for tri in tris:

@@ -1,9 +1,28 @@
 # Roadmap
 
-Goal: a native Windows x86-64 port of Super Mario Sunshine (GMSJ01) built from the matching decomp (`sms/`), with Aurora replacing the GameCube SDK (`sunshine-pc/`). Launcher, mods, settings, unlocked framerate, widescreen, playable end to end. No game data in this repository.
+Goal: a fully playable native Windows x86-64 port of Super Mario Sunshine (GMSJ01), using `sms/` as source and Aurora as the GameCube SDK replacement.
+Normal progression from a new save through credits/postgame, all original content including 120 Shines and 240 blue coins, reliable cold save/load and a reproducible Windows package are required.
+100% byte-identical PowerPC matching is tracked separately, not a playability prerequisite.
+Existing launcher, mods, settings, unlocked-framerate and widescreen features remain preserved; new optional features must not delay the core port.
+No game data belongs in this repository.
 
 Status legend: DONE = observed artifact, PART = partly working or unverified, OPEN = not working.
 Last updated from observed state (see `sunshine-pc/docs/status.md` section 0 for evidence).
+
+**Current acceptance target (2026-10-16):** unassisted original gameplay, not a matching percentage or an assisted route.
+The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) records concrete reproductions, owners, acceptance conditions and evidence limits.
+Historical dev-assisted acceptances below remain valid only within their stated scope; they do not satisfy the new unassisted criteria.
+
+**New bounded checkpoint (2026-10-16):** an input-only fresh file defeats the airport boss, earns Shine `0x56` and reaches live Delfino 1/0 without gameplay aids; a new process restores that earned Shine from a copied isolated test profile. Later unlocks, settings and repeated lifecycle cases remain open.
+The native `FaceTo` deadzone correction passes its real 3-degree scene condition; the floor-grid generator now preserves ramp heights and excludes ceilings, with two failing-before/passing-after regressions. Shadow Mario pursuit still times out.
+The [content inventory](sunshine-pc/docs/content-coverage.tsv) derives 120 Shine identities and 240 observed blue-coin identities from actual sources/resources, not helper capacity. All runtime rows remain open; unresolved resources/fields are retained.
+Delfino stance/combat, the walking chase and Bianco are still the next normal-progression gates. An early WARP presentation watchdog and the existing broad allocation colour-screen mitigation require separate root-cause evidence; neither is hidden by a gameplay fallback.
+The shared native SmallEnemy table now has an explicit terminator; unmodified Ricco3/0 loads and its ordinary walk/jump/return regression passes on WARP after the previous loader AV.
+Actual native captures and normal Close pass at both diagnostic quarter scale and Auto/window resolution; quarter scale is not graphical-quality acceptance.
+The two independent implementation slices are integrated: format-1/2-bit voices decode in real Ricco, and the original map1 shine-shadow volume reads validated geometry from the supported user DOL.
+The integrated Auto-resolution map1 surface is observed, its unchanged 3-degree FaceTo condition passes, and native Close exits0; listening, retail-pixel equivalence and real-GPU performance remain open.
+
+**Published background, not a connected-playthrough certificate:**
 
 The diagnostic lifetime fix is published in `3c10554`; [issue #12](https://github.com/Astrr00/SMSunshinePC/issues/12) is closed.
 Status-enabled route 85 and route-86 reload pass under documented dev aids; the fresh-checkout build gate also passes.
@@ -15,7 +34,7 @@ Unassisted combat/navigation and the 120-Shine alternate ending remain open.
 The later `3d095fa` spawn correction restores center NaN priority and velocity FI/FR boundaries without a new helper.
 Actual capacity-rejected spawning is observed on Null/WARP; whole-`perform` transitive FP certification remains partial.
 Source `d33c1ef` also restores the unconditional collision-radius square and its sticky inexact/underflow flags.
-The compiled helper reviews are now boundedly complete; final whole-caller integration is the next FP review.
+Those bounded compiled helper reviews remain useful evidence; further whole-caller FP certification is not a core-port priority without a demonstrated gameplay defect.
 
 ## Working rules (apply to every phase)
 
@@ -141,11 +160,12 @@ Exit criterion: every toggle in the launcher has an observed effect in game.
 
 ## Order of work
 
-1. **Corona unassisted combat and sound (#10):** diagnostic platform travel plus real rocket/L attacks now reach natural epilogue/credits/normal ending, final save and real completion-flag reload on WARP. No forced victory flags or developer movie skip supplies that proof. Verify unassisted combat/navigation, the 120-Shine ending on a legitimately qualifying save, and audible sound. Keep ending-bit/checksum/reload evidence; global THP state 0 is invalid for Plaza readiness because its TV loops a movie. Depth readback retains measured 2–4-copy lag, not same-frame retail equivalence.
-2. **Bath-water equivalence (#10):** initializer and corrected `setLookDir` compiled-PPC reviews complete. Sources `3d095fa`/`d33c1ef` fix center NaN priority, velocity FI/FR and the unconditional collision-square exception history. Additional compiled `getGravityDir`/`calcBathtub` reviews are complete for production-valid objects, IEEE mode, masked exception enables and the same PPC/math implementations. Next: final whole-`perform` FP integration, including initialized and initialization paths. Do not generalize this to host-x64, enabled traps or scratch-state equivalence.
-3. **Remaining decomp units (#10):** EventWatcher warp/Appear8 reviews complete; claim further whole units and prioritize gameplay-path operand/branch differences. Diagnostic lifetime regression #12 is published/closed; keep status-enabled route85/GCI/route86 as gates.
-4. **Owner/hardware checks (#9):** listening, physical input, native Browse dialog and real-GPU FPS verification remain separate from automated evidence; collect these results before claiming those feature rows complete.
-5. **Release (#8):** preserve the existing checked ZIP; installer tooling/signing require the documented owner decision, and release acceptance still requires a clean-PC test and fresh-clone gate.
+1. **Secure the current baseline:** preserve user changes and paused matching worktrees; maintain Strict zero unresolved, the reference SHA and existing regressions. Source `154d9f5` passes the current gates and an isolated cached-dependency build. Actual D3D12 WARP intro output and normal window close are observed; this is not full gameplay or clean-PC evidence.
+2. **Remove early-flow dependencies on developer aids:** complete new game, airport Shine, Delfino GateKeeper, Shadow Mario and Bianco entry with ordinary inputs. Distinguish bot/navigation failures and Null-backend limitations from real engine bugs. No forced crouch, aiming, teleportation, health/water cheat or direct progress write counts as acceptance.
+3. **Complete normal progression and content:** close each reproducible blocker through the required episodes, final boss, credits and postgame, then cover all original episodes, secret stages, 120 Shines, 240 blue coins and the corresponding ending. Reconcile earned progress before save and after a fresh-process load. Existing diagnostic Corona completion is supplementary evidence only.
+4. **Qualify shared systems and hardware:** exercise real graphics/effects, keyboard/controller and analog triggers, listen to music/SFX/movies, measure original gameplay speed without competing jobs, and run at least 30 minutes with transitions/save/load and lifecycle checks. WARP, Null and hardware-GPU results remain distinct; unavailable human/device checks stay open.
+5. **Release only the accepted state:** refresh README/status/ledger/GitHub after each completed wave, keep gates green, and verify the packaged exact source outside the repository and on suitable Windows without developer tools. Preserve the existing checked ZIP. Licence/redistribution approvals remain owner decisions; installer, signing, DLSS and new convenience features are not core acceptance requirements.
+
 
 ## Out of scope for now
 
