@@ -28,6 +28,7 @@ Ricco's native SmallEnemy model-table overread is fixed: diagnostic scene loadin
 For visual checks use launcher `Resolution scale: Auto`, or remove the route tool's `SUNSHINE_RENDER_SCALE=0.25` override with `SUNSHINE_RENDER_SCALE=`. Auto/window rendering is visibly sharper; the diagnostic quarter-scale image is not representative of normal display quality.
 Format-1/2-bit ADPCM now decodes real game voices instead of ending them as silence. The original map1 shine-shadow volume loads its validated geometry from the user's supported DOL; no game bytes are embedded.
 Known risks remain explicit: Delfino/Bianco normal progression, an early WARP presentation watchdog, unverified full-game audio/graphics and a broad zero-allocation mitigation not yet certified safe to remove.
+Current independent work: `GatekeeperInput` closes the normal Delfino boss path; `ShadowInput` corrects the contact-blocked input-only pursuit. The [working rules](ROADMAP.md#working-rules-apply-to-every-phase) reuse verified build inputs and earned test checkpoints while retaining every publication gate.
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |

@@ -31,6 +31,9 @@ This remains a development-host build, not clean-PC, real-GPU or full-gameplay a
 The next independent ordinary-input slices are owned by `GatekeeperInput` and `ShadowInput`.
 Private game-thread observation of scene1/1 now captures the live unheld `TResetFruit` in Mario's actual contact list while the pursuit waypoint lies inside its combined 130-unit collision envelope.
 The capture records grounded Mario, real forward input/velocity and no held actor or spray; it is a diagnosis, not a completed chase, normal unlocking or a demonstrated engine defect.
+Execution now reuses the canonical immutable compiler artifacts for private single-translation-unit candidates and copied normally earned profiles for local route checks.
+The current host exposes 6 logical processors and about 16 GiB RAM; the existing maximum of 3 native build/run owners is retained rather than adding competing workers.
+Complete publication gates remain per completed source wave; documentation-only changes do not trigger another unchanged game build.
 
 The actual native intro window is observed with `computer` screenshot and accessibility helpers.
 `build/PortGoal_20261016/native-ui.png` and `native-ui.log` retain the private evidence; the adapter is D3D12 Microsoft Basic Render Driver (CPU/WARP).
@@ -547,7 +550,7 @@ Order: P0 blocks playing the game from the disc image. P1 is required to ship. P
 | R30 | Packaged run from clean dir, `--dvd` | 8 | **Partial** | 20 s from clean dir, process stays alive, log empty | No screenshot or in-game verification |
 | R31 | Dev switches and test harness documented and removed from release | 8 | **Partial** | `SUNSHINE_DEV_START`, `SUNSHINE_DEV_SKIP_MOVIES`, `SUNSHINE_CHECK_HEAP`, `SUNSHINE_HANG_DUMP`, `SUNSHINE_WINDOW_*`, `SUNSHINE_DEV_LAUNCHER_PAGE`, `SUNSHINE_DEV_AUDIO_STATS` | Need decision: keep as dev-only or gate out of release |
 
-## 4. Blockers that gate "fully playable" (summary)
+## 4. Historical blockers from the original audit (superseded)
 
 1. **Title render (R01)**: `GXCopyDisp` stub and EFB clear. Blocks visual correctness of every screen.
 2. **Stage crashes (R02, R03)**: NpcParts ctor and dolpic heap writer. Blocks Bianco Ep1 and most worlds.
@@ -556,7 +559,10 @@ Order: P0 blocks playing the game from the disc image. P1 is required to ship. P
 5. **Audio gaps (R14)**: missing ADPCM and osc waveforms blocks music correctness.
 6. **Unverified gameplay**: nothing past delfino load is verified in-game (shine, save, bosses, credits).
 
-## 5. Next 20 tasks (priority order)
+## 5. Historical task list (superseded; not the current queue)
+
+The numbered list below is retained as audit history, not an instruction to redo completed work.
+Use the [current playability matrix](playability-matrix.tsv) for owners, completed bounded proofs, active progression blockers and outstanding acceptance criteria.
 
 1. Fix `GXCopyDisp`: snapshot EFB into display source before any clear, and present that source (R01). Owner: GxCopy2 (coordinate; they own `lib/gx/*`).
 2. Gate title-frame logs on copy-2 count, check background quad vs viewport and `drain()` (R01).
@@ -581,7 +587,7 @@ Order: P0 blocks playing the game from the disc image. P1 is required to ship. P
 
 Deferred (not in the 20): widescreen part B (R10), framerate step 2 interpolation (R17), DLSS (R27, blocked by SDK and motion vectors).
 
-## 6. Checks the main agent should run
+## 6. Historical checks from the original audit (superseded)
 - `probe-units` (resolve 151/736 count and the blocked list).
 - Strict link and `_link.log` to confirm 0 unresolved and refresh `unresolved.md`.
 - SHA-1 check of `sms/build/GMSJ01/mario.dol` against `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` (matches now).

@@ -47,6 +47,9 @@ Those bounded compiled helper reviews remain useful evidence; further whole-call
 4. **Evidence**: a feature counts as done only with a log excerpt or screenshot. Dev hooks are named as such.
 5. **Decomp changes**: `#ifdef TARGET_PC` for port behaviour; asm-proven decomp bugs are fixed unguarded only in NonMatching units, with an `// asm 0x<addr>` comment.
 6. **Saves**: tests use a temp save directory, never the user's `%APPDATA%\Sunshine\saves`.
+7. **Reuse verified build inputs:** share the canonical dependency caches and immutable libraries/objects; compile only a changed private translation unit and relink to private outputs when source, headers, ABI, toolchain and flags still agree. Shared-header changes invalidate every affected consumer. Authenticate PE/PDB GUID and age before typed runtime observation.
+8. **Batch verification by completed wave:** run the changed path and its relevant regression during iteration, then run one complete publication gate and isolated exact-source build at integration. Do not repeat unchanged game builds for documentation-only updates; retain the applicable compiled-source evidence. Never omit Strict, SHA, preserved-match, changed-path or isolation requirements.
+9. **Reuse earned test checkpoints:** copy isolated normally earned profiles instead of replaying the airport for each local candidate. Prefer observed state conditions over fixed waits and limit temporary logs/screenshots to decisive events. Keep original timeout/fall failures and use Auto/window resolution for visual acceptance.
 
 ## Phase 0: Decomp correctness (targeted audit resumed 2026-10-15)
 
@@ -163,7 +166,7 @@ Exit criterion: every toggle in the launcher has an observed effect in game.
 
 ## Order of work
 
-1. **Secure the current baseline:** preserve user changes and paused matching worktrees; maintain Strict zero unresolved, the reference SHA and existing regressions. Source `154d9f5` passes the current gates and an isolated cached-dependency build. Actual D3D12 WARP intro output and normal window close are observed; this is not full gameplay or clean-PC evidence.
+1. **Secure the current baseline:** preserve user changes and paused matching worktrees; maintain Strict zero unresolved, the reference SHA and existing regressions. Canonical source `2702e9b` passes all 7 gates/63 host checks and an isolated clean-Aurora build with documented dependency caches. Actual D3D12 WARP output and normal window close are observed; this is not full gameplay or clean-PC evidence.
 2. **Remove early-flow dependencies on developer aids:** complete new game, airport Shine, Delfino GateKeeper, Shadow Mario and Bianco entry with ordinary inputs. Distinguish bot/navigation failures and Null-backend limitations from real engine bugs. No forced crouch, aiming, teleportation, health/water cheat or direct progress write counts as acceptance.
 3. **Complete normal progression and content:** close each reproducible blocker through the required episodes, final boss, credits and postgame, then cover all original episodes, secret stages, 120 Shines, 240 blue coins and the corresponding ending. Reconcile earned progress before save and after a fresh-process load. Existing diagnostic Corona completion is supplementary evidence only.
 4. **Qualify shared systems and hardware:** exercise real graphics/effects, keyboard/controller and analog triggers, listen to music/SFX/movies, measure original gameplay speed without competing jobs, and run at least 30 minutes with transitions/save/load and lifecycle checks. WARP, Null and hardware-GPU results remain distinct; unavailable human/device checks stay open.
