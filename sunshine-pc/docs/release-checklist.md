@@ -65,8 +65,9 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 - [ ] Upload the zip and `.sha256` only. Do not upload disc images, PDBs (except as a separate symbols archive),
       or `build/`.
 - [ ] Keep the release notes free of game data and download links to game data.
-- [ ] Re-check the licence items in `THIRD_PARTY_LICENSES.md` open notes before publishing (Visual C++ redist terms,
-      the port's own licence).
+- [ ] Re-check the licence items in `THIRD_PARTY_LICENSES.md` before publishing: own port-code/artwork licence,
+      Microsoft CRT/SDK entitlement/compliance and exact upstream signed-DXIL provenance. Matching executable
+      content or a successful package copy is not legal approval.
 
 ## Package exclusion regression (2026-10-16)
 
@@ -75,6 +76,17 @@ The shared staged-folder/ZIP filter previously missed WIA and GCZ, although the 
 An actual `package.py` main-path smoke uses the current Strict binary and real PE/DLL/licence/cache resolution with copied port assets in an isolated temporary root. Clean packaging creates a 21.1 MiB ZIP; adding synthetic `accidental.WIA`/`accidental.gcz` fixtures makes the command refuse the package and leave no ZIP. No real game image or original save is used, and all temporary output is removed.
 
 The build correctly warns that it is RelWithDebInfo, not Release. This is packaging-safety evidence, not current Release, redistribution, full-game or clean-PC approval. Those gates remain open.
+
+## Pinned notices and normal lifecycle evidence (2026-10-16)
+
+The actual frozen Strict inputs are traced to configured source/archive pins. The package now carries20 licence texts, including complete FreeType FTL/BDF/PCF and RmlUi containers, plus pinned Dawn/nod/DXC dependency notices. Actual isolated `package.py` main exits0 with134 files/11 DLLs; every notice matches its source, every ZIP member matches staging, forbidden extensions are absent and the checksum sidecar matches. The final internal ZIP SHA256 is `820a92e4c828e310fa68f8aa16893b86407638bcd712578ea305d5c44e188e53`; all temporary output is removed. RelWithDebInfo is not Release, and no archive is approved for publication.
+
+At the final source seal, only 22 copied nod-notice CRLF sequences are normalized to repository LF; notice wording is unchanged. Actual package-main is rerun on the final Main files, with the same 134 files/11 DLLs/20 notices and all source/stage/ZIP/checksum checks passing. The final internal ZIP SHA256 `d33d55e14351ee2b12d70129a1056a9d88c1b1fcfc77223fdf3d461577f8e131` supersedes the preceding private checksum. Temporary output is removed. No native build/game run or Release approval is added.
+
+The recommended release path remains `tools/package.py`. A bare `cmake --install`/CPack output does not provide that tool's complete dependency-notice/VC-runtime closure or exclusion gates; it is not an approved substitute.
+
+An actual31m14.686s ordinary run completes three Bianco/ExitArea/Plaza Save/title/load cycles and native Close0. A fresh process loads the same two-Shine File B and closes natively0; GCI SHA256 `4f258d289914783426e0daeba81d8154b895d1872bcbde6a530b37f2a185ba8a`, exact IDs0/86/save5, seven checksums, persistent flags/21 saved integers and INI survive cold load. Real death/restart, next-episode progression, all-content/hardware/clean-PC and legal release gates remain open. Contended quarter-WARP is functional evidence, not a speed or listening certificate.
+
 
 ## Verified 2026-10-14 (ReleasePkg rebuild + pipeline cache seed)
 

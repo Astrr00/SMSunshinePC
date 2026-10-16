@@ -2,6 +2,8 @@
 
 A native Windows x86-64 port of Super Mario Sunshine (GameCube, GMSJ01). The game code is the decompilation in `sms/`, compiled with clang-cl against [Aurora](https://github.com/encounter/aurora), which replaces the Dolphin SDK layer (GX, VI, PAD, OS, DVD, CARD). No emulator, no PowerPC code.
 
+**Session paused (2026-10-16):** work stopped at the user's request. Read the [complete next-session handoff](sunshine-pc/docs/session-2026-10-16.md) before resuming. All owned tests and agents are stopped; the full-port goal remains unfinished.
+
 ## Status
 
 ![Status treemap: decompiled functions per unit and port rows](sunshine-pc/docs/img/status.svg)
@@ -12,7 +14,7 @@ Not playable end to end yet. Legend: done = observed in a run or check, partial 
 
 **Decompilation progress (measured 2026-10-16, full `ninja` + `changes_all`):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %**; fuzzy match **98.67 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical; no byte-match gain. Bath-water spawn center NaN priority, velocity `FI/FR` boundaries and an unconditional collision-radius square are corrected. `perform` fuzzy score decreases from 94.09952 to 93.910194; `calcBathtub` increases from 95.36346 to 95.55992. Corrected `setLookDir` has 120 helper instructions and 13 inverse-square-root instructions verified after register/ABI normalization. Corona has real GPU depth, diagnostic five-platform victory, natural ending/credits and a persisted completion-Shine reload. Platform travel/health/water assistance remains explicit. Unassisted combat/navigation, the 120-Shine ending, whole-`perform` FP-state integration, universal host FP equivalence, sound listening and hardware GPU remain open. Depth readback retains measured 2–4-copy latency, not same-frame retail equivalence. Details: [`status.md`](sunshine-pc/docs/status.md), [`decomp-rounds.md`](sunshine-pc/docs/decomp-rounds.md).
 
-**Active goal:** a complete, unassisted Windows playthrough and all original content, with reliable saves and a reproducible package.
+**Retained goal (work paused):** a complete, unassisted Windows playthrough and all original content, with reliable saves and a reproducible package.
 100% PowerPC byte matching is not a playability prerequisite.
 The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) tracks concrete blockers and acceptance evidence; historical dev-assisted runs do not certify this goal.
 
@@ -35,7 +37,9 @@ Original Options now retains the missing native console sound bit through ordina
 Normal earned File B also reaches the actual Bianco STORY2 selector and controllable raw scene 2/1 on the three-fix candidate (exit 0, 138.40 seconds). The card and native preferences remain byte-identical. This proves selection/entry, not Petey's reward or the whole game.
 
 **Next progress blocker:** the ordinary next-episode route reaches the windmill bank, then hits a native no-frame watchdog. Actual PE/COFF bytes uniquely bind the caller to `TSpineEnemy::zigzagToCurPathNode`, inside its `MsWrap<float>` call; the actual float inputs and upstream cause are still under investigation. No wrap guard, route bypass or unauthenticated PDB field read is used.
-Normal scene-cycle calibration also passes: earned File B enters real Bianco STORY2, uses the original pause ExitArea action, saves in Delfino, returns to title and reloads (exit 0, 393.60 seconds, exact IDs0/86/save3, all seven checksums). This diagnostic-exit calibration is not the separate 30-minute/native-Close or death/restart acceptance.
+Normal scene-cycle calibration passes: earned File B enters real Bianco STORY2, uses original pause ExitArea, saves in Delfino, returns to title and reloads (exit 0, 393.60 seconds).
+A following actual **31m 14.686s wall-time** run completes three such scene/save/title/load cycles and exits 0 through the exact native window Close. A fresh process loads its File B and also closes natively with exit 0. Exactly IDs 0/86/save5, all seven GCI checksums, all persistent flags/21 saved integers and native settings survive that new process; only save count increases from 2 to 5 across the three normal saves.
+This is contended quarter-WARP functional stability, not original-speed, image-quality, listening or hardware acceptance. Separate airport run1 observes real death/life loss and original restart, but its replay ends rc3; the corrected replay is interrupted and not accepted. The next-episode enemy watchdog remains unresolved.
 
 | Area | State | % | Evidence / gap |
 | --- | --- | ---: | --- |
@@ -109,6 +113,8 @@ The verified developer Strict build can be opened from the repository root:
 The redesign does not add the reference launcher's online installer/updater, HD downloads or GMSE01-only features. Existing game and settings functions remain the base.
 
 Packaging safety also rejects supported WIA/GCZ images, including mixed-case names, from both the staged folder and ZIP. `python sunshine-pc/tools/package_test.py` passes; an actual isolated packaging smoke refuses synthetic contamination and leaves no ZIP. This is not Release/licence/clean-PC approval.
+Pinned-source notices are also corrected: actual packaging now copies 20 licence texts, including the FreeType FTL/drivers and RmlUi containers, with complete pinned Dawn/nod/DXC dependency notices. The isolated actual CLI passes source/stage/ZIP/checksum checks (134 files, 11 DLLs); its temporary internal ZIP is removed. Own-code/artwork licensing, Microsoft redistribution compliance and exact signed-DXIL provenance remain unresolved; no Release approval is inferred.
+
 
 
 ## Matching decompilation
