@@ -130,6 +130,18 @@ void verifyFooter(Header* h, const char* what)
 	}
 }
 
+// Diagnosis (SUNSHINE_DEV_GARBAGE_NEW=lo-hi, bytes): plain `new` blocks of that size come from malloc unzeroed (stale CRT contents), to
+// bisect which object class reads uninitialised memory (docs/platform-notes.md, "port zero fill").
+bool garbageRange(size_t size)
+{
+	static size_t lo = 1, hi = 0;
+	static const bool on = [] {
+		const char* e = std::getenv("SUNSHINE_DEV_GARBAGE_NEW");
+		return e && std::sscanf(e, "%zu-%zu", &lo, &hi) == 2;
+	}();
+	return on && size >= lo && size <= hi;
+}
+
 } // namespace
 
 void* operator new(size_t size)
@@ -148,6 +160,9 @@ void* operator new(size_t size)
 				std::memset(raw + kHeader + size, 0xFD, kFooter);
 				return raw + kHeader;
 			}
+		} else if (garbageRange(size)) {
+			if (void* p = std::malloc(size ? size : 1))
+				return p; // CRT garbage, as before the zero fill
 		} else if (void* p = std::calloc(1, size ? size : 1)) {
 			return p;
 		}
