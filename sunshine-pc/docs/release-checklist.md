@@ -65,7 +65,7 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 - [ ] Upload the zip and `.sha256` only. Do not upload disc images, PDBs (except as a separate symbols archive),
       or `build/`.
 - [ ] Keep the release notes free of game data and download links to game data.
-- [ ] Re-check the licence items in `THIRD_PARTY_LICENSES.md` before publishing: own port-code/artwork licence,
+- [ ] Re-check the licence items in `THIRD_PARTY_LICENSES.md` before publishing: own port-code/artwork licence (MIT, decided),
       Microsoft CRT/SDK entitlement/compliance and exact upstream signed-DXIL provenance. Matching executable
       content or a successful package copy is not legal approval.
 

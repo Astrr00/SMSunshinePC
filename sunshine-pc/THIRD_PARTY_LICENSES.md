@@ -83,13 +83,13 @@ of the release zip, with the embedded-header notices reproduced below. The pinne
 - **NVIDIA DLSS SDK.** Not included. No DLSS code, DLL or model is shipped.
 - **Game data.** Not included. The user supplies their own legally obtained GMSJ01 disc image via `sunshine.exe --dvd`.
   No download links or decryption tools are shipped.
-- **Sunshine's own code.** Licence of the port's own code is undecided. The decompilation in `sms/` is CC0 1.0.
+- **Sunshine's own code.** Licensed MIT (owner decision 2026-10-17, `LICENSE`). The decompilation in `sms/` is CC0 1.0 (shipped as `LICENSE-sms-decomp-CC0.txt`).
 - **Port artwork.** `tools/gen_glyphs.py` describes the controller glyphs as original generic geometry, not copied
   vendor artwork. The port's session provenance also establishes `assets/launcher/ocean.png` as original procedural
   Pillow artwork created for this port, not upstream/Nintendo artwork or copied pixels (adding commit `16d1c13`,
   SHA256 `a8e17ed0a80250f43cacb8a338163a530014068503b085cc569939532cfbd118`).
-  No separate third-party artwork licence is inferred. Choosing a licence for the port's own code/artwork and
-  establishing the distributor's rights remain owner decisions; this source/package check does not approve a release.
+  No separate third-party artwork licence is inferred. The port's artwork is covered by the MIT `LICENSE`. Establishing the
+  distributor's rights remains an owner decision; this source/package check does not approve a release.
 
 ## Pinned-input receipt (2026-10-16)
 

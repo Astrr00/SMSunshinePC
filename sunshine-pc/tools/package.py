@@ -18,6 +18,7 @@ import sys
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # sunshine-pc
+PORT_LICENSE = os.path.join(ROOT, "LICENSE")  # port code/artwork licence (MIT)
 SMS_LICENSE = os.path.join(ROOT, "..", "sms", "LICENSE")  # decompilation licence (CC0 1.0)
 SYSTEM32 = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32")
 FORBIDDEN_EXT = (".rvz", ".iso", ".dol", ".szs", ".gcm", ".wbfs", ".ciso", ".nkit", ".wia", ".gcz")
@@ -68,6 +69,7 @@ Contents:
   *.dll                      runtime libraries (see THIRD_PARTY_LICENSES.md)
   assets/                    port assets
   LICENSE                    licence of the decompilation (CC0 1.0)
+  LICENSE                    port code and artwork (MIT); LICENSE-sms-decomp-CC0.txt is the decompilation (CC0)
   THIRD_PARTY_LICENSES.md    third-party components and their licences
   licenses/                  full licence texts
 
@@ -173,7 +175,7 @@ def main():
     assets = os.path.join(ROOT, "assets")
     if not os.path.isdir(assets):
         sys.exit(f"error: {assets} missing; generate the port assets before packaging")
-    for path in (SMS_LICENSE, os.path.join(ROOT, "THIRD_PARTY_LICENSES.md")):
+    for path in (PORT_LICENSE, SMS_LICENSE, os.path.join(ROOT, "THIRD_PARTY_LICENSES.md")):
         if not os.path.isfile(path):
             sys.exit(f"error: {path} missing")
 
@@ -199,7 +201,8 @@ def main():
     for dll_name, src in sorted(dlls.items()):
         shutil.copy2(src, os.path.join(stage, dll_name))
     shutil.copytree(assets, os.path.join(stage, "assets"))
-    shutil.copy2(SMS_LICENSE, os.path.join(stage, "LICENSE"))
+    shutil.copy2(PORT_LICENSE, os.path.join(stage, "LICENSE"))
+    shutil.copy2(SMS_LICENSE, os.path.join(stage, "LICENSE-sms-decomp-CC0.txt"))
     shutil.copy2(os.path.join(ROOT, "THIRD_PARTY_LICENSES.md"), stage)
     for dest, base, rel in LICENSES:
         src = os.path.join(ROOT if base == "root" else build, rel)
