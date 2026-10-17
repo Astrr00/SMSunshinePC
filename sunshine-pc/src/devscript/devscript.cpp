@@ -98,6 +98,7 @@ struct Command {
 	float radius = 80.f;    // walkto: arrival distance in the XZ plane
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
 	int sprayFrom = 0;      // walkto spray=N: R held from tick N-1 on
+	bool hover = false;     // walkto hover=1: hover steering, and R let go once a trigger nozzle is spent
 	float tol = 8.f;        // faceto: accepted angle error in degrees
 	int period = 30;        // mash: press for 2 ticks (hold=N: N ticks, a higher jump) every `period` ticks
 	bool tpBehind = false;  // chase tp=1: dev crutch, not retail input: every 60 ticks put Mario behind the shadow Mario and spray for 45 of them
@@ -260,7 +261,7 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "walkto" || verb == "faceto") {
-		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
+		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] [hover=1] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
 		bool gotX = false, gotZ = false;
 		std::string tok;
@@ -274,6 +275,7 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "radius") c.radius = v;
 			else if (key == "spray") { c.spray = v != 0.f; c.sprayFrom = static_cast<int>(v) - 1; } // R from tick N-1: jump first, then hover
 			else if (key == "jump" && c.op == Op::WalkTo) c.frames = static_cast<int>(v); // A held for the first N ticks while steering
+			else if (key == "hover" && c.op == Op::WalkTo) c.hover = v != 0.f; // opt-in: older routes were tuned without it
 			else if (key == "tol") c.tol = v;
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
 			else fail(line, "unexpected token in walkto", tok);
@@ -1263,7 +1265,7 @@ void step()
 			float dist = 0.f;
 			if (gpMarioOriginal && gpCamera) {
 				walkStick(c, pad.stickX, pad.stickY, dist);
-				if (gpMarioOriginal->mStatus == MARIO_STATUS_ROCKET && dist > c.radius) {
+				if (c.hover && gpMarioOriginal->mStatus == MARIO_STATUS_ROCKET && dist > c.radius) {
 					// Hover turns only while the stick is 30..150 deg off the facing and thrusts straight inside 30 deg (MarioJump.cpp rocketing):
 					// push 45 deg off the facing until it points at the target, so the flight follows the line instead of drifting up to 30 deg.
 					const float face = gpMarioOriginal->mFaceAngle.y * (6.2831853f / 65536.f);
@@ -1278,7 +1280,7 @@ void step()
 					}
 				}
 				if (c.spray && gRemaining >= c.sprayFrom) pad.triggerRight = 255;
-				if (TWaterGun* wg = gpMarioOriginal->mWaterGun) { // a hover burst ends after its trigger time (DEAD) and re-arms only once R is let go
+				if (TWaterGun* wg = c.hover ? gpMarioOriginal->mWaterGun : nullptr) { // a hover burst ends after its trigger time (DEAD) and re-arms only once R is let go
 					TNozzleBase* nz = wg->getCurrentNozzle();
 					if (nz && nz->getNozzleKind() == 1 && static_cast<TNozzleTrigger*>(nz)->unk385 == TNozzleTrigger::DEAD) pad.triggerRight = 0;
 				}
