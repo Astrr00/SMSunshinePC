@@ -10,7 +10,7 @@ Metadata presence is not collectibility; nothing here is a runtime or completion
 | `absent-referenced-resource` | 36 | 11 `scale0-9`, 12 `test10-19`, 13 `pinnaDemo0-2`, 25-27 `dolpic_ex5-7`, 28 `bia_ex0`, 34-39 `pinna_ex0-5`, 43 `monte_ex1`, 45 `mare_ex1`, 49 `coro_ex3` | `stageArc.bin` names an archive that is not in the disc file system (`FST-absent`). Test stages (`scale`, `test`) and demo stages are leftovers; the `*_ex*` ones are extra-slot stages whose archive is missing in this release. Probably not reachable in a normal game: verify by checking that no `setSystemFlag`/scene change names them. |
 | `placeholder-reference` | 8 | 1 (scenarios 3, 4), 10, 17, 18, 19, 53, 54 | The archive is `none.arc`: an empty slot, nothing to load. |
 
-Next step for these 44: for each, prove "unreachable" from the scene-change code paths (or find a reachable one). No game run needed.
+Evidence from `exShineTable` (`sms/src/System/StageUtil.cpp`, index = raw stage - 21): all 13 absent extra stages (25-28, 34-39, 43, 45, 49) have the entry `0xFF`, i.e. no Shine reward. So no Shine depends on them. The other 23 (`scale`, `test`, `pinnaDemo`) are test and demo stages with no entry in that table. Still unproven: that no scene change enters them; that needs the scene-exit data (`scene.bin` exits, `manievent.sb`), not done.
 
 ## 144 unresolved script/object records (`kind=unresolved`)
 
