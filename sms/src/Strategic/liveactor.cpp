@@ -23,6 +23,10 @@
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
+#ifdef TARGET_PC
+#include <cmath>
+#include <cstdio>
+#endif
 
 f32 TLiveActor::mVelocityMinY = -40.0f;
 
@@ -297,6 +301,25 @@ void TLiveActor::moveObject()
 
 	setGroundCollision();
 	calcRidePos();
+#ifdef TARGET_PC
+	{ // dev diagnostic: first absurd step or position (a later distance MsWrap would never end, enemy.cpp zigzag)
+		static int sReports = 0;
+		const f32 v = fabsf(mLinearVelocity.x) + fabsf(mLinearVelocity.y) + fabsf(mLinearVelocity.z);
+		const f32 p = fabsf(mPosition.x) + fabsf(mPosition.y) + fabsf(mPosition.z);
+		if (sReports < 4 && !(v < 1.0e5f && p < 1.0e7f)) {
+			++sReports;
+			std::fprintf(stderr,
+			             "[actor-blowup] tick=%d actor=%p type=%08X name=%s pos=(%g,%g,%g) step=(%g,%g,%g) "
+			             "ground=%g flag=%08X nerve=%p\n",
+			             gpMarDirector ? gpMarDirector->mMoveTickCount : -1, (void*)this, (unsigned)getActorType(),
+			             getName() ? getName() : "?", (double)mPosition.x, (double)mPosition.y, (double)mPosition.z,
+			             (double)mLinearVelocity.x, (double)mLinearVelocity.y, (double)mLinearVelocity.z,
+			             (double)mGroundHeight, (unsigned)mLiveFlag,
+			             mSpine ? (const void*)mSpine->getCurrentNerve() : nullptr);
+			std::fflush(stderr);
+		}
+	}
+#endif
 }
 
 void TLiveActor::requestShadow()

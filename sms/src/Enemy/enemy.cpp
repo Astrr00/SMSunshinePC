@@ -17,6 +17,9 @@
 // rogue includes needed for matching sinit & bss
 #include <MSound/MSSetSound.hpp>
 #include <MSound/MSoundBGM.hpp>
+#ifdef TARGET_PC
+#include <cstdio>
+#endif
 
 TSpineEnemy::TSpineEnemy(const char* name)
     : TLiveActor(name)
@@ -517,6 +520,21 @@ void TSpineEnemy::zigzagToCurPathNode(f32 march_speed, f32 turn_speed,
 
 	f32 dVar9 = (unkF4.getPoint() - mPosition).length();
 
+#ifdef TARGET_PC
+	{ // dev diagnostic: MsWrap below never ends once dVar9 - cycle rounds back to dVar9 (or dVar9 is inf)
+		static bool sReported = false;
+		if (!sReported && !(dVar9 < 1.0e7f)) {
+			sReported = true;
+			const JGeometry::TVec3<f32> node = unkF4.getPoint();
+			std::fprintf(stderr,
+			             "[zigzag-wrap] actor=%p type=%08X dist=%g cycle=%g pos=(%g,%g,%g) node=(%g,%g,%g) idx=%d\n",
+			             (void*)this, (unsigned)getActorType(), (double)dVar9, (double)cycle, (double)mPosition.x,
+			             (double)mPosition.y, (double)mPosition.z, (double)node.x, (double)node.y, (double)node.z,
+			             unk124->getCurGraphIndex());
+			std::fflush(stderr);
+		}
+	}
+#endif
 	f32 dVar13 = MsWrap(dVar9, 0.0f, cycle);
 
 	dVar13 *= 360.0f * (1.0f / cycle);
