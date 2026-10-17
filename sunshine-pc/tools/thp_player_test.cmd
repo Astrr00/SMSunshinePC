@@ -26,6 +26,6 @@ clang-cl %CF% %INC% /TP /std:c++20 /c "%SMS%\src\THPPlayer\THPPlayer.c" "%SMS%\s
   "%SMS%\src\THPPlayer\THPVideoDecode.c" "%SMS%\src\THPPlayer\THPAudioDecode.c" /Fo"%OUT%\\" || exit /b 1
 clang-cl %CF% %INC% /TP /std:c++20 "%~dp0thp_player_test.cpp" "%OUT%\THPDec.obj" "%OUT%\THPAudio.obj" "%OUT%\THPPlayer.obj" ^
   "%OUT%\THPRead.obj" "%OUT%\THPVideoDecode.obj" "%OUT%\THPAudioDecode.obj" ^
-  "%PC%\src\sdk\os_thread.cpp" "%PC%\src\sdk\os_misc.cpp" "%PC%\src\sdk\av.cpp" "%PC%\src\sdk\av_win.cpp" "%PC%\src\crash.cpp" ^
+  "%PC%\src\sdk\os_thread.cpp" "%PC%\src\sdk\os_misc.cpp" "%PC%\src\sdk\av.cpp" "%PC%\src\sdk\av_win.cpp" "%PC%\src\sdk\av_dump.cpp" "%PC%\src\settings.cpp" "%PC%\src\crash.cpp" ^
   /Zi /Fo"%OUT%\\" /Fe"%OUT%\thp_player_test.exe" /link /DEBUG || exit /b 1
 "%OUT%\thp_player_test.exe" "%MOVIE%" %N%
