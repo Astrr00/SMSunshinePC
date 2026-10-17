@@ -68,8 +68,8 @@ Contents:
   initial_pipeline_cache.db  bundled GX pipeline cache seed
   *.dll                      runtime libraries (see THIRD_PARTY_LICENSES.md)
   assets/                    port assets
-  LICENSE                    licence of the decompilation (CC0 1.0)
   LICENSE                    port code and artwork (MIT); LICENSE-sms-decomp-CC0.txt is the decompilation (CC0)
+  TESTING.md, collect_logs.cmd  tester guide and bug-report log collector
   THIRD_PARTY_LICENSES.md    third-party components and their licences
   licenses/                  full licence texts
 
@@ -204,6 +204,8 @@ def main():
     shutil.copy2(PORT_LICENSE, os.path.join(stage, "LICENSE"))
     shutil.copy2(SMS_LICENSE, os.path.join(stage, "LICENSE-sms-decomp-CC0.txt"))
     shutil.copy2(os.path.join(ROOT, "THIRD_PARTY_LICENSES.md"), stage)
+    shutil.copy2(os.path.join(ROOT, "docs", "TESTING.md"), stage)
+    shutil.copy2(os.path.join(ROOT, "tools", "collect_logs.cmd"), stage)
     for dest, base, rel in LICENSES:
         src = os.path.join(ROOT if base == "root" else build, rel)
         if not os.path.isfile(src):

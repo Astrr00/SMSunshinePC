@@ -21,7 +21,7 @@ load back, speed that is not about 30 logic ticks per second, anything that diff
 
 ## Report
 
-1. Run `tools\collect_logs.cmd` from the package folder (or from `sunshine-pc\tools` in a checkout). It writes
+1. Run `collect_logs.cmd` from the package folder (or from `sunshine-pc\tools` in a checkout). It writes
    `sunshine-logs.zip` with `crash.log`, `sunshine.log`, `settings.ini` and `hardware.txt` (GPU, driver, Windows). It
    never includes save files or the disc image.
 2. Open a GitHub issue with the **Bug report** template and attach the zip.
