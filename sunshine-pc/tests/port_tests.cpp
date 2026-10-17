@@ -171,6 +171,9 @@ void testWidescreen() {
     s.aspect = "auto";
     check(widescreenInit(s, 1281, 960) == 1281 && sunshineRenderWidth() == 640 && sunshineUIOffsetX() == 0,
           "widescreen: auto 1281x960 stays on the 640 path");
+    // Fullscreen auto passes the monitor size (main.cpp): a 3440x1440 ultrawide renders 1148 wide.
+    widescreenInit(s, 3440, 1440);
+    check(sunshineRenderWidth() == 1148 && widescreenWindowWidth(1600, 1200) == 2870, "widescreen: auto 3440x1440 monitor -> 1148");
     s.aspect = "16:9";
     check(widescreenInit(s, 1280, 960) == 1704 && sunshineRenderWidth() == 852, "widescreen: 16:9 window 1704x960");
     check(sunshineUIOffsetX() == 106 && sunshineRenderWidth() - 640 - sunshineUIOffsetX() == 106,

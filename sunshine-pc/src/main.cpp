@@ -16,6 +16,7 @@
 #include <System/Application.hpp>
 
 #include <cstdio>
+#include <windows.h>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
@@ -145,7 +146,13 @@ int main(int argc, char* argv[])
 	if (const char* size = std::getenv("SUNSHINE_WINDOW_SIZE")) {
 		std::sscanf(size, "%d,%d", &width, &height);
 	}
-	width = static_cast<int>(widescreenInit(s, static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
+	// Fullscreen covers the monitor, so aspect=auto takes the primary monitor's shape there, not the saved window's.
+	if (s.fullscreen && GetSystemMetrics(SM_CXSCREEN) > 0 && GetSystemMetrics(SM_CYSCREEN) > 0) {
+		widescreenInit(s, static_cast<uint32_t>(GetSystemMetrics(SM_CXSCREEN)), static_cast<uint32_t>(GetSystemMetrics(SM_CYSCREEN)));
+		width = static_cast<int>(widescreenWindowWidth(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
+	} else {
+		width = static_cast<int>(widescreenInit(s, static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
+	}
 	// GameCube main RAM backs the OS arena the JKR heaps are carved from; ARAM backs JKRAram.
 	// SUNSHINE_ALLOW_CPU_ADAPTER=1: accept the software adapter (WARP). Without it a GPU-less host falls back to Aurora's
 	// Null backend, which draws nothing (white screenshots, 0 presents). "0" or empty keeps it off.
