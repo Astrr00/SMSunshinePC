@@ -395,7 +395,7 @@ void TMario::damageExec(THitActor* hittingActor, int damage, int damageAnimType,
 		f32 dx = hittingActor->mPosition.x - mPosition.x;
 		f32 dy = hittingActor->mPosition.y - mPosition.y;
 		f32 dz = hittingActor->mPosition.z - mPosition.z;
-		std::printf("[hplog-dmg] tick=%d sender=%08X dmg=%d anim=%d inv=%d hp=%d dist=%.0f status=%08X pol=%d dirty=%d fogT=%d sinkT=%.2f bck=%d\n", hpLogTick(), (unsigned)hittingActor->getActorType(), damage, damageAnimType, (int)invincibilityFrames, (int)mHealth, (double)std::sqrt(dx * dx + dy * dy + dz * dz), (unsigned)mStatus, (int)mPollutionTypeStandingOn, checkFlag(MARIO_FLAG_DIRTY) ? 1 : 0, (int)mStandingOnGraffitoTimer, (double)mSinkTimer, gDbgGKCurBck);
+		std::printf("[hplog-dmg] tick=%d sender=%08X name=%s at=(%.0f,%.0f,%.0f) dmg=%d anim=%d inv=%d hp=%d dist=%.0f status=%08X pol=%d dirty=%d fogT=%d sinkT=%.2f bck=%d\n", hpLogTick(), (unsigned)hittingActor->getActorType(), hittingActor->getName() ? hittingActor->getName() : "?", (double)hittingActor->mPosition.x, (double)hittingActor->mPosition.y, (double)hittingActor->mPosition.z, damage, damageAnimType, (int)invincibilityFrames, (int)mHealth, (double)std::sqrt(dx * dx + dy * dy + dz * dz), (unsigned)mStatus, (int)mPollutionTypeStandingOn, checkFlag(MARIO_FLAG_DIRTY) ? 1 : 0, (int)mStandingOnGraffitoTimer, (double)mSinkTimer, gDbgGKCurBck);
 	}
 #endif
 	mInvincibilityFrames = invincibilityFrames;

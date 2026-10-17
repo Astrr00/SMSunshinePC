@@ -83,10 +83,10 @@ u32 sunshineLogicTickCount();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr };
+enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, MarioYGe, MarioYLe, FloorYGe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -97,8 +97,9 @@ struct Command {
 	int maxTicks = 0;       // waitfor/mash/walkto: fail loudly after this many logic ticks
 	float radius = 80.f;    // walkto: arrival distance in the XZ plane
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
+	int sprayFrom = 0;      // walkto spray=N: R held from tick N-1 on
 	float tol = 8.f;        // faceto: accepted angle error in degrees
-	int period = 30;        // mash: press for 2 ticks every `period` ticks
+	int period = 30;        // mash: press for 2 ticks (hold=N: N ticks, a higher jump) every `period` ticks
 	bool tpBehind = false;  // chase tp=1: dev crutch, not retail input: every 60 ticks put Mario behind the shadow Mario and spray for 45 of them
 };
 
@@ -117,6 +118,7 @@ const ButtonName kButtons[] = {
 std::vector<Command> gScript;
 size_t gCursor = 0;
 int gRemaining = 0;
+int gTrace = 0; // `trace frames=N` ticks left
 bool gStarted = false;
 bool gLoaded = false;
 bool gDone = false;
@@ -159,6 +161,9 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("washed=", 0) == 0) k = Command::Cond::Washed; // graffiti wash finished (see washedCount)
 	else if (tok.rfind("talk=", 0) == 0) k = Command::Cond::Talk; // 1 while a talk/message window owns the game (TMarDirector::isTalkModeNow)
 	else if (tok.rfind("bck=", 0) == 0) k = Command::Cond::Bck; // TBiancoGateKeeper/GateKeeper current bck index (gatekeeper.cpp gDbgGKCurBck)
+	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
+	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
+	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
 	else return false;
 	const size_t eq = tok.find('=');
 	c.conds.emplace_back(k, eq == std::string::npos ? 0 : static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0)));
@@ -230,6 +235,8 @@ Command parseLine(const std::string& text, int line)
 				c.maxTicks = std::atoi(tok.c_str() + tok.find('=') + 1);
 			} else if (tok.rfind("period=", 0) == 0) {
 				c.period = std::atoi(tok.c_str() + 7);
+			} else if (c.op == Op::Mash && tok.rfind("hold=", 0) == 0) {
+				c.frames = std::atoi(tok.c_str() + 5);
 			} else if (parseCond(tok, c)) {
 				continue;
 			} else if (c.op == Op::WaitFor) {
@@ -249,10 +256,11 @@ Command parseLine(const std::string& text, int line)
 		if (c.conds.empty()) fail(line, "needs a condition (stage=, scen=, dirstate=, flag=, thp=/movie=, mario, director)", text);
 		if (c.maxTicks <= 0) fail(line, "needs timeout=N (logic ticks)", text);
 		if (c.op == Op::Mash && c.period < 2) fail(line, "period must be >= 2", text);
+		if (c.op == Op::Mash && c.frames >= c.period) fail(line, "hold must be < period", text);
 		return c;
 	}
 	if (verb == "walkto" || verb == "faceto") {
-		// walkto x=<x> z=<z> [radius=R] [spray=1] [jump=N] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
+		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
 		bool gotX = false, gotZ = false;
 		std::string tok;
@@ -264,7 +272,7 @@ Command parseLine(const std::string& text, int line)
 			if (key == "x") { c.pos[0] = v; gotX = true; }
 			else if (key == "z") { c.pos[2] = v; gotZ = true; }
 			else if (key == "radius") c.radius = v;
-			else if (key == "spray") c.spray = v != 0.f;
+			else if (key == "spray") { c.spray = v != 0.f; c.sprayFrom = static_cast<int>(v) - 1; } // R from tick N-1: jump first, then hover
 			else if (key == "jump" && c.op == Op::WalkTo) c.frames = static_cast<int>(v); // A held for the first N ticks while steering
 			else if (key == "tol") c.tol = v;
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
@@ -382,6 +390,14 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "log") { c.op = Op::Log; return c; }
+	if (verb == "trace") { // trace frames=N: one line of Mario/nozzle state per tick for N ticks, alongside the following commands
+		c.op = Op::Trace;
+		std::string tok;
+		while (in >> tok)
+			if (tok.rfind("frames=", 0) == 0) c.frames = std::atoi(tok.c_str() + 7);
+		if (c.frames <= 0) fail(line, "trace needs frames=N", text);
+		return c;
+	}
 	if (verb == "discerr") { c.op = Op::DiscErr; return c; }
 	if (verb == "end") { c.op = Op::End; return c; }
 	fail(line, "unknown command", verb);
@@ -708,6 +724,9 @@ bool condHolds(const Command& c)
 		case Command::Cond::Washed: ok = sceneReady() && washedCount() >= val; break;
 		case Command::Cond::Talk: ok = sceneReady() && gpMarDirector->isTalkModeNow() == (val != 0); break;
 		case Command::Cond::Bck: ok = sceneReady() && gDbgGKCurBck == val; break;
+		case Command::Cond::MarioYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y >= val; break;
+		case Command::Cond::MarioYLe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y <= val; break;
+		case Command::Cond::FloorYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mFloorPosition.y >= val; break;
 		default: break;
 		}
 		if (!ok) return false;
@@ -1244,7 +1263,25 @@ void step()
 			float dist = 0.f;
 			if (gpMarioOriginal && gpCamera) {
 				walkStick(c, pad.stickX, pad.stickY, dist);
-				if (c.spray) pad.triggerRight = 255;
+				if (gpMarioOriginal->mStatus == MARIO_STATUS_ROCKET && dist > c.radius) {
+					// Hover turns only while the stick is 30..150 deg off the facing and thrusts straight inside 30 deg (MarioJump.cpp rocketing):
+					// push 45 deg off the facing until it points at the target, so the flight follows the line instead of drifting up to 30 deg.
+					const float face = gpMarioOriginal->mFaceAngle.y * (6.2831853f / 65536.f);
+					const float d = std::remainder(std::atan2(c.pos[0] - gpMarioOriginal->mPosition.x, c.pos[2] - gpMarioOriginal->mPosition.z) - face, 6.2831853f);
+					if (std::fabs(d) > 0.05f && std::fabs(d) < 0.5236f) {
+						Command t = c;
+						const float a = face + (d > 0.f ? 0.7854f : -0.7854f);
+						t.pos[0] = gpMarioOriginal->mPosition.x + 100.f * std::sin(a);
+						t.pos[2] = gpMarioOriginal->mPosition.z + 100.f * std::cos(a);
+						float unused;
+						walkStick(t, pad.stickX, pad.stickY, unused);
+					}
+				}
+				if (c.spray && gRemaining >= c.sprayFrom) pad.triggerRight = 255;
+				if (TWaterGun* wg = gpMarioOriginal->mWaterGun) { // a hover burst ends after its trigger time (DEAD) and re-arms only once R is let go
+					TNozzleBase* nz = wg->getCurrentNozzle();
+					if (nz && nz->getNozzleKind() == 1 && static_cast<TNozzleTrigger*>(nz)->unk385 == TNozzleTrigger::DEAD) pad.triggerRight = 0;
+				}
 				if (gRemaining < c.frames) pad.button |= PAD_BUTTON_A;
 				// Stall recovery (dev aid): Mario standing still while the stick pushes (seen once in a real-time run at (3692,704,-2716), cause not found)
 				// gets 40 ticks of sideways steering plus a jump, alternating sides. A wall that really blocks the line still ends in the walkto TIMEOUT.
@@ -1306,7 +1343,7 @@ void step()
 				std::fflush(stdout);
 				std::exit(3);
 			}
-			const bool press = c.op == Op::Mash && gRemaining % c.period < 2;
+			const bool press = c.op == Op::Mash && gRemaining % c.period < (c.frames > 0 ? c.frames : 2);
 			if (press) std::printf("[devscript] mash press line=%d tick=%d button=0x%04x\n", c.line, gTick, c.pad.button);
 			setVirtualPad(0, press ? &c.pad : &neutral);
 			++gRemaining;
@@ -1346,6 +1383,7 @@ void step()
 			aurora_screenshot_next(c.path.c_str());
 		}
 		if (c.op == Op::Log) logStatus("devscript");
+		if (c.op == Op::Trace) gTrace = c.frames;
 		if (c.op == Op::DiscErr) {
 			// SUNSHINE_DEV_DISC_ERR=1 (dev-only): close the disc here, so DVDGetDriveStatus() reports no disc and
 			// TApplication::drawDVDErr shows its error screen (sms Application.cpp)
@@ -1446,6 +1484,22 @@ void sunshineDevScriptTick()
 		navLoad(); // eager: routes without `chase` never reached the lazy call
 	}
 	if (gLoaded && !gDone) step();
+	if (gTrace > 0 && sceneReady() && gpMarioOriginal) {
+		--gTrace;
+		const TMario* m = gpMarioOriginal;
+		int trig = -1, trigT = 0;
+		if (m->mWaterGun) {
+			TNozzleBase* nz = m->mWaterGun->getCurrentNozzle();
+			if (nz && nz->getNozzleKind() == 1) {
+				trig = static_cast<TNozzleTrigger*>(nz)->unk385;
+				trigT = static_cast<TNozzleTrigger*>(nz)->unk386;
+			}
+		}
+		std::printf("[trace] tick=%d pos=(%.0f,%.1f,%.0f) vel=(%.1f,%.1f,%.1f) fwd=%.1f face=%.1f status=0x%08X upper=%d trig=%d/%d water=%d floor=%.0f\n", gTick,
+		    m->mPosition.x, m->mPosition.y, m->mPosition.z, m->mVel.x, m->mVel.y, m->mVel.z, m->mForwardVel,
+		    static_cast<s16>(m->mFaceAngle.y) * (360.0f / 65536.0f), (unsigned)m->mStatus, (int)m->mUpperState, trig, trigT,
+		    m->mWaterGun ? (int)m->mWaterGun->mCurrentWater : -1, m->mFloorPosition.y);
+	}
 	if (std::getenv("SUNSHINE_DEV_STATUS") && gTick % 30 == 0) {
 		logStatus("status");
 		std::printf("[padclock] padreads=%d logic=%u\n", gTick, sunshineLogicTickCount());
