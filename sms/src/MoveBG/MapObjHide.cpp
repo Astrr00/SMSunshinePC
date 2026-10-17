@@ -111,7 +111,14 @@ void THideObjBase::load(JSUMemoryInputStream& stream)
 {
 	TMapObjBase::load(stream);
 
+#ifdef TARGET_PC
+	// Retail leaves this uninitialised. The MapObjSteam nodes of coro_ex6 (scene.bin 0x1744..0x1a3c) end before the
+	// event ID, so the failed read keeps it, and on the host that stack garbage could spawn a coin, fruit or 1-up.
+	// -1: newAndRegisterObjByEventID returns nullptr (no hidden object), the retail outcome assumed [INFERENCE].
+	s32 eventId = -1;
+#else
 	s32 eventId;
+#endif
 	TMapObjBase::loadHideObjInfo(stream, &eventId, &mAppearSpeed,
 	                             &mAppearYSpeed, &unk148);
 	setEventId(eventId);

@@ -150,10 +150,12 @@ def actor_reader(data, node):
     return reader
 
 
-def enemy_reader(data, node):
+def enemy_reader(data, node, short_ok=False):
     reader = actor_reader(data, node)
     reader.string()  # TSpineEnemy manager and graph.
     if reader.pos == reader.end:
+        if short_ok:
+            return reader  # graph read hits the node end: retail readString leaves '' (per-node stream, JDRNameRef.cpp getType)
         raise DecodeError('retail node ends after manager; source loader still requests graph and drop fields; no event ID inferred')
     reader.string()
     return reader
@@ -510,6 +512,10 @@ def collect_archive(files, sources):
                     raise DecodeError('hidden model absent from source TMapObjData')
                 if sources.map_flags[model] & 0x80:
                     reader.take(4)
+                if reader.end - reader.pos < 4:
+                    # No event field (coro_ex6 MapObjSteam): retail reads an uninitialised local; the PC build presets -1,
+                    # no hidden object (sms/src/MoveBG/MapObjHide.cpp THideObjBase::load).
+                    continue
                 event = reader.s32()
                 if 0 <= event < 50:
                     add('blue', event, 'hidden-generated-blue-coin', 'sms/src/MoveBG/MapObjHide.cpp:86-118;sms/src/MoveBG/MapObjLib.cpp:57-75')
@@ -540,9 +546,12 @@ def collect_archive(files, sources):
                 if 0 <= event < 50:
                     add('blue', event, 'npc-generated-blue-coin', 'sms/src/NPC/NpcInitPrg.cpp:363-387,454-470;sms/src/NPC/NpcCoin.cpp:19-20')
             elif sources.loads_through(cls, 'TSmallEnemy') or sources.loads_through(cls, 'TAmiNoko'):
-                reader = enemy_reader(data, n)
+                reader = enemy_reader(data, n, short_ok=True)
                 if reader.end - reader.pos < 4:
-                    raise DecodeError('source small-enemy loader requests mCoinId but retail node has no drop field; no event ID inferred')
+                    # No drop field: the short read keeps the ctor's mCoinId(-1) (smallEnemy.cpp:169, 229; PC read(s32&)
+                    # keeps a failed read's preset), and newAndRegisterCoin(0xFFFFFFFF) returns nullptr: no coin. All three
+                    # functions match retail 100 % (objdiff), so this is retail behaviour, not a port gap.
+                    continue
                 event = reader.s32()
                 if 0 <= event < 50:
                     add('blue', event, 'enemy-drop-blue-coin', 'sms/src/Enemy/smallEnemy.cpp:226-238;sms/src/Enemy/amiNoko.cpp:154-157')
@@ -713,6 +722,11 @@ def inventory():
                             issues.append(row('unresolved', 'script-invalid-event:%d' % event, **context, event_id=event,
                                 classification='sentinel-not-reward', metadata_status='unresolved', source_refs=ref,
                                 condition='setEventID narrows to u16; not aliased to a reward'))
+                    elif member.endswith('/manievent.sb') and len(values) == 2 and values[0] == 'シャイン（マニ屋用）'.encode('cp932') and values[1] is None:
+                        # Blue-coin exchange (Delfino boathouse): text 0x322-0x37c computes local5 = 0x10000 + 70 + i, plus 22
+                        # when i > 15 (i = exchanges done); setEventID narrows to u16, so i 0-23 give Shines 70-85 and
+                        # 108-115: the 24 flags GCConsole2.cpp:2035-2044 counts, already listed as blue-coin-exchange-reward.
+                        continue
                     else:
                         issues.append(row('unresolved', 'script-event-binding', **context, classification='dynamic-event-assignment',
                             metadata_status='unresolved', source_refs=ref, condition='target matches=%d; args=%s; requires interprocedural variable/branch analysis' % (len(targets), numeric)))

@@ -12,21 +12,12 @@ Metadata presence is not collectibility; nothing here is a runtime or completion
 
 Evidence from `exShineTable` (`sms/src/System/StageUtil.cpp`, index = raw stage - 21): all 13 absent extra stages (25-28, 34-39, 43, 45, 49) have the entry `0xFF`, i.e. no Shine reward. So no Shine depends on them. The other 23 (`scale`, `test`, `pinnaDemo`) are test and demo stages with no entry in that table. Still unproven: that no scene change enters them; that needs the scene-exit data (`scene.bin` exits, `manievent.sb`), not done.
 
-## 144 unresolved script/object records (`kind=unresolved`)
+## 144 script/object records: resolved 2026-10-17 (0 left)
 
-| Group | Rows | Where | Reading |
-|---|---|---|---|
-| `Kazekun` in `scene.bin` | 92 | ricco1/2/4/5, bianco3, monte2 and more (Ricco Harbor and Bianco/Monte scenes) | Retail node ends after the manager; the source loader still requests graph and drop fields. No event ID can be inferred. Question: does this object ever drop a Shine/blue coin? Decide from the retail loader asm. |
-| `Amenbo` in `scene.bin` | 31 | same scenes | Same pattern as Kazekun (water striders). |
-| `Kukku`, `Cannon` | 6 + 2 | scene.bin | The source small-enemy loader requests `mCoinId`, but the retail node has no drop field. No event ID. |
-| `MapObjSteam` | 8 | scene.bin | `field out of bounds ... size=4`: the node is shorter than the source parser reads. Parser vs. data question. |
-| `dynamic-event-assignment` | 5 | `manievent.sb` at text+0x37c in dolpic5, 6, 10 and two more | `setEventID` with a dynamic argument; needs interprocedural analysis of the script variable or branch. |
+| Group | Rows | Resolution |
+|---|---|---|
+| `Kazekun` 92, `Amenbo` 31, `Kukku` 6, `Cannon` 2 | 131 | The node ends before the graph name and/or the drop field. Each node has its own bounded stream (`TNameRef::getType`), so the reads fail: graph `""`, and `mCoinId` keeps the ctor value -1 (`smallEnemy.cpp:169`; the PC `read(s32&)` keeps a failed read's preset). `newAndRegisterCoin(0xFFFFFFFF)` returns nullptr: no coin. `TSmallEnemy::load`, `TSpineEnemy::load`, `newAndRegisterCoin` and the ctor match retail 100 % (objdiff), so this is retail behaviour. No reward. |
+| `MapObjSteam` in `coro_ex6` (Corona, stage 52) | 8 | The node ends before the event ID. Retail `THideObjBase::load` reads it into an uninitialised local, so on the host that stack garbage could spawn a coin, fruit or 1-up. Fixed in the PC build: the local is preset to -1 (`MapObjHide.cpp`, `TARGET_PC` only), no hidden object [INFERENCE: retail outcome assumed, not observed]. |
+| `setEventID` in `manievent.sb` (dolpic5, 6, 7, 8, 10) | 5 | Bytecode text 0x322-0x37c: `local5 = 0x10000 + 70 + i`, plus 22 when `i > 15` (`i` = exchanges done); `setEventID` narrows to u16, so `i` 0-23 give Shines 70-85 and 108-115. These are the 24 blue-coin exchange Shines (`GCConsole2.cpp:2035-2044`), already listed as `blue-coin-exchange-reward`. |
 
-Reading: 139 of 144 are one question, "does the retail loader read fewer fields than the source loader", for four object types. One decode of those loaders would settle most rows at once. The 5 script rows need real script analysis.
-
-## Suggested order
-
-1. Retail asm check of the Kazekun/Amenbo/Kukku/Cannon node readers (131 rows).
-2. MapObjSteam parser bounds (8 rows).
-3. manievent.sb dynamic `setEventID` (5 rows).
-4. Reachability proof for the 36 absent archives (no 36-way work: group by test/demo/extra).
+`tools/content_inventory.py` now classifies these cases instead of raising; self-check passes; coverage 4570 rows, 0 unresolved records, 240 blue and 120 Shine identities unchanged. Runtime collectibility stays open.
