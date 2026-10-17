@@ -22,6 +22,12 @@
 #include <filesystem>
 #include <string>
 #include "cheats/cheats.h"
+
+// Aurora VI entry points (extern/aurora/lib/dolphin/vi), declared locally as launcher.cpp does.
+extern "C" {
+void VISetWindowFullscreen(bool fullscreen);
+bool VIGetWindowFullscreen();
+}
 #include "mods/mods_loader.h"
 
 // ABI guard: the game's PADStatus (sms/include/dolphin/pad.h, TARGET_PC) must match Aurora's, which PADRead() fills.
@@ -88,6 +94,14 @@ static void presentAndPump()
 			}
 		}
 		sunshineHeartbeat(); // minimized or paused windows keep pumping events: not a hang
+		{
+			// Alt+Enter toggles fullscreen. GetActiveWindow is null while another app has focus.
+			static bool held = false;
+			const bool down = GetActiveWindow() && (GetAsyncKeyState(VK_MENU) & 0x8000) && (GetAsyncKeyState(VK_RETURN) & 0x8000);
+			if (down && !held)
+				VISetWindowFullscreen(!VIGetWindowFullscreen());
+			held = down;
+		}
 		HostWait host;
 		if (aurora_begin_frame()) // false while minimized or paused: keep pumping events
 			break;
