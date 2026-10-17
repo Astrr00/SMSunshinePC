@@ -6,11 +6,9 @@ test package contains game data, and bug reports must not either.
 ## Run
 
 1. Unpack the package into a folder you can write to.
-2. Start it with logging, from that folder:
-
-   ```
-   sunshine.exe --dvd "C:\path\to\your\image.rvz" > sunshine.log 2>&1
-   ```
+2. Start `play_logged.cmd "C:\path\to\your\image.rvz"`. It starts the game and writes `sunshine.log`. (`collect_logs.cmd`
+   only gathers logs afterwards; it does not start the game.) Manual equivalent:
+   `sunshine.exe --dvd "C:\path\to\your\image.rvz" > sunshine.log 2>&1`
 
 3. Play normally (keyboard or gamepad). Pause/menu and quitting through the window's close button are part of the test.
 
