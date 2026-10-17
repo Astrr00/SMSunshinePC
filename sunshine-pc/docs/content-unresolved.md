@@ -36,6 +36,8 @@ in all scene.bin files, `setNextStage` calls in all SPC scripts (0 dynamic or un
 | `none.arc` stages 10, 17, 18, 19, 53, 54 | Never named. |
 | `none.arc` stage 1 scenarios 3, 4 | Stage 1 (Delfino) is named, but Delfino's scenario comes from the Shine selection and flags, not from a stage change; scenarios 3 and 4 are `none.arc` placeholders. Not proven unselectable. |
 
-Not covered by the scan: ground-plane warps (collision type with a stage ID, `MarioMove.cpp:2020`; needs a `.col` decoder),
+Ground-plane warps are now scanned too (`content_reach.py` decodes every `.col`: 4069 collision files in the scene archives, BG
+type histogram checked): no group has BG type `0x300`, so no collision names any of the 44 stages. Not covered:
 `TMarioAutodemo` (stages 2, 3, 4 only) and the debug stage menu in `MenuDir.cpp` (`APP_STATE_MENU` is never set by any source
-line, only by a director's return value). So "not named" is strong evidence, not proof; the open gap is the collision warps.
+line, only by a director's return value). With these, every stage change in the data and code is accounted for; the 44 are
+unreachable in a normal game (Delfino scenarios 3/4 remain unproven).

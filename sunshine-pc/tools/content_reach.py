@@ -25,6 +25,17 @@ HARDCODED = {  # file:line -> param (sms/src), 0xE05 etc. as passed
 }
 
 
+def col_warps(data):
+    # .col (big-endian): {vtxNum, vtxOfs, grpNum, grpOfs}; group 0x18 B {u16 bgType, s16 triNum, u16 flags, u16, u32 idxOfs,
+    # u32, u32, u32 addOfs}; additional = s16[triNum].
+    grpNum, grpOfs = ci.struct.unpack_from('>II', data, 8)
+    for g in range(grpNum):
+        bg, tri, flags, _, _, _, _, add = ci.struct.unpack_from('>HhHHIIII', data, grpOfs + g * 0x18)
+        if bg != 0x300:
+            continue
+        yield from (set(ci.struct.unpack_from('>%dh' % tri, data, add)) if flags & 1 else {0})
+
+
 def main():
     sources = ci.Sources()
     dest = collections.defaultdict(list)  # stage -> [origin]
@@ -34,6 +45,13 @@ def main():
     unknown = []
     for path in sorted((ci.ROOT / 'data/scene').glob('*.szs')):
         files = discfmt.load_szs(str(path))
+        for member in sorted(m for m in files if m.endswith('.col')):
+            try:
+                for ws in col_warps(files[member]):
+                    for w in ws:
+                        dest[decode(w & 0xffff)[0]].append('%s:%s ground warp 0x%x' % (path.name, member, w & 0xffff))
+            except ci.struct.error as e:
+                unknown.append('%s:%s col: %s' % (path.name, member, e))
         if '/map/scene.bin' in files:
             data = files['/map/scene.bin']
             for n in ci.flatten(ci.parse_node(data)):
