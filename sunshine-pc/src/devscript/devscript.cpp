@@ -252,7 +252,7 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "walkto" || verb == "faceto") {
-		// walkto x=<x> z=<z> [radius=R] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
+		// walkto x=<x> z=<z> [radius=R] [spray=1] [jump=N] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
 		bool gotX = false, gotZ = false;
 		std::string tok;
@@ -265,6 +265,7 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "z") { c.pos[2] = v; gotZ = true; }
 			else if (key == "radius") c.radius = v;
 			else if (key == "spray") c.spray = v != 0.f;
+			else if (key == "jump" && c.op == Op::WalkTo) c.frames = static_cast<int>(v); // A held for the first N ticks while steering
 			else if (key == "tol") c.tol = v;
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
 			else fail(line, "unexpected token in walkto", tok);
@@ -1244,6 +1245,7 @@ void step()
 			if (gpMarioOriginal && gpCamera) {
 				walkStick(c, pad.stickX, pad.stickY, dist);
 				if (c.spray) pad.triggerRight = 255;
+				if (gRemaining < c.frames) pad.button |= PAD_BUTTON_A;
 				// Stall recovery (dev aid): Mario standing still while the stick pushes (seen once in a real-time run at (3692,704,-2716), cause not found)
 				// gets 40 ticks of sideways steering plus a jump, alternating sides. A wall that really blocks the line still ends in the walkto TIMEOUT.
 				if (dist > c.radius) {
