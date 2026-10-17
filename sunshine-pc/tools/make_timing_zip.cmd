@@ -17,5 +17,7 @@ xcopy /e /i /q /y "%PC%\build\%B%\assets" "%T%\assets" >nul || exit /b 1
 xcopy /e /i /q /y "%PC%\build\%B%\sjis" "%T%\sjis" >nul || exit /b 1
 copy /y "%DISC%" "%T%\game.rvz" >nul || exit /b 1
 copy /y "%~dp0run_timing.cmd" "%T%\run_timing.cmd" >nul || exit /b 1
+copy /y "%PC%\docs\TESTING.md" "%T%\TESTING.md" >nul || exit /b 1
+copy /y "%~dp0collect_logs.cmd" "%T%\collect_logs.cmd" >nul || exit /b 1
 powershell -NoProfile -Command "Compress-Archive -Path '%T%' -DestinationPath '%PC%\build\transfer\SunshineTiming.zip' -CompressionLevel Fastest" || exit /b 1
 echo ok: %PC%\build\transfer\SunshineTiming.zip
