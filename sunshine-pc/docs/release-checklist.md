@@ -101,3 +101,9 @@ An actual31m14.686s ordinary run completes three Bianco/ExitArea/Plaza Save/titl
 - Zip content check: no `.iso/.rvz/.szs/.arc/.dol/.bmd/.thp/.bin`, no `sms/`, assets complete (launcher rml/rcss/theme.rcss, fonts, glyphs, `cheats.json`), 16 licence files, every linked component (Aurora, SDL3, Dawn, DXC, nod, libpng, zlib, freetype, fmt, imgui, rmlui, sqlite3, xxhash, zstd, abseil, Lato) has a shipped text.
 - Smoke of the UNPACKED zip from a different working directory with a temp `APPDATA`: launcher (WARP) shows the launcher page (screenshot written); `--dvd` with the owner's own disc image: 60 s run reaches `stage=15` (title), no fatal exception, ended by `SUNSHINE_DEV_MAX_SECONDS` (rc `0xDEAD0002`). Observed: the launcher run ignores `SUNSHINE_DEV_MAX_SECONDS` and had to be killed by the harness after 100 s.
 - Not verified: a clean PC without Visual Studio (the VC runtime DLLs come from the zip), the Windows installer/CPack generator, code signing.
+
+## First release attempt (2026-10-17)
+
+- Fresh `windows-clang-release` build (Release, `/O2`), `package.py --version 0.1.0` -> `dist/sunshine-0.1.0.zip` (20.6 MiB, SHA-256 `1cdbfd466a2033415210728fc371b29517e8f7b42846e35a03e31d2633ff8888`), 11 DLLs, 0 forbidden files, `package_test.py` OK.
+- Unpacked smoke from another cwd with a temp `APPDATA`: pipeline cache seeded (484 rows), 75 s at 30 logic/s, ended by `SUNSHINE_DEV_MAX_SECONDS`.
+- GitHub: draft pre-release `v0.1.0` with the zip and `.sha256` created; not published. Publishing waits for the owner's decision on the Microsoft redistributable/DXIL items in `THIRD_PARTY_LICENSES.md`.
