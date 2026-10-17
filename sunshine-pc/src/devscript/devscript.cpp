@@ -41,6 +41,7 @@
 #include "Enemy/Conductor.hpp"
 #include "Enemy/EnemyManager.hpp"
 #include "Enemy/SmallEnemy.hpp"
+#include "Strategic/Spine.hpp"
 #include "System/MarioGamePad.hpp"
 #include "Player/Mario.hpp"
 #include "System/Application.hpp"
@@ -110,6 +111,7 @@ struct Command {
 	int taken = 0;          // goto: jumps back taken so far (frames holds the label's command index)
 	float tol = 8.f;        // faceto: accepted angle error in degrees
 	int period = 30;        // mash: press for 2 ticks (hold=N: N ticks, a higher jump) every `period` ticks
+	bool gateMouth = false; // hold gate=mouth: the analog R trigger only while Petey's mouth takes water (peteyMouthTakesWater)
 	bool tpBehind = false;  // chase tp=1: dev crutch, not retail input: every 60 ticks put Mario behind the shadow Mario and spray for 45 of them
 };
 
@@ -221,6 +223,8 @@ Command parseLine(const std::string& text, int line)
 				if (!parsePair(tok.substr(5), 0, 255, l, r)) fail(line, "bad trig", tok);
 				c.pad.triggerLeft = static_cast<u8>(l);
 				c.pad.triggerRight = static_cast<u8>(r);
+			} else if (tok == "gate=mouth") {
+				c.gateMouth = true;
 			} else if (tok == "aimhead") {
 				c.spray = true; // dev-only: face the airport GateKeeper head every tick while the pad is held (diagnosis only)
 			} else {
@@ -561,6 +565,8 @@ const TSmallEnemy* nearestSmallEnemy(float r)
 		for (int i = 0; i < (*it)->getObjNum(); ++i) {
 			const TSmallEnemy* e = dynamic_cast<const TSmallEnemy*>((*it)->getObj(i));
 			if (!e || e->checkLiveFlag(LIVE_FLAG_DEAD) || e->checkLiveFlag(LIVE_FLAG_HIDDEN) || std::fabs(e->mPosition.y - m.y) > 300.f) continue;
+			// Already hit: one water hit pushes the die nerve (TNameKuri::behaveToWater); more spray only drains the tank.
+			if (e->mSpine && e->mSpine->getCurrentNerve() == &TNerveSmallEnemyDie::theNerve()) continue;
 			const float d = std::hypot(e->mPosition.x - m.x, e->mPosition.z - m.z);
 			if (d < r) { r = d; best = e; }
 		}
@@ -581,7 +587,22 @@ void sprayAt(const TSmallEnemy* e, PADStatus& pad)
 		pad.stickX = static_cast<s8>(pad.stickX / 3);
 		pad.stickY = static_cast<s8>(pad.stickY / 3);
 	}
-	pad.triggerRight = 255;
+	// Water only once Mario roughly faces it (within 45 deg): the Petey arena has no refill, and spraying while turning
+	// emptied the tank on the ordinary route (pg11_ramp_spray23e: water 0, then the slugs took the last health). 20 deg
+	// was too late: the slugs jumped Mario before the spray started (pg11_petey_navel11, health 8 to 0).
+	const float err = std::remainder(std::atan2(e->mPosition.x - gpMarioOriginal->mPosition.x, e->mPosition.z - gpMarioOriginal->mPosition.z)
+	                                     - static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (6.2831853f / 65536.f), 6.2831853f);
+	pad.triggerRight = std::fabs(err) < 0.785f ? 255 : 0;
+}
+
+// Petey's mouth takes water now: open (weak point 2) and Mario inside the damage cone in front of it, as
+// TBPHeadHit::receiveMessage checks before gotWaterDamage (`hold ... gate=mouth`).
+bool peteyMouthTakesWater()
+{
+	const TBossPakkun* p = findPetey();
+	if (!p || !gpMarioOriginal || p->mWeakPoint != TBossPakkun::WEAK_POINT_MOUTH) return false;
+	const float toMario = std::atan2(gpMarioOriginal->mPosition.x - p->mPosition.x, gpMarioOriginal->mPosition.z - p->mPosition.z) * (180.f / 3.14159265f);
+	return std::fabs(std::remainder(toMario - p->mRotation.y, 360.f)) < 0.5f * p->getBossPakkunParams()->mSLDamageAngle.get();
 }
 
 // The shadow Mario of the Delfino gate event ("マリオモドキ_0", Shift-JIS bytes): position, distance to Mario.
@@ -1148,8 +1169,20 @@ void step()
 					}
 				}
 			}
-			setVirtualPad(0, c.op == Op::Hold ? &c.pad : &neutral);
+			PADStatus held = c.pad;
+			if (c.gateMouth && !peteyMouthTakesWater()) {
+				held.triggerRight = 0;
+				held.button &= ~PAD_TRIGGER_R;
+			}
+			setVirtualPad(0, c.op == Op::Hold ? &held : &neutral);
+			const TBossPakkun* full = c.gateMouth ? findPetey() : nullptr; // filled mouth: more water is wasted
+			if (full && full->unk178 >= full->getBossPakkunParams()->mSLWaterMarkLimit.get())
+				gRemaining = 1;
 			if (--gRemaining == 0) {
+				if (c.gateMouth)
+					if (const TBossPakkun* p = findPetey())
+						std::printf("[devscript] gate=mouth end line=%d fill=%d/%d water=%d tick=%d\n", c.line, (int)p->unk178,
+						    (int)p->getBossPakkunParams()->mSLWaterMarkLimit.get(), gpMarioOriginal ? (int)gpMarioOriginal->mWaterGun->mCurrentWater : -1, gTick);
 				gStarted = false;
 				++gCursor;
 			}
