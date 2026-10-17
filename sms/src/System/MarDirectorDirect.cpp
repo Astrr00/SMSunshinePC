@@ -1248,6 +1248,54 @@ JStage::TObject* TMarDirector::JSGFindObject(const char* param_1,
 #include <JSystem/JDrama/JDRViewObjPtrList.hpp>
 #include <stddef.h>
 #include <string.h>
+#include <chrono>
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+
+// Diagnosis (SUNSHINE_DEV_REPLAY_PROFILE=1): per-phase cost of sunshineReplayFrame, averaged and printed once per 60 replays.
+static const char* const kReplayPhase[] = { "prep", "entry34", "list40", "list3C", "mirror", "drawGX", "drawSil", "drawPost", "tail" };
+static double sReplayPhaseMs[9];
+static int sReplayCount;
+struct SunshineLinkCost {
+	const char* name = "";
+	int list = 0;
+	double ms = 0;
+};
+static std::map<const void*, SunshineLinkCost> sLinkCost;
+struct SunshineReplayProfile {
+	bool on = std::getenv("SUNSHINE_DEV_REPLAY_PROFILE") != nullptr;
+	std::chrono::steady_clock::time_point t = std::chrono::steady_clock::now();
+	void mark(int i)
+	{
+		if (!on)
+			return;
+		const auto n = std::chrono::steady_clock::now();
+		sReplayPhaseMs[i] += std::chrono::duration<double, std::milli>(n - t).count();
+		t = n;
+	}
+	~SunshineReplayProfile()
+	{
+		if (!on || ++sReplayCount < 60)
+			return;
+		std::printf("[replay-profile]");
+		for (int i = 0; i < 9; ++i) {
+			std::printf(" %s %.2f", kReplayPhase[i], sReplayPhaseMs[i] / sReplayCount);
+			sReplayPhaseMs[i] = 0;
+		}
+		std::printf(" ms\n");
+		std::vector<SunshineLinkCost> top;
+		for (auto& kv : sLinkCost)
+			top.push_back(kv.second);
+		std::sort(top.begin(), top.end(), [](const SunshineLinkCost& a, const SunshineLinkCost& b) { return a.ms > b.ms; });
+		for (size_t i = 0; i < top.size() && i < 12; ++i)
+			std::printf("[replay-link] list%d %.2f ms %s\n", top[i].list, top[i].ms / sReplayCount, top[i].name ? top[i].name : "?");
+		sLinkCost.clear();
+		sReplayCount = 0;
+	}
+};
 
 // Presentation replay (sunshine-pc/src/framerate/framerate.cpp): draws the current game frame again without advancing
 // logic. DRAW_INIT clears the draw buffers, so the entry stage is re-run first with logic (MOVE) and animation (CALC_ANIM)
@@ -1284,6 +1332,7 @@ void sunshineReplayFrame()
 	TMarDirector* d = gpMarDirector;
 	// One TGraphics for the whole frame, as in direct(): TFrmGXSet (entry list, CUE_DRAW) fills in the frame buffer and
 	// render mode that the draw lists read.
+	SunshineReplayProfile prof;
 	JDrama::TGraphics local;
 	JDrama::SunshineApplyDisplay(d->unkC0, &local);
 	local.unk0 = 0; // the flag halfword direct() writes (asm 0x800ED050: sth to TGraphics+0x0)
@@ -1317,8 +1366,11 @@ void sunshineReplayFrame()
 		sSavedShadowReqs[i] = shadows->mRequests[i];
 	if (shadows)
 		shadows->reset();
+	prof.mark(0);
 	d->unk34->perform(CUE_ALL & ~(CUE_MOVE | CUE_CALC_ANIM), &local);
+	prof.mark(1);
 	d->unk40->perform(CUE_ALL, &local);
+	prof.mark(2);
 	// On a stage with pollution layers unk38/unk3C are the pollution passes (initECTGft): they count goop, apply the
 	// stamps queued by logic and the layer's per-frame change, and the copy is read back into the map that logic reads.
 	// That is game logic run once per tick in retail, not a picture: the replay skips them and draws with the maps of the
@@ -1326,6 +1378,7 @@ void sunshineReplayFrame()
 	// pre-pass and its GXCopyTex for the bath water draw), so the replay runs it as direct() does.
 	if (gpPollution->getJointModelNum() == 0)
 		d->unk3C->perform(CUE_ALL, &local);
+	prof.mark(3);
 	// Draw code that steps state once per drawn frame (retail draws once per tick): the console's rocket nozzle pressure
 	// flash (TGCConsole2::drawWaterBack, ++unk30C), the camera-in-wall overlay fade (TMapDrawWall::perform, unk18) and
 	// the screen blur easing (TAfterEffect::perform on CUE_SET_PROJECTION). Their state is put back after the draw lists,
@@ -1356,12 +1409,22 @@ void sunshineReplayFrame()
 				mirror->testPerform(CUE_CALC_ANIM, &local);
 	// Logic cues masked as on the entry stage: PerformList GX runs the mirror scene with CUE_CALC_ANIM (link 0x206 from
 	// PerformLists.bin), and each such perform steps the animation of TMapStaticObj 太陽in鏡 (MActor::frameUpdate).
+	prof.mark(4);
 	for (int i = 0; i < 3; ++i) {
 		if (i == 1 && !silhouette)
 			continue;
 		for (SunshineLinkIt it = draws[i]->getChildren().begin(); it != draws[i]->getChildren().end(); it++)
-			if (!sunshineIsPostDrawClear(draws, 3, *it))
+			if (!sunshineIsPostDrawClear(draws, 3, *it)) {
+				const auto l0 = std::chrono::steady_clock::now();
 				it->perform(CUE_ALL & ~(CUE_MOVE | CUE_CALC_ANIM), &local);
+				if (prof.on) {
+					SunshineLinkCost& c = sLinkCost[it->mPerformer];
+					c.name = it->mPerformer->getName();
+					c.list = i;
+					c.ms += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - l0).count();
+				}
+			}
+		prof.mark(5 + i);
 	}
 	GXInvalidateTexAll();
 	if (console)
@@ -1390,5 +1453,6 @@ void sunshineReplayFrame()
 	           1.0f);
 	GXSetProjection(ortho, GX_ORTHOGRAPHIC);
 	gpApplication.mFader->draw(JDrama::TRect(0, 0, video->mNextRenderMode.fbWidth, video->mNextRenderMode.efbHeight));
+	prof.mark(8);
 }
 #endif

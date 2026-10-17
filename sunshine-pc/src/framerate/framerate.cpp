@@ -6,6 +6,7 @@
 // Upgrade: align slots to the display's vblank when the renderer exposes it.
 #include <dolphin/vi.h>
 #include <algorithm>
+#include <cstdlib>
 #include <chrono>
 #include <cstdio>
 
@@ -150,4 +151,9 @@ void sunshinePaceWindow(u32 nextRetraceIndex)
 	}
 	if (slots == 0)
 		++g_skips;
+	// Diagnosis: SUNSHINE_DEV_REPLAY_PROFILE forces one (late) replay per tick so its phase costs get measured on slow
+	// adapters too; never on in normal play.
+	static const bool forceReplay = std::getenv("SUNSHINE_DEV_REPLAY_PROFILE") != nullptr;
+	if (slots == 0 && forceReplay)
+		sunshineReplayFrame();
 }

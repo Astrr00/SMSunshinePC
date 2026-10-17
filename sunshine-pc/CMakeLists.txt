@@ -76,7 +76,7 @@ target_compile_options(sms_game PUBLIC
     /FI${CMAKE_CURRENT_SOURCE_DIR}/include/pc_compat.h)
 target_compile_options(sms_game PRIVATE /MP)
 
-add_executable(sunshine src/main.cpp src/crash.cpp src/devstart/devstart.cpp src/render/render_scale.cpp
+add_executable(sunshine src/main.cpp src/crash.cpp src/sampler.cpp src/devstart/devstart.cpp src/render/render_scale.cpp
     src/cheats/cheats_core.cpp src/cheats/cheats_game.cpp src/json/json_lite.cpp
     src/mods/mod_manifest.cpp src/mods/mods_host.cpp src/mods/mods_loader.cpp src/util/read_file.cpp
     src/settings.cpp src/launcher/launcher.cpp src/glyphs/glyphs.cpp src/framerate/framerate.cpp src/widescreen/widescreen.cpp

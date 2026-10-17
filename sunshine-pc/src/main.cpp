@@ -52,6 +52,7 @@ static const char* findDvdArg(int argc, char** argv)
 }
 
 void installCrashHandler(); // crash.cpp
+void sunshineStartSampler(); // sampler.cpp
 void sunshineHeartbeat();   // crash.cpp: watchdog heartbeat, once per presented frame
 void sunshineWatchdogStart(); // crash.cpp
 void sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
@@ -123,6 +124,7 @@ void sunshineLogicTick()
 int main(int argc, char* argv[])
 {
 	installCrashHandler();
+	sunshineStartSampler();
 	// Settings load before Aurora starts: window and VSync options are part of Aurora's startup config.
 	static const std::filesystem::path settingsFile
 	    = std::filesystem::absolute(sunshine::settingsPath(std::filesystem::path(argv[0]).parent_path()));
