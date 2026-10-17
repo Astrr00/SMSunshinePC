@@ -1060,9 +1060,31 @@ void step()
 			static const TSmallEnemy* target = nullptr; // pooled actors: the pointer stays valid after death
 			static int since = 0;
 			const TSmallEnemy* e = nearestSmallEnemy(gGuard);
+			static int reface = 0; // ticks left to turn back toward Petey after a slug was dealt with
 			if (target && e != target) {
 				std::printf("[devscript] guard: target %s after %d ticks, tick=%d\n", target->checkLiveFlag(LIVE_FLAG_DEAD) ? "dead" : "left", since, gTick);
 				target = nullptr;
+				reface = 60;
+			}
+			if (!e && reface > 0) {
+				const TBossPakkun* p = findPetey();
+				const float err = p ? std::remainder(std::atan2(p->mPosition.x - gpMarioOriginal->mPosition.x, p->mPosition.z - gpMarioOriginal->mPosition.z)
+				                                         - static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (6.2831853f / 65536.f), 6.2831853f)
+				                    : 0.f;
+				if (p && std::fabs(err) > 0.1f) { // same small stick turn as faceto, so the spray window is not lost to a slug's bearing
+					Command t{};
+					t.pos[0] = p->mPosition.x;
+					t.pos[2] = p->mPosition.z;
+					PADStatus pad{};
+					float dist = 0.f;
+					walkStick(t, pad.stickX, pad.stickY, dist);
+					pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f));
+					pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
+					setVirtualPad(0, &pad);
+					--reface;
+					return;
+				}
+				reface = 0;
 			}
 			if (e) {
 				if (!target) {
