@@ -888,6 +888,12 @@ Mechanism search for out-of-line header helpers (HeaderLab, ~38 probes in a temp
 - Use relative tool paths in the worktree's `configure.py` (`--dtk build/tools/dtk.exe` and so on). An absolute path containing a space ("Sunshine Decomp") lands unquoted in `build.ninja` and breaks argparse.
 - Remove the junctions with `cmd /c rmdir` (no `/S`) before `git worktree remove`.
 
+## Strict build was unoptimised (fixed 2026-10-17)
+
+- `build/Strict`'s CMake cache held empty `CMAKE_{C,CXX}_FLAGS_RELWITHDEBINFO`, so every Strict object compiled without `/O2` (other trees and the package use `/O2`). `tools/_strict.cmd` now passes `/O2 /Ob1 /DNDEBUG` explicitly. `sunshine.exe` shrinks from 18.9 to 11.3 MB.
+- Delfino replay (`SUNSHINE_DEV_REPLAY_PROFILE=1`, `dolpic/0`, scale 1, WARP host): 25 ms to 9.4 ms; the AlphaCatch/ZBufferCatch draw syncs, which drain the Aurora FIFO, from 13/7 ms to 4.6/3.0 ms. Owner GPU PC (unoptimised build, same profile): 22 ms, FIFO processor 75% busy in `handle_draw`/`draw_prim`/`resolve_sampled_textures`.
+- Earlier Strict timing and route results came from the unoptimised build.
+
 ## Bianco flat-colour screen: port zero fill (mitigated, cause open)
 
 - Probe `tools/routes/92_bianco_wedge_probe.dev` (`SUNSHINE_DEV_START=bianco/0`, no input, screenshot at logic tick 600, Strict build, WARP). Anomaly metric: share of the dominant 16-level colour bucket of a 160x120 downscale; normal 0.059, anomalous 0.256-0.924.
