@@ -31,6 +31,19 @@ u32 g_step       = 0; // interpolation step: one per TMarDirector::direct() tick
 u32 g_logicTicks = 0; // one per waitForRetrace, in every director (logs: devscript, launcher)
 u32 g_blends     = 0;
 Clock::time_point g_tickStart;
+
+// Replay cost (sunshinePaceWindow budget and log): decaying peaks in ns, plus per-second max, sum and the count of
+// ticks whose window had no room for a slot.
+int64_t g_presentPeakNs = 0, g_replayPeakNs = 0;
+int64_t g_presentMaxNs = 0, g_replayMaxNs = 0, g_presentSumNs = 0, g_replaySumNs = 0;
+int g_skips = 0;
+
+void notePeak(int64_t& peak, int64_t& max, int64_t& sum, int64_t ns)
+{
+	peak = std::max(ns, peak - peak / 16);
+	max  = std::max(max, ns);
+	sum += ns;
+}
 }
 
 // J3DModel draws blend the draw matrices of the last two logic ticks with sunshineInterpAlpha(); -1 = no blend.
@@ -72,12 +85,18 @@ void sunshinePaceWindow(u32 nextRetraceIndex)
 	++ticks;
 	++g_logicTicks;
 	if (now - logStart >= std::chrono::seconds(1)) {
-		std::printf("[framerate] logic %d/s, window presents %d/s, blended draws %u/s, fpsLimit %d\n", ticks, presents,
-		            g_blends, sunshine::settings().fpsLimit);
+		// The replay fields come last, so readers of the first four keep working (ms: avg/max per slot).
+		const double n = presents > 0 ? presents : 1;
+		std::printf("[framerate] logic %d/s, window presents %d/s, blended draws %u/s, fpsLimit %d, present ms %.1f/%.1f, "
+		            "replay ms %.1f/%.1f, no-slot ticks %d\n",
+		            ticks, presents, g_blends, sunshine::settings().fpsLimit, g_presentSumNs / n / 1e6,
+		            g_presentMaxNs / 1e6, g_replaySumNs / n / 1e6, g_replayMaxNs / 1e6, g_skips);
 		std::fflush(stdout);
 		ticks = 0;
 		g_blends = 0;
 		presents = 0;
+		g_presentMaxNs = g_replayMaxNs = g_presentSumNs = g_replaySumNs = 0;
+		g_skips = 0;
 		logStart = now;
 	}
 
@@ -101,16 +120,34 @@ void sunshinePaceWindow(u32 nextRetraceIndex)
 	auto toNs       = [](Clock::time_point p) {
 		return (int64_t)std::chrono::duration_cast<std::chrono::nanoseconds>(p.time_since_epoch()).count();
 	};
-	auto t = Clock::now();
+	// Cost budget: a slot runs a present and a replay, and the caller presents once more before its retrace. A slot that
+	// ends after the deadline makes TVideo::waitForRetrace miss its retrace, and the tick slips by whole retraces (owner
+	// RTX 3070 Ti, Delfino, fps_limit=60: logic 15/s). So a slot starts only if its decaying peak cost and the caller's
+	// present still fit; when none fits, the tick keeps the single present of fps 30.
+	// The peaks decay per tick as well, so a tick without slots retries after a cost spike (half after about 44 ticks).
+	g_presentPeakNs -= g_presentPeakNs / 64;
+	g_replayPeakNs -= g_replayPeakNs / 64;
+	auto ns = [](Clock::duration d) { return (int64_t)std::chrono::duration_cast<std::chrono::nanoseconds>(d).count(); };
+	auto t  = Clock::now();
+	int slots = 0;
 	while (toNs(t) + margin < deadline && Clock::now() < windowEnd) {
+		if (toNs(std::max(t, Clock::now())) + g_presentPeakNs * 2 + g_replayPeakNs + margin >= deadline)
+			break;
 		av::SleepUntil(t);
+		const auto p0 = Clock::now();
 		sunshinePresentFrame();
+		const auto p1 = Clock::now();
 		++presents;
-		g_alpha = std::clamp(std::chrono::duration<float>(Clock::now() - g_tickStart).count() / kLogicPeriod,
-		                     0.0f, 1.0f);
+		++slots;
+		g_alpha = std::clamp(std::chrono::duration<float>(p1 - g_tickStart).count() / kLogicPeriod, 0.0f, 1.0f);
 		sunshineReplayFrame();
+		const auto p2 = Clock::now();
+		notePeak(g_presentPeakNs, g_presentMaxNs, g_presentSumNs, ns(p1 - p0));
+		notePeak(g_replayPeakNs, g_replayMaxNs, g_replaySumNs, ns(p2 - p1));
 		t += slot;
 		if (t < Clock::now()) // fell behind (slow replay): resync, do not burst to catch up
 			t = Clock::now();
 	}
+	if (slots == 0)
+		++g_skips;
 }
