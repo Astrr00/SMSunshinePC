@@ -19,5 +19,6 @@ copy /y "%DISC%" "%T%\game.rvz" >nul || exit /b 1
 copy /y "%~dp0run_timing.cmd" "%T%\run_timing.cmd" >nul || exit /b 1
 copy /y "%PC%\docs\TESTING.md" "%T%\TESTING.md" >nul || exit /b 1
 copy /y "%~dp0collect_logs.cmd" "%T%\collect_logs.cmd" >nul || exit /b 1
+copy /y "%~dp0play_logged.cmd" "%T%\play_logged.cmd" >nul || exit /b 1
 powershell -NoProfile -Command "Compress-Archive -Path '%T%' -DestinationPath '%PC%\build\transfer\SunshineTiming.zip' -CompressionLevel Fastest" || exit /b 1
 echo ok: %PC%\build\transfer\SunshineTiming.zip

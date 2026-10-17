@@ -206,6 +206,7 @@ def main():
     shutil.copy2(os.path.join(ROOT, "THIRD_PARTY_LICENSES.md"), stage)
     shutil.copy2(os.path.join(ROOT, "docs", "TESTING.md"), stage)
     shutil.copy2(os.path.join(ROOT, "tools", "collect_logs.cmd"), stage)
+    shutil.copy2(os.path.join(ROOT, "tools", "play_logged.cmd"), stage)
     for dest, base, rel in LICENSES:
         src = os.path.join(ROOT if base == "root" else build, rel)
         if not os.path.isfile(src):
