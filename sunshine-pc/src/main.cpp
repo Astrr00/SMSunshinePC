@@ -55,6 +55,7 @@ void installCrashHandler(); // crash.cpp
 void sunshineHeartbeat();   // crash.cpp: watchdog heartbeat, once per presented frame
 void sunshineWatchdogStart(); // crash.cpp
 void sunshineInstallKeyboardDefaults(); // sdk/pad_keys.cpp
+void sunshineMouseInstall();            // mouse/mouse.cpp
 
 // Developer switch: SUNSHINE_DEV_SKIP_MOVIES=1 ends every THP movie as soon as it starts playing (the retail game only
 // allows skipping movies that were already seen), to reach the scenes behind them quickly during boot testing.
@@ -196,6 +197,7 @@ int main(int argc, char* argv[])
 	launcher::devVpadAttach(); // dev hook, SUNSHINE_DEV_VPAD only: virtual gamepad as player 0 before the dead zones apply
 	launcher::applyRuntimeSettings(); // launcher/launcher.cpp: PAD bindings, dead zones, master volume, window
 	launcher::menuInstall(settingsFile); // launcher/launcher.cpp: R+Start / F1 in-game menu layer
+	sunshineMouseInstall();              // mouse/mouse.cpp: cursor lock while a stage runs
 	savesApplyDirectory(s, exeDir); // saves/save_directory.cpp: [saves] directory, before CARDInit in initialize()
 
 	// The console's startup code (excluded, __start) runs OSInit before main; it sets up the arena JKRHeap draws from.

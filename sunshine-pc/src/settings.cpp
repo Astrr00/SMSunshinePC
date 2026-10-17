@@ -172,6 +172,8 @@ Settings parseSettings(std::string_view text)
 		s.consoleSoundMode = mode->second[0] - '0';
 	s.stickDeadZonePct = readInt(ini, "controls.stick_deadzone", def.stickDeadZonePct, 0, 50);
 	s.substickDeadZonePct = readInt(ini, "controls.substick_deadzone", def.substickDeadZonePct, 0, 50);
+	s.mouseControls = readBool(ini, "controls.mouse", def.mouseControls);
+	s.mouseSensitivityPct = readInt(ini, "controls.mouse_sensitivity", def.mouseSensitivityPct, 10, 400);
 	s.keys = def.keys;
 	for (auto& [name, scancode] : s.keys)
 		scancode = readInt(ini, "keys." + name, scancode, 0, 511);
@@ -222,6 +224,8 @@ std::string serializeSettings(const Settings& in)
 	out << "[controls]\n";
 	out << "stick_deadzone=" << in.stickDeadZonePct << '\n';
 	out << "substick_deadzone=" << in.substickDeadZonePct << '\n';
+	out << "mouse=" << (in.mouseControls ? 1 : 0) << '\n';
+	out << "mouse_sensitivity=" << in.mouseSensitivityPct << '\n';
 	out << "[keys]\n";
 	for (const auto& [name, scancode] : in.keys)
 		out << name << '=' << scancode << '\n';

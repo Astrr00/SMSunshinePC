@@ -31,6 +31,8 @@ struct Settings {
 	// [controls]
 	int stickDeadZonePct = 10;     // 0..50, percent of full stick travel
 	int substickDeadZonePct = 10;  // 0..50
+	bool mouseControls = true;     // mouse look, left click = R (spray), right click = L (crouch and aim), middle click = Z; see src/mouse/mouse.cpp
+	int mouseSensitivityPct = 100; // 10..400
 	std::map<std::string, int> keys; // PAD input name (see defaultKeys) -> SDL scancode
 	// [interface]
 	GlyphStyle glyphStyle = GlyphStyle::Generic; // applied via glyphsSetStyle() (glyphs/glyphs.h); Generic shows the Xbox set

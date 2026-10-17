@@ -79,6 +79,10 @@ u32 JUTGamePad::read()
 	sunshineDevScriptTick(); // one script step per logic pad read, before PADRead
 #endif
 	PADRead(mPadStatus);
+#ifdef TARGET_PC
+	void sunshineMouseTick(PADStatus*); // sunshine-pc/src/mouse/mouse.cpp
+	sunshineMouseTick(mPadStatus);      // mouse buttons and motion join the keyboard pad before PADClamp
+#endif
 	PADClamp(mPadStatus);
 	u32 reset_mask = 0;
 	for (int i = 0; i < 4; i++) {
