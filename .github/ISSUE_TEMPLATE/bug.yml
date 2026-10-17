@@ -1,0 +1,39 @@
+name: Bug report
+description: Something in the Sunshine Windows port does not work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read [TESTING.md](../../sunshine-pc/docs/TESTING.md) first. Do **not** attach game data, disc images, save files or screenshots with copyrighted assets you cannot share. A short screenshot of the problem is fine.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release name or commit hash
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: GPU, driver and Windows version
+      description: Output of tools\collect_logs.cmd (hardware.txt) is enough
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Where in the game (stage, episode), what you did, what you expected, what you saw. Crash, wrong picture, wrong sound, stuck, wrong input?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Does it happen every time? From a new save or a loaded one?
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Attach the zip from tools\collect_logs.cmd (crash.log, sunshine.log, settings.ini, hardware.txt)
