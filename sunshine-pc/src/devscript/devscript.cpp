@@ -37,6 +37,10 @@
 #include "MoveBG/ModelGate.hpp"
 #include "Player/MarioAccess.hpp"
 #include "Enemy/GateKeeper.hpp"
+#include "Enemy/BossPakkun.hpp"
+#include "Enemy/Conductor.hpp"
+#include "Enemy/EnemyManager.hpp"
+#include "Enemy/SmallEnemy.hpp"
 #include "System/MarioGamePad.hpp"
 #include "Player/Mario.hpp"
 #include "System/Application.hpp"
@@ -83,10 +87,10 @@ u32 sunshineLogicTickCount();
 
 namespace {
 
-enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr };
+enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, MarioYGe, MarioYLe, FloorYGe };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -99,6 +103,11 @@ struct Command {
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
 	int sprayFrom = 0;      // walkto spray=N: R held from tick N-1 on
 	bool hover = false;     // walkto hover=1: hover steering, and R let go once a trigger nozzle is spent
+	bool navel = false;     // walkto/faceto navel=1: target Petey's navel, re-read every tick (what the in-game target arrow marks)
+	bool petey = false;     // walkto/faceto petey=1: target Petey's position
+	float behind = 0.f;     // walkto behind=R: the point R behind Petey, reached around his swing radius
+	bool soft = false;      // walkto/faceto/waitfor soft=1: a timeout moves on (to a `goto` retry) instead of failing
+	int taken = 0;          // goto: jumps back taken so far (frames holds the label's command index)
 	float tol = 8.f;        // faceto: accepted angle error in degrees
 	int period = 30;        // mash: press for 2 ticks (hold=N: N ticks, a higher jump) every `period` ticks
 	bool tpBehind = false;  // chase tp=1: dev crutch, not retail input: every 60 ticks put Mario behind the shadow Mario and spray for 45 of them
@@ -124,6 +133,7 @@ bool gStarted = false;
 bool gLoaded = false;
 bool gDone = false;
 int gTick = 0;
+float gGuard = 0.f; // `guard radius=R`, 0 = off
 
 [[noreturn]] void fail(int line, const char* msg, const std::string& tok)
 {
@@ -165,6 +175,9 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
 	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
+	else if (tok.rfind("weak=", 0) == 0) k = Command::Cond::Weak; // TBossPakkun::mWeakPoint (1 navel, 2 mouth), the target arrow a player follows
+	else if (tok.rfind("facing=", 0) == 0) k = Command::Cond::Facing; // Petey faces Mario within N degrees (his mouth only takes water from the front)
+	else if (tok.rfind("peteyhp=", 0) == 0) k = Command::Cond::PeteyHp; // Petey's hit points (3 at the start, one per navel pound)
 	else return false;
 	const size_t eq = tok.find('=');
 	c.conds.emplace_back(k, eq == std::string::npos ? 0 : static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0)));
@@ -234,6 +247,8 @@ Command parseLine(const std::string& text, int line)
 			if (tok == "until") continue;
 			if (tok.rfind("max=", 0) == 0 || tok.rfind("timeout=", 0) == 0) {
 				c.maxTicks = std::atoi(tok.c_str() + tok.find('=') + 1);
+			} else if (c.op == Op::WaitFor && tok == "soft=1") {
+				c.soft = true;
 			} else if (tok.rfind("period=", 0) == 0) {
 				c.period = std::atoi(tok.c_str() + 7);
 			} else if (c.op == Op::Mash && tok.rfind("hold=", 0) == 0) {
@@ -262,6 +277,7 @@ Command parseLine(const std::string& text, int line)
 	}
 	if (verb == "walkto" || verb == "faceto") {
 		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] [hover=1] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
+		// navel=1 / petey=1 / behind=R instead of x/z: Petey's navel, Petey, or R behind him (stage 55), followed every tick.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
 		bool gotX = false, gotZ = false;
 		std::string tok;
@@ -276,12 +292,54 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "spray") { c.spray = v != 0.f; c.sprayFrom = static_cast<int>(v) - 1; } // R from tick N-1: jump first, then hover
 			else if (key == "jump" && c.op == Op::WalkTo) c.frames = static_cast<int>(v); // A held for the first N ticks while steering
 			else if (key == "hover" && c.op == Op::WalkTo) c.hover = v != 0.f; // opt-in: older routes were tuned without it
+			else if (key == "navel") c.navel = gotX = gotZ = v != 0.f;
+			else if (key == "petey") c.petey = gotX = gotZ = v != 0.f;
+			else if (key == "behind" && c.op == Op::WalkTo) { c.behind = v; gotX = gotZ = v > 0.f; }
+			else if (key == "soft") c.soft = v != 0.f;
 			else if (key == "tol") c.tol = v;
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
 			else fail(line, "unexpected token in walkto", tok);
 		}
 		if (!gotX || !gotZ) fail(line, "walkto needs x= and z=", text);
 		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
+		return c;
+	}
+	if (verb == "guard") {
+		// guard radius=R: from here on, while Mario is on the ground and a small enemy is within R, pause the script and spray it
+		// (as a player turns on a goop slug before it jumps him); guard radius=0 turns it off.
+		c.op = Op::Guard;
+		std::string tok;
+		if (!(in >> tok) || tok.rfind("radius=", 0) != 0 || (in >> tok)) fail(line, "guard needs only radius=R", text);
+		c.radius = static_cast<float>(std::atof(text.c_str() + text.find('=') + 1));
+		return c;
+	}
+	if (verb == "label" || verb == "goto") {
+		// label NAME / goto NAME unless <cond...> max=K: jump back to NAME while the conditions fail, at most K times, then fail.
+		// A fight round a knock-back or a missed pound spoils is played again, as a player would.
+		c.op = verb == "label" ? Op::Label : Op::Goto;
+		if (!(in >> c.path)) fail(line, "needs a label name", text);
+		std::string tok;
+		while (in >> tok) {
+			if (c.op == Op::Goto && tok == "unless") continue;
+			if (c.op == Op::Goto && tok.rfind("max=", 0) == 0) c.maxTicks = std::atoi(tok.c_str() + 4);
+			else if (c.op != Op::Goto || !parseCond(tok, c)) fail(line, "unexpected token", tok);
+		}
+		if (c.op == Op::Goto && (c.conds.empty() || c.maxTicks <= 0)) fail(line, "goto needs unless <cond> and max=K", text);
+		return c;
+	}
+	if (verb == "clear") {
+		// clear [radius=R] [until <cond...>] timeout=N: walk at the nearest live small enemy within R (XZ, 300 up or down) with R held, as a
+		// player sprays goop slugs off; ends when none is left in R (with until: when the conditions hold, standing still while none is
+		// near), or quietly at the timeout (they keep spawning).
+		c.op = Op::Clear;
+		c.radius = 700.f;
+		std::string tok;
+		while (in >> tok) {
+			if (tok.rfind("radius=", 0) == 0) c.radius = static_cast<float>(std::atof(tok.c_str() + 7));
+			else if (tok.rfind("timeout=", 0) == 0) c.maxTicks = std::atoi(tok.c_str() + 8);
+			else if (tok != "until" && !parseCond(tok, c)) fail(line, "unexpected token in clear", tok);
+		}
+		if (c.maxTicks <= 0) fail(line, "clear needs timeout=N (logic ticks)", text);
 		return c;
 	}
 	if (verb == "fightboss") {
@@ -421,6 +479,13 @@ void loadScript(const char* path)
 		if (text.find_first_not_of(" \t\r") == std::string::npos) continue;
 		gScript.push_back(parseLine(text, line));
 	}
+	for (Command& g : gScript) {
+		if (g.op != Op::Goto) continue;
+		g.frames = -1;
+		for (size_t i = 0; i < gScript.size(); ++i)
+			if (gScript[i].op == Op::Label && gScript[i].path == g.path) g.frames = static_cast<int>(i);
+		if (g.frames < 0) fail(g.line, "goto to an unknown label", g.path);
+	}
 	std::printf("[devscript] loaded %zu commands from %s\n", gScript.size(), path);
 }
 
@@ -475,6 +540,48 @@ TBiancoGateKeeper* findBoss()
 	static const char kName[] = "\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x72\x83\x41\x83\x93\x83\x52\x81\x6a";
 	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
 	return dynamic_cast<TBiancoGateKeeper*>(JDrama::TNameRefGen::search(kName));
+}
+
+// Petey, the first actor of "ボスパックンマネージャー" (Shift-JIS bytes; a search for the actor name "ボスパックンA" found nothing), null outside stage 55.
+TBossPakkun* findPetey()
+{
+	static const char kName[] = "\x83\x7b\x83\x58\x83\x70\x83\x62\x83\x4e\x83\x93\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b";
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
+	TLiveManager* m = dynamic_cast<TLiveManager*>(JDrama::TNameRefGen::search(kName));
+	return m && m->getObjNum() > 0 ? dynamic_cast<TBossPakkun*>(m->getObj(0)) : nullptr;
+}
+
+// The nearest live, shown small enemy within r of Mario in XZ and 300 in Y (`clear`), or null.
+const TSmallEnemy* nearestSmallEnemy(float r)
+{
+	const TSmallEnemy* best = nullptr;
+	if (!gpConductor || !gpMarioOriginal) return best;
+	const JGeometry::TVec3<f32>& m = gpMarioOriginal->mPosition;
+	for (JGadget::TList<TEnemyManager*>::iterator it = gpConductor->unk20.begin(); it != gpConductor->unk20.end(); ++it)
+		for (int i = 0; i < (*it)->getObjNum(); ++i) {
+			const TSmallEnemy* e = dynamic_cast<const TSmallEnemy*>((*it)->getObj(i));
+			if (!e || e->checkLiveFlag(LIVE_FLAG_DEAD) || e->checkLiveFlag(LIVE_FLAG_HIDDEN) || std::fabs(e->mPosition.y - m.y) > 300.f) continue;
+			const float d = std::hypot(e->mPosition.x - m.x, e->mPosition.z - m.z);
+			if (d < r) { r = d; best = e; }
+		}
+	return best;
+}
+
+void walkStick(const Command& c, s8& sx, s8& sy, float& dist);
+
+// Pad that turns Mario toward e with the analog R trigger full on (`clear`, `guard`); gpCamera must be set.
+void sprayAt(const TSmallEnemy* e, PADStatus& pad)
+{
+	Command t{};
+	t.pos[0] = e->mPosition.x;
+	t.pos[2] = e->mPosition.z;
+	float dist = 0.f;
+	walkStick(t, pad.stickX, pad.stickY, dist);
+	if (dist < 300.f) { // close: turn toward it at a walk instead of running into its attack
+		pad.stickX = static_cast<s8>(pad.stickX / 3);
+		pad.stickY = static_cast<s8>(pad.stickY / 3);
+	}
+	pad.triggerRight = 255;
 }
 
 // The shadow Mario of the Delfino gate event ("マリオモドキ_0", Shift-JIS bytes): position, distance to Mario.
@@ -729,6 +836,16 @@ bool condHolds(const Command& c)
 		case Command::Cond::MarioYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y >= val; break;
 		case Command::Cond::MarioYLe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y <= val; break;
 		case Command::Cond::FloorYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mFloorPosition.y >= val; break;
+		case Command::Cond::Weak: { const TBossPakkun* p = sceneReady() ? findPetey() : nullptr; ok = p && p->mWeakPoint == val; break; }
+		case Command::Cond::PeteyHp: { const TBossPakkun* p = sceneReady() ? findPetey() : nullptr; ok = p && p->getHitPoints() == val; break; }
+		case Command::Cond::Facing: {
+			const TBossPakkun* p = sceneReady() ? findPetey() : nullptr;
+			ok = p && gpMarioOriginal
+			     && std::fabs(std::remainder(std::atan2(gpMarioOriginal->mPosition.x - p->mPosition.x, gpMarioOriginal->mPosition.z - p->mPosition.z)
+			                                     - p->mRotation.y * (3.14159265f / 180.f), 6.2831853f))
+			            < val * (3.14159265f / 180.f);
+			break;
+		}
 		default: break;
 		}
 		if (!ok) return false;
@@ -912,6 +1029,62 @@ void step()
 {
 	while (gCursor < gScript.size()) {
 		const Command& c = gScript[gCursor];
+		if (c.navel || c.petey || c.behind > 0.f) {
+			const TBossPakkun* p = sceneReady() ? findPetey() : nullptr;
+			if (!p || !p->mNavel) {
+				std::printf("[devscript] FAIL line=%d: Petey target without Petey in the scene, tick=%d\n", c.line, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			Command& w = gScript[gCursor];
+			const JGeometry::TVec3<f32>& t = c.navel ? p->mNavel->mPosition : p->mPosition;
+			w.pos[0] = t.x;
+			w.pos[1] = t.y;
+			w.pos[2] = t.z;
+			if (c.behind > 0.f && gpMarioOriginal) {
+				// TNerveBPWait swings at Mario inside the swing radius within 60 deg of the facing, and pivots and vomits at him
+				// elsewhere: walk around outside that radius until within 30 deg of his back, then step in.
+				float a = (p->mRotation.y + 180.f) * (3.14159265f / 180.f), r = c.behind;
+				const float am = std::atan2(gpMarioOriginal->mPosition.x - t.x, gpMarioOriginal->mPosition.z - t.z);
+				const float d = std::remainder(a - am, 6.2831853f);
+				if (std::fabs(d) > 0.5236f) {
+					a = am + (d > 0.f ? 0.7854f : -0.7854f);
+					r = p->getBossPakkunParams()->mSLSwingLength.get() + 150.f;
+				}
+				w.pos[0] = t.x + r * std::sin(a);
+				w.pos[2] = t.z + r * std::cos(a);
+			}
+		}
+		if (gGuard > 0.f && sceneReady() && gpMarioOriginal && gpCamera
+		    && gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y < 10.f) { // not mid-jump or mid-pound
+			static const TSmallEnemy* target = nullptr; // pooled actors: the pointer stays valid after death
+			static int since = 0;
+			const TSmallEnemy* e = nearestSmallEnemy(gGuard);
+			if (target && e != target) {
+				std::printf("[devscript] guard: target %s after %d ticks, tick=%d\n", target->checkLiveFlag(LIVE_FLAG_DEAD) ? "dead" : "left", since, gTick);
+				target = nullptr;
+			}
+			if (e) {
+				if (!target) {
+					const JGeometry::TVec3<f32>& m = gpMarioOriginal->mPosition;
+					std::printf("[devscript] guard: enemy at (%.0f,%.0f,%.0f) dist=%.0f, line=%d paused tick=%d\n", e->mPosition.x, e->mPosition.y, e->mPosition.z,
+					    std::hypot(e->mPosition.x - m.x, e->mPosition.z - m.z), c.line, gTick);
+					since = 0;
+				}
+				target = e;
+				++since;
+				PADStatus pad{};
+				sprayAt(e, pad);
+				setVirtualPad(0, &pad);
+				return; // the current command resumes once no enemy is near
+			}
+		}
+		if (c.op == Op::Guard) {
+			gGuard = c.radius;
+			std::printf("[devscript] guard radius=%.0f tick=%d\n", gGuard, gTick);
+			++gCursor;
+			continue;
+		}
 		if (c.op == Op::Hold && !c.conds.empty()) {
 			// hold <buttons/trig> until <cond> timeout=N: pad held until the condition is true; timeout fails loudly.
 			if (!gStarted) {
@@ -1125,6 +1298,14 @@ void step()
 				pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f)); // small deflection: turns more than it walks
 				pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
 			}
+			if (gRemaining >= c.maxTicks && c.soft) {
+				std::printf("[devscript] soft timeout faceto line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
+				const PADStatus neutral{};
+				setVirtualPad(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
 			if (gRemaining >= c.maxTicks) {
 				std::printf("[devscript] TIMEOUT faceto line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
 				std::fflush(stdout);
@@ -1249,6 +1430,44 @@ void step()
 			++gRemaining;
 			return;
 		}
+		if (c.op == Op::Goto) {
+			if (condHolds(c)) {
+				std::printf("[devscript] goto %s passed line=%d tick=%d\n", c.path.c_str(), c.line, gTick);
+				++gCursor;
+				continue;
+			}
+			if (++gScript[gCursor].taken > c.maxTicks) {
+				std::printf("[devscript] FAIL goto %s line=%d: condition still unmet after %d retries, tick=%d\n", c.path.c_str(), c.line, c.maxTicks, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			const TBossPakkun* p = findPetey();
+			std::printf("[devscript] goto %s retry=%d line=%d petey hp=%d weak=%d health=%d tick=%d\n", c.path.c_str(), gScript[gCursor].taken, c.line,
+			    p ? p->getHitPoints() : -1, p ? p->mWeakPoint : -1, gpMarioOriginal ? gpMarioOriginal->mHealth : -1, gTick);
+			gCursor = static_cast<size_t>(c.frames);
+			continue;
+		}
+		if (c.op == Op::Clear) {
+			if (!gStarted) {
+				gStarted = true;
+				gRemaining = 0;
+				std::printf("[devscript] clear start line=%d radius=%.0f tick=%d\n", c.line, c.radius, gTick);
+			}
+			const TSmallEnemy* e = sceneReady() ? nearestSmallEnemy(c.radius) : nullptr;
+			if ((c.conds.empty() ? !e : condHolds(c)) || gRemaining >= c.maxTicks) {
+				std::printf("[devscript] clear done line=%d left=%d after=%d tick=%d\n", c.line, e ? 1 : 0, gRemaining, gTick);
+				const PADStatus neutral{};
+				setVirtualPad(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
+			PADStatus pad{};
+			if (e && gpCamera) sprayAt(e, pad);
+			setVirtualPad(0, &pad);
+			++gRemaining;
+			return;
+		}
 		if (c.op == Op::WalkTo) {
 			static int walkStall = 0, walkRecover = 0, walkSide = 1;
 			static float walkRefX = 0.f, walkRefZ = 0.f;
@@ -1256,6 +1475,7 @@ void step()
 				gStarted = true;
 				gRemaining = 0;
 				std::printf("[devscript] walkto start line=%d to=(%.0f,%.0f) radius=%.0f tick=%d\n", c.line, c.pos[0], c.pos[2], c.radius, gTick);
+				if (c.navel) std::printf("[devscript] navel y=%.0f weak=%d hp=%d mario=(%.0f,%.0f,%.0f)\n", c.pos[1], findPetey()->mWeakPoint, findPetey()->getHitPoints(),gpMarioOriginal ? gpMarioOriginal->mPosition.x : 0.f, gpMarioOriginal ? gpMarioOriginal->mPosition.y : 0.f, gpMarioOriginal ? gpMarioOriginal->mPosition.z : 0.f);
 				walkStall = 0;
 				walkRecover = 0;
 				walkRefX = gpMarioOriginal ? gpMarioOriginal->mPosition.x : 0.f;
@@ -1316,6 +1536,14 @@ void step()
 					continue;
 				}
 			}
+			if (gRemaining >= c.maxTicks && c.soft) {
+				std::printf("[devscript] soft timeout walkto line=%d dist=%.0f tick=%d\n", c.line, dist, gTick);
+				const PADStatus neutral{};
+				setVirtualPad(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
 			if (gRemaining >= c.maxTicks) {
 				std::printf("[devscript] TIMEOUT walkto line=%d: dist=%.0f after %d ticks, tick=%d\n", c.line, dist, gRemaining, gTick);
 				std::fflush(stdout);
@@ -1335,6 +1563,13 @@ void step()
 			const PADStatus neutral{};
 			if (condHolds(c)) {
 				std::printf("[devscript] %s met line=%d after=%d tick=%d\n", name, c.line, gRemaining, gTick);
+				setVirtualPad(0, &neutral);
+				gStarted = false;
+				++gCursor;
+				continue;
+			}
+			if (gRemaining >= c.maxTicks && c.soft) {
+				std::printf("[devscript] soft timeout %s line=%d tick=%d\n", name, c.line, gTick);
 				setVirtualPad(0, &neutral);
 				gStarted = false;
 				++gCursor;

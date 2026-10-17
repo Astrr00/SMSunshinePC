@@ -74,12 +74,15 @@ void TSpider::bind(TLiveActor* param_1)
 	param_1->mGroundHeight = fVar3;
 	param_1->mGroundPlane  = local_60;
 
+	// asm 0x802819A0..0x802819D4: the wall check runs at head height with the wall radius.
 	TBGWallCheckRecord local_90(
-	    local_50.x, local_50.y, local_50.z,
-	    ((TSpineEnemy*)param_1)->mBodyScale * param_1->mHeadHeight, 1, 0);
+	    local_50.x, local_50.y + ((TSpineEnemy*)param_1)->getHeadHeight(),
+	    local_50.z, ((TSpineEnemy*)param_1)->getWallRadius(), 1, 0);
 
 	JGeometry::TVec3<f32> local_bc;
-	f32 unaff_f29;
+	// f29 is left unset when a wall is touched while moving away from it; every caller reaches this binder
+	// through TSmallEnemy::moveObject, which holds 0.0f in f29 at its bind() call (asm 0x8027F600).
+	f32 unaff_f29 = 0.0f;
 
 	bool b   = gpMap->isTouchedWallsAndMoveXZ(&local_90);
 	local_bc = local_90.mCenter;
@@ -116,7 +119,7 @@ void TSpider::bind(TLiveActor* param_1)
 
 			JGeometry::TVec3<f32> tmp;
 			tmp.scale(((TSpineEnemy*)param_1)->getWallRadius() * unk10, normal);
-			local_bc.sub(tmp, local_90.mCenter);
+			local_bc.sub(tmp); // asm 0x80281B74: center minus the offset, not the reverse
 
 			unk10 += 1.0f / 60.0f;
 			if (unk10 > 1.0f)
