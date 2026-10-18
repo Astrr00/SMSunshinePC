@@ -6,6 +6,8 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+**Normal Petey milestone and prerequisite correction (2026-10-18).** `nw03_petey_clean` follows the normal menu, Bianco STORY2 portal/selector, windmill and roof-fall intro, defeats Petey (HP0 at tick20805) and visibly reveals the Shine, with no gameplay aids and an empty crash log. A controller-script branch error prevents collection/save/return, so this is not a full route PASS. The next trial dies on the ramp before reaching the boss, also without a native crash. The older cold Petey checkpoint is cheat-assisted and cannot seed normal later-world acceptance. See [normal-world-routes.md](normal-world-routes.md) for provenance and the verified conditional-branch fix; PC-CORE and PC-CONTENT remain open.
+
 **Later-world load coverage completed (2026-10-18).** All 91 present later-world scenario rows are covered on one uninstrumented Strict executable: 36 raw stage slots and 88 distinct archives.
 [world-load-coverage.tsv](world-load-coverage.tsv) records the archive, expected control scene, accepted run, exit code, duration, crash-log size and executable SHA256 for every row.
 `wl06` finishes with 89 passes and two script timeouts; `wl07` retries those two cases successfully on the unchanged binary: Noki raw9/scenario2 in 55 s, Pinna raw13/scenario6 in 39 s.
