@@ -110,6 +110,7 @@ struct Command {
 	float behind = 0.f;     // walkto behind=R: the point R behind Petey, reached around his swing radius
 	bool soft = false;      // walkto/faceto/waitfor soft=1: a timeout moves on (to a `goto` retry) instead of failing
 	int taken = 0;          // goto: jumps back taken so far (frames holds the label's command index)
+	bool jumpIf = false;    // goto if: branch on a completed phase; unless keeps the legacy retry behavior
 	float tol = 8.f;        // faceto: accepted angle error in degrees
 	int period = 30;        // mash: press for 2 ticks (hold=N: N ticks, a higher jump) every `period` ticks
 	bool gateMouth = false; // hold gate=mouth: the analog R trigger only while Petey's mouth takes water (peteyMouthTakesWater)
@@ -333,16 +334,18 @@ Command parseLine(const std::string& text, int line)
 	}
 	if (verb == "label" || verb == "goto") {
 		// label NAME / goto NAME unless <cond...> max=K: jump back to NAME while the conditions fail, at most K times, then fail.
+		// goto NAME if <cond...> max=K takes the branch when a phase has already completed.
 		// A fight round a knock-back or a missed pound spoils is played again, as a player would.
 		c.op = verb == "label" ? Op::Label : Op::Goto;
 		if (!(in >> c.path)) fail(line, "needs a label name", text);
 		std::string tok;
 		while (in >> tok) {
 			if (c.op == Op::Goto && tok == "unless") continue;
+			if (c.op == Op::Goto && tok == "if") { c.jumpIf = true; continue; }
 			if (c.op == Op::Goto && tok.rfind("max=", 0) == 0) c.maxTicks = std::atoi(tok.c_str() + 4);
 			else if (c.op != Op::Goto || !parseCond(tok, c)) fail(line, "unexpected token", tok);
 		}
-		if (c.op == Op::Goto && (c.conds.empty() || c.maxTicks <= 0)) fail(line, "goto needs unless <cond> and max=K", text);
+		if (c.op == Op::Goto && (c.conds.empty() || c.maxTicks <= 0)) fail(line, "goto needs if/unless <cond> and max=K", text);
 		return c;
 	}
 	if (verb == "clear") {
@@ -1546,7 +1549,7 @@ void step()
 			return;
 		}
 		if (c.op == Op::Goto) {
-			if (condHolds(c)) {
+			if (condHolds(c) != c.jumpIf) {
 				std::printf("[devscript] goto %s passed line=%d tick=%d\n", c.path.c_str(), c.line, gTick);
 				++gCursor;
 				continue;

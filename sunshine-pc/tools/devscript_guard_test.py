@@ -10,6 +10,9 @@ directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
     ("legacy", "guard radius=0\nend\n", 0, "done at tick"),
+    ("if_taken", "goto finish if thp=0 max=1\nwaitfor stage=999 timeout=1\nlabel finish\nend\n", 0, "goto finish retry=1"),
+    ("if_fallthrough", "goto finish if thp=2 max=1\nend\nlabel finish\nwaitfor stage=999 timeout=1\n", 0, "goto finish passed"),
+    ("unless_taken", "goto finish unless thp=2 max=1\nwaitfor stage=999 timeout=1\nlabel finish\nend\n", 0, "goto finish retry=1"),
     ("resume", "guard radius=0 resume=aim until bck=5\nlabel aim\nend\n", 0, "done at tick"),
     ("observations", "guard radius=0 until gkawake=1 squat=1 talkbusy=0 bckframe>=60 bckframe<=120\nend\n", 0, "done at tick"),
     ("unknown", "guard radius=0 resume=missing\nend\n", 2, "unknown label"),
