@@ -72,3 +72,16 @@ Portal-observer executable SHA256: `716b82f10d82317fc5b88393264d991f3a59e0cdd1f2
 
 The next candidate waits for the original sleep animation before moving in, uses a safer wake point, attempts normal Pause > Save > Yes > Continue, and adjusts the portal spray/jump inputs.
 Normal Ricco selector/entry, persisted unlock and Blooper completion remain open. None of these controller failures establishes an engine hang or optimization-related UB.
+
+
+## Controller replay corrections
+
+The steering helper now uses the camera input yaw consumed by `TMario::controllerWork` (`getUnk258()`), rather than deriving its basis from the rendered camera target.
+Its pure input conversion also compensates PADClamp's 15-unit per-axis deadzone. Host fixtures apply the game-side yaw equation independently across six camera angles and six world directions, including wraparound and a neutral arrival case.
+
+`nw23_ricco_entry` exposes a separate controller stall after entering the water: the enemy-defense helper treats any large distance above the seabed as an airborne braking jump and repeatedly emits neutral-stick R without advancing the route timeout.
+The helper now requires Mario's actual jumping flag as well as height above the floor; a compile-time assertion binds that flag to the game enum.
+The regression uses the actual jump and swim statuses from the replay. `nw24_ricco_entry` subsequently exits rc3 at the one-tick ground-height check after a failed return, with an empty crash log, rather than remaining in the swimming wait. This corrects the controller driver, not an engine hang.
+
+Strict has 0 unresolved symbols; all 67 host checks and all 13 native parser cases pass. The Ricco route is still being refined; a full entry or persisted unlock is not claimed by these helper tests.
+Controller-helper executable SHA256: `650f1bebfae64f25131b44e9f8fd53b447c1646216cbf0bc058f3e5447883db4`.

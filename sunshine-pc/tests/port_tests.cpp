@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "cheats/cheats_core.h"
+#include "devscript/controller_input.h"
 #include "json/json_lite.h"
 #include "mods/mod_manifest.h"
 #include "settings.h"
@@ -157,6 +158,30 @@ void testManifest() {
     check(mods::overlayDvdPath("sb/x.bin") == "/sb/x.bin", "overlay: DVD path form");
 }
 
+void testControllerSteering() {
+    bool correct = true;
+    const int yaws[] = {0, 8192, 16384, 24576, -32768, -12345};
+    const float targets[][2] = {{100, 0}, {0, 100}, {-100, 0}, {0, -100}, {200, -100}, {-100, 300}};
+    for (int yaw : yaws) {
+        for (const auto& target : targets) {
+            std::int8_t sx = 0, sy = 0;
+            const float dist = devscript::cameraRelativeStick(target[0], target[1], static_cast<std::int16_t>(yaw), sx, sy);
+            // Apply the game-side equation independently to the generated pad, then compare world headings.
+            const auto unclamped = [](int v) { return v > 15 ? v - 15 : v < -15 ? v + 15 : 0; };
+            const float heading = std::atan2(static_cast<float>(unclamped(sx)), -static_cast<float>(unclamped(sy))) + yaw * (6.2831853f / 65536.f);
+            const float dot = (std::sin(heading) * target[0] + std::cos(heading) * target[1]) / dist;
+            correct &= dot > 0.9998f;
+        }
+    }
+    check(correct, "controller: input camera yaw preserves world heading across turns and wraparound");
+    std::int8_t sx = 99, sy = 99;
+    const float dist = devscript::cameraRelativeStick(0.25f, 0.25f, 12345, sx, sy);
+    check(dist < 1.f && sx == 0 && sy == 0, "controller: reached target emits neutral stick");
+    // Actual jump and swimming states from the Ricco replay; both can be far above the seabed.
+    check(devscript::brakingJump(0x02000880, 140.f) && !devscript::brakingJump(0x000022D2, 620.f)
+          && !devscript::brakingJump(0x0C400201, 0.f), "controller: swimming cannot stall the braking-jump wait");
+}
+
 void testWidescreen() {
     check(widescreenRenderWidthForAspect(4.0 / 3.0) == 640, "widescreen: 4:3 -> 640");
     check(widescreenRenderWidthForAspect(16.0 / 9.0) == 852, "widescreen: 16:9 -> 852 (multiple of 4)");
@@ -194,6 +219,7 @@ int main() {
     testTick();
     testManifest();
     testWidescreen();
+    testControllerSteering();
     smsHostChecks(check);
     std::printf("%d checks, %d failed\n", gChecks, gFailures);
     return gFailures;

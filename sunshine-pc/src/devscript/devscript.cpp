@@ -5,6 +5,7 @@
 //                               [controls] dead zones apply to it; `menu vstick:<x>:<y>` moves its left stick
 //   SUNSHINE_DEV_VPAD=late      same pad, added only at the game's first event pump (after applyRuntimeSettings)
 // Input goes through Aurora's virtual pad status; the game code runs unchanged.
+#include "controller_input.h"
 #include <dolphin/pad.h>
 #include <dolphin/gx.h>
 
@@ -53,6 +54,8 @@
 #include "System/EmitterViewObj.hpp"
 #include "JSystem/JParticle/JPAEmitterManager.hpp"
 #include "JSystem/JParticle/JPAEmitter.hpp"
+
+static_assert(devscript::kMarioJumping == MARIO_STATUS_FLAG_JUMPING);
 
 extern JPAEmitterManager* gpEmitterManager4D2;
 #include "GC2D/GCConsole2.hpp"
@@ -955,21 +958,11 @@ bool condHolds(const Command& c)
 	return true;
 }
 
-// Main-stick vector (-127..127) that walks Mario toward (x,z). The stick is camera-relative: up = away from the camera.
-// Sunshine world is right-handed, y up; camera forward f (XZ), right = (-fz, fx).
+// Use the game's input yaw; the rendered look direction can differ during camera modes.
 void walkStick(const Command& c, s8& sx, s8& sy, float& dist)
 {
-	const float dx = c.pos[0] - gpMarioOriginal->mPosition.x;
-	const float dz = c.pos[2] - gpMarioOriginal->mPosition.z;
-	dist = std::sqrt(dx * dx + dz * dz);
-	float fx = gpCamera->mTarget.x - gpCamera->mPosition.x;
-	float fz = gpCamera->mTarget.z - gpCamera->mPosition.z;
-	const float fl = std::sqrt(fx * fx + fz * fz);
-	if (fl < 1.f || dist < 1.f) { sx = sy = 0; return; }
-	fx /= fl;
-	fz /= fl;
-	sx = static_cast<s8>(127.f * (dx * -fz + dz * fx) / dist);
-	sy = static_cast<s8>(127.f * (dx * fx + dz * fz) / dist);
+	dist = devscript::cameraRelativeStick(c.pos[0] - gpMarioOriginal->mPosition.x,
+	    c.pos[2] - gpMarioOriginal->mPosition.z, gpCamera->getUnk258(), sx, sy);
 }
 
 // Dev aid for `chase`: floor cells (40 units, cx/cz/y as int16) cut from the stage's map.col by tools/nav (SUNSHINE_DEV_NAV=<file>).
@@ -1174,7 +1167,7 @@ void step()
 		    && (gGuardResume >= 0 || gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y < 10.f)) { // legacy guards do not interrupt jumps
 			static const TSmallEnemy* target = nullptr; // pooled actors: the pointer stays valid after death
 			static int since = 0;
-			const bool airborne = gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y >= 10.f;
+			const bool airborne = devscript::brakingJump(gpMarioOriginal->mStatus, gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y);
 			if (gGuardResume >= 0 && airborne && target) {
 				// Finish the braking jump without letting the paused walk command steer it back into goop.
 				PADStatus pad{};
