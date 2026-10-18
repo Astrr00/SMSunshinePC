@@ -60,17 +60,17 @@ hold L stick=0,127 frames=7
 hold L frames=3
 log
 # gatekeeper.cpp:590-605: bck0x12 throat accepts damage only at animation frames50..160.
-# shortcut: sixteen pad ticks enter that window at current native pacing; resample if pacing changes.
+# Enter the window by animation frame (bckframe>=), not by a tick count that depends on pacing.
 hold L until bck=18 timeout=900
-hold L frames=16
+hold L until bck=18 bckframe>=60 timeout=300
 hold R until bck=3 timeout=300
 log
 hold L until bck=18 timeout=900
-hold L frames=16
+hold L until bck=18 bckframe>=60 timeout=300
 hold R until bck=3 timeout=300
 log
 hold L until bck=18 timeout=900
-hold L frames=16
+hold L until bck=18 bckframe>=60 timeout=300
 hold R until bck=5 timeout=300
 log
 waitfor stage=1 scen=1 director mario dirstate=4 camDemo=0 timeout=3000

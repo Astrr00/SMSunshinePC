@@ -81,6 +81,7 @@ extern "C" s32 THPPlayerGetState();
 extern int gDbgGKHeadSprayHits;
 extern int gDbgGKBodySprayHits;
 extern int gDbgGKCurBck;
+extern float gDbgGKBckFrame;
 #endif
 // Logic tick count from sunshine-pc/src/framerate/framerate.cpp. Return type must be u32: MSVC mangling includes it,
 // and an `unsigned` declaration links to an undefined symbol (/FORCE:UNRESOLVED turns the call into a bogus address).
@@ -91,7 +92,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, BckFrameGe, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -174,6 +175,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("washed=", 0) == 0) k = Command::Cond::Washed; // graffiti wash finished (see washedCount)
 	else if (tok.rfind("talk=", 0) == 0) k = Command::Cond::Talk; // 1 while a talk/message window owns the game (TMarDirector::isTalkModeNow)
 	else if (tok.rfind("bck=", 0) == 0) k = Command::Cond::Bck; // TBiancoGateKeeper/GateKeeper current bck index (gatekeeper.cpp gDbgGKCurBck)
+	else if (tok.rfind("bckframe>=", 0) == 0) k = Command::Cond::BckFrameGe; // frame of that bck (gatekeeper.cpp gDbgGKBckFrame), with bck=N
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
 	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
@@ -854,6 +856,7 @@ bool condHolds(const Command& c)
 		case Command::Cond::Washed: ok = sceneReady() && washedCount() >= val; break;
 		case Command::Cond::Talk: ok = sceneReady() && gpMarDirector->isTalkModeNow() == (val != 0); break;
 		case Command::Cond::Bck: ok = sceneReady() && gDbgGKCurBck == val; break;
+		case Command::Cond::BckFrameGe: ok = sceneReady() && gDbgGKBckFrame >= val; break;
 		case Command::Cond::MarioYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y >= val; break;
 		case Command::Cond::MarioYLe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y <= val; break;
 		case Command::Cond::FloorYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mFloorPosition.y >= val; break;

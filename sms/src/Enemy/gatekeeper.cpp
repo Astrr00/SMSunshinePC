@@ -84,6 +84,8 @@ int gDbgGKHeadSprayHits = 0;
 int gDbgGKBodySprayHits = 0;
 // Dev hook: bck index of the GateKeeper performed last (devscript `bck=N` condition, SUNSHINE_DEV_HPLOG hit lines).
 int gDbgGKCurBck = -1;
+// Dev hook: frame of that bck (devscript `bckframe>=N` condition), so a route enters the head-hit window by animation frame, not by tick count.
+float gDbgGKBckFrame = 0.f;
 #endif
 
 BOOL TGKHitObj::receiveMessage(THitActor* sender, u32 message)
@@ -159,6 +161,7 @@ void TGateKeeperBase::perform(u32 cue, JDrama::TGraphics* graphics)
 {
 #ifdef TARGET_PC
 	gDbgGKCurBck = mMActor->getCurAnmIdx(ANM_TYPE_BCK);
+	gDbgGKBckFrame = mMActor->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
 #endif
 	if (!checkLiveFlag(LIVE_FLAG_DEAD)) {
 		if (cue & CUE_CALC_ANIM)
