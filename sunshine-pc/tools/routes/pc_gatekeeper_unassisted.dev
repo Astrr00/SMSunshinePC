@@ -26,6 +26,9 @@ walkto x=5380 z=2700 radius=150 timeout=1200
 walkto x=4980 z=3100 radius=150 timeout=600
 # Wash the approach before crossing the pollution boundary rather than entering it dry.
 walkto x=1600 z=5800 radius=80 spray=1 timeout=900
+# Defend the approach and restart its aim after each slug; stop only when the boss actually appears.
+guard radius=450 resume=washed_approach until gkawake=1
+label washed_approach
 walkto x=12 z=5450 radius=45 spray=1 timeout=600
 log
 hold A frames=1
@@ -34,27 +37,43 @@ log
 wait frames=45
 log
 faceto x=12 z=4631 tol=3 timeout=180
+# Turning on oil adds velocity; stop it before L settles the camera and the spray starts.
+hold A frames=1
+wait frames=45
 hold L frames=10
 log
 shot washed_approach.png
 # Remain stationary and spray the sleeping body until the normal appear animation.
-hold L trig=0,255 until bck=0 timeout=600
+hold L trig=0,255 until gkawake=1 timeout=600
+guard radius=0
 log
 shot boss_awake.png
 waitfor camDemo=0 timeout=900
 wait frames=1
+guard radius=450 resume=throat_round until bck=5
+label wash_spot
 hold L frames=10
 log
 # On goop the first back-stick R phase turns Mario, not the nozzle (typed tick1247).
 # Keep spraying at rest until the observed rear cleanup completes, then reacquire the boss.
-hold R stick=0,-127 frames=28
-hold R frames=240
+hold trig=0,255 stick=0,-127 frames=28
+hold trig=0,255 frames=240
 log
+# Hits change facing and pitch; reacquire the stance before each short spray window.
+label throat_round
+walkto x=12 z=5350 radius=100 spray=1 timeout=600
+hold A frames=1
+wait frames=45
+faceto x=12 z=4631 tol=3 timeout=180
+# A defense or a dive may have put the boss back to sleep; wake it with the normal flat jet.
+hold trig=0,255 until gkawake=1 timeout=600
+waitfor camDemo=0 timeout=900
 faceto x=12 z=4631 tol=3 timeout=180
 hold L frames=15
 log
-# Raise through the head to provoke bck7, then dry-adjust down from sampled pitch-11207.
-hold R stick=0,-127 frames=28
+goto wash_spot unless squat=1 max=8
+# Set the nozzle dry, so damage can only occur in the observed throat window below.
+hold L stick=0,-127 frames=28
 # Source/trace: full stick adds about720 pitch units per pad tick before clamping.
 hold L stick=0,127 frames=7
 hold L frames=3
@@ -62,17 +81,11 @@ log
 # gatekeeper.cpp:590-605: bck0x12 throat accepts damage only at animation frames50..160.
 # Enter the window by animation frame (bckframe>=), not by a tick count that depends on pacing.
 hold L until bck=18 timeout=900
-hold L until bck=18 bckframe>=60 timeout=300
-hold R until bck=3 timeout=300
+hold L until bck=18 bckframe>=60 bckframe<=120 timeout=300
+hold R frames=45
 log
-hold L until bck=18 timeout=900
-hold L until bck=18 bckframe>=60 timeout=300
-hold R until bck=3 timeout=300
-log
-hold L until bck=18 timeout=900
-hold L until bck=18 bckframe>=60 timeout=300
-hold R until bck=5 timeout=300
-log
+goto throat_round unless bck=5 max=8
+guard radius=0
 waitfor stage=1 scen=1 director mario dirstate=4 camDemo=0 timeout=3000
 log
 shot gatekeeper_defeated.png

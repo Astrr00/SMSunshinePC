@@ -11,7 +11,8 @@ ADAPT = "SUNSHINE_ALLOW_CPU_ADAPTER=0"
 RUNS = [  # (script, seconds, extra args)
     ("pc_ricco_scene", 150, ["SUNSHINE_DEV_START=ricco/0", ADAPT]),
     ("pc_airport_unassisted", 700, [ADAPT]),
-    ("pc_gatekeeper_unassisted", 500, ["--appdata-from", "pg1_airport_reload_20261016", ADAPT]),
+    # Washing needs GX copy readback; keep route.py's software-renderer fallback on GPU-less hosts.
+    ("pc_gatekeeper_unassisted", 500, ["--appdata-from", "pg1_airport_reload_20261016"]),
     ("pc_shadow_unassisted", 400, ["SUNSHINE_DEV_START=dolpic/1", "SUNSHINE_DEV_NAV=" + NAV, ADAPT]),
 ]
 for script, secs, extra in RUNS:
@@ -23,5 +24,6 @@ for script, secs, extra in RUNS:
                         "--seconds", str(secs)] + extra, cwd=ROOT, capture_output=True, text=True)
     d = os.path.join(ROOT, "build", "Route", name)
     log = open(os.path.join(d, "run.log"), errors="replace").read() if os.path.exists(os.path.join(d, "run.log")) else ""
-    ok = r.returncode == 0 and "done at tick" in log and os.path.getsize(os.path.join(d, "crash.log")) <= 2 if os.path.exists(os.path.join(d, "crash.log")) else True
+    crash = os.path.join(d, "crash.log")
+    ok = r.returncode == 0 and "done at tick" in log and (not os.path.exists(crash) or os.path.getsize(crash) == 0)
     print(f"{'PASS' if ok else 'FAIL'} {script} rc={r.returncode} {time.time()-t:.0f}s", flush=True)

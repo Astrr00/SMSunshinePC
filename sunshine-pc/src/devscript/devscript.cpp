@@ -92,7 +92,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, BckFrameGe, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -137,6 +137,8 @@ bool gLoaded = false;
 bool gDone = false;
 int gTick = 0;
 float gGuard = 0.f; // `guard radius=R`, 0 = off
+int gGuardResume = -1; // optional label to restart after defending against a small enemy
+size_t gGuardCommand = 0; // command whose observed `until` conditions stop the controller defense
 
 [[noreturn]] void fail(int line, const char* msg, const std::string& tok)
 {
@@ -176,6 +178,9 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("talk=", 0) == 0) k = Command::Cond::Talk; // 1 while a talk/message window owns the game (TMarDirector::isTalkModeNow)
 	else if (tok.rfind("bck=", 0) == 0) k = Command::Cond::Bck; // TBiancoGateKeeper/GateKeeper current bck index (gatekeeper.cpp gDbgGKCurBck)
 	else if (tok.rfind("bckframe>=", 0) == 0) k = Command::Cond::BckFrameGe; // frame of that bck (gatekeeper.cpp gDbgGKBckFrame), with bck=N
+	else if (tok.rfind("bckframe<=", 0) == 0) k = Command::Cond::BckFrameLe;
+	else if (tok.rfind("gkawake=", 0) == 0) k = Command::Cond::GkAwake; // currently raised, including an appear animation the route did not catch at frame zero
+	else if (tok.rfind("squat=", 0) == 0) k = Command::Cond::Squat;
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
 	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
@@ -313,10 +318,16 @@ Command parseLine(const std::string& text, int line)
 	if (verb == "guard") {
 		// guard radius=R: from here on, while Mario is on the ground and a small enemy is within R, pause the script and spray it
 		// (as a player turns on a goop slug before it jumps him); guard radius=0 turns it off.
+		// resume=LABEL restarts the controller setup after defense; until <cond...> stops defense at an observed milestone.
 		c.op = Op::Guard;
 		std::string tok;
-		if (!(in >> tok) || tok.rfind("radius=", 0) != 0 || (in >> tok)) fail(line, "guard needs only radius=R", text);
+		if (!(in >> tok) || tok.rfind("radius=", 0) != 0) fail(line, "guard needs radius=R [resume=LABEL]", text);
 		c.radius = static_cast<float>(std::atof(text.c_str() + text.find('=') + 1));
+		while (in >> tok) {
+			if (tok == "until") continue;
+			if (tok.rfind("resume=", 0) == 0 && tok.size() > 7) c.path = tok.substr(7);
+			else if (!parseCond(tok, c)) fail(line, "unexpected token in guard", tok);
+		}
 		return c;
 	}
 	if (verb == "label" || verb == "goto") {
@@ -486,11 +497,11 @@ void loadScript(const char* path)
 		gScript.push_back(parseLine(text, line));
 	}
 	for (Command& g : gScript) {
-		if (g.op != Op::Goto) continue;
+		if (g.op != Op::Goto && !(g.op == Op::Guard && !g.path.empty())) continue;
 		g.frames = -1;
 		for (size_t i = 0; i < gScript.size(); ++i)
 			if (gScript[i].op == Op::Label && gScript[i].path == g.path) g.frames = static_cast<int>(i);
-		if (g.frames < 0) fail(g.line, "goto to an unknown label", g.path);
+		if (g.frames < 0) fail(g.line, "unknown label", g.path);
 	}
 	std::printf("[devscript] loaded %zu commands from %s\n", gScript.size(), path);
 }
@@ -857,6 +868,19 @@ bool condHolds(const Command& c)
 		case Command::Cond::Talk: ok = sceneReady() && gpMarDirector->isTalkModeNow() == (val != 0); break;
 		case Command::Cond::Bck: ok = sceneReady() && gDbgGKCurBck == val; break;
 		case Command::Cond::BckFrameGe: ok = sceneReady() && gDbgGKBckFrame >= val; break;
+		case Command::Cond::BckFrameLe: ok = sceneReady() && gDbgGKBckFrame <= val; break;
+		case Command::Cond::Squat: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT) == (val != 0); break;
+		case Command::Cond::GkAwake: {
+			const TBiancoGateKeeper* b = sceneReady() ? findBoss() : nullptr;
+			if (b && b->mSpine) {
+				const auto* nerve = b->mSpine->getCurrentNerve();
+				const bool awake = nerve == &TNerveBGKAppear::theNerve() || nerve == &TNerveBGKWait::theNerve()
+				    || nerve == &TNerveBGKWait2::theNerve() || nerve == &TNerveBGKAwakeDamage::theNerve()
+				    || nerve == &TNerveBGKDie::theNerve();
+				ok = awake == (val != 0);
+			}
+			break;
+		}
 		case Command::Cond::MarioYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y >= val; break;
 		case Command::Cond::MarioYLe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mPosition.y <= val; break;
 		case Command::Cond::FloorYGe: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mFloorPosition.y >= val; break;
@@ -1079,16 +1103,44 @@ void step()
 				w.pos[2] = t.z + r * std::cos(a);
 			}
 		}
+		if (c.op == Op::Guard) {
+			gGuard = c.radius;
+			gGuardResume = c.path.empty() ? -1 : c.frames;
+			gGuardCommand = gCursor;
+			std::printf("[devscript] guard radius=%.0f tick=%d\n", gGuard, gTick);
+			++gCursor;
+			continue;
+		}
+		if (gGuard > 0.f && sceneReady() && !gScript[gGuardCommand].conds.empty() && condHolds(gScript[gGuardCommand])) {
+			std::printf("[devscript] guard: completed line=%d tick=%d\n", gScript[gGuardCommand].line, gTick);
+			gGuard = 0.f;
+			gGuardResume = -1;
+		}
 		if (gGuard > 0.f && sceneReady() && gpMarioOriginal && gpCamera
-		    && gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y < 10.f) { // not mid-jump or mid-pound
+		    && (gGuardResume >= 0 || gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y < 10.f)) { // legacy guards do not interrupt jumps
 			static const TSmallEnemy* target = nullptr; // pooled actors: the pointer stays valid after death
 			static int since = 0;
-			const TSmallEnemy* e = nearestSmallEnemy(gGuard);
+			const bool airborne = gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y >= 10.f;
+			if (gGuardResume >= 0 && airborne && target) {
+				// Finish the braking jump without letting the paused walk command steer it back into goop.
+				PADStatus pad{};
+				pad.triggerRight = 255;
+				setVirtualPad(0, &pad);
+				return;
+			}
+			const TSmallEnemy* e = airborne ? nullptr : nearestSmallEnemy(gGuard);
 			static int reface = 0; // ticks left to turn back toward Petey after a slug was dealt with
 			if (target && e != target) {
 				std::printf("[devscript] guard: target %s after %d ticks, tick=%d\n", target->checkLiveFlag(LIVE_FLAG_DEAD) ? "dead" : "left", since, gTick);
 				target = nullptr;
 				reface = 60;
+				if (gGuardResume >= 0) {
+					std::printf("[devscript] guard: restart line=%d tick=%d\n", gScript[gGuardResume].line, gTick);
+					gCursor = static_cast<size_t>(gGuardResume);
+					gStarted = false;
+					reface = 0;
+					continue;
+				}
 			}
 			if (!e && reface > 0) {
 				const TBossPakkun* p = findPetey();
@@ -1121,15 +1173,18 @@ void step()
 				++since;
 				PADStatus pad{};
 				sprayAt(e, pad);
+				if (gGuardResume >= 0) {
+					// A clears oil-slide momentum; small deflections defend the stance instead of chasing through goop.
+					const float err = std::remainder(std::atan2(e->mPosition.x - gpMarioOriginal->mPosition.x, e->mPosition.z - gpMarioOriginal->mPosition.z)
+					                                     - static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (6.2831853f / 65536.f), 6.2831853f);
+					pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f));
+					pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
+					if (std::fabs(err) < 0.14f) pad.stickX = pad.stickY = 0;
+					if ((since == 1 || std::fabs(err) < 0.14f) && gpMarioOriginal->mStatus == MARIO_STATUS_OIL_RUN) pad.button = PAD_BUTTON_A;
+				}
 				setVirtualPad(0, &pad);
 				return; // the current command resumes once no enemy is near
 			}
-		}
-		if (c.op == Op::Guard) {
-			gGuard = c.radius;
-			std::printf("[devscript] guard radius=%.0f tick=%d\n", gGuard, gTick);
-			++gCursor;
-			continue;
 		}
 		if (c.op == Op::Hold && !c.conds.empty()) {
 			// hold <buttons/trig> until <cond> timeout=N: pad held until the condition is true; timeout fails loudly.
