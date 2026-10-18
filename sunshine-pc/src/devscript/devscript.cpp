@@ -709,6 +709,21 @@ void logBoss(const char* tag)
 	}
 }
 
+void logRiccoGate(const char* tag)
+{
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef() || !gpMarioOriginal) return;
+	auto* gate = dynamic_cast<TModelGate*>(JDrama::TNameRefGen::search("GateToRicco"));
+	if (!gate || !gate->mActor || !gate->mActor->getModel()) return;
+	JGeometry::TVec3<f32> local;
+	MTXMultVec(gate->mInvCenterMtx, &gpMarioOriginal->mPosition, &local);
+	MtxPtr center = gate->mActor->getModel()->getAnmMtx(gate->mCenterJointIdx);
+	std::printf("[%s-gate] dest=%u flags=0x%X state=%u timer=%d ratio=%.2f center=(%.1f,%.1f,%.1f) marioLocal=(%.1f,%.1f,%.1f) box=(%.1f,%.1f,%.1f,%.1f,%.1f) tick=%d\n",
+	    tag, gate->mDestination, gate->mFlags, gate->mState, gate->mOpenTimer, gate->mOpenRatio,
+	    center[0][3], center[1][3], center[2][3], local.x, local.y, local.z,
+	    gate->mEnterHalfWidth, gate->mEnterMinY, gate->mEnterMaxY, gate->mEnterMinZ, gate->mEnterMaxZ, gTick);
+}
+
+
 void logJpa(const char* tag)
 {
 	JPAEmitterManager* m3d = gpMarioParticleManager ? gpMarioParticleManager->unk3B8 : nullptr;
@@ -753,6 +768,7 @@ void logStatus(const char* tag)
 	logWash(tag);
 	logEMario(tag);
 	logBoss(tag);
+	logRiccoGate(tag);
 	logJpa(tag);
 	if (gpCardLoad)
 		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,

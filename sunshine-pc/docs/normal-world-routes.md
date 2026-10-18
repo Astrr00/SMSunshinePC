@@ -51,3 +51,24 @@ python tools/route.py Strict tools/routes/pc_bianco_petey_reload.dev --name <col
 ```
 
 The accepted normal route is one bounded pass; broad repeatability and later-world connected entry/completion remain open. Script `_Exit` does not certify native Close. Matrix statuses remain unchanged.
+
+
+## Ricco Gatekeeper milestone, entry still open
+
+`nw13_ricco_wake` follows the normal earned-three-Shine cold load, crosses the west boardwalk with A/hover inputs and wakes the Ricco Gatekeeper: rc0/81 seconds, empty crash log, health 8.
+`nw19_ricco_entry` then defeats both original three-HP phases using normal controller inputs on the same final helper build used by the cold-three-Shine check above.
+Phase one reaches HP0 at tick3208, resets naturally to HP3, and phase two reaches HP0 at tick5104; the boss is flagged dead at tick5704 and the original event sets flag 0x10386.
+The route retains health 3 and reaches the rebuilt house, but its final portal entry wait fails: the overall trial is rc3/274 seconds, **not** a full entry PASS. Its crash log is empty.
+The saved GCI is unchanged from the earned-three-Shine source, so this run does not certify a persisted Ricco unlock. No unlocked checkpoint may be inferred from its live flag.
+
+The boss continually registers its pollution stamp while active. Ricco uses scale 1.2, compared with the Bianco gatekeeper's 0.8; copying the close Bianco stance leaves Mario in recurring goop.
+The tested controller sequence wakes nearby, then retreats to a dry outer stance for the throat shots; frame-window observations now follow the Ricco actor rather than the distant Mamma actor.
+`SUNSHINE_DEV_HIT_LOG=1` only reports counters; active gameplay-cheat counts remain zero. No direct aim or gameplay-state writes are used.
+
+A read-only Ricco portal snapshot now records its flags, state, open timer/ratio, center joint, Mario's local position and the actual entry box.
+The native `nw20_ricco_entry` logs finite observations with destination 1 and center approximately (-9947.3,612.1,2002.9), then fails after falling into the water while re-waking; its crash log is empty.
+Strict has 0 unresolved symbols, all 64 host checks and all 13 native parser cases pass after adding the snapshot.
+Portal-observer executable SHA256: `716b82f10d82317fc5b88393264d991f3a59e0cdd1f2bd93df4f8864cafdeed3`.
+
+The next candidate waits for the original sleep animation before moving in, uses a safer wake point, attempts normal Pause > Save > Yes > Continue, and adjusts the portal spray/jump inputs.
+Normal Ricco selector/entry, persisted unlock and Blooper completion remain open. None of these controller failures establishes an engine hang or optimization-related UB.
