@@ -1,0 +1,134 @@
+# Earned five-Shine File B with the saved Gelato unlock: enter episode1 and the sandcastle secret.
+# Stop on the stable middle block; this route does not collect a Shine. See docs/normal-world-routes.md.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+walkto x=7000 z=6000 radius=100 timeout=1500
+walkto x=9000 z=2500 radius=100 timeout=1200
+walkto x=9000 z=-4500 radius=100 timeout=1200
+walkto x=8000 z=-6500 radius=80 timeout=900
+# The raised plaza starts behind the beach wall; clear it with a normal hover jump.
+hold X frames=1
+wait frames=20
+faceto x=8079 z=-7590 tol=3 timeout=180
+hold A frames=10
+walkto x=8079 z=-7590 radius=80 spray=1 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+waitfor marioy>=200 timeout=1
+waitfor flag=0x10387 timeout=1
+walkto x=9158 z=-7567 radius=80 timeout=600
+faceto x=9410 z=-7567 tol=3 timeout=180
+hold L frames=15
+hold L stick=0,-127 frames=28
+log
+hold L trig=0,255 stick=0,64 frames=60
+log
+hold L trig=0,255 stick=0,-64 frames=60
+log
+shot gelato_portal_sprayed.png
+wait frames=30
+walkto x=9198 z=-7567 radius=30 timeout=600
+mash A period=24 hold=5 until stage=4 scen=255 timeout=900
+wait frames=400
+log
+shot gelato_selector.png
+hold A frames=4
+waitfor stage=4 scen=0 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=90
+log
+shot gelato_normal_entry.png
+wait frames=30
+# Open the first sandcastle through its original water-reactive sprout.
+walkto x=8500 z=-2000 radius=100 timeout=900
+walkto x=6000 z=1000 radius=100 timeout=900
+walkto x=3300 z=3847 radius=80 timeout=900
+faceto x=2908 z=3847 tol=3 timeout=180
+hold L frames=10
+hold L trig=0,255 frames=180
+waitfor camDemo=0 timeout=1800
+log
+shot gelato_sandcastle_revealed.png
+walkto x=8500 z=8000 radius=80 timeout=1800
+walkto x=8570 z=8310 radius=350 timeout=600
+faceto x=8570 z=8310 tol=3 timeout=180
+hold L frames=10
+wait frames=30
+hold A stick=0,127 until stage=32 timeout=600
+waitfor stage=32 scen=0 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=90
+log
+shot gelato_sandcastle_secret_entry.png
+wait frames=30
+# Use the narrow connected section before taking the wider gaps deliberately.
+trace frames=600
+walkto x=-3200 z=200 radius=40 hop=8 timeout=600
+walkto x=-2400 z=200 radius=40 jump=12 timeout=180
+log
+shot gelato_secret_first_gap.png
+waitfor marioy>=3600 timeout=1
+walkto x=-1700 z=200 radius=25 timeout=120
+walkto x=-950 z=200 radius=40 jump=12 timeout=180
+log
+shot gelato_secret_gap_two.png
+waitfor marioy>=3550 timeout=1
+walkto x=-750 z=200 radius=25 timeout=90
+walkto x=0 z=200 radius=40 jump=12 timeout=180
+log
+shot gelato_secret_first_corridor.png
+waitfor marioy>=3550 timeout=1
+walkto x=180 z=200 radius=25 timeout=90
+walkto x=1200 z=200 radius=40 jump=12 timeout=240
+log
+shot gelato_secret_wood_block.png
+waitfor marioy>=3050 timeout=1
+# Keep the landing speed and use the original double-jump chain up the rising corridors.
+walkto x=1380 z=200 radius=25 timeout=90
+walkto x=2200 z=200 radius=40 jump=12 hop=8 timeout=180
+log
+shot gelato_secret_second_corridor.png
+waitfor marioy>=3275 timeout=1
+walkto x=3000 z=200 radius=25 timeout=120
+walkto x=3450 z=200 radius=40 jump=12 hop=8 timeout=180
+walkto x=4250 z=200 radius=25 timeout=120
+walkto x=4750 z=200 radius=40 jump=12 hop=8 timeout=180
+walkto x=5300 z=200 radius=25 timeout=120
+walkto x=5800 z=200 radius=40 jump=12 hop=8 timeout=180
+walkto x=6100 z=200 radius=25 timeout=90
+walkto x=6600 z=200 radius=40 jump=12 hop=8 timeout=180
+walkto x=6900 z=200 radius=40 timeout=120
+hold L until marioy<=4200 timeout=180
+wait frames=30
+log
+shot gelato_secret_stable_middle.png
+waitfor marioy>=4100 timeout=1
+wait frames=30
+end

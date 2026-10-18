@@ -259,3 +259,22 @@ python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card 
 ```
 
 This certifies normal Gelato entry and a saved entrance unlock, not a Gelato mission reward or Wiggler defeat. Those remain open. The independent cold run `nw67_gelato_castle` observes saved flag0x10387 and re-enters its normal portal from Delfino1/6 with health8. The normal next Delfino scenario is6 after both Ricco and Mamma unlock flags are saved; future cold routes must allow that original progression.
+
+
+## Normal Gelato sandcastle entry and middle approach
+
+`nw77_gelato_ledge_jump` passes a bounded approach from the unchanged saved-unlock `nw66_gelato_hover_entry` profile: rc0/212 seconds, done at tick6035, health8, empty crash log and zero active-cheat counts.
+[pc_gelato_sandcastle_approach.dev](../tools/routes/pc_gelato_sandcastle_approach.dev) loads File B normally, follows the saved portal through the episode1 selector, waters the original sandcastle sprout and enters raw32/0 through its live entrance. The normal Shadow Mario movie takes FLUDD; no dev start or gameplay-state write is used.
+The route crosses the first sand-block corridor, lands on the wooden block and climbs the second corridor to the stable (about6995,4150,200) middle platform.
+
+The first wide gaps need running momentum and an initial twelve-tick A hold. Neutral ground waits brake Mario before takeoff. For the rising corridor, `jump=12 hop=8` keeps the initial normal jump and then repeats ordinary A presses; this chooses the faster original ledge pull-up before a crumbling block drops too far.
+L is the normal ground-pound button; Z opens the guide map. Early prototypes using Z as a brake were route failures, not crashes. No jump physics or extra input option is changed in the accepted build.
+
+The saved GCI remains byte-identical to the source: latest File B sector4/write7, IDs `[0, 1, 10, 86, 117]`, SHA256 `efaa86da54279feec25d4f1af77b3482064c081029dfaee50f6ef8b21e9fbda6`; the header and every sector checksum pass.
+Accepted executable SHA256: `2cb29905a29c3186735cadd65520a53c4e32d9c1f78daeafd6c5b73b5b3b80c5`. Strict reports 0 unresolved symbols and all68 port checks pass (`nw74-strict.log`, `nw74-tests.log`).
+
+```powershell
+python tools/route.py Strict tools/routes/pc_gelato_sandcastle_approach.dev --name <unique> --appdata-from nw66_gelato_hover_entry --seconds 1000
+```
+
+This certifies the connected secret entrance and its lower/middle approach only. The upper crossing, tower, Shine20 reward/save/cold reload and Gelato's boss milestone remain open; matrix statuses stay16/25.
