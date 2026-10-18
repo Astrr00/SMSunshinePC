@@ -25,8 +25,8 @@ Evidence from `exShineTable` (`sms/src/System/StageUtil.cpp`, index = raw stage 
 ### Reachability of the other 44 resources (2026-10-18, `tools/content_reach.py`)
 
 The script collects every stage change the data and code can request: `MapObjChangeStage`/`MapObjChangeStageHipDrop` destinations
-in all scene.bin files, `setNextStage` calls in all SPC scripts (0 dynamic or undecoded), and the constants passed to
-`TMarDirector::setNextStage` in the source. 35 raw stages are named. Of the 44 unresolved scenario resources:
+in all scene.bin files, `setNextStage` calls in SPC scripts from both loaded roots (`common/sp` and `scene/map/sp`, 0 dynamic or undecoded), and the constants passed to
+`TMarDirector::setNextStage` in the source. 39 raw stages are named. Of the 44 unresolved scenario resources:
 
 | Group | Result |
 |---|---|
@@ -40,7 +40,8 @@ Ground-plane warps are now scanned too (`content_reach.py` decodes every `.col`:
 type histogram checked): no group has BG type `0x300`, so no collision names any of the 44 stages.
 `TMarioAutodemo` contributes only stages 2, 3 and 4 and is included in the source audit.
 The debug stage menu in `MenuDir.cpp` is excluded from normal reachability (`APP_STATE_MENU` is never assigned by the normal source flow).
-The scanner now retains scenario indices, fails on undecoded scripts or dynamic requests, and derives both selector sets from the current source rather than treating a named stage as every possible scenario.
+The scanner retains scenario indices, fails on undecoded scripts or dynamic requests, and derives both selector sets from the current source rather than treating a named stage as every possible scenario.
+The 2026-10-18 correction explicitly requests `setNextStage` calls from the SPC decoder; its default inventory filter intentionally excludes those calls. The earlier 35-stage count omitted script transitions. A byte-level transition fixture now checks that filter boundary.
 `python tools/content_reach.py` reports 44 unreferenced rows and 0 undecoded/dynamic cases; `python tools/content_reach_test.py` checks explicit overrides, dynamic selectors and absent destinations.
 All 44 missing slots are statically unreferenced by the audited normal routing.
 Their metadata remains `unresolved-resource` because the files are absent; that label does not imply a missing reachable mission.

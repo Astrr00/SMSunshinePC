@@ -6,6 +6,11 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+**Reachability call-filter correction (2026-10-18).** The SPC decoder's default inventory filter excludes `setNextStage`, so the previous 35-stage reachability scan did not actually collect script transitions.
+The reachability caller now requests those calls explicitly and scans both script roots loaded by the director (`common/sp`, `scene/map/sp`).
+A byte-level SPCB fixture verifies that the inventory filter stays unchanged while transition decoding returns its literal destination.
+The fresh actual-data scan names 39 raw stages; all 44 absent resource slots remain unreferenced, with 0 undecoded/dynamic calls. Inventory parser checks pass.
+
 **Pianta archive crash and dialog-aware probes (2026-10-18).** The broader `wl02` sweep finds a native access violation in Pianta raw8/scenario1 (`monte5.arc`).
 The crash stack runs through `TEnemyMario::TSettingParams`, `TParams::load` and recursive `JKRArchive::findFsResource`.
 The requested optional parameter path is `../map/pad2/Setting.prm` after the leading slash is removed; the fallback `params` archive has 12 directories and its root `..` entry contains `0xFFFFFFFF`.

@@ -1,6 +1,16 @@
 """Reachability boundary checks without disc data: python tools/content_reach_test.py."""
 from content_reach import decode, delfino_scenarios, pinna_scenarios, scenario_reachable
-from content_inventory import DecodeError
+from content_inventory import DecodeError, spc_calls
+import struct
+
+# Real SPCB bytes exercise the call filter as well as destination classification.
+text = (b'\x00' + struct.pack('>I', 44) + b'\x25'
+        + b'\x1d' + struct.pack('>II', 0, 2) + b'\x27')
+offset = 28 + len(text)
+script = (b'SPCB' + struct.pack('>6I', 28, offset, 0, offset, 1, 0)
+          + text + bytes(20) + b'setNextStage\0')
+assert spc_calls(script) == []  # Inventory intentionally filters transitions.
+assert spc_calls(script, {'setNextStage'}) == [(6, 0, 'setNextStage', [44, 0])]
 
 assert decode(0xE05) == (13, 5)
 assert decode(1) == (1, 255)

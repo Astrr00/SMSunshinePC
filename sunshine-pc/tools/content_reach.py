@@ -67,7 +67,9 @@ def main():
         for q in ([2, 3, 4] if p is None else [p]):
             dest[decode(q)].append('code ' + ref)
     unknown = []
-    for path in sorted((ci.ROOT / 'data/scene').glob('*.szs')):
+    # These are both script roots loaded by TMarDirector::setupObjects.
+    archives = [ci.ROOT / 'data/common.szs', *sorted((ci.ROOT / 'data/scene').glob('*.szs'))]
+    for path in archives:
         files = discfmt.load_szs(str(path))
         for member in sorted(m for m in files if m.endswith('.col')):
             try:
@@ -91,7 +93,7 @@ def main():
                     unknown.append('%s %s: %s' % (path.name, n['type'], e))
         for member in sorted(m for m in files if m.endswith('.sb')):
             try:
-                calls = ci.spc_calls(files[member])
+                calls = ci.spc_calls(files[member], {'setNextStage'})
             except (ci.DecodeError, ci.struct.error, UnicodeError) as e:
                 unknown.append('%s:%s script: %s' % (path.name, member, e))
                 continue

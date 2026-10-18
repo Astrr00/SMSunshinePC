@@ -338,7 +338,7 @@ RELEVANT_CALLS = {'getSystemFlag', 'setSystemFlag', 'setEventID', 'appearShine',
                   'maniCoinFallDown'}
 
 
-def spc_calls(data):
+def spc_calls(data, relevant_calls=RELEVANT_CALLS):
     reader = Reader(data)
     if reader.take(4) != b'SPCB':
         raise DecodeError('SPCB magic')
@@ -439,7 +439,7 @@ def spc_calls(data):
                 raise DecodeError('SPCB builtin index/argc')
             values = [pop() for _ in range(argc)][::-1]
             name = symbol_names[symbol]
-            if name in RELEVANT_CALLS:
+            if name in relevant_calls:
                 result.append((pc, block, name, values))
             stack.append(values[0] if name == 'getNameRefHandle' and len(values) == 1 else None)
         elif op in ('call', 'jne', 'jmp', 'ret', 'ret0', 'end'):
