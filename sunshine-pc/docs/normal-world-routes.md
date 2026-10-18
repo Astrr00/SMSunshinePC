@@ -241,3 +241,21 @@ The unchanged executable SHA256 is `b18fed7651cc60b9998e7e027d78a44859e67bcfd774
 python tools/route.py Strict tools/routes/pc_delfino_beach_shine.dev --name <unique> --appdata-from nw55_blooper_complete --seconds 800
 python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
 ```
+
+
+## Normal Gelato unlock, save and episode1 entry
+
+`nw66_gelato_hover_entry` passes from the clean five-Shine `nw64_fifth_shine` seed: rc0/249 seconds, done at tick7041, empty crash log and no active cheats.
+[pc_gelato_entry_unassisted.dev](../tools/routes/pc_gelato_entry_unassisted.dev) follows ordinary menus/movies, swims around the plaza houses and uses a hover jump over the beach wall into the raised plaza. The earlier `nw65` walking-only approach times out at that wall with no crash.
+The normal Mamma Gatekeeper at (9990,330,-7590) takes three throat hits in each of its two original phases. The reused controller defense and animation-frame aiming defeat both; Mario has health3 at the saved unlock, so this is not a damage-free or broad repeatability certificate.
+Flag0x10387 becomes true at tick5332. The route waits for the real finish camera, uses Pause > Save > Yes > Continue, sprays the normal west-facing JellyGate, jumps into it and chooses episode1 through the selector. Normal raw4/scenario0 control starts at tick6921; entry restores health8.
+
+The saved File B copy passes the header and every sector checksum. Latest sector4/write7 still has exactly Shine IDs `[0, 1, 10, 86, 117]`; its additional native world-unlock state produces GCI SHA256 `efaa86da54279feec25d4f1af77b3482064c081029dfaee50f6ef8b21e9fbda6`.
+The original five-Shine source remains unchanged. Executable SHA256 is `b18fed7651cc60b9998e7e027d78a44859e67bcfd7744e9aa54282437d78f599`; a repeated Strict build reports 0 unresolved symbols and all68 port checks pass (`nw66-strict.log`, `nw66-tests.log`).
+
+```powershell
+python tools/route.py Strict tools/routes/pc_gelato_entry_unassisted.dev --name <unique> --appdata-from nw64_fifth_shine --seconds 1200 SUNSHINE_DEV_HIT_LOG=1
+python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+```
+
+This certifies normal Gelato entry and a saved entrance unlock, not a Gelato mission reward or Wiggler defeat. Those remain open. The independent cold run `nw67_gelato_castle` observes saved flag0x10387 and re-enters its normal portal from Delfino1/6 with health8. The normal next Delfino scenario is6 after both Ricco and Mamma unlock flags are saved; future cold routes must allow that original progression.

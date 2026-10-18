@@ -1,0 +1,191 @@
+# Earned five-Shine File B: defeat the Mamma Gatekeeper, save its unlock, spray the portal and enter Gelato episode1.
+# Ordinary PAD input only; start from nw64_fifth_shine. See docs/normal-world-routes.md.
+# Load the earned File B through ordinary menus and require its saved rewards.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+walkto x=7000 z=6000 radius=100 timeout=1500
+walkto x=9000 z=2500 radius=100 timeout=1200
+walkto x=9000 z=-4500 radius=100 timeout=1200
+walkto x=8000 z=-6500 radius=80 timeout=900
+# The raised plaza starts behind the beach wall; clear it with a normal hover jump.
+hold X frames=1
+wait frames=20
+faceto x=8079 z=-7590 tol=3 timeout=180
+hold A frames=10
+walkto x=8079 z=-7590 radius=80 spray=1 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+waitfor marioy>=200 timeout=1
+guard radius=0
+faceto x=9990 z=-7590 tol=4 timeout=180
+hold R frames=75
+walkto x=8079 z=-7590 radius=40 spray=1 timeout=600
+waitfor stage=1 scen=5 timeout=1
+faceto x=9990 z=-7590 tol=4 timeout=180
+hold R frames=75
+walkto x=8379 z=-7590 radius=40 spray=1 timeout=600
+waitfor stage=1 scen=5 timeout=1
+faceto x=9990 z=-7590 tol=4 timeout=180
+hold R frames=75
+walkto x=8579 z=-7590 radius=40 spray=1 timeout=600
+waitfor stage=1 scen=5 timeout=1
+wait frames=2
+hold L frames=15
+goto brake_done_1 if squat=1 max=64
+hold A frames=1
+wait frames=45
+label brake_done_1
+label wake_spot
+guard radius=0
+wait frames=15
+goto gelato_gate if flag=0x10387 max=1
+goto settle if bck=5 max=8
+goto gelato_round if gkawake=1 max=12
+guard radius=450 stationary=1 resume=wake_spot until gkawake=1
+waitfor bck=10 timeout=900
+walkto x=8879 z=-7590 radius=40 spray=1 timeout=600
+waitfor marioy>=200 timeout=1
+faceto x=9990 z=-7590 tol=4 timeout=180
+hold trig=0,255 frames=90
+log
+goto wake_spot unless gkawake=1 max=10
+guard radius=0
+waitfor camDemo=0 timeout=1800
+guard radius=450 stationary=1 resume=gelato_round until flag=0x10387
+label gelato_round
+guard radius=0
+wait frames=15
+goto gelato_gate if flag=0x10387 max=1
+goto settle if bck=5 max=8
+guard radius=450 stationary=1 resume=gelato_round until flag=0x10387
+walkto x=8579 z=-7590 radius=40 spray=1 timeout=600
+waitfor marioy>=200 timeout=1
+wait frames=2
+hold L frames=15
+goto brake_done_2 if squat=1 max=64
+hold A frames=1
+wait frames=45
+label brake_done_2
+label gelato_aim
+guard radius=0
+wait frames=15
+goto gelato_gate if flag=0x10387 max=1
+goto settle if bck=5 max=8
+goto wake_spot unless gkawake=1 max=12
+guard radius=450 stationary=1 resume=gelato_aim until flag=0x10387
+faceto x=9990 z=-7590 tol=3 timeout=180
+hold trig=0,255 until gkawake=1 timeout=900
+waitfor camDemo=0 timeout=1800
+faceto x=9990 z=-7590 tol=3 timeout=180
+hold L frames=15
+goto brake_done_3 if squat=1 max=64
+hold A frames=1
+wait frames=45
+hold L frames=15
+label brake_done_3
+log
+goto wash_spot unless squat=1 max=4
+hold L stick=0,127 until pitch>=-4300 timeout=120
+hold L stick=0,-127 until pitch<=-4500 timeout=120
+hold L frames=3
+hold L until bck=18 timeout=1200
+hold L until bck=18 bckframe>=60 bckframe<=120 timeout=300
+log
+hold L trig=0,255 frames=45
+log
+goto settle if bck=5 max=8
+wait frames=60
+goto gelato_round unless flag=0x10387 max=20
+label wash_spot
+guard radius=0
+wait frames=15
+walkto x=8579 z=-7590 radius=40 spray=1 timeout=600
+waitfor marioy>=200 timeout=1
+wait frames=2
+hold L frames=15
+goto brake_done_4 if squat=1 max=64
+hold A frames=1
+wait frames=45
+label brake_done_4
+goto gelato_round unless flag=0x10387 max=4
+label settle
+guard radius=0
+wait frames=30
+goto gelato_gate if flag=0x10387 max=1
+goto settle if bck=5 max=60
+goto gelato_round unless flag=0x10387 max=8
+label gelato_gate
+guard radius=0
+waitfor flag=0x10387 timeout=1800
+waitfor camDemo=0 timeout=3000
+log
+shot gelato_gate_unlocked.png
+wait frames=30
+# Pause > Save > Yes > Continue: persist the genuinely earned unlock through normal menus.
+hold START frames=1
+waitfor dirstate=5 timeout=90
+wait frames=60
+hold DOWN frames=2
+wait frames=30
+hold A frames=2
+wait frames=120
+log
+shot gelato_pause_save_prompt.png
+hold LEFT frames=2
+wait frames=30
+mash A period=30 until stage=1 scen=5 director mario dirstate=4 camDemo=0 timeout=1500
+wait frames=60
+log
+shot gelato_unlock_saved.png
+walkto x=9158 z=-7567 radius=80 timeout=600
+faceto x=9410 z=-7567 tol=3 timeout=180
+hold L frames=15
+hold L stick=0,-127 frames=28
+log
+hold L trig=0,255 stick=0,64 frames=60
+log
+hold L trig=0,255 stick=0,-64 frames=60
+log
+shot gelato_portal_sprayed.png
+wait frames=30
+walkto x=9198 z=-7567 radius=30 timeout=600
+mash A period=24 hold=5 until stage=4 scen=255 timeout=900
+wait frames=400
+log
+shot gelato_selector.png
+hold A frames=4
+waitfor stage=4 scen=0 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=90
+log
+shot gelato_normal_entry.png
+wait frames=30
+end
