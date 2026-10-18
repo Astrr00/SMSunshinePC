@@ -16,6 +16,17 @@ inline float cameraRelativeStick(float dx, float dz, std::int16_t cameraYaw, std
     sy = static_cast<std::int8_t>(y + (y > 0 ? 15 : y < 0 ? -15 : 0));
     return dist;
 }
+// Small turns invert Mario's second deadzone after JUTGamePad scales the stick by 128/54.
+inline std::int8_t smallTurnAxis(std::int8_t raw) {
+    const int magnitude = raw < 0 ? -static_cast<int>(raw) : raw;
+    if (magnitude <= 15) return 0;
+    const int desired = static_cast<int>(std::lround(48.f * (magnitude - 15) / 112.f));
+    if (!desired) return 0;
+    const int clamped = static_cast<int>(std::ceil((desired + 6) * 54.f / 128.f));
+    const int value = 15 + static_cast<int>(std::ceil(clamped * 112.f / 72.f));
+    return static_cast<std::int8_t>(raw < 0 ? -value : value);
+}
+
 constexpr std::uint32_t kMarioJumping = 0x800;
 inline bool brakingJump(std::uint32_t status, float heightAboveFloor) {
     return (status & kMarioJumping) != 0 && heightAboveFloor >= 10.f;

@@ -53,7 +53,7 @@ python tools/route.py Strict tools/routes/pc_bianco_petey_reload.dev --name <col
 The accepted normal route is one bounded pass; broad repeatability and later-world connected entry/completion remain open. Script `_Exit` does not certify native Close. Matrix statuses remain unchanged.
 
 
-## Ricco Gatekeeper milestone, entry still open
+## Earlier Ricco Gatekeeper trials (superseded by the complete route below)
 
 `nw13_ricco_wake` follows the normal earned-three-Shine cold load, crosses the west boardwalk with A/hover inputs and wakes the Ricco Gatekeeper: rc0/81 seconds, empty crash log, health 8.
 `nw19_ricco_entry` then defeats both original three-HP phases using normal controller inputs on the same final helper build used by the cold-three-Shine check above.
@@ -85,3 +85,38 @@ The regression uses the actual jump and swim statuses from the replay. `nw24_ric
 
 Strict has 0 unresolved symbols; all 67 host checks and all 13 native parser cases pass. The Ricco route is still being refined; a full entry or persisted unlock is not claimed by these helper tests.
 Controller-helper executable SHA256: `650f1bebfae64f25131b44e9f8fd53b447c1646216cbf0bc058f3e5447883db4`.
+
+## Complete normal Ricco unlocking, save and entry
+
+`nw27_ricco_entry` passes on Strict `/O2`: rc0/275 seconds, `done at tick=7813`, empty crash log and active-cheat counts zero.
+It starts from the unchanged earned-three-Shine `nw11_petey_clean` profile, loads File B through ordinary menus/movies, crosses the west boardwalk and defeats both Ricco Gatekeeper phases.
+One-second observations record HP3 -> 2 -> 1 -> 0 at ticks570/3300/3540/3780, the natural reset to HP3 at tick3930, then HP2/1/0 at ticks4050/4170/5790 and dead=1 at tick5940.
+The original event sets flag0x10386. Mario retains health7 before the save/entry sequence.
+
+The route chooses normal Pause > Save > Yes > Continue, opens the portal by ordinary L/analog-R spray with vertical stick movement, jumps inside its real entry box, reaches raw3/scenario255 and confirms episode1 at raw3/scenario0 with normal control.
+The public [pc_ricco_entry_unassisted.dev](../tools/routes/pc_ricco_entry_unassisted.dev) retains all 182 tested commands unchanged.
+No teleport, direct aim, gameplay cheat, dev start, state/resource write, seed, movie skip or timing override is used. `SUNSHINE_DEV_HIT_LOG=1` is read-only telemetry.
+
+Independent GCI verification passes: latest File B sector3, write4, earned Shine IDs `[0, 1, 86]`.
+Saved GCI SHA256: `74c6589a03d19c7d82e18e8b8f28671b8dcfc320f86cec264efa8b1efba6e8f2`.
+The earned-three-Shine source remains byte-identical (`f90a95a1b571817a264abaf05000a92365885eac75d7be7fe4cb3340f148f796c94`).
+`nw28_cold_ricco` separately passes a fresh normal menu/movie load: rc0/49 seconds, `done at tick=1333`, three Shines, flags0x10001 and0x10386, controllable Delfino1/5, crash0 and no active cheats.
+Public cold route: [pc_ricco_unlock_reload.dev](../tools/routes/pc_ricco_unlock_reload.dev).
+Both accepted runs use executable SHA256 `d7f75220d83621f638ecaebbf973a2188a9b07d65194f65ff762c859a8c9477c`.
+
+The replay's small-turn conversion now compensates the second stick deadzone in Mario's controller work; an independent game-side conversion fixture covers 360 headings within three degrees.
+The opt-in `guard stationary=1` defends dry flat ground with full-R and normal stick rotation instead of walking toward nearby slugs at a narrow dock edge. Existing walking guards remain the default; oil-slide escape still uses A.
+Read-only signed-int16 `pitch>=` / `pitch<=` conditions bracket the actual nozzle angle through L/stick inputs before throat shots, avoiding accumulated fixed-duration pitch drift.
+These are controller-driver corrections, not game physics/state changes or engine-hang bypasses.
+Strict reports 0 unresolved symbols, all 68 host checks and all 17 native parser cases pass, including invalid stationary/pitch tokens.
+
+Reproduce:
+
+```powershell
+python tools/route.py Strict tools/routes/pc_ricco_entry_unassisted.dev --name <unique> --appdata-from nw11_petey_clean --seconds 1000 SUNSHINE_DEV_HIT_LOG=1
+python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_ricco_unlock_reload.dev --name <cold-unique> --appdata-from <unique> --seconds 240
+```
+
+This certifies one complete connected Ricco unlocking/entry and an independent persisted-unlock reload. Broad repeatability, the Ricco mission boss Gooper Blooper, other worlds' normal mission completion, hardware rendering and native Close remain open.
+The earlier 91-world load certificate and Bianco Gatekeeper pair remain tied to their recorded executable hashes; they are not silently recertified by this controller change. Matrix statuses stay unchanged at 16/25.

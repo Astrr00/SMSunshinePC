@@ -177,6 +177,24 @@ void testControllerSteering() {
     std::int8_t sx = 99, sy = 99;
     const float dist = devscript::cameraRelativeStick(0.25f, 0.25f, 12345, sx, sy);
     check(dist < 1.f && sx == 0 && sy == 0, "controller: reached target emits neutral stick");
+    bool smallCorrect = true;
+    const auto marioAxis = [](int raw) {
+        const int magnitude = raw < 0 ? -raw : raw;
+        const int clamped = (magnitude > 15 ? magnitude - 15 : 0) * 72 / 112;
+        const int scaled = static_cast<int>(128.f * (clamped / 54.f));
+        const int value = scaled > 7 ? scaled - 6 : 0;
+        return raw < 0 ? -value : value;
+    };
+    for (int degree = 0; degree < 360; ++degree) {
+        const float wanted = degree * (6.2831853f / 360.f);
+        std::int8_t x = 0, y = 0;
+        devscript::cameraRelativeStick(100.f * std::sin(wanted), 100.f * std::cos(wanted), -20711, x, y);
+        const float heading = std::atan2(static_cast<float>(marioAxis(devscript::smallTurnAxis(x))),
+                                        -static_cast<float>(marioAxis(devscript::smallTurnAxis(y))))
+                              - 20711.f * (6.2831853f / 65536.f);
+        smallCorrect &= std::cos(heading - wanted) > 0.9986f;
+    }
+    check(smallCorrect, "controller: small turns stay within three degrees through both stick deadzones");
     // Actual jump and swimming states from the Ricco replay; both can be far above the seabed.
     check(devscript::brakingJump(0x02000880, 140.f) && !devscript::brakingJump(0x000022D2, 620.f)
           && !devscript::brakingJump(0x0C400201, 0.f), "controller: swimming cannot stall the braking-jump wait");

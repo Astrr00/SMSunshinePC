@@ -96,7 +96,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -115,6 +115,7 @@ struct Command {
 	float behind = 0.f;     // walkto behind=R: the point R behind Petey, reached around his swing radius
 	bool soft = false;      // walkto/faceto/waitfor soft=1: a timeout moves on (to a `goto` retry) instead of failing
 	int taken = 0;          // goto: jumps back taken so far (frames holds the label's command index)
+	bool stationary = false; // guard stationary=1: full-R turn in place for flat-floor defense
 	bool jumpIf = false;    // goto if: branch on a completed phase; unless keeps the legacy retry behavior
 	float tol = 8.f;        // faceto: accepted angle error in degrees
 	int period = 30;        // mash: press for 2 ticks (hold=N: N ticks, a higher jump) every `period` ticks
@@ -188,6 +189,8 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("bckframe<=", 0) == 0) k = Command::Cond::BckFrameLe;
 	else if (tok.rfind("gkawake=", 0) == 0) k = Command::Cond::GkAwake; // currently raised, including an appear animation the route did not catch at frame zero
 	else if (tok.rfind("squat=", 0) == 0) k = Command::Cond::Squat;
+	else if (tok.rfind("pitch>=", 0) == 0) k = Command::Cond::PitchGe;
+	else if (tok.rfind("pitch<=", 0) == 0) k = Command::Cond::PitchLe;
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
 	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
@@ -196,7 +199,13 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("peteyhp=", 0) == 0) k = Command::Cond::PeteyHp; // Petey's hit points (3 at the start, one per navel pound)
 	else return false;
 	const size_t eq = tok.find('=');
-	c.conds.emplace_back(k, eq == std::string::npos ? 0 : static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0)));
+	int value = 0;
+	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe) {
+		const char* end = tok.c_str() + tok.size();
+		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
+		if (parsed.ec != std::errc{} || parsed.ptr != end || value < -0x8000 || value > 0x7fff) return false;
+	} else if (eq != std::string::npos) value = static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0));
+	c.conds.emplace_back(k, value);
 	return true;
 }
 
@@ -336,6 +345,8 @@ Command parseLine(const std::string& text, int line)
 		c.radius = static_cast<float>(std::atof(text.c_str() + text.find('=') + 1));
 		while (in >> tok) {
 			if (tok == "until") continue;
+			if (tok == "stationary=1" || tok == "stationary=0") { c.stationary = tok.back() == '1'; continue; }
+			if (tok.rfind("stationary=", 0) == 0) fail(line, "stationary needs 0 or 1", tok);
 			if (tok.rfind("resume=", 0) == 0 && tok.size() > 7) c.path = tok.substr(7);
 			else if (!parseCond(tok, c)) fail(line, "unexpected token in guard", tok);
 		}
@@ -926,6 +937,12 @@ bool condHolds(const Command& c)
 			else ok = frame <= val;
 			break;
 		}
+		case Command::Cond::PitchGe:
+		case Command::Cond::PitchLe: {
+			const TNozzleBase* nozzle = sceneReady() && gpMarioOriginal && gpMarioOriginal->mWaterGun ? gpMarioOriginal->mWaterGun->getCurrentNozzle() : nullptr;
+			if (nozzle) ok = kind == Command::Cond::PitchGe ? nozzle->unk36E >= val : nozzle->unk36E <= val;
+			break;
+		}
 		case Command::Cond::Squat: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT) == (val != 0); break;
 		case Command::Cond::GkAwake: {
 			const TBiancoGateKeeper* b = sceneReady() ? findBoss() : nullptr;
@@ -1154,7 +1171,7 @@ void step()
 			gGuard = c.radius;
 			gGuardResume = c.path.empty() ? -1 : c.frames;
 			gGuardCommand = gCursor;
-			std::printf("[devscript] guard radius=%.0f tick=%d\n", gGuard, gTick);
+			std::printf("[devscript] guard radius=%.0f%s tick=%d\n", gGuard, c.stationary ? " stationary=1" : "", gTick);
 			++gCursor;
 			continue;
 		}
@@ -1201,8 +1218,8 @@ void step()
 					PADStatus pad{};
 					float dist = 0.f;
 					walkStick(t, pad.stickX, pad.stickY, dist);
-					pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f));
-					pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
+					pad.stickX = devscript::smallTurnAxis(pad.stickX);
+					pad.stickY = devscript::smallTurnAxis(pad.stickY);
 					setVirtualPad(0, &pad);
 					--reface;
 					return;
@@ -1220,12 +1237,23 @@ void step()
 				++since;
 				PADStatus pad{};
 				sprayAt(e, pad);
-				if (gGuardResume >= 0) {
+				if (gScript[gGuardCommand].stationary && gpMarioOriginal->mPosition.y - gpMarioOriginal->mFloorPosition.y < 10.f
+				    && gpMarioOriginal->mStatus != MARIO_STATUS_OIL_RUN && gpMarioOriginal->mStatus != MARIO_STATUS_OIL_SLIP
+				    && gpMarioOriginal->mStatus != MARIO_STATUS_OIL_SLOPE) {
+					const float err = std::remainder(std::atan2(e->mPosition.x - gpMarioOriginal->mPosition.x, e->mPosition.z - gpMarioOriginal->mPosition.z)
+					                                     - static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (6.2831853f / 65536.f), 6.2831853f);
+					pad.button = PAD_TRIGGER_R;
+					pad.triggerRight = 255;
+					pad.stickX = gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT && std::fabs(err) > 0.08f ? (err > 0.f ? -127 : 127) : 0;
+					const TNozzleBase* nozzle = gpMarioOriginal->mWaterGun ? gpMarioOriginal->mWaterGun->getCurrentNozzle() : nullptr;
+					// shortcut: slight downward spray for flat-floor enemies; keep walking guards on slopes.
+					pad.stickY = gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT && nozzle ? (nozzle->unk36E < 1500 ? 127 : nozzle->unk36E > 2500 ? -127 : 0) : 0;
+				} else if (gGuardResume >= 0) {
 					// A clears oil-slide momentum; small deflections defend the stance instead of chasing through goop.
 					const float err = std::remainder(std::atan2(e->mPosition.x - gpMarioOriginal->mPosition.x, e->mPosition.z - gpMarioOriginal->mPosition.z)
 					                                     - static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (6.2831853f / 65536.f), 6.2831853f);
-					pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f));
-					pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
+					pad.stickX = devscript::smallTurnAxis(pad.stickX);
+					pad.stickY = devscript::smallTurnAxis(pad.stickY);
 					if (std::fabs(err) < 0.14f) pad.stickX = pad.stickY = 0;
 					if ((since == 1 || std::fabs(err) < 0.14f) && (gpMarioOriginal->mStatus == MARIO_STATUS_OIL_RUN
 					    || gpMarioOriginal->mStatus == MARIO_STATUS_OIL_SLIP)) pad.button = PAD_BUTTON_A;
@@ -1456,8 +1484,8 @@ void step()
 				float dist = 0.f;
 				walkStick(c, pad.stickX, pad.stickY, dist);
 				// shortcut: calibrated for native PADClamp/Mario deadzones; recalibrate if that input pipeline changes.
-				pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f)); // small deflection: turns more than it walks
-				pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
+				pad.stickX = devscript::smallTurnAxis(pad.stickX); // small deflection: turns more than it walks
+				pad.stickY = devscript::smallTurnAxis(pad.stickY);
 			}
 			if (gRemaining >= c.maxTicks && c.soft) {
 				std::printf("[devscript] soft timeout faceto line=%d after %d ticks, tick=%d\n", c.line, gRemaining, gTick);
