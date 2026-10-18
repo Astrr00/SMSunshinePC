@@ -142,3 +142,26 @@ python tools/route.py Strict tools/routes/pc_ricco_harbor_approach.dev --name <u
 ```
 
 This is one bounded approach pass. The remaining harbor traversal, container-arm pull, Gooper Blooper defeat/reward/save and broad repeatability remain open; it does not certify the Ricco mission's completion.
+
+## Normal crossing to the central harbor platform
+
+`nw46_blooper_central` passes on Strict `/O2`: rc0/167 seconds, `done at tick=4683`, empty crash log, health8 and active-cheat counts zero.
+The public [pc_ricco_central_unassisted.dev](../tools/routes/pc_ricco_central_unassisted.dev) preserves the tested commands, including the ordinary cold File B load and Ricco episode1 entry from `nw27_ricco_entry`.
+Mario swims through the clear western channel, jumps/hovers from (750,2750), releases R before the platform wall and uses normal A presses to climb its edge.
+The trace records the original ledge/climb states `0x3800034B` and `0x3000054F` at ticks4605/4610; the final position is (3237.5,400.0,3001.7), with normal control.
+Both source and trial GCI retain SHA256 `74c6589a03d19c7d82e18e8b8f28671b8dcfc320f86cec264efa8b1efba6e8f2`.
+Executable SHA256: `e4f268915c12a2c294a76bf7ae61e35682a3b646f2ccbcfe4cb8115b9c24666e`.
+
+The failed small-ramp trials expose a solid steel pillar above its slippery base; (1100,3400) is inside that pillar, not a free landing target.
+Slope jumps use the original `MARIO_STATUS_MISS_JUMP`, which cannot start hover. The alternate open-water attempt `nw44` loses health in polluted water and dies normally; its owned process was stopped, not counted as a PASS or crash.
+The accepted crossing avoids both obstacles with ordinary controller inputs. No game physics, collision, resources, progress flags or health are changed.
+
+Read-only replay observations now include the original Ricco crane state/cargo Y, Gooper HP/mode and whether Mario holds an object.
+Their strict parser rejects invalid state ranges, nondecimal heights and signed-int16 overflow. Strict has 0 unresolved symbols, all 68 port checks and all 25 native parser cases pass.
+These observations do not target actors or change controller inputs by themselves.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_ricco_central_unassisted.dev --name <unique> --appdata-from nw27_ricco_entry --seconds 720
+```
+
+This is one bounded central-platform crossing. The crane transfer, container-arm pull, boss defeat, Shine collection/save and repeatability remain open; matrix statuses stay at 16/25.

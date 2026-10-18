@@ -37,6 +37,7 @@
 #include "Enemy/Emario.hpp"
 #include "Enemy/EnemyMario.hpp"
 #include "MoveBG/ModelGate.hpp"
+#include "MoveBG/MapObjRicco.hpp"
 #include "Player/MarioAccess.hpp"
 #include "Enemy/GateKeeper.hpp"
 #include "Enemy/BossPakkun.hpp"
@@ -98,7 +99,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, GessoHp, GessoMode, Held, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -193,6 +194,11 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("squat=", 0) == 0) k = Command::Cond::Squat;
 	else if (tok.rfind("pitch>=", 0) == 0) k = Command::Cond::PitchGe;
 	else if (tok.rfind("pitch<=", 0) == 0) k = Command::Cond::PitchLe;
+	else if (tok.rfind("cranestate=", 0) == 0) k = Command::Cond::CraneState;
+	else if (tok.rfind("cargoy<=", 0) == 0) k = Command::Cond::CargoYLe;
+	else if (tok.rfind("gessohp=", 0) == 0) k = Command::Cond::GessoHp;
+	else if (tok.rfind("gessomode=", 0) == 0) k = Command::Cond::GessoMode;
+	else if (tok.rfind("held=", 0) == 0) k = Command::Cond::Held;
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
 	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
@@ -202,10 +208,15 @@ bool parseCond(const std::string& tok, Command& c)
 	else return false;
 	const size_t eq = tok.find('=');
 	int value = 0;
-	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe) {
+	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
+	    || k == Command::Cond::CargoYLe || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::Held) {
 		const char* end = tok.c_str() + tok.size();
 		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < -0x8000 || value > 0x7fff) return false;
+		if (k == Command::Cond::CraneState && (value < 0 || value > 3)) return false;
+		if (k == Command::Cond::GessoHp && (value < 0 || value > 255)) return false;
+		if (k == Command::Cond::GessoMode && (value < 0 || value > 7)) return false;
+		if (k == Command::Cond::Held && (value < 0 || value > 1)) return false;
 	} else if (eq != std::string::npos) value = static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0));
 	c.conds.emplace_back(k, value);
 	return true;
@@ -606,6 +617,20 @@ TBossPakkun* findPetey()
 	return m && m->getObjNum() > 0 ? dynamic_cast<TBossPakkun*>(m->getObj(0)) : nullptr;
 }
 
+TBossGesso* findGesso()
+{
+	static const char kName[] = "\x83\x7b\x83\x58\x83\x51\x83\x62\x83\x5c\x81\x5b\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b";
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
+	TLiveManager* manager = dynamic_cast<TLiveManager*>(JDrama::TNameRefGen::search(kName));
+	return manager && manager->getObjNum() ? dynamic_cast<TBossGesso*>(manager->getObj(0)) : nullptr;
+}
+
+TCraneUpDown* findRiccoCrane()
+{
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
+	return dynamic_cast<TCraneUpDown*>(JDrama::TNameRefGen::search("craneUpDown 0"));
+}
+
 // The nearest live, shown small enemy within r of Mario in XZ and 300 in Y (`clear`), or null.
 const TSmallEnemy* nearestSmallEnemy(float r)
 {
@@ -776,14 +801,15 @@ void logJpa(const char* tag)
 // Read-only Ricco combat telemetry; replay actions still use ordinary PAD inputs.
 void logGesso(const char* tag)
 {
-	static const char kName[] = "\x83\x7b\x83\x58\x83\x51\x83\x62\x83\x5c\x81\x5b\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b";
-	TLiveManager* manager = dynamic_cast<TLiveManager*>(JDrama::TNameRefGen::search(kName));
-	TBossGesso* boss = manager && manager->getObjNum() ? dynamic_cast<TBossGesso*>(manager->getObj(0)) : nullptr;
+	const TBossGesso* boss = findGesso();
 	if (!boss) return;
 	std::printf("[%s-gesso] hp=%d mode=%d dead=%d pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, (int)boss->getHitPoints(), boss->mAttackMode,
 	    (int)boss->checkLiveFlag(LIVE_FLAG_DEAD), boss->mPosition.x, boss->mPosition.y, boss->mPosition.z,
 	    gpMarioOriginal && gpMarioOriginal->mHeldObject ? 1 : 0, gTick);
 	if (boss->mBeak) std::printf("[%s-gesso-beak] pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, boss->mBeak->mPosition.x, boss->mBeak->mPosition.y, boss->mBeak->mPosition.z, boss->mBeak->mHolder ? 1 : 0, gTick);
+	if (const TCraneUpDown* crane = findRiccoCrane())
+		if (crane->unk138) std::printf("[%s-ricco-cargo] state=%d angle=%.1f pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, (int)crane->mState, crane->mRotation.x,
+		    crane->unk138->mPosition.x, crane->unk138->mPosition.y, crane->unk138->mPosition.z, gTick);
 	for (int i = 0; i < TBossGesso::TENTACLE_NUM; ++i) {
 		const TBGTentacle* t = boss->mTentacles[i];
 		if (t && t->mTakeHit) std::printf("[%s-gesso-tentacle] i=%d state=%d pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, i, t->mState,
@@ -964,6 +990,19 @@ bool condHolds(const Command& c)
 			if (nozzle) ok = kind == Command::Cond::PitchGe ? nozzle->unk36E >= val : nozzle->unk36E <= val;
 			break;
 		}
+		case Command::Cond::CraneState:
+		case Command::Cond::CargoYLe: {
+			const TCraneUpDown* crane = sceneReady() ? findRiccoCrane() : nullptr;
+			if (crane) ok = kind == Command::Cond::CraneState ? crane->mState == val : crane->unk138 && crane->unk138->mPosition.y <= val;
+			break;
+		}
+		case Command::Cond::GessoHp:
+		case Command::Cond::GessoMode: {
+			const TBossGesso* boss = sceneReady() ? findGesso() : nullptr;
+			if (boss) ok = kind == Command::Cond::GessoHp ? boss->getHitPoints() == val : boss->mAttackMode == val;
+			break;
+		}
+		case Command::Cond::Held: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mHeldObject != nullptr) == (val != 0); break;
 		case Command::Cond::Squat: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT) == (val != 0); break;
 		case Command::Cond::GkAwake: {
 			const TBiancoGateKeeper* b = sceneReady() ? findBoss() : nullptr;

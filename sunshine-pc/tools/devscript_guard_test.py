@@ -9,6 +9,14 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ("cargo", "guard radius=0 until cranestate=2 cargoy<=-600\nend\n", 0, "done at tick"),
+    ("cargo_state_invalid", "guard radius=0 until cranestate=4\nend\n", 2, "unexpected token in guard"),
+    ("cargo_height_invalid", "guard radius=0 until cargoy<=nan\nend\n", 2, "unexpected token in guard"),
+    ("cargo_height_overflow", "guard radius=0 until cargoy<=32768\nend\n", 2, "unexpected token in guard"),
+    ("gesso", "guard radius=0 until gessohp=2 gessomode=6 held=0\nend\n", 0, "done at tick"),
+    ("gesso_hp_invalid", "guard radius=0 until gessohp=256\nend\n", 2, "unexpected token in guard"),
+    ("gesso_mode_invalid", "guard radius=0 until gessomode=8\nend\n", 2, "unexpected token in guard"),
+    ("held_invalid", "guard radius=0 until held=2\nend\n", 2, "unexpected token in guard"),
     ("hop_parse", "goto finish if thp=0 max=1\nwalkto x=0 z=0 hop=24 timeout=1\nlabel finish\nend\n", 0, "done at tick"),
     ("hop_zero", "walkto x=0 z=0 hop=0 timeout=1\n", 2, "hop needs an integer >= 3"),
     ("hop_fraction", "walkto x=0 z=0 hop=3.5 timeout=1\n", 2, "hop needs an integer >= 3"),
