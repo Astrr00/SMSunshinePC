@@ -1,0 +1,95 @@
+# Earned four-Shine File B: reveal the beach drawing, cross its sea pillars, collect Shine117 and save.
+# Ordinary PAD inputs only; source and bounded evidence are in docs/normal-world-routes.md.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+# Reach the beach drawing through the plaza and wash it with the hover nozzle.
+walkto x=7000 z=6000 radius=100 timeout=1500
+walkto x=9000 z=2500 radius=100 timeout=1200
+walkto x=9000 z=-3500 radius=100 timeout=1200
+walkto x=9024 z=-5097 radius=60 timeout=900
+log
+shot beach_drawing.png
+hold X frames=1
+wait frames=20
+hold A frames=10
+hold R frames=120
+wait frames=120
+log
+shot beach_washed.png
+waitfor camDemo=0 timeout=1200
+hold X frames=1
+wait frames=20
+# Swim to the low stone; hover, release R and climb its ledge.
+walkto x=13780 z=-9600 radius=60 timeout=1800
+faceto x=13780 z=-10240 tol=3 timeout=180
+hold X frames=1
+wait frames=20
+hold A frames=10
+walkto x=13780 z=-9820 radius=20 spray=1 hover=1 timeout=180
+walkto x=13780 z=-10240 radius=100 hop=8 timeout=300
+wait frames=30
+log
+shot beach_low_stone.png
+waitfor marioy>=400 timeout=1
+hold X frames=1
+wait frames=30
+# Jump and hover to the two higher stones.
+faceto x=15150 z=-9870 tol=3 timeout=180
+trace frames=170
+hold A frames=10
+hold X frames=1
+wait frames=1
+walkto x=15150 z=-9870 radius=300 spray=1 hover=1 timeout=300
+hold L trig=0,255 stick=0,-127 frames=10
+hold trig=0,255 frames=20
+hold X frames=1
+wait frames=30
+log
+shot beach_middle_stone.png
+waitfor marioy>=570 timeout=1
+faceto x=17381 z=-9340 tol=3 timeout=180
+trace frames=170
+hold A frames=10
+hold X frames=1
+wait frames=1
+walkto x=17381 z=-9340 radius=280 spray=1 hover=1 timeout=360
+hold trig=0,255 frames=30
+hold X frames=1
+wait frames=45
+log
+shot beach_reward_position.png
+walkto x=17381 z=-9340 radius=20 timeout=300
+mash A period=30 hold=5 until flag=0x10075 timeout=600
+mash A period=30 until stage=1 dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot fifth_shine_saved.png
+end

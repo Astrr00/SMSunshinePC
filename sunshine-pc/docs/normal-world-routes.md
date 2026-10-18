@@ -222,3 +222,22 @@ python tools/route.py Strict tools/routes/pc_ricco_blooper_reload.dev --name <co
 
 This certifies one complete normal Ricco/Gooper mission, its saved fourth Shine and an independent cold reload. Broad repeatability, hardware playthrough and the other later worlds' normal mission completions remain open.
 The 91 diagnostic loading rows retain their own recorded executable hashes; matrix statuses remain 16/25 and are not recertified by this route.
+
+
+## Normal fifth-Shine prerequisite for Gelato
+
+Original `MarDirectorSetupObjects.cpp` enables the Mamma/Gelato Gatekeeper event at five Shines, after Ricco's three-Shine threshold. The clean Gooper profile has four; no progress flag or save is edited to open the next world.
+`nw64_fifth_shine` passes from unchanged `nw55_blooper_complete` through the normal File B menu and movies: rc0/153 seconds, done at tick4311, health8, no active cheats and an empty crash log.
+[pc_delfino_beach_shine.dev](../tools/routes/pc_delfino_beach_shine.dev) washes the original beach drawing at (9024,-5097) with ordinary hover spray. Its normal reward camera carries Shine117 to the offshore pillar at (17380.5,839.9,-9340.3).
+The route swims to the low pillar, uses hover/ledge climb, jumps across two pillars, walks under the reward and collects it with A. The original save confirmation returns Mario to controllable Delfino1/5 with five Shines.
+
+The loaded `/mario/hhover.prm` brake is0.985, rather than the constructor default0.95. Neutral flight alone overshoots the middle pillar; a short ordinary backward-stick phase followed by neutral hover lands on it. This changes only controller input.
+`nw57` times out against a plaza building; `nw58` reveals the reward but tries to collect it at the drawing. `nw59` and `nw61` were explicitly stopped prototypes. `nw60`/`nw62` overshoot the middle pillar; `nw63` lands both but jumps about120 units short of the Shine. None has a nonempty crash log. The accepted route moves under the reward before jumping; no engine behavior is bypassed.
+
+GCI header and all sector checksums pass. Latest File B sector3/write6 contains exactly IDs `[0, 1, 10, 86, 117]`; SHA256 `c1832412d7e7ed55175c528dfd39eb137e17500e0dbf78971de00a35bf88ed02`.
+The unchanged executable SHA256 is `b18fed7651cc60b9998e7e027d78a44859e67bcfd7744e9aa54282437d78f599`. The fresh normal-menu/movie load in `nw65_gelato_entry` independently observes all five Shines and flag0x10075 before its approach trial. This is a saved prerequisite, not Gelato entry or mission completion.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_delfino_beach_shine.dev --name <unique> --appdata-from nw55_blooper_complete --seconds 800
+python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+```
