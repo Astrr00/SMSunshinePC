@@ -1,5 +1,11 @@
 """World probe verdict checks without game data: python tools/world_sweep_test.py."""
-from world_sweep import verdict
+from world_sweep import selects, verdict
+
+assert selects(8, 1, set())
+assert selects(8, 1, {(8,)})
+assert selects(8, 1, {(8, 1)})
+assert not selects(8, 0, {(8, 1)})
+assert not selects(9, 1, {(8,)})
 
 
 def snapshot(stage=3, scenario=0, point="1,2,3", demo=0, director=4):

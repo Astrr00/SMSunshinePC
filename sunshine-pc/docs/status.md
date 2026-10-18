@@ -6,6 +6,20 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+**Pianta archive crash and dialog-aware probes (2026-10-18).** The broader `wl02` sweep finds a native access violation in Pianta raw8/scenario1 (`monte5.arc`).
+The crash stack runs through `TEnemyMario::TSettingParams`, `TParams::load` and recursive `JKRArchive::findFsResource`.
+The requested optional parameter path is `../map/pad2/Setting.prm` after the leading slash is removed; the fallback `params` archive has 12 directories and its root `..` entry contains `0xFFFFFFFF`.
+Using that sentinel as an index forms an out-of-bounds host pointer.
+Both `findDirectory` and `findFsResource` now reject indices outside the mounted directory table under `TARGET_PC`, returning normal lookup failure before pointer arithmetic.
+No resource or gameplay state is fabricated; no `/Od` or optimization-cause inference is made.
+
+Gelato raw4/scenario1 initially reports no motion because its normal NPC introduction is still open.
+The old `talk=0` condition excludes director dialog-camera states3/4 and therefore ends the A-input loop too early.
+The added observational `talkbusy=0` includes `isTalkOrDemoModeNow()`; the bot continues ordinary A inputs, then waits for normal camera/control before testing movement.
+Targeted uninstrumented `wl05` passes raw8/0 (23 s), raw4/1 (44 s) and raw8/1 (23 s), with exit0, empty crash logs and actual jump/stick motion.
+Strict has 0 unresolved symbols, all 64 host checks and five native parser cases pass, and world verdict/selection checks pass.
+Executable SHA256 is `f1358d01a7fe809958e2909bcb80402191b0c87f4ef208c3c817dc1efff98585`; the complete 91-case `wl06` replay is now in progress on this common build.
+
 **Later-world load blockers and resource audit (2026-10-18).** Fresh Strict `/O2` WARP probes reproduce renderer fatal exits in `sirena0`, `monte0` and `mare0` before playable control.
 Sirena reports `unmapped vtx attr 13`; Pianta and Noki report `unhandled tcg src 21`.
 The crash logs are empty, so these are explicit renderer aborts, not recorded native crashes or evidence of UB.

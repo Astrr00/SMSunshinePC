@@ -92,7 +92,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -176,6 +176,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("camDemo=", 0) == 0) k = Command::Cond::CamDemo; // 1 while a demo camera owns the view
 	else if (tok.rfind("washed=", 0) == 0) k = Command::Cond::Washed; // graffiti wash finished (see washedCount)
 	else if (tok.rfind("talk=", 0) == 0) k = Command::Cond::Talk; // 1 while a talk/message window owns the game (TMarDirector::isTalkModeNow)
+	else if (tok.rfind("talkbusy=", 0) == 0) k = Command::Cond::TalkBusy; // includes camera-dialogue states 3/4 until normal player control returns
 	else if (tok.rfind("bck=", 0) == 0) k = Command::Cond::Bck; // TBiancoGateKeeper/GateKeeper current bck index (gatekeeper.cpp gDbgGKCurBck)
 	else if (tok.rfind("bckframe>=", 0) == 0) k = Command::Cond::BckFrameGe; // frame of that bck (gatekeeper.cpp gDbgGKBckFrame), with bck=N
 	else if (tok.rfind("bckframe<=", 0) == 0) k = Command::Cond::BckFrameLe;
@@ -866,6 +867,7 @@ bool condHolds(const Command& c)
 		case Command::Cond::CamDemo: ok = sceneReady() && gpCamera && gpCamera->isDemoCamera() == (val != 0); break;
 		case Command::Cond::Washed: ok = sceneReady() && washedCount() >= val; break;
 		case Command::Cond::Talk: ok = sceneReady() && gpMarDirector->isTalkModeNow() == (val != 0); break;
+		case Command::Cond::TalkBusy: ok = sceneReady() && gpMarDirector->isTalkOrDemoModeNow() == (val != 0); break;
 		case Command::Cond::Bck: ok = sceneReady() && gDbgGKCurBck == val; break;
 		case Command::Cond::BckFrameGe: ok = sceneReady() && gDbgGKBckFrame >= val; break;
 		case Command::Cond::BckFrameLe: ok = sceneReady() && gDbgGKBckFrame <= val; break;

@@ -83,6 +83,11 @@ JKRArchive::SDIDirEntry* JKRArchive::findResType(u32 type) const
 JKRArchive::SDIDirEntry* JKRArchive::findDirectory(const char* name,
                                                    u32 directoryId) const
 {
+#ifdef TARGET_PC
+	// Root's ".." entry is the sentinel 0xFFFFFFFF, not a directory index.
+	if (directoryId >= mArcInfoBlock->num_nodes)
+		return nullptr;
+#endif
 	if (name == nullptr) {
 		return mDirectories + directoryId;
 	}
@@ -136,6 +141,11 @@ JKRArchive::SDIFileEntry* JKRArchive::findTypeResource(u32 type,
 JKRArchive::SDIFileEntry* JKRArchive::findFsResource(const char* name,
                                                      u32 directoryId) const
 {
+#ifdef TARGET_PC
+	// A relative lookup may ascend past the archive root; do not form an out-of-bounds host pointer.
+	if (directoryId >= mArcInfoBlock->num_nodes)
+		return nullptr;
+#endif
 	if (name) {
 		CArcName arcName(&name, '/');
 		SDIDirEntry* dirEntry   = mDirectories + directoryId;

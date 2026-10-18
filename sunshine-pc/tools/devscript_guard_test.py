@@ -11,7 +11,7 @@ tag = time.time_ns()
 cases = [
     ("legacy", "guard radius=0\nend\n", 0, "done at tick"),
     ("resume", "guard radius=0 resume=aim until bck=5\nlabel aim\nend\n", 0, "done at tick"),
-    ("observations", "guard radius=0 until gkawake=1 squat=1 bckframe>=60 bckframe<=120\nend\n", 0, "done at tick"),
+    ("observations", "guard radius=0 until gkawake=1 squat=1 talkbusy=0 bckframe>=60 bckframe<=120\nend\n", 0, "done at tick"),
     ("unknown", "guard radius=0 resume=missing\nend\n", 2, "unknown label"),
     ("invalid", "guard radius=0 resume=\nend\n", 2, "unexpected token in guard"),
 ]
