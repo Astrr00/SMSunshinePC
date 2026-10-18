@@ -22,3 +22,5 @@ static Z24X8 source size | lib/gx/texture.cpp | ^    case GX_TF_Z24X8:
 static Z24X8 decoder | lib/gfx/texture_convert.cpp | ^  case GX_TF_Z24X8:
 Z24X8 depth-copy shader | lib/gfx/tex_copy_conv.cpp | ConvPipeline\{GX_TF_Z24X8, FragZ24X8,
 Z24X8 canonical readback | lib/gfx/depth_peek.cpp | constexpr void pack_z24x8\( && static_assert\(check_z24x8_packing<84, 8, 512>\(\)\);
+GX texcoord alias | lib/gx/gx.cpp | static_assert\(active_texcoord\(GX_TEXCOORD1, 1\) == GX_TEXCOORD0\);
+GX absent UV input | lib/gx/shader.cpp | return "vec2f\(0.0, 0.0\)"s;

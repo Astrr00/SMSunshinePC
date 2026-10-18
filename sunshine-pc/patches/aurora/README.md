@@ -21,7 +21,7 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 87 file entries over 48 distinct files, +2327 / -216 (recounted with 0020).
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 89 file entries over 49 distinct files, +2348 / -216 (recounted with 0021).
 
 | file | topic | files | +/- |
 |---|---|---|---|
@@ -45,6 +45,7 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0018-gx-z24x8-copy-readback.patch` | genuine Z24X8 depth conversion and canonical 4×4/two-plane CPU readback through the existing generation-guarded transport; preserves R8 layout, records copy formats, rejects unsupported depth conversion; constexpr packing checks include width 84 and padded rows | 8 | +127 / -34 |
 | `0019-thread-skip-single-core-cache-domain.patch` | `pin_shared_cache` pins main, FIFO worker and render worker only to a cache domain of at least 4 processors; a VM reporting one L3 per vCPU pinned all three to one core and starved the game thread (70 to 180 ms baton wake latency, audio dropouts every few seconds) | 1 | +4 / -1 |
 | `0020-host-wait-hooks.patch` | `aurora_set_host_wait_hooks` and `thread::HostWaitScope`: the embedding application is called around the blocking waits on Aurora's workers (FIFO drain, blocking pipeline compile, DVD command wait) so the port can let its audio thread run meanwhile; audio dropouts at scene loads | 7 | +34 / -0 |
+| `0021-gx-missing-texcoords.patch` | Missing vertex UVs start at zero; TEV and indirect references beyond the enabled texgen count alias coordinate zero. Fixes Sirena's position-only EFB alpha clear and Pianta/Noki rope draws without changing game code or removing draws; three constexpr alias checks | 2 | +14 / -0 |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
 
@@ -53,6 +54,15 @@ Patch 0008 was produced with `python tools/make_aurora_patch.py 0008-gx-fifo-des
 Each patch applies on top of the previous one. Topic boundaries are per line, so several files hold lines from more than one patch (e.g. `lib/aurora.cpp` in 0005 and 0006; `lib/gx/command_processor.cpp` in 0001, 0006, and 0007). The `CopySrc` flags in `lib/gfx/texture.cpp` are assigned to 0006 because they sit with the pass dump; their exact purpose was not traced in the code.
 
 ## Verification (run when the series was regenerated)
+
+0021 (2026-10-18): the checker reports 21 applied patches over 49 files.
+Strict reports zero unresolved symbols, and the host suite passes all 64 checks.
+Fresh WARP dev-start probes `world_fix_06`, `world_fix_08`, `world_fix_09` load Sirena, Pianta and Noki, execute jump/stick input and finish with exit 0 and empty crash logs.
+Before the fix, the same probes fail with `unmapped vtx attr 13` or `unhandled tcg src 21`.
+FIFO draw provenance identifies `TBossMantaManager::setupEfbAlpha`; its position-only clear is also present in the original PPC assembly.
+The indirect failure records a reference to coordinate 1 with just one enabled texgen.
+This follows the compatibility behavior in Dolphin's [vertex input generation](https://github.com/dolphin-emu/dolphin/blob/master/Source/Core/VideoCommon/VertexShaderGen.cpp) and [TEV/indirect coordinate selection](https://github.com/dolphin-emu/dolphin/blob/master/Source/Core/VideoCommon/PixelShaderGen.cpp).
+It is functional WARP evidence, not retail-pixel or hardware-GPU equivalence.
 
 Current 0018 source `b1392e5` (2026-10-15): checker reports 18 applied/tracked patches over 45 files.
 Full verification: 7 PASS, 0 FAIL, 1 optional SKIP; 63 host checks and 45-second WARP boot pass.

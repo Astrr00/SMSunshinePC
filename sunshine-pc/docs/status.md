@@ -6,6 +6,26 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+**Later-world load blockers and resource audit (2026-10-18).** Fresh Strict `/O2` WARP probes reproduce renderer fatal exits in `sirena0`, `monte0` and `mare0` before playable control.
+Sirena reports `unmapped vtx attr 13`; Pianta and Noki report `unhandled tcg src 21`.
+The crash logs are empty, so these are explicit renderer aborts, not recorded native crashes or evidence of UB.
+FIFO provenance plus the actual live module base resolves the Sirena draw to `TBossMantaManager::setupEfbAlpha`; the original PPC assembly confirms its position-only clear.
+The rope draw configuration retains an indirect reference to coordinate 1 with only one active texgen.
+Aurora patch `0021-gx-missing-texcoords.patch` handles missing UV inputs as zero and aliases out-of-range TEV/indirect coordinates to coordinate zero, following the documented Dolphin compatibility behavior linked in the patch README.
+It preserves the game draws and their matrices/offsets; no game-state workaround, resource substitution or hang bypass is added.
+
+The final uninstrumented candidate passes `world_fix_06`, `world_fix_08`, `world_fix_09`: each rc0/22 s, real D3D12 WARP rendering, jump/stick response, live expected scenario and empty crash log.
+Executable SHA256: `6909401400e35a082e40e733727e59d59d281d9c1901875a5c6ff92adceb8042`.
+Strict reports 0 unresolved symbols; all 64 host checks pass, as do three constexpr alias checks and 13 world-verdict cases.
+`tools/world_sweep.py` runs the 91 present later-world scenario rows in isolated empty profiles; the complete `wl02` batch is in progress.
+These dev-start probes skip movies for diagnosis and do not certify normal unlocking, selected-episode flag context, mission completion, retail pixels, hardware GPUs or native quit.
+
+`tools/content_reach.py` now keeps scenario indices and fails closed on undecoded scripts/dynamic calls.
+It derives Delfino's selector return set (0,1,2,5,6,7,8,9) and Pinna's unspecified-scenario values (0-5) from the current source; explicit Pinna transitions add only 5-7.
+The actual data/source scan reports all 44 absent resource slots unreferenced and 0 undecoded/dynamic cases; explicit/dynamic destination and selector tests pass.
+Their metadata remains `unresolved-resource` because the files are absent, while normal collectible completion remains open.
+PC-CONTENT and PC-CORE retain status `open`.
+
 **O2 Gatekeeper controller replay verified (2026-10-17).** `python tools/o2_sweep.py gk14 gatekeeper` and then `python tools/o2_sweep.py gk15 gatekeeper` both print PASS, rc0/429 s, on an unchanged Strict executable and route. Both load earned File B from `pg1_airport_reload_20261016` through the ordinary menu and movies, defeat the boss (HP0 at ticks11199/11204), and finish in controllable Delfino stage1/scenario1 at ticks12318/12324. Both crash logs are empty. Mario retains health4/5 at the post-defeat snapshot. No teleport, boss aim helper, cheats, dev start, state/resource writes, seed, movie skip or timing override is used.
 
 The route brakes oil-slide momentum with A, defends the approach and fight with ordinary stick/FLUDD inputs, and reacquires its stance after each defense. Defense stops walking once aimed and finishes its braking jump before the paused route can steer again. Waking observes the current raised boss nerve (`gkawake=1`), so a boss awakened during defense is recognized. Dry nozzle calibration follows an observed squat; each throat shot starts at `bck=18`, animation frame60..120. A missed round repeats the controller setup, including normal re-waking after a dive. The new `guard resume=LABEL until <conditions>` behavior is opt-in; the existing guard syntax remains supported. These are controller replay changes, not game-state or engine-hang bypasses.

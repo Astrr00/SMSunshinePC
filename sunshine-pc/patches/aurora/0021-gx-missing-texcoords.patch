@@ -1,0 +1,45 @@
+diff --git a/lib/gx/gx.cpp b/lib/gx/gx.cpp
+--- a/lib/gx/gx.cpp
++++ b/lib/gx/gx.cpp
+@@ -379,6 +379,14 @@ wgpu::RenderPipeline build_pipeline(const PipelineConfig& config, const gfx::Ren
+   return g_device.CreateRenderPipeline(&descriptor);
+ }
+ 
++// GX aliases references beyond the enabled texgens to coordinate zero (also for indirect stages).
++constexpr GXTexCoordID active_texcoord(GXTexCoordID id, u8 count) {
++  return id != GX_TEXCOORD_NULL && id >= count ? GX_TEXCOORD0 : id;
++}
++static_assert(active_texcoord(GX_TEXCOORD1, 1) == GX_TEXCOORD0);
++static_assert(active_texcoord(GX_TEXCOORD1, 2) == GX_TEXCOORD1);
++static_assert(active_texcoord(GX_TEXCOORD_NULL, 1) == GX_TEXCOORD_NULL);
++
+ void populate_pipeline_config(PipelineConfig& config, GXPrimitive primitive, GXVtxFmt fmt) noexcept {
+   ZoneScoped;
+ 
+@@ -440,10 +448,12 @@ void populate_pipeline_config(PipelineConfig& config, GXPrimitive primitive, GXV
+   config.shaderConfig.tevSwapTable = g_gxState.tevSwapTable;
+   for (u8 i = 0; i < g_gxState.numTevStages; ++i) {
+     config.shaderConfig.tevStages[i] = g_gxState.tevStages[i];
++    config.shaderConfig.tevStages[i].texCoordId = active_texcoord(g_gxState.tevStages[i].texCoordId, g_gxState.numTexGens);
+   }
+   config.shaderConfig.tevStageCount = g_gxState.numTevStages;
+   for (u8 i = 0; i < g_gxState.numIndStages; ++i) {
+     config.shaderConfig.indStages[i] = g_gxState.indStages[i];
++    config.shaderConfig.indStages[i].texCoordId = active_texcoord(g_gxState.indStages[i].texCoordId, g_gxState.numTexGens);
+   }
+   config.shaderConfig.numIndStages = g_gxState.numIndStages;
+   for (u8 i = 0; i < MaxColorChannels; ++i) {
+diff --git a/lib/gx/shader.cpp b/lib/gx/shader.cpp
+--- a/lib/gx/shader.cpp
++++ b/lib/gx/shader.cpp
+@@ -576,6 +576,10 @@ std::string vtx_attr(const ShaderConfig& config, GXAttr attr) {
+     if (attr == GX_VA_CLR0 || attr == GX_VA_CLR1) {
+       return "vec4f(0.0, 0.0, 0.0, 0.0)"s;
+     }
++    if (attr >= GX_VA_TEX0 && attr <= GX_VA_TEX7) {
++      // Absent UV inputs start at zero; the texgen still applies its matrix and point/line offsets.
++      return "vec2f(0.0, 0.0)"s;
++    }
+     UNLIKELY FATAL("unmapped vtx attr {}", underlying(attr));
+   }
+   if (attr == GX_VA_POS) {
