@@ -120,3 +120,25 @@ python tools/route.py Strict tools/routes/pc_ricco_unlock_reload.dev --name <col
 
 This certifies one complete connected Ricco unlocking/entry and an independent persisted-unlock reload. Broad repeatability, the Ricco mission boss Gooper Blooper, other worlds' normal mission completion, hardware rendering and native Close remain open.
 The earlier 91-world load certificate and Bianco Gatekeeper pair remain tied to their recorded executable hashes; they are not silently recertified by this controller change. Matrix statuses stay unchanged at 16/25.
+
+## Normal harbor approach and Gooper Blooper observations
+
+`nw32_blooper_approach` passes the first Ricco harbor approach component: rc0/120 seconds, `done at tick=3364`, empty crash log, health8 and active-cheat counts zero.
+It loads the earned Ricco-unlock File B from `nw27_ricco_entry`, enters episode1 through the normal portal/selector, takes the upper quay at (-13000,1000)/(-11100,1100), then jumps and hovers onto the first container.
+The final controllable position is (-9411.3,630.3,2356.6). The public [pc_ricco_harbor_approach.dev](../tools/routes/pc_ricco_harbor_approach.dev) retains every tested controller command unchanged.
+The source and trial GCI both retain SHA256 `74c6589a03d19c7d82e18e8b8f28671b8dcfc320f86cec264efa8b1efba6e8f2`; no progress or resource file is altered to construct this approach.
+
+The earlier `nw29` trial spends its entire height wait below an unreachable 600-unit target after launching from the lower, 150-high quay.
+`nw30` cannot walk through the 150-unit curb to its intended 300-high launch point. `nw31` reaches that point via the upper quay, but uses 50 hover ticks waiting for height before horizontal travel and falls short of the container.
+The passing route moves toward the container immediately after the jump, retaining the hover burst for the crossing. All three failed trials have empty crash logs; these are bounded controller navigation failures, not engine hangs or optimization-related UB evidence.
+
+A read-only `logGesso` snapshot follows the actual scene manager name and reports HP, attack mode, dead flag, beak/tentacle positions and held status.
+Native observations show Gooper Blooper at (12600,1500,2200), HP2/mode6, with tentacle0 in state9 and its grip near (11035.4,1492.7,2440.0). Inactive beak/other tentacle positions are zero during the original container phase.
+The snapshot adds no targeting action or gameplay-state write. Strict has 0 unresolved symbols; all 68 host checks pass.
+Accepted executable SHA256: `7e38ce5474889c0f9b36ef58c2793862132fa6570e98f10595a04c7182c75c60`.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_ricco_harbor_approach.dev --name <unique> --appdata-from nw27_ricco_entry --seconds 480
+```
+
+This is one bounded approach pass. The remaining harbor traversal, container-arm pull, Gooper Blooper defeat/reward/save and broad repeatability remain open; it does not certify the Ricco mission's completion.

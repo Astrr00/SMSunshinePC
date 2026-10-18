@@ -40,6 +40,8 @@
 #include "Player/MarioAccess.hpp"
 #include "Enemy/GateKeeper.hpp"
 #include "Enemy/BossPakkun.hpp"
+#include "Enemy/BossGesso.hpp"
+#include "Enemy/BossGessoTentacle.hpp"
 #include "Enemy/Conductor.hpp"
 #include "Enemy/EnemyManager.hpp"
 #include "Enemy/SmallEnemy.hpp"
@@ -771,6 +773,24 @@ void logJpa(const char* tag)
 	            tag, e3, d3, p3, g3[0], g3[1], g3[2], g3[3], e2, d2, p2, gTick);
 }
 
+// Read-only Ricco combat telemetry; replay actions still use ordinary PAD inputs.
+void logGesso(const char* tag)
+{
+	static const char kName[] = "\x83\x7b\x83\x58\x83\x51\x83\x62\x83\x5c\x81\x5b\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b";
+	TLiveManager* manager = dynamic_cast<TLiveManager*>(JDrama::TNameRefGen::search(kName));
+	TBossGesso* boss = manager && manager->getObjNum() ? dynamic_cast<TBossGesso*>(manager->getObj(0)) : nullptr;
+	if (!boss) return;
+	std::printf("[%s-gesso] hp=%d mode=%d dead=%d pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, (int)boss->getHitPoints(), boss->mAttackMode,
+	    (int)boss->checkLiveFlag(LIVE_FLAG_DEAD), boss->mPosition.x, boss->mPosition.y, boss->mPosition.z,
+	    gpMarioOriginal && gpMarioOriginal->mHeldObject ? 1 : 0, gTick);
+	if (boss->mBeak) std::printf("[%s-gesso-beak] pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, boss->mBeak->mPosition.x, boss->mBeak->mPosition.y, boss->mBeak->mPosition.z, boss->mBeak->mHolder ? 1 : 0, gTick);
+	for (int i = 0; i < TBossGesso::TENTACLE_NUM; ++i) {
+		const TBGTentacle* t = boss->mTentacles[i];
+		if (t && t->mTakeHit) std::printf("[%s-gesso-tentacle] i=%d state=%d pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, i, t->mState,
+		    t->mTakeHit->mPosition.x, t->mTakeHit->mPosition.y, t->mTakeHit->mPosition.z, t->mTakeHit->mHolder ? 1 : 0, gTick);
+	}
+}
+
 void logStatus(const char* tag)
 {
 	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
@@ -783,6 +803,7 @@ void logStatus(const char* tag)
 	logEMario(tag);
 	logBoss(tag);
 	logRiccoGate(tag);
+	logGesso(tag);
 	logJpa(tag);
 	if (gpCardLoad)
 		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,

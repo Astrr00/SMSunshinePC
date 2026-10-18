@@ -1,0 +1,79 @@
+# Earned Ricco unlock: normal File B load, portal/episode 1, upper quay and first harbor container.
+# This is an approach component; Gooper Blooper completion remains open.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+walkto x=-6780 z=2020 radius=40 timeout=1200
+log
+shot ricco_dock_takeoff.png
+hold X frames=1
+wait frames=20
+faceto x=-8200 z=2000 tol=4 timeout=180
+hold A frames=10
+hold trig=0,255 until marioy>=600 timeout=90
+walkto x=-8200 z=2000 radius=70 spray=1 hover=1 timeout=240
+wait frames=20
+waitfor marioy>=200 timeout=1
+log
+shot ricco_boardwalk.png
+walkto x=-9650 z=2003 radius=80 timeout=600
+faceto x=-9902 z=2003 tol=3 timeout=180
+hold L frames=15
+hold L stick=0,-127 frames=28
+log
+hold L trig=0,255 stick=0,64 frames=60
+log
+hold L trig=0,255 stick=0,-64 frames=60
+log
+shot ricco_portal_sprayed.png
+wait frames=30
+walkto x=-9690 z=2003 radius=30 timeout=600
+mash A period=24 hold=5 until stage=3 scen=255 timeout=900
+wait frames=400
+log
+shot ricco_selector.png
+hold A frames=4
+waitfor stage=3 scen=0 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=90
+log
+shot ricco_normal_entry.png
+wait frames=30
+walkto x=-13000 z=1000 radius=60 timeout=600
+walkto x=-11100 z=1100 radius=40 timeout=600
+waitfor marioy>=290 timeout=1
+log
+shot ricco_cross_launch.png
+hold X frames=1
+wait frames=15
+faceto x=-9500 z=2300 tol=4 timeout=180
+hold A frames=10
+walkto x=-9500 z=2300 radius=80 spray=1 hover=1 timeout=240
+wait frames=30
+log
+shot ricco_cross_landing.png
+waitfor marioy>=600 timeout=1
+end
