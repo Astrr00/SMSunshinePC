@@ -169,7 +169,7 @@ This is one bounded central-platform crossing. The crane transfer, container-arm
 ## Normal crane transfer and Gooper Blooper arena entry
 
 `nw50_blooper_awake` passes the connected approach through the original container-arm event: rc0/224 seconds, `done at tick=6307`, empty crash log, health8 and active-cheat counts zero.
-The tested [pc_ricco_blooper_unassisted.dev](../tools/routes/pc_ricco_blooper_unassisted.dev) currently ends with the awakened boss; it does not yet certify defeat, reward or save.
+The accepted `nw50` command sequence ended with the awakened boss; the public route has since been extended by the full completion below.
 It preserves the central crossing, waits for the real crane state2/cargoY<=-600, boards the moving cargo and rides it above MarioY1350 before jumping to the high quay.
 The cargo observations and Gesso HP2/mode6/held0 checks are exercised natively. Navigation around the crane support retains the existing controller-only stall recovery; no collision or game-state bypass is added.
 
@@ -187,4 +187,38 @@ The accepted run GCI is still byte-identical to the earned-unlock source (`74c65
 python tools/route.py Strict tools/routes/pc_ricco_blooper_unassisted.dev --name <unique> --appdata-from nw27_ricco_entry --seconds 1000
 ```
 
-This certifies one normal connected Gooper arena entry. Boss defeat, Shine-ID10 collection/save, independent cold reload and broad repeatability remain open. Matrix statuses stay at 16/25.
+This entry-only result did not certify boss defeat or a saved Shine. The following completion supersedes that boundary; broad repeatability remains open and matrix statuses stay at 16/25.
+
+## Complete normal Gooper Blooper defeat, Shine save and cold reload
+
+`nw55_blooper_complete` passes the complete connected Ricco episode1 mission on Strict `/O2`: rc0/310 seconds, `done at tick=8716`, empty crash log, health8 and active-cheat counts zero.
+It starts from the unchanged earned Ricco-unlock `nw27_ricco_entry` profile, loads File B through ordinary menus/movies, crosses the central platform, rides the crane, pulls the container tentacle and follows the original raw3/0 -> raw59/0 arena transition.
+The public [pc_ricco_blooper_unassisted.dev](../tools/routes/pc_ricco_blooper_unassisted.dev) now includes the tested fight, collection, normal save confirmation and controllable Delfino1/5 return; the earlier `nw50` awakening-only boundary is superseded by this result.
+
+The original JP `/enemy/bossgesso.prm` supplies a beak-damage length of 800, an automatic-release limit of 1100, and a dirty-face limit of 500; the constructor's default damage length 600 is not the loaded value.
+The read-only `gessopull=1` observation requires a held beak and compares its actual root distance with the loaded original damage threshold. It only ends an ordinary B hold; two neutral ticks then release B through the game's normal pulling handler.
+The strict boolean parser rejects values outside 0/1 and fractional values; the Gesso snapshot reports actual pull/required distances.
+The successful sequence washes from the safer (11750,2230) stance for 80 ticks, releases L/R for 30 ticks, approaches (12150,2230), takes with B and pulls backward until that threshold.
+Both pulls reach the observed release condition after 66 ticks: HP2 -> 1 at tick6706, then HP1 -> 0 at tick7199. A 240-tick interval follows the first cork-damage/pollution sequence; the second wash clears the original renewed face ink.
+
+`nw51` waits for automatic release and is interrupted by an arm. `nw52` releases before the loaded 800 threshold. `nw53` takes damage while washing too close and cannot grab during invincibility. `nw54` still reaches the arm hit before its fixed-duration release.
+All have empty crash logs. The accepted route shortens the wash from 180 to 80 ticks, takes the beak farther out and observes the real damage threshold; no game physics, collision, actor HP, resources or progress state is changed.
+No teleport, direct aim, gameplay cheat, dev start, resource/state write, seed, movie skip or timing override is used. `SUNSHINE_DEV_HPLOG=1` is read-only telemetry.
+
+The original death/reward camera runs, the route collects Shine-ID10 (flag0x1000a) at tick8153, then confirms the normal save and returns with four Shines at tick8656.
+Independent GCI validation passes every sector checksum: latest File B sector4/write5 has exactly IDs `[0, 1, 10, 86]`.
+Saved GCI SHA256: `c227fb7200e0e7a30b7a5f253a66eaba3028f1b37ba70bb57f53d357d2772b53`.
+The source GCI remains byte-identical (`74c6589a03d19c7d82e18e8b8f28671b8dcfc320f86cec264efa8b1efba6e8f2`).
+
+`nw56_cold_blooper` independently passes a fresh ordinary menu/movie load: rc0/49 seconds, `done at tick=1333`, four Shines, flags0x10001/0x10386/0x1000a, health8, normal Delfino1/5 control, empty crash log and no active cheats.
+Public cold proof: [pc_ricco_blooper_reload.dev](../tools/routes/pc_ricco_blooper_reload.dev). Both accepted runs use executable SHA256 `b18fed7651cc60b9998e7e027d78a44859e67bcfd7744e9aa54282437d78f599`.
+Strict reports 0 unresolved symbols; all 68 port checks and all 28 native parser cases pass on this build.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_ricco_blooper_unassisted.dev --name <unique> --appdata-from nw27_ricco_entry --seconds 1500 SUNSHINE_DEV_HPLOG=1
+python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_ricco_blooper_reload.dev --name <cold-unique> --appdata-from <unique> --seconds 240
+```
+
+This certifies one complete normal Ricco/Gooper mission, its saved fourth Shine and an independent cold reload. Broad repeatability, hardware playthrough and the other later worlds' normal mission completions remain open.
+The 91 diagnostic loading rows retain their own recorded executable hashes; matrix statuses remain 16/25 and are not recertified by this route.

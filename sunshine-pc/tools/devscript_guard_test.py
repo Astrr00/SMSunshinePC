@@ -9,6 +9,9 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ("gesso_pull", "guard radius=0 until gessopull=0 gessopull=1\nend\n", 0, "done at tick"),
+    ("gesso_pull_invalid", "guard radius=0 until gessopull=2\nend\n", 2, "unexpected token in guard"),
+    ("gesso_pull_fraction", "guard radius=0 until gessopull=1.0\nend\n", 2, "unexpected token in guard"),
     ("cargo", "guard radius=0 until cranestate=2 cargoy<=-600\nend\n", 0, "done at tick"),
     ("cargo_state_invalid", "guard radius=0 until cranestate=4\nend\n", 2, "unexpected token in guard"),
     ("cargo_height_invalid", "guard radius=0 until cargoy<=nan\nend\n", 2, "unexpected token in guard"),

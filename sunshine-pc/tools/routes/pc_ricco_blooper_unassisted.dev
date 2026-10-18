@@ -130,4 +130,48 @@ waitfor camDemo=0 timeout=3000
 wait frames=120
 log
 shot ricco_boss_awake.png
+walkto x=11750 z=2230 radius=40 spray=1 timeout=600
+faceto x=12600 z=2200 tol=3 timeout=180
+hold L frames=15
+hold L trig=0,255 frames=80
+log
+wait frames=30
+walkto x=12150 z=2230 radius=25 timeout=600
+hold B frames=1
+hold B stick=0,127 until held=1 timeout=180
+log
+hold B stick=0,-127 until held=1 gessopull=1 timeout=600
+wait frames=2
+log
+waitfor gessohp=1 timeout=600
+shot ricco_blooper_first_pull.png
+wait frames=240
+walkto x=11750 z=2230 radius=40 spray=1 timeout=600
+faceto x=12600 z=2200 tol=3 timeout=180
+hold L frames=15
+hold L trig=0,255 frames=80
+log
+wait frames=30
+walkto x=12150 z=2230 radius=25 timeout=600
+hold B frames=1
+hold B stick=0,127 until held=1 timeout=180
+log
+hold B stick=0,-127 until held=1 gessopull=1 timeout=600
+wait frames=2
+log
+waitfor gessohp=0 timeout=600
+shot ricco_blooper_defeated.png
+wait frames=900
+waitfor camDemo=0 timeout=1800
+log
+shot ricco_blooper_shine.png
+walkto x=12600 z=2200 radius=50 timeout=900
+mash A period=30 hold=5 until flag=0x1000a timeout=900
+log
+shot ricco_blooper_shine_collected.png
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=9000
+log
+shot ricco_blooper_saved_return.png
+wait frames=60
+waitfor flag=0x1000a timeout=1
 end
