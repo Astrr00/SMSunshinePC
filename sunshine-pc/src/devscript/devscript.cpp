@@ -803,9 +803,9 @@ void logGesso(const char* tag)
 {
 	const TBossGesso* boss = findGesso();
 	if (!boss) return;
-	std::printf("[%s-gesso] hp=%d mode=%d dead=%d pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, (int)boss->getHitPoints(), boss->mAttackMode,
+	std::printf("[%s-gesso] hp=%d mode=%d dead=%d pos=(%.1f,%.1f,%.1f) held=%d ink=%u tick=%d\n", tag, (int)boss->getHitPoints(), boss->mAttackMode,
 	    (int)boss->checkLiveFlag(LIVE_FLAG_DEAD), boss->mPosition.x, boss->mPosition.y, boss->mPosition.z,
-	    gpMarioOriginal && gpMarioOriginal->mHeldObject ? 1 : 0, gTick);
+	    gpMarioOriginal && gpMarioOriginal->mHeldObject ? 1 : 0, (unsigned)boss->unk190.color.a, gTick);
 	if (boss->mBeak) std::printf("[%s-gesso-beak] pos=(%.1f,%.1f,%.1f) held=%d tick=%d\n", tag, boss->mBeak->mPosition.x, boss->mBeak->mPosition.y, boss->mBeak->mPosition.z, boss->mBeak->mHolder ? 1 : 0, gTick);
 	if (const TCraneUpDown* crane = findRiccoCrane())
 		if (crane->unk138) std::printf("[%s-ricco-cargo] state=%d angle=%.1f pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, (int)crane->mState, crane->mRotation.x,

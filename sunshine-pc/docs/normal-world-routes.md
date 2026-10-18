@@ -165,3 +165,26 @@ python tools/route.py Strict tools/routes/pc_ricco_central_unassisted.dev --name
 ```
 
 This is one bounded central-platform crossing. The crane transfer, container-arm pull, boss defeat, Shine collection/save and repeatability remain open; matrix statuses stay at 16/25.
+
+## Normal crane transfer and Gooper Blooper arena entry
+
+`nw50_blooper_awake` passes the connected approach through the original container-arm event: rc0/224 seconds, `done at tick=6307`, empty crash log, health8 and active-cheat counts zero.
+The tested [pc_ricco_blooper_unassisted.dev](../tools/routes/pc_ricco_blooper_unassisted.dev) currently ends with the awakened boss; it does not yet certify defeat, reward or save.
+It preserves the central crossing, waits for the real crane state2/cargoY<=-600, boards the moving cargo and rides it above MarioY1350 before jumping to the high quay.
+The cargo observations and Gesso HP2/mode6/held0 checks are exercised natively. Navigation around the crane support retains the existing controller-only stall recovery; no collision or game-state bypass is added.
+
+A neutral 30-tick interval after L lets Mario leave squat/holding-pump before B. In `nw50`, the one-tick B press already takes the tentacle at tick5803; the following forward-B wait sees held1 immediately.
+Backward B releases at tick5868 after 65 ticks and triggers the original streaming-movie/transition to raw59/scenario0.
+Normal control resumes at tick6187; the final boss has HP2/mode0, Mario is at (10500,1500,2400), and the original beak position is about (12351.1,1464.1,2233.5).
+The extra cargo-to-quay waypoint in failed `nw48` leads over the edge; it is absent from the accepted route. Earlier immediate B attempts remain in squat and time out normally. All crash logs are empty.
+
+Gesso's read-only snapshot now also reports its original face-ink alpha; the initial value is230. No targeting, collision, actor state or gameplay resource is changed.
+Strict reports 0 unresolved symbols and all 68 port checks pass after this logging-only change. The earlier 25 native parser cases cover the unchanged observation parser.
+Executable SHA256: `5aebf349eedf4c4b4018cf56edad023a24947854190c55b90a1bf2216f9bb6b8`.
+The accepted run GCI is still byte-identical to the earned-unlock source (`74c6589a03d19c7d82e18e8b8f28671b8dcfc320f86cec264efa8b1efba6e8f2`); this approach creates no saved Shine.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_ricco_blooper_unassisted.dev --name <unique> --appdata-from nw27_ricco_entry --seconds 1000
+```
+
+This certifies one normal connected Gooper arena entry. Boss defeat, Shine-ID10 collection/save, independent cold reload and broad repeatability remain open. Matrix statuses stay at 16/25.
