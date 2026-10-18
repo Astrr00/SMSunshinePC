@@ -9,6 +9,11 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ("hop_parse", "goto finish if thp=0 max=1\nwalkto x=0 z=0 hop=24 timeout=1\nlabel finish\nend\n", 0, "done at tick"),
+    ("hop_zero", "walkto x=0 z=0 hop=0 timeout=1\n", 2, "hop needs an integer >= 3"),
+    ("hop_fraction", "walkto x=0 z=0 hop=3.5 timeout=1\n", 2, "hop needs an integer >= 3"),
+    ("hop_nan", "walkto x=0 z=0 hop=nan timeout=1\n", 2, "hop needs an integer >= 3"),
+    ("hop_overflow", "walkto x=0 z=0 hop=2147483648 timeout=1\n", 2, "hop needs an integer >= 3"),
     ("legacy", "guard radius=0\nend\n", 0, "done at tick"),
     ("if_taken", "goto finish if thp=0 max=1\nwaitfor stage=999 timeout=1\nlabel finish\nend\n", 0, "goto finish retry=1"),
     ("if_fallthrough", "goto finish if thp=2 max=1\nend\nlabel finish\nwaitfor stage=999 timeout=1\n", 0, "goto finish passed"),

@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <charconv>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -103,6 +104,7 @@ struct Command {
 	int maxTicks = 0;       // waitfor/mash/walkto: fail loudly after this many logic ticks
 	float radius = 80.f;    // walkto: arrival distance in the XZ plane
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
+	int hop = 0;            // walkto hop=N: repeat a two-tick A press every N ticks while steering
 	int sprayFrom = 0;      // walkto spray=N: R held from tick N-1 on
 	bool hover = false;     // walkto hover=1: hover steering, and R let go once a trigger nozzle is spent
 	bool navel = false;     // walkto/faceto navel=1: target Petey's navel, re-read every tick (what the in-game target arrow marks)
@@ -289,7 +291,7 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "walkto" || verb == "faceto") {
-		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] [hover=1] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
+		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] [hop=N] [hover=1] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
 		// navel=1 / petey=1 / behind=R instead of x/z: Petey's navel, Petey, or R behind him (stage 55), followed every tick.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
 		bool gotX = false, gotZ = false;
@@ -304,7 +306,11 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "radius") c.radius = v;
 			else if (key == "spray") { c.spray = v != 0.f; c.sprayFrom = static_cast<int>(v) - 1; } // R from tick N-1: jump first, then hover
 			else if (key == "jump" && c.op == Op::WalkTo) c.frames = static_cast<int>(v); // A held for the first N ticks while steering
-			else if (key == "hover" && c.op == Op::WalkTo) c.hover = v != 0.f; // opt-in: older routes were tuned without it
+			else if (key == "hop" && c.op == Op::WalkTo) {
+				const char* end = tok.c_str() + tok.size();
+				const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, c.hop);
+				if (parsed.ec != std::errc{} || parsed.ptr != end || c.hop < 3) fail(line, "hop needs an integer >= 3", tok);
+			} else if (key == "hover" && c.op == Op::WalkTo) c.hover = v != 0.f; // opt-in: older routes were tuned without it
 			else if (key == "navel") c.navel = gotX = gotZ = v != 0.f;
 			else if (key == "petey") c.petey = gotX = gotZ = v != 0.f;
 			else if (key == "behind" && c.op == Op::WalkTo) { c.behind = v; gotX = gotZ = v > 0.f; }
@@ -555,12 +561,24 @@ int washedCount()
 	return n;
 }
 
-// The airport GateKeeper object by its Shift-JIS scene name (null outside airport scenario 1 and before the scene is built).
+// Observe the nearest named Gatekeeper, including a defeated one until its normal event finishes.
 TBiancoGateKeeper* findBoss()
 {
-	static const char kName[] = "\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x72\x83\x41\x83\x93\x83\x52\x81\x6a";
+	static const char* const names[] = {
+		"\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x72\x83\x41\x83\x93\x83\x52\x81\x6a",
+		"\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x8a\x83\x52\x81\x6a",
+		"\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x7d\x83\x93\x83\x7d\x81\x6a",
+	};
 	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
-	return dynamic_cast<TBiancoGateKeeper*>(JDrama::TNameRefGen::search(kName));
+	TBiancoGateKeeper* best = nullptr;
+	float distance = 0.f;
+	for (const char* name : names) {
+		auto* boss = dynamic_cast<TBiancoGateKeeper*>(JDrama::TNameRefGen::search(name));
+		if (!boss) continue;
+		const float d = gpMarioOriginal ? std::hypot(boss->mPosition.x - gpMarioOriginal->mPosition.x, boss->mPosition.z - gpMarioOriginal->mPosition.z) : 0.f;
+		if (!best || d < distance) { best = boss; distance = d; }
+	}
+	return best;
 }
 
 // Petey, the first actor of "ボスパックンマネージャー" (Shift-JIS bytes; a search for the actor name "ボスパックンA" found nothing), null outside stage 55.
@@ -649,9 +667,7 @@ void logEMario(const char* tag)
 // dead flag, position. Killing it starts the airport event (TAirportEventSink::watch) that ends the tutorial.
 void logBoss(const char* tag)
 {
-	static const char kName[] = "\x83\x51\x81\x5b\x83\x67\x83\x4c\x81\x5b\x83\x70\x81\x5b\x81\x69\x83\x72\x83\x41\x83\x93\x83\x52\x81\x6a";
-	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return;
-	TGateKeeperBase* g = dynamic_cast<TGateKeeperBase*>(JDrama::TNameRefGen::search(kName));
+	TGateKeeperBase* g = findBoss();
 	if (!g) return;
 	int bck = -1;
 	if (TBiancoGateKeeper* b = dynamic_cast<TBiancoGateKeeper*>(g))
@@ -871,9 +887,26 @@ bool condHolds(const Command& c)
 		case Command::Cond::Washed: ok = sceneReady() && washedCount() >= val; break;
 		case Command::Cond::Talk: ok = sceneReady() && gpMarDirector->isTalkModeNow() == (val != 0); break;
 		case Command::Cond::TalkBusy: ok = sceneReady() && gpMarDirector->isTalkOrDemoModeNow() == (val != 0); break;
-		case Command::Cond::Bck: ok = sceneReady() && gDbgGKCurBck == val; break;
-		case Command::Cond::BckFrameGe: ok = sceneReady() && gDbgGKBckFrame >= val; break;
-		case Command::Cond::BckFrameLe: ok = sceneReady() && gDbgGKBckFrame <= val; break;
+		case Command::Cond::Bck:
+		case Command::Cond::BckFrameGe:
+		case Command::Cond::BckFrameLe: {
+			if (!sceneReady()) break;
+			int bck = gDbgGKCurBck;
+			float frame = gDbgGKBckFrame;
+			const auto* boss = findBoss();
+			// Two Gatekeepers share Delfino: global debug fields can belong to the distant actor.
+			if (boss && (boss->mVariant == TBiancoGateKeeper::VARIANT_RICO_GATEKEEPER
+			             || boss->mVariant == TBiancoGateKeeper::VARIANT_MAMMA_GATEKEEPER)) {
+				if (MActor* actor = boss->getMActor()) {
+					bck = actor->getCurAnmIdx(ANM_TYPE_BCK);
+					frame = actor->getFrameCtrl(ANM_TYPE_BCK)->getFrame();
+				}
+			}
+			if (kind == Command::Cond::Bck) ok = bck == val;
+			else if (kind == Command::Cond::BckFrameGe) ok = frame >= val;
+			else ok = frame <= val;
+			break;
+		}
 		case Command::Cond::Squat: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT) == (val != 0); break;
 		case Command::Cond::GkAwake: {
 			const TBiancoGateKeeper* b = sceneReady() ? findBoss() : nullptr;
@@ -1185,7 +1218,8 @@ void step()
 					pad.stickX = pad.stickX == 0 ? 0 : static_cast<s8>(pad.stickX * 0.25f + (pad.stickX > 0 ? 20.5f : -20.5f));
 					pad.stickY = pad.stickY == 0 ? 0 : static_cast<s8>(pad.stickY * 0.25f + (pad.stickY > 0 ? 20.5f : -20.5f));
 					if (std::fabs(err) < 0.14f) pad.stickX = pad.stickY = 0;
-					if ((since == 1 || std::fabs(err) < 0.14f) && gpMarioOriginal->mStatus == MARIO_STATUS_OIL_RUN) pad.button = PAD_BUTTON_A;
+					if ((since == 1 || std::fabs(err) < 0.14f) && (gpMarioOriginal->mStatus == MARIO_STATUS_OIL_RUN
+					    || gpMarioOriginal->mStatus == MARIO_STATUS_OIL_SLIP)) pad.button = PAD_BUTTON_A;
 				}
 				setVirtualPad(0, &pad);
 				return; // the current command resumes once no enemy is near
@@ -1622,7 +1656,7 @@ void step()
 					TNozzleBase* nz = wg->getCurrentNozzle();
 					if (nz && nz->getNozzleKind() == 1 && static_cast<TNozzleTrigger*>(nz)->unk385 == TNozzleTrigger::DEAD) pad.triggerRight = 0;
 				}
-				if (gRemaining < c.frames) pad.button |= PAD_BUTTON_A;
+				if (gRemaining < c.frames || (c.hop && gRemaining % c.hop < 2)) pad.button |= PAD_BUTTON_A;
 				// Stall recovery (dev aid): Mario standing still while the stick pushes (seen once in a real-time run at (3692,704,-2716), cause not found)
 				// gets 40 ticks of sideways steering plus a jump, alternating sides. A wall that really blocks the line still ends in the walkto TIMEOUT.
 				if (dist > c.radius) {

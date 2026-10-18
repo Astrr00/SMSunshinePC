@@ -12,6 +12,7 @@ Evidence and history: [`status.md`](sunshine-pc/docs/status.md), [`roadmap-histo
 
 - Done: boot, launcher, new game, airport, Delfino, Shadow Mario, Bianco + boss, save and cold reload, Ricco loading, input (keyboard + DualSense), 60 fps timing (Strict build now `/O2`), widescreen incl. `aspect=auto`, Alt+Enter fullscreen.
 - Owner played the first two Shines: picture, sound and gamepad fine.
+- Clean normal Petey connection/reward/save verified (2026-10-18): `nw11_petey_clean` rc0/483 s, earned IDs0/1/86; `nw12_cold_three` rc0/48 s confirms three Shines after a fresh menu load. Public routes and evidence: `sunshine-pc/docs/normal-world-routes.md`. Next normal milestone: Ricco unlocking/entry and Blooper.
 - A draft pre-release v0.1.0 and `dist/sunshine-0.1.0.zip` exist; nothing is published.
 - `/O2` sweep (`tools/o2_sweep.py`, 2026-10-17): Ricco, Shadow, airport (needs 700 s) and the cold Petey reload pass. That Petey checkpoint came from an `infinite_health` diagnostic run; it is not an unassisted third-Shine prerequisite. Gatekeeper now passes twice consecutively (`gk14`, `gk15`, each rc0/429 s), using only ordinary controller inputs from the earned airport profile. Approach defense, waking and frame-based throat attacks are verified through the natural Delfino scenario transition.
 

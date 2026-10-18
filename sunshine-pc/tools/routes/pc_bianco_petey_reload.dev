@@ -1,0 +1,27 @@
+# Earned Petey File B: ordinary cold menu load, movies, flag0x10001 and three-Shine observation.
+# Start from the completed unassisted Petey run; verify the GCI independently.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 scen=5 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+end

@@ -1,0 +1,418 @@
+# Earned two-Shine File B -> ordinary Bianco STORY2 entry -> windmill -> Petey -> Shine/save/return.
+# Start with an owned copy of the earned nw_earned_two_20261018 profile (Shine IDs 0/86).
+# Ordinary PAD inputs only; no dev start, cheats, teleport, direct aim or state/resource writes.
+# walkto hop=N repeats A while steering and spraying; guard defends with stick/FLUDD inputs.
+# Boss conditions only observe the mouth, belly and HP; completion must collect flag 0x10001.
+# Diagnostic script _Exit does not certify native Close. Verify the saved GCI and cold reload separately.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 scen=5 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10385 timeout=60
+walkto x=340 z=5650 radius=60 spray=1 timeout=900
+faceto x=0 z=4941 tol=3 timeout=300
+hold trig=0,255 frames=120
+log
+shot episode2_gate_sprayed.png
+wait frames=30
+walkto x=0 z=4800 radius=200 timeout=600
+log
+hold A stick=0,127 frames=120
+waitfor stage=2 scen=255 timeout=1200
+wait frames=400
+log
+shot episode2_selector_default.png
+wait frames=30
+hold LEFT frames=4
+wait frames=90
+shot episode2_selector_previous.png
+wait frames=30
+hold RIGHT frames=4
+wait frames=90
+shot episode2_selector_selected.png
+wait frames=30
+hold A frames=4
+waitfor stage=2 scen=1 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=120
+log
+shot episode2_controllable_before.png
+wait frames=30
+hold stick=0,127 frames=60
+log
+hold A stick=0,127 frames=30
+wait frames=60
+waitfor stage=2 scen=1 director mario dirstate=4 camDemo=0 timeout=300
+log
+shot episode2_controllable_after.png
+wait frames=60
+walkto x=-5900 z=16260 radius=30 timeout=1361
+walkto x=-2740 z=11660 radius=30 timeout=1735
+walkto x=-1140 z=10060 radius=30 timeout=739
+walkto x=-880 z=9420 radius=30 timeout=268
+walkto x=-560 z=8920 radius=30 timeout=239
+walkto x=-440 z=8820 radius=30 timeout=107
+walkto x=-380 z=8780 radius=50 timeout=82
+log
+hold X frames=1
+wait frames=1
+hold stick=40,0 frames=1
+hold stick=28,-28 frames=1
+hold stick=0,-40 frames=1
+hold stick=-28,-28 frames=1
+hold stick=-40,0 frames=1
+hold stick=-28,28 frames=1
+hold stick=0,40 frames=1
+hold stick=28,28 frames=1
+hold A stick=45,119 frames=14
+log
+walkto x=500 z=7800 radius=250 spray=1 timeout=400
+walkto x=500 z=7800 radius=60 timeout=200
+wait frames=30
+walkto x=500 z=7400 radius=50 timeout=250
+walkto x=750 z=7100 radius=50 timeout=250
+walkto x=1000 z=6800 radius=50 timeout=250
+log
+shot bianco_walkway.png
+walkto x=1160 z=4960 radius=30 timeout=615
+walkto x=920 z=3480 radius=30 timeout=510
+walkto x=840 z=3320 radius=30 timeout=114
+walkto x=880 z=3280 radius=30 timeout=177
+walkto x=5840 z=1080 radius=50 timeout=1688
+walkto x=6040 z=800 radius=50 timeout=264
+log
+shot windmill_bank_takeoff.png
+hold stick=40,0 frames=1
+hold stick=28,-28 frames=1
+hold stick=0,-40 frames=1
+hold stick=-28,-28 frames=1
+hold stick=-40,0 frames=1
+hold stick=-28,28 frames=1
+hold stick=0,40 frames=1
+hold stick=28,28 frames=1
+hold A frames=14
+log
+walkto x=7050 z=2050 radius=180 spray=1 timeout=400
+walkto x=7050 z=2050 radius=40 timeout=240
+wait frames=45
+log
+shot windmill_ramp_foot.png
+hold X frames=1
+wait frames=20
+guard radius=0
+waitfor stage=2 scen=1 timeout=1
+walkto x=7050 z=1300 radius=50 spray=1 hop=24 timeout=600
+log
+waitfor stage=2 scen=1 timeout=1
+walkto x=7050 z=550 radius=50 spray=1 hop=24 timeout=600
+log
+waitfor stage=2 scen=1 timeout=1
+walkto x=7050 z=-200 radius=50 spray=1 hop=24 timeout=600
+log
+waitfor stage=2 scen=1 timeout=1
+walkto x=7050 z=-950 radius=50 spray=1 hop=24 timeout=600
+log
+waitfor stage=2 scen=1 timeout=1
+walkto x=7050 z=-1700 radius=50 spray=1 hop=24 timeout=600
+log
+waitfor marioy>=4000 timeout=60
+shot windmill_ramp_top.png
+guard radius=300 resume=wash_step_15
+label wash_step_15
+faceto x=7150 z=-2000 tol=3 timeout=120
+hold trig=0,255 frames=90
+hold trig=0,255 frames=90
+log
+guard radius=0
+walkto x=7150 z=-1990 radius=30 timeout=250
+wait frames=10
+log
+shot head_edge.png
+walkto x=7150 z=-2200 radius=40 timeout=250
+wait frames=20
+log
+shot fence_on.png
+walkto x=7260 z=-2350 radius=25 timeout=250
+wait frames=10
+log
+guard radius=0
+wait frames=10
+faceto x=7372 z=-4500 tol=3 timeout=120
+hold X frames=1
+wait frames=20
+hold A frames=10
+trace frames=90
+hold trig=0,255 until marioy>=4350 timeout=90
+walkto x=7372 z=-2650 radius=25 spray=1 hover=1 timeout=200
+wait frames=10
+waitfor marioy>=4080 timeout=60
+log
+shot beam_on.png
+walkto x=7372 z=-2600 radius=40 timeout=200
+log
+walkto x=7372 z=-3100 radius=40 timeout=200
+log
+walkto x=7372 z=-3600 radius=40 timeout=200
+log
+shot beam_mid.png
+walkto x=7372 z=-4100 radius=40 timeout=200
+log
+walkto x=7372 z=-4470 radius=30 timeout=200
+log
+hold A frames=1
+wait frames=40
+log
+shot wire_top.png
+waitfor marioy>=4000 timeout=60
+walkto x=7150 z=-4900 radius=60 jump=1 timeout=300
+wait frames=30
+log
+shot north_shore.png
+walkto x=7200 z=-4900 radius=50 timeout=200
+log
+shot windmill_bridge_north.png
+walkto x=7170 z=-6930 radius=35 timeout=700
+walkto x=7200 z=-8070 radius=35 timeout=700
+walkto x=7290 z=-8160 radius=35 timeout=700
+walkto x=7320 z=-8190 radius=35 timeout=700
+walkto x=9030 z=-9570 radius=35 timeout=700
+walkto x=9270 z=-9630 radius=35 timeout=700
+walkto x=9300 z=-9690 radius=35 timeout=700
+walkto x=10650 z=-12540 radius=35 timeout=700
+walkto x=10830 z=-13020 radius=35 timeout=700
+walkto x=10830 z=-13410 radius=35 timeout=700
+walkto x=10320 z=-14820 radius=35 timeout=700
+walkto x=10140 z=-15030 radius=35 timeout=700
+walkto x=9360 z=-15510 radius=35 timeout=700
+walkto x=9060 z=-15570 radius=35 timeout=700
+log
+hold X frames=1
+wait frames=20
+guard radius=300 resume=wash_step_16
+label wash_step_16
+faceto x=7500 z=-15570 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=8837 z=-15570 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_17
+label wash_step_17
+faceto x=7500 z=-15570 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=8614 z=-15570 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_18
+label wash_step_18
+faceto x=7500 z=-15570 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=8391 z=-15570 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_19
+label wash_step_19
+faceto x=7500 z=-15570 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=8169 z=-15570 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_20
+label wash_step_20
+faceto x=7500 z=-15570 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=7946 z=-15570 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_21
+label wash_step_21
+faceto x=7500 z=-15570 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=7723 z=-15570 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_22
+label wash_step_22
+faceto x=7500 z=-15570 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=7500 z=-15570 radius=35 timeout=300
+log
+shot hill_leg287.png
+walkto x=7350 z=-15480 radius=35 timeout=700
+walkto x=6570 z=-14640 radius=35 timeout=700
+guard radius=300 resume=wash_step_23
+label wash_step_23
+faceto x=6450 z=-14340 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=6510 z=-14490 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_24
+label wash_step_24
+faceto x=6450 z=-14340 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=6450 z=-14340 radius=35 timeout=300
+log
+shot hill_leg290.png
+log
+shot hill_goop_start.png
+guard radius=300 resume=wash_step_25
+label wash_step_25
+faceto x=6450 z=-13410 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=6450 z=-14108 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_26
+label wash_step_26
+faceto x=6450 z=-13410 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=6450 z=-13875 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_27
+label wash_step_27
+faceto x=6450 z=-13410 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=6450 z=-13642 radius=30 timeout=250
+wait frames=10
+log
+guard radius=300 resume=wash_step_28
+label wash_step_28
+faceto x=6450 z=-13410 tol=3 timeout=120
+hold trig=0,255 frames=75
+walkto x=6450 z=-13410 radius=35 timeout=300
+log
+shot hill_goop_end.png
+walkto x=6870 z=-12990 radius=35 timeout=700
+walkto x=6960 z=-12750 radius=35 timeout=700
+walkto x=7590 z=-11550 radius=35 timeout=700
+log
+shot windmill_tower_base.png
+guard radius=0
+hold X frames=1
+wait frames=20
+trace frames=3
+walkto x=8456 z=-11500 radius=40 timeout=500
+walkto x=8948 z=-11565 radius=40 timeout=400
+walkto x=9174 z=-11859 radius=40 timeout=400
+walkto x=9288 z=-12212 radius=40 timeout=400
+walkto x=9340 z=-12516 radius=40 timeout=400
+log
+shot tower_spiral_45.png
+walkto x=9539 z=-12775 radius=40 timeout=400
+walkto x=9663 z=-13076 radius=40 timeout=400
+walkto x=9754 z=-13468 radius=30 timeout=400
+log
+faceto x=9570 z=-13967 tol=3 timeout=120
+walkto x=9570 z=-13967 radius=90 jump=10 spray=12 hover=1 timeout=400
+wait frames=30
+log
+shot p2_gap1.png
+walkto x=9340 z=-14284 radius=40 timeout=400
+walkto x=9183 z=-14478 radius=40 timeout=400
+walkto x=7767 z=-14502 radius=90 spray=1 jump=4 hover=1 timeout=300
+wait frames=30
+log
+shot p2_gap2.png
+walkto x=7572 z=-14284 radius=40 timeout=400
+walkto x=7373 z=-14025 radius=40 timeout=400
+walkto x=7249 z=-13724 radius=40 timeout=400
+walkto x=7061 z=-13278 radius=30 timeout=400
+log
+faceto x=6780 z=-13013 tol=3 timeout=120
+walkto x=6780 z=-13013 radius=100 jump=10 spray=12 hover=1 timeout=200
+walkto x=6897 z=-12673 radius=100 spray=1 hover=1 timeout=200
+walkto x=7337 z=-12645 radius=120 spray=1 hover=1 timeout=200
+wait frames=30
+log
+shot p2_gap3.png
+walkto x=7572 z=-12516 radius=40 timeout=400
+walkto x=7831 z=-12317 radius=40 timeout=400
+walkto x=8132 z=-12193 radius=40 timeout=400
+walkto x=8300 z=-12090 radius=30 timeout=400
+wait frames=40
+walkto x=8300 z=-12090 radius=15 timeout=200
+wait frames=40
+log
+shot p2_platform.png
+mash A period=48 hold=8 until floory>=7290 timeout=2000
+log
+wait frames=60
+hold X frames=1
+wait frames=20
+trace frames=2
+waitfor marioy>=12000 timeout=1800
+log
+walkto x=8250 z=-12350 radius=60 timeout=120
+waitfor stage=55 timeout=300
+trace frames=2
+waitfor stage=55 director mario dirstate=4 camDemo=0 timeout=6000
+trace frames=2
+wait frames=60
+guard radius=650 resume=round until weak=1
+label round
+guard radius=0
+goto reward if peteyhp=0 max=1
+goto belly if weak=1 max=8
+guard radius=650 resume=round until weak=1
+clear radius=900 timeout=300
+walkto behind=450 radius=40 timeout=1500 soft=1
+faceto petey=1 tol=3 timeout=180 soft=1
+clear radius=400 until facing=60 timeout=900
+faceto petey=1 tol=5 timeout=30 soft=1
+guard radius=650 resume=round until weak=1
+hold L frames=10
+hold R stick=0,-127 frames=28
+hold L frames=3
+hold L trig=0,255 frames=240 gate=mouth
+hold L frames=30
+guard radius=650 resume=round until weak=1
+log
+waitfor weak=1 timeout=600 soft=1
+goto round unless weak=1 max=8
+label belly
+guard radius=0
+shot petey_filled.png
+walkto navel=1 radius=320 timeout=300 soft=1
+faceto navel=1 tol=5 timeout=90 soft=1
+guard radius=0
+walkto navel=1 radius=20 jump=14 timeout=180 soft=1
+wait frames=20
+walkto navel=1 radius=30 timeout=120 soft=1
+hold A frames=1
+wait frames=5
+hold L frames=30
+log
+shot petey_ground_pound.png
+guard radius=650 resume=round until weak=1
+wait frames=60
+goto round unless peteyhp=0 max=8
+label reward
+guard radius=0
+wait frames=900
+waitfor camDemo=0 timeout=1200
+walkto x=-600 z=-200 radius=50 timeout=600
+hold A until flag=0x10001 timeout=900
+log
+shot petey_reward1_collected.png
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=9000
+log
+shot petey_normal_return.png
+wait frames=60
+end
