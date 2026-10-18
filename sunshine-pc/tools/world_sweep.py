@@ -15,6 +15,9 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parent.parent
+# mare2.sb: bottle demo, then literal setNextStage(44, 0) at text offset 0xd7.
+# pinnaParco6/enchotalk.sb: literal setNextStage(58, 1) at offset 0x95.
+INTRO_DESTINATIONS = {(9, 2): (44, 0), (13, 6): (58, 1)}
 
 
 def selects(stage, scenario, selected):
@@ -31,7 +34,10 @@ def verdict(log, code, crash, stage, scenario):
     if "API: D3D12" not in log or "screenshot written: scene_ready.png" not in log:
         return "no-render-proof"
     snapshots = re.findall(r"\[devscript\] tick=\d+[^\n]*?stage=(\d+) scen=(\d+) mario=\(([^)]+)\)[^\n]*?camDemo=(\d+)[^\n]*?dir.state=(\d+)", log)
-    if len(snapshots) < 3 or any((int(s[0]), int(s[1])) != (stage, scenario) for s in snapshots):
+    destination = INTRO_DESTINATIONS.get((stage, scenario), (stage, scenario))
+    if destination != (stage, scenario) and not re.search(rf"\[status\] tick=\d+[^\n]*stage={stage} scen={scenario} mario=", log):
+        return "wrong-scene"
+    if len(snapshots) < 3 or any((int(s[0]), int(s[1])) != destination for s in snapshots):
         return "wrong-scene"
     if snapshots[-1][3:] != ("0", "4"):
         return "not-controllable"
@@ -67,6 +73,7 @@ def main():
         if digest() != summary["exe_sha256"]:
             raise SystemExit("Strict binary changed during sweep; stopped.")
         stage, scenario = int(row["raw_stage"]), int(row["scenario_index"])
+        target_stage, target_scenario = INTRO_DESTINATIONS.get((stage, scenario), (stage, scenario))
         name = f"world_{tag}_{stage:02}_{scenario:02}"
         if (ROOT / "build/Route" / name).exists():
             raise SystemExit(f"Refusing to overwrite existing run {name}")
@@ -76,7 +83,7 @@ waitfor stage={stage} scen={scenario} director mario dirstate=4 camDemo=0 timeou
 wait frames=90
 mash A period=30 until talkbusy=0 camDemo=0 timeout=1200
 wait frames=30
-waitfor stage={stage} scen={scenario} director mario dirstate=4 camDemo=0 talkbusy=0 timeout=1200
+waitfor stage={target_stage} scen={target_scenario} director mario dirstate=4 camDemo=0 talkbusy=0 timeout=1200
 log
 hold A frames=2
 log

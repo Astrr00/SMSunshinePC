@@ -6,6 +6,18 @@ Legend: **Done** = verified by observed artifact. **Partial** = some code or ver
 
 ## 0. Lead update (later than this audit; supersedes the rows it contradicts)
 
+**Later-world load coverage completed (2026-10-18).** All 91 present later-world scenario rows are covered on one uninstrumented Strict executable: 36 raw stage slots and 88 distinct archives.
+[world-load-coverage.tsv](world-load-coverage.tsv) records the archive, expected control scene, accepted run, exit code, duration, crash-log size and executable SHA256 for every row.
+`wl06` finishes with 89 passes and two script timeouts; `wl07` retries those two cases successfully on the unchanged binary: Noki raw9/scenario2 in 55 s, Pinna raw13/scenario6 in 39 s.
+The original timeout logs are retained. Noki's `/map/sp/mare2.sb` calls `startMareBottleDemo`, then `setNextStage(44, 0)` at text offset0xd7; Pinna's `enchotalk.sb` calls `setNextStage(58, 1)` at0x95.
+Those normal intro transitions invalidate a wait for the original scene; no engine hang was observed. The revised probes require the loaded source scene in live status, then test the exact scripted destination. They do not alter the transition or game state.
+
+All 91 accepted probes exit0, complete the script, use D3D12 WARP, save a screenshot, reach director state4/camera-demo0 and record finite nonzero movement during ordinary A/stick input. All crash logs are empty; the only error-word log match is the expected missing save file in each isolated empty profile.
+This is bounded diagnostic load/pad coverage: moving scenes can move Mario automatically, and selected-episode flag context, normal unlocking, mission/boss completion, collectible reachability, retail pixels, hardware GPUs and native quit remain unverified by these probes.
+PC-CONTENT and PC-CORE stay open; the matrix remains 16/25 passed-bounded.
+Executable SHA256: `f1358d01a7fe809958e2909bcb80402191b0c87f4ef208c3c817dc1efff98585`. Strict has 0 unresolved symbols; all 64 host checks pass.
+The 13 verdict cases, six intro-transition cases and five selector assertions pass. The summary exporter refuses incomplete or failed coverage and mixed binaries; `python tools/world_summary.py wl06 wl07 --write-coverage` rechecks the private logs before exporting metadata only.
+
 **Reachability call-filter correction (2026-10-18).** The SPC decoder's default inventory filter excludes `setNextStage`, so the previous 35-stage reachability scan did not actually collect script transitions.
 The reachability caller now requests those calls explicitly and scans both script roots loaded by the director (`common/sp`, `scene/map/sp`).
 A byte-level SPCB fixture verifies that the inventory filter stays unchanged while transition decoding returns its literal destination.
@@ -23,20 +35,20 @@ The old `talk=0` condition excludes director dialog-camera states3/4 and therefo
 The added observational `talkbusy=0` includes `isTalkOrDemoModeNow()`; the bot continues ordinary A inputs, then waits for normal camera/control before testing movement.
 Targeted uninstrumented `wl05` passes raw8/0 (23 s), raw4/1 (44 s) and raw8/1 (23 s), with exit0, empty crash logs and actual jump/stick motion.
 Strict has 0 unresolved symbols, all 64 host checks and five native parser cases pass, and world verdict/selection checks pass.
-Executable SHA256 is `f1358d01a7fe809958e2909bcb80402191b0c87f4ef208c3c817dc1efff98585`; the complete 91-case `wl06` replay is now in progress on this common build.
+Executable SHA256 is `f1358d01a7fe809958e2909bcb80402191b0c87f4ef208c3c817dc1efff98585`; the completed `wl06` plus two `wl07` transition retries cover all 91 cases on this common build (see above).
 
 **Later-world load blockers and resource audit (2026-10-18).** Fresh Strict `/O2` WARP probes reproduce renderer fatal exits in `sirena0`, `monte0` and `mare0` before playable control.
 Sirena reports `unmapped vtx attr 13`; Pianta and Noki report `unhandled tcg src 21`.
 The crash logs are empty, so these are explicit renderer aborts, not recorded native crashes or evidence of UB.
 FIFO provenance plus the actual live module base resolves the Sirena draw to `TBossMantaManager::setupEfbAlpha`; the original PPC assembly confirms its position-only clear.
-The rope draw configuration retains an indirect reference to coordinate 1 with only one active texgen.
+The failing Pianta/Noki draw configuration retains an indirect reference to coordinate 1 with only one active texgen.
 Aurora patch `0021-gx-missing-texcoords.patch` handles missing UV inputs as zero and aliases out-of-range TEV/indirect coordinates to coordinate zero, following the documented Dolphin compatibility behavior linked in the patch README.
 It preserves the game draws and their matrices/offsets; no game-state workaround, resource substitution or hang bypass is added.
 
 The final uninstrumented candidate passes `world_fix_06`, `world_fix_08`, `world_fix_09`: each rc0/22 s, real D3D12 WARP rendering, jump/stick response, live expected scenario and empty crash log.
 Executable SHA256: `6909401400e35a082e40e733727e59d59d281d9c1901875a5c6ff92adceb8042`.
 Strict reports 0 unresolved symbols; all 64 host checks pass, as do three constexpr alias checks and 13 world-verdict cases.
-`tools/world_sweep.py` runs the 91 present later-world scenario rows in isolated empty profiles; the complete `wl02` batch is in progress.
+`tools/world_sweep.py` runs the 91 present later-world scenario rows in isolated empty profiles. The older `wl02` batch stopped after 52 recorded outcomes (50 pass, one no-motion dialog probe, one archive crash); the completed common-build coverage above supersedes it.
 These dev-start probes skip movies for diagnosis and do not certify normal unlocking, selected-episode flag context, mission completion, retail pixels, hardware GPUs or native quit.
 
 `tools/content_reach.py` now keeps scenario indices and fails closed on undecoded scripts/dynamic calls.

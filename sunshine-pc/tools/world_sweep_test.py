@@ -31,4 +31,14 @@ cases = [
 ]
 for log, code, crash, expected in cases:
     assert verdict(log, code, crash, 3, 0) == expected, expected
-print(f"PASS {len(cases)} world probe verdict checks")
+transition = good.replace("stage=3", "stage=44")
+assert verdict(transition, 0, 0, 9, 2) == "wrong-scene"
+transition += "\n[status] tick=390 stage=9 scen=2 mario=(1,2,3)"
+assert verdict(transition, 0, 0, 9, 2) == "pass"
+assert verdict(transition, 0, 0, 9, 3) == "wrong-scene"
+coaster = good.replace("stage=3 scen=0", "stage=58 scen=1")
+assert verdict(coaster, 0, 0, 13, 6) == "wrong-scene"
+coaster += "\n[status] tick=120 stage=13 scen=6 mario=(1,2,3)"
+assert verdict(coaster, 0, 0, 13, 6) == "pass"
+assert verdict(coaster, 0, 0, 13, 7) == "wrong-scene"
+print(f"PASS {len(cases)} world probe verdict checks, 6 intro-transition checks")
