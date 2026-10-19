@@ -12,6 +12,7 @@
 #include "settings.h"
 #include "saves/saves.hpp"
 #include "sdk/os_host.hpp"
+#include "logging.h"
 
 #include <System/Application.hpp>
 
@@ -58,7 +59,7 @@ static const char* findDvdArg(int argc, char** argv)
 	return nullptr;
 }
 
-void installCrashHandler(); // crash.cpp
+void installCrashHandler(const wchar_t* path); // crash.cpp
 void sunshineStartSampler(); // sampler.cpp
 void sunshineHeartbeat();   // crash.cpp: watchdog heartbeat, once per presented frame
 void sunshineWatchdogStart(); // crash.cpp
@@ -132,13 +133,23 @@ void sunshinePresentFrame()
 // Called from sms MarDirectorDirect.cpp once per direct() tick (30 Hz), after the last logic sub-step's movement().
 void sunshineLogicTick()
 {
+	// Application fields live in BSS; do not dereference scene-owned actors while logging transitions.
+	static int previousStage = -1, previousScenario = -1;
+	const int stage = gpApplication.mCurrArea.getStage();
+	const int scenario = gpApplication.mCurrArea.getScenario();
+	if (stage != previousStage || scenario != previousScenario) {
+		std::printf("[scene] stage=%d scenario=%d\n", stage, scenario);
+		previousStage = stage;
+		previousScenario = scenario;
+	}
 	cheatsTick();
 	modsLogicTick();
 }
 
 int main(int argc, char* argv[])
 {
-	installCrashHandler();
+	const auto crashPath = sunshine::initializeLogging();
+	installCrashHandler(crashPath.c_str());
 	sunshineStartSampler();
 	// Settings load before Aurora starts: window and VSync options are part of Aurora's startup config.
 	static const std::filesystem::path settingsFile
