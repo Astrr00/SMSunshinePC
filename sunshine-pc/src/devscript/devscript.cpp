@@ -26,6 +26,7 @@
 #include "pinna_observe.h"
 #include "pinna_secret_observe.h"
 #include "pinna_ship_observe.h"
+#include <NPC/NpcEvent.hpp>
 #include "Camera/Camera.hpp"
 #include "Camera/CameraOption.hpp"
 #include "System/StageUtil.hpp"
@@ -127,6 +128,7 @@ struct Command {
 	bool hover = false;     // walkto hover=1: hover steering, and R let go once a trigger nozzle is spent
 	bool navel = false;     // walkto/faceto navel=1: target Petey's navel, re-read every tick (what the in-game target arrow marks)
 	bool petey = false;     // walkto/faceto petey=1: target Petey's position
+	int tama = -1;         // walkto/faceto: current Pinna4 turtle, followed with ordinary PAD inputs
 	float behind = 0.f;     // walkto behind=R: the point R behind Petey, reached around his swing radius
 	bool soft = false;      // walkto/faceto/waitfor soft=1: a timeout moves on (to a `goto` retry) instead of failing
 	int taken = 0;          // goto: jumps back taken so far (frames holds the label's command index)
@@ -399,13 +401,14 @@ Command parseLine(const std::string& text, int line)
 		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] [hop=N] [hover=1] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
 		// navel=1 / petey=1 / behind=R instead of x/z: Petey's navel, Petey, or R behind him (stage 55), followed every tick.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
-		bool gotX = false, gotZ = false;
+		bool gotX = false, gotZ = false, otherTarget = false;
 		std::string tok;
 		while (in >> tok) {
 			const size_t eq = tok.find('=');
 			if (eq == std::string::npos) fail(line, "unexpected token in walkto", tok);
 			const std::string key = tok.substr(0, eq);
 			const float v = static_cast<float>(std::atof(tok.c_str() + eq + 1));
+			if (key == "x" || key == "z" || key == "navel" || key == "petey" || key == "behind") otherTarget = true;
 			if (key == "x") { c.pos[0] = v; gotX = true; }
 			else if (key == "z") { c.pos[2] = v; gotZ = true; }
 			else if (key == "radius") c.radius = v;
@@ -416,6 +419,14 @@ Command parseLine(const std::string& text, int line)
 				const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, c.hop);
 				if (parsed.ec != std::errc{} || parsed.ptr != end || c.hop < 3) fail(line, "hop needs an integer >= 3", tok);
 			} else if (key == "hover" && c.op == Op::WalkTo) c.hover = v != 0.f; // opt-in: older routes were tuned without it
+			else if (key == "tama") {
+				const char* end = tok.c_str() + tok.size();
+				int index = -1;
+				const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, index);
+				if (parsed.ec != std::errc{} || parsed.ptr != end || index < 0 || index > 4 || c.tama >= 0)
+					fail(line, "tama needs one integer index 0..4", tok);
+				c.tama = index;
+			}
 			else if (key == "navel") c.navel = gotX = gotZ = v != 0.f;
 			else if (key == "petey") c.petey = gotX = gotZ = v != 0.f;
 			else if (key == "behind" && c.op == Op::WalkTo) { c.behind = v; gotX = gotZ = v > 0.f; }
@@ -424,7 +435,9 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
 			else fail(line, "unexpected token in walkto", tok);
 		}
-		if (!gotX || !gotZ) fail(line, "walkto needs x= and z=", text);
+		if (c.tama >= 0 && otherTarget)
+			fail(line, "tama cannot mix with another target", text);
+		if (c.tama < 0 && (!gotX || !gotZ)) fail(line, "walkto needs x= and z=", text);
 		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
 		return c;
 	}
@@ -1096,6 +1109,15 @@ void logStatus(const char* tag)
 	logGesso(tag);
 	logTinKoopa(tag);
 	logPinnaPrerequisites(tag, gTick);
+	if (pinnaPrerequisitesSceneReady(3)) {
+		std::printf("[%s-pinna-sunflowers] remaining=%d tick=%d\n", tag, TNpcEvent::mDownSunflowerNum, gTick);
+		auto* registry = JDrama::TNameRefGen::instance;
+		auto* root = registry ? registry->getRootNameRef() : nullptr;
+		const auto* shine = root ? dynamic_cast<const TShine*>(root->search("\x82\xd0\x82\xdc\x82\xed\x82\xe8\x97\x70\x83\x56\x83\x83\x83\x43\x83\x93")) : nullptr;
+		if (shine) std::printf("[%s-pinna-shine33] pos=(%.1f,%.1f,%.1f) dead=%d hidden=%d tick=%d\n", tag,
+		    shine->mPosition.x, shine->mPosition.y, shine->mPosition.z,
+		    (int)shine->checkLiveFlag(LIVE_FLAG_DEAD), (int)shine->checkLiveFlag(LIVE_FLAG_HIDDEN), gTick);
+	}
 	logSecretWoodBlocks(tag, gTick);
 	logPinnaShips(tag, gTick);
 	logCrates(tag);
@@ -1585,6 +1607,19 @@ void step()
 {
 	while (gCursor < gScript.size()) {
 		const Command& c = gScript[gCursor];
+		if (c.tama >= 0) {
+			const auto* tama = findPinnaTama(c.tama);
+			if (!tama) {
+				std::printf("[devscript] FAIL line=%d: turtle target unavailable, tick=%d\n", c.line, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			// Only update the waypoint; the existing steering code emits ordinary PAD inputs.
+			Command& target = gScript[gCursor];
+			target.pos[0] = tama->mPosition.x;
+			target.pos[1] = tama->mPosition.y;
+			target.pos[2] = tama->mPosition.z;
+		}
 		if (c.navel || c.petey || c.behind > 0.f) {
 			const TBossPakkun* p = sceneReady() ? findPetey() : nullptr;
 			if (!p || !p->mNavel) {

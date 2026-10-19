@@ -1,8 +1,8 @@
 # Normal Pinna milestone
 
-Latest bounded component: [normal Episode4 entry and first-turtle defeat](pinna-four-first-turtle.md) pass once from the earned thirteen-Shine save. Four turtles, all flower revivals, Shine33 save and fresh-process reload remain open; Episode4 is not accepted as complete.
+Latest accepted milestone: [normal Episode4 completion](#complete-normal-sunflower-milestone), all five flower revivals, Shine33 save and independent fresh-process reload pass in `p409_full`/`p410_cold`. The [earlier first-turtle component](pinna-four-first-turtle.md) remains historical evidence.
 
-Pinna Episodes1–3 now pass normal completion, saved rewards and independent fresh-process reloads: Mecha Bowser/Shine30, Cannon and block secret/Shine31, and pirate-ship red coins/Shine32. The latest connected earned save contains thirteen Shines. Episode4 onward remains open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
+Pinna Episodes1–4 now pass normal completion, saved rewards and independent fresh-process reloads: Mecha Bowser/Shine30, Cannon and block secret/Shine31, pirate-ship red coins/Shine32, and sunflowers/Shine33. The latest connected earned save contains fourteen Shines. Episode5 onward remains open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
 
 ## Earned prerequisites (2026-10-19)
 
@@ -143,3 +143,57 @@ python tools/route.py Strict tools/routes/pc_pinna_pirate_reload.dev --name <col
 ```
 
 This certifies one complete Episode3 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Episode4 onward, later worlds, full image/audio quality and the connected full playthrough remain open. Matrix states stay17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
+
+## Complete normal sunflower milestone
+
+Accepted `p409_full` starts from the earned thirteen-Shine `p317_full` profile.
+Normal File B menus, plaza traversal, cannon and the episode selector load raw5/3.
+The route wakes and defeats all five Snooza Koopas in actor order2/0/1/3/4:
+ordinary L+R spray starts their chase, Mario runs to collision sand, dodges each
+actual jump and uses an ordinary running jump plus L ground pound while the
+turtle is sunk. Each original flower camera starts and finishes before continuing.
+All five actors are dead and `TNpcEvent::mDownSunflowerNum` reaches0. The original
+Shine33 reward appears, settles at its placed collectible location, and is collected
+by normal movement/jump inputs. The original card flow saves it and returns to
+Delfino1/8. No original game source or asset is changed.
+
+The complete run passes **rc0 / 328.42s**, `done` at tick9270, health minimum7.
+Independent `p410_cold` starts after that process ends from only its saved appdata,
+loads File B through normal menus and passes **rc0 / 50.19s**, tick1393, health8.
+Both logs contain fourteen native Shines, the new flag0x10021 and prior progression.
+Both crash logs are empty; no active cheats are logged. One full run and one cold
+reload were sufficient; no old sweep or unrelated route was repeated.
+
+Latest File B sector3/write18 contains exactly IDs0/1/10/20/30/31/32/33/86/94/95/98/107/117.
+All seven GCI checksums pass. The cold GCI is byte-identical to the saved result:
+SHA-256 `f909c6d58a761ece38cdbfecdc36b42d8be53db2ac45ded98d14b94c1bf69d76`.
+The parent card remains the accepted thirteen-Shine Episode3 save documented above.
+
+Both runs use Strict executable SHA-256
+`f600b811ec0e9eebb01756be2a0d64edb661e4c440303c023cf86a763215a4c6`:
+**STRICT: 0 unresolved symbols**,68 port checks and14 focused native parser cases
+pass. A second agent reviewed the final target/observation code and save flow
+without findings. Read-only `walkto/faceto tama=N` supplies the currently observed
+turtle position to the existing PAD steering. It validates one integer index0..4,
+rejects mixed targets, requires the joined Pinna4 scene and fails explicitly if the
+actor is unavailable. It never writes an actor or camera. Additional flower-count
+and typed Shine telemetry only reads state; no scene pointer is retained.
+
+Public full-route SHA-256:
+`5762733a313f854798645d795d58661e6df33ce9619786971355a1844623bf78`.
+It was unchanged during the accepted run. Public/frozen cold-route SHA-256:
+`24adc1d174526c2469b2b16faf46313df51ec8769eebf7cc1d3dafabc206fa75`.
+Local summaries: `build/p409_full-acceptance.json` and `build/p410_cold-acceptance.json`;
+logs/screenshots remain under the corresponding `build/Route` profiles.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_pinna_sunflower_unassisted.dev --name <pinna4> --appdata-from p317_full --seconds 1600 SUNSHINE_DEV_HPLOG=1
+python tools/gci_check.py "build/Route/<pinna4>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_pinna_sunflower_reload.dev --name <cold> --appdata-from <pinna4> --seconds 240
+```
+
+This certifies one normal Episode4 completion and its saved-reward cold proof.
+Consecutive full-route repeatability, Episode5 onward, other worlds and the connected
+full playthrough remain open. WARP at0.25 render scale and muted audio provide no
+new physical audiovisual acceptance. Matrix states stay17/8/0; PC-CORE/PC-CONTENT
+remain open, mirrors deferred and v0.1.0 a draft.
