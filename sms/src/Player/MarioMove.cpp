@@ -1607,6 +1607,11 @@ int TMario::checkStickRotate(int* outDir)
 	// TODO: volatile is fake, but it's uninitialized,
 	// so a bug, it seems?
 	volatile BOOL q[4];
+#ifdef TARGET_PC
+	// Each query must cover its own quadrants, not a previous call's stack values.
+	for (int i = 0; i < 4; ++i)
+		q[i] = 0;
+#endif
 
 	for (int i = 0; i < unk534 - 1; i++) {
 		f32 angle = (f32)unk530[i];

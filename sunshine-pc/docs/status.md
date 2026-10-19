@@ -1,5 +1,7 @@
 # Port status audit
 
+**PC stick-rotation initialization (2026-10-18).** The shared query previously read four uninitialized quadrant flags, allowing a previous rotation to satisfy a straight or empty input history. An isolated build of the actual routine at `/O2 /Ob1` fails six of twelve checks before the change and passes all twelve afterward, preserving both rotation directions and original thresholds. Initialization is PC-only; the PPC object remains byte-identical. Strict: 0 unresolved symbols; 68 port checks pass. Native normal-menu regression `pa04_stick_rotation_fast` passes both spin states (49 ticks each) and three normal jumps (19 ticks each), rc0/73 s, health8, crash0/no cheats and unchanged earned six-Shine GCI. Full evidence, the inherited retail bug and native movement limits: [stick-rotation-initialization.md](stick-rotation-initialization.md). Matrix statuses remain 16/25; the historical wrap watchdog and broad playthrough remain open.
+
 Scope: Port.md phases 1-8 and §5-§6 features, plus the Goal-Port §6 acceptance criteria. Read-only audit by PortAudit. No game runs, no builds, no edits outside this file.
 
 Legend: **Done** = verified by observed artifact. **Partial** = some code or verification exists, gaps remain. **Not started** / **Open** = no working implementation or known blocker. `[INFERENCE]` = not observed directly.
