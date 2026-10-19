@@ -1,6 +1,6 @@
 # Normal Pinna milestone
 
-Normal Pinna entry through the cannon, beach, park, director dialogue and coaster intro is verified. Mecha Bowser completion and its saved/cold-reloaded Shine remain **open**. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
+Pinna Episode1 now passes normal entry, Mecha Bowser defeat, Shine30 collection/save and an independent fresh-process reload. Other Pinna episodes remain open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
 
 ## Earned prerequisites (2026-10-19)
 
@@ -76,4 +76,22 @@ Private `pn40_pinna_combat` starts a fresh process from `pn42_coins_observed` an
 
 The first combat candidate exits3 after288.49s at its required two-broken-parts check, with health8 and an empty crash log. Both normal R launches occur, but boss state remains0/partsHP1. Its original second trajectory passes above the boss. The first measured ray reproduces an original static-ground intersection at triangle7076 near rail1315: BG0x400 is passable for Mario but remains solid for an enemy rocket. This explains a valid collision within the observed disappearance interval; the exact native kill target was not logged. No engine defect or undefined-behavior cause is asserted.
 
-The corrected private candidate uses fixed controller pitches computed from the authored chest, FLUDD and nozzle transforms, including the roll-dependent FLUDD base tilt omitted from the earlier estimate. Mecha Bowser hits, reward pickup, saving and the final cold reload still require native acceptance.
+The corrected private candidate uses fixed controller pitches computed from the authored chest, FLUDD and nozzle transforms, including the roll-dependent FLUDD base tilt omitted from the earlier estimate. The corrected candidate is accepted by the complete native result below.
+
+## Complete normal Mecha Bowser milestone
+
+`pc_pinna_mecha_unassisted.dev`, accepted private `pn45_pinna_combat` from the earned ten-Shine `pn42_coins_observed` save, passes in 469.67s: rc0, `done` at tick13211, all four boss parts broken, original victory flag/movie8, Parco13/7 reward, ordinary Shine30 collection/save and return to Delfino1/8. Health ends8 after the plaza reset, with combat minimum6; crash.log is empty and no active cheats are logged. Four fresh R launches use fixed ordinary stick inputs and read-only rail/loaded/state checks. No developer stage start, teleportation, direct boss aiming, progress/save edit or movie/timing override is used.
+
+The controller pitches are -640/-5760/-2880/0 at authored rail windows1200/1375/2100/2550. Native boss state progresses0 to4; the last part finishes at tick8443/rail2733.5 and the original defeat flag is observed at tick8490. The normal reward route crosses the shallow pool rim with a jump and collects the original Shine at(-2000,799.694,-12202.711).
+
+Latest File B sector4/write15 contains eleven earned Shines: IDs0/1/10/20/30/86/94/95/98/107/117. All seven sector checksums pass. GCI SHA-256: `f430dcb08a8b745c2e340de231510c920c53946216b68fe77232d61832e85213`. Accepted frozen route SHA-256: `caae0905b0af68a909b48a61c1b4ca0d980c0d8b3969e7d47cae2ad6e414466c`. Executable SHA-256: `a24e73a61055538b2cade5011747a1bf54ace0c4135f4b796ecf4079576ddaa8`. Public executable commands match the actual accepted frozen route; comments differ.
+
+`pc_pinna_mecha_reload.dev`, accepted private `pn44_cold_pinna`, starts a separate process from that saved output and passes in 51.35s: rc0, `done` at tick1363, normal File B menus, Delfino1/8, all eleven Shine flags plus Ricco/Gelato/cannon progression flags. Health8, empty crash log and no active cheats. The GCI is byte-identical to the saved result above, with all seven checksums valid. Accepted frozen cold-route SHA-256: `c92779fe005ea486351f2bae61106e7ad8b974a579cb011a1ba5765b83615be7`.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_pinna_mecha_unassisted.dev --name <pinna> --appdata-from <hundred> --seconds 1600
+python tools/gci_check.py "build/Route/<pinna>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_pinna_mecha_reload.dev --name <cold> --appdata-from <pinna> --seconds 240
+```
+
+This certifies one complete controller-input Episode1 pass plus its saved-reward cold proof. It does not certify consecutive full-route repeatability, other Pinna episodes, later-world completion, image quality or audible playback on physical hardware. The broader PC-CORE/PC-CONTENT rows remain open; matrix counts remain17 passed-bounded,8 open and0 external-check-required. The deferred mirror route and draft release are unchanged.

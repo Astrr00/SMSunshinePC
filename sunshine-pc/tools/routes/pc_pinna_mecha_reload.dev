@@ -1,0 +1,56 @@
+# Cold normal menu load of the earned eleven-Shine File B after pc_pinna_mecha_unassisted.dev.
+# Required seed: the original accepted pn45_pinna_combat save, derived from pn42_coins_observed.
+# Native accepted cold controller sequence: pn44_cold_pinna.
+# Require saved Shine30, all ten prerequisite Shines, progression flags and cannon unlock0x10389.
+# The initial plaza log must show eleven Shines/scenario8; flag checks assert presence, not an exact count.
+# Seed/input/save reproduction details: docs/pinna-normal-route.md.
+# Ordinary File B menu inputs, read-only persistent-flag assertions and neutral plaza observation.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot pn_cold_pinna_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+
+# The saved Peach-kidnap progression restores plaza scenario8.
+waitfor scen=8 timeout=1
+
+# Ten earned prerequisite Shines, followed by the Mecha Bowser reward30.
+waitfor flag=0x10000 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x1000a timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10056 timeout=1
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+waitfor flag=0x1001e timeout=1
+
+# Saved Ricco/Gelato progression and the original Pinna cannon unlock.
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10389 timeout=1
+log
+shot pn_cold_pinna_saved_flags.png
+
+# Neutral observation after all saved-state checks.
+trace frames=60
+wait frames=60
+log
+shot pn_cold_pinna_neutral.png
+end
