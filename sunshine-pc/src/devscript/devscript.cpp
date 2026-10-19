@@ -48,6 +48,7 @@
 #include "Enemy/BossGessoTentacle.hpp"
 #include "Enemy/TinKoopa.hpp"
 #include "Enemy/Rocket.hpp"
+#include "Enemy/FruitsBoat.hpp"
 #include "Enemy/Conductor.hpp"
 #include "Enemy/EnemyManager.hpp"
 #include "Enemy/SmallEnemy.hpp"
@@ -104,7 +105,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -206,6 +207,9 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("coasterrail<=", 0) == 0) k = Command::Cond::CoasterRailLe;
 	else if (tok.rfind("coasterloaded=", 0) == 0) k = Command::Cond::CoasterLoaded;
 	else if (tok.rfind("tinkoopa=", 0) == 0) k = Command::Cond::TinKoopaState;
+	else if (tok.rfind("boatdist<=", 0) == 0) k = Command::Cond::BoatDistLe;
+	else if (tok.rfind("boatz>=", 0) == 0) k = Command::Cond::BoatZGe;
+	else if (tok.rfind("boatz<=", 0) == 0) k = Command::Cond::BoatZLe;
 	else if (tok.rfind("gessohp=", 0) == 0) k = Command::Cond::GessoHp;
 	else if (tok.rfind("gessomode=", 0) == 0) k = Command::Cond::GessoMode;
 	else if (tok.rfind("gessopull=", 0) == 0) k = Command::Cond::GessoPull;
@@ -229,7 +233,8 @@ bool parseCond(const std::string& tok, Command& c)
 	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held
 	    || k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft
 	    || k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe || k == Command::Cond::PlungeloWet
-	    || k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe || k == Command::Cond::CoasterLoaded || k == Command::Cond::TinKoopaState) {
+	    || k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe || k == Command::Cond::CoasterLoaded || k == Command::Cond::TinKoopaState
+	    || k == Command::Cond::BoatDistLe || k == Command::Cond::BoatZGe || k == Command::Cond::BoatZLe) {
 		const char* end = tok.c_str() + tok.size();
 		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < -0x8000 || value > 0x7fff) return false;
@@ -238,6 +243,7 @@ bool parseCond(const std::string& tok, Command& c)
 		if ((k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe) && value < 0) return false;
 		if (k == Command::Cond::CoasterLoaded && (value < 0 || value > 1)) return false;
 		if (k == Command::Cond::TinKoopaState && (value < 0 || value > 4)) return false;
+		if (k == Command::Cond::BoatDistLe && value < 0) return false;
 		if (k == Command::Cond::GessoHp && (value < 0 || value > 255)) return false;
 		if (k == Command::Cond::GessoMode && (value < 0 || value > 7)) return false;
 		if ((k == Command::Cond::Held || k == Command::Cond::GessoPull) && (value < 0 || value > 1)) return false;
@@ -669,6 +675,26 @@ const TBellDolpic* findDelfinoTVBell()
 	return bell && bell->unk13C == 1 ? bell : nullptr;
 }
 
+const TFruitsBoat* nearestDelfinoBoat()
+{
+	if (!sceneReady() || gpApplication.mCurrArea.getStage() != 1 || !gpMarioOriginal || !gpConductor) return nullptr;
+	const TFruitsBoat* nearest = nullptr;
+	float best = 0.f;
+	for (auto it = gpConductor->unk20.begin(); it != gpConductor->unk20.end(); ++it)
+		for (int i = 0; i < (*it)->getObjNum(); ++i)
+			if (const auto* boat = dynamic_cast<const TFruitsBoat*>((*it)->getObj(i))) {
+				if (boat->checkLiveFlag(LIVE_FLAG_DEAD)) continue;
+				const float dx = boat->mPosition.x - gpMarioOriginal->mPosition.x;
+				const float dz = boat->mPosition.z - gpMarioOriginal->mPosition.z;
+				const float distance = dx * dx + dz * dz;
+				if (!nearest || distance < best) {
+					nearest = boat;
+					best = distance;
+				}
+			}
+	return nearest;
+}
+
 const TLeanMirror* findMirror(const char* name)
 {
 	if (!sceneReady() || gpApplication.mCurrArea.getStage() != 4 || gpApplication.mCurrArea.getScenario() != 1) return nullptr;
@@ -1024,6 +1050,10 @@ void logStatus(const char* tag)
 	if (const auto* bell = findDelfinoTVBell())
 		std::printf("[%s-bell] bellleft=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, bell->unk154,
 		    bell->mPosition.x, bell->mPosition.y, bell->mPosition.z, gTick);
+	if (const auto* boat = nearestDelfinoBoat())
+		std::printf("[%s-boat] pos=(%.1f,%.1f,%.1f) relative=(%.1f,%.1f) tick=%d\n", tag,
+		    boat->mPosition.x, boat->mPosition.y, boat->mPosition.z,
+		    boat->mPosition.x - gpMarioOriginal->mPosition.x, boat->mPosition.z - gpMarioOriginal->mPosition.z, gTick);
 	logGelatoMirrors(tag);
 	if (gpApplication.mCurrArea.getStage() == 4 && gpApplication.mCurrArea.getScenario() == 1)
 		std::printf("[%s-plungelo-edge] side=%d wet=%d tick=%d\n", tag, plungeloEdge(), observedPlungelo(true) ? 1 : 0, gTick);
@@ -1196,6 +1226,17 @@ bool condHolds(const Command& c)
 		case Command::Cond::BellLeft: {
 			const auto* bell = findDelfinoTVBell();
 			if (bell) ok = bell->unk154 == val;
+			break;
+		}
+		case Command::Cond::BoatDistLe:
+		case Command::Cond::BoatZGe:
+		case Command::Cond::BoatZLe: {
+			const auto* boat = nearestDelfinoBoat();
+			if (!boat) break;
+			const float dx = boat->mPosition.x - gpMarioOriginal->mPosition.x;
+			const float dz = boat->mPosition.z - gpMarioOriginal->mPosition.z;
+			if (kind == Command::Cond::BoatDistLe) ok = dx * dx + dz * dz <= static_cast<float>(val) * val;
+			else ok = kind == Command::Cond::BoatZGe ? dz >= val : dz <= val;
 			break;
 		}
 		case Command::Cond::CoasterRailGe:
