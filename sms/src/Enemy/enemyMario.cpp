@@ -301,6 +301,9 @@ void TEnemyMario::initEnemyValues()
 	mDistanceToMario     = 0.0f;
 	mEMDoingTimer        = 0;
 	mReplayIndex         = 0;
+#ifdef TARGET_PC
+	mReplayNodeCount     = 0;
+#endif
 	mTrembleStrength     = 2.5f;
 	mPadIndex            = 0;
 	mAttackRange         = 120.0f;
@@ -419,6 +422,7 @@ void TEnemyMario::initEnemyValues()
 		u32 nodeCount;
 #ifdef TARGET_PC
 		nodeCount = stream.readU32(); // big-endian on disc
+		mReplayNodeCount = nodeCount;
 #else
 		stream.read(&nodeCount, sizeof(nodeCount));
 #endif
@@ -972,8 +976,13 @@ void TEnemyMario::emReplayJumpToNearestNode()
 	}
 
 	++mEMDoingTimer;
-	int nodeIndex
-	    = mEMario->getTracer()->getGraph()->findNearestNodeIndex(mPosition, -1);
+	// Dolpic1 has nine graph nodes but only seven normal replay rows; the last two belong to the gate event.
+	int nodeIndex = mEMario->getTracer()->getGraph()->findNearestNodeIndex(
+	    mPosition, -1
+#ifdef TARGET_PC
+	    , mReplayNodeCount
+#endif
+	    );
 	TGraphNode* currentNode
 	    = &mEMario->getTracer()->getGraph()->getGraphNode(nodeIndex);
 #ifdef TARGET_PC

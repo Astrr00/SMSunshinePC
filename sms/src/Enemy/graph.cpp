@@ -585,12 +585,20 @@ int TGraphWeb::getEscapeDirLimited(int param_1, int param_2,
 }
 
 int TGraphWeb::findNearestNodeIndex(const JGeometry::TVec3<f32>& param_1,
-                                    u32 param_2) const
+                                    u32 param_2
+#ifdef TARGET_PC
+                                    , int nodeCount
+#endif
+                                    ) const
 {
 	int i;
 	int result  = -1;
 	f32 minDist = -1.0f;
-	for (i = 0; i < unk8; ++i) {
+	for (i = 0; i < unk8
+#ifdef TARGET_PC
+	            && (nodeCount < 0 || i < nodeCount)
+#endif
+	     ; ++i) {
 		if (param_2 != 0xffffffff && getGraphNode(i).checkFlag(param_2))
 			continue;
 

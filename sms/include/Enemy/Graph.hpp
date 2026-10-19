@@ -94,7 +94,11 @@ public:
 	                           const JGeometry::TVec3<f32>&, f32, u32) const;
 	int getEscapeDirLimited(int, int, const JGeometry::TVec3<f32>&,
 	                        const JGeometry::TVec3<f32>&, f32, u32) const;
-	int findNearestNodeIndex(const JGeometry::TVec3<f32>&, u32) const;
+	int findNearestNodeIndex(const JGeometry::TVec3<f32>&, u32
+#ifdef TARGET_PC
+	                        , int nodeCount = -1
+#endif
+	                        ) const;
 	int findFarthestNodeIndex(const JGeometry::TVec3<f32>&, u32) const;
 	int findNearestVisibleIndex(const JGeometry::TVec3<f32>&, f32, f32, f32,
 	                            u32) const;

@@ -200,6 +200,10 @@ public:
 	/* 0x4304 */ TReplayLink (*mReplayLinks)[3];
 	/* 0x4308 */ char unk4308[0x4];
 	/* 0x430C */ TSettingParams* mSettingParams;
+#ifdef TARGET_PC
+	// The normal replay table excludes the extra gate-event graph nodes.
+	u32 mReplayNodeCount;
+#endif
 };
 
 #endif
