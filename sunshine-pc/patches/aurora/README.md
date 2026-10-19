@@ -1,8 +1,8 @@
 # Aurora patch series
 
-`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as eighteen patches so the submodule can be pinned to upstream and the changes re-applied.
+`extern/aurora` is upstream [encounter/aurora](https://github.com/encounter/aurora) at `50e5be3`, plus the port's changes. The changes are stored here as twenty-two patches so the submodule can be pinned to upstream and the changes re-applied.
 
-Series base: `50e5be3`. Applying all eighteen to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
+Series base: `50e5be3`. Applying all twenty-two to a clean checkout gives the tree the port builds against (verified byte-for-byte, see below).
 
 ## Apply
 
@@ -21,7 +21,7 @@ The tool needs the `50e5be3` commit in the aurora repo (`git -C extern/aurora ca
 
 ## Patches
 
-Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 89 file entries over 49 distinct files, +2348 / -216 (recounted with 0021).
+Applied in filename order. Counts are `+`/`-` lines in the patch text. The total is 94 file entries over 52 distinct files, +2468 / -217 (recounted with 0022).
 
 | file | topic | files | +/- |
 |---|---|---|---|
@@ -41,11 +41,12 @@ Applied in filename order. Counts are `+`/`-` lines in the patch text. The total
 | `0014-gx-copy-readback-off-null-backend.patch` | `register_copy_readback` ignores every registration when the adapter is Dawn's Null backend (`SUNSHINE_ALLOW_CPU_ADAPTER=0` without a GPU) and logs once "Copy readback off: Null backend": Null renders nothing, so its R8 copies are empty and the readback of 0013 wiped the goop maps (airport nonzero 6306 -> 0), which stalled the Delfino boss in route 85; the maps keep their load state as before 0013. Other backends unchanged | 1 | +9 / -0 |
 | `0015-fsr1-sharp-easu-rcas-limiter.patch` | FSR1 rework (own implementation): EASU maps output pixel centres like the bilinear sampler (`pos * scale - 0.5`; before `(pos - 0.5) * scale`, a 1.5 px shift at 4x), Lanczos-2 weight rotated to the 2x2 luma edge and stretched along it up to 1.8x instead of the 4x4 Gaussian, result clamped to the min/max of the nearest 2x2 texels (no ringing); RCAS (`k = 0.25 * sharpness`, unchanged) limited to the min/max of its 4-neighbour cross (no halos); default sharpness 0.8 (k 0.2; before 0.2, k 0.05), `aurora.h` doc comment updated; `SUNSHINE_UPSCALE_SHARPNESS` keeps its scale (1 = k 0.25). Bilinear and area paths unchanged; measurements in `sunshine-pc/docs/platform-notes.md` (T2 section) | 2 | +38 / -20 |
 | `0016-gx-scissor-12bit-fields.patch` | scissor BP registers 0x20/0x21 use 12-bit coordinate fields (hardware: 11) in `GXSetScissor`, `GXGetScissor` and the `bp_scissor` decode, values masked to 12 bits: with the +342 offset an 11-bit field ends at a right edge of 1705, so a widescreen EFB of 1708 px (32:9) encoded rt 2049, decoded as 1, the scissor came out empty and every frame was black; now right edges up to 3753 work (from code; run at W 1708 only), all values below 2048 encode as before; see `sunshine-pc/docs/platform-notes.md`, "Widescreen pixel checks" | 3 | +17 / -12 |
-| `0017-gx-static-z24x8.patch` | size and decode static `GX_TF_Z24X8` depth textures using the existing 64-byte 4×4 tile decoder; required by bath-water's `clear_z_TX` at Corona stage 60/0 | 2 | +2 / -0 |
-| `0018-gx-z24x8-copy-readback.patch` | genuine Z24X8 depth conversion and canonical 4×4/two-plane CPU readback through the existing generation-guarded transport; preserves R8 layout, records copy formats, rejects unsupported depth conversion; constexpr packing checks include width 84 and padded rows | 8 | +127 / -34 |
+| `0017-gx-static-z24x8.patch` | size and decode static `GX_TF_Z24X8` depth textures using the existing 64-byte 4Ãƒâ€”4 tile decoder; required by bath-water's `clear_z_TX` at Corona stage 60/0 | 2 | +2 / -0 |
+| `0018-gx-z24x8-copy-readback.patch` | genuine Z24X8 depth conversion and canonical 4Ãƒâ€”4/two-plane CPU readback through the existing generation-guarded transport; preserves R8 layout, records copy formats, rejects unsupported depth conversion; constexpr packing checks include width 84 and padded rows | 8 | +127 / -34 |
 | `0019-thread-skip-single-core-cache-domain.patch` | `pin_shared_cache` pins main, FIFO worker and render worker only to a cache domain of at least 4 processors; a VM reporting one L3 per vCPU pinned all three to one core and starved the game thread (70 to 180 ms baton wake latency, audio dropouts every few seconds) | 1 | +4 / -1 |
 | `0020-host-wait-hooks.patch` | `aurora_set_host_wait_hooks` and `thread::HostWaitScope`: the embedding application is called around the blocking waits on Aurora's workers (FIFO drain, blocking pipeline compile, DVD command wait) so the port can let its audio thread run meanwhile; audio dropouts at scene loads | 7 | +34 / -0 |
 | `0021-gx-missing-texcoords.patch` | Missing vertex UVs start at zero; TEV and indirect references beyond the enabled texgen count alias coordinate zero. Fixes Sirena's position-only EFB alpha clear and Pianta/Noki immediate draws without changing game code or removing draws; three constexpr alias checks | 2 | +14 / -0 |
+| `0022-gx-logic-invert.patch` | `GX_LO_INV` uses white fragment RGBA after fog and the original alpha test, then inverse-destination blending. Shader-cache keys distinguish INV; destination-alpha replacement and channel write masks remain active. Four focused cases in `gfx_recording_tests` cover shader order, key selection, blend factors and masks | 5 | +120 / -1 |
 
 Patch 0001 also adds `lib/gfx/pixel_metric.{cpp,hpp}` and `lib/gfx/depth_peek.{cpp,hpp}`; patch 0006 adds `lib/gfx/pass_dump.{cpp,hpp}` and `lib/gfx/screenshot.{cpp,hpp}`.
 
@@ -54,6 +55,8 @@ Patch 0008 was produced with `python tools/make_aurora_patch.py 0008-gx-fifo-des
 Each patch applies on top of the previous one. Topic boundaries are per line, so several files hold lines from more than one patch (e.g. `lib/aurora.cpp` in 0005 and 0006; `lib/gx/command_processor.cpp` in 0001, 0006, and 0007). The `CopySrc` flags in `lib/gfx/texture.cpp` are assigned to 0006 because they sit with the pass dump; their exact purpose was not traced in the code.
 
 ## Verification (run when the series was regenerated)
+
+0022 (2026-10-19): the checker reports 22 applied patches over 52 files. The prior 21-patch series matched before the incremental edit. Strict reports zero unresolved symbols; all68 port checks and four focused renderer cases pass. Identical Pinna controller inputs reproduce electrical damage at tick7036 and continue without the old renderer abort; the full route remains a separate gate. See [control, hashes and test limits](../../docs/gx-logic-invert.md). Alpha handling follows Dolphin's [logic-op generation](https://github.com/dolphin-emu/dolphin/blob/master/Source/Core/VideoCommon/PixelShaderGen.cpp) and [blend-state mapping](https://github.com/dolphin-emu/dolphin/blob/master/Source/Core/VideoCommon/RenderState.cpp): INV complements all enabled destination channels, while constant destination alpha overrides the alpha result.
 
 0021 (2026-10-18): the checker reports 21 applied patches over 49 files.
 Strict reports zero unresolved symbols, and the host suite passes all 64 checks.

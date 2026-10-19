@@ -1,0 +1,201 @@
+diff --git a/lib/gx/gx.cpp b/lib/gx/gx.cpp
+--- a/lib/gx/gx.cpp
++++ b/lib/gx/gx.cpp
+@@ -108,6 +108,8 @@ wgpu::CompareFunction to_compare_function(GXCompare func) {
+   }
+ }
+ 
++} // namespace
++
+ wgpu::BlendState to_blend_state(GXBlendMode mode, GXBlendFactor srcFac, GXBlendFactor dstFac, GXLogicOp op,
+                                 u32 dstAlpha, bool dualSource) {
+   wgpu::BlendComponent colorBlendComponent;
+@@ -158,6 +160,14 @@ wgpu::BlendState to_blend_state(GXBlendMode mode, GXBlendFactor srcFac, GXBlendF
+           .dstFactor = wgpu::BlendFactor::One,
+       };
+       break;
++    case GX_LO_INV:
++      // The fragment shader supplies one, so the result is independent of source color.
++      colorBlendComponent = {
++          .operation = wgpu::BlendOperation::Add,
++          .srcFactor = wgpu::BlendFactor::OneMinusDst,
++          .dstFactor = wgpu::BlendFactor::Zero,
++      };
++      break;
+     }
+     break;
+   }
+@@ -201,6 +211,7 @@ wgpu::ColorWriteMask to_write_mask(bool colorUpdate, bool alphaUpdate) {
+   return writeMask;
+ }
+ 
++namespace {
+ wgpu::PrimitiveState to_primitive_state(GXCullMode gx_cullMode) {
+   auto cullMode = wgpu::CullMode::None;
+   switch (gx_cullMode) {
+@@ -394,6 +405,7 @@ void populate_pipeline_config(PipelineConfig& config, GXPrimitive primitive, GXV
+   config.shaderConfig = {};
+   config.shaderConfig.fogType = g_gxState.fog.type;
+   config.shaderConfig.fogRangeEnabled = g_gxState.fog.rangeEnabled;
++  config.shaderConfig.logicInv = g_gxState.blendMode == GX_BM_LOGIC && g_gxState.blendOp == GX_LO_INV;
+   u8 vtxOffset = 0;
+   for (int i = GX_VA_PNMTXIDX; i <= GX_VA_TEX7; ++i) {
+     const auto attr = static_cast<GXAttr>(i);
+diff --git a/lib/gx/gx.hpp b/lib/gx/gx.hpp
+--- a/lib/gx/gx.hpp
++++ b/lib/gx/gx.hpp
+@@ -494,7 +494,8 @@ struct ShaderConfig {
+   u8 vtxStride = 0;
+   u8 lineMode : 2 = 0; // 1 = GX_LINES, 2 = GX_LINESTRIP, 3 = GX_POINTS
+   u8 fogRangeEnabled : 1 = false;
+-  u8 pad1 : 5 = 0;
++  u8 logicInv : 1 = false;
++  u8 pad1 : 4 = 0;
+   u8 pad2 = 0;
+   std::array<AttrConfig, MaxVtxAttr> attrs;
+   std::array<TevSwap, MaxTevSwap> tevSwapTable;
+@@ -538,6 +539,9 @@ struct BindGroupRanges {
+   std::array<gfx::Range, MaxIndexAttr> vaRanges{};
+ };
+ void populate_pipeline_config(PipelineConfig& config, GXPrimitive primitive, GXVtxFmt fmt) noexcept;
++wgpu::BlendState to_blend_state(GXBlendMode mode, GXBlendFactor srcFac, GXBlendFactor dstFac, GXLogicOp op,
++                                u32 dstAlpha, bool dualSource);
++wgpu::ColorWriteMask to_write_mask(bool colorUpdate, bool alphaUpdate);
+ wgpu::RenderPipeline build_pipeline(const PipelineConfig& config, const gfx::RenderTargetLayout& layout,
+                                     const PipelineOptions& options, ArrayRef<wgpu::VertexBufferLayout> vtxBuffers,
+                                     wgpu::ShaderModule shader, const char* label) noexcept;
+diff --git a/lib/gx/shader.cpp b/lib/gx/shader.cpp
+--- a/lib/gx/shader.cpp
++++ b/lib/gx/shader.cpp
+@@ -1646,6 +1646,12 @@ std::string build_shader_source(const ShaderConfig& config, DstAlphaMode dstAlph
+     fragmentFn += "\n    prev = vec4f(in.nrm, prev.a);";
+   }
+ 
++  if (config.logicInv) {
++    // INV complements destination RGBA; retain the original alpha for alpha compare above.
++    // Destination-alpha replacement and channel write masks still apply independently.
++    fragmentFn += "\n    // GX_LO_INV\n    prev = vec4f(1.0);";
++  }
++
+   if (dstAlphaMode == DstAlphaMode::Replace) {
+     // GX destination alpha is set via the blend constant
+     fragmentFn += "\n    prev.a = 1.0;";
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -204,6 +204,7 @@ if (AURORA_ENABLE_GX)
+ 
+   add_executable(gfx_recording_tests
+     gfx_recording_test.cpp
++    gx_logic_op_test.cpp
+     render_target_layout_test.cpp
+   )
+   target_include_directories(gfx_recording_tests PRIVATE
+@@ -214,6 +215,7 @@ if (AURORA_ENABLE_GX)
+   target_link_libraries(gfx_recording_tests PRIVATE
+     aurora::gx
+     aurora::vi
++    absl::flat_hash_map
+     gtest
+     gtest_main
+   )
+diff --git a/tests/gx_logic_op_test.cpp b/tests/gx_logic_op_test.cpp
+new file mode 100644
+--- /dev/null
++++ b/tests/gx_logic_op_test.cpp
+@@ -0,0 +1,95 @@
++#include <gtest/gtest.h>
++
++#include "gx/gx.hpp"
++#include "gx/pipeline.hpp"
++
++namespace aurora::gx {
++namespace {
++
++ShaderConfig shader_config() {
++  ShaderConfig config{};
++  config.attrs[GX_VA_POS] = {.attrType = GX_DIRECT, .cnt = 3, .compType = GX_F32};
++  config.vtxStride = 12;
++  config.tevStageCount = 1;
++  config.fogType = GX_FOG_PERSP_LIN;
++  config.alphaCompare = {GX_GREATER, 128, GX_AOP_AND, GX_ALWAYS, 0};
++  return config;
++}
++
++TEST(GXLogicInvTest, ShaderOverrideFollowsFogAndOriginalAlphaTest) {
++  auto config = shader_config();
++  const auto original = build_shader_source(config, DstAlphaMode::None);
++  EXPECT_EQ(original.find("// GX_LO_INV"), std::string::npos);
++  const auto ordinaryConfig = config;
++  config.logicInv = true;
++  EXPECT_FALSE(config == ordinaryConfig); // This byte representation is the shader-cache key.
++  const auto source = build_shader_source(config, DstAlphaMode::None);
++  const auto fog = source.find("mix(prev.rgb, ubuf.fog.color.rgb");
++  const auto alpha = source.find("let alphaCompare =");
++  const auto discard = source.find("discard;", alpha);
++  const auto invert = source.find("// GX_LO_INV\n    prev = vec4f(1.0);");
++  ASSERT_NE(fog, std::string::npos);
++  ASSERT_NE(alpha, std::string::npos);
++  ASSERT_NE(discard, std::string::npos);
++  ASSERT_NE(invert, std::string::npos);
++  EXPECT_LT(fog, invert);
++  EXPECT_LT(discard, invert);
++  EXPECT_LT(invert, source.find("return prev;", invert));
++}
++
++TEST(GXLogicInvTest, DestinationAlphaReplacementStillFollowsAlphaTest) {
++  auto config = shader_config();
++  config.logicInv = true;
++  const auto source = build_shader_source(config, DstAlphaMode::Replace);
++  const auto invert = source.find("// GX_LO_INV");
++  const auto replace = source.find("prev.a = 1.0;", invert);
++  ASSERT_NE(invert, std::string::npos);
++  ASSERT_NE(replace, std::string::npos);
++  EXPECT_LT(source.find("discard;"), invert);
++  EXPECT_LT(invert, replace);
++}
++
++TEST(GXLogicInvTest, BlendInvertsDestinationRGBAAndKeepsConstantAlphaOverride) {
++  for (bool dualSource : {false, true}) {
++    const auto blend = to_blend_state(GX_BM_LOGIC, GX_BL_ZERO, GX_BL_ONE, GX_LO_INV, UINT32_MAX, dualSource);
++    EXPECT_EQ(blend.color.operation, wgpu::BlendOperation::Add);
++    EXPECT_EQ(blend.color.srcFactor, wgpu::BlendFactor::OneMinusDst);
++    EXPECT_EQ(blend.color.dstFactor, wgpu::BlendFactor::Zero);
++    EXPECT_EQ(blend.alpha.operation, wgpu::BlendOperation::Add);
++    EXPECT_EQ(blend.alpha.srcFactor, wgpu::BlendFactor::OneMinusDst);
++    EXPECT_EQ(blend.alpha.dstFactor, wgpu::BlendFactor::Zero);
++    for (u32 alpha : {0u, 127u, 255u}) {
++      const auto constant = to_blend_state(GX_BM_LOGIC, GX_BL_ZERO, GX_BL_ONE, GX_LO_INV, alpha, dualSource);
++      EXPECT_EQ(constant.color.srcFactor, blend.color.srcFactor);
++      EXPECT_EQ(constant.color.dstFactor, blend.color.dstFactor);
++      EXPECT_EQ(constant.alpha.operation, wgpu::BlendOperation::Add);
++      EXPECT_EQ(constant.alpha.srcFactor, wgpu::BlendFactor::Constant);
++      EXPECT_EQ(constant.alpha.dstFactor, wgpu::BlendFactor::Zero);
++    }
++  }
++  EXPECT_EQ(to_write_mask(false, false), wgpu::ColorWriteMask::None);
++  EXPECT_EQ(to_write_mask(true, false),
++            wgpu::ColorWriteMask::Red | wgpu::ColorWriteMask::Green | wgpu::ColorWriteMask::Blue);
++  EXPECT_EQ(to_write_mask(false, true), wgpu::ColorWriteMask::Alpha);
++  EXPECT_EQ(to_write_mask(true, true), wgpu::ColorWriteMask::All);
++}
++
++TEST(GXLogicInvTest, PipelineSelectsOverrideOnlyForEnabledInvertLogic) {
++  const auto saved = g_gxState;
++  g_gxState = {};
++  g_gxState.dstAlpha = UINT32_MAX;
++  PipelineConfig config{};
++  g_gxState.blendOp = GX_LO_INV;
++  for (auto mode : {GX_BM_NONE, GX_BM_BLEND, GX_BM_SUBTRACT, GX_BM_LOGIC}) {
++    g_gxState.blendMode = mode;
++    populate_pipeline_config(config, GX_TRIANGLES, GX_VTXFMT0);
++    EXPECT_EQ(bool(config.shaderConfig.logicInv), mode == GX_BM_LOGIC);
++  }
++  g_gxState.blendOp = GX_LO_COPY;
++  populate_pipeline_config(config, GX_TRIANGLES, GX_VTXFMT0);
++  EXPECT_FALSE(config.shaderConfig.logicInv);
++  g_gxState = saved;
++}
++
++} // namespace
++} // namespace aurora::gx
