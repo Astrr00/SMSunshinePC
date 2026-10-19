@@ -839,6 +839,12 @@ Measured: SHA-1 unchanged, 11 247 / 12 881 byte-identical (87.3 %), matched code
 
 Measured: SHA-1 unchanged, 11 282 / 12 881 byte-identical (87.6 %), matched code 61.98 %, fuzzy 98.60 %, 445 / 736 units, strict link 0 unresolved, `TEMP-DEBUG` 0; route 70 smoke 1 of 2 complete (chase flake). Details: session log section 52.
 
+## Pinna Episode4 first combat component (2026-10-19)
+
+The [bounded shared-code audit](playability-audit-2026-10-19.md) establishes no new supported defect. Normal Episode4 entry and first Snooza Koopa defeat now pass in `p408_hipdrop` (exit0/180.31s, health8, empty crash, unchanged valid thirteen-Shine GCI). Five read-only observations synchronize ordinary controller inputs; no original game code, progress or save is changed. Strict reports zero unresolved symbols;68 port checks and ten focused native parser cases pass. A second agent reviewed the observation code without findings. [Exact route, hashes, failed controls and remaining acceptance](pinna-four-first-turtle.md).
+
+This component leaves four turtles alive. Shine33 acquisition/save/cold reload, full Episode4 completion and PC-CORE/PC-CONTENT remain open. Matrix states stay17/8/0; mirrors remain deferred and v0.1.0 remains Draft.
+
 ## Normal Pinna milestone (2026-10-19)
 
 Normal Delfino crate94/95, paid-throw98 and hundred-coin107 rewards establish the ten-Shine Pinna cannon prerequisite. `pn45_pinna_combat` then passes normal cannon/beach/park/director/coaster entry, four rocket hits, Mecha Bowser defeat and Shine30 save/plaza return (rc0/469.67s, health8 end/min6, crash0/no cheats). `pn44_cold_pinna` restores all eleven Shines and the cannon unlock through normal menus in a separate process (rc0/51.35s); its GCI is byte-identical, with all seven sector checksums valid. [Exact routes, hashes, preserved failures and limits](pinna-normal-route.md).

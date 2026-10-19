@@ -19,7 +19,11 @@ The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) has **17 passe
 - The private Release candidate `0.1.0.20261019` passes on a second Windows PC without development tools: picture, sound, controls, saved Shine after restart and normal quit. [Exact package, hardware and evidence limits](sunshine-pc/docs/clean-pc-test-2026-10-19.md).
 - v0.1.0 is a draft. The tested private snapshot is not final release approval. [Release checklist](sunshine-pc/docs/release-checklist.md).
 
+- A [focused shared-code audit](sunshine-pc/docs/playability-audit-2026-10-19.md) finds no new supported defect. [Normal Pinna Episode4 entry and first-turtle combat](sunshine-pc/docs/pinna-four-first-turtle.md) pass once (`p408_hipdrop`, health8, unchanged thirteen-Shine card). Four turtles, Shine33 save and cold reload remain open; this is a component, not mission completion.
+
 ## Open work, in order
+
+The latest bounded code audit rejects the inspected candidates. Continue normal Pinna Episode4 progression to expose concrete failures; apply no speculative game-code fix. The immediate content target is the other four turtles, all flower revivals, Shine33 save and independent cold reload.
 
 1. **Next: establish and fix one shared gameplay defect** — PC-CORE. Recommended model: **GPT-6.1-Sol, high effort**; agent work. Audit remaining fixed PPC-layout reads and uninitialized runtime state in movement, camera, FLUDD and enemy code. Select a change only after a supported-data or production-code counterexample; the Pinna electrical-damage renderer abort is now corrected ([proof](sunshine-pc/docs/gx-logic-invert.md)); no next defect is asserted yet. For a confirmed defect, retain a failing old-source control, apply the smallest correction, run Strict/port checks and a relevant short normal-input regression, and check PPC retention when game sources change. Record what remains isolated versus observed in native play. The historical `MsWrap` watchdog still needs actual arguments and an upstream cause; do not mask it with a guard or bypass.
 
@@ -70,6 +74,8 @@ Detailed earlier milestones are preserved in the [roadmap history](sunshine-pc/d
 - Complete normal Gelato sandcastle: `python tools/route.py Strict tools/routes/pc_gelato_sandcastle_unassisted.dev --name <unique> --appdata-from nw66_gelato_hover_entry --seconds 1200`. Accepted `nw91_gelato_early_takeoff` collects Shine20 and saves six earned Shines (rc0/263 s, health8). File B sector3/write8 has IDs0/1/10/20/86/117, GCI SHA256 `f7a1826bd9098a4c2d588ce6d65c4fba1e248afeb2344427673ac823228f954a`. Independent normal-menu cold proof: `python tools/route.py Strict tools/routes/pc_gelato_sandcastle_reload.dev --name <cold-unique> --appdata-from <unique> --seconds 240` (`nw92_cold_gelato_six`, rc0/50 s). Deferred world milestone: normal mirror mission, Wiggler and saved/cold rewards; see `sunshine-pc/docs/normal-world-routes.md`. No consecutive complete-route repeatability claim.
 - Disk: check free space on `C:` before long route batches (it hit 0 bytes on 2026-10-17). Delete old `build/Route/pg*`/`o2s_*` runs only with owner approval; keep the profiles above. Old free-space measurements are historical; use `Get-PSDrive C` before each long batch.
 - Release: use the source-controlled [release checklist](sunshine-pc/docs/release-checklist.md) for configure/build/package commands; do not rely on private historical build helpers.
+
+- Normal Pinna Episode4 first-turtle component: `python tools/route.py Strict tools/routes/pc_pinna_sunflower_first.dev --name <pinna4-component> --appdata-from p317_full --seconds 600 SUNSHINE_DEV_HPLOG=1`. Accepted `p408_hipdrop` defeats actor2 and leaves four alive; the thirteen-Shine card stays valid and unchanged. Extend through the remaining revivals, original Shine33 save and fresh-process reload. [Proof and controller pitfalls](sunshine-pc/docs/pinna-four-first-turtle.md).
 
 ## Rules
 
