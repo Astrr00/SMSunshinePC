@@ -9,6 +9,13 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('tama_valid', 'end\nguard radius=0 until tamaawake=0 tamaair=1 tamasunk=2 tamadead=4\n', 0, 'done at tick'),
+    ('tama_negative', 'waitfor tamasunk=-1 timeout=1\nend\n', 2, 'unexpected token'),
+    ('tama_large', 'waitfor tamaair=5 timeout=1\nend\n', 2, 'unexpected token'),
+    ('tama_fraction', 'waitfor tamaawake=1.0 timeout=1\nend\n', 2, 'unexpected token'),
+    ('tama_trailing', 'waitfor tamadead=1x timeout=1\nend\n', 2, 'unexpected token'),
+    ('tama_missing', 'waitfor tamasunk= timeout=1\nend\n', 2, 'unexpected token'),
+    ('tama_outside', 'waitfor tamadead=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
     # Strict signed-int storage: decimal or0xHEX,0..INT_MAX; no outside-scene match.
     ('mstatus_limits', 'guard radius=0 until mstatus=0 mstatus=2147483647 mstatus=0x0 mstatus=0x7FFFFFFF mstatus=0x38000368\nend\n', 0, 'done at tick'),
     ('mstatus_empty', 'guard radius=0 until mstatus=\nend\n', 2, 'unexpected token in guard'),

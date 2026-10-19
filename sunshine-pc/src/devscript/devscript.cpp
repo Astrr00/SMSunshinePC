@@ -110,7 +110,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, MarioStatus, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
+	enum class Cond { None, Stage, Scen, Mario, MarioStatus, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, TamaAwake, TamaAir, TamaSunk, TamaDead, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -228,6 +228,10 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("plungeloedge=", 0) == 0) k = Command::Cond::PlungeloEdge;
 	else if (tok.rfind("held=", 0) == 0) k = Command::Cond::Held;
 	else if (tok.rfind("bombready=", 0) == 0) k = Command::Cond::BombReady;
+	else if (tok.rfind("tamaawake=", 0) == 0) k = Command::Cond::TamaAwake;
+	else if (tok.rfind("tamaair=", 0) == 0) k = Command::Cond::TamaAir;
+	else if (tok.rfind("tamasunk=", 0) == 0) k = Command::Cond::TamaSunk;
+	else if (tok.rfind("tamadead=", 0) == 0) k = Command::Cond::TamaDead;
 	else if (tok.rfind("wood8wait>=", 0) == 0) k = Command::Cond::Wood8WaitGe;
 	else if (tok.rfind("wood8wait<=", 0) == 0) k = Command::Cond::Wood8WaitLe;
 	else if (tok.rfind("wood12wait>=", 0) == 0) k = Command::Cond::Wood12WaitGe;
@@ -263,6 +267,7 @@ bool parseCond(const std::string& tok, Command& c)
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < 0) return false;
 	} else if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
 	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held || k == Command::Cond::BombReady
+	    || k == Command::Cond::TamaAwake || k == Command::Cond::TamaAir || k == Command::Cond::TamaSunk || k == Command::Cond::TamaDead
 	    || k == Command::Cond::Wood8WaitGe || k == Command::Cond::Wood8WaitLe || k == Command::Cond::Wood12WaitGe || k == Command::Cond::Wood12WaitLe
 	    || k == Command::Cond::Ship0AngleGe || k == Command::Cond::Ship0AngleLe || k == Command::Cond::Ship1AngleGe || k == Command::Cond::Ship1AngleLe
 	    || k == Command::Cond::Ship0RateGe || k == Command::Cond::Ship0RateLe || k == Command::Cond::Ship1RateGe || k == Command::Cond::Ship1RateLe || k == Command::Cond::RedCoinsGe
@@ -273,6 +278,7 @@ bool parseCond(const std::string& tok, Command& c)
 		const char* end = tok.c_str() + tok.size();
 		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < -0x8000 || value > 0x7fff) return false;
+		if ((k == Command::Cond::TamaAwake || k == Command::Cond::TamaAir || k == Command::Cond::TamaSunk || k == Command::Cond::TamaDead) && (value < 0 || value > 4)) return false;
 		if (k == Command::Cond::CraneState && (value < 0 || value > 3)) return false;
 		if (k == Command::Cond::BellLeft && (value < 0 || value > 1000)) return false;
 		if ((k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe) && value < 0) return false;
@@ -1336,6 +1342,21 @@ bool condHolds(const Command& c)
 		case Command::Cond::PlungeloWet: ok = (sceneReady() && observedPlungelo(true)) == (val != 0); break;
 		case Command::Cond::Held: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mHeldObject != nullptr) == (val != 0); break;
 		case Command::Cond::BombReady: ok = sceneReady() && pinnaPrerequisitesSceneReady(1) && pinnaBombReady() == (val != 0); break;
+		case Command::Cond::TamaAwake:
+		case Command::Cond::TamaAir:
+		case Command::Cond::TamaSunk:
+		case Command::Cond::TamaDead: {
+			if (const auto* tama = findPinnaTama(val)) {
+				const bool dead = tama->checkLiveFlag(LIVE_FLAG_DEAD);
+				if (kind == Command::Cond::TamaDead) ok = dead;
+				else if (!dead && !tama->checkLiveFlag(LIVE_FLAG_HIDDEN)) {
+					if (kind == Command::Cond::TamaAwake) ok = !tama->unk1B9;
+					else if (kind == Command::Cond::TamaAir) ok = tama->mIsDoingJumpAttack;
+					else ok = tama->mIsSunkInGround;
+				}
+			}
+			break;
+		}
 		case Command::Cond::Ship0AngleGe:
 		case Command::Cond::Ship0AngleLe:
 		case Command::Cond::Ship1AngleGe:
