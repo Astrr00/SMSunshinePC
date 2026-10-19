@@ -2,10 +2,23 @@
 
 Output: `sunshine-pc/dist/sunshine-<version>.zip` plus `.sha256`. Installation-free. No game data.
 
+## Remaining release gates (reviewed 2026-10-19)
+
+v0.1.0 remains a draft. The dated package results below are historical evidence, not acceptance of the latest source. The [roadmap](../../ROADMAP.md#open-work-in-order) defines the outstanding gameplay work; this checklist covers the exact release candidate after that work is accepted.
+
+1. Record the accepted source commit, applied Aurora patch set and Release executable hash; refresh the candidate rather than reusing an old ZIP.
+2. Verify packaging exclusions, complete notices/runtime dependencies, ZIP checksum and an unpacked smoke outside the checkout.
+3. Resolve the existing Microsoft runtime entitlement/compliance and signed-DXIL provenance items in [third-party licences](../THIRD_PARTY_LICENSES.md).
+4. Test the exact archive on suitable Windows 10/11 without development tools; record hardware, startup, gameplay, save/cold load and normal quit. A second folder on the development host is not this test.
+5. Keep the release draft until the required acceptance gates pass and the owner explicitly says **"Ja"** to publication. Committing and pushing verified source does not publish the release.
+
+Commands below run from the repository root in a VS 2022 x64 developer environment, with clang-cl, CMake and Ninja on PATH. `--llvm-bin` names the directory containing `llvm-readobj.exe`.
+
 ## 1. Preconditions
 
 - [ ] `sunshine-pc/assets/` exists and holds the generated glyph assets. `package.py` fails without it.
-- [ ] `sms/` is unmodified for the release build (SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` for the matching build).
+- [ ] The game sources and Aurora patch set match the accepted commit/recorded inputs; no unreviewed local changes enter the candidate. Relevant PPC-retention checks pass; the independent matching build retains reference SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625`.
+- [ ] Strict reports zero unresolved symbols, port checks pass, and required gameplay/lifecycle evidence is recorded for the accepted source.
 - [ ] `THIRD_PARTY_LICENSES.md` and `licenses/` are present (CMake install requires them).
 - [ ] `CMakeLists.txt` `project(sunshine VERSION x.y.z)` is the version to ship.
 - [ ] A recent LLVM/clang-cl is installed (llvm-readobj is needed for the DLL closure).
@@ -13,7 +26,7 @@ Output: `sunshine-pc/dist/sunshine-<version>.zip` plus `.sha256`. Installation-f
 ## 2. Configure Release
 
 ```
-cmake -S sunshine-pc -B sunshine-pc/build/windows-clang-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl
+cmake -S sunshine-pc -B sunshine-pc/build/windows-clang-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DSUNSHINE_ALLOW_UNRESOLVED=OFF
 ```
 
 The `CMakePresets.json` has no release preset; the command above is the release configure.
@@ -33,7 +46,7 @@ python sunshine-pc/tools/package_test.py
 
 
 ```
-python sunshine-pc/tools/package.py --build-dir sunshine-pc/build/windows-clang-release --version x.y.z --llvm-bin "C:/llvm-dl/t/clang+llvm-23.1.3-x86_64-pc-windows-msvc/bin"
+python sunshine-pc/tools/package.py --build-dir sunshine-pc/build/windows-clang-release --version x.y.z --llvm-bin "<LLVM bin>"
 ```
 
 Internal build with symbols (keep the PDB out of the public zip):
@@ -53,7 +66,7 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 
 ## 5. Verify the artifact
 
-- [ ] `dist/sunshine-x.y.z.zip.sha256` matches `certutil -hashfile dist/sunshine-x.y.z.zip SHA256`.
+- [ ] `sunshine-pc/dist/sunshine-x.y.z.zip.sha256` matches `certutil -hashfile sunshine-pc/dist/sunshine-x.y.z.zip SHA256`.
 - [ ] Unzip into an empty folder outside the repo.
 - [ ] `sunshine.exe --dvd "<your image>"` starts from that folder (use your own legally obtained GMSJ01 image).
 - [ ] No `.pdb` in the zip unless it is an internal build.
@@ -62,6 +75,7 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 
 ## 6. Publish
 
+- [ ] All required acceptance gates pass for this candidate; the owner explicitly approves publication. Otherwise keep v0.1.0 draft.
 - [ ] Upload the zip and `.sha256` only. Do not upload disc images, PDBs (except as a separate symbols archive),
       or `build/`.
 - [ ] Keep the release notes free of game data and download links to game data.

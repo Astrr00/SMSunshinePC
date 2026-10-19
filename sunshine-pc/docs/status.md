@@ -1,5 +1,22 @@
 # Port status audit
 
+## Current remaining work (reviewed 2026-10-19)
+
+The [ROADMAP](../../ROADMAP.md#open-work-in-order) owns the current queue and completion criteria. The [matrix](playability-matrix.tsv) retains **16 passed-bounded, 8 open and 1 external check**; this review adds no new runtime result.
+
+1. Find and prove the next shared gameplay defect, then fix and verify it. No next defect is established yet.
+2. Complete remaining normal world milestones and saved/cold-reloaded rewards; mirrors remain deferred.
+3. Finish the connected owner playthrough and explicit remaining Shine/blue-coin acquisition evidence.
+4. Fill later-scene visual/audio gaps, including audible startup/refill and death/restart behavior.
+5. Verify transitions, save/load, death/restart and native quit together in the required lifecycle run.
+6. Build the accepted Release candidate, verify it on clean Windows and keep publication behind the owner's explicit decision.
+
+Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards and cold reloads; six earned Shines are recorded in [normal-world-routes.md](normal-world-routes.md). The old `/O2` sweep and diagnostic later-world load batch are complete. Do not repeat them without a relevant regression need.
+
+## Dated evidence log
+
+Entries below retain their original test scope and historical open items. Their dates matter: older claims that Ricco/Gooper or sandcastle completion is still pending are superseded by the accepted routes above. Historical headings do not override the current queue.
+
 **PC FLUDD full-tank notification (2026-10-19).** HUD initialization now uses the real nozzle-capacity parameter rather than pointer metadata at PPC offset0xCC. The extracted cache expression and full gauge-update helper pass 25 checks (six old-source failures), suppressing a false initial refill-sound request while preserving subsequent fill, alpha and sound-gate behavior. Strict0, 68 port checks, byte-identical PPC object and symbol validation pass. Normal consumption/sea-refill smoke `pa10b_water_gauge` passes (rc0/65 s, water10000 to9816 to10000, health8, crash0/no cheats, unchanged earned save). Audible startup/refill behavior remains unverified. Evidence: [water-gauge-host-layout.md](water-gauge-host-layout.md). Mirrors remain deferred; matrix statuses stay 16/25.
 
 **PC slide-direction initialization (2026-10-19).** `slideProcess` now initializes the relative facing angle used for signed speed when tiny motion skips heading adjustment. The complete extracted routine improves from five failures to 35/35 PASS. Strict0, 68 port checks and byte-identical PPC object pass; baseline-aware symbol validation finds zero new errors and one inherited unused-symbol error. Normal Delfino smoke `pa09_normal_slide` passes two dive/slide/stop/jump cycles (rc0/72 s, health8, finite motion, crash0/no cheats, unchanged earned save). The exact tiny-speed branch remains unobserved in native play. Evidence and limits: [slide-direction-initialization.md](slide-direction-initialization.md). Mirrors remain deferred; matrix statuses stay 16/25.
@@ -631,7 +648,7 @@ Measured: `ninja -k 0 -j4` exit 0, DOL SHA-1 `9f5a8caf...` OK, `changes_all` no 
 
 Gates: DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625`, 11 013 / 12 881 functions, 445 / 736 units, strict link 0 unresolved, Aurora series 11 patches. Fixed in the decomp/port: `TEMario::perform` control flow (shadow Mario froze), `TSelectDir` `OSJoinThread` result, `TSelectMenu` stage-name index and `break`, `TMarDirector::mConsole` init (PC), Aurora alpha-compare shader (patch 0011). Reached with dev assists only: Delfino gate chain to Bianco Ep.1 (controllable), both GateKeepers killed by the water jet (dev aim assist), Shine collect via dev verb, `.gci` PASS, switch-free reload `shines=1`. Not reached: a switch-free route logos to Bianco under 330 s (the whole flow needs about 20 000 logic ticks at 30 Hz), the bosses and the real Shine without dev assists, two clean full runs.
 
-### Latest lead update (end of the agent session; supersedes everything else in this file where they conflict, including the A3/R02/R03 rows)
+### Historical lead update (round 7; superseded by later dated evidence)
 
 Measured by the lead at round 7 (commit 513e37a, base d414ba0): `ninja -k 0 -j4` in `sms/` rc 0, DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged, strict link 0 unresolved, `apply-aurora-patches.py --check` "applied: 11 patches", 11 317 / 12 881 functions byte-identical (87.858 %; matched code 62.56448 %, fuzzy 98.637474 %, matched data 87.469604 %), 445 / 736 units Matching. Ledger (fact sheet; rows, not unique functions): 1 977 `logic-verified`, 149 `matched`, 250 `partial`. Previous entry: 11 012 / 12 881 (58.56 % code), ledger 1 196 / 66 / 614 with no stated basis; not reconciled here.
 
