@@ -2157,7 +2157,11 @@ void TGCConsole2::loadAfter()
 	unk144->setStatus(JPABaseEmitter::STATUS_STOP_EMIT);
 
 	TNozzleBase* nozzle = ((const TWaterGun*)gpMarioOriginal->mWaterGun)->getCurrentNozzle();
+#ifdef TARGET_PC
+	unk28               = nozzle->mEmitParams.mAmountMax.get();
+#else
 	unk28               = *(u32*)((u8*)nozzle + 0xCC);
+#endif
 
 	unkBC = static_cast<TBathtub*>(JDrama::TNameRefGen::search("バスタブ"));
 	unkC0 = static_cast<TBossEel*>(JDrama::TNameRefGen::search("めおとウナギ"));
