@@ -62,7 +62,10 @@ To start directly with your disc:
 .\build\windows-clang-relwithdebinfo\sunshine.exe --dvd "C:\Games\Super Mario Sunshine (Japan).rvz"
 ```
 
-For testing and bug reports, follow the [testing guide](sunshine-pc/docs/TESTING.md). Include the stage, episode and reproduction steps. An empty `crash.log` is normal; attach logs without disc images or other game data.
+For testing and bug reports, follow the [testing guide](sunshine-pc/docs/TESTING.md). Include the stage, episode and reproduction steps. An empty crash report is normal; attach logs without disc images or other game data.
+
+Normal starts automatically save session and crash logs under `%APPDATA%\Sunshine\logs`, including in Release builds.
+Run the packaged `collect_logs.cmd` to export `%APPDATA%\Sunshine\sunshine-logs.zip` for a bug report; no development tools are needed and nothing is uploaded automatically.
 
 ## Development checks
 

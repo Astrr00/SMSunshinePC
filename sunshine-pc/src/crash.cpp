@@ -1,5 +1,5 @@
 // Crash report for the PC port: on a fatal exception print the code, the faulting address and a symbolized stack
-// (function+offset, file:line from the PDB) to stderr and to crash.log next to the exe. Keeps early boot failures of
+// (function+offset, file:line from the PDB) to stderr and the configured session log (standalone tools use crash.log). Keeps early boot failures of
 // the decompiled game debuggable without an attached debugger.
 //
 // Design notes:
@@ -12,6 +12,7 @@
 #include <tlhelp32.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #pragma comment(lib, "dbghelp.lib")
@@ -330,19 +331,22 @@ void sunshineWatchdogStart() { watchdogStartImpl(); }
 extern "C" void sunshineEnterSehGuard() { ++g_sehGuardedDepth; }
 extern "C" void sunshineLeaveSehGuard() { --g_sehGuardedDepth; }
 
-void installCrashHandler()
+void installCrashHandler(const wchar_t* path)
 {
 #if defined(__SANITIZE_ADDRESS__) || (defined(__has_feature) && __has_feature(address_sanitizer))
 	// ASan commits its shadow memory on demand through first-chance access violations and reports real errors itself;
 	// reporting those faults as fatal (and symbolizing inside the fault) deadlocks the process.
 	return;
 #endif
-	g_log = CreateFileA("crash.log", GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	g_log = CreateFileW(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 	AddVectoredExceptionHandler(1, vectoredHandler);
 	if (const char* hang = std::getenv("SUNSHINE_HANG_DUMP"))
 		CloseHandle(CreateThread(nullptr, 1 << 20, hangDumpThread, (LPVOID)(uintptr_t)std::atoi(hang), 0, nullptr));
 	SetUnhandledExceptionFilter(unhandledFilter);
 }
+
+// Standalone diagnostics retain their existing working-directory report path.
+void installCrashHandler() { installCrashHandler(L"crash.log"); }
 
 // Prints message and a symbolized stack of the calling thread, then terminates (used by the SUNSHINE_CHECK_HEAP allocator).
 void sunshineReportAndAbort(const char* message)

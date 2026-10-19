@@ -76,12 +76,14 @@ target_compile_options(sms_game PUBLIC
     /FI${CMAKE_CURRENT_SOURCE_DIR}/include/pc_compat.h)
 target_compile_options(sms_game PRIVATE /MP)
 
-add_executable(sunshine src/main.cpp src/crash.cpp src/sampler.cpp src/devstart/devstart.cpp src/render/render_scale.cpp
+add_executable(sunshine src/main.cpp src/crash.cpp src/logging.cpp src/sampler.cpp src/devstart/devstart.cpp src/render/render_scale.cpp
     src/cheats/cheats_core.cpp src/cheats/cheats_game.cpp src/json/json_lite.cpp
     src/mods/mod_manifest.cpp src/mods/mods_host.cpp src/mods/mods_loader.cpp src/util/read_file.cpp
     src/settings.cpp src/launcher/launcher.cpp src/glyphs/glyphs.cpp src/framerate/framerate.cpp src/widescreen/widescreen.cpp
     src/saves/save_directory.cpp src/saves/save_roundtrip.cpp src/devscript/devscript.cpp src/mouse/mouse.cpp)
 target_include_directories(sunshine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set_property(SOURCE src/logging.cpp APPEND PROPERTY COMPILE_DEFINITIONS
+    SUNSHINE_VERSION="${PROJECT_VERSION}" SUNSHINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 # Round-trip test of the INI settings reader/writer (tools/settings_test.cpp); no game or Aurora dependency.
 add_executable(settings_test tools/settings_test.cpp src/settings.cpp)
 target_include_directories(settings_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -154,7 +156,7 @@ if (WIN32)
 endif ()
 install(DIRECTORY assets/ DESTINATION assets OPTIONAL)
 install(FILES "$<TARGET_FILE_DIR:sunshine>/initial_pipeline_cache.db" DESTINATION .)
-install(FILES LICENSE THIRD_PARTY_LICENSES.md docs/TESTING.md tools/collect_logs.cmd tools/play_logged.cmd DESTINATION .)
+install(FILES LICENSE THIRD_PARTY_LICENSES.md docs/TESTING.md tools/collect_logs.cmd tools/collect_logs.ps1 tools/play_logged.cmd DESTINATION .)
 install(DIRECTORY licenses/ DESTINATION licenses)
 set(CPACK_PACKAGE_NAME "sunshine")
 set(CPACK_GENERATOR "ZIP")
