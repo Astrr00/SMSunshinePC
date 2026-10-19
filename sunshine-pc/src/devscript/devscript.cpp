@@ -104,7 +104,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -202,6 +202,10 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("cranestate=", 0) == 0) k = Command::Cond::CraneState;
 	else if (tok.rfind("cargoy<=", 0) == 0) k = Command::Cond::CargoYLe;
 	else if (tok.rfind("bellleft=", 0) == 0) k = Command::Cond::BellLeft; // TV bell water hits remaining; zero means clean, before collection
+	else if (tok.rfind("coasterrail>=", 0) == 0) k = Command::Cond::CoasterRailGe;
+	else if (tok.rfind("coasterrail<=", 0) == 0) k = Command::Cond::CoasterRailLe;
+	else if (tok.rfind("coasterloaded=", 0) == 0) k = Command::Cond::CoasterLoaded;
+	else if (tok.rfind("tinkoopa=", 0) == 0) k = Command::Cond::TinKoopaState;
 	else if (tok.rfind("gessohp=", 0) == 0) k = Command::Cond::GessoHp;
 	else if (tok.rfind("gessomode=", 0) == 0) k = Command::Cond::GessoMode;
 	else if (tok.rfind("gessopull=", 0) == 0) k = Command::Cond::GessoPull;
@@ -224,12 +228,16 @@ bool parseCond(const std::string& tok, Command& c)
 	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
 	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held
 	    || k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft
-	    || k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe || k == Command::Cond::PlungeloWet) {
+	    || k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe || k == Command::Cond::PlungeloWet
+	    || k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe || k == Command::Cond::CoasterLoaded || k == Command::Cond::TinKoopaState) {
 		const char* end = tok.c_str() + tok.size();
 		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < -0x8000 || value > 0x7fff) return false;
 		if (k == Command::Cond::CraneState && (value < 0 || value > 3)) return false;
 		if (k == Command::Cond::BellLeft && (value < 0 || value > 1000)) return false;
+		if ((k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe) && value < 0) return false;
+		if (k == Command::Cond::CoasterLoaded && (value < 0 || value > 1)) return false;
+		if (k == Command::Cond::TinKoopaState && (value < 0 || value > 4)) return false;
 		if (k == Command::Cond::GessoHp && (value < 0 || value > 255)) return false;
 		if (k == Command::Cond::GessoMode && (value < 0 || value > 7)) return false;
 		if ((k == Command::Cond::Held || k == Command::Cond::GessoPull) && (value < 0 || value > 1)) return false;
@@ -895,13 +903,31 @@ void logGesso(const char* tag)
 	}
 }
 
+bool coasterSceneReady()
+{
+	return sceneReady() && gpApplication.mCurrArea.getStage() == 58 && gpApplication.mCurrArea.getScenario() == 1
+	    && JDrama::TNameRefGen::getInstance() && JDrama::TNameRefGen::getInstance()->getRootNameRef();
+}
+
+TTinKoopa* findTinKoopa()
+{
+	if (!coasterSceneReady()) return nullptr;
+	const char* bossName = "\x83\x81\x83\x4a\x83\x4e\x83\x62\x83\x70"; // メカクッパ
+	return dynamic_cast<TTinKoopa*>(JDrama::TNameRefGen::search(bossName));
+}
+
+TRocketManager* findCoasterRockets()
+{
+	if (!coasterSceneReady()) return nullptr;
+	const char* name = "\x83\x8d\x83\x50\x83\x62\x83\x67\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"; // ロケットマネージャー
+	return dynamic_cast<TRocketManager*>(JDrama::TNameRefGen::search(name));
+}
+
 // Observe the Mecha Bowser fight without changing its actors, aim or controller inputs.
 void logTinKoopa(const char* tag)
 {
-	if (gpApplication.mCurrArea.getStage() != 58 || gpApplication.mCurrArea.getScenario() != 1
-	    || !JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return;
-	const char* bossName = "\x83\x81\x83\x4a\x83\x4e\x83\x62\x83\x70"; // メカクッパ
-	if (auto* boss = dynamic_cast<TTinKoopa*>(JDrama::TNameRefGen::search(bossName))) {
+	if (!coasterSceneReady()) return;
+	if (auto* boss = findTinKoopa()) {
 		const auto* nerve = boss->mSpine ? boss->mSpine->getCurrentNerve() : nullptr;
 		MActor* actor = boss->getMActor();
 		std::printf("[%s-tinkoopa] state=%d partsHp=%d nerve=%s time=%d bck=%d frame=%.1f rail=%.1f defeat=%d shine=%d tick=%d\n", tag,
@@ -910,8 +936,7 @@ void logTinKoopa(const char* tag)
 		    boss->mKoopaRail ? boss->mKoopaRail->getFrameCtrl(ANM_TYPE_BCK)->getFrame() : -1.f,
 		    TFlagManager::smInstance->getBool(0x5000A), TFlagManager::smInstance->getShineFlag(0x1E), gTick);
 	}
-	const char* rocketManagerName = "\x83\x8d\x83\x50\x83\x62\x83\x67\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"; // ロケットマネージャー
-	if (auto* manager = dynamic_cast<TRocketManager*>(JDrama::TNameRefGen::search(rocketManagerName))) {
+	if (auto* manager = findCoasterRockets()) {
 		for (int i = 0; i < manager->getObjNum(); ++i)
 			if (auto* rocket = dynamic_cast<TRocket*>(manager->getObj(i))) {
 				if (rocket->checkLiveFlag(LIVE_FLAG_DEAD) || (!rocket->mIsPossessed && !rocket->isAttack())) continue;
@@ -1171,6 +1196,27 @@ bool condHolds(const Command& c)
 		case Command::Cond::BellLeft: {
 			const auto* bell = findDelfinoTVBell();
 			if (bell) ok = bell->unk154 == val;
+			break;
+		}
+		case Command::Cond::CoasterRailGe:
+		case Command::Cond::CoasterRailLe:
+		case Command::Cond::TinKoopaState: {
+			const auto* boss = findTinKoopa();
+			if (!boss) break;
+			if (kind == Command::Cond::TinKoopaState) ok = boss->mState == val;
+			else if (boss->mKoopaRail)
+				if (const auto* frame = boss->mKoopaRail->getFrameCtrl(ANM_TYPE_BCK))
+					ok = kind == Command::Cond::CoasterRailGe ? frame->getFrame() >= val : frame->getFrame() <= val;
+			break;
+		}
+		case Command::Cond::CoasterLoaded: {
+			const auto* manager = findCoasterRockets();
+			if (!manager) break;
+			bool loaded = false;
+			for (int i = 0; i < manager->getObjNum(); ++i)
+				if (const auto* rocket = dynamic_cast<const TRocket*>(manager->getObj(i)))
+					loaded |= !rocket->checkLiveFlag(LIVE_FLAG_DEAD) && rocket->mIsPossessed;
+			ok = loaded == (val != 0);
 			break;
 		}
 		case Command::Cond::GessoHp:
