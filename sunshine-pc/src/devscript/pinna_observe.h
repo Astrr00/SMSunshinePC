@@ -25,6 +25,18 @@ static inline bool pinnaPrerequisitesSceneReady(int scenario)
 	    && gpApplication.mCurrArea.getScenario() == scenario;
 }
 
+static inline const TTamaNoko* findPinnaTama(int index)
+{
+	if (!pinnaPrerequisitesSceneReady(3) || index < 0 || index >= 5) return nullptr;
+	// Fresh lookup in the joined current scene; never retain an actor pointer.
+	for (auto it = gpConductor->unk20.begin(); it != gpConductor->unk20.end(); ++it) {
+		const auto* manager = dynamic_cast<const TTamaNokoManager*>(*it);
+		if (manager && index < manager->getObjNum())
+			return dynamic_cast<const TTamaNoko*>(manager->getObj(index));
+	}
+	return nullptr;
+}
+
 static inline bool pinnaBombReady()
 {
 	if (!pinnaPrerequisitesSceneReady(1)) return false;

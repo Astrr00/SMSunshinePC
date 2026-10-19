@@ -1,5 +1,7 @@
 # Normal Pinna milestone
 
+Latest bounded component: [normal Episode4 entry and first-turtle defeat](pinna-four-first-turtle.md) pass once from the earned thirteen-Shine save. Four turtles, all flower revivals, Shine33 save and fresh-process reload remain open; Episode4 is not accepted as complete.
+
 Pinna Episodes1–3 now pass normal completion, saved rewards and independent fresh-process reloads: Mecha Bowser/Shine30, Cannon and block secret/Shine31, and pirate-ship red coins/Shine32. The latest connected earned save contains thirteen Shines. Episode4 onward remains open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
 
 ## Earned prerequisites (2026-10-19)
