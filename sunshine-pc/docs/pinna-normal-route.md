@@ -1,6 +1,6 @@
 # Normal Pinna milestone
 
-Pinna entry, Mecha Bowser completion and its saved/cold-reloaded Shine remain **open**. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains nine earned Shines.
+Pinna entry, Mecha Bowser completion and its saved/cold-reloaded Shine remain **open**. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
 
 ## Earned prerequisites (2026-10-19)
 
@@ -11,11 +11,13 @@ Start from `nw91_gelato_early_takeoff`, the normal six-Shine File B documented i
 
 3. `pc_delfino_chuckster_unassisted.dev`, accepted private `pn24_chuckster` from `pn20_blue_main`: rc0/155.39s, ordinary paid rooftop Pianta throw, Shine98 collection/save/plaza return, health8, empty crash log and no active cheats. The original nine yellow sewer coins fund the one-coin payment (9 to8); the NPC controls the throw. Latest File B write13 has nine Shines: IDs0/1/10/20/86/94/95/98/117. All seven sector checksums pass; GCI SHA-256 `acf58dfc4fe2d9994950a308e00f1ca41f0dc8fa9ae01445a764f6b1196c57a9`. Accepted private route SHA-256 `cce701f07d522a3effc29df4246ae1982c855bb74b563b205715a7d56ee2741f`; public commands match exactly, with comments changed.
 
+4. `pc_delfino_100coins_unassisted.dev`, accepted private `pn42_coins_observed` from `pn24_chuckster`: rc0/771.96s,104 ordinary coins, first observed boat boarding, island landing, Shine107 collection/save and normal plaza return. `done` at tick21965, health8, empty crash log and no active cheats. Latest File B sector3/write14 has ten Shines: IDs0/1/10/20/86/94/95/98/107/117. All seven sector checksums pass; GCI SHA-256 `d7f5ea5640a49d942f78aad98a60eafcc0bcc1bb9e839d3beee0bd7462064241`. Accepted private route SHA-256 `85898888bb46177b84a3f428070052b17b9f13fdf413bb7c997b66842767dcc2`; public executable commands are identical. The fresh-process normal-menu prefix of `pn40_pinna_combat` restores the ten-Shine File B and enters Delfino1/7; its later Pinna traversal is a separate result.
+
 The initial normal-menu section of `pn25_coins` independently cold-loads all nine Shines, including flag0x10062, with the same GCI hash. Its later coin/boat traversal is a separate, unverified result.
 
 The second run cold-loads the first reward through normal menus. The next private roof trial `pn15_roof` independently cold-loads all eight Shines before its unverified traversal; that initial load is evidence for the saved second reward only.
 
-The accepted Strict executable SHA-256 is `4bc903e7a254f9782f8e52d561dfc373a5dbc55eb2d74f2b81424ba1407b55af`, built from game source at `99dca5dd` with read-only route diagnostics. Strict reports zero unresolved symbols; 68 port checks, all 46 native parser cases (including five new bell cases) and 37 coaster-aim checks pass. This hash identifies those accepted prerequisite runs; later read-only diagnostics use the separate build below.
+The crate, sewer-blue and paid-throw runs use Strict executable SHA-256 `4bc903e7a254f9782f8e52d561dfc373a5dbc55eb2d74f2b81424ba1407b55af`, built from game source at `99dca5dd` with read-only route diagnostics. Strict reports zero unresolved symbols; 68 port checks, all 46 native parser cases (including five new bell cases) and 37 coaster-aim checks pass. This hash identifies those earlier prerequisite runs; later read-only diagnostics use the separate build below.
 
 Accepted private route hashes: first `2152f18d4f41fa3971b8c23c5a8b5262b6e80cd3ee54c7d89641bcd9b31b0adc`, second `58f550f92cacad22158d52a950b02ac0d227bf9464d0843ed0e44fea1681bf9a`. Public copies change only comments; executable controller commands match the accepted inputs.
 
@@ -61,3 +63,9 @@ Read-only `boatdist<=N` and `boatz>=N`/`boatz<=N` conditions now observe the nea
 Private `pn41_boat_observed`, seeded from `pn24_chuckster`, passes the first observed boarding attempt and the subsequent normal island landing: rc0/278.49s, `done` at tick7838, health8, floor801.9, empty crash log and no active cheats. This component does not collect a Shine. Route SHA-256: `f97495976b41f231703b6786497b44bd24d9a6290ceb77db5aa598120b2557d7`. Its final spin presses A with the fifth small nonzero stick input; a neutral A input would clear the original angle history before jump selection.
 
 This component uses Strict executable SHA-256 `a24e73a61055538b2cade5011747a1bf54ace0c4135f4b796ecf4079576ddaa8`: zero unresolved symbols and68 port checks pass. The preceding coaster-observation build passes all72 existing native parser cases; this build passes23 added boat parser cases plus three existing parser controls. The coaster observations expose only rail frame, carried-rocket presence and boss state. Native combat calibration remains open.
+
+Reproduce the complete hundred-coin reward after the paid-throw save:
+
+```powershell
+python tools/route.py Strict tools/routes/pc_delfino_100coins_unassisted.dev --name <hundred> --appdata-from <throw> --seconds 1300
+```

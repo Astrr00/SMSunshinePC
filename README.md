@@ -8,7 +8,7 @@ A native Windows x86-64 port of the Japanese GameCube release (**GMSJ01**), buil
 
 ## Playability
 
-Normal controller-input routes have verified the airport, Delfino Gatekeeper and Shadow Mario, Petey Piranha, Gooper Blooper, and Gelato's sandcastle mission. Nine earned Shines have been saved and independently reloaded in fresh processes, including three [normal Delfino prerequisites for Pinna](sunshine-pc/docs/pinna-normal-route.md). These are bounded route results, not proof that every mission works. See the [normal world route evidence](sunshine-pc/docs/normal-world-routes.md) and [acceptance matrix](sunshine-pc/docs/playability-matrix.tsv).
+Normal controller-input routes have verified the airport, Delfino Gatekeeper and Shadow Mario, Petey Piranha, Gooper Blooper, and Gelato's sandcastle mission. Ten earned Shines have been saved and independently reloaded in fresh processes, including four [normal Delfino prerequisites for Pinna](sunshine-pc/docs/pinna-normal-route.md). These are bounded route results, not proof that every mission works. See the [normal world route evidence](sunshine-pc/docs/normal-world-routes.md) and [acceptance matrix](sunshine-pc/docs/playability-matrix.tsv).
 
 ![Playability: 17 checks passed with bounded evidence, 8 open, and 0 requiring an external check. These counts do not measure overall completion.](sunshine-pc/docs/img/status.svg)
 

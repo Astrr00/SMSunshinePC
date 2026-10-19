@@ -1,0 +1,1269 @@
+# Controller-only Delfino hundred-coin Shine107, ordinary save and plaza return.
+# Accepted seed: pn24_chuckster; exact evidence in docs/pinna-normal-route.md.
+# Original boat observed from shore; controller-only actions and read-only conditions.
+# Cold normal-menu load of the nine earned Shines and two saved Delfino blue coins.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10062 timeout=1
+log
+shot cold_gelato_six_shines.png
+wait frames=30
+# Accepted 104-coin route with ordinary boat observation controlling boarding timing.
+# Cold profile: nine earned Shines; main-sewer blues16/17 already saved.
+# Observed HUD totals: east8, ocean13, main77, west86, far104.
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10088 timeout=1
+waitfor flag=0x10089 timeout=1
+walkto x=0 z=8500 radius=60 timeout=6000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=10000 z=8500 radius=60 timeout=6000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=10000 z=500 radius=60 timeout=6000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=9000 z=436 radius=60 timeout=6000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=8750 z=436 radius=60 timeout=6000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=8395 z=436 radius=15 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=20
+hold A frames=8
+hold L frames=90
+wait frames=100
+waitfor marioy<=-900 timeout=180
+log
+# east: 8 original sewer coins; map-grid length 3360 units.
+walkto x=8380 z=-180 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8300 z=-180 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8300 z=-380 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8100 z=-380 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7900 z=-380 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7900 z=-580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7900 z=-780 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8100 z=-780 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8300 z=-780 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8300 z=-580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8300 z=-180 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8380 z=-180 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=8380 z=420 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+log
+shot coins_east.png
+
+
+walkto x=8395 z=436 radius=12 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=20
+hold A until marioy>=440 timeout=180
+walkto x=8750 z=436 radius=30 timeout=300
+wait frames=3
+hold L frames=1
+wait frames=160
+waitfor marioy<=170 timeout=360
+wait frames=30
+log
+walkto x=11100 z=2800 radius=25 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=10
+mash B period=36 hold=2 until marioy<=-640 timeout=2400
+wait frames=30
+log
+shot coins_ocean_1.png
+mash A period=24 hold=12 until marioy>=-100 timeout=1800
+wait frames=120
+walkto x=11100 z=3000 radius=25 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=10
+mash B period=36 hold=2 until marioy<=-640 timeout=2400
+wait frames=30
+log
+shot coins_ocean_2.png
+mash A period=24 hold=12 until marioy>=-100 timeout=1800
+wait frames=120
+walkto x=11300 z=2700 radius=25 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=10
+mash B period=36 hold=2 until marioy<=-640 timeout=2400
+wait frames=30
+log
+shot coins_ocean_3.png
+mash A period=24 hold=12 until marioy>=-100 timeout=1800
+wait frames=120
+walkto x=11300 z=3100 radius=25 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=10
+mash B period=36 hold=2 until marioy<=-640 timeout=2400
+wait frames=30
+log
+shot coins_ocean_4.png
+mash A period=24 hold=12 until marioy>=-100 timeout=1800
+wait frames=120
+walkto x=11500 z=2800 radius=25 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=10
+mash B period=36 hold=2 until marioy<=-640 timeout=2400
+wait frames=30
+log
+shot coins_ocean_5.png
+mash A period=24 hold=12 until marioy>=-100 timeout=1800
+wait frames=120
+walkto x=11500 z=3000 radius=25 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=10
+mash B period=36 hold=2 until marioy<=-640 timeout=2400
+wait frames=30
+log
+shot coins_ocean_6.png
+mash A period=24 hold=12 until marioy>=-100 timeout=1800
+wait frames=120
+walkto x=12000 z=8500 radius=50 timeout=6000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=0 z=8500 radius=50 timeout=6000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=90
+faceto x=0 z=7035 tol=3 timeout=240
+wait frames=15
+hold R trig=0,255 frames=10
+hold A R trig=0,255 frames=2
+walkto x=0 z=7500 radius=30 jump=120 timeout=600
+wait frames=180
+hold R trig=0,255 frames=2
+wait frames=30
+waitfor floory>=250 timeout=1
+walkto x=0 z=7035 radius=25 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=0 z=7035 radius=15 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=20
+hold A frames=8
+hold L frames=90
+wait frames=100
+waitfor marioy<=-900 timeout=180
+log
+# main: 64 original sewer coins; map-grid length 80320 units.
+walkto x=-20 z=7020 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-20 z=-2060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-220 z=-2060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-220 z=-2260 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-420 z=-2260 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-420 z=-2460 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-220 z=-2460 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-20 z=-2460 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-20 z=-2260 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-420 z=-2260 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-420 z=-2060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-420 z=-3700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=380 z=-3700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=580 z=-3700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=580 z=-3900 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=420 z=-3900 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=420 z=-4100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=580 z=-4100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=820 z=-4100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=780 z=-4100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=780 z=-3900 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=780 z=-3700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=820 z=-3700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-3700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-1580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-60 z=-1580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-60 z=1060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=1060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=300 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=-100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=-300 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=-500 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=-700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=-900 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=-1100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=-1300 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-3740 z=1140 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=5460 z=1140 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=5460 z=1940 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7460 z=1940 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7460 z=2140 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7660 z=2140 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7660 z=2340 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7460 z=2340 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7860 z=2340 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7860 z=2140 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7860 z=1940 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=7660 z=1940 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=5460 z=1940 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=5460 z=-5980 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=220 z=-5980 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=220 z=-6060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-100 z=-6060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-100 z=-7700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-140 z=-7700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-140 z=-8580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=220 z=-8580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=220 z=-8620 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=380 z=-8620 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=380 z=-8820 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=420 z=-8820 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=380 z=-8820 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=380 z=-8980 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=580 z=-8980 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=580 z=-8780 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=580 z=-8580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=180 z=-8580 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=180 z=-8820 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=180 z=-9020 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-9020 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-9100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1020 z=-9100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1020 z=-9500 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1220 z=-9500 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1220 z=-9700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1420 z=-9700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1420 z=-9900 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1220 z=-9900 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1020 z=-9900 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1020 z=-9700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1420 z=-9700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1420 z=-9500 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-1420 z=-9100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-9100 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-6060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-6060 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-6940 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-7140 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-7340 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-7540 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-7740 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-7940 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-8140 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-8340 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-8540 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-8700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2580 z=-8700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-8700 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-6020 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+log
+shot coins_main.png
+
+
+walkto x=-2603 z=-6031 radius=12 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=20
+hold A until marioy>=1050 timeout=180
+walkto x=-2440 z=-5800 radius=30 timeout=300
+wait frames=3
+hold L frames=1
+wait frames=160
+waitfor marioy<=780 timeout=360
+wait frames=30
+log
+walkto x=-2440 z=-6200 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-2800 z=-6200 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-2800 z=-7200 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-4120 z=-7200 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-4120 z=-5500 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-6200 z=-5500 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-6200 z=-6200 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-6750 z=-6200 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-6750 z=-6502 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-6537 z=-6502 radius=25 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-6537 z=-6502 radius=15 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=20
+hold A frames=8
+hold L frames=90
+wait frames=100
+waitfor marioy<=-900 timeout=180
+log
+# west: 9 original sewer coins; map-grid length 9760 units.
+walkto x=-6540 z=-3220 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-3020 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-2820 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-2620 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-2420 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-2220 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-2020 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-1820 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-1620 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-6540 z=-6500 radius=20 timeout=1200
+hold R trig=0,255 frames=2
+wait frames=5
+log
+shot coins_west.png
+
+
+walkto x=-6537 z=-6502 radius=12 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=20
+hold A until marioy>=650 timeout=180
+walkto x=-7000 z=-6502 radius=25 timeout=300
+wait frames=3
+hold L frames=1
+wait frames=160
+waitfor marioy>=280 marioy<=380 floory>=290 timeout=180
+wait frames=30
+log
+walkto x=-6750 z=-6200 radius=40 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-7000 z=-6200 radius=40 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-7500 z=-5500 radius=40 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+walkto x=-7800 z=-5100 radius=25 timeout=600
+hold R trig=0,255 frames=2
+wait frames=60
+waitfor floory>=290 timeout=1
+log
+shot far_cover_street_takeoff.png
+hold X frames=1
+wait frames=20
+faceto x=-7511 z=-3499 tol=3 timeout=240
+wait frames=15
+hold A until marioy>=480 timeout=120
+walkto x=-7511 z=-3499 radius=20 spray=1 hover=1 timeout=600
+wait frames=3
+hold L frames=1
+wait frames=220
+waitfor marioy<=-900 timeout=300
+hold X frames=1
+wait frames=30
+log
+shot coins_far_entry.png
+walkto x=-14220 z=-3500 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-3460 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-15100 z=-3460 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-15100 z=-2180 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14300 z=-2180 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14300 z=-1940 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-1940 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-1740 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-1540 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-1340 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14180 z=-1340 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14180 z=-1140 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14180 z=-940 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-940 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-740 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14220 z=-540 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14180 z=-540 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14180 z=-340 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-14180 z=-2340 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-13100 z=-2340 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-13100 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-13020 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-12780 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-12620 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-12420 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-12180 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-12020 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-11820 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-11580 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-11420 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-13100 z=-2580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-13100 z=-2340 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-15220 z=-2340 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-15220 z=-3460 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-19380 z=-3460 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-19380 z=-3500 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-19420 z=-3500 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+log
+shot coins_far_105.png
+
+walkto x=-19411 z=-3496 radius=12 timeout=3000
+hold R trig=0,255 frames=2
+wait frames=10
+wait frames=20
+hold A until marioy>=650 timeout=180
+walkto x=-19000 z=-3500 radius=30 timeout=300
+wait frames=3
+hold L frames=1
+wait frames=160
+waitfor marioy>=260 marioy<=380 floory>=260 timeout=180
+wait frames=30
+log
+# Controller-only boat1 boarding from the far manhole/basket island; primary nozzle selected.
+# Cover10 (-19411,300,-3496). East shore is a continuous original slope: x-19000 y286.7 -> x-18100 y42.7.
+# Boat1 S_ship1 northbound passes x~-17250, z-4400..-2600, speed4.
+# Retry ordinary spin-jump+Hover to fixed intercept; existing floory observes boat beneath airborne Mario.
+label boat_retry
+walkto x=-18200 z=-3500 radius=120 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=30
+waitfor marioy>=30 floory>=25 timeout=180
+# Face and settle the camera BEFORE waiting for the approaching original boat.
+faceto x=-17350 z=-3500 tol=3 timeout=240
+hold L frames=1
+wait frames=20
+# Observation to first deck poll: circle5 + face~4 + ascent~12 + X1 + flight~40 + brake12 = ~74 PAD ticks.
+waitfor boatdist<=1500 boatz>=900 boatz<=1250 timeout=6000
+log
+shot boat_observed_approach.png
+trace frames=180
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-17350 z=-3500 tol=3 timeout=90
+hold A until marioy>=600 timeout=150
+hold A X frames=1
+walkto x=-17350 z=-3500 radius=20 spray=1 hover=1 timeout=600
+hold R trig=0,255 stick=0,-127 frames=12
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+goto boat_found if floory>=50 max=1
+hold R trig=0,255 frames=1
+wait frames=3
+hold L frames=1
+wait frames=150
+hold X frames=1
+wait frames=30
+goto boat_retry if stage=1 max=64
+waitfor stage=1 timeout=1
+label boat_found
+wait frames=3
+hold L frames=1
+wait frames=120
+waitfor floory>=50 timeout=180
+log
+shot coins107_boat_boarded.png
+hold X frames=1
+wait frames=30
+# The original boat moves four substeps per PAD tick: reverse-direction island pass is about2557 PAD ticks after boarding.
+# Ride 2350 neutral ticks after settling before the normal spin preparation.
+wait frames=2100
+log
+shot coins107_boat_ride.png
+wait frames=250
+waitfor floory>=50 timeout=1
+log
+shot coins107_boat_takeoff.png
+# Original spin jump: vY70; X is allowed during ROTATE_JUMP, unlike BACK_JUMP.
+# Hold A through ascent; swap to Hover only after reaching the desired launch height.
+faceto x=72 z=13232 tol=3 timeout=240
+wait frames=15
+wait frames=20
+trace frames=180
+hold stick=0,24 frames=1
+hold stick=24,0 frames=1
+hold stick=0,-24 frames=1
+hold stick=-24,0 frames=1
+hold A stick=0,24 frames=1
+hold A until marioy>=680 timeout=150
+hold A X frames=1
+walkto x=72 z=13232 radius=20 spray=1 hover=1 timeout=900
+wait frames=3
+hold L frames=1
+wait frames=120
+waitfor marioy>=790 floory>=790 timeout=180
+log
+shot boat_probe_island_floor.png
+hold X frames=1
+wait frames=30
+mash A period=28 hold=16 until flag=0x1006b timeout=1800
+mash A period=30 until stage=1 dirstate=4 camDemo=0 timeout=9000
+wait frames=180
+log
+shot coins107_saved_from_boat.png
+end
