@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate separate playability and matching graphics for the README.
+"""Generate playability, gameplay-feature and matching graphics for the README.
 
 Usage: python sunshine-pc/tools/status_treemap.py [report.json] [status.svg]
-The matching graphic is written beside status.svg as matching.svg.
+Matching and gameplay-feature graphics are written beside status.svg.
 Uses only the standard library; reads the matrix and build report, not game data.
 """
 import csv
@@ -18,6 +18,7 @@ BG, PANEL = "#101b2a", "#19283a"
 INK, MUTED = "#f3f7fb", "#b9cbdc"
 GREEN, ORANGE, GOLD, GREY = "#5fd5b2", "#ffb181", "#f0d47b", "#42566d"
 STATES = {"passed-bounded": GREEN, "open": ORANGE, "external-check-required": GOLD}
+FEATURE_STATES = {"observed-bounded": GREEN, "partial": GOLD, "unverified": ORANGE}
 
 
 def squarify(items, x, y, w, h):
@@ -76,14 +77,43 @@ def svg(title, description, height, parts):
     ])
 
 
-def port_rows(path):
+def port_rows(path, states=STATES):
     with path.open(encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f, delimiter="\t"))
-    if not rows or any(not r.get("id") or not r.get("area") or r.get("status") not in STATES for r in rows):
+    if not rows or any(not r.get("id") or not r.get("area") or r.get("status") not in states for r in rows):
         raise ValueError("Matrix needs nonempty id/area fields and a recognized status for every row")
     if len({r["id"] for r in rows}) != len(rows):
         raise ValueError("Duplicate matrix IDs would inflate the status counts")
     return rows
+
+
+def feature_graphic(rows):
+    counts = Counter(r["status"] for r in rows)
+    if any(not r.get("evidence") or not r.get("scope") for r in rows):
+        raise ValueError("Every tracked feature needs an evidence reference and scope")
+    parts = [text(32, 42, "SUNSHINE / GAMEPLAY SYSTEMS", 14, GREEN, 700),
+             text(32, 87, "Gameplay feature tracking", 36, weight=700),
+             text(32, 118, f"{len(rows)} tracked systems. Native observations establish bounded implementation evidence.", 19, MUTED)]
+    labels = ["Implemented / observed", "Partial verification", "Not yet verified"]
+    for i, (state, label) in enumerate(zip(FEATURE_STATES, labels)):
+        x = 32 + i * 316
+        parts += [rect(x, 146, 304, 116, PANEL, 12),
+                  text(x+20, 205, counts[state], 48, FEATURE_STATES[state], 700),
+                  text(x+20, 239, label, 17, MUTED)]
+    ordered = sorted(rows, key=lambda r: list(FEATURE_STATES).index(r["status"]))
+    for i, row in enumerate(ordered):
+        x, y = 32 + (i % 2) * 480, 286 + (i // 2) * 48
+        parts.append(f'<g><title>{escape(row["area"] + ": " + row["status"] + " — " + row["scope"] + " Source: " + row["evidence"])}</title>'
+                     + rect(x, y, 456, 40, PANEL, 6)
+                     + rect(x+12, y+14, 12, 12, FEATURE_STATES[row["status"]], 3)
+                     + text(x+36, y+26, row["area"], 17) + '</g>')
+    y = 286 + ((len(rows)+1)//2)*48
+    parts += [text(32, y+24, "Source: gameplay-features.tsv. This is a curated list, not a count of C++ functions.", 16, MUTED),
+              text(32, y+50, "Unverified does not mean missing code. Counts are not overall game completion.", 16, MUTED)]
+    return svg("Gameplay feature implementation evidence",
+               f'{counts["observed-bounded"]} of {len(rows)} tracked systems observed working with bounded evidence; '
+               f'{counts["partial"]} partially verified; {counts["unverified"]} not yet verified. '
+               'Unverified does not mean unimplemented. Not overall completion.', y+76, parts)
 
 
 def port_graphic(rows):
@@ -172,15 +202,19 @@ def main():
     report = Path(sys.argv[1]) if len(sys.argv)>1 else ROOT / "sms/build/GMSJ01/report.json"
     out = Path(sys.argv[2]) if len(sys.argv)>2 else ROOT / "sunshine-pc/docs/img/status.svg"
     rows = port_rows(ROOT / "sunshine-pc/docs/playability-matrix.tsv")
-    # Validate and render both before writing either artifact.
-    graphics = [(out, port_graphic(rows)), (out.with_name("matching.svg"), matching_graphic(json.loads(report.read_text(encoding="utf-8"))))]
-    if graphics[0][0] == graphics[1][0]:
-        raise ValueError("The status output must not be named matching.svg")
+    features = port_rows(ROOT / "sunshine-pc/docs/gameplay-features.tsv", FEATURE_STATES)
+    # Validate and render all inputs before writing any artifact.
+    graphics = [(out, port_graphic(rows)),
+                (out.with_name("matching.svg"), matching_graphic(json.loads(report.read_text(encoding="utf-8")))),
+                (out.with_name("features.svg"), feature_graphic(features))]
+    if len({path for path, _ in graphics}) != len(graphics):
+        raise ValueError("The status output must not be named matching.svg or features.svg")
     out.parent.mkdir(parents=True, exist_ok=True)
     for path, content in graphics:
         path.write_text(content, encoding="utf-8", newline="\n")
         print(f"wrote {path} ({len(content.encode('utf-8'))//1024} KiB)")
     print("Matrix: " + ", ".join(f"{state}={sum(r['status']==state for r in rows)}" for state in STATES))
+    print("Features: " + ", ".join(f"{state}={sum(r['status']==state for r in features)}" for state in FEATURE_STATES))
 
 
 if __name__ == "__main__":

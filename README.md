@@ -10,13 +10,21 @@ Support for US and European ROMs is planned for a future milestone.
 
 ## Playability
 
-Normal controller-input routes have verified the airport, Delfino Gatekeeper and Shadow Mario, Petey Piranha, Gooper Blooper, Gelato's sandcastle mission, and Pinna's Mecha Bowser battle. Eleven earned Shines have been saved and independently reloaded in fresh processes, including four [Delfino prerequisites for Pinna](sunshine-pc/docs/pinna-normal-route.md). These are bounded route results, not proof that every mission works. See the [normal world route evidence](sunshine-pc/docs/normal-world-routes.md) and [acceptance matrix](sunshine-pc/docs/playability-matrix.tsv).
+Normal controller-input routes have verified the airport, Delfino Gatekeeper and Shadow Mario, Petey Piranha, Gooper Blooper, Gelato's sandcastle mission, and Pinna's Mecha Bowser, Cannon/block secret and pirate-ship red coins. Thirteen earned Shines have been saved and independently reloaded in fresh processes, including four [Delfino prerequisites for Pinna](sunshine-pc/docs/pinna-normal-route.md). These are bounded route results, not proof that every mission works. See the [normal world route evidence](sunshine-pc/docs/normal-world-routes.md) and [acceptance matrix](sunshine-pc/docs/playability-matrix.tsv).
 
 ![Playability: 17 checks passed with bounded evidence, 8 open, and 0 requiring an external check. These counts do not measure overall completion.](sunshine-pc/docs/img/status.svg)
 
 Current work targets confirmed defects in shared gameplay code. Remaining acceptance includes normal progression through later worlds, all missions and collectibles, later-scene audio and graphics checks, long sessions, and final release packaging. A [Clean-PC test](sunshine-pc/docs/clean-pc-test-2026-10-19.md) passes for the private `0.1.0.20261019` package on a second Windows PC without development tools, including picture, sound, controls and a saved Shine after restart. Gelato's mirror route is deferred. Diagnostic loading of 91 later-world scenarios is recorded separately in [world-load coverage](sunshine-pc/docs/world-load-coverage.tsv); it does not establish normal mission completion.
 
 The graphics are generated from recorded evidence, not live test runs. [Sources and regeneration](sunshine-pc/docs/img/README.md).
+
+### Implemented gameplay features
+
+The [feature catalogue](sunshine-pc/docs/gameplay-features.tsv) tracks gameplay mechanics and systems separately from release checks and binary matching. "Implemented / observed" means normal native play has demonstrated the recorded behavior; each entry states its evidence and limits. Partial or unverified entries still need acceptance evidence and do not imply missing code.
+
+![Gameplay features: counts of systems observed working with bounded implementation evidence, partially verified systems and systems not yet verified.](sunshine-pc/docs/img/features.svg)
+
+This is a curated list of tracked systems, not a count of C++ functions or a percentage of the game completed. Update the catalogue as normal-play evidence grows, then [regenerate the graphics](sunshine-pc/docs/img/README.md#regenerate).
 
 ## Build from source
 
