@@ -1,6 +1,6 @@
 # Normal Pinna milestone
 
-Pinna entry, Mecha Bowser completion and its saved/cold-reloaded Shine remain **open**. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat.
+Pinna entry, Mecha Bowser completion and its saved/cold-reloaded Shine remain **open**. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains nine earned Shines.
 
 ## Earned prerequisites (2026-10-19)
 
@@ -8,6 +8,10 @@ Start from `nw91_gelato_early_takeoff`, the normal six-Shine File B documented i
 
 1. `pc_delfino_crates_first_unassisted.dev`, accepted private `pn12_crate_first`: rc0/149.44s, ten crates broken with 7.35 seconds left, ordinary Shine94 collection/save/plaza return, health8, empty crash log and no active cheats. Latest File B write9 has seven Shines: IDs0/1/10/20/86/94/117. All seven GCI sector checksums pass; SHA-256 `fe7f0b046a47cbea85302ce00c41bfbf9805450014c87536db0796628927edcd`.
 2. `pc_delfino_crates_second_unassisted.dev`, accepted private `pn14_crate_second`, seeded from that saved result: rc0/146.35s, ten crates broken with 10.59 seconds left, ordinary Shine95 collection/save/plaza return, health8, empty crash log and no active cheats. Latest File B write10 has eight Shines: IDs0/1/10/20/86/94/95/117. All seven GCI sector checksums pass; SHA-256 `cfcee4186e7e85c998e8fd1831cfcc69f4de588e7aa7db6cff04bc0f03c8105c`.
+
+3. `pc_delfino_chuckster_unassisted.dev`, accepted private `pn24_chuckster` from `pn20_blue_main`: rc0/155.39s, ordinary paid rooftop Pianta throw, Shine98 collection/save/plaza return, health8, empty crash log and no active cheats. The original nine yellow sewer coins fund the one-coin payment (9 to8); the NPC controls the throw. Latest File B write13 has nine Shines: IDs0/1/10/20/86/94/95/98/117. All seven sector checksums pass; GCI SHA-256 `acf58dfc4fe2d9994950a308e00f1ca41f0dc8fa9ae01445a764f6b1196c57a9`. Accepted private route SHA-256 `cce701f07d522a3effc29df4246ae1982c855bb74b563b205715a7d56ee2741f`; public commands match exactly, with comments changed.
+
+The initial normal-menu section of `pn25_coins` independently cold-loads all nine Shines, including flag0x10062, with the same GCI hash. Its later coin/boat traversal is a separate, unverified result.
 
 The second run cold-loads the first reward through normal menus. The next private roof trial `pn15_roof` independently cold-loads all eight Shines before its unverified traversal; that initial load is evidence for the saved second reward only.
 
@@ -30,8 +34,20 @@ Earlier private failures remain preserved: canal/door geometry, insufficient jum
 
 ## Bounded sewer blue-coin route
 
-`pc_delfino_sewer_blues_unassisted.dev` is accepted as private `pn20_blue_main` from `pn14_crate_second`: rc0/162.40s, flags0x10089/0x10088 through ordinary collection/save prompts, normal sewer-cover exit, health8, empty crash log and no active cheats. The two blue coins do not increase the Shine count. Latest File B write12 retains all eight Shines; all seven sector checksums pass, GCI SHA-256 `b5af285dbdab4015840ebec0b61d8e5e78d052ae247328c256f1db0dfad4425a`. Accepted private route SHA-256 `8488a532492b500d59343de65a9a2fd8cd67956a822855a76f398af1b786923b`. Its public executable commands are identical; comments differ. An independent cold proof of the two blue flags remains pending.
+`pc_delfino_sewer_blues_unassisted.dev` is accepted as private `pn20_blue_main` from `pn14_crate_second`: rc0/162.40s, flags0x10089/0x10088 through ordinary collection/save prompts, normal sewer-cover exit, health8, empty crash log and no active cheats. The two blue coins do not increase the Shine count. Latest File B write12 retains all eight Shines; all seven sector checksums pass, GCI SHA-256 `b5af285dbdab4015840ebec0b61d8e5e78d052ae247328c256f1db0dfad4425a`. Accepted private route SHA-256 `8488a532492b500d59343de65a9a2fd8cd67956a822855a76f398af1b786923b`. Its public executable commands are identical; comments differ. The initial normal-menu section of private `pn21_chuckster` independently cold-loads both blue flags and the unchanged eight-Shine GCI before its later, unsuccessful NPC-talk attempt. That subsequent failure does not certify the roof reward.
 
 ```powershell
 python tools/route.py Strict tools/routes/pc_delfino_sewer_blues_unassisted.dev --name <blues> --appdata-from <second> --seconds 600
+```
+
+## Paid tower throw
+
+The original Aloha Pianta stands near(-3621,2272,-3734), fixed yaw124. His ordinary talk script takes one yellow coin and schedules the original throw toward the tower window and Shine98. This uses the game's NPC interaction; the route never sets a throw vector or actor velocity.
+
+The controller route reuses the west sewer's original spring floor and a Hover flight to the east eave. Three neutral frames before a fresh L press let the original Hover-fall transition finish, so ground pound actually brakes the flight. A second normal jump/Hover reaches the crate-house roof. Primary nozzle is selected before a wide approach around the Pianta's collision cylinder; a brief planted spray brakes Mario, and ordinary B/A starts and accepts the paid talk.
+
+Earlier direct-window and talk attempts remain preserved as `pn15_roof`, `pn16_roof`, `pn18_roof_stop`, `pn19_roof`, `pn21_chuckster`, `pn22_chuckster` and `pn23_chuckster`. They establish flight/stop behavior or fail their later checks; they are not Shine-route passes. Source and actual logs explain the sloped-roof momentum, collider separation, three-dimensional talk cone, WAIT-state requirement and window-lintel contact. No game-code correction or undefined-behavior claim is made.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_delfino_chuckster_unassisted.dev --name <throw> --appdata-from <blues> --seconds 600
 ```

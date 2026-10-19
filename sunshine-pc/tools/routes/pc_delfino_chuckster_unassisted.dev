@@ -1,0 +1,142 @@
+# Earn normal Delfino Shine98 using the original paid rooftop Pianta throw.
+# Seed and accepted input/save evidence: docs/pinna-normal-route.md.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10088 timeout=1
+waitfor flag=0x10089 timeout=1
+log
+shot cold_gelato_six_shines.png
+wait frames=30
+# Ordinary approach to the crate-game street warp.
+walkto x=-3500 z=2500 radius=80 timeout=1200
+walkto x=-3500 z=0 radius=80 timeout=900
+walkto x=-2500 z=-700 radius=40 timeout=600
+hold X frames=1
+wait frames=20
+faceto x=-2500 z=-3000 tol=3 timeout=180
+walkto x=-2500 z=-3000 radius=80 jump=12 spray=15 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+log
+shot crate_canal_crossed.png
+waitfor marioy>=680 timeout=1
+walkto x=-2500 z=-4000 radius=50 timeout=600
+walkto x=-2800 z=-5500 radius=40 timeout=600
+walkto x=-2440 z=-5500 radius=30 timeout=600
+walkto x=-2440 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-5500 radius=30 timeout=600
+walkto x=-6200 z=-5500 radius=30 timeout=600
+walkto x=-6200 z=-6200 radius=30 timeout=600
+walkto x=-6750 z=-6200 radius=30 timeout=600
+walkto x=-6750 z=-6502 radius=30 timeout=600
+walkto x=-6537 z=-6502 radius=30 timeout=600
+log
+shot northwest_street_cover.png
+wait frames=30
+# NW street cover0 at (-6537,300,-6502); canal crossing returned to primary nozzle.
+# Western sewer is isolated from spawn/east sewers; do not start below spawn cover3.
+# All position/flag commands below are read-only conditions or controller steering.
+walkto x=-6537 z=-6502 radius=8 timeout=180
+wait frames=30
+hold L frames=30
+hold A frames=4
+wait frames=8
+hold L frames=20
+wait frames=100
+waitfor marioy<=-900 timeout=120
+log
+shot shine98_west_sewer.png
+# Exact solid sewer path: cover0 and roof cover11 share the straight west shaft.
+walkto x=-6533 z=-267 radius=8 timeout=1200
+wait frames=30
+# Face the flight bearing while still grounded; do not spend the boost turning 164 degrees.
+faceto x=-6050 z=-2000 tol=2 timeout=180
+wait frames=30
+waitfor marioy<=-1200 timeout=1
+# Ordinary X selects Hover from the assumed primary nozzle; no progress unlock needed.
+hold X frames=1
+wait frames=20
+trace frames=1200
+# Original bg0x108/data19000 floor supplies vY190. Keep A held through the shaft.
+# Hover then replaces the boost velocity with a normal +230 height target.
+hold A until marioy>=2780 timeout=120
+walkto x=-6050 z=-2000 radius=35 spray=1 hover=1 timeout=300
+# Normal ground pound brakes drift and lands on the outer east eave, solid y2709.8.
+# Release Hover before a fresh L press; Rocket state ignores back-trigger input.
+wait frames=3
+hold L frames=1
+waitfor marioy<=2760 timeout=180
+wait frames=30
+log
+shot shine98_east_eave.png
+waitfor marioy>=2670 timeout=1
+# Hover remains selected. Face then immediately jump off the eave; no slope idle.
+# Static line to the crate-house roof is clear above2750; landing floor2050.
+faceto x=-4000 z=-3150 tol=3 timeout=120
+walkto x=-4000 z=-3150 radius=35 jump=12 spray=15 hover=1 timeout=300
+wait frames=3
+hold L frames=1
+waitfor marioy<=2100 timeout=180
+wait frames=24
+waitfor marioy>=2000 timeout=1
+log
+shot chuckster_roof_landing.png
+# Approach around the Pianta's body, within his three-dimensional talk cone.
+hold X frames=1
+walkto x=-3200 z=-3150 radius=35 timeout=240
+walkto x=-3200 z=-3800 radius=35 timeout=240
+walkto x=-3460 z=-3785 radius=15 timeout=180
+walkto x=-3621 z=-3734 radius=85 spray=1 timeout=2 soft=1
+hold R trig=0,255 frames=2
+log
+shot chuckster_front_stopped.png
+mash B period=30 hold=2 until talk=1 timeout=180
+# Default choice0 pays one ordinary yellow coin. The fixed-yaw NPC throws after talk.
+mash A period=24 until talkbusy=0 timeout=900
+wait frames=180
+log
+shot chuckster_after_throw.png
+walkto x=-6500 z=-2000 radius=35 timeout=240
+mash A period=24 hold=8 until flag=0x10062 timeout=1200
+mash A period=30 until stage=1 dirstate=4 camDemo=0 timeout=9000
+wait frames=120
+log
+shot chuckster_shine98_saved.png
+wait frames=30
+end
