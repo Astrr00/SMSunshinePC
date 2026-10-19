@@ -1,0 +1,21 @@
+id	area	status	evidence	scope
+GF-MOVEMENT	Movement, jumps and net climbing	observed-bounded	pinna-normal-route.md#complete-normal-pirate-ship-red-coin-milestone	Normal running, jumping, wall jumps and roof crawling in the accepted Pinna3 route; not every movement state.
+GF-CAMERA	Camera control and first-person aiming	observed-bounded	pinna-normal-route.md#complete-normal-mecha-bowser-milestone	Normal coaster aiming and camera use; not every camera mode or scene.
+GF-SPRAY	FLUDD spray nozzle	observed-bounded	normal-world-routes.md	Controller-only Gatekeeper, Petey and Ricco routes exercise ordinary spraying and water use.
+GF-HOVER	FLUDD hover nozzle	observed-bounded	pinna-normal-route.md#complete-normal-pirate-ship-red-coin-milestone	Normal nozzle swaps and Hover transfers complete Pinna3; not every fuel or collision edge case.
+GF-ROCKET	FLUDD rocket nozzle	unverified	../../ROADMAP.md#open-work-in-order	No accepted normal rocket-nozzle acquisition/use milestone is recorded here; no missing-code claim.
+GF-TURBO	FLUDD turbo nozzle	unverified	../../ROADMAP.md#open-work-in-order	No accepted normal turbo-nozzle acquisition/use milestone is recorded here; no missing-code claim.
+GF-GOOP	Goop removal and collision	observed-bounded	normal-world-routes.md	Normal airport and Delfino Gatekeeper progression exercises spray removal and gameplay collision; later goop variants remain open.
+GF-COMBAT	Enemy and boss combat	observed-bounded	normal-world-routes.md; pinna-normal-route.md	Normal Gatekeeper, Petey, Gooper Blooper, Mecha Bowser and Cannon milestones; not all enemies or bosses.
+GF-OBJECTS	Grabbing, throwing and pulling	observed-bounded	pinna-normal-route.md#complete-normal-cannon-and-block-secret-milestone	Normal bomb handling and boss/object interactions; not every carryable object.
+GF-NPC	NPC dialogue and minigames	observed-bounded	pinna-normal-route.md#earned-prerequisites-2026-10-19	Normal crate games and paid Pianta throw produce saved rewards; not every NPC script.
+GF-COINS	Gold, red and blue coin rewards	observed-bounded	pinna-normal-route.md	Hundred-coin reward, two normal sewer blue coins and Pinna3 eight-red-coin reward; not all coin identities.
+GF-SHINES	Shine collection and reward flow	observed-bounded	pinna-normal-route.md#complete-normal-pirate-ship-red-coin-milestone	Thirteen distinct normally earned Shines are saved and cold loaded; not all 120 Shines.
+GF-PROGRESSION	World entry and episode selection	observed-bounded	pinna-normal-route.md	Normal earned prerequisites, cannon entry and Pinna Episodes 1–3; later progression remains open.
+GF-PLATFORMS	Moving platforms and pirate ships	observed-bounded	pinna-normal-route.md	Normal Pinna2 block secret and Pinna3 ship transfers; not every platform or mechanism.
+GF-SECRETS	FLUDD-less secret stages	observed-bounded	pinna-normal-route.md#complete-normal-cannon-and-block-secret-milestone	Normal Pinna2 secret completion and saved Shine31; other secret stages remain open.
+GF-SAVE	Card save and fresh-process load	observed-bounded	pinna-normal-route.md#complete-normal-pirate-ship-red-coin-milestone	Thirteen-Shine GCI, seven valid sector checksums and byte-identical normal cold reload; not every recovery/error path.
+GF-YOSHI	Yoshi riding and abilities	unverified	../../ROADMAP.md#open-work-in-order	No accepted normal Yoshi unlock/riding/ability route is recorded here; no missing-code claim.
+GF-DEATH	Death and restart lifecycle	partial	normal-world-routes.md; ../../ROADMAP.md#open-work-in-order	Normal death returns to Delfino are recorded; the combined transitions/death/restart/save lifecycle gate remains open.
+GF-HUD	Graphics, menus and HUD	partial	clean-pc-test-2026-10-19.md; playability-matrix.tsv	Owner-confirmed early picture and controls plus bounded rendering fixes; later scenes and full visual quality remain open.
+GF-AUDIO	Music, sound effects and movies	partial	clean-pc-test-2026-10-19.md; playability-matrix.tsv	Owner-confirmed sound on the private Clean-PC candidate; later-world/refill/death audio and full coverage remain open.

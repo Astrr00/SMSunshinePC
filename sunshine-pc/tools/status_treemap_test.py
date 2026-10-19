@@ -11,6 +11,40 @@ NS = {"s": "http://www.w3.org/2000/svg"}
 
 
 class StatusGraphicsTest(unittest.TestCase):
+    def test_feature_counts_preserve_verification_limits(self):
+        rows = [{"id": "GF-A", "area": "Spray & Hover", "status": "observed-bounded",
+                 "evidence": "route.md", "scope": "One normal route <only>"},
+                {"id": "GF-B", "area": "Audio", "status": "partial",
+                 "evidence": "audio.md", "scope": "Later scenes open"},
+                {"id": "GF-C", "area": "Yoshi", "status": "unverified",
+                 "evidence": "roadmap.md", "scope": "No normal route recorded"}]
+        root = ET.fromstring(status.feature_graphic(rows))
+        description = root.find("s:desc", NS).text
+        self.assertIn("1 of 3 tracked systems", description)
+        self.assertIn("1 partially verified; 1 not yet verified", description)
+        self.assertIn("Unverified does not mean unimplemented", description)
+        self.assertIn("Spray & Hover", [n.text for n in root.findall(".//s:text", NS)])
+        self.assertIn("One normal route <only>", root.find("s:g/s:title", NS).text)
+        for key in ("evidence", "scope"):
+            with self.subTest(key=key):
+                invalid = [dict(rows[0], **{key: ""})]
+                with self.assertRaises(ValueError):
+                    status.feature_graphic(invalid)
+
+    def test_feature_catalogue_has_unique_ids_and_existing_sources(self):
+        path = status.ROOT / "sunshine-pc/docs/gameplay-features.tsv"
+        rows = status.port_rows(path, status.FEATURE_STATES)
+        self.assertGreater(len(rows), 0)
+        for row in rows:
+            for reference in row["evidence"].split(";"):
+                with self.subTest(feature=row["id"], reference=reference):
+                    self.assertTrue((path.parent / reference.strip().split("#", 1)[0]).is_file())
+        with tempfile.TemporaryDirectory() as directory:
+            invalid = Path(directory) / "features.tsv"
+            invalid.write_text("id\tarea\tstatus\nGF-A\tJump\timplemented\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                status.port_rows(invalid, status.FEATURE_STATES)
+
     def test_matrix_rejects_misleading_counts(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "matrix.tsv"
