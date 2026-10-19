@@ -27,3 +27,11 @@ python tools/route.py Strict tools/routes/pc_delfino_crates_second_unassisted.de
 The crate-room approach crosses the canal at x-2500 and enters the street opening at z-5500. A normal circle-stick spin jump is followed by facing the next crate before takeoff. Every layer of the second game's stacked columns receives its own jump/ground pound. Early braking before the reward prevents overshooting its pickup volume.
 
 Earlier private failures remain preserved: canal/door geometry, insufficient jump height, spin-facing errors, collection overshoot and the second layout's unbroken lower layers. They timed out without a nonempty crash log. No undefined-behavior cause is asserted. These routes write only ordinary PAD inputs; conditions, actor lookup and logs observe state. No teleport, developer stage start, automatic boss aiming, cheat, save/progress edit or movie/timing override is used. Quarter-scale muted WARP runs are functional evidence, not image-quality, listening or physical-controller checks.
+
+## Bounded sewer blue-coin route
+
+`pc_delfino_sewer_blues_unassisted.dev` is accepted as private `pn20_blue_main` from `pn14_crate_second`: rc0/162.40s, flags0x10089/0x10088 through ordinary collection/save prompts, normal sewer-cover exit, health8, empty crash log and no active cheats. The two blue coins do not increase the Shine count. Latest File B write12 retains all eight Shines; all seven sector checksums pass, GCI SHA-256 `b5af285dbdab4015840ebec0b61d8e5e78d052ae247328c256f1db0dfad4425a`. Accepted private route SHA-256 `8488a532492b500d59343de65a9a2fd8cd67956a822855a76f398af1b786923b`. Its public executable commands are identical; comments differ. An independent cold proof of the two blue flags remains pending.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_delfino_sewer_blues_unassisted.dev --name <blues> --appdata-from <second> --seconds 600
+```
