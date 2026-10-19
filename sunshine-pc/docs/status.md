@@ -17,6 +17,14 @@ Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards 
 
 Entries below retain their original test scope and historical open items. Their dates matter: older claims that Ricco/Gooper or sandcastle completion is still pending are superseded by the accepted routes above. Historical headings do not override the current queue.
 
+**Delfino news holder lookup (2026-10-19).** The scenario1 news selector now reads Peach's typed holder instead of collision count/capacity at the fixed PPC offset0x68.
+The complete isolated selector passes 37 checks (four old-source failures), preserving the other tested arrays and reset behavior.
+Strict0, 68 port checks, unchanged PPC report measures and byte-identical object pass; symbol validation retains four inherited UNUSED-size warnings.
+Normal Gatekeeper/Shadow Mario defeat and completed dialogue pass in `pa11_telop_holder` (rc0/512s, health8 at end/min1, unchanged earned one-Shine save, crash0/no cheats).
+Read-only native observation confirms held/unheld Peach states while the old collision word stays131072; the final requested screenshot is absent at script exit, so final-state evidence is log-based.
+Evidence and test limits: [telop-holder-host-layout.md](telop-holder-host-layout.md).
+The matrix remains 16 passed-bounded, 8 open and 1 external check; mirrors remain deferred.
+
 **PC FLUDD full-tank notification (2026-10-19).** HUD initialization now uses the real nozzle-capacity parameter rather than pointer metadata at PPC offset0xCC. The extracted cache expression and full gauge-update helper pass 25 checks (six old-source failures), suppressing a false initial refill-sound request while preserving subsequent fill, alpha and sound-gate behavior. Strict0, 68 port checks, byte-identical PPC object and symbol validation pass. Normal consumption/sea-refill smoke `pa10b_water_gauge` passes (rc0/65 s, water10000 to9816 to10000, health8, crash0/no cheats, unchanged earned save). Audible startup/refill behavior remains unverified. Evidence: [water-gauge-host-layout.md](water-gauge-host-layout.md). Mirrors remain deferred; matrix statuses stay 16/25.
 
 **PC slide-direction initialization (2026-10-19).** `slideProcess` now initializes the relative facing angle used for signed speed when tiny motion skips heading adjustment. The complete extracted routine improves from five failures to 35/35 PASS. Strict0, 68 port checks and byte-identical PPC object pass; baseline-aware symbol validation finds zero new errors and one inherited unused-symbol error. Normal Delfino smoke `pa09_normal_slide` passes two dive/slide/stop/jump cycles (rc0/72 s, health8, finite motion, crash0/no cheats, unchanged earned save). The exact tiny-speed branch remains unobserved in native play. Evidence and limits: [slide-direction-initialization.md](slide-direction-initialization.md). Mirrors remain deferred; matrix statuses stay 16/25.

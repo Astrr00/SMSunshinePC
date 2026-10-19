@@ -21,6 +21,7 @@
 #include <System/MarDirector.hpp>
 #ifdef TARGET_PC
 #include <System/Resolution.hpp>
+#include <Strategic/TakeActor.hpp>
 #endif
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <JSystem/JKernel/JKRFileLoader.hpp>
@@ -3528,7 +3529,12 @@ void TGCConsole2::checkChangeTelopArray()
 			unk570 = scDolpicNewsDolpic0;
 			break;
 		case 1:
+#ifdef TARGET_PC
+			// The PPC holder offset selects collision counts in the host layout.
+			if (((TTakeActor*)unkC4)->getHolder() != nullptr)
+#else
 			if (*(u32*)((u8*)unkC4 + 0x68) != 0)
+#endif
 				unk570 = scDolpicNewsDolpic1;
 			else
 				unk570 = nullptr;
