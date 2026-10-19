@@ -62,6 +62,10 @@ public:
 class TSpcSlice {
 public:
 	/* 0x0 */ u32 mType;
+#ifdef TARGET_PC
+	// Uses the host padding before mData; ordinary script ints stay 32-bit.
+	bool mHostPointer;
+#endif
 	/* 0x4 */ union {
 #ifdef TARGET_PC
 		// Script ints are also how native calls hand object addresses to the
@@ -80,6 +84,9 @@ public:
 
 	TSpcSlice()
 	    : mType(TYPE_INT)
+#ifdef TARGET_PC
+	    , mHostPointer(false)
+#endif
 	{
 #ifdef TARGET_PC
 		mData.asInt = 0;
@@ -90,6 +97,9 @@ public:
 
 	TSpcSlice(int value)
 	    : mType(TYPE_INT)
+#ifdef TARGET_PC
+	    , mHostPointer(false)
+#endif
 	{
 #ifdef TARGET_PC
 		mData.asInt = value;
@@ -100,12 +110,18 @@ public:
 
 	TSpcSlice(f32 value)
 	    : mType(TYPE_FLOAT)
+#ifdef TARGET_PC
+	    , mHostPointer(false)
+#endif
 	{
 		(float&)mData = value;
 	}
 
 	TSpcSlice(const char* value)
 	    : mType(TYPE_STRING)
+#ifdef TARGET_PC
+	    , mHostPointer(false)
+#endif
 	{
 		if (!value)
 			mData.asString = "";
@@ -133,6 +149,11 @@ public:
 	}
 
 #ifdef TARGET_PC
+	intptr_t getDataIntForComparison() const
+	{
+		return mHostPointer ? mData.asInt : getDataInt();
+	}
+
 	// The address a native call pushed with TSpcInterp::push(void*).
 	void* getDataPtr() const
 	{
@@ -161,18 +182,27 @@ public:
 
 	void setDataInt(int i)
 	{
+#ifdef TARGET_PC
+		mHostPointer = false;
+#endif
 		mData.asInt = i;
 		mType       = TYPE_INT;
 	}
 
 	void setDataFloat(f32 f)
 	{
+#ifdef TARGET_PC
+		mHostPointer = false;
+#endif
 		mType         = TYPE_FLOAT;
 		mData.asFloat = f;
 	}
 
 	void setDataString(const char* s)
 	{
+#ifdef TARGET_PC
+		mHostPointer = false;
+#endif
 		mType = TYPE_STRING;
 		if (!s)
 			mData.asString = "";
@@ -251,10 +281,15 @@ public:
 			else
 				return false;
 		} else {
+#ifdef TARGET_PC
+			return getDataIntForComparison()
+			       == other.getDataIntForComparison();
+#else
 			if (getDataInt() == other.getDataInt())
 				return true;
 			else
 				return false;
+#endif
 		}
 	}
 	BOOL operator!=(const TSpcSlice& other) const
@@ -270,10 +305,15 @@ public:
 			else
 				return false;
 		} else {
+#ifdef TARGET_PC
+			return getDataIntForComparison()
+			       != other.getDataIntForComparison();
+#else
 			if (getDataInt() != other.getDataInt())
 				return true;
 			else
 				return false;
+#endif
 		}
 	}
 
@@ -288,7 +328,12 @@ public:
 		if (a.mType == TYPE_FLOAT || b.mType == TYPE_FLOAT)
 			return (float)a > (float)b ? TRUE : FALSE;
 		else
+#ifdef TARGET_PC
+			return a.getDataIntForComparison() > b.getDataIntForComparison()
+			           ? TRUE : FALSE;
+#else
 			return (int)a > (int)b ? TRUE : FALSE;
+#endif
 	}
 
 	friend BOOL operator<(const TSpcSlice& a, const TSpcSlice& b)
@@ -296,7 +341,12 @@ public:
 		if (a.mType == TYPE_FLOAT || b.mType == TYPE_FLOAT)
 			return (float)a < (float)b ? TRUE : FALSE;
 		else
+#ifdef TARGET_PC
+			return a.getDataIntForComparison() < b.getDataIntForComparison()
+			           ? TRUE : FALSE;
+#else
 			return (int)a < (int)b ? TRUE : FALSE;
+#endif
 	}
 
 	friend BOOL operator>=(const TSpcSlice& a, const TSpcSlice& b)
@@ -304,7 +354,12 @@ public:
 		if (a.mType == TYPE_FLOAT || b.mType == TYPE_FLOAT)
 			return (float)a >= (float)b ? TRUE : FALSE;
 		else
+#ifdef TARGET_PC
+			return a.getDataIntForComparison() >= b.getDataIntForComparison()
+			           ? TRUE : FALSE;
+#else
 			return (int)a >= (int)b ? TRUE : FALSE;
+#endif
 	}
 
 	friend BOOL operator<=(const TSpcSlice& a, const TSpcSlice& b)
@@ -312,7 +367,12 @@ public:
 		if (a.mType == TYPE_FLOAT || b.mType == TYPE_FLOAT)
 			return (float)a <= (float)b ? TRUE : FALSE;
 		else
+#ifdef TARGET_PC
+			return a.getDataIntForComparison() <= b.getDataIntForComparison()
+			           ? TRUE : FALSE;
+#else
 			return (int)a <= (int)b ? TRUE : FALSE;
+#endif
 	}
 };
 
@@ -529,6 +589,7 @@ public:
 	{
 		TSpcSlice slice;
 		slice.mData.asInt = (intptr_t)p;
+		slice.mHostPointer = true;
 		mProcessStack.push(slice);
 	}
 #endif

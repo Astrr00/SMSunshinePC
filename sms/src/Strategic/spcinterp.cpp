@@ -424,21 +424,35 @@ void TSpcInterp::execneg()
 void TSpcInterp::execnot()
 {
 	TSpcSlice slice = mProcessStack.pop();
+#ifdef TARGET_PC
+	push(slice.getDataIntForComparison() == 0 ? 1 : 0);
+#else
 	push(slice.getDataInt() == 0 ? 1 : 0);
+#endif
 }
 
 void TSpcInterp::execand()
 {
 	TSpcSlice arg2 = mProcessStack.pop();
 	TSpcSlice arg1 = mProcessStack.pop();
+#ifdef TARGET_PC
+	push(arg1.getDataIntForComparison() != 0
+	             && arg2.getDataIntForComparison() != 0 ? 1 : 0);
+#else
 	push(arg1.getDataInt() != 0 && arg2.getDataInt() != 0 ? 1 : 0);
+#endif
 }
 
 void TSpcInterp::execor()
 {
 	TSpcSlice arg2 = mProcessStack.pop();
 	TSpcSlice arg1 = mProcessStack.pop();
+#ifdef TARGET_PC
+	push(arg1.getDataIntForComparison() != 0
+	             || arg2.getDataIntForComparison() != 0 ? 1 : 0);
+#else
 	push(arg1.getDataInt() != 0 || arg2.getDataInt() != 0 ? 1 : 0);
+#endif
 }
 
 void TSpcInterp::execband()
@@ -533,7 +547,11 @@ void TSpcInterp::execret0()
 void TSpcInterp::execjne()
 {
 	u32 arg1 = fetchU32();
+#ifdef TARGET_PC
+	if (!pop().getDataIntForComparison())
+#else
 	if (!pop().getDataInt())
+#endif
 		mProgramCounter = arg1;
 }
 
