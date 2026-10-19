@@ -1,0 +1,61 @@
+# Normal earned six-Shine File B: enter the beach sewer and collect its fixed 1-up.
+# Cold File B proof: six earned Shines, Gelato unlock and saved Shine20.
+# Cold normal menu load of the earned four-Shine File B; require the saved Gooper reward.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10014 timeout=1
+log
+shot cold_gelato_six_shines.png
+wait frames=30
+# Ordinary approach to the beach sewer cover and fixed underground 1-up.
+walkto x=7000 z=6000 radius=100 timeout=1500
+walkto x=9000 z=2500 radius=100 timeout=1200
+walkto x=8395 z=436 radius=15 timeout=900
+wait frames=30
+walkto x=8395 z=436 radius=8 timeout=120
+hold L frames=30
+log
+shot oneup_cover.png
+hold A frames=4
+wait frames=8
+hold L frames=20
+wait frames=100
+waitfor marioy<=-900 timeout=120
+log
+shot oneup_below_cover.png
+walkto x=8395 z=-577 radius=30 timeout=450
+walkto x=8095 z=-577 radius=15 timeout=450
+wait frames=150
+log
+shot oneup_contact.png
+end

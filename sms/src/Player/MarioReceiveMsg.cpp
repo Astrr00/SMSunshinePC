@@ -7,6 +7,7 @@
 #include <Map/MapWire.hpp>
 #include <Map/MapWireManager.hpp>
 #include <MoveBG/MapObjManager.hpp>
+#include <MoveBG/MapObjItem2.hpp>
 #include <MarioUtil/MathUtil.hpp>
 #include <Strategic/HitActor.hpp>
 #include <System/EmitterViewObj.hpp>
@@ -206,10 +207,11 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 			break;
 		case 0x20000005:
 		case 0x20000006:
-		case 0x20000007: // collectible fruit
+		case 0x20000007: // 1-up mushrooms
 			if (message == HIT_MESSAGE_ATTACK) {
-				if (*(s8*)((u8*)sender + 0x13A) != 0
-				    || !(*(s32*)((u8*)sender + 0x13C) < 120 ? true : false)) {
+				if (static_cast<TMushroom1up*>(sender)->unk13A != 0
+				    || !(static_cast<TMushroom1up*>(sender)->unk13C < 120 ? true
+				                                                          : false)) {
 					mHealth = mDeParams.mHpMax.get();
 					if (checkFlag(MARIO_FLAG_HAS_FLUDD)) {
 						mWaterGun->addWater(mWaterGun->getMaxWater());
@@ -249,13 +251,14 @@ BOOL TMario::receiveMessage(THitActor* sender, u32 message)
 		case 0x20000010: // blue coin
 			getCoinBlue();
 			return TRUE;
-		case 0x20000013: // 1-up shroom / pickup-action
+		case 0x20000013: // Shine pickup
 			if (message == HIT_MESSAGE_ATTACK
 			    && mStatus != MARIO_STATUS_WIN_DEMO) {
 				unk384          = sender;
 				mPosition.x     = sender->mPosition.x;
 				mPosition.z     = sender->mPosition.z;
-				mFaceAngle.y    = DEG2SHORTANGLE(*(f32*)((u8*)sender + 0x11C));
+				mFaceAngle.y = DEG2SHORTANGLE(
+				    static_cast<TMapObjBase*>(sender)->mInitialRotation.y);
 				mModelFaceAngle = mFaceAngle.y;
 				setPlayerVelocity(0.0f);
 				mHealth = mDeParams.mHpMax.get();
