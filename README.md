@@ -10,9 +10,9 @@ A native Windows x86-64 port of the Japanese GameCube release (**GMSJ01**), buil
 
 Normal controller-input routes have verified the airport, Delfino Gatekeeper and Shadow Mario, Petey Piranha, Gooper Blooper, and Gelato's sandcastle mission. Six earned Shines have been saved and independently reloaded in a fresh process. These are bounded route results, not proof that every mission works. See the [normal world route evidence](sunshine-pc/docs/normal-world-routes.md) and [acceptance matrix](sunshine-pc/docs/playability-matrix.tsv).
 
-![Playability: 16 checks passed with bounded evidence, 8 open, and 1 requiring an external check. These counts do not measure overall completion.](sunshine-pc/docs/img/status.svg)
+![Playability: 17 checks passed with bounded evidence, 8 open, and 0 requiring an external check. These counts do not measure overall completion.](sunshine-pc/docs/img/status.svg)
 
-Current work targets confirmed defects in shared gameplay code. Remaining acceptance includes normal progression through later worlds, all missions and collectibles, audio and graphics checks, long sessions, and a clean Windows package. Gelato's mirror route is deferred. Diagnostic loading of 91 later-world scenarios is recorded separately in [world-load coverage](sunshine-pc/docs/world-load-coverage.tsv); it does not establish normal mission completion.
+Current work targets confirmed defects in shared gameplay code. Remaining acceptance includes normal progression through later worlds, all missions and collectibles, later-scene audio and graphics checks, long sessions, and final release packaging. A [Clean-PC test](sunshine-pc/docs/clean-pc-test-2026-10-19.md) passes for the private `0.1.0.20261019` package on a second Windows PC without development tools, including picture, sound, controls and a saved Shine after restart. Gelato's mirror route is deferred. Diagnostic loading of 91 later-world scenarios is recorded separately in [world-load coverage](sunshine-pc/docs/world-load-coverage.tsv); it does not establish normal mission completion.
 
 The graphics are generated from recorded evidence, not live test runs. [Sources and regeneration](sunshine-pc/docs/img/README.md).
 

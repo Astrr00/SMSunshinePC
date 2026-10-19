@@ -4,12 +4,12 @@ Output: `sunshine-pc/dist/sunshine-<version>.zip` plus `.sha256`. Installation-f
 
 ## Remaining release gates (reviewed 2026-10-19)
 
-v0.1.0 remains a draft. The dated package results below are historical evidence, not acceptance of the latest source. The [roadmap](../../ROADMAP.md#open-work-in-order) defines the outstanding gameplay work; this checklist covers the exact release candidate after that work is accepted.
+v0.1.0 remains a draft. The private `0.1.0.20261019` snapshot passes the [external Clean-PC test](clean-pc-test-2026-10-19.md), including owner-confirmed picture, sound, controls and saved Shine after restart. This accepts that bounded test, not final release readiness. Other dated package results below remain historical evidence. The [roadmap](../../ROADMAP.md#open-work-in-order) defines the outstanding gameplay work; this checklist covers the exact release candidate after that work is accepted.
 
 1. Record the accepted source commit, applied Aurora patch set and Release executable hash; refresh the candidate rather than reusing an old ZIP.
 2. Verify packaging exclusions, complete notices/runtime dependencies, ZIP checksum and an unpacked smoke outside the checkout.
 3. Resolve the existing Microsoft runtime entitlement/compliance and signed-DXIL provenance items in [third-party licences](../THIRD_PARTY_LICENSES.md).
-4. Test the exact archive on suitable Windows 10/11 without development tools; record hardware, startup, gameplay, save/cold load and normal quit. A second folder on the development host is not this test.
+4. Retain the passed exact-archive Clean-PC evidence for private candidate `0.1.0.20261019`; refresh it for a changed final archive on suitable Windows 10/11 without development tools. Record hardware, startup, gameplay, save/cold load and normal quit. A second folder on the development host is not this test.
 5. Keep the release draft until the required acceptance gates pass and the owner explicitly says **"Ja"** to publication. Committing and pushing verified source does not publish the release.
 
 Commands below run from the repository root in a VS 2022 x64 developer environment, with clang-cl, CMake and Ninja on PATH. `--llvm-bin` names the directory containing `llvm-readobj.exe`.

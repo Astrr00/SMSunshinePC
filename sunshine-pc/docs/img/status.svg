@@ -1,18 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="861" viewBox="0 0 1000 861" role="img" aria-labelledby="title desc" font-family="Segoe UI,Arial,sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="785" viewBox="0 0 1000 785" role="img" aria-labelledby="title desc" font-family="Segoe UI,Arial,sans-serif">
 <title id="title">Windows port playability evidence</title>
-<desc id="desc">16 of 25 checks passed with bounded evidence; 8 open and 1 requiring an external check. Not overall completion.</desc>
-<rect x="0.00" y="0.00" width="1000.00" height="861.00" rx="16" fill="#101b2a" />
+<desc id="desc">17 of 25 checks passed with bounded evidence; 8 open and 0 requiring an external check. Not overall completion.</desc>
+<rect x="0.00" y="0.00" width="1000.00" height="785.00" rx="16" fill="#101b2a" />
 <text x="32" y="42" font-size="14" font-weight="700" fill="#5fd5b2">SUNSHINE / WINDOWS PORT</text>
 <text x="32" y="87" font-size="36" font-weight="700" fill="#f3f7fb">Playability evidence</text>
 <text x="32" y="118" font-size="19" font-weight="400" fill="#b9cbdc">A complete, unassisted playthrough is still open.</text>
 <rect x="32.00" y="146.00" width="304.00" height="116.00" rx="12" fill="#19283a" />
-<text x="52" y="205" font-size="48" font-weight="700" fill="#5fd5b2">16</text>
+<text x="52" y="205" font-size="48" font-weight="700" fill="#5fd5b2">17</text>
 <text x="52" y="239" font-size="17" font-weight="400" fill="#b9cbdc">Passed with bounded evidence</text>
 <rect x="348.00" y="146.00" width="304.00" height="116.00" rx="12" fill="#19283a" />
 <text x="368" y="205" font-size="48" font-weight="700" fill="#ffb181">8</text>
 <text x="368" y="239" font-size="17" font-weight="400" fill="#b9cbdc">Open acceptance checks</text>
 <rect x="664.00" y="146.00" width="304.00" height="116.00" rx="12" fill="#19283a" />
-<text x="684" y="205" font-size="48" font-weight="700" fill="#f0d47b">1</text>
+<text x="684" y="205" font-size="48" font-weight="700" fill="#f0d47b">0</text>
 <text x="684" y="239" font-size="17" font-weight="400" fill="#b9cbdc">External check required</text>
 <g><title>PC-BASE: Current-source build and regression baseline — passed-bounded</title><rect x="32.00" y="282.00" width="34.44" height="10.00" rx="3" fill="#5fd5b2" /></g>
 <g><title>PC-ISO: Isolated current-source build — passed-bounded</title><rect x="69.44" y="282.00" width="34.44" height="10.00" rx="3" fill="#5fd5b2" /></g>
@@ -30,15 +30,15 @@
 <g><title>PC-SHINE-VOLUME: Original map1 shine-shadow volume — passed-bounded</title><rect x="518.72" y="282.00" width="34.44" height="10.00" rx="3" fill="#5fd5b2" /></g>
 <g><title>PC-INPUT: Keyboard and physical controller — passed-bounded</title><rect x="556.16" y="282.00" width="34.44" height="10.00" rx="3" fill="#5fd5b2" /></g>
 <g><title>PC-TIMING: Original game speed and tick rate — passed-bounded</title><rect x="593.60" y="282.00" width="34.44" height="10.00" rx="3" fill="#5fd5b2" /></g>
-<g><title>PC-CORE: Shared gameplay correctness — open</title><rect x="631.04" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-RUN: Connected normal playthrough — open</title><rect x="668.48" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-CONTENT: All original missions and collectibles — open</title><rect x="705.92" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-GRAPHICS: Graphics, water, effects and menus — open</title><rect x="743.36" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-AUDIO: Music, effects and movie audio — open</title><rect x="780.80" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-STABILITY: Long session and lifecycle — open</title><rect x="818.24" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-PACKAGE: Versioned package and licences — open</title><rect x="855.68" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-PUBLISH: Evidence and GitHub synchronisation — open</title><rect x="893.12" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
-<g><title>PC-CLEANPC: Windows without development tools — external-check-required</title><rect x="930.56" y="282.00" width="34.44" height="10.00" rx="3" fill="#f0d47b" /></g>
+<g><title>PC-CLEANPC: Windows without development tools — passed-bounded</title><rect x="631.04" y="282.00" width="34.44" height="10.00" rx="3" fill="#5fd5b2" /></g>
+<g><title>PC-CORE: Shared gameplay correctness — open</title><rect x="668.48" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
+<g><title>PC-RUN: Connected normal playthrough — open</title><rect x="705.92" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
+<g><title>PC-CONTENT: All original missions and collectibles — open</title><rect x="743.36" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
+<g><title>PC-GRAPHICS: Graphics, water, effects and menus — open</title><rect x="780.80" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
+<g><title>PC-AUDIO: Music, effects and movie audio — open</title><rect x="818.24" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
+<g><title>PC-STABILITY: Long session and lifecycle — open</title><rect x="855.68" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
+<g><title>PC-PACKAGE: Versioned package and licences — open</title><rect x="893.12" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
+<g><title>PC-PUBLISH: Evidence and GitHub synchronisation — open</title><rect x="930.56" y="282.00" width="34.44" height="10.00" rx="3" fill="#ffb181" /></g>
 <text x="32" y="322" font-size="17" font-weight="400" fill="#b9cbdc">25 checks with unequal scope. This is not a completion percentage.</text>
 <text x="32" y="369" font-size="23" font-weight="700" fill="#f3f7fb">Still to verify</text>
 <rect x="32.00" y="388.00" width="456.00" height="74.00" rx="10" fill="#19283a" />
@@ -65,8 +65,5 @@
 <rect x="512.00" y="646.00" width="456.00" height="74.00" rx="10" fill="#19283a" />
 <text x="528" y="669" font-size="12" font-weight="700" fill="#ffb181">PC-PUBLISH</text>
 <text x="528" y="693" font-size="17" font-weight="400" fill="#f3f7fb">Evidence and GitHub synchronisation</text>
-<rect x="32.00" y="737.00" width="936.00" height="62.00" rx="10" fill="#19283a" />
-<text x="48" y="762" font-size="12" font-weight="700" fill="#f0d47b">PC-CLEANPC / EXTERNAL CHECK</text>
-<text x="48" y="785" font-size="18" font-weight="400" fill="#f3f7fb">Windows without development tools</text>
-<text x="32" y="837" font-size="16" font-weight="400" fill="#b9cbdc">Source: playability-matrix.tsv · A pass certifies only its recorded test scope.</text>
+<text x="32" y="761" font-size="16" font-weight="400" fill="#b9cbdc">Source: playability-matrix.tsv · A pass certifies only its recorded test scope.</text>
 </svg>
