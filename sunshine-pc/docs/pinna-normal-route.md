@@ -1,6 +1,6 @@
 # Normal Pinna milestone
 
-Pinna entry, Mecha Bowser completion and its saved/cold-reloaded Shine remain **open**. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
+Normal Pinna entry through the cannon, beach, park, director dialogue and coaster intro is verified. Mecha Bowser completion and its saved/cold-reloaded Shine remain **open**. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
 
 ## Earned prerequisites (2026-10-19)
 
@@ -62,10 +62,18 @@ Read-only `boatdist<=N` and `boatz>=N`/`boatz<=N` conditions now observe the nea
 
 Private `pn41_boat_observed`, seeded from `pn24_chuckster`, passes the first observed boarding attempt and the subsequent normal island landing: rc0/278.49s, `done` at tick7838, health8, floor801.9, empty crash log and no active cheats. This component does not collect a Shine. Route SHA-256: `f97495976b41f231703b6786497b44bd24d9a6290ceb77db5aa598120b2557d7`. Its final spin presses A with the fifth small nonzero stick input; a neutral A input would clear the original angle history before jump selection.
 
-This component uses Strict executable SHA-256 `a24e73a61055538b2cade5011747a1bf54ace0c4135f4b796ecf4079576ddaa8`: zero unresolved symbols and68 port checks pass. The preceding coaster-observation build passes all72 existing native parser cases; this build passes23 added boat parser cases plus three existing parser controls. The coaster observations expose only rail frame, carried-rocket presence and boss state. Native combat calibration remains open.
+This component uses Strict executable SHA-256 `a24e73a61055538b2cade5011747a1bf54ace0c4135f4b796ecf4079576ddaa8`: zero unresolved symbols and68 port checks pass. All95 native parser cases pass on this executable:23 new boat cases plus the72 existing cases, in separate targeted invocations. The coaster observations expose only rail frame, carried-rocket presence and boss state. The native calibration and remaining combat limit are recorded below.
 
 Reproduce the complete hundred-coin reward after the paid-throw save:
 
 ```powershell
 python tools/route.py Strict tools/routes/pc_delfino_100coins_unassisted.dev --name <hundred> --appdata-from <throw> --seconds 1300
 ```
+
+## Normal Pinna entry and first combat calibration
+
+Private `pn40_pinna_combat` starts a fresh process from `pn42_coins_observed` and confirms the ten-Shine File B in Delfino1/7. Ordinary movement triggers the original kidnapping movie/cannon, episode selector, Pinna beach5/0 and park13/0. Movie7 and the original director dialogue lead to coaster58/1. The route observes the complete intro camera before testing individual controller axes. Measured rail progression is2 BCK frames per PAD tick; first-person mode is enabled after the intro, and the initial rocket is acquired normally. Full positive-X input changes yaw by-924 per PAD tick; negative-X changes it by+920. No Y-button mode toggle is needed.
+
+The first combat candidate exits3 after288.49s at its required two-broken-parts check, with health8 and an empty crash log. Both normal R launches occur, but boss state remains0/partsHP1. Its original second trajectory passes above the boss. The first measured ray reproduces an original static-ground intersection at triangle7076 near rail1315: BG0x400 is passable for Mario but remains solid for an enemy rocket. This explains a valid collision within the observed disappearance interval; the exact native kill target was not logged. No engine defect or undefined-behavior cause is asserted.
+
+The corrected private candidate uses fixed controller pitches computed from the authored chest, FLUDD and nozzle transforms, including the roll-dependent FLUDD base tilt omitted from the earlier estimate. Mecha Bowser hits, reward pickup, saving and the final cold reload still require native acceptance.
