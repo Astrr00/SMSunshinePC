@@ -11,6 +11,7 @@ The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) has **17 passe
 
 - Normal airport/Gatekeeper/Shadow Mario progression passes. Gatekeeper already has two consecutive `/O2` passes (`gk14`, `gk15`); the old sweep is complete.
 - Petey, Gooper Blooper and Gelato's sandcastle have normal completion/save and independent cold-reload evidence. The earned save holds six Shines: IDs0/1/10/20/86/117. [Routes, save provenance and limits](sunshine-pc/docs/normal-world-routes.md).
+- Two normal Delfino crate-game rewards extend the earned save to eight Shines (adding IDs94/95); both save and cold-load successfully. [Pinna prerequisites and remaining milestone](sunshine-pc/docs/pinna-normal-route.md).
 - All 91 present later-world diagnostic load probes pass on their recorded Strict build. They do not certify normal unlocking, missions or collectibles. [Coverage](sunshine-pc/docs/world-load-coverage.tsv).
 - Replay-row selection, stick-rotation flags, pickup fields, coaster-mode lookup, slide direction, water-gauge initialization, Delfino news holder lookup and SPC handle conditions have bounded fixes and regressions. [Evidence log](sunshine-pc/docs/status.md). None closes the broad PC-CORE row.
 - The owner has verified the first two Shines on physical hardware, including picture, sound and controller input. Later scenes and a full playthrough remain open.
