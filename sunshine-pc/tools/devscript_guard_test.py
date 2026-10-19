@@ -9,6 +9,11 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ("bell_limits", "guard radius=0 until bellleft=0 bellleft=1000\nend\n", 0, "done at tick"),
+    ("bell_invalid", "guard radius=0 until bellleft=1001\nend\n", 2, "unexpected token in guard"),
+    ("bell_negative", "guard radius=0 until bellleft=-1\nend\n", 2, "unexpected token in guard"),
+    ("bell_zero_outside_scene", "waitfor bellleft=0 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    ("bell_full_outside_scene", "waitfor bellleft=1000 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
     ("plungelo_wet", "guard radius=0 until plungelowet=0 plungelowet=1\nend\n", 0, "done at tick"),
     ("plungelo_wet_invalid", "guard radius=0 until plungelowet=2\nend\n", 2, "unexpected token in guard"),
     ("plungelo_wet_fraction", "guard radius=0 until plungelowet=1.0\nend\n", 2, "unexpected token in guard"),

@@ -33,6 +33,7 @@
 #include "MoveBG/ItemManager.hpp"
 #include "MoveBG/MapObjManager.hpp"
 #include "MoveBG/MapObjTown.hpp"
+#include "MoveBG/MapObjDolpic.hpp"
 #include "MoveBG/MapObjHide.hpp"
 #include "Enemy/Emario.hpp"
 #include "Enemy/EnemyMario.hpp"
@@ -45,6 +46,8 @@
 #include "Enemy/BossPakkun.hpp"
 #include "Enemy/BossGesso.hpp"
 #include "Enemy/BossGessoTentacle.hpp"
+#include "Enemy/TinKoopa.hpp"
+#include "Enemy/Rocket.hpp"
 #include "Enemy/Conductor.hpp"
 #include "Enemy/EnemyManager.hpp"
 #include "Enemy/SmallEnemy.hpp"
@@ -101,7 +104,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -198,6 +201,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("pitch<=", 0) == 0) k = Command::Cond::PitchLe;
 	else if (tok.rfind("cranestate=", 0) == 0) k = Command::Cond::CraneState;
 	else if (tok.rfind("cargoy<=", 0) == 0) k = Command::Cond::CargoYLe;
+	else if (tok.rfind("bellleft=", 0) == 0) k = Command::Cond::BellLeft; // TV bell water hits remaining; zero means clean, before collection
 	else if (tok.rfind("gessohp=", 0) == 0) k = Command::Cond::GessoHp;
 	else if (tok.rfind("gessomode=", 0) == 0) k = Command::Cond::GessoMode;
 	else if (tok.rfind("gessopull=", 0) == 0) k = Command::Cond::GessoPull;
@@ -218,13 +222,14 @@ bool parseCond(const std::string& tok, Command& c)
 	const size_t eq = tok.find('=');
 	int value = 0;
 	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
-	    || k == Command::Cond::CargoYLe || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held
+	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held
 	    || k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft
 	    || k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe || k == Command::Cond::PlungeloWet) {
 		const char* end = tok.c_str() + tok.size();
 		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < -0x8000 || value > 0x7fff) return false;
 		if (k == Command::Cond::CraneState && (value < 0 || value > 3)) return false;
+		if (k == Command::Cond::BellLeft && (value < 0 || value > 1000)) return false;
 		if (k == Command::Cond::GessoHp && (value < 0 || value > 255)) return false;
 		if (k == Command::Cond::GessoMode && (value < 0 || value > 7)) return false;
 		if ((k == Command::Cond::Held || k == Command::Cond::GessoPull) && (value < 0 || value > 1)) return false;
@@ -646,6 +651,16 @@ TCraneUpDown* findRiccoCrane()
 	return dynamic_cast<TCraneUpDown*>(JDrama::TNameRefGen::search("craneUpDown 0"));
 }
 
+const TBellDolpic* findDelfinoTVBell()
+{
+	if (!sceneReady() || gpApplication.mCurrArea.getStage() != 1) return nullptr;
+	if (!JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return nullptr;
+	// Original TV bell name, in Shift-JIS; reject the other Delfino bell variant.
+	const auto* bell = dynamic_cast<const TBellDolpic*>(JDrama::TNameRefGen::search(
+	    "\x83\x68\x83\x8b\x83\x73\x83\x62\x83\x4e\x8f\xe0\x81\x69\x83\x65\x83\x8c\x83\x72\x8b\xc7\x81\x6a"));
+	return bell && bell->unk13C == 1 ? bell : nullptr;
+}
+
 const TLeanMirror* findMirror(const char* name)
 {
 	if (!sceneReady() || gpApplication.mCurrArea.getStage() != 4 || gpApplication.mCurrArea.getScenario() != 1) return nullptr;
@@ -880,6 +895,39 @@ void logGesso(const char* tag)
 	}
 }
 
+// Observe the Mecha Bowser fight without changing its actors, aim or controller inputs.
+void logTinKoopa(const char* tag)
+{
+	if (gpApplication.mCurrArea.getStage() != 58 || gpApplication.mCurrArea.getScenario() != 1
+	    || !JDrama::TNameRefGen::getInstance() || !JDrama::TNameRefGen::getInstance()->getRootNameRef()) return;
+	const char* bossName = "\x83\x81\x83\x4a\x83\x4e\x83\x62\x83\x70"; // メカクッパ
+	if (auto* boss = dynamic_cast<TTinKoopa*>(JDrama::TNameRefGen::search(bossName))) {
+		const auto* nerve = boss->mSpine ? boss->mSpine->getCurrentNerve() : nullptr;
+		MActor* actor = boss->getMActor();
+		std::printf("[%s-tinkoopa] state=%d partsHp=%d nerve=%s time=%d bck=%d frame=%.1f rail=%.1f defeat=%d shine=%d tick=%d\n", tag,
+		    boss->mState, boss->mPartsHP, nerve ? typeid(*nerve).name() : "none", boss->mSpine ? boss->mSpine->getTime() : -1,
+		    actor ? actor->getCurAnmIdx(ANM_TYPE_BCK) : -1, actor ? actor->getFrameCtrl(ANM_TYPE_BCK)->getFrame() : -1.f,
+		    boss->mKoopaRail ? boss->mKoopaRail->getFrameCtrl(ANM_TYPE_BCK)->getFrame() : -1.f,
+		    TFlagManager::smInstance->getBool(0x5000A), TFlagManager::smInstance->getShineFlag(0x1E), gTick);
+	}
+	const char* rocketManagerName = "\x83\x8d\x83\x50\x83\x62\x83\x67\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"; // ロケットマネージャー
+	if (auto* manager = dynamic_cast<TRocketManager*>(JDrama::TNameRefGen::search(rocketManagerName))) {
+		for (int i = 0; i < manager->getObjNum(); ++i)
+			if (auto* rocket = dynamic_cast<TRocket*>(manager->getObj(i))) {
+				if (rocket->checkLiveFlag(LIVE_FLAG_DEAD) || (!rocket->mIsPossessed && !rocket->isAttack())) continue;
+				std::printf("[%s-coaster-rocket] i=%d loaded=%d flying=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, i,
+				    (int)rocket->mIsPossessed, (int)rocket->isAttack(), rocket->mPosition.x, rocket->mPosition.y, rocket->mPosition.z, gTick);
+			}
+	}
+	if (gpMarioOriginal && gpMarioOriginal->mWaterGun && gpCamera) {
+		MtxPtr emit = gpMarioOriginal->mWaterGun->getEmitMtx(0);
+		if (!emit) return;
+		std::printf("[%s-coaster-aim] firstPerson=%d yaw=%d pitch=%d emit=(%.3f,%.3f,%.3f) tick=%d\n", tag,
+		    (int)gpCamera->isJetCoaster1stCamera(), (int)gpMarioOriginal->mToroccoAngle, (int)gpCamera->mCurrentTarget.mPitch,
+		    emit[0][0], emit[1][0], emit[2][0], gTick);
+	}
+}
+
 // Read-only observations for the original mirror fight; actions still use ordinary PAD inputs.
 void logGelatoMirrors(const char* tag)
 {
@@ -899,6 +947,40 @@ void logGelatoMirrors(const char* tag)
 			}
 }
 
+// Callers already require sceneReady(); only inspect the original Delfino crate room.
+void logCrates(const char* tag)
+{
+	if (gpApplication.mCurrArea.getStage() != 1 || !gpMarioOriginal || gpMarioOriginal->mPosition.y <= 9000.f) return;
+	int found = 0, dead = 0;
+	unsigned deadMask = 0;
+	for (int i = 1; i <= 10; ++i) {
+		char name[32];
+		// Exact SJIS name prefix for the ten original game crates.
+		std::snprintf(name, sizeof(name), "\x83\x51\x81\x5b\x83\x80\x96\xd8\x94\xa0%d", i);
+		const TWoodBox* box = dynamic_cast<TWoodBox*>(JDrama::TNameRefGen::search(name));
+		if (!box) continue;
+		++found;
+		if (box->checkLiveFlag(LIVE_FLAG_DEAD)) {
+			++dead;
+			deadMask |= 1u << (i - 1);
+		}
+	}
+	TGCConsole2* console = gpMarDirector->getConsole();
+	std::printf("[%s-crates] found=%d live=%d dead=%d deadMask=0x%03X timer=%d marioState=%u marioTimer=%u tick=%d\n", tag,
+	    found, found - dead, dead, deadMask, console ? console->getFinishedTime() : -1,
+	    gpMarioOriginal->mStatusState, gpMarioOriginal->mStatusTimer, gTick);
+	static const char* const rewardNames[] = {
+		"\x96\xd8\x94\xa0\x83\x51\x81\x5b\x83\x80\x97\x70\x83\x56\x83\x83\x83\x43\x83\x93\x82\x50",
+		"\x96\xd8\x94\xa0\x83\x51\x81\x5b\x83\x80\x97\x70\x83\x56\x83\x83\x83\x43\x83\x93\x82\x51",
+	};
+	for (const char* name : rewardNames)
+		if (auto* shine = dynamic_cast<TShine*>(JDrama::TNameRefGen::search(name)))
+			std::printf("[%s-crate-shine] event=%u pos=(%.1f,%.1f,%.1f) initial=(%.1f,%.1f,%.1f) dead=%d noCollision=%d tick=%d\n", tag,
+			    shine->getEventId(), shine->mPosition.x, shine->mPosition.y, shine->mPosition.z,
+			    shine->mInitialPosition.x, shine->mInitialPosition.y, shine->mInitialPosition.z,
+			    (int)shine->checkLiveFlag(LIVE_FLAG_DEAD), (int)shine->checkHitFlag(HIT_FLAG_NO_COLLISION), gTick);
+}
+
 void logStatus(const char* tag)
 {
 	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
@@ -912,6 +994,11 @@ void logStatus(const char* tag)
 	logBoss(tag);
 	logRiccoGate(tag);
 	logGesso(tag);
+	logTinKoopa(tag);
+	logCrates(tag);
+	if (const auto* bell = findDelfinoTVBell())
+		std::printf("[%s-bell] bellleft=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, bell->unk154,
+		    bell->mPosition.x, bell->mPosition.y, bell->mPosition.z, gTick);
 	logGelatoMirrors(tag);
 	if (gpApplication.mCurrArea.getStage() == 4 && gpApplication.mCurrArea.getScenario() == 1)
 		std::printf("[%s-plungelo-edge] side=%d wet=%d tick=%d\n", tag, plungeloEdge(), observedPlungelo(true) ? 1 : 0, gTick);
@@ -1079,6 +1166,11 @@ bool condHolds(const Command& c)
 		case Command::Cond::CargoYLe: {
 			const TCraneUpDown* crane = sceneReady() ? findRiccoCrane() : nullptr;
 			if (crane) ok = kind == Command::Cond::CraneState ? crane->mState == val : crane->unk138 && crane->unk138->mPosition.y <= val;
+			break;
+		}
+		case Command::Cond::BellLeft: {
+			const auto* bell = findDelfinoTVBell();
+			if (bell) ok = bell->unk154 == val;
 			break;
 		}
 		case Command::Cond::GessoHp:
@@ -2092,6 +2184,7 @@ void sunshineDevScriptTick()
 		    m->mPosition.x, m->mPosition.y, m->mPosition.z, m->mVel.x, m->mVel.y, m->mVel.z, m->mForwardVel,
 		    static_cast<s16>(m->mFaceAngle.y) * (360.0f / 65536.0f), (unsigned)m->mStatus, (int)m->mUpperState, trig, trigT,
 		    m->mWaterGun ? (int)m->mWaterGun->mCurrentWater : -1, m->mFloorPosition.y);
+		logCrates("trace");
 	}
 	if (std::getenv("SUNSHINE_DEV_STATUS") && gTick % 30 == 0) {
 		logStatus("status");
