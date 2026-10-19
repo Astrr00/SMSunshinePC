@@ -344,6 +344,10 @@ void TMario::slideProcess(f32 baseAcc, f32 friction)
 	unk9E = matan(mSlideVelZ, mSlideVelX);
 
 	int turn;
+#ifdef TARGET_PC
+	// Preserve signed speed when tiny motion skips the heading adjustment.
+	turn = (s16)(mFaceAngle.y - unk9E);
+#endif
 	if (!(-0.1f < mSlideVelX && mSlideVelX < 0.1f && -0.1f < mSlideVelZ
 	      && mSlideVelZ < 0.1f)) {
 		turn = (s16)(mFaceAngle.y - unk9E);
