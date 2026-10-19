@@ -2098,7 +2098,12 @@ void TMario::boxDrawPrepare(MtxPtr mtx)
 	GXGetProjectionv(psave);
 
 	volatile u32 holeTop;
+#ifdef TARGET_PC
+	// GXGetViewportv writes all six viewport values, including far Z.
+	f32 wpsave[6];
+#else
 	f32 wpsave[5];
+#endif
 	GXGetViewportv(wpsave);
 
 	JGeometry::TVec3<f32> pos = mPosition;
