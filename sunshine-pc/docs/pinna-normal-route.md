@@ -95,3 +95,27 @@ python tools/route.py Strict tools/routes/pc_pinna_mecha_reload.dev --name <cold
 ```
 
 This certifies one complete controller-input Episode1 pass plus its saved-reward cold proof. It does not certify consecutive full-route repeatability, other Pinna episodes, later-world completion, image quality or audible playback on physical hardware. The broader PC-CORE/PC-CONTENT rows remain open; matrix counts remain17 passed-bounded,8 open and0 external-check-required. The deferred mirror route and draft release are unchanged.
+
+## Complete normal Cannon and block-secret milestone
+
+`pc_pinna_cannon_unassisted.dev`, accepted private `si25_pinna2_full` from earned eleven-Shine `pn45_pinna_combat`, passes in410.67s: rc0, `done` at tick11534, normal Episode2 selection, Cannon HP3 to0 and original flag0x5000c, secret entry50/0, all block/spring transfers, Shine31 collection, original card/save flow and natural return to Delfino1/8. Combat minimum health is3; the secret resets it normally and final health is8. Crash log is empty and no active cheats are logged. Only controller inputs are emitted; no stage start, teleport, direct boss aim, actor/progress/save edit or timing/movie override is used.
+
+Fresh Bob-ombs are sprayed, picked up with bounded B pulses and thrown normally. The secret route waits on fixed surfaces, walks touching timed blocks, crosses two600-unit gaps with running jumps and uses all four original spring pads. Read-only hidden-block countdowns synchronize the upper departures. The final L corner through(13080,3720) saves approximately541units and passes both original-collision footprint checks and native traversal. Final takeoff is reached at10799 and fixed landing at10840. Height/floor guards observe the route; they do not establish a grounded Mario status.
+
+Earlier `si24_pinna2_full` is **not a pass**: Cube14 disappears at10666 while Mario is123units short of its edge, then Cube15 briefly catches him before disappearing at10716. An earlier departure would enter the still-hidden first block; the supported shorter corner corrects the late crossing. `si15` is only a component pass: its unintended first `end` skipped the secret tail. Failed local evidence remains preserved. No game-code defect or undefined-behavior cause is asserted.
+
+File B sector3/write16 has twelve earned Shines: IDs0/1/10/20/30/31/86/94/95/98/107/117. All seven sector checksums pass. GCI SHA-256: `1f99d219bda24b4dabb8ba4e555bd7c9038cdc7d5567f5b4fc1027c6dda2afb8`. Accepted frozen full-route SHA-256: `75d69e4f490ed17f6e08f7835a00195b6d099e3ccae9ec2bf1580f66c3c4af94`. Public executable commands are identical; comments and line endings differ. The parent GCI is the accepted Episode1 save documented above.
+
+`pc_pinna_cannon_reload.dev`, accepted private `si26_pinna2_cold`, starts a separate process from that saved output and passes in50.25s: rc0, `done` at tick1363, normal File B menus, Delfino1/8, all twelve Shine flags and prior progression checks, health8, empty crash log and no active cheats. The GCI is byte-identical to the saved result above with all seven checksums valid. Accepted frozen/public cold-route SHA-256: `67c0255c1484878b68b1fcec1ae9bcf8da8f7ea41a355f5025174f159e9c72ff`.
+
+Both use Strict executable SHA-256 `e5c1252ece36959d80fe964df20e2b37efe9c0827bff8979b11ed5fc82880478`: **STRICT: 0 unresolved symbols**,68 port checks and42 focused native parser cases pass (23 countdown,17 bomb/filter, invalid held state and existing observations). The new typed observations require the joined current scene, perform fresh lookups and retain no scene pointers. `clear bombs=1` filters existing PAD steering/spray targets; default0 preserves previous behavior. `bombready` observes a candidate; the route separately checks actual holding. Additional Tama telemetry is diagnostic and certifies no Episode4 play.
+
+The observer headers follow the standard-library headers. Game headers define global `EOF=1`; reversing that order changed the compiled stream EOF value and hung developer-script parsing. A compile-time assertion now requires `std::char_traits<char>::eof()==-1`: the bad-order control fails it, while the corrected native parser triplet passes. No original game source or asset is changed.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_pinna_cannon_unassisted.dev --name <pinna2> --appdata-from pn45_pinna_combat --seconds 1000
+python tools/gci_check.py "build/Route/<pinna2>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_pinna_cannon_reload.dev --name <cold> --appdata-from <pinna2> --seconds 240
+```
+
+This certifies one complete Episode2 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Pinna Episode3 onward, later worlds, full image/audio quality and the full playthrough remain open. Matrix states remain17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
