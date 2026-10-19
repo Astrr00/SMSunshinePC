@@ -15,6 +15,14 @@ Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards 
 
 ## Dated evidence log
 
+**PC omitted hide-info fields (2026-10-19).** Eight original `coro_ex6` steam nodes end before the helper's float/integer fields; the helper previously evaluated uninitialized locals at EOF.
+PC-only zero initialization retains the existing speed/timer decoding and yields deterministic omitted-field defaults.
+The complete helper with real streams passes 55 checks; the pattern-initialized old-source control fails four.
+Strict0, 68 port checks, identical report measures and all736 unchanged PPC objects pass; baseline-aware symbol checks retain two inherited missing UNUSED symbols and 27 size warnings, with zero new errors.
+Normal eleven-Shine cold load `pa13_hide_info` passes (rc0/52.4s, health8, crash0/no cheats, unchanged valid GCI).
+No visible steam failure or native affected-path completion is claimed; [proof and limits](hide-object-load-defaults.md).
+Matrix states remain17/8/0; mirrors remain deferred.
+
 **External Clean-PC test PASS (2026-10-19).** The owner ran private Release candidate `0.1.0.20261019` on a second Windows PC without development tools and confirmed correct picture, sound and controls, plus an earned Shine persisting after restarting the game. Returned logs show RTX3070 Ti/D3D12, 36 steady logic30/s samples, an empty crash log and normal window exit. PC-CLEANPC becomes passed-bounded; PC-PACKAGE and PC-PUBLISH remain open. Exact archive/executable/log hashes, source-snapshot provenance, hardware and limits: [clean-pc-test-2026-10-19.md](clean-pc-test-2026-10-19.md). This is not final release approval; v0.1.0 remains draft.
 
 Entries below retain their original test scope and historical open items. Their dates matter: older claims that Ricco/Gooper or sandcastle completion is still pending are superseded by the accepted routes above. Historical headings do not override the current queue.
