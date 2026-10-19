@@ -4,8 +4,8 @@ Goal: a fully playable native Windows x86-64 port of Super Mario Sunshine (JP, G
 Acceptance requires normal controller-input play, reliable saves, all original content and a reproducible Windows package.
 Dev starts, teleporting, automatic boss aiming and cheats provide diagnostic evidence only. PAL/US support and 100% byte matching are separate work.
 
-Reviewed against recorded evidence on **2026-10-19**; no new gameplay certification in this documentation update.
-The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) has **16 passed-bounded, 8 open and 1 external-check-required** rows. These counts are not a completion percentage.
+Reviewed against recorded evidence on **2026-10-19**; the owner-confirmed external Clean-PC test now passes for the supplied private candidate.
+The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) has **17 passed-bounded, 8 open and 0 external-check-required** rows. These counts are not a completion percentage.
 
 ## Where we are
 
@@ -14,7 +14,8 @@ The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) has **16 passe
 - All 91 present later-world diagnostic load probes pass on their recorded Strict build. They do not certify normal unlocking, missions or collectibles. [Coverage](sunshine-pc/docs/world-load-coverage.tsv).
 - Replay-row selection, stick-rotation flags, pickup fields, coaster-mode lookup, slide direction, water-gauge initialization, Delfino news holder lookup and SPC handle conditions have bounded fixes and regressions. [Evidence log](sunshine-pc/docs/status.md). None closes the broad PC-CORE row.
 - The owner has verified the first two Shines on physical hardware, including picture, sound and controller input. Later scenes and a full playthrough remain open.
-- v0.1.0 is a draft. Historical packages are not a current release candidate. [Release checklist](sunshine-pc/docs/release-checklist.md).
+- The private Release candidate `0.1.0.20261019` passes on a second Windows PC without development tools: picture, sound, controls, saved Shine after restart and normal quit. [Exact package, hardware and evidence limits](sunshine-pc/docs/clean-pc-test-2026-10-19.md).
+- v0.1.0 is a draft. The tested private snapshot is not final release approval. [Release checklist](sunshine-pc/docs/release-checklist.md).
 
 ## Open work, in order
 
@@ -28,7 +29,7 @@ The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) has **16 passe
 
 5. **Close the combined lifecycle gap** — PC-STABILITY. Recommended model: **GPT-6.1-Sol, high effort**; agent work with owner hardware evidence where needed. Existing 31-minute save/load and 74-minute idle runs remain valid history. The missing result combines at least 30 minutes of transitions, repeated save/load, ordinary death/restart, pause/menu and native quit, followed by a fresh-process load with save-integrity checks. Log memory/handle trends and separate a gameplay timeout from a native crash. Do not repeat a long idle run merely to accumulate duration.
 
-6. **Produce and validate the release candidate** — PC-PACKAGE, PC-CLEANPC, PC-PUBLISH. Recommended model: **GPT-6.1-Sol, medium effort** for packaging/evidence; owner external checks and publication decision. Package the accepted source as Release, record executable/ZIP hashes, verify dependency notices and exclusions, and smoke the unpacked archive outside the checkout. Resolve the recorded Microsoft runtime/DXIL provenance questions and test the exact archive on Windows 10/11 without development tools. Scope commits and push verified work throughout development; this does not authorize release publication. v0.1.0 stays draft until the gates pass and the owner explicitly says **"Ja"**.
+6. **Produce and validate the release candidate** — PC-PACKAGE, PC-CLEANPC, PC-PUBLISH. Recommended model: **GPT-6.1-Sol, medium effort** for packaging/evidence; owner external checks and publication decision. Package the accepted source as Release, record executable/ZIP hashes, verify dependency notices and exclusions, and smoke the unpacked archive outside the checkout. Resolve the recorded Microsoft runtime/DXIL provenance questions. The private `0.1.0.20261019` archive passes the external Clean-PC gate; retain that exact-artifact evidence or refresh it when producing a changed final candidate. Scope commits and push verified work throughout development; this does not authorize release publication. v0.1.0 stays draft until the gates pass and the owner explicitly says **"Ja"**.
 
 ## Execution limits
 
