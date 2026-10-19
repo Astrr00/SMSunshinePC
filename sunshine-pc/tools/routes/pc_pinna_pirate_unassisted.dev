@@ -1,0 +1,324 @@
+# Normal Pinna Episode3: eight red coins, Shine32 and original card save.
+# Seed: si25_pinna2_full, earned twelve-Shine File B after Pinna Episode2.
+# Ordinary controller inputs only; all conditions and logs are read-only.
+# Acceptance: complete route, thirteen earned Shines, valid GCI and fresh normal reload.
+# Companion: pc_pinna_pirate_reload.dev. Evidence: docs/pinna-normal-route.md.
+# This certifies one full pass plus cold reload, not a damage-free or all-episodes run.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot pn_cold_pinna_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10000 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x1000a timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10056 timeout=1
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+waitfor flag=0x1001e timeout=1
+waitfor flag=0x1001f timeout=1
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10389 timeout=1
+log
+shot pn_cold_pinna_saved_flags.png
+trace frames=60
+wait frames=60
+log
+shot pn_cold_pinna_neutral.png
+
+walkto x=-3500 z=2500 radius=80 timeout=1200
+walkto x=-3500 z=0 radius=80 timeout=900
+walkto x=-2500 z=-700 radius=40 timeout=600
+hold X frames=1
+wait frames=20
+faceto x=-2500 z=-3000 tol=3 timeout=180
+walkto x=-2500 z=-3000 radius=80 jump=12 spray=15 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+waitfor marioy>=680 timeout=1
+walkto x=-2500 z=-4000 radius=50 timeout=600
+walkto x=-2800 z=-5500 radius=40 timeout=600
+walkto x=-2440 z=-5500 radius=30 timeout=600
+walkto x=-2440 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-5500 radius=30 timeout=600
+walkto x=-5500 z=-5500 radius=30 timeout=600
+walkto x=-7200 z=-5500 radius=50 timeout=900
+walkto x=-7200 z=-6650 radius=30 timeout=600
+walkto x=-9300 z=-6650 radius=50 timeout=900
+walkto x=-9660 z=-7020 radius=25 timeout=300
+walkto x=-9700 z=-7100 radius=25 timeout=300
+walkto x=-9740 z=-7260 radius=25 timeout=300
+walkto x=-9740 z=-7660 radius=25 timeout=300
+walkto x=-9220 z=-8140 radius=25 timeout=300
+hold X frames=1
+wait frames=20
+faceto x=-9000 z=-7800 tol=3 timeout=180
+walkto x=-9000 z=-7800 radius=35 jump=12 spray=12 hover=1 timeout=300
+hold X frames=1
+wait frames=30
+waitfor marioy>=590 timeout=1
+hold X frames=1
+wait frames=20
+faceto x=-8920 z=-7380 tol=2 timeout=180
+trace frames=120
+walkto x=-8920 z=-7380 radius=35 jump=12 spray=12 hover=1 timeout=300
+wait frames=2
+hold L frames=8
+wait frames=30
+waitfor marioy>=790 floory>=790 timeout=1
+hold X frames=1
+wait frames=30
+log
+shot si_cannon_hill.png
+faceto x=-9450 z=-7380 tol=3 timeout=180
+hold L frames=1
+wait frames=20
+
+hold stick=0,64 until stage=5 scen=255 timeout=1200
+wait frames=400
+log
+shot si_pinna2_selector.png
+hold A frames=4
+waitfor stage=5 scen=2 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=60
+log
+shot p3_beach.png
+walkto x=-3500 z=2500 radius=40 timeout=1200
+faceto x=-3515 z=1700 tol=2 timeout=120
+hold L frames=1
+wait frames=20
+hold stick=0,127 until stage=13 timeout=600
+waitfor stage=13 scen=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=60
+log
+shot si_pinna3_park_ready.png
+
+walkto x=-3400 z=-1000 radius=40 timeout=900
+walkto x=-2000 z=-1000 radius=40 timeout=600
+walkto x=-2000 z=300 radius=40 timeout=600
+walkto x=2380 z=300 radius=40 timeout=1200
+walkto x=2380 z=-2300 radius=30 timeout=900
+waitfor stage=13 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+
+walkto x=2380 z=-4000 radius=25 timeout=900
+waitfor marioy>=1700 timeout=120
+walkto x=2379 z=-4554 radius=18 timeout=400
+wait frames=15
+waitfor stage=13 scen=1 director mario dirstate=4 camDemo=0 flag=0x60000 timeout=120
+log
+shot si_pinna3_first_red_coin.png
+waitfor stage=13 scen=1 director mario dirstate=4 camDemo=0 redcoins>=1 timeout=1
+faceto x=2500 z=-4800 tol=2 timeout=120
+hold L frames=1
+wait frames=20
+hold X frames=1
+wait frames=20
+waitfor stage=13 scen=1 ship1angle>=-30 ship1angle<=-25 ship1rate>=180 ship1rate<=250 timeout=1800
+log
+trace frames=6000
+walkto x=2500 z=-4800 radius=25 jump=12 timeout=150
+waitfor stage=13 scen=1 ship1angle>=50 ship1angle<=55 ship1rate>=1 marioy>=2250 timeout=300
+log
+shot p3_ship1_right_ride.png
+walkto x=3699 z=-5101 radius=25 jump=12 spray=12 hover=1 timeout=120
+wait frames=3
+hold L frames=1
+waitfor stage=13 scen=1 redcoins>=2 timeout=240
+log
+shot p3_red0_collected.png
+wait frames=30
+
+waitfor stage=13 scen=1 redcoins>=2 ship1angle>=-95 ship1angle<=-75 ship1rate>=0 ship1rate<=120 ship0angle>=75 ship0angle<=95 ship0rate>=-120 ship0rate<=0 marioy>=2500 floory>=1800 timeout=3000
+log
+walkto x=-100 z=-6397 radius=25 jump=12 spray=12 hover=1 timeout=150
+wait frames=3
+hold L frames=1
+wait frames=35
+waitfor stage=13 scen=1 redcoins>=3 timeout=180
+log
+shot p305_red1_and_landing.png
+waitfor stage=13 scen=1 redcoins>=3 ship0angle>=-110 ship0angle<=-65 ship0rate>=-400 ship0rate<=200 marioy>=3650 floory>=3000 timeout=2400
+log
+walkto x=-1500 z=-6300 radius=30 jump=12 spray=12 hover=1 timeout=240
+wait frames=3
+hold L frames=1
+wait frames=30
+waitfor stage=13 scen=1 redcoins>=4 marioy>=4080 marioy<=4120 floory>=4080 timeout=180
+log
+shot p3_west_cage_red2.png
+hold X frames=1
+wait frames=20
+waitfor stage=13 scen=1 director mario dirstate=4 camDemo=0 redcoins>=4 marioy>=4085 marioy<=4120 timeout=1
+log
+shot p3_net_west_roof_start.png
+
+walkto x=-1260 z=-6300 radius=15 timeout=120
+hold X frames=1
+wait frames=20
+walkto x=-1050 z=-6100 radius=20 jump=12 spray=15 hover=1 timeout=120
+walkto x=-1120 z=-6150 radius=10 spray=1 hover=1 timeout=90
+waitfor stage=13 scen=1 redcoins>=4 mstatus=0x38000368 timeout=180
+log
+hold B frames=2
+wait frames=40
+hold A frames=2
+wait frames=30
+log
+goto p3_inside_roof_drop if mstatus=0x8200348 max=1
+goto p3_inside_roof_drop if mstatus=0x200349 max=1
+goto p3_inside_roof_drop if mstatus=0x20054a max=1
+goto p3_inside_floor unless mstatus=0x8200348 max=1
+label p3_inside_roof_drop
+hold B frames=2
+wait frames=24
+label p3_inside_floor
+hold X frames=1
+wait frames=20
+walkto x=-1500 z=-6300 radius=20 timeout=120
+waitfor stage=13 scen=1 redcoins>=4 marioy>=3485 marioy<=3515 floory>=3480 timeout=120
+wait frames=20
+hold A frames=8
+wait frames=8
+hold L frames=1
+wait frames=45
+waitfor stage=13 scen=1 redcoins>=4 marioy>=3315 marioy<=3355 timeout=120
+log
+
+walkto x=-1350 z=-6620 radius=12 timeout=150
+walkto x=-1350 z=-7200 radius=12 timeout=240
+waitfor stage=13 scen=1 redcoins>=5 timeout=120
+log
+shot p3_net_red3.png
+walkto x=-1350 z=-7750 radius=12 timeout=240
+hold B frames=2
+walkto x=-1200 z=-7800 radius=15 timeout=150
+waitfor stage=13 scen=1 redcoins>=5 marioy>=2585 marioy<=2620 floory>=2580 timeout=180
+walkto x=-1000 z=-7950 radius=12 timeout=150
+
+# Compensate measured braking drift to plant the first stomp near patrol midpoint-600.
+walkto x=-700 z=-7950 radius=12 timeout=150
+wait frames=20
+hold A frames=8
+wait frames=8
+hold L frames=1
+wait frames=45
+
+# Plant the second stomp near midpoint850; the owner cylinder accepts ground pounds.
+walkto x=750 z=-7950 radius=12 timeout=450
+wait frames=20
+hold A frames=8
+wait frames=8
+hold L frames=1
+wait frames=45
+walkto x=-1000 z=-7950 radius=12 timeout=450
+walkto x=-1200 z=-7800 radius=15 timeout=180
+wait frames=20
+hold A frames=8
+wait frames=8
+hold L frames=1
+wait frames=45
+waitfor stage=13 scen=1 redcoins>=5 marioy>=2420 marioy<=2460 timeout=120
+walkto x=-1000 z=-7950 radius=12 timeout=180
+walkto x=200 z=-7950 radius=12 timeout=450
+waitfor stage=13 scen=1 redcoins>=6 timeout=120
+log
+shot p3_net_red4.png
+walkto x=1200 z=-7950 radius=12 timeout=360
+walkto x=1500 z=-8100 radius=15 timeout=180
+hold A frames=2
+wait frames=60
+waitfor stage=13 scen=1 redcoins>=6 marioy>=2585 marioy<=2620 timeout=150
+
+walkto x=1720 z=-8100 radius=15 timeout=90
+faceto x=1900 z=-8100 tol=3 timeout=90
+hold L frames=1
+wait frames=20
+hold A stick=0,127 frames=12
+hold stick=0,127 until stage=13 scen=1 redcoins>=6 marioy>=3040 timeout=180
+wait frames=3
+hold A frames=2
+wait frames=8
+walkto x=1500 z=-8100 radius=20 timeout=150
+waitfor stage=13 scen=1 redcoins>=6 marioy>=3185 marioy<=3220 floory>=3180 mstatus=0x0c400201 timeout=150
+log
+shot p3_net_east_upper_panel_trial.png
+
+
+# Approach the actual ceiling edge before jumping to its underside.
+walkto x=1850 z=-8100 radius=12 timeout=150
+
+# Normal head contact catches the3500ceiling; continue along its underside.
+walkto x=2100 z=-8100 radius=15 jump=12 timeout=150
+waitfor stage=13 scen=1 redcoins>=6 marioy>=3320 marioy<=3360 timeout=120
+walkto x=2340 z=-7860 radius=12 timeout=240
+walkto x=2560 z=-7640 radius=12 timeout=180
+walkto x=3300 z=-6900 radius=12 timeout=450
+waitfor stage=13 scen=1 redcoins>=7 marioy>=4580 marioy<=4690 timeout=120
+log
+shot p3_net_red6_underside.png
+
+walkto x=2560 z=-7640 radius=12 timeout=450
+walkto x=2340 z=-7860 radius=12 timeout=180
+walkto x=1900 z=-8100 radius=12 timeout=240
+hold B frames=2
+wait frames=30
+waitfor stage=13 scen=1 redcoins>=7 marioy>=3185 marioy<=3220 floory>=3180 timeout=150
+walkto x=1500 z=-8100 radius=15 timeout=150
+hold X frames=1
+wait frames=20
+walkto x=2340 z=-7860 radius=15 jump=12 spray=15 hover=1 timeout=180
+hold X frames=1
+wait frames=45
+
+# Require the actual idle TOP landing, including its rising slope after braking.
+waitfor stage=13 scen=1 redcoins>=7 marioy>=3490 marioy<=3650 floory>=3490 mstatus=0x0c400201 timeout=150
+log
+shot p3_net_top_entry_trial.png
+
+walkto x=2560 z=-7640 radius=15 timeout=240
+walkto x=3300 z=-6900 radius=15 timeout=450
+walkto x=4130 z=-6070 radius=15 timeout=450
+
+# The eighth coin starts the original reward camera before this waypoint finishes.
+walkto x=4200 z=-5800 radius=15 timeout=1800
+waitfor stage=13 scen=1 redcoins>=8 marioy>=5960 timeout=180
+log
+shot p3_net_red5_TOP_all8.png
+waitfor stage=13 scen=1 director mario dirstate=4 camDemo=0 redcoins>=8 timeout=1800
+walkto x=4000 z=-5600 radius=15 timeout=180
+walkto x=3850 z=-5400 radius=15 jump=12 timeout=180
+
+# Collect the original Shine; only the game reward/card flow writes progression.
+mash A period=30 until stage=13 scen=1 flag=0x10020 timeout=1500
+log
+shot p3_net_shine32_collected.png
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor stage=1 flag=0x10020 timeout=1
+log
+shot p3_net_shine32_plaza_NEEDS_GCI_COLD_PROOF.png
+end
