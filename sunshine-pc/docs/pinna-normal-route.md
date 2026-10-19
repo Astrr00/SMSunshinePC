@@ -1,6 +1,6 @@
 # Normal Pinna milestone
 
-Pinna Episode1 now passes normal entry, Mecha Bowser defeat, Shine30 collection/save and an independent fresh-process reload. Other Pinna episodes remain open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
+Pinna Episodes1–3 now pass normal completion, saved rewards and independent fresh-process reloads: Mecha Bowser/Shine30, Cannon and block secret/Shine31, and pirate-ship red coins/Shine32. The latest connected earned save contains thirteen Shines. Episode4 onward remains open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
 
 ## Earned prerequisites (2026-10-19)
 
@@ -118,4 +118,26 @@ python tools/gci_check.py "build/Route/<pinna2>/appdata/Sunshine/saves/JAP/Card 
 python tools/route.py Strict tools/routes/pc_pinna_cannon_reload.dev --name <cold> --appdata-from <pinna2> --seconds 240
 ```
 
-This certifies one complete Episode2 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Pinna Episode3 onward, later worlds, full image/audio quality and the full playthrough remain open. Matrix states remain17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
+This certifies one complete Episode2 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Pinna Episode4 onward, later worlds, full image/audio quality and the full playthrough remain open. Episode3 is recorded below. Matrix states remain17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
+
+## Complete normal pirate-ship red-coin milestone
+
+Accepted `p317_full` starts a fresh process from the earned twelve-Shine `si25_pinna2_full` profile. Normal File B menus, Delfino cannon, Episode3 selector and the beach gate lead to park13/1. Ordinary movement, jumping/Hover and ship-angle gates collect the ship and west-cage coins; normal green-panel flips and roof crawling collect the remaining coins. The lower bridge uses two top-side ground pounds; the accepted crossing has no electrical-damage samples. The actual east-cage wall jump reaches the3200panel, a near-edge jump catches the3500ceiling, and a normal Hover transfer reaches its TOP. Eight red coins trigger the original reward camera, followed by Shine32 collection, the original card flow and return to Delfino1/8.
+
+Full route: **rc0 / 334.85s**, final tick9275; all eight temporary red coins, saved flag0x10020, thirteen Shines, empty crash log and no active cheats. Minimum observed health is5; this is not a damage-free run. File B sector4/write17 contains exactly IDs0/1/10/20/30/31/32/86/94/95/98/107/117. All seven GCI sector checksums pass. Saved GCI SHA-256: `99f868abf960e0eba6d68b0e6fc4248947ba075f8d5b75dbaface967a96545e4`.
+
+Independent `p318_cold` starts after that process ends, using only its saved appdata and the normal File B menus. **rc0 / 50.23s**, final tick1363; Delfino1/8, health8, thirteen native Shines and every prior/new Shine flag pass. Its GCI is byte-identical to the saved result, with all seven checksums valid; crash log is empty and no cheats are active.
+
+Both accepted runs use `/O2 /Ob1` Strict executable SHA-256 `7c8ec93285ee025a85f233570c996b0bda0fa15a494991cacc1d0c0308335e19`: **STRICT: 0 unresolved symbols**,68 port checks and four focused renderer cases pass. The unchanged observation sources previously passed33 focused native parser cases (21 ship/red-coin cases, ten Mario-status cases, existing observations and wood-wait bounds). The full route and cold proof additionally exercise those observations on this final executable. No original game source or asset is changed.
+
+Public full route SHA-256: `e8d131c76e13402f68217ffb520543980b9216fb8fae22374bf4417ec35798b2`. Accepted private frozen route SHA-256: `d5b903f08b82b442deef9b40adb5a851bdc71e3e79d7cc3a8ec421f60747a4b3`. Only comments/blank lines differ; all291 commands are identical, with command-list SHA-256 `220db005ccc19c474e958cc53fe0491c2165e61c0a083d99ef56b9a77042b518`. Public/frozen cold route SHA-256: `7150dc7965442ab96f6a275f7bec490a6c5b60e25949fab10ae443a5b226dddc`.
+
+Failure controls retained privately: `p303_full` rejects an unreachable ship-rate band; `p304_full` misses the second ship with a stale target; `p305_full` expires during a still-progressing Hover flight; `p306_full`/`p307_full` expose the west-wall approach and fence-versus-roof distinction; `p308_full` jumps before braking and misses the floor flip. `p309_full` proves the real renderer abort during normal electrical damage. [Renderer correction, identical-input control and limits](gx-logic-invert.md). `p310_inv_control` survives that same hit but falls; it is not a full-route pass. `p311_full` reaches an impassable cage wall from the TOP; `p312_full` shows a ground pound outside the second patrol's collision radius. Corrected approach targets account for measured braking drift. `p313_full` actually reaches3200 and rejects an obsolete intermediate-height assumption; `p314_full` launches too early to catch the next ceiling. `p315_full` proves the TOP landing on the rising net at3613, beyond an obsolete flat-walkway bound. `p316_full` collects all eight coins but its last waypoint expires during the original reward camera; `p317_full` allows that camera to finish normally. No camera skip, invulnerability change, timing override or save edit is used.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_pinna_pirate_unassisted.dev --name <pinna3> --appdata-from si25_pinna2_full --seconds 1600
+python tools/gci_check.py "build/Route/<pinna3>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_pinna_pirate_reload.dev --name <cold> --appdata-from <pinna3> --seconds 240
+```
+
+This certifies one complete Episode3 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Episode4 onward, later worlds, full image/audio quality and the connected full playthrough remain open. Matrix states stay17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
