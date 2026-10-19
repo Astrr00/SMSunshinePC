@@ -46,7 +46,12 @@ python tools/route.py Strict tools/routes/pc_pinna_sunflower_first.dev --name <u
   [Earlier failed controls and the bounded shared-code audit](playability-audit-2026-10-19.md)
   remain explicit; none is attributed to a new game-code defect.
 
-## Remaining acceptance
+## Historical component limits
+
+The complete [Episode4 saved/cold milestone](pinna-normal-route.md#complete-normal-sunflower-milestone) now passes in
+`p409_full`/`p410_cold`. The limits below describe this earlier first-turtle run.
+
+### Limits at the time of this component
 
 Defeat the other four turtles, wait for all original flower revivals, collect
 Shine33, save through the original card flow and reload it in a fresh process.
