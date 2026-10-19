@@ -15,6 +15,14 @@ Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards 
 
 ## Dated evidence log
 
+**Mario viewport stack bounds (2026-10-19).** The normal occlusion/silhouette render helper supplied five floats to `GXGetViewportv`, which writes six; `GXProject` also reads the sixth.
+The PC buffer now holds all six values; the original PPC declaration is retained.
+The complete caller with actual getter/projector bodies triggers a four-byte ASan stack-buffer-overflow on old source and passes 60 projection checks after correction at `/O2 /Ob1`.
+Strict0, 68 port checks, identical report measures and all736 unchanged PPC objects pass; baseline-aware symbol validation finds zero new and 17 inherited missing/order errors.
+Normal eleven-Shine cold load `pa14_mario_viewport` passes (rc0/52.37s, health8, crash0/no cheats, unchanged valid GCI).
+[Proof and limits](mario-viewport-buffer.md): no historical crash cause or full rendered-occlusion correctness is claimed.
+Matrix states remain17/8/0; mirrors remain deferred.
+
 **PC omitted hide-info fields (2026-10-19).** Eight original `coro_ex6` steam nodes end before the helper's float/integer fields; the helper previously evaluated uninitialized locals at EOF.
 PC-only zero initialization retains the existing speed/timer decoding and yields deterministic omitted-field defaults.
 The complete helper with real streams passes 55 checks; the pattern-initialized old-source control fails four.
