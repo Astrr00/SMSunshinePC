@@ -18,13 +18,18 @@ Current work targets confirmed defects in shared gameplay code. Remaining accept
 
 The graphics are generated from recorded evidence, not live test runs. [Sources and regeneration](sunshine-pc/docs/img/README.md).
 
-### Implemented gameplay features
+### Original C++ game functions
 
-The [feature catalogue](sunshine-pc/docs/gameplay-features.tsv) tracks gameplay mechanics and systems separately from release checks and binary matching. "Implemented / observed" means normal native play has demonstrated the recorded behavior; each entry states its evidence and limits. Partial or unverified entries still need acceptance evidence and do not imply missing code.
+The GMSJ01 report snapshot records **8,763 original game C++ function symbols** across 381 `.cpp` units: **7,261 byte-identical reconstructions**, **1,428 compared but non-identical**, and **74 without a comparison value**.
+The scope includes emitted helpers, constructors and destructors from units classified as `game`; it excludes SDK, JSystem, C files and new PC-port functions.
 
-![Gameplay features: counts of systems observed working with bounded implementation evidence, partially verified systems and systems not yet verified.](sunshine-pc/docs/img/features.svg)
+![Original game C++ functions: 7,261 byte-identical reconstructions, 1,428 compared but non-identical and 74 without a comparison value, out of 8,763 function symbols.](sunshine-pc/docs/img/functions.svg)
 
-This is a curated list of tracked systems, not a count of C++ functions or a percentage of the game completed. Update the catalogue as normal-play evidence grows, then [regenerate the graphics](sunshine-pc/docs/img/README.md#regenerate).
+This counts emitted binary function symbols, not unique C++ declarations or verified native gameplay behavior.
+A non-identical or missing comparison does not mean the implementation is absent; the report cannot supply a reliable implemented-versus-missing total for those functions.
+The measurement snapshot is dated **2026-10-16**, like the broader matching chart below.
+Normal-play evidence remains in the [gameplay-system catalogue](sunshine-pc/docs/gameplay-features.tsv) and [its graphic](sunshine-pc/docs/img/features.svg).
+[Counting rules and regeneration](sunshine-pc/docs/img/README.md#regenerate).
 
 ## Build from source
 

@@ -1,12 +1,13 @@
 # Status graphics
 
-Three checked-in SVGs serve different purposes:
+Four checked-in SVGs serve different purposes:
 
 - `status.svg` counts the rows in [playability-matrix.tsv](../playability-matrix.tsv) and lists open acceptance checks. A `passed-bounded` row certifies only its recorded evidence. The rows have unequal scope; their counts are not a completion percentage.
 - `matching.svg` reads `sms/build/GMSJ01/report.json`. It shows byte-identical functions, matched code bytes and complete units. Each treemap cell represents a source unit, weighted by its function count. Green represents matched functions within that unit. Open the SVG directly to inspect cell tooltips; README image embeds may not expose them.
+- `functions.svg` reads the same report but includes only units whose `metadata.progress_categories` contains `game` and whose `metadata.source_path` ends in `.cpp`. Each listed function symbol counts once per unit, including emitted helpers, constructors and destructors. SDK, JSystem, C units and PC additions are excluded. A score of 100 is counted as byte-identical reconstruction; lower scores are compared/non-identical; an absent score is unclassified, not proof of missing code. Unit list lengths and matched totals must agree with the report's measures. These are emitted binary symbols, not deduplicated C++ declarations or verified native implementations. The report cannot establish a complete implemented-versus-missing count. The checked-in measurement date is 2026-10-16.
 - `features.svg` counts the explicitly scoped systems in [gameplay-features.tsv](../gameplay-features.tsv). `observed-bounded` means the implementation has been exercised in normal native play within the recorded scope. `partial` means some behavior has evidence while explicit checks remain open. `unverified` means no accepted normal-play milestone is recorded for that system; it does not mean its code is absent. The list is curated, can grow and is not an exhaustive denominator for game completion. Evidence paths are relative to the catalogue's directory.
 
-All three contain a title and text description for accessibility. Feature cells include evidence and scope in their tooltips. The root README also provides text summaries and links to the evidence.
+All four contain a title and text description for accessibility. Feature cells include evidence and scope in their tooltips. The root README also provides text summaries and links to the evidence.
 
 ## Regenerate
 
@@ -25,4 +26,4 @@ An alternate report and output location can be supplied:
 python sunshine-pc/tools/status_treemap.py path/to/report.json path/to/status.svg
 ```
 
-`matching.svg` and `features.svg` are written beside the requested status output. For new evidence, edit the feature catalogue's status, scope and source together, then regenerate; do not infer feature status from matching or linking success. Inspect the graphics at README display width before committing; keep generated raster previews in an ignored build directory.
+`matching.svg`, `functions.svg` and `features.svg` are written beside the requested status output. For new evidence, edit the feature catalogue's status, scope and source together, then regenerate; do not infer feature status from matching or linking success. Inspect the graphics at README display width before committing; keep generated raster previews in an ignored build directory.

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate playability, gameplay-feature and matching graphics for the README.
+"""Generate playability, game-function, gameplay-feature and matching graphics for the README.
 
 Usage: python sunshine-pc/tools/status_treemap.py [report.json] [status.svg]
-Matching and gameplay-feature graphics are written beside status.svg.
+Matching, game-function and gameplay-feature graphics are written beside status.svg.
 Uses only the standard library; reads the matrix and build report, not game data.
 """
 import csv
@@ -116,6 +116,54 @@ def feature_graphic(rows):
                'Unverified does not mean unimplemented. Not overall completion.', y+76, parts)
 
 
+def function_graphic(report):
+    """Count original game C++ symbols; do not turn comparison scores into gameplay claims."""
+    counts = Counter()
+    units = 0
+    for unit in report["units"]:
+        metadata = unit.get("metadata", {})
+        if "game" not in metadata.get("progress_categories", []) or not metadata.get("source_path", "").endswith(".cpp"):
+            continue
+        functions = unit.get("functions", [])
+        if len(functions) != int(unit["measures"].get("total_functions", 0)):
+            raise ValueError("Game C++ function list disagrees with unit total")
+        if len({f["name"] for f in functions}) != len(functions):
+            raise ValueError("Duplicate function within a game C++ unit")
+        units += 1
+        matched = 0
+        for function in functions:
+            score = function.get("fuzzy_match_percent")
+            if score is not None and not 0 <= score <= 100:
+                raise ValueError("Invalid function comparison score")
+            state = "uncompared" if score is None else "matched" if score == 100 else "different"
+            counts[state] += 1
+            matched += state == "matched"
+        if matched != int(unit["measures"].get("matched_functions", 0)):
+            raise ValueError("Game C++ matching count disagrees with function list")
+    total = counts.total()
+    if not total:
+        raise ValueError("Report contains no original game C++ functions")
+    parts = [text(32, 42, "SUNSHINE / ORIGINAL GAME C++", 14, GREEN, 700),
+             text(32, 87, "Original C++ function reconstruction", 34, weight=700),
+             text(32, 118, f"{total:,} function symbols across {units} game C++ source units.", 19, MUTED)]
+    for i, (state, label, color) in enumerate([
+            ("matched", "Byte-identical reconstruction", GREEN),
+            ("different", "Compared, non-identical", GOLD),
+            ("uncompared", "No comparison value", ORANGE)]):
+        x = 32 + i * 316
+        parts += [rect(x, 146, 304, 116, PANEL, 12),
+                  text(x+20, 205, f"{counts[state]:,}", 48, color, 700),
+                  text(x+20, 239, label, 17, MUTED)]
+    parts += [text(32, 300, "Scope: report category game, .cpp units only; excludes SDK, JSystem and C units.", 17, MUTED),
+              text(32, 329, "Includes emitted helpers, constructors and destructors; not unique source declarations.", 17, MUTED),
+              text(32, 358, "A different or missing comparison does not establish an absent implementation.", 17, MUTED),
+              text(32, 387, "Source: GMSJ01 report snapshot (2026-10-16). No native gameplay certification.", 17, MUTED)]
+    return svg("Original game C++ function reconstruction",
+               f'{counts["matched"]:,} of {total:,} function symbols byte-identical; '
+               f'{counts["different"]:,} compared but non-identical; {counts["uncompared"]:,} without comparison. '
+               'Not a count of verified native gameplay functions.', 420, parts)
+
+
 def port_graphic(rows):
     counts = Counter(r["status"] for r in rows)
     parts = [text(32, 42, "SUNSHINE / WINDOWS PORT", 14, GREEN, 700),
@@ -204,11 +252,13 @@ def main():
     rows = port_rows(ROOT / "sunshine-pc/docs/playability-matrix.tsv")
     features = port_rows(ROOT / "sunshine-pc/docs/gameplay-features.tsv", FEATURE_STATES)
     # Validate and render all inputs before writing any artifact.
+    matching = json.loads(report.read_text(encoding="utf-8"))
     graphics = [(out, port_graphic(rows)),
-                (out.with_name("matching.svg"), matching_graphic(json.loads(report.read_text(encoding="utf-8")))),
+                (out.with_name("matching.svg"), matching_graphic(matching)),
+                (out.with_name("functions.svg"), function_graphic(matching)),
                 (out.with_name("features.svg"), feature_graphic(features))]
     if len({path for path, _ in graphics}) != len(graphics):
-        raise ValueError("The status output must not be named matching.svg or features.svg")
+        raise ValueError("The status output must not be named matching.svg, functions.svg or features.svg")
     out.parent.mkdir(parents=True, exist_ok=True)
     for path, content in graphics:
         path.write_text(content, encoding="utf-8", newline="\n")

@@ -11,6 +11,26 @@ NS = {"s": "http://www.w3.org/2000/svg"}
 
 
 class StatusGraphicsTest(unittest.TestCase):
+    def test_original_cpp_counts_exclude_libraries_and_missing_scores(self):
+        unit = {"metadata": {"progress_categories": ["game"], "source_path": "src/Mario.cpp"},
+                "measures": {"total_functions": 3, "matched_functions": 1},
+                "functions": [{"name": "match", "fuzzy_match_percent": 100},
+                              {"name": "different", "fuzzy_match_percent": 80}, {"name": "unknown"}]}
+        report = {"units": [unit,
+                  {"metadata": {"progress_categories": ["sdk"], "source_path": "src/lib.cpp"}},
+                  {"metadata": {"progress_categories": ["game"], "source_path": "src/video.c"}}]}
+        root = ET.fromstring(status.function_graphic(report))
+        description = root.find("s:desc", NS).text
+        self.assertIn("1 of 3 function symbols byte-identical", description)
+        self.assertIn("1 compared but non-identical; 1 without comparison", description)
+        unit["measures"]["matched_functions"] = 2
+        with self.assertRaises(ValueError):
+            status.function_graphic(report)
+        unit["measures"]["matched_functions"] = 1
+        unit["functions"][2]["name"] = "match"
+        with self.assertRaises(ValueError):
+            status.function_graphic(report)
+
     def test_feature_counts_preserve_verification_limits(self):
         rows = [{"id": "GF-A", "area": "Spray & Hover", "status": "observed-bounded",
                  "evidence": "route.md", "scope": "One normal route <only>"},
