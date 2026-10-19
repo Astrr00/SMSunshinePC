@@ -38,6 +38,8 @@
 #include "Enemy/EnemyMario.hpp"
 #include "MoveBG/ModelGate.hpp"
 #include "MoveBG/MapObjRicco.hpp"
+#include "MoveBG/MapObjMamma.hpp"
+#include "Enemy/ChuuHana.hpp"
 #include "Player/MarioAccess.hpp"
 #include "Enemy/GateKeeper.hpp"
 #include "Enemy/BossPakkun.hpp"
@@ -99,7 +101,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, GessoHp, GessoMode, GessoPull, Held, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -199,6 +201,12 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("gessohp=", 0) == 0) k = Command::Cond::GessoHp;
 	else if (tok.rfind("gessomode=", 0) == 0) k = Command::Cond::GessoMode;
 	else if (tok.rfind("gessopull=", 0) == 0) k = Command::Cond::GessoPull;
+	else if (tok.rfind("mirrorSleft=", 0) == 0) k = Command::Cond::MirrorSLeft;
+	else if (tok.rfind("mirrorMleft=", 0) == 0) k = Command::Cond::MirrorMLeft;
+	else if (tok.rfind("mirrorLleft=", 0) == 0) k = Command::Cond::MirrorLLeft;
+	else if (tok.rfind("plungelowet=", 0) == 0) k = Command::Cond::PlungeloWet;
+	else if (tok.rfind("plungeloedge>=", 0) == 0) k = Command::Cond::PlungeloEdgeGe;
+	else if (tok.rfind("plungeloedge=", 0) == 0) k = Command::Cond::PlungeloEdge;
 	else if (tok.rfind("held=", 0) == 0) k = Command::Cond::Held;
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
@@ -210,7 +218,9 @@ bool parseCond(const std::string& tok, Command& c)
 	const size_t eq = tok.find('=');
 	int value = 0;
 	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
-	    || k == Command::Cond::CargoYLe || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held) {
+	    || k == Command::Cond::CargoYLe || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held
+	    || k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft
+	    || k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe || k == Command::Cond::PlungeloWet) {
 		const char* end = tok.c_str() + tok.size();
 		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < -0x8000 || value > 0x7fff) return false;
@@ -218,6 +228,10 @@ bool parseCond(const std::string& tok, Command& c)
 		if (k == Command::Cond::GessoHp && (value < 0 || value > 255)) return false;
 		if (k == Command::Cond::GessoMode && (value < 0 || value > 7)) return false;
 		if ((k == Command::Cond::Held || k == Command::Cond::GessoPull) && (value < 0 || value > 1)) return false;
+		if ((k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft)
+		    && (value < 0 || value > (k == Command::Cond::MirrorSLeft ? 1 : k == Command::Cond::MirrorMLeft ? 2 : 3))) return false;
+		if ((k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe) && (value < 0 || value > 4)) return false;
+		if (k == Command::Cond::PlungeloWet && (value < 0 || value > 1)) return false;
 	} else if (eq != std::string::npos) value = static_cast<int>(std::strtol(tok.c_str() + eq + 1, nullptr, 0));
 	c.conds.emplace_back(k, value);
 	return true;
@@ -632,6 +646,53 @@ TCraneUpDown* findRiccoCrane()
 	return dynamic_cast<TCraneUpDown*>(JDrama::TNameRefGen::search("craneUpDown 0"));
 }
 
+const TLeanMirror* findMirror(const char* name)
+{
+	if (!sceneReady() || gpApplication.mCurrArea.getStage() != 4 || gpApplication.mCurrArea.getScenario() != 1) return nullptr;
+	return dynamic_cast<const TLeanMirror*>(JDrama::TNameRefGen::search(name));
+}
+
+// Observe a pushed or teetering enemy on the mirror Mario occupies; never change aim or actors.
+const TChuuHana* observedPlungelo(bool pushed)
+{
+	if (!gpMarioOriginal || !gpConductor) return nullptr;
+	const auto& mario = gpMarioOriginal->mPosition;
+	const TLeanMirror* panel = nullptr;
+	float best = 1.e9f;
+	for (const char* name : {"mirrorS", "mirrorM", "mirrorL"})
+		if (const auto* mirror = findMirror(name)) {
+			const float d = std::hypot(mario.x - mirror->mPosition.x, mario.z - mirror->mPosition.z);
+			if (mirror->mHitsLeft > 0 && d < mirror->mHalfSize + 200.f && d < best && std::fabs(mario.y - mirror->mPosition.y) < 700.f) {
+				panel = mirror;
+				best = d;
+			}
+		}
+	if (!panel) return nullptr;
+	const TChuuHana* observed = nullptr;
+	best = 1.e9f;
+	for (auto it = gpConductor->unk20.begin(); it != gpConductor->unk20.end(); ++it)
+		for (int i = 0; i < (*it)->getObjNum(); ++i)
+			if (const auto* enemy = dynamic_cast<const TChuuHana*>((*it)->getObj(i))) {
+				if (enemy->unk218 != panel || enemy->checkLiveFlag(LIVE_FLAG_DEAD) || enemy->checkLiveFlag(LIVE_FLAG_HIDDEN)) continue;
+				// These are the original KeepBalance start, loop and shaken animations (chuuhana.cpp).
+				if (pushed ? !enemy->isBckAnm(4) : !enemy->isBckAnm(1) && !enemy->isBckAnm(2) && !enemy->isBckAnm(7)) continue;
+				const float d = std::hypot(enemy->mPosition.x - mario.x, enemy->mPosition.z - mario.z);
+				if (d >= best) continue;
+				best = d;
+				observed = enemy;
+			}
+	return observed;
+}
+
+// Teetering side: 0 none, 1 +X, 2 -X, 3 +Z, 4 -Z. Routes choose fixed opposite landing points.
+int plungeloEdge()
+{
+	const auto* enemy = observedPlungelo(false);
+	if (!enemy) return 0;
+	const float x = enemy->mPosition.x - enemy->unk218->mPosition.x, z = enemy->mPosition.z - enemy->unk218->mPosition.z;
+	return std::fabs(x) >= std::fabs(z) ? (x >= 0.f ? 1 : 2) : (z >= 0.f ? 3 : 4);
+}
+
 // The nearest live, shown small enemy within r of Mario in XZ and 300 in Y (`clear`), or null.
 const TSmallEnemy* nearestSmallEnemy(float r)
 {
@@ -819,6 +880,25 @@ void logGesso(const char* tag)
 	}
 }
 
+// Read-only observations for the original mirror fight; actions still use ordinary PAD inputs.
+void logGelatoMirrors(const char* tag)
+{
+	if (gpApplication.mCurrArea.getStage() != 4 || gpApplication.mCurrArea.getScenario() != 1 || !gpConductor) return;
+	for (const char* name : {"mirrorS", "mirrorM", "mirrorL"})
+		if (const auto* mirror = findMirror(name))
+			std::printf("[%s-mirror] name=%s left=%d state=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, name, mirror->mHitsLeft, (int)mirror->mState,
+			    mirror->mPosition.x, mirror->mPosition.y, mirror->mPosition.z, gTick);
+	for (auto it = gpConductor->unk20.begin(); it != gpConductor->unk20.end(); ++it)
+		for (int i = 0; i < (*it)->getObjNum(); ++i)
+			if (const auto* enemy = dynamic_cast<const TChuuHana*>((*it)->getObj(i))) {
+				const auto* nerve = enemy->mSpine ? enemy->mSpine->getCurrentNerve() : nullptr;
+				std::printf("[%s-plungelo] i=%d dead=%d hidden=%d pos=(%.1f,%.1f,%.1f) nerve=%s time=%d tick=%d\n", tag, i,
+				    (int)enemy->checkLiveFlag(LIVE_FLAG_DEAD), (int)enemy->checkLiveFlag(LIVE_FLAG_HIDDEN),
+				    enemy->mPosition.x, enemy->mPosition.y, enemy->mPosition.z, nerve ? typeid(*nerve).name() : "none",
+				    enemy->mSpine ? enemy->mSpine->getTime() : -1, gTick);
+			}
+}
+
 void logStatus(const char* tag)
 {
 	std::printf("[%s-thp] thp=%d tick=%d\n", tag, THPPlayerGetState(), gTick);
@@ -832,6 +912,9 @@ void logStatus(const char* tag)
 	logBoss(tag);
 	logRiccoGate(tag);
 	logGesso(tag);
+	logGelatoMirrors(tag);
+	if (gpApplication.mCurrArea.getStage() == 4 && gpApplication.mCurrArea.getScenario() == 1)
+		std::printf("[%s-plungelo-edge] side=%d wet=%d tick=%d\n", tag, plungeloEdge(), observedPlungelo(true) ? 1 : 0, gTick);
 	logJpa(tag);
 	if (gpCardLoad)
 		std::printf("[%s-card] unk10=%d unk14=%d unk1C=%d\n", tag, gpCardLoad->unk10, gpCardLoad->unk14,
@@ -1012,6 +1095,20 @@ bool condHolds(const Command& c)
 			}
 			break;
 		}
+		case Command::Cond::MirrorSLeft:
+		case Command::Cond::MirrorMLeft:
+		case Command::Cond::MirrorLLeft: {
+			const auto* mirror = findMirror(kind == Command::Cond::MirrorSLeft ? "mirrorS" : kind == Command::Cond::MirrorMLeft ? "mirrorM" : "mirrorL");
+			ok = mirror && mirror->mHitsLeft == val;
+			break;
+		}
+		case Command::Cond::PlungeloEdge:
+		case Command::Cond::PlungeloEdgeGe: {
+			const int edge = sceneReady() ? plungeloEdge() : 0;
+			ok = kind == Command::Cond::PlungeloEdge ? edge == val : edge >= val;
+			break;
+		}
+		case Command::Cond::PlungeloWet: ok = (sceneReady() && observedPlungelo(true)) == (val != 0); break;
 		case Command::Cond::Held: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mHeldObject != nullptr) == (val != 0); break;
 		case Command::Cond::Squat: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT) == (val != 0); break;
 		case Command::Cond::GkAwake: {

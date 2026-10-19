@@ -9,6 +9,19 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ("plungelo_wet", "guard radius=0 until plungelowet=0 plungelowet=1\nend\n", 0, "done at tick"),
+    ("plungelo_wet_invalid", "guard radius=0 until plungelowet=2\nend\n", 2, "unexpected token in guard"),
+    ("plungelo_wet_fraction", "guard radius=0 until plungelowet=1.0\nend\n", 2, "unexpected token in guard"),
+    ("plungelo_wet_outside", "waitfor plungelowet=1 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    ("mirror_limits", "guard radius=0 until mirrorSleft=1 mirrorMleft=2 mirrorLleft=3 plungeloedge=0 plungeloedge>=4\nend\n", 0, "done at tick"),
+    ("mirror_outside_scene", "waitfor mirrorSleft=0 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    ("mirror_s_invalid", "guard radius=0 until mirrorSleft=2\nend\n", 2, "unexpected token in guard"),
+    ("mirror_m_invalid", "guard radius=0 until mirrorMleft=3\nend\n", 2, "unexpected token in guard"),
+    ("mirror_l_invalid", "guard radius=0 until mirrorLleft=4\nend\n", 2, "unexpected token in guard"),
+    ("mirror_fraction", "guard radius=0 until mirrorSleft=1.0\nend\n", 2, "unexpected token in guard"),
+    ("plungelo_invalid", "guard radius=0 until plungeloedge=5\nend\n", 2, "unexpected token in guard"),
+    ("plungelo_negative", "guard radius=0 until plungeloedge>=-1\nend\n", 2, "unexpected token in guard"),
+    ("plungelo_fraction", "guard radius=0 until plungeloedge>=1.0\nend\n", 2, "unexpected token in guard"),
     ("gesso_pull", "guard radius=0 until gessopull=0 gessopull=1\nend\n", 0, "done at tick"),
     ("gesso_pull_invalid", "guard radius=0 until gessopull=2\nend\n", 2, "unexpected token in guard"),
     ("gesso_pull_fraction", "guard radius=0 until gessopull=1.0\nend\n", 2, "unexpected token in guard"),

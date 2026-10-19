@@ -258,7 +258,7 @@ python tools/route.py Strict tools/routes/pc_gelato_entry_unassisted.dev --name 
 python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
 ```
 
-This certifies normal Gelato entry and a saved entrance unlock, not a Gelato mission reward or Wiggler defeat. Those remain open. The independent cold run `nw67_gelato_castle` observes saved flag0x10387 and re-enters its normal portal from Delfino1/6 with health8. The normal next Delfino scenario is6 after both Ricco and Mamma unlock flags are saved; future cold routes must allow that original progression.
+This entry component certifies the saved Gelato entrance unlock. The complete sandcastle reward/save proof follows below; mirrors and Wiggler remain open. The independent cold run `nw67_gelato_castle` observes saved flag0x10387 and re-enters its normal portal from Delfino1/6 with health8. The normal next Delfino scenario is6 after both Ricco and Mamma unlock flags are saved; future cold routes must allow that original progression.
 
 
 ## Normal Gelato sandcastle entry and middle approach
@@ -277,7 +277,7 @@ Accepted executable SHA256: `2cb29905a29c3186735cadd65520a53c4e32d9c1f78daeafd6c
 python tools/route.py Strict tools/routes/pc_gelato_sandcastle_approach.dev --name <unique> --appdata-from nw66_gelato_hover_entry --seconds 1000
 ```
 
-This certifies the connected secret entrance and its lower/middle approach only. The upper crossing, tower, Shine20 reward/save/cold reload and Gelato's boss milestone remain open; matrix statuses stay16/25.
+This component certifies the connected secret entrance and its lower/middle approach only. The complete upper crossing, Shine20 save and independent cold proof follow below; mirrors and Wiggler remain open. Matrix statuses stay16/25.
 
 
 ## Normal Gelato sandcastle reward, save and cold reload
@@ -299,3 +299,17 @@ python tools/route.py Strict tools/routes/pc_gelato_sandcastle_reload.dev --name
 ```
 
 This certifies one complete normal first-mission pass plus its independent persisted-reward reload, not consecutive full-route repeatability. The mirror mission (Shine21), Wiggler (Shine22) and their saved/cold proofs remain open. Matrix statuses stay16/25.
+
+
+## Mirror component observations; route tuning deferred (2026-10-18)
+
+`nw95_gelato_palm_grab` reaches the original palm leaves through normal episode2 entry, the NPC introduction and repeated ordinary A/up-stick inputs: rc0/197 s, health8, empty crash log and no active cheats.
+Later controller trials land on the small mirror and push its enemy with normal water inputs.
+`nw100` observes the original KeepBalance state on its east edge; its attempted ground pound falls off and the route fails.
+`nw102` and `nw103` observe water contact but time out before teetering; empty crash logs are not crashes.
+No mirror release, Shine21, Wiggler victory or saved reward is certified.
+
+The read-only `mirrorSleft`/`mirrorMleft`/`mirrorLleft`, `plungelowet` and `plungeloedge` conditions expose the existing actors' counters and animations.
+They do not steer, aim or change gameplay actors.
+Parser/range and wrong-scene tests pass; the native water-contact and teeter-side positive paths above are observed, while a native cleared-mirror positive path remains untested.
+The owner reprioritized shared playability fixes over further mirror-input trials; the failed private trials are retained.
