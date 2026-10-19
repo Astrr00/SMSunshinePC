@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Render the README status treemap (docs/img/status.svg).
+"""Generate separate playability and matching graphics for the README.
 
-Left: decomp functions per library/unit from the objdiff report (green = byte-identical share).
-Bottom: playability rows from docs/playability-matrix.tsv (colour by acceptance status).
-Usage (repo root): python sunshine-pc/tools/status_treemap.py [report.json] [out.svg]
-Stdlib only; reads no game data.
+Usage: python sunshine-pc/tools/status_treemap.py [report.json] [status.svg]
+The matching graphic is written beside status.svg as matching.svg.
+Uses only the standard library; reads the matrix and build report, not game data.
 """
-import json, re, sys
+import csv
+import json
+import sys
+import textwrap
+from collections import Counter
 from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-REPORT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "sms/build/GMSJ01/report.json"
-OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "sunshine-pc/docs/img/status.svg"
-BG, CELL_GAP = "#0d1117", 1.0
-GREEN, GREY = "#2da44e", "#6e7681"
+BG, PANEL = "#101b2a", "#19283a"
+INK, MUTED = "#f3f7fb", "#b9cbdc"
+GREEN, ORANGE, GOLD, GREY = "#5fd5b2", "#ffb181", "#f0d47b", "#42566d"
+STATES = {"passed-bounded": GREEN, "open": ORANGE, "external-check-required": GOLD}
 
 
 def squarify(items, x, y, w, h):
@@ -56,92 +59,128 @@ def squarify(items, x, y, w, h):
     return out
 
 
-def rect(x, y, w, h, fill, extra=""):
-    return f'<rect x="{x:.1f}" y="{y:.1f}" width="{max(w,0):.1f}" height="{max(h,0):.1f}" fill="{fill}"{extra}/>'
+def rect(x, y, w, h, fill, radius=0, extra=""):
+    return f'<rect x="{x:.2f}" y="{y:.2f}" width="{max(w, 0):.2f}" height="{max(h, 0):.2f}" rx="{radius}" fill="{fill}" {extra}/>'
 
 
-def label(x, y, w, h, text, size=11, color="#fff", bold=False):
-    n = int((w - 6) / (size * 0.6))
-    if n < 3 or h < size + 4:
-        return ""
-    t = text if len(text) <= n else text[: n - 1] + "…"
-    wt = ' font-weight="700"' if bold else ""
-    return (f'<text x="{x+4:.1f}" y="{y+size+2:.1f}" font-size="{size}"{wt} fill="{color}" '
-            f'stroke="#000" stroke-opacity=".55" stroke-width="3" paint-order="stroke">{escape(t)}</text>')
+def text(x, y, value, size=18, color=INK, weight=400):
+    return f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" fill="{color}">{escape(str(value))}</text>'
 
 
-def decomp_panel(x0, y0, w, h):
-    rep = json.load(open(REPORT))
+def svg(title, description, height, parts):
+    return '\n'.join([
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="{height}" viewBox="0 0 1000 {height}" role="img" aria-labelledby="title desc" font-family="Segoe UI,Arial,sans-serif">',
+        f'<title id="title">{escape(title)}</title>',
+        f'<desc id="desc">{escape(description)}</desc>',
+        rect(0, 0, 1000, height, BG, 16), *parts, '</svg>', '',
+    ])
+
+
+def port_rows(path):
+    with path.open(encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f, delimiter="\t"))
+    if not rows or any(not r.get("id") or not r.get("area") or r.get("status") not in STATES for r in rows):
+        raise ValueError("Matrix needs nonempty id/area fields and a recognized status for every row")
+    if len({r["id"] for r in rows}) != len(rows):
+        raise ValueError("Duplicate matrix IDs would inflate the status counts")
+    return rows
+
+
+def port_graphic(rows):
+    counts = Counter(r["status"] for r in rows)
+    parts = [text(32, 42, "SUNSHINE / WINDOWS PORT", 14, GREEN, 700),
+             text(32, 87, "Playability evidence", 36, weight=700),
+             text(32, 118, "A complete, unassisted playthrough is still open.", 19, MUTED)]
+    for i, (state, label) in enumerate(zip(STATES, ["Passed with bounded evidence", "Open acceptance checks", "External check required"])):
+        x = 32 + i * 316
+        parts += [rect(x, 146, 304, 116, PANEL, 12), text(x+20, 205, counts[state], 48, STATES[state], 700),
+                  text(x+20, 239, label, 17, MUTED)]
+    # Equal segments represent matrix rows, not effort or overall completion.
+    cell = 936 / len(rows)
+    for i, row in enumerate(sorted(rows, key=lambda r: list(STATES).index(r["status"]))):
+        parts.append(f'<g><title>{escape(row["id"] + ": " + row["area"] + " — " + row["status"])}</title>'
+                     + rect(32+i*cell, 282, cell-3, 10, STATES[row["status"]], 3) + '</g>')
+    parts += [text(32, 322, f'{len(rows)} checks with unequal scope. This is not a completion percentage.', 17, MUTED),
+              text(32, 369, "Still to verify", 23, weight=700)]
+    pending = [r for r in rows if r["status"] == "open"]
+    for i, row in enumerate(pending):
+        x, y = 32 + (i % 2) * 480, 388 + (i // 2) * 86
+        parts += [rect(x, y, 456, 74, PANEL, 10), text(x+16, y+23, row["id"], 12, ORANGE, 700)]
+        for j, line in enumerate(textwrap.wrap(row["area"], 43)):
+            parts.append(text(x+16, y+47+j*19, line, 17))
+    y = 388 + ((len(pending)+1)//2)*86 + 5
+    for row in rows:
+        if row["status"] == "external-check-required":
+            parts += [rect(32, y, 936, 62, PANEL, 10), text(48, y+25, row["id"] + " / EXTERNAL CHECK", 12, GOLD, 700),
+                      text(48, y+48, row["area"], 18)]
+            y += 76
+    parts.append(text(32, y+24, "Source: playability-matrix.tsv · A pass certifies only its recorded test scope.", 16, MUTED))
+    return svg("Windows port playability evidence", f'{counts["passed-bounded"]} of {len(rows)} checks passed with bounded evidence; '
+               f'{counts["open"]} open and {counts["external-check-required"]} requiring an external check. Not overall completion.', y+48, parts)
+
+
+def matching_graphic(report):
+    totals = report["measures"]
+    mf, tf = int(totals["matched_functions"]), int(totals["total_functions"])
+    mc, tc = int(totals["matched_code"]), int(totals["total_code"])
+    cu, tu = int(totals["complete_units"]), int(totals["total_units"])
+    if not (0 <= mf <= tf and tf > 0 and 0 <= mc <= tc and tc > 0 and 0 <= cu <= tu and tu > 0):
+        raise ValueError("Invalid matching report totals")
+    parts = [text(32, 42, "SUNSHINE / GMSJ01 DECOMPILATION", 14, GREEN, 700),
+             text(32, 87, "Matching the original binary", 36, weight=700),
+             text(32, 118, "Byte matching measures reconstruction, not Windows playability.", 19, MUTED)]
+    metrics = [(f'{100*mf/tf:.1f}%', "Byte-identical functions", f'{mf:,} / {tf:,} functions'),
+               (f'{100*mc/tc:.2f}%', "Matched code bytes", f'{mc:,} / {tc:,} bytes'),
+               (f'{cu} / {tu}', "Complete units", "Build report classification")]
+    for i, (value, label, detail) in enumerate(metrics):
+        x = 32+i*316
+        parts += [rect(x, 146, 304, 126, PANEL, 12), text(x+20, 198, value, 40, GREEN, 700),
+                  text(x+20, 232, label, 18), text(x+20, 255, detail, 15, MUTED)]
+    parts += [rect(32, 298, 12, 12, GREEN, 2), text(52, 310, "Byte-identical", 16, MUTED),
+              rect(190, 298, 12, 12, GREY, 2), text(210, 310, "Not byte-identical", 16, MUTED),
+              text(540, 310, "Cell area = function count in a unit", 16, MUTED)]
     groups = {}
-    for u in rep["units"]:
+    for u in report["units"]:
         m = u["measures"]
-        parts = u["name"].split("/")[1:]  # drop "mario"
-        key = "/".join(parts[:2]) if parts and parts[0] == "JSystem" and len(parts) > 2 else (parts[0] if parts else "main")
-        groups.setdefault(key, []).append((m.get("total_functions", 0), m.get("matched_functions", 0), parts[-1]))
-    tot = rep["measures"]
-    s = []
-    glist = sorted(((sum(t for t, _, _ in v), k) for k, v in groups.items()), reverse=True)
-    for (gx, gy, gw, gh), k in [((a, b, c, d), p) for p, a, b, c, d in squarify(glist, x0, y0, w, h)]:
-        units = sorted(groups[k], reverse=True)
-        for (t, mt, name), ux, uy, uw, uh in [(p, a, b, c, d) for p, a, b, c, d in squarify([(u[0], u) for u in units], gx, gy, gw, gh)]:
-            frac = mt / t if t else 1.0
-            s.append(rect(ux + CELL_GAP, uy + CELL_GAP, uw - 2 * CELL_GAP, uh - 2 * CELL_GAP, GREY))
-            s.append(rect(ux + CELL_GAP, uy + CELL_GAP, (uw - 2 * CELL_GAP) * frac, uh - 2 * CELL_GAP, GREEN))
-        s.append(rect(gx, gy, gw, gh, "none", ' stroke="#0d1117" stroke-width="3"'))
-        s.append(label(gx, gy, gw, gh, k, 15, "#fff", True))
-    return "".join(s), tot["matched_functions"], tot["total_functions"]
-
-
-MATRIX = ROOT / "sunshine-pc/docs/playability-matrix.tsv"
-STATE_COLOR = {"passed-bounded": GREEN, "open": "rgb(200,80,50)"}  # anything else (external-check-required): grey
-
-
-def port_rows():
-    lines = MATRIX.read_text(encoding="utf-8").splitlines()
-    head = lines[0].split("\t")
-    ia, ist = head.index("area"), head.index("status")
-    return [(c[ia], c[ist]) for c in (l.split("\t") for l in lines[1:] if l.strip())]
-
-
-def port_panel(x0, y0, w, h):
-    rows = port_rows()
-    items = [(1.0, r) for r in rows]
-    s = []
-    for (name, state), x, y, cw, ch in squarify(items, x0, y0, w, h):
-        s.append(rect(x + 1, y + 1, cw - 2, ch - 2, STATE_COLOR.get(state, GREY)))
-        words, lines, cur = re.split(r"[,(]", name)[0].split(), [], ""
-        per = max(int((cw - 10) / 9.0), 4)
-        for wd in words:
-            if cur and len(cur) + 1 + len(wd) > per:
-                lines.append(cur)
-                cur = wd
-            else:
-                cur = (cur + " " + wd).strip()
-        lines.append(cur)
-        for i, ln in enumerate(lines[:3]):
-            s.append(label(x + 1, y + 1 + i * 17, cw - 2, ch - 2, ln, 15, "#fff", True))
-        s.append(label(x + 1, y + 1 + min(len(lines), 3) * 17, cw - 2, ch - 2, state, 13, "#fff"))
-    passed = sum(st == "passed-bounded" for _, st in rows)
-    return "".join(s), passed, len(rows)
+        total, matched = int(m.get("total_functions", 0)), int(m.get("matched_functions", 0))
+        if not 0 <= matched <= total:
+            raise ValueError(f'Invalid function counts in {u["name"]}')
+        names = u["name"].split("/")[1:]
+        key = "/".join(names[:2]) if len(names)>2 and names[0]=="JSystem" else (names[0] if names else "main")
+        groups.setdefault(key, []).append((total, matched, u["name"]))
+    items = sorted(((sum(t for t, _, _ in units), key) for key, units in groups.items()), reverse=True)
+    for key, x, y, w, h in squarify(items, 32, 334, 936, 420):
+        units = sorted(groups[key], reverse=True)
+        for (total, matched, name), ux, uy, uw, uh in squarify([(u[0], u) for u in units], x, y, w, h):
+            iw, ih = max(uw-2, 0), max(uh-2, 0)
+            parts.append(f'<g><title>{escape(name)}: {matched}/{total} byte-identical functions</title>'
+                         + rect(ux+1, uy+1, iw, ih, GREY)
+                         + rect(ux+1, uy+1, iw*matched/total, ih, GREEN) + '</g>')
+        parts.append(rect(x, y, w, h, "none", extra=f'stroke="{BG}" stroke-width="4"'))
+        if w >= 100 and h >= 45:
+            name = key.removeprefix("JSystem/")
+            limit = int((w-16)/8)
+            name = name if len(name)<=limit else name[:limit-1]+"…"
+            parts += [rect(x+4, y+4, min(w-8, len(name)*8+16), 25, BG, 4), text(round(x+12, 2), round(y+22, 2), name, 14, INK, 700)]
+    parts += [text(32, 786, "Source: sms/build/GMSJ01/report.json · Open the SVG to inspect unit counts.", 16, MUTED),
+              text(32, 812, "100% byte matching is not required for the Windows port.", 16, MUTED)]
+    return svg("GMSJ01 matching progress", f'{mf:,} of {tf:,} functions byte-identical; {100*mc/tc:.2f}% of code bytes matched; '
+               f'{cu} of {tu} units complete. This does not certify gameplay.', 840, parts)
 
 
 def main():
-    W, H, pw = 1000, 1060, 980
-    dh, ph = 540, 400
-    dp, mf, tf = decomp_panel(10, 70, pw, dh)
-    py = 70 + dh + 50
-    pp, passed, n = port_panel(10, py, pw, ph)
-    svg = (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
-        f'font-family="Segoe UI,Helvetica,Arial,sans-serif">{rect(0,0,W,H,BG)}'
-        f'<text x="10" y="28" font-size="22" font-weight="700" fill="#fff">Status</text>'
-        f'<text x="10" y="54" font-size="16" fill="#c9d1d9">Decompiled functions: {100*mf/tf:.1f}% ({mf}/{tf}), cell = unit, green = byte-identical share</text>'
-        f'<text x="10" y="{py-14}" font-size="16" fill="#c9d1d9">Playability matrix: {passed} of {n} rows passed (bounded), green = passed, red = open, grey = external check</text>'
-        f"{dp}{pp}</svg>"
-    )
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(svg, encoding="utf-8", newline="\n")
-    print(f"wrote {OUT} ({len(svg)//1024} KiB): decomp {mf}/{tf}, playability {passed}/{n} passed")
+    report = Path(sys.argv[1]) if len(sys.argv)>1 else ROOT / "sms/build/GMSJ01/report.json"
+    out = Path(sys.argv[2]) if len(sys.argv)>2 else ROOT / "sunshine-pc/docs/img/status.svg"
+    rows = port_rows(ROOT / "sunshine-pc/docs/playability-matrix.tsv")
+    # Validate and render both before writing either artifact.
+    graphics = [(out, port_graphic(rows)), (out.with_name("matching.svg"), matching_graphic(json.loads(report.read_text(encoding="utf-8"))))]
+    if graphics[0][0] == graphics[1][0]:
+        raise ValueError("The status output must not be named matching.svg")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    for path, content in graphics:
+        path.write_text(content, encoding="utf-8", newline="\n")
+        print(f"wrote {path} ({len(content.encode('utf-8'))//1024} KiB)")
+    print("Matrix: " + ", ".join(f"{state}={sum(r['status']==state for r in rows)}" for state in STATES))
 
 
 if __name__ == "__main__":

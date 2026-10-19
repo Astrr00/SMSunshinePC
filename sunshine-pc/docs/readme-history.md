@@ -216,3 +216,9 @@ After a 12-agent decomp pass (details in `sunshine-pc/docs/session-2026-10-11b.m
 ### Update 2026-10-12 (decomp round 2)
 
 Gates: SHA-1 unchanged, 11 020 / 12 881 functions byte-identical, 445 / 736 units, fuzzy total 98.23 %, strict link 0 unresolved, `TEMP-DEBUG` 0. Route 70 smoke after the edits: 3 of 6 runs complete; one chase fall, one rare crash in the shadow-Mario replay (`TEnemyMario::emReplayJumpToNearestNode`, run `v02`, cause open). Details: session log section 45.
+
+## Matching and Corona snapshot archived 2026-10-19
+
+The following dated paragraph was moved from the root README. Current acceptance remains in the matrix and roadmap.
+
+**Decompilation progress (measured 2026-10-16, full `ninja` + `changes_all`):** 11 323 of 12 881 functions byte-identical = **87.9 %** (87.90467); matched code **62.65 %**; fuzzy match **98.67 %**; units complete **445 of 736 = 60.5 %**; data 87.47 %. DOL SHA-1 `9f5a8caf56f5356aeac9d3ed28bf8de976a03625` unchanged. 1 558 functions remain non-identical; no byte-match gain. Bath-water spawn center NaN priority, velocity `FI/FR` boundaries and an unconditional collision-radius square are corrected. `perform` fuzzy score decreases from 94.09952 to 93.910194; `calcBathtub` increases from 95.36346 to 95.55992. Corrected `setLookDir` has 120 helper instructions and 13 inverse-square-root instructions verified after register/ABI normalization. Corona has real GPU depth, diagnostic five-platform victory, natural ending/credits and a persisted completion-Shine reload. Platform travel/health/water assistance remains explicit. Unassisted combat/navigation, the 120-Shine ending, whole-`perform` FP-state integration, universal host FP equivalence, sound listening and hardware GPU remain open. Depth readback retains measured 2–4-copy latency, not same-frame retail equivalence. Details: [`status.md`](status.md), [`decomp-rounds.md`](decomp-rounds.md).
