@@ -1,0 +1,62 @@
+# Ordinary earned-file Delfino camera/FLUDD smoke; no coaster combat certificate.
+# Cold File B proof: six earned Shines, Gelato unlock and saved Shine20.
+# Cold normal menu load of the earned four-Shine File B; require the saved Gooper reward.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10014 timeout=1
+log
+shot cold_gelato_six_shines.png
+wait frames=30
+# Ordinary first-person and grounded FLUDD inputs; no coaster-stage acceptance claim.
+trace frames=420
+hold Y frames=1
+wait frames=30
+log
+shot aim_first_person.png
+hold R stick=0,90 frames=30
+log
+hold R stick=0,-90 frames=30
+log
+hold Y frames=1
+wait frames=30
+log
+hold L trig=0,255 stick=0,64 frames=45
+log
+shot aim_squat_up.png
+hold L trig=0,255 stick=0,-64 frames=45
+log
+shot aim_squat_down.png
+wait frames=30
+log
+wait frames=30
+end
