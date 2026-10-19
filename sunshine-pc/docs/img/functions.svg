@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc" font-family="Segoe UI,Arial,sans-serif">
+<title id="title">Original game C++ function reconstruction</title>
+<desc id="desc">7,261 of 8,763 function symbols byte-identical; 1,428 compared but non-identical; 74 without comparison. Not a count of verified native gameplay functions.</desc>
+<rect x="0.00" y="0.00" width="1000.00" height="420.00" rx="16" fill="#101b2a" />
+<text x="32" y="42" font-size="14" font-weight="700" fill="#5fd5b2">SUNSHINE / ORIGINAL GAME C++</text>
+<text x="32" y="87" font-size="34" font-weight="700" fill="#f3f7fb">Original C++ function reconstruction</text>
+<text x="32" y="118" font-size="19" font-weight="400" fill="#b9cbdc">8,763 function symbols across 381 game C++ source units.</text>
+<rect x="32.00" y="146.00" width="304.00" height="116.00" rx="12" fill="#19283a" />
+<text x="52" y="205" font-size="48" font-weight="700" fill="#5fd5b2">7,261</text>
+<text x="52" y="239" font-size="17" font-weight="400" fill="#b9cbdc">Byte-identical reconstruction</text>
+<rect x="348.00" y="146.00" width="304.00" height="116.00" rx="12" fill="#19283a" />
+<text x="368" y="205" font-size="48" font-weight="700" fill="#f0d47b">1,428</text>
+<text x="368" y="239" font-size="17" font-weight="400" fill="#b9cbdc">Compared, non-identical</text>
+<rect x="664.00" y="146.00" width="304.00" height="116.00" rx="12" fill="#19283a" />
+<text x="684" y="205" font-size="48" font-weight="700" fill="#ffb181">74</text>
+<text x="684" y="239" font-size="17" font-weight="400" fill="#b9cbdc">No comparison value</text>
+<text x="32" y="300" font-size="17" font-weight="400" fill="#b9cbdc">Scope: report category game, .cpp units only; excludes SDK, JSystem and C units.</text>
+<text x="32" y="329" font-size="17" font-weight="400" fill="#b9cbdc">Includes emitted helpers, constructors and destructors; not unique source declarations.</text>
+<text x="32" y="358" font-size="17" font-weight="400" fill="#b9cbdc">A different or missing comparison does not establish an absent implementation.</text>
+<text x="32" y="387" font-size="17" font-weight="400" fill="#b9cbdc">Source: GMSJ01 report snapshot (2026-10-16). No native gameplay certification.</text>
+</svg>
