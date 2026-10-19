@@ -59,14 +59,23 @@ void TMapObjBase::loadHideObjInfo(JSUMemoryInputStream& stream, s32* param_2,
                                   s32* param_5)
 {
 	stream >> *param_2;
+#ifdef TARGET_PC
+	// Original coro_ex6 steam nodes omit these fields; failed reads retain values.
+	f32 val = 0.0f;
+#else
 	f32 val;
+#endif
 	stream >> val;
 	*appear_speed = val * 0.06f;
 	stream >> val;
 	if (val < 0.0f)
 		val = 20.0f;
 	*appear_y_speed = val;
+#ifdef TARGET_PC
+	s32 val2 = 0;
+#else
 	s32 val2;
+#endif
 	stream >> val2;
 	if (val2 <= 0)
 		val2 = 1200;
