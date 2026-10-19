@@ -17,6 +17,13 @@ Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards 
 
 Entries below retain their original test scope and historical open items. Their dates matter: older claims that Ricco/Gooper or sandcastle completion is still pending are superseded by the accepted routes above. Historical headings do not override the current queue.
 
+**SPC native-pointer conditions (2026-10-19).** Real interpreter tests reproduce 64-bit native handles being truncated in comparisons and Boolean opcodes: 17 of51 checks fail on the old source using distinct actual Windows allocations.
+Host pointer provenance now selects full-width conditions while ordinary numeric conversions and the 16-byte host slice layout remain intact; all51 checks pass.
+Strict0, 68 port checks, all736 pre-edit PPC objects and report measures remain unchanged; symbol validation passes with six inherited UNUSED-size warnings.
+Normal six-earned-Shine cold load `pa12_spc_pointer` passes (rc0/51s, health8, crash0/no cheats, unchanged valid GCI).
+The exact address conditions are isolated-interpreter evidence, not a reproduced historical in-game crash; see [spc-pointer-conditions.md](spc-pointer-conditions.md).
+Matrix states remain16/25 passed-bounded and mirrors remain deferred. Defect waves now use small commits in one reviewed PR, then squash-merge.
+
 **Delfino news holder lookup (2026-10-19).** The scenario1 news selector now reads Peach's typed holder instead of collision count/capacity at the fixed PPC offset0x68.
 The complete isolated selector passes 37 checks (four old-source failures), preserving the other tested arrays and reset behavior.
 Strict0, 68 port checks, unchanged PPC report measures and byte-identical object pass; symbol validation retains four inherited UNUSED-size warnings.
