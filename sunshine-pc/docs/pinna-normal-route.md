@@ -15,7 +15,7 @@ The initial normal-menu section of `pn25_coins` independently cold-loads all nin
 
 The second run cold-loads the first reward through normal menus. The next private roof trial `pn15_roof` independently cold-loads all eight Shines before its unverified traversal; that initial load is evidence for the saved second reward only.
 
-The accepted Strict executable SHA-256 is `4bc903e7a254f9782f8e52d561dfc373a5dbc55eb2d74f2b81424ba1407b55af`, built from game source at `99dca5dd` with read-only route diagnostics. Strict reports zero unresolved symbols; 68 port checks, all 46 native parser cases (including five new bell cases) and 37 coaster-aim checks pass. Later documentation-only changes do not alter this binary.
+The accepted Strict executable SHA-256 is `4bc903e7a254f9782f8e52d561dfc373a5dbc55eb2d74f2b81424ba1407b55af`, built from game source at `99dca5dd` with read-only route diagnostics. Strict reports zero unresolved symbols; 68 port checks, all 46 native parser cases (including five new bell cases) and 37 coaster-aim checks pass. This hash identifies those accepted prerequisite runs; later read-only diagnostics use the separate build below.
 
 Accepted private route hashes: first `2152f18d4f41fa3971b8c23c5a8b5262b6e80cd3ee54c7d89641bcd9b31b0adc`, second `58f550f92cacad22158d52a950b02ac0d227bf9464d0843ed0e44fea1681bf9a`. Public copies change only comments; executable controller commands match the accepted inputs.
 
@@ -51,3 +51,13 @@ Earlier direct-window and talk attempts remain preserved as `pn15_roof`, `pn16_r
 ```powershell
 python tools/route.py Strict tools/routes/pc_delfino_chuckster_unassisted.dev --name <throw> --appdata-from <blues> --seconds 600
 ```
+
+## Boat approach component
+
+The original hundred-coin Shine camera pauses the boat movement list. Consequently, a fixed departure schedule from the shorter boat probe does not preserve its phase after the complete coin route. Private `pn38_coins_boat` reaches104 coins but misses the boat repeatedly; its approximately644-tick retries nearly alias the boat circuit. It was closed normally after872.18s, with health8 and an empty crash log. Despite rc0, it has no `done` marker and is **not a passing route**. No Shine107 save is established by that run.
+
+Read-only `boatdist<=N` and `boatz>=N`/`boatz<=N` conditions now observe the nearest live typed Delfino boat. Distance is horizontal distance from Mario; Z is the signed boat-minus-Mario coordinate. Missing actors and other scenes always fail the conditions. The route faces and settles the camera on shore, then waits for an approaching boat within1500 units and relative Z900..1250 before applying the ordinary circle-stick/jump/Hover sequence. Neither boat nor Mario state is changed by these observations.
+
+Private `pn41_boat_observed`, seeded from `pn24_chuckster`, passes the first observed boarding attempt and the subsequent normal island landing: rc0/278.49s, `done` at tick7838, health8, floor801.9, empty crash log and no active cheats. This component does not collect a Shine. Route SHA-256: `f97495976b41f231703b6786497b44bd24d9a6290ceb77db5aa598120b2557d7`. Its final spin presses A with the fifth small nonzero stick input; a neutral A input would clear the original angle history before jump selection.
+
+This component uses Strict executable SHA-256 `a24e73a61055538b2cade5011747a1bf54ace0c4135f4b796ecf4079576ddaa8`: zero unresolved symbols and68 port checks pass. The preceding coaster-observation build passes all72 existing native parser cases; this build passes23 added boat parser cases plus three existing parser controls. The coaster observations expose only rail frame, carried-rocket presence and boss state. Native combat calibration remains open.
