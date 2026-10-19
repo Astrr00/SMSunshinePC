@@ -110,7 +110,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
+	enum class Cond { None, Stage, Scen, Mario, MarioStatus, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -192,6 +192,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("scen=", 0) == 0) k = Command::Cond::Scen;
 	else if (tok.rfind("dirstate=", 0) == 0 || tok.rfind("dir.state=", 0) == 0) k = Command::Cond::DirState;
 	else if (tok.rfind("flag=", 0) == 0) k = Command::Cond::Flag;
+	else if (tok.rfind("mstatus=", 0) == 0) k = Command::Cond::MarioStatus;
 	else if (tok.rfind("cardmode=", 0) == 0) k = Command::Cond::CardMode; // TCardLoad::unk14
 	else if (tok.rfind("cardprog=", 0) == 0) k = Command::Cond::CardProg; // TCardLoad::unk1C (TEProgress)
 	else if (tok.rfind("thp=", 0) == 0 || tok.rfind("movie=", 0) == 0) k = Command::Cond::Thp; // THP player state, 0 = no movie
@@ -249,7 +250,18 @@ bool parseCond(const std::string& tok, Command& c)
 	else return false;
 	const size_t eq = tok.find('=');
 	int value = 0;
-	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
+	if (k == Command::Cond::MarioStatus) {
+		const char* begin = tok.c_str() + eq + 1;
+		const char* end = tok.c_str() + tok.size();
+		int base = 10;
+		if (end - begin >= 2 && begin[0] == '0' && begin[1] == 'x') {
+			begin += 2;
+			base = 16;
+		}
+		if (begin == end || *begin == '-') return false;
+		const auto parsed = std::from_chars(begin, end, value, base);
+		if (parsed.ec != std::errc{} || parsed.ptr != end || value < 0) return false;
+	} else if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
 	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held || k == Command::Cond::BombReady
 	    || k == Command::Cond::Wood8WaitGe || k == Command::Cond::Wood8WaitLe || k == Command::Cond::Wood12WaitGe || k == Command::Cond::Wood12WaitLe
 	    || k == Command::Cond::Ship0AngleGe || k == Command::Cond::Ship0AngleLe || k == Command::Cond::Ship1AngleGe || k == Command::Cond::Ship1AngleLe
@@ -1214,6 +1226,7 @@ bool condHolds(const Command& c)
 		case Command::Cond::Stage: ok = static_cast<int>(gpApplication.mCurrArea.getStage()) == val; break;
 		case Command::Cond::Scen: ok = static_cast<int>(gpApplication.mCurrArea.getScenario()) == val; break;
 		case Command::Cond::Mario: ok = sceneReady() && gpMarioOriginal != nullptr; break;
+		case Command::Cond::MarioStatus: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mStatus == static_cast<u32>(val); break;
 		case Command::Cond::Director: ok = sceneReady(); break;
 		case Command::Cond::DirState: ok = sceneReady() && static_cast<int>(gpMarDirector->mState) == val; break;
 		case Command::Cond::Flag: ok = TFlagManager::smInstance->getFlag(val) != 0; break;

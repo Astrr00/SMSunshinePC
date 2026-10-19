@@ -9,6 +9,17 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    # Strict signed-int storage: decimal or0xHEX,0..INT_MAX; no outside-scene match.
+    ('mstatus_limits', 'guard radius=0 until mstatus=0 mstatus=2147483647 mstatus=0x0 mstatus=0x7FFFFFFF mstatus=0x38000368\nend\n', 0, 'done at tick'),
+    ('mstatus_empty', 'guard radius=0 until mstatus=\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_negative', 'guard radius=0 until mstatus=-1\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_fraction', 'guard radius=0 until mstatus=1.0\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_trailing', 'guard radius=0 until mstatus=123x\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_decimal_overflow', 'guard radius=0 until mstatus=2147483648\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_hex_overflow', 'guard radius=0 until mstatus=0x80000000\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_hex_empty', 'guard radius=0 until mstatus=0x\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_hex_trailing', 'guard radius=0 until mstatus=0x38000368g\nend\n', 2, 'unexpected token in guard'),
+    ('mstatus_zero_outside_scene', 'waitfor mstatus=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
     # Ship angles/rates and red-coin count are read-only and scoped to ready13/1.
     ('ship_redcoin_limits', 'guard radius=0 until ship0angle>=-180 ship0angle>=180 ship0angle<=-180 ship0angle<=180 ship1angle>=-180 ship1angle>=180 ship1angle<=-180 ship1angle<=180 ship0rate>=-10000 ship0rate>=10000 ship0rate<=-10000 ship0rate<=10000 ship1rate>=-10000 ship1rate>=10000 ship1rate<=-10000 ship1rate<=10000 redcoins>=0 redcoins>=8\nend\n', 0, 'done at tick'),
     ('ship_angle_below', 'guard radius=0 until ship0angle>=-181\nend\n', 2, 'unexpected token in guard'),
