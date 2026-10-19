@@ -23,6 +23,8 @@
 #include <utility>
 #include <vector>
 
+#include "pinna_observe.h"
+#include "pinna_secret_observe.h"
 #include "Camera/Camera.hpp"
 #include "Camera/CameraOption.hpp"
 #include "System/StageUtil.hpp"
@@ -64,6 +66,8 @@
 #include "JSystem/JParticle/JPAEmitterManager.hpp"
 #include "JSystem/JParticle/JPAEmitter.hpp"
 
+// JSU's global EOF enumerator must not affect the standard stream traits.
+static_assert(std::char_traits<char>::eof() == -1);
 static_assert(devscript::kMarioJumping == MARIO_STATUS_FLAG_JUMPING);
 
 extern JPAEmitterManager* gpEmitterManager4D2;
@@ -105,7 +109,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
+	enum class Cond { None, Stage, Scen, Mario, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -116,6 +120,7 @@ struct Command {
 	int maxTicks = 0;       // waitfor/mash/walkto: fail loudly after this many logic ticks
 	float radius = 80.f;    // walkto: arrival distance in the XZ plane
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
+	bool bombs = false;     // clear bombs=1: select only fresh, usable original Pinna Episode2 Bob-ombs
 	int hop = 0;            // walkto hop=N: repeat a two-tick A press every N ticks while steering
 	int sprayFrom = 0;      // walkto spray=N: R held from tick N-1 on
 	bool hover = false;     // walkto hover=1: hover steering, and R let go once a trigger nozzle is spent
@@ -220,6 +225,11 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("plungeloedge>=", 0) == 0) k = Command::Cond::PlungeloEdgeGe;
 	else if (tok.rfind("plungeloedge=", 0) == 0) k = Command::Cond::PlungeloEdge;
 	else if (tok.rfind("held=", 0) == 0) k = Command::Cond::Held;
+	else if (tok.rfind("bombready=", 0) == 0) k = Command::Cond::BombReady;
+	else if (tok.rfind("wood8wait>=", 0) == 0) k = Command::Cond::Wood8WaitGe;
+	else if (tok.rfind("wood8wait<=", 0) == 0) k = Command::Cond::Wood8WaitLe;
+	else if (tok.rfind("wood12wait>=", 0) == 0) k = Command::Cond::Wood12WaitGe;
+	else if (tok.rfind("wood12wait<=", 0) == 0) k = Command::Cond::Wood12WaitLe;
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
 	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
@@ -230,7 +240,8 @@ bool parseCond(const std::string& tok, Command& c)
 	const size_t eq = tok.find('=');
 	int value = 0;
 	if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
-	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held
+	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held || k == Command::Cond::BombReady
+	    || k == Command::Cond::Wood8WaitGe || k == Command::Cond::Wood8WaitLe || k == Command::Cond::Wood12WaitGe || k == Command::Cond::Wood12WaitLe
 	    || k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft
 	    || k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe || k == Command::Cond::PlungeloWet
 	    || k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe || k == Command::Cond::CoasterLoaded || k == Command::Cond::TinKoopaState
@@ -244,9 +255,10 @@ bool parseCond(const std::string& tok, Command& c)
 		if (k == Command::Cond::CoasterLoaded && (value < 0 || value > 1)) return false;
 		if (k == Command::Cond::TinKoopaState && (value < 0 || value > 4)) return false;
 		if (k == Command::Cond::BoatDistLe && value < 0) return false;
+		if ((k == Command::Cond::Wood8WaitGe || k == Command::Cond::Wood8WaitLe || k == Command::Cond::Wood12WaitGe || k == Command::Cond::Wood12WaitLe) && value < 0) return false;
 		if (k == Command::Cond::GessoHp && (value < 0 || value > 255)) return false;
 		if (k == Command::Cond::GessoMode && (value < 0 || value > 7)) return false;
-		if ((k == Command::Cond::Held || k == Command::Cond::GessoPull) && (value < 0 || value > 1)) return false;
+		if ((k == Command::Cond::Held || k == Command::Cond::GessoPull || k == Command::Cond::BombReady) && (value < 0 || value > 1)) return false;
 		if ((k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft)
 		    && (value < 0 || value > (k == Command::Cond::MirrorSLeft ? 1 : k == Command::Cond::MirrorMLeft ? 2 : 3))) return false;
 		if ((k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe) && (value < 0 || value > 4)) return false;
@@ -416,7 +428,7 @@ Command parseLine(const std::string& text, int line)
 		return c;
 	}
 	if (verb == "clear") {
-		// clear [radius=R] [until <cond...>] timeout=N: walk at the nearest live small enemy within R (XZ, 300 up or down) with R held, as a
+		// clear [radius=R] [bombs=0/1] [until <cond...>] timeout=N: walk at the nearest live small enemy within R (XZ, 300 up or down) with R held, as a
 		// player sprays goop slugs off; ends when none is left in R (with until: when the conditions hold, standing still while none is
 		// near), or quietly at the timeout (they keep spawning).
 		c.op = Op::Clear;
@@ -425,7 +437,10 @@ Command parseLine(const std::string& text, int line)
 		while (in >> tok) {
 			if (tok.rfind("radius=", 0) == 0) c.radius = static_cast<float>(std::atof(tok.c_str() + 7));
 			else if (tok.rfind("timeout=", 0) == 0) c.maxTicks = std::atoi(tok.c_str() + 8);
-			else if (tok != "until" && !parseCond(tok, c)) fail(line, "unexpected token in clear", tok);
+			else if (tok.rfind("bombs=", 0) == 0) {
+				if (tok != "bombs=0" && tok != "bombs=1") fail(line, "bombs needs 0 or 1", tok);
+				c.bombs = tok == "bombs=1";
+			} else if (tok != "until" && !parseCond(tok, c)) fail(line, "unexpected token in clear", tok);
 		}
 		if (c.maxTicks <= 0) fail(line, "clear needs timeout=N (logic ticks)", text);
 		return c;
@@ -1046,6 +1061,8 @@ void logStatus(const char* tag)
 	logRiccoGate(tag);
 	logGesso(tag);
 	logTinKoopa(tag);
+	logPinnaPrerequisites(tag, gTick);
+	logSecretWoodBlocks(tag, gTick);
 	logCrates(tag);
 	if (const auto* bell = findDelfinoTVBell())
 		std::printf("[%s-bell] bellleft=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, bell->unk154,
@@ -1289,6 +1306,16 @@ bool condHolds(const Command& c)
 		}
 		case Command::Cond::PlungeloWet: ok = (sceneReady() && observedPlungelo(true)) == (val != 0); break;
 		case Command::Cond::Held: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mHeldObject != nullptr) == (val != 0); break;
+		case Command::Cond::BombReady: ok = sceneReady() && pinnaPrerequisitesSceneReady(1) && pinnaBombReady() == (val != 0); break;
+		case Command::Cond::Wood8WaitGe:
+		case Command::Cond::Wood8WaitLe:
+		case Command::Cond::Wood12WaitGe:
+		case Command::Cond::Wood12WaitLe: {
+			const bool cube8 = kind == Command::Cond::Wood8WaitGe || kind == Command::Cond::Wood8WaitLe;
+			const bool atLeast = kind == Command::Cond::Wood8WaitGe || kind == Command::Cond::Wood12WaitGe;
+			ok = pinnaSecretWoodWait(cube8 ? "WoodBlockCube 8" : "WoodBlockCube 12", val, atLeast);
+			break;
+		}
 		case Command::Cond::Squat: ok = sceneReady() && gpMarioOriginal && (gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT) == (val != 0); break;
 		case Command::Cond::GkAwake: {
 			const TBiancoGateKeeper* b = sceneReady() ? findBoss() : nullptr;
@@ -1988,7 +2015,7 @@ void step()
 				gRemaining = 0;
 				std::printf("[devscript] clear start line=%d radius=%.0f tick=%d\n", c.line, c.radius, gTick);
 			}
-			const TSmallEnemy* e = sceneReady() ? nearestSmallEnemy(c.radius) : nullptr;
+			const TSmallEnemy* e = sceneReady() ? (c.bombs ? nearestPinnaBomb(c.radius) : nearestSmallEnemy(c.radius)) : nullptr;
 			if ((c.conds.empty() ? !e : condHolds(c)) || gRemaining >= c.maxTicks) {
 				std::printf("[devscript] clear done line=%d left=%d after=%d tick=%d\n", c.line, e ? 1 : 0, gRemaining, gTick);
 				const PADStatus neutral{};

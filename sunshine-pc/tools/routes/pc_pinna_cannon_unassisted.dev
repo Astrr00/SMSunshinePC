@@ -1,0 +1,321 @@
+# Normal Pinna Episode2: Cannon, FLUDD-less block secret, Shine31 and save.
+# Seed: accepted pn45_pinna_combat, earned eleven-Shine File B after Mecha Bowser.
+# Ordinary controller inputs only; observations never change actors, progression or saves.
+# Initial normal menus check all eleven prior Shine flags and saved unlock flags.
+# Final height/floor checks observe the route; they do not assert a grounded Mario status.
+# Require native completion, a valid twelve-Shine GCI and pc_pinna_cannon_reload.dev.
+# Exact accepted run, hashes and limits: docs/pinna-normal-route.md.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot pn_cold_pinna_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+
+# Load the earned File B through the original opening menu/movie flow.
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10000 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x1000a timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10056 timeout=1
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+waitfor flag=0x1001e timeout=1
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10389 timeout=1
+log
+shot pn_cold_pinna_saved_flags.png
+trace frames=60
+wait frames=60
+log
+shot pn_cold_pinna_neutral.png
+
+# Cross Delfino through the original west sewer and canal; approach the unlocked cannon.
+walkto x=-3500 z=2500 radius=80 timeout=1200
+walkto x=-3500 z=0 radius=80 timeout=900
+walkto x=-2500 z=-700 radius=40 timeout=600
+hold X frames=1
+wait frames=20
+faceto x=-2500 z=-3000 tol=3 timeout=180
+walkto x=-2500 z=-3000 radius=80 jump=12 spray=15 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+waitfor marioy>=680 timeout=1
+walkto x=-2500 z=-4000 radius=50 timeout=600
+walkto x=-2800 z=-5500 radius=40 timeout=600
+walkto x=-2440 z=-5500 radius=30 timeout=600
+walkto x=-2440 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-5500 radius=30 timeout=600
+walkto x=-5500 z=-5500 radius=30 timeout=600
+walkto x=-7200 z=-5500 radius=50 timeout=900
+walkto x=-7200 z=-6650 radius=30 timeout=600
+walkto x=-9300 z=-6650 radius=50 timeout=900
+walkto x=-9660 z=-7020 radius=25 timeout=300
+walkto x=-9700 z=-7100 radius=25 timeout=300
+walkto x=-9740 z=-7260 radius=25 timeout=300
+walkto x=-9740 z=-7660 radius=25 timeout=300
+walkto x=-9220 z=-8140 radius=25 timeout=300
+hold X frames=1
+wait frames=20
+faceto x=-9000 z=-7800 tol=3 timeout=180
+walkto x=-9000 z=-7800 radius=35 jump=12 spray=12 hover=1 timeout=300
+hold X frames=1
+wait frames=30
+waitfor marioy>=590 timeout=1
+hold X frames=1
+wait frames=20
+faceto x=-8920 z=-7380 tol=2 timeout=180
+trace frames=120
+walkto x=-8920 z=-7380 radius=35 jump=12 spray=12 hover=1 timeout=300
+wait frames=2
+hold L frames=8
+wait frames=30
+waitfor marioy>=790 floory>=790 timeout=1
+hold X frames=1
+wait frames=30
+log
+shot si_cannon_hill.png
+faceto x=-9450 z=-7380 tol=3 timeout=180
+hold L frames=1
+wait frames=20
+
+# Normal world entry and Episode2 selection from the earned Episode1 save.
+hold stick=0,64 until stage=5 scen=255 timeout=1200
+wait frames=400
+log
+shot si_pinna2_selector.png
+hold A frames=4
+waitfor stage=5 scen=1 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=60
+log
+shot si_pinna2_beach.png
+waitfor stage=5 scen=1 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=30
+log
+
+# Circle the beach to the original Cannon firing lane.
+walkto x=-3500 z=6000 radius=70 timeout=1200
+walkto x=0 z=6000 radius=70 timeout=1200
+walkto x=5000 z=6000 radius=70 timeout=1500
+walkto x=10000 z=6000 radius=70 timeout=1500
+walkto x=11000 z=5000 radius=50 timeout=600
+walkto x=11300 z=3590 radius=40 timeout=600
+hold L frames=1
+wait frames=20
+waitfor marioy>=100 marioy<=230 floory>=90 timeout=1
+log
+shot si_pinna2_cannon_stand.png
+
+# Spray fresh Bob-ombs, release the nozzle, then use bounded B pulses to pick up.
+label si_bomb_round
+goto si_cannon_defeated if flag=0x5000c max=1
+walkto x=11300 z=3590 radius=40 timeout=300
+wait frames=4
+trace frames=600
+clear radius=600 bombs=1 until bombready=1 timeout=450
+goto si_cannon_defeated if flag=0x5000c max=1
+goto si_bomb_round unless bombready=1 max=12
+wait frames=6
+hold B frames=2
+waitfor held=1 timeout=10 soft=1
+goto si_bomb_captured if held=1 max=12
+hold B frames=2
+waitfor held=1 timeout=10 soft=1
+goto si_bomb_captured if held=1 max=12
+hold B frames=2
+waitfor held=1 timeout=10 soft=1
+goto si_bomb_captured if held=1 max=12
+hold B frames=2
+waitfor held=1 timeout=10 soft=1
+goto si_bomb_captured if held=1 max=12
+hold B frames=2
+waitfor held=1 timeout=10 soft=1
+goto si_bomb_captured if held=1 max=12
+goto si_bomb_round unless held=1 max=12
+
+# Check actual holding, return to the throw anchor and face the original Cannon.
+label si_bomb_captured
+waitfor held=1 timeout=1
+wait frames=18
+waitfor held=1 timeout=1
+log
+shot si_pinna2_bomb_held.png
+walkto x=11300 z=3590 radius=40 timeout=240
+faceto x=12391.823 z=3590.186 tol=2 timeout=180
+hold L frames=1
+wait frames=4
+hold stick=0,127 frames=1
+hold B stick=0,127 frames=2
+waitfor held=0 timeout=90
+wait frames=60
+log
+waitfor stage=5 scen=1 director mario dirstate=4 camDemo=0 timeout=2400
+goto si_bomb_round unless flag=0x5000c max=5
+
+# Require the original defeat flag before entering its exposed secret portal.
+label si_cannon_defeated
+waitfor flag=0x5000c timeout=2400
+waitfor stage=5 scen=1 director mario dirstate=4 camDemo=0 timeout=2400
+wait frames=90
+log
+shot si_pinna2_cannon_defeated.png
+
+# Jump over the Cannon rim; release L before a fresh ground-pound press over the opening.
+walkto x=12000 z=3590 radius=40 timeout=600
+faceto x=12400 z=3580 tol=1 timeout=180
+hold L frames=1
+wait frames=20
+trace frames=180
+hold stick=0,127 frames=1
+hold A L stick=0,127 frames=12
+hold stick=0,127 frames=11
+hold L until stage=50 timeout=180
+waitfor stage=50 scen=0 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=60
+log
+shot si_pinna2_secret_entered.png
+waitfor stage=50 scen=0 director mario dirstate=4 camDemo=0 timeout=1
+wait frames=20
+
+# The original secret intro removes FLUDD. Start on the fixed floor at4600.
+walkto x=-7700 z=0 radius=50 timeout=240
+waitfor marioy>=4590 marioy<=4630 floory>=4590 timeout=90
+log
+shot si_pinna2_secret_start.png
+
+# A four-quadrant spin jump crosses the initial gap to the fixed Yoshi block.
+faceto x=-6800 z=0 tol=3 timeout=90
+trace frames=120
+hold stick=0,24 frames=1
+hold stick=24,0 frames=1
+hold stick=0,-24 frames=1
+hold stick=-24,0 frames=1
+hold A stick=0,24 frames=1
+hold A until marioy>=4900 timeout=90
+walkto x=-6800 z=0 radius=35 timeout=150
+wait frames=3
+hold L frames=8
+waitfor marioy>=4350 marioy<=4635 floory>=4350 timeout=150
+wait frames=8
+waitfor stage=50 scen=0 marioy>=4350 marioy<=4635 floory>=4350 timeout=1
+log
+waitfor stage=50 scen=0 marioy>=4590 marioy<=4630 floory>=4590 timeout=1
+wait frames=28
+trace frames=300
+log
+
+# Walk the touching lower blocks continuously; waits stay on fixed Yoshi platforms.
+walkto x=-6200 z=200 radius=20 timeout=90
+walkto x=-5200 z=200 radius=20 timeout=90
+walkto x=-5200 z=-1200 radius=20 timeout=120
+walkto x=-2800 z=-1200 radius=40 timeout=150
+hold L frames=8
+wait frames=12
+waitfor stage=50 scen=0 marioy>=4590 marioy<=4630 floory>=4590 timeout=1
+log
+shot si_lower_walk_fixed_anchor2.png
+
+# Wait on the second fixed platform for the wider joint phase of the next chain.
+wait frames=1972
+trace frames=360
+log
+walkto x=-2400 z=-400 radius=20 timeout=90
+walkto x=-1600 z=-400 radius=20 timeout=90
+walkto x=-100 z=-400 radius=20 timeout=150
+walkto x=1720 z=-400 radius=20 timeout=120
+
+# A running jump crosses the real600-unit gap to the fixed large platform.
+walkto x=2550 z=-400 radius=35 jump=12 timeout=120
+hold L frames=8
+wait frames=12
+waitfor stage=50 scen=0 marioy>=4590 marioy<=4630 floory>=4590 timeout=1
+log
+shot si_lower_walk_large_anchor.png
+
+# Approach the first spring before jumping its45-unit side. Four original BG7 pads launch Mario.
+walkto x=2850 z=-350 radius=20 timeout=120
+faceto x=3300 z=-350 tol=3 timeout=90
+trace frames=600
+walkto x=3300 z=-350 radius=25 jump=8 timeout=180
+wait frames=3
+hold L frames=1
+waitfor marioy>=5000 floory>=4600 timeout=180
+walkto x=2950 z=0 radius=25 timeout=150
+wait frames=3
+hold L frames=1
+waitfor marioy>=5800 floory>=5300 timeout=180
+walkto x=3300 z=350 radius=25 timeout=150
+wait frames=3
+hold L frames=1
+waitfor marioy>=6500 floory>=6000 timeout=180
+walkto x=3650 z=0 radius=25 timeout=150
+wait frames=3
+hold L frames=1
+waitfor marioy>=7200 floory>=6700 timeout=180
+walkto x=4500 z=0 radius=35 timeout=150
+wait frames=3
+hold L frames=8
+waitfor marioy>=7180 marioy<=7240 floory>=7180 timeout=180
+wait frames=8
+log
+shot si_pinna2_secret_upper_start.png
+waitfor stage=50 scen=0 director mario dirstate=4 camDemo=0 marioy>=7180 marioy<=7240 floory>=7180 timeout=1
+log
+trace frames=1800
+
+# Read the hidden block countdown; run across the first upper row to the fixed L arm.
+waitfor wood8wait>=94 wood8wait<=98 timeout=1200
+log
+walkto x=12800 z=0 radius=30 timeout=420
+walkto x=12800 z=400 radius=25 timeout=90
+hold L frames=8
+wait frames=12
+waitfor marioy>=7180 marioy<=7240 floory>=7180 timeout=1
+
+# Wait on the fixed arm for the second row. The inner-corner waypoint preserves time and floor clearance.
+waitfor wood12wait>=102 wood12wait<=106 timeout=1600
+log
+walkto x=13080 z=3720 radius=30 timeout=240
+walkto x=18720 z=4000 radius=15 timeout=300
+
+# Keep running into a fresh normal jump over the final600-unit gap.
+walkto x=19900 z=4000 radius=35 jump=12 timeout=150
+waitfor stage=50 scen=0 marioy>=7180 marioy<=7240 floory>=7180 timeout=120
+log
+shot si_pinna2_upper_fixed_final.png
+
+# The connected fixed mound carries the original Shine31; collect it with normal movement.
+walkto x=20280 z=4000 radius=15 timeout=120
+walkto x=21150 z=4000 radius=30 jump=12 timeout=180
+mash A period=30 until flag=0x1001f timeout=1500
+log
+shot si_pinna2_shine31_collected.png
+
+# Complete the original reward/card flow and return naturally to Delfino. Verify the saved GCI separately.
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor flag=0x1001f timeout=1
+log
+shot si_pinna2_shine31_saved_plaza.png
+end

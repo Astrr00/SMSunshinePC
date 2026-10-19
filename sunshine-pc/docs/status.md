@@ -15,6 +15,8 @@ Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards 
 
 ## Dated evidence log
 
+**Normal Pinna Episode2 PASS (2026-10-19).** `si25_pinna2_full` completes normal entry, Cannon defeat, the original block/spring secret and Shine31 save (rc0/410.67s). Independent `si26_pinna2_cold` passes normal File B reload (rc0/50.25s), retaining exactly twelve earned Shines and the byte-identical GCI; all seven sector checksums pass. Controller inputs only, empty crash logs, no active cheats. Strict0,68 port checks and42 focused parser cases pass. Read-only observations and a shorter supported corner correct the route timing; no original game-code defect is claimed. [Hashes, failure controls, routes and limits](pinna-normal-route.md#complete-normal-cannon-and-block-secret-milestone). One full pass plus cold proof; Episode3 onward and broad PC-CORE/PC-CONTENT remain open. Matrix states stay17/8/0; mirrors remain deferred and the release stays draft.
+
 **Mario viewport stack bounds (2026-10-19).** The normal occlusion/silhouette render helper supplied five floats to `GXGetViewportv`, which writes six; `GXProject` also reads the sixth.
 The PC buffer now holds all six values; the original PPC declaration is retained.
 The complete caller with actual getter/projector bodies triggers a four-byte ASan stack-buffer-overflow on old source and passes 60 projection checks after correction at `/O2 /Ob1`.

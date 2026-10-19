@@ -9,6 +9,48 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    # Wood wait conditions expose only a hidden block's remaining MOVE updates.
+    ("wood_wait_limits", "guard radius=0 until wood8wait>=0 wood8wait>=32767 wood8wait<=0 wood8wait<=32767 wood12wait>=0 wood12wait>=32767 wood12wait<=0 wood12wait<=32767\nend\n", 0, "done at tick"),
+    ("wood8_wait_ge_negative", "guard radius=0 until wood8wait>=-1\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_le_negative", "guard radius=0 until wood8wait<=-1\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_ge_negative", "guard radius=0 until wood12wait>=-1\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_le_negative", "guard radius=0 until wood12wait<=-1\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_ge_fraction", "guard radius=0 until wood8wait>=1.0\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_le_fraction", "guard radius=0 until wood8wait<=1.0\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_ge_fraction", "guard radius=0 until wood12wait>=1.0\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_le_fraction", "guard radius=0 until wood12wait<=1.0\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_ge_empty", "guard radius=0 until wood8wait>=\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_le_empty", "guard radius=0 until wood8wait<=\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_ge_empty", "guard radius=0 until wood12wait>=\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_le_empty", "guard radius=0 until wood12wait<=\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_ge_overflow", "guard radius=0 until wood8wait>=32768\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_le_overflow", "guard radius=0 until wood8wait<=32768\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_ge_overflow", "guard radius=0 until wood12wait>=32768\nend\n", 2, "unexpected token in guard"),
+    ("wood12_wait_le_overflow", "guard radius=0 until wood12wait<=32768\nend\n", 2, "unexpected token in guard"),
+    ("wood_wait_integer_overflow", "guard radius=0 until wood8wait>=999999999999999999999\nend\n", 2, "unexpected token in guard"),
+    ("wood_wait_trailing", "guard radius=0 until wood12wait<=1x\nend\n", 2, "unexpected token in guard"),
+    ("wood8_wait_ge_outside_scene", "waitfor wood8wait>=0 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    ("wood8_wait_le_outside_scene", "waitfor wood8wait<=32767 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    ("wood12_wait_ge_outside_scene", "waitfor wood12wait>=0 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    ("wood12_wait_le_outside_scene", "waitfor wood12wait<=32767 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    # Parse Clear behind end: these cases assert syntax only, never a capture.
+    ("clear_bombs_zero", "end\nclear bombs=0 timeout=1\n", 0, "done at tick"),
+    ("clear_bombs_one", "end\nclear bombs=1 timeout=1\n", 0, "done at tick"),
+    ("clear_bombs_negative", "end\nclear bombs=-1 timeout=1\n", 2, "bombs needs 0 or 1"),
+    ("clear_bombs_invalid", "end\nclear bombs=2 timeout=1\n", 2, "bombs needs 0 or 1"),
+    ("clear_bombs_text", "end\nclear bombs=nan timeout=1\n", 2, "bombs needs 0 or 1"),
+    ("clear_bombs_fraction", "end\nclear bombs=1.0 timeout=1\n", 2, "bombs needs 0 or 1"),
+    ("clear_bombs_trailing", "end\nclear bombs=1x timeout=1\n", 2, "bombs needs 0 or 1"),
+    ("clear_bombs_empty", "end\nclear bombs= timeout=1\n", 2, "bombs needs 0 or 1"),
+    ("bombready_zero", "guard radius=0 until bombready=0\nend\n", 0, "done at tick"),
+    ("bombready_one", "guard radius=0 until bombready=1\nend\n", 0, "done at tick"),
+    ("bombready_invalid", "guard radius=0 until bombready=2\nend\n", 2, "unexpected token in guard"),
+    ("bombready_negative", "guard radius=0 until bombready=-1\nend\n", 2, "unexpected token in guard"),
+    ("bombready_text", "guard radius=0 until bombready=nan\nend\n", 2, "unexpected token in guard"),
+    ("bombready_fraction", "guard radius=0 until bombready=1.0\nend\n", 2, "unexpected token in guard"),
+    ("bombready_trailing", "guard radius=0 until bombready=1x\nend\n", 2, "unexpected token in guard"),
+    ("bombready_zero_outside_scene", "waitfor bombready=0 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
+    ("bombready_one_outside_scene", "waitfor bombready=1 timeout=1\nend\n", 3, "TIMEOUT waitfor"),
     ("bell_limits", "guard radius=0 until bellleft=0 bellleft=1000\nend\n", 0, "done at tick"),
     ("bell_invalid", "guard radius=0 until bellleft=1001\nend\n", 2, "unexpected token in guard"),
     ("bell_negative", "guard radius=0 until bellleft=-1\nend\n", 2, "unexpected token in guard"),
@@ -105,6 +147,11 @@ cases = [
     ("unknown", "guard radius=0 resume=missing\nend\n", 2, "unknown label"),
     ("invalid", "guard radius=0 resume=\nend\n", 2, "unexpected token in guard"),
 ]
+if sys.argv[1:]:
+    unknown = set(sys.argv[1:]) - {case[0] for case in cases}
+    if unknown:
+        raise SystemExit(f"Unknown guard parser cases: {', '.join(sorted(unknown))}")
+    cases = [case for case in cases if case[0] in sys.argv[1:]]
 for case, script, expected_code, expected_log in cases:
     path = directory / f"{case}.dev"
     path.write_text(script)
