@@ -9,6 +9,28 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    # Ship angles/rates and red-coin count are read-only and scoped to ready13/1.
+    ('ship_redcoin_limits', 'guard radius=0 until ship0angle>=-180 ship0angle>=180 ship0angle<=-180 ship0angle<=180 ship1angle>=-180 ship1angle>=180 ship1angle<=-180 ship1angle<=180 ship0rate>=-10000 ship0rate>=10000 ship0rate<=-10000 ship0rate<=10000 ship1rate>=-10000 ship1rate>=10000 ship1rate<=-10000 ship1rate<=10000 redcoins>=0 redcoins>=8\nend\n', 0, 'done at tick'),
+    ('ship_angle_below', 'guard radius=0 until ship0angle>=-181\nend\n', 2, 'unexpected token in guard'),
+    ('ship_angle_above', 'guard radius=0 until ship1angle<=181\nend\n', 2, 'unexpected token in guard'),
+    ('ship_rate_below', 'guard radius=0 until ship0rate>=-10001\nend\n', 2, 'unexpected token in guard'),
+    ('ship_rate_above', 'guard radius=0 until ship1rate<=10001\nend\n', 2, 'unexpected token in guard'),
+    ('redcoins_below', 'guard radius=0 until redcoins>=-1\nend\n', 2, 'unexpected token in guard'),
+    ('redcoins_above', 'guard radius=0 until redcoins>=9\nend\n', 2, 'unexpected token in guard'),
+    ('ship_angle_empty', 'guard radius=0 until ship1angle>=\nend\n', 2, 'unexpected token in guard'),
+    ('ship_angle_fraction', 'guard radius=0 until ship0angle<=1.0\nend\n', 2, 'unexpected token in guard'),
+    ('ship_rate_overflow', 'guard radius=0 until ship1rate>=999999999999999999999\nend\n', 2, 'unexpected token in guard'),
+    ('ship_rate_trailing', 'guard radius=0 until ship0rate<=1x\nend\n', 2, 'unexpected token in guard'),
+    ('redcoins_fraction', 'guard radius=0 until redcoins>=1.0\nend\n', 2, 'unexpected token in guard'),
+    ('ship0angle_ge_outside_scene', 'waitfor ship0angle>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ship0angle_le_outside_scene', 'waitfor ship0angle<=180 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ship1angle_ge_outside_scene', 'waitfor ship1angle>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ship1angle_le_outside_scene', 'waitfor ship1angle<=180 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ship0rate_ge_outside_scene', 'waitfor ship0rate>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ship0rate_le_outside_scene', 'waitfor ship0rate<=10000 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ship1rate_ge_outside_scene', 'waitfor ship1rate>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ship1rate_le_outside_scene', 'waitfor ship1rate<=10000 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('redcoins_ge_outside_scene', 'waitfor redcoins>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
     # Wood wait conditions expose only a hidden block's remaining MOVE updates.
     ("wood_wait_limits", "guard radius=0 until wood8wait>=0 wood8wait>=32767 wood8wait<=0 wood8wait<=32767 wood12wait>=0 wood12wait>=32767 wood12wait<=0 wood12wait<=32767\nend\n", 0, "done at tick"),
     ("wood8_wait_ge_negative", "guard radius=0 until wood8wait>=-1\nend\n", 2, "unexpected token in guard"),
