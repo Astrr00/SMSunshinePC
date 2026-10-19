@@ -69,7 +69,7 @@ Contents:
   *.dll                      runtime libraries (see THIRD_PARTY_LICENSES.md)
   assets/                    port assets
   LICENSE                    port code and artwork (MIT); LICENSE-sms-decomp-CC0.txt is the decompilation (CC0)
-  TESTING.md, collect_logs.cmd  tester guide and bug-report log collector
+  TESTING.md, collect_logs.cmd/.ps1  tester guide and bug-report log collector
   THIRD_PARTY_LICENSES.md    third-party components and their licences
   licenses/                  full licence texts
 
@@ -206,6 +206,7 @@ def main():
     shutil.copy2(os.path.join(ROOT, "THIRD_PARTY_LICENSES.md"), stage)
     shutil.copy2(os.path.join(ROOT, "docs", "TESTING.md"), stage)
     shutil.copy2(os.path.join(ROOT, "tools", "collect_logs.cmd"), stage)
+    shutil.copy2(os.path.join(ROOT, "tools", "collect_logs.ps1"), stage)
     shutil.copy2(os.path.join(ROOT, "tools", "play_logged.cmd"), stage)
     for dest, base, rel in LICENSES:
         src = os.path.join(ROOT if base == "root" else build, rel)

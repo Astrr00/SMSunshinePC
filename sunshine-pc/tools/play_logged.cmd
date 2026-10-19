@@ -1,10 +1,8 @@
 @echo off
-rem Starts the game with logging to sunshine.log. Usage: play_logged.cmd ["path\to\your\image.rvz"]  (default: game.rvz next to this file).
+rem Starts the game with automatic session logs. Optional argument: disc image path; otherwise open the launcher.
 rem Afterwards run collect_logs.cmd and attach sunshine-logs.zip to the bug report.
 cd /d "%~dp0"
 set "IMG=%~1"
-if "%IMG%"=="" set "IMG=%~dp0game.rvz"
-if not exist "%IMG%" (echo No disc image found: "%IMG%" & echo Usage: play_logged.cmd "path\to\your\image.rvz" & pause & exit /b 1)
-sunshine.exe --dvd "%IMG%" > sunshine.log 2>&1
+if "%IMG%"=="" (sunshine.exe) else (sunshine.exe --dvd "%IMG%")
 echo Game closed. Now run collect_logs.cmd.
 pause

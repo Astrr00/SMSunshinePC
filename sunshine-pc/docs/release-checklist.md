@@ -66,6 +66,7 @@ licence text, or any game-image file (`.rvz .iso .dol .szs .gcm .wbfs .ciso .nki
 
 ## 5. Verify the artifact
 
+- [ ] Normal launch creates a session log; `collect_logs.cmd` exports readable logs, settings and hardware/build information without saves or game data. [Private implementation evidence](release-logging.md) passes; repeat on the exact final candidate.
 - [ ] `sunshine-pc/dist/sunshine-x.y.z.zip.sha256` matches `certutil -hashfile sunshine-pc/dist/sunshine-x.y.z.zip SHA256`.
 - [ ] Unzip into an empty folder outside the repo.
 - [ ] `sunshine.exe --dvd "<your image>"` starts from that folder (use your own legally obtained GMSJ01 image).
