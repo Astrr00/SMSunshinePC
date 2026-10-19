@@ -278,3 +278,24 @@ python tools/route.py Strict tools/routes/pc_gelato_sandcastle_approach.dev --na
 ```
 
 This certifies the connected secret entrance and its lower/middle approach only. The upper crossing, tower, Shine20 reward/save/cold reload and Gelato's boss milestone remain open; matrix statuses stay16/25.
+
+
+## Normal Gelato sandcastle reward, save and cold reload
+
+`nw91_gelato_early_takeoff` completes the first Gelato mission from the earned five-Shine saved-unlock profile `nw66_gelato_hover_entry`: rc0/263 seconds, done at tick7469, health8 on return to Delfino1/6, an empty crash log and zero active-cheat counts. It enters the normal portal, selects episode1, waters the original sandcastle trigger, enters raw32/0 through its entrance and plays the original FLUDD-theft sequence. All traversal uses ordinary stick, A and L inputs; no position, aim, progress, resource, save or timing override is used.
+
+The connected curved rows are walked on the ground so Mario can turn. Running jumps use `jump=12 hop=8`, including the normal A ledge pull-up. L stops air drift over the stable NormalBlock and WoodBlock landings. After the final sand ledge, one straight run-up step supplies a full held-A jump early enough to meet the last wall while descending; the original `hangonCheck` rejects upward ledge grabs. Earlier attempts show wall clashes, slow ledge climbs and falling sand blocks, with empty crash logs; they do not establish an engine hang or UB.
+
+Shine-ID20 is collected, the normal save dialog completes and the route returns to Delfino. Latest File B is sector3/write8 with exactly IDs0/1/10/20/86/117. All GCI checksums pass; SHA256 is `f7a1826bd9098a4c2d588ce6d65c4fba1e248afeb2344427673ac823228f954a`. The five-Shine source remains byte-identical (`efaa86da54279feec25d4f1af77b3482064c081029dfaee50f6ef8b21e9fbda6`).
+
+`nw92_cold_gelato_six` independently cold-loads File B through the normal menus and verifies the saved Gelato unlock, Shine20 flag0x10014 and all earlier earned milestone flags: rc0/50 seconds, done at tick1363, six Shines, health8, zero active cheats and an empty crash log. Its GCI remains byte-identical to `nw91`.
+
+Both runs use Strict executable SHA256 `2cb29905a29c3186735cadd65520a53c4e32d9c1f78daeafd6c5b73b5b3b80c5`; the associated Strict build reports 0 unresolved symbols and all68 port checks pass (`nw74-strict.log`, `nw74-tests.log`). The public route command sequences exactly match the native-tested scripts; only comments differ.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_gelato_sandcastle_unassisted.dev --name <unique> --appdata-from nw66_gelato_hover_entry --seconds 1200
+python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_gelato_sandcastle_reload.dev --name <cold-unique> --appdata-from <unique> --seconds 240
+```
+
+This certifies one complete normal first-mission pass plus its independent persisted-reward reload, not consecutive full-route repeatability. The mirror mission (Shine21), Wiggler (Shine22) and their saved/cold proofs remain open. Matrix statuses stay16/25.
