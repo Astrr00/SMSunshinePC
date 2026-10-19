@@ -1,0 +1,258 @@
+# Normal Pinna Episode1: cold earned File B -> cannon -> Mecha Bowser -> Shine30/save/plaza.
+# Required seed: accepted pn42_coins_observed, ten saved Shines and no Peach-kidnap flag0x10389.
+# Seed Shine IDs:0,1,10,20,86,94,95,98,107,117. The first plaza log must show shines=10.
+# Seed/input/save reproduction details: docs/pinna-normal-route.md.
+# Native accepted controller sequence: pn45_pinna_combat; screenshot names retain that evidence sequence.
+# Ordinary PAD inputs only; stage/rail/rocket/boss conditions and logs observe original game state.
+# Four fixed stick aims and fresh R presses; no cheats, dev start, direct aim or state/save writes.
+# The original movie8/reward chain saves Shine30. Verify its cold load with pc_pinna_mecha_reload.dev.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot pn_pinna_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=7 timeout=1
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+log
+shot pn_pinna_cold_ten_shines.png
+wait frames=30
+
+# Cross the west stairs/canal, then follow the normal street to the kidnap trigger.
+walkto x=-3500 z=2500 radius=80 timeout=1200
+walkto x=-3500 z=0 radius=80 timeout=900
+walkto x=-2500 z=-700 radius=40 timeout=600
+hold X frames=1
+wait frames=20
+faceto x=-2500 z=-3000 tol=3 timeout=180
+walkto x=-2500 z=-3000 radius=80 jump=12 spray=15 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+waitfor marioy>=680 timeout=1
+walkto x=-2500 z=-4000 radius=50 timeout=600
+walkto x=-2800 z=-5500 radius=40 timeout=600
+
+walkto x=-2440 z=-5500 radius=30 timeout=600
+walkto x=-2440 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-5500 radius=30 timeout=600
+walkto x=-5500 z=-5500 radius=30 timeout=600
+log
+shot pn_pinna_before_kidnap.png
+
+# Enter the original movie0 trigger; stop steering when its persistent flag is set.
+faceto x=-6500 z=-5500 tol=3 timeout=180
+hold L frames=1
+wait frames=30
+hold stick=0,127 until flag=0x10389 timeout=1200
+log
+shot pn_pinna_kidnap_movie.png
+mash A period=30 until stage=1 scen=8 director mario dirstate=4 camDemo=0 timeout=15000
+waitfor flag=0x10389 timeout=1
+wait frames=45
+log
+shot pn_pinna_cannon_return.png
+
+# Face west and drop into the original cannon mouth; A selects Episode1.
+walkto x=-8920 z=-7380 radius=35 timeout=300
+faceto x=-9450 z=-7380 tol=3 timeout=180
+hold L frames=1
+wait frames=20
+hold stick=0,64 until stage=5 timeout=1200
+mash A period=30 until stage=5 scen=0 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=60
+log
+shot pn_pinna_beach_arrival.png
+
+# Beach western stairs lead to the park entrance.
+walkto x=-3500 z=5200 radius=60 timeout=1200
+walkto x=-4500 z=5200 radius=40 timeout=600
+walkto x=-4500 z=3300 radius=40 timeout=900
+walkto x=-3500 z=3300 radius=40 timeout=600
+walkto x=-3500 z=2700 radius=30 timeout=450
+log
+shot pn_pinna_before_park_gate.png
+faceto x=-3500 z=1500 tol=3 timeout=180
+hold L frames=1
+wait frames=20
+hold stick=0,127 until stage=13 timeout=900
+waitfor stage=13 scen=0 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=60
+log
+shot pn_pinna_park_arrival.png
+
+# Follow the park west path to the original Mecha movie7 trigger.
+walkto x=-3600 z=-1000 radius=40 timeout=900
+walkto x=-4500 z=-1000 radius=40 timeout=600
+walkto x=-4500 z=-6000 radius=40 timeout=1200
+walkto x=-4000 z=-6000 radius=40 timeout=600
+walkto x=-4000 z=-8500 radius=30 timeout=900
+log
+shot pn_pinna_before_mecha_movie.png
+faceto x=-4000 z=-10000 tol=3 timeout=180
+hold L frames=1
+wait frames=20
+hold stick=0,127 until stage=13 scen=0 dirstate=9 timeout=1200
+log
+shot pn_pinna_mecha_intro.png
+mash A period=30 until stage=13 scen=6 director mario timeout=15000
+wait frames=30
+log
+shot pn_pinna_director_dialogue.png
+
+# Original director dialogue transfers to the coaster. Observe intro start and completion.
+mash A period=24 until stage=58 scen=1 director mario timeout=15000
+log
+waitfor stage=58 scen=1 director mario camDemo=1 timeout=900
+log
+shot pn39_coaster_intro.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1800
+log
+shot pn39_coaster_intro_done.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+wait frames=30
+log
+shot pn39_coaster_baseline.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+wait frames=1
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=127,0 frames=1
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+
+# Fixed one-tick left-stick pulse.
+hold stick=-127,0 frames=1
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,-127 frames=1
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,127 frames=1
+log
+shot pn39_coaster_controls.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+wait frames=30
+log
+
+# Confirm the original first rocket; retain the baseline controller calibration above.
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail<=1000 tinkoopa=0 coasterloaded=1 timeout=1
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+
+# Shot1 setup: yaw1596, pitch-640; first R window1200..1204.
+hold stick=127,0 frames=16
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,127 frames=30
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,-127 frames=2
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail>=1200 coasterrail<=1204 coasterloaded=1 tinkoopa=0 pitch>=-850 pitch<=-300 timeout=300
+log
+shot pn45_shot1_aim.png
+hold R frames=1
+wait frames=1
+log
+shot pn45_shot1_launched.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+
+# Shot2 setup: yaw3436, pitch-5760; rocket2 pickup and R window1375..1379.
+hold stick=-127,0 frames=2
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,-127 frames=30
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,127 frames=7
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail>=1375 coasterrail<=1379 coasterloaded=1 tinkoopa=0 pitch>=-6100 pitch<=-5400 timeout=100
+log
+shot pn45_shot2_aim.png
+hold R frames=1
+wait frames=1
+log
+shot pn45_shot2_launched.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=127,0 frames=1
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,-127 frames=30
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,127 frames=16
+log
+
+# Require both real hits and completed breaks before the third shot.
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail<=1900 tinkoopa=2 timeout=180
+log
+shot pn45_two_parts_broken.png
+
+# Shot3: yaw2512, pitch-2880; require the normal rocket5 pickup.
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail>=2100 coasterrail<=2104 coasterloaded=1 tinkoopa=2 pitch>=-3200 pitch<=-2500 timeout=300
+log
+shot pn45_shot3_aim.png
+hold R frames=1
+wait frames=1
+log
+shot pn45_shot3_launched.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+
+# Fixed one-tick left-stick pulse.
+hold stick=-127,0 frames=1
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 timeout=1
+hold stick=0,127 frames=30
+log
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail<=2450 tinkoopa=3 timeout=180
+log
+shot pn45_three_parts_broken.png
+
+# Shot4: yaw3432, pitch0; require the normal rocket3 pickup.
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail>=2550 coasterrail<=2554 coasterloaded=1 tinkoopa=3 pitch>=-160 pitch<=0 timeout=250
+log
+shot pn45_shot4_aim.png
+hold R frames=1
+wait frames=1
+log
+shot pn45_shot4_launched.png
+waitfor stage=58 scen=1 director mario dirstate=4 camDemo=0 coasterrail<=3100 tinkoopa=4 timeout=450
+log
+shot pn45_four_parts_broken.png
+
+# Original victory/movie8 chain returns to Parco7 and spawns Shine30.
+mash A period=30 until stage=13 scen=7 director mario dirstate=4 camDemo=0 timeout=15000
+log
+shot pn45_parco7_arrival.png
+wait frames=300
+waitfor stage=13 scen=7 director mario dirstate=4 camDemo=0 timeout=1800
+log
+shot pn45_reward_visible.png
+
+# Jump the pool rim, collect the original reward, accept its save prompt and return to plaza.
+walkto x=-2000 z=-9750 radius=30 timeout=600
+faceto x=-2000 z=-10150 tol=3 timeout=120
+walkto x=-2000 z=-10150 radius=30 jump=12 timeout=240
+walkto x=-2000 z=-12203 radius=20 timeout=900
+mash A period=30 hold=12 until flag=0x1001e timeout=1200
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=9000
+wait frames=120
+waitfor stage=1 director mario dirstate=4 camDemo=0 flag=0x1001e timeout=1
+log
+shot pn45_shine30_saved_plaza.png
+wait frames=30
+end

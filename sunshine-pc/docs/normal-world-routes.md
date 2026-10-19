@@ -313,3 +313,7 @@ The read-only `mirrorSleft`/`mirrorMleft`/`mirrorLleft`, `plungelowet` and `plun
 They do not steer, aim or change gameplay actors.
 Parser/range and wrong-scene tests pass; the native water-contact and teeter-side positive paths above are observed, while a native cleared-mirror positive path remains untested.
 The owner reprioritized shared playability fixes over further mirror-input trials; the failed private trials are retained.
+
+## Normal Pinna Episode1 (2026-10-19)
+
+Four ordinary Delfino rewards extend the six-Shine seed to the ten-Shine cannon prerequisite. Normal Pinna entry, four Mecha Bowser hits, Shine30 collection/save and independent cold reload pass as `pn45_pinna_combat`/`pn44_cold_pinna`, ending with eleven earned Shines. [Routes, exact save/build hashes, earlier failed calibration and evidence limits](pinna-normal-route.md). Other Pinna episodes and the deferred Gelato mirrors/Wiggler remain open.

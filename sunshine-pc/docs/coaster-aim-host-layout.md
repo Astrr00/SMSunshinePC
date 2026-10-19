@@ -64,6 +64,5 @@ Public route SHA256: `5fc6ae9d83b5902ba376577455fd500ba8ebbb1260f79f5fde323a8bec
 No developer stage selection, teleportation, direct aim, cheat, fixed seed, progress/resource write or movie/timing override is used.
 Script completion is not native Close acceptance or a consecutive-repeatability claim.
 
-Normal access to Pinna, actual coaster balloon combat and a saved coaster Shine remain unverified by this change.
-The affected-path proof is the extracted production query/angle regression, not native coaster acceptance.
+The original isolated change did not certify normal Pinna access or combat. On2026-10-19, `pn45_pinna_combat` establishes normal cannon/beach/park/director/coaster entry, first-person aiming, four real rocket hits, Mecha Bowser defeat and Shine30 save (rc0/469.67s, health8 end/min6, crash0/no cheats). `pn44_cold_pinna` independently reloads all eleven earned Shines and the cannon unlock (rc0/51.35s), with unchanged valid GCI. Exact build/route/save hashes and controller commands: [normal Pinna milestone](pinna-normal-route.md). This is one affected-path completion and cold proof, not coverage of every coaster mission or a native old-source control.
 The mirror route remains deferred; the broader playthrough and historical enemy wrap watchdog remain open.

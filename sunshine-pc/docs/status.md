@@ -818,3 +818,9 @@ Measured: SHA-1 unchanged, 11 247 / 12 881 byte-identical (87.3 %), matched code
 ### Update 2026-10-12 (decomp round 6): 11 282 / 12 881 functions byte-identical (87.6 %)
 
 Measured: SHA-1 unchanged, 11 282 / 12 881 byte-identical (87.6 %), matched code 61.98 %, fuzzy 98.60 %, 445 / 736 units, strict link 0 unresolved, `TEMP-DEBUG` 0; route 70 smoke 1 of 2 complete (chase flake). Details: session log section 52.
+
+## Normal Pinna milestone (2026-10-19)
+
+Normal Delfino crate94/95, paid-throw98 and hundred-coin107 rewards establish the ten-Shine Pinna cannon prerequisite. `pn45_pinna_combat` then passes normal cannon/beach/park/director/coaster entry, four rocket hits, Mecha Bowser defeat and Shine30 save/plaza return (rc0/469.67s, health8 end/min6, crash0/no cheats). `pn44_cold_pinna` restores all eleven Shines and the cannon unlock through normal menus in a separate process (rc0/51.35s); its GCI is byte-identical, with all seven sector checksums valid. [Exact routes, hashes, preserved failures and limits](pinna-normal-route.md).
+
+The current diagnostic Strict binary reports zero unresolved symbols;68 port checks and all95 native parser cases pass. Read-only crate/bell/coaster/boat observations synchronize ordinary controller inputs. No game-state, progress or save edits are introduced. PC-CORE and PC-CONTENT remain broad open rows; matrix counts remain17 passed-bounded,8 open and0 external-check-required. Other Pinna episodes, later worlds and physical later-scene audiovisual checks remain open.

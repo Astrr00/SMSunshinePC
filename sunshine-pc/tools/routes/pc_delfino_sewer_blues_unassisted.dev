@@ -1,0 +1,135 @@
+# Earn and save two original Delfino sewer blue coins through ordinary controller inputs.
+# Flags0x10089/0x10088; seed and evidence: docs/pinna-normal-route.md.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10014 timeout=1
+log
+shot cold_gelato_six_shines.png
+wait frames=30
+walkto x=0 z=7035 radius=15 timeout=1800
+hold R trig=0,255 frames=2
+wait frames=30
+hold A frames=8
+hold L frames=90
+wait frames=100
+waitfor marioy<=-900 timeout=180
+walkto x=20 z=-2900 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-2900 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-4420 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=540 z=-4420 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=540 z=-5420 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=580 z=-5420 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+wait frames=30
+waitfor flag=0x10089 timeout=120
+mash A period=30 until stage=1 dirstate=4 camDemo=0 timeout=3000
+wait frames=90
+log
+shot blue_delfino_17.png
+walkto x=540 z=-5420 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=540 z=-4420 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-4420 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-1580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-60 z=-1580 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-60 z=1060 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=5460 z=1060 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=5460 z=-5980 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-5980 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-9100 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-980 z=-9100 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-980 z=-11100 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+wait frames=30
+waitfor flag=0x10088 timeout=120
+mash A period=30 until stage=1 dirstate=4 camDemo=0 timeout=3000
+wait frames=90
+log
+shot blue_delfino_16.png
+walkto x=-980 z=-9100 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-9100 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-260 z=-6060 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-6060 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+walkto x=-2620 z=-6020 radius=20 timeout=2400
+hold R trig=0,255 frames=2
+wait frames=5
+wait frames=20
+hold A until marioy>=1050 timeout=180
+walkto x=-2440 z=-5800 radius=30 timeout=240
+wait frames=3
+hold L frames=1
+wait frames=160
+log
+shot blue_main_exit.png
+end

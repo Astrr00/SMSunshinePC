@@ -1,0 +1,201 @@
+# Earn Delfino crate-game Shine94 from the normal six-Shine File B.
+# Controller inputs only; position/flag conditions and logging are read-only.
+# Seed and accepted run: docs/pinna-normal-route.md.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot episode2_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+log
+shot episode2_earned_delfino.png
+wait frames=30
+waitfor flag=0x10001 timeout=1
+log
+shot cold_three_shines.png
+waitfor flag=0x10386 timeout=1
+log
+shot cold_ricco_unlock.png
+waitfor flag=0x1000a timeout=1
+log
+shot cold_four_shines.png
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10014 timeout=1
+log
+shot cold_gelato_six_shines.png
+wait frames=30
+# Ordinary approach to the crate-game street warp.
+walkto x=-3500 z=2500 radius=80 timeout=1200
+walkto x=-3500 z=0 radius=80 timeout=900
+walkto x=-2500 z=-700 radius=40 timeout=600
+hold X frames=1
+wait frames=20
+faceto x=-2500 z=-3000 tol=3 timeout=180
+walkto x=-2500 z=-3000 radius=80 jump=12 spray=15 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+log
+shot crate_canal_crossed.png
+waitfor marioy>=680 timeout=1
+walkto x=-2500 z=-4000 radius=50 timeout=600
+walkto x=-2800 z=-5500 radius=40 timeout=600
+log
+shot crate_door_approach.png
+walkto x=-3145 z=-5500 radius=20 timeout=450
+wait frames=90
+log
+shot crate_room_arrival.png
+wait frames=30
+waitfor marioy>=9600 timeout=30
+walkto x=-3190 z=-5500 radius=20 timeout=120
+faceto x=-3350 z=-5500 tol=3 timeout=120
+wait frames=20
+hold B frames=1
+wait frames=30
+log
+shot crate_start_talk.png
+mash A period=24 until talkbusy=0 timeout=900
+wait frames=15
+log
+shot crate_game_started.png
+trace frames=1200
+walkto x=-3600 z=-5000 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-3600 z=-5000 tol=3 timeout=90
+walkto x=-3600 z=-5000 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-3800 z=-5200 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-3800 z=-5200 tol=3 timeout=90
+walkto x=-3800 z=-5200 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-4000 z=-5400 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-4000 z=-5400 tol=3 timeout=90
+walkto x=-4000 z=-5400 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-4400 z=-5400 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-4400 z=-5400 tol=3 timeout=90
+walkto x=-4400 z=-5400 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-4400 z=-6000 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-4400 z=-6000 tol=3 timeout=90
+walkto x=-4400 z=-6000 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-4000 z=-6000 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-4000 z=-6000 tol=3 timeout=90
+walkto x=-4000 z=-6000 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-3800 z=-6000 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-3800 z=-6000 tol=3 timeout=90
+walkto x=-3800 z=-6000 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-3600 z=-6000 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-3600 z=-6000 tol=3 timeout=90
+walkto x=-3600 z=-6000 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-4000 z=-5800 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-4000 z=-5800 tol=3 timeout=90
+walkto x=-4000 z=-5800 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+walkto x=-3800 z=-5600 radius=220 timeout=150
+hold stick=0,127 frames=1
+hold stick=127,0 frames=1
+hold stick=0,-127 frames=1
+hold stick=-127,0 frames=1
+hold stick=0,127 frames=1
+faceto x=-3800 z=-5600 tol=3 timeout=90
+walkto x=-3800 z=-5600 radius=70 jump=8 timeout=120
+hold L frames=1
+waitfor marioy<=9702 timeout=120
+wait frames=4
+log
+shot crate_game_finished.png
+waitfor talk=1 timeout=180
+mash A period=24 until talkbusy=0 timeout=900
+wait frames=300
+log
+shot crate_shine_appeared.png
+walkto x=-4230 z=-4870 radius=160 timeout=240
+hold L frames=15
+wait frames=20
+mash A period=30 hold=8 until flag=0x1005e timeout=600
+mash A period=30 until stage=1 dirstate=4 camDemo=0 timeout=9000
+wait frames=120
+log
+shot crate_shine_saved.png
+wait frames=30
+end
