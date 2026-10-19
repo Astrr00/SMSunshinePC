@@ -9,6 +9,18 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('tama_target_reset_mix', 'walkto tama=0 x=1 z=2 petey=0 timeout=1\nend\n', 2, 'cannot mix'),
+    ('tama_target_valid', 'end\nwalkto tama=0 radius=300 timeout=1\nfaceto tama=4 tol=2 timeout=1\n', 0, 'done at tick'),
+    ('tama_target_unready', 'walkto tama=2 timeout=1\nend\n', 3, 'turtle target unavailable'),
+    ('tama_target_negative', 'walkto tama=-1 timeout=1\nend\n', 2, 'tama needs one integer'),
+    ('tama_target_large', 'walkto tama=5 timeout=1\nend\n', 2, 'tama needs one integer'),
+    ('tama_target_fraction', 'walkto tama=1.0 timeout=1\nend\n', 2, 'tama needs one integer'),
+    ('tama_target_trailing', 'walkto tama=2x timeout=1\nend\n', 2, 'tama needs one integer'),
+    ('tama_target_empty', 'walkto tama= timeout=1\nend\n', 2, 'tama needs one integer'),
+    ('tama_target_overflow', 'walkto tama=99999999999999999999 timeout=1\nend\n', 2, 'tama needs one integer'),
+    ('tama_target_mixed', 'walkto tama=0 x=1 z=2 timeout=1\nend\n', 2, 'cannot mix'),
+    ('tama_target_petey', 'walkto tama=0 petey=1 timeout=1\nend\n', 2, 'cannot mix'),
+    ('tama_target_duplicate', 'walkto tama=0 tama=1 timeout=1\nend\n', 2, 'tama needs one integer'),
     ('tama_chase_large', 'waitfor tamachase=5 timeout=1\nend\n', 2, 'unexpected token'),
     ('tama_chase_outside', 'waitfor tamachase=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
     ('tama_valid', 'end\nguard radius=0 until tamaawake=0 tamachase=3 tamaair=1 tamasunk=2 tamadead=4\n', 0, 'done at tick'),
