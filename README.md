@@ -4,6 +4,8 @@ A native Windows x86-64 port of the Japanese GameCube release (**GMSJ01**), buil
 
 **In development. A complete, unassisted playthrough is not yet verified.** The goal is reliable original gameplay, saves and a reproducible Windows package. You need your own GMSJ01 disc image; this repository contains no game data. Release **v0.1.0 remains a draft**.
 
+Support for US and European ROMs is planned for a future milestone.
+
 [Roadmap](ROADMAP.md) · [Test and report bugs](sunshine-pc/docs/TESTING.md) · [Detailed status](sunshine-pc/docs/status.md) · [Build](#build-from-source)
 
 ## Playability
