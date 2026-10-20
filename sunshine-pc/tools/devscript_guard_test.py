@@ -9,6 +9,15 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('eggfruit_valid', 'end\nwaitfor eggfruit=0x40000390 eggfruit=1073742740 timeout=1\n', 0, 'done at tick'),
+    ('eggfruit_negative', 'waitfor eggfruit=-1 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_low', 'waitfor eggfruit=0x4000038f timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_high', 'waitfor eggfruit=0x40000395 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_fraction', 'waitfor eggfruit=1.0 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_empty', 'waitfor eggfruit= timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_overflow', 'waitfor eggfruit=99999999999999999999 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_unready', 'waitfor eggfruit=0x40000394 timeout=1\n', 3, 'TIMEOUT waitfor'),
+
     ('yoshi_valid', 'end\nwaitfor yoshistate=0 yoshistate=8 timeout=1\n', 0, 'done at tick'),
     ('yoshi_negative', 'waitfor yoshistate=-1 timeout=1\n', 2, 'unexpected token'),
     ('yoshi_large', 'waitfor yoshistate=9 timeout=1\n', 2, 'unexpected token'),
