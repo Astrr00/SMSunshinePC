@@ -9,6 +9,12 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('redcoins_unready', 'waitfor redcoins>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ferris_valid', 'end\nwaitfor ferrisframe>=0 ferrisframe<=32767 timeout=1\n', 0, 'done at tick'),
+    ('ferris_unready', 'waitfor ferrisframe>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
+    ('ferris_negative', 'waitfor ferrisframe>=-1 timeout=1\n', 2, 'unexpected token'),
+    ('ferris_fraction', 'waitfor ferrisframe>=1.5 timeout=1\n', 2, 'unexpected token'),
+    ('ferris_overflow', 'waitfor ferrisframe<=32768 timeout=1\n', 2, 'unexpected token'),
     ('tama_target_reset_mix', 'walkto tama=0 x=1 z=2 petey=0 timeout=1\nend\n', 2, 'cannot mix'),
     ('tama_target_valid', 'end\nwalkto tama=0 radius=300 timeout=1\nfaceto tama=4 tol=2 timeout=1\n', 0, 'done at tick'),
     ('tama_target_unready', 'walkto tama=2 timeout=1\nend\n', 3, 'turtle target unavailable'),
