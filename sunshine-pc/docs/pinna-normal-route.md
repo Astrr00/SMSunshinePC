@@ -1,8 +1,8 @@
 # Normal Pinna milestone
 
-Latest accepted milestone: [normal Episode4 completion](#complete-normal-sunflower-milestone), all five flower revivals, Shine33 save and independent fresh-process reload pass in `p409_full`/`p410_cold`. The [earlier first-turtle component](pinna-four-first-turtle.md) remains historical evidence.
+Latest accepted milestone: [normal Episode5 completion](#complete-normal-ferris-wheel-milestone), Ferris-wheel boss defeat, Shine34 save and independent fresh-process reload pass in `p525_full`/`p526_cold`. Earlier milestones remain recorded below.
 
-Pinna Episodes1–4 now pass normal completion, saved rewards and independent fresh-process reloads: Mecha Bowser/Shine30, Cannon and block secret/Shine31, pirate-ship red coins/Shine32, and sunflowers/Shine33. The latest connected earned save contains fourteen Shines. Episode5 onward remains open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
+Pinna Episodes1–5 now pass normal completion, saved rewards and independent fresh-process reloads: Mecha Bowser/Shine30, Cannon and block secret/Shine31, pirate-ship red coins/Shine32, sunflowers/Shine33, and Ferris wheel/Shine34. The latest connected earned save contains fifteen Shines. Episode6 onward remains open. The normal cannon prerequisite is ten distinct earned Shines plus the Ricco/Gelato unlocks. The following accepted controller-input prerequisites extend the existing six-Shine save; they do not certify Pinna combat. The accepted prerequisite save now contains ten earned Shines, including the normally collected hundred-coin reward107.
 
 ## Earned prerequisites (2026-10-19)
 
@@ -120,7 +120,7 @@ python tools/gci_check.py "build/Route/<pinna2>/appdata/Sunshine/saves/JAP/Card 
 python tools/route.py Strict tools/routes/pc_pinna_cannon_reload.dev --name <cold> --appdata-from <pinna2> --seconds 240
 ```
 
-This certifies one complete Episode2 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Pinna Episode4 onward, later worlds, full image/audio quality and the full playthrough remain open. Episode3 is recorded below. Matrix states remain17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
+This certifies one complete Episode2 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Pinna Episode6 onward, later worlds, full image/audio quality and the full playthrough remain open. Episode3 is recorded below. Matrix states remain17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
 
 ## Complete normal pirate-ship red-coin milestone
 
@@ -142,7 +142,7 @@ python tools/gci_check.py "build/Route/<pinna3>/appdata/Sunshine/saves/JAP/Card 
 python tools/route.py Strict tools/routes/pc_pinna_pirate_reload.dev --name <cold> --appdata-from <pinna3> --seconds 240
 ```
 
-This certifies one complete Episode3 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Episode4 onward, later worlds, full image/audio quality and the connected full playthrough remain open. Matrix states stay17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
+This certifies one complete Episode3 controller-input pass and its independent saved-reward cold proof. Consecutive full-route repeatability, Episode6 onward, later worlds, full image/audio quality and the connected full playthrough remain open. Matrix states stay17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and v0.1.0 a draft.
 
 ## Complete normal sunflower milestone
 
@@ -193,7 +193,98 @@ python tools/route.py Strict tools/routes/pc_pinna_sunflower_reload.dev --name <
 ```
 
 This certifies one normal Episode4 completion and its saved-reward cold proof.
-Consecutive full-route repeatability, Episode5 onward, other worlds and the connected
+Consecutive full-route repeatability, Episode6 onward, other worlds and the connected
 full playthrough remain open. WARP at0.25 render scale and muted audio provide no
 new physical audiovisual acceptance. Matrix states stay17/8/0; PC-CORE/PC-CONTENT
 remain open, mirrors deferred and v0.1.0 a draft.
+
+
+## Complete normal Ferris-wheel milestone
+
+Accepted `p525_full` starts from the earned fourteen-Shine `p409_full` profile.
+Normal File B menus, plaza traversal, cannon and Episode5 selection load raw5/4;
+the original park gate remaps to raw13/2. Ordinary ship jumps, Hover transfers,
+net crawling and A-operated panels reach the boss. A fresh A press under the
+central panel launches the original AmiKing; it dies, the original wheel slows
+to0.490 and Shine34 appears. Mario returns across the supported rear roof,
+spin-jumps/Hovers onto a rising gondola roof, releases Hover to land, rides it
+up and jumps to the reward. Ordinary inputs collect the Shine and finish the
+original card/return flow in Delfino1/8. Game source and assets are unchanged;
+the harness makes no direct actor, camera or save writes.
+
+The full run passes **rc0 / 382.62s**, `done` tick10675, minimum health6.
+Independent `p526_cold` starts9.48s after it ends, loads File B through normal
+menus and passes **rc0 / 51.27s**, tick1393, health8. Both native logs show15
+Shines and flag0x10022 with prior progression. Both crash logs are empty and
+neither logs active cheats.
+
+Latest File B sector4/write19 contains exactly
+IDs0/1/10/20/30/31/32/33/34/86/94/95/98/107/117. Relative to the parent
+sector3/write18, only Shine34 is added. All seven GCI checksums pass. Saved and
+cold-loaded cards are byte-identical, SHA-256
+`d2881420875902009086f4ca53a6a9659cf58a6841bb00a62ad169ca51a6db9a`.
+
+Both accepted runs use Strict executable SHA-256
+`906aa4403cd9d1c2d437560125653850c682bf07f8dc2882cc278d1171163d33`:
+**STRICT: 0 unresolved symbols** and **74 port checks,0 failed**. Targeted
+Ferris/walk-until parser checks and current-binary arrival/unready smokes pass.
+Six added steering checks include positive and negative backward targets; those
+two cases fail with the old helper and all74 pass after correction. The route
+steering now supplies turning PAD input in both original Hover thrust cones.
+Optional `walkto ... until` uses the existing read-only condition evaluator for
+contact-based stopping; default radius and explicit timeout behavior remain.
+Ferris phase and typed boss/reward telemetry require the joined Pinna5 scene,
+use fresh lookups and retain no actor pointer. Ship observations also admit
+raw13/2; red-coin completion remains restricted to raw13/1. These are controller
+harness and observation changes, not a newly established original-game defect.
+
+Calibration evidence remains local rather than being replaced by a passing log:
+
+- `p504`–`p508` distinguish a missed second-ship support edge from the long,
+  normally progressing ledge-climb animation. The accepted target usesZ-6500
+  and allows that original animation to finish. `p509`–`p517` establish the
+  direct middle-bridge Hover landing, real side-fence obstruction, normal
+  underside panel entry, conditional upper-panel flip and higher-net re-grip.
+- `p511` is the backward Hover-steering counterexample. `p513` demonstrates
+  drift after releasing Hover; a neutral PAD then fresh L brakes airborne
+  transfers. `p515` also exposes the steep rear ledge nearX6000; takeoff stays
+  on the flat5800 surface. `p518` first completes the normal boss defeat.
+- `p519` lands on a descending gondola but runs past it. `p520` stops there,
+  then loses horizontal carry. Temporary read-only `p521` diagnostics confirm
+  the correct gondola owner: a14–18-unit downward floor step fails the existing
+  four-unit contact gate, clears the rider, and subsequent substeps rebind the
+  same pose. The inspected ride gate and wheel init/control match retail
+  assembly; no PC-specific cause or rate correction is established. The
+  diagnostic is removed. The accepted route boards a rising gondola normally;
+  it does not certify descending-roof carry parity.
+- `p524` reaches the rising roof but held Hover keeps the airborne state and
+  target chasing. `p525` releases R at arrival and uses a fresh L press before
+  waiting for actual grounded idle. The final Shine transfer uses the same
+  brake. Early setup/calibration stops are not crash evidence; `p506` never
+  started gameplay, and `p522`/`p523` stopped during preparation for the final
+  transfer correction. No crash or undefined-behavior attribution is made.
+
+Public full-route SHA-256:
+`e3c823cbc8b1a926ac5b9bb0391cfe82c780708e7c13f96828cf7e113e75d5c7`.
+Its330 commands exactly match frozen `p525_full.dev`, SHA-256
+`a5c3772282f0faf7df1227857a7d040031d96d0d89aedcf844e5a91e65c13fab`;
+only the public explanatory header differs. Public/frozen cold-route SHA-256:
+`15896ca94806e15aa55e3b94c9f9f2344e643f33b5d7f28843a67170db2c1c61`.
+A second agent independently checked commands, native logs, save identities,
+checksums, hashes and cold-start ordering without findings. Local summaries:
+`build/p525_full-acceptance.json`, `build/p526_cold-acceptance.json`;
+logs/screenshots remain in the corresponding `build/Route` profiles.
+
+```powershell
+python tools/route.py Strict tools/routes/pc_pinna_ferris_unassisted.dev --name <pinna5> --appdata-from p409_full --seconds 1200
+python tools/gci_check.py "build/Route/<pinna5>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_pinna_ferris_reload.dev --name <cold> --appdata-from <pinna5> --seconds 240
+```
+
+Acceptance uses one complete normal Episode5 pass and its independent cold proof,
+with calibration failures retained above. No old sweep or unrelated mission was
+repeated. Consecutive full-route repeatability, Episode6 onward, other worlds,
+descending-roof carry parity and the connected full playthrough remain open.
+WARP at0.25 render scale and muted audio add no physical audiovisual acceptance.
+Matrix states remain17/8/0; PC-CORE/PC-CONTENT remain open, mirrors deferred and
+v0.1.0 a draft.
