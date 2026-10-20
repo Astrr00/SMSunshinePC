@@ -1,0 +1,293 @@
+# Normal Yoshi feeding, riding and ability test; no Shine mission.
+# Seed: p525_full, fifteen normally earned and saved Shines.
+# Normal File B menus, Delfino cannon and two left selections to the Pinna Episode4 beach.
+# Both refill fruits are revealed using normal squat-spray stick sweeps.
+# Egg requests and Yoshi states are read-only observations.
+# No developer stage start, teleport, direct aim, cheats or save edits.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot pn_cold_pinna_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10000 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x1000a timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10056 timeout=1
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+waitfor flag=0x1001e timeout=1
+waitfor flag=0x1001f timeout=1
+waitfor flag=0x10020 timeout=1
+waitfor flag=0x10021 timeout=1
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10389 timeout=1
+log
+shot pn_cold_pinna_saved_flags.png
+trace frames=60
+wait frames=60
+log
+shot pn_cold_pinna_neutral.png
+
+walkto x=-3500 z=2500 radius=80 timeout=1200
+walkto x=-3500 z=0 radius=80 timeout=900
+walkto x=-2500 z=-700 radius=40 timeout=600
+hold X frames=1
+wait frames=20
+faceto x=-2500 z=-3000 tol=3 timeout=180
+walkto x=-2500 z=-3000 radius=80 jump=12 spray=15 hover=1 timeout=240
+hold X frames=1
+wait frames=45
+waitfor marioy>=680 timeout=1
+walkto x=-2500 z=-4000 radius=50 timeout=600
+walkto x=-2800 z=-5500 radius=40 timeout=600
+walkto x=-2440 z=-5500 radius=30 timeout=600
+walkto x=-2440 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-6200 radius=30 timeout=600
+walkto x=-2800 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-7200 radius=30 timeout=600
+walkto x=-4120 z=-5500 radius=30 timeout=600
+walkto x=-5500 z=-5500 radius=30 timeout=600
+walkto x=-7200 z=-5500 radius=50 timeout=900
+walkto x=-7200 z=-6650 radius=30 timeout=600
+walkto x=-9300 z=-6650 radius=50 timeout=900
+walkto x=-9660 z=-7020 radius=25 timeout=300
+walkto x=-9700 z=-7100 radius=25 timeout=300
+walkto x=-9740 z=-7260 radius=25 timeout=300
+walkto x=-9740 z=-7660 radius=25 timeout=300
+walkto x=-9220 z=-8140 radius=25 timeout=300
+hold X frames=1
+wait frames=20
+faceto x=-9000 z=-7800 tol=3 timeout=180
+walkto x=-9000 z=-7800 radius=35 jump=12 spray=12 hover=1 timeout=300
+hold X frames=1
+wait frames=30
+waitfor marioy>=590 timeout=1
+hold X frames=1
+wait frames=20
+faceto x=-8920 z=-7380 tol=2 timeout=180
+trace frames=120
+walkto x=-8920 z=-7380 radius=35 jump=12 spray=12 hover=1 timeout=300
+wait frames=2
+hold L frames=8
+wait frames=30
+waitfor marioy>=790 floory>=790 timeout=1
+hold X frames=1
+wait frames=30
+log
+shot si_cannon_hill.png
+faceto x=-9450 z=-7380 tol=3 timeout=180
+hold L frames=1
+wait frames=20
+
+hold stick=0,64 until stage=5 scen=255 timeout=1200
+wait frames=400
+log
+shot si_pinna2_selector.png
+hold LEFT frames=1
+wait frames=40
+hold LEFT frames=1
+wait frames=40
+log
+shot ys_episode4_selector.png
+hold A frames=4
+waitfor stage=5 scen=3 director mario dirstate=4 camDemo=0 timeout=6000
+wait frames=60
+log
+shot p5_beach.png
+# One shared-function milestone on the normally accessible beach egg.
+walkto x=-3500 z=6000 radius=70 timeout=1200
+walkto x=-3500 z=5000 radius=70 timeout=600
+walkto x=0 z=5000 radius=70 timeout=1200
+walkto x=3000 z=5000 radius=70 timeout=900
+walkto x=5000 z=5000 radius=70 timeout=600
+log
+shot ys_egg_wish.png
+# Stop at the first living fruit. Spray rolling fruit inland to keep it on sand.
+walkto x=6237 z=4883 radius=25 timeout=900
+wait frames=20
+faceto x=6237 z=5133 tol=2 timeout=180
+hold L until squat=1 timeout=120
+hold L stick=0,-127 frames=28
+hold L R stick=0,127 until livefruit=0x40000394 timeout=120
+wait frames=70
+log
+shot ys_reveal.png
+walkto x=8742 z=6879 radius=25 timeout=900
+wait frames=20
+faceto x=8742 z=6629 tol=2 timeout=180
+hold L until squat=1 timeout=120
+hold L stick=0,-127 frames=28
+hold L R stick=0,127 until livefruit=0x40000392 timeout=120
+wait frames=70
+log
+shot ys_reveal.png
+goto feed_banana if eggfruit=0x40000394 max=1
+goto feed_papaya if eggfruit=0x40000391 max=1
+goto feed_pineapple if eggfruit=0x40000392 max=1
+goto feed_coconut if eggfruit=0x40000390 max=1
+waitfor yoshistate=8 timeout=1
+label feed_banana
+walkto fruit=0x40000394 radius=140 timeout=240
+wait frames=20
+faceto fruit=0x40000394 tol=2 timeout=180
+mash B period=30 until held=1 timeout=150
+log
+walkto x=7800 z=5700 radius=200 timeout=300
+waitfor yoshistate=6 timeout=300
+log
+shot ys_hatched_banana.png
+walkto x=7800 z=5700 radius=15 jump=32 until yoshistate=8 timeout=300
+wait frames=20
+log
+shot ys_mounted.png
+# Eat a different pre-revealed fruit, then share the remaining ability checks.
+walkto fruit=0x40000392 radius=250 timeout=900
+wait frames=20
+faceto fruit=0x40000392 tol=2 timeout=180
+wait frames=10
+hold B frames=1
+log
+wait frames=64
+log
+shot ys_tongue_refill.png
+waitfor yoshistate=8 timeout=1
+goto abilities if yoshistate=8 max=1
+label feed_papaya
+walkto x=5304 z=5844 radius=25 timeout=900
+wait frames=20
+faceto x=5304 z=5594 tol=2 timeout=180
+hold L until squat=1 timeout=120
+hold L stick=0,-127 frames=28
+hold L R stick=0,127 until livefruit=0x40000391 timeout=120
+wait frames=70
+log
+shot ys_reveal.png
+walkto fruit=0x40000391 radius=140 timeout=240
+wait frames=20
+faceto fruit=0x40000391 tol=2 timeout=180
+mash B period=30 until held=1 timeout=150
+log
+walkto x=7800 z=5700 radius=200 timeout=300
+waitfor yoshistate=6 timeout=300
+log
+shot ys_hatched_papaya.png
+walkto x=7800 z=5700 radius=15 jump=32 until yoshistate=8 timeout=300
+wait frames=20
+log
+shot ys_mounted.png
+# Eat a different pre-revealed fruit, then share the remaining ability checks.
+walkto fruit=0x40000394 radius=250 timeout=900
+wait frames=20
+faceto fruit=0x40000394 tol=2 timeout=180
+wait frames=10
+hold B frames=1
+log
+wait frames=64
+log
+shot ys_tongue_refill.png
+waitfor yoshistate=8 timeout=1
+goto abilities if yoshistate=8 max=1
+label feed_pineapple
+walkto fruit=0x40000392 radius=140 timeout=240
+wait frames=20
+faceto fruit=0x40000392 tol=2 timeout=180
+mash B period=30 until held=1 timeout=150
+log
+walkto x=7800 z=5700 radius=200 timeout=300
+waitfor yoshistate=6 timeout=300
+log
+shot ys_hatched_pineapple.png
+walkto x=7800 z=5700 radius=15 jump=32 until yoshistate=8 timeout=300
+wait frames=20
+log
+shot ys_mounted.png
+# Eat a different pre-revealed fruit, then share the remaining ability checks.
+walkto fruit=0x40000394 radius=250 timeout=900
+wait frames=20
+faceto fruit=0x40000394 tol=2 timeout=180
+wait frames=10
+hold B frames=1
+log
+wait frames=64
+log
+shot ys_tongue_refill.png
+waitfor yoshistate=8 timeout=1
+goto abilities if yoshistate=8 max=1
+label feed_coconut
+walkto x=10988 z=5722 radius=25 timeout=900
+wait frames=20
+faceto x=10988 z=5472 tol=2 timeout=180
+hold L until squat=1 timeout=120
+hold L stick=0,-127 frames=28
+hold L R stick=0,127 until livefruit=0x40000390 timeout=120
+wait frames=70
+log
+shot ys_reveal.png
+walkto fruit=0x40000390 radius=140 timeout=240
+wait frames=20
+faceto fruit=0x40000390 tol=2 timeout=180
+mash B period=30 until held=1 timeout=150
+log
+walkto x=7800 z=5700 radius=200 timeout=300
+waitfor yoshistate=6 timeout=300
+log
+shot ys_hatched_coconut.png
+walkto x=7800 z=5700 radius=15 jump=32 until yoshistate=8 timeout=300
+wait frames=20
+log
+shot ys_mounted.png
+# Eat a different pre-revealed fruit, then share the remaining ability checks.
+walkto fruit=0x40000394 radius=250 timeout=900
+wait frames=20
+faceto fruit=0x40000394 tol=2 timeout=180
+wait frames=10
+hold B frames=1
+log
+wait frames=64
+log
+shot ys_tongue_refill.png
+waitfor yoshistate=8 timeout=1
+goto abilities if yoshistate=8 max=1
+label abilities
+waitfor yoshistate=8 timeout=1
+walkto x=8200 z=6100 radius=35 timeout=900
+log
+hold A frames=100
+wait frames=30
+log
+shot ys_flutter.png
+hold R trig=0,255 frames=15
+log
+shot ys_juice_start.png
+hold R trig=0,255 frames=45
+waitfor yoshistate=8 timeout=1
+log
+shot ys_juice.png
+wait frames=30
+hold X frames=1
+waitfor yoshistate=6 timeout=90
+wait frames=30
+log
+shot ys_dismounted.png
+end

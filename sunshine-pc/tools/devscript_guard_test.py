@@ -9,6 +9,36 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('livefruit_valid', 'end\nwaitfor livefruit=0x40000390 livefruit=1073742740 timeout=1\n', 0, 'done at tick'),
+    ('livefruit_unready', 'waitfor livefruit=0x40000394 timeout=1\n', 3, 'TIMEOUT waitfor'),
+    ('livefruit_low', 'waitfor livefruit=0x4000038f timeout=1\n', 2, 'unexpected token'),
+    ('livefruit_high', 'waitfor livefruit=0x40000395 timeout=1\n', 2, 'unexpected token'),
+    ('fruit_target_valid', 'end\nwalkto fruit=0x40000394 timeout=1\nfaceto fruit=1073742740 timeout=1\n', 0, 'done at tick'),
+    ('fruit_target_unready', 'walkto fruit=0x40000394 timeout=1\n', 3, 'fruit target unavailable'),
+    ('fruit_target_negative', 'walkto fruit=-1 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_fraction', 'walkto fruit=1.0 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_overflow', 'walkto fruit=99999999999999999999 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_duplicate', 'walkto fruit=0x40000394 fruit=0x40000394 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_mix', 'walkto x=0 z=0 fruit=0x40000394 timeout=1\n', 2, 'fruit cannot mix'),
+    ('fruit_target_tama', 'faceto fruit=0x40000394 tama=0 timeout=1\n', 2, 'fruit cannot mix'),
+
+    ('eggfruit_valid', 'end\nwaitfor eggfruit=0x40000390 eggfruit=1073742740 timeout=1\n', 0, 'done at tick'),
+    ('eggfruit_negative', 'waitfor eggfruit=-1 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_low', 'waitfor eggfruit=0x4000038f timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_high', 'waitfor eggfruit=0x40000395 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_fraction', 'waitfor eggfruit=1.0 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_empty', 'waitfor eggfruit= timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_overflow', 'waitfor eggfruit=99999999999999999999 timeout=1\n', 2, 'unexpected token'),
+    ('eggfruit_unready', 'waitfor eggfruit=0x40000394 timeout=1\n', 3, 'TIMEOUT waitfor'),
+
+    ('yoshi_valid', 'end\nwaitfor yoshistate=0 yoshistate=8 timeout=1\n', 0, 'done at tick'),
+    ('yoshi_negative', 'waitfor yoshistate=-1 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_large', 'waitfor yoshistate=9 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_fraction', 'waitfor yoshistate=1.0 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_empty', 'waitfor yoshistate= timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_overflow', 'waitfor yoshistate=99999999999999999999 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_unready', 'waitfor yoshistate=0 timeout=1\n', 3, 'TIMEOUT waitfor'),
+
     ('walk_until_valid', 'end\nwalkto x=0 z=0 until mstatus=0x38000368 timeout=1\n', 0, 'done at tick'),
     ('walk_until_unready', 'walkto x=0 z=0 until mstatus=0x38000368 timeout=1\n', 3, 'TIMEOUT walkto'),
     ('walk_until_empty', 'walkto x=0 z=0 until timeout=1\n', 2, 'until needs a condition'),

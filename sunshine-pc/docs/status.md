@@ -4,12 +4,13 @@
 
 The [ROADMAP](../../ROADMAP.md#open-work-in-order) owns the current queue and completion criteria. The [matrix](playability-matrix.tsv) now records **17 passed-bounded, 8 open and 0 external checks**. The private `0.1.0.20261019` candidate passes the owner-confirmed [external Clean-PC test](clean-pc-test-2026-10-19.md).
 
-1. Find and prove the next shared gameplay defect, then fix and verify it. No next defect is established yet.
-2. Complete remaining normal world milestones and saved/cold-reloaded rewards; mirrors remain deferred.
-3. Finish the connected owner playthrough and explicit remaining Shine/blue-coin acquisition evidence.
-4. Fill later-scene visual/audio gaps, including audible startup/refill and death/restart behavior.
-5. Verify transitions, save/load, death/restart and native quit together in the required lifecycle run.
-6. Build the accepted final Release candidate, retain or refresh exact-package Clean-PC evidence and keep publication behind the owner's explicit decision.
+1. Verify normal Rocket/Turbo nozzle acquisition/use and representative interactions. The [bounded Yoshi ability milestone](yoshi-gameplay.md) passes (`ys16_inland`, rc0/205.36s, unchanged valid fifteen-Shine card); permanent Delfino unlock/save/cold remains open. Keep tests functional and compact; do not automate every Shine separately.
+2. Correct demonstrated shared gameplay defects. No next defect is established yet.
+3. Complete remaining normal world milestones and saved/cold-reloaded rewards; mirrors remain deferred.
+4. Finish the connected owner playthrough and explicit remaining Shine/blue-coin acquisition evidence.
+5. Fill later-scene visual/audio gaps, including audible startup/refill and death/restart behavior.
+6. Verify transitions, save/load, death/restart and native quit together in the required lifecycle run.
+7. Build the accepted final Release candidate, retain or refresh exact-package Clean-PC evidence and keep publication behind the owner's explicit decision.
 
 Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards and cold reloads; six earned Shines are recorded in [normal-world-routes.md](normal-world-routes.md). The old `/O2` sweep and diagnostic later-world load batch are complete. Do not repeat them without a relevant regression need.
 
