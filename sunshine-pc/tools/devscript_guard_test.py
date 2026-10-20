@@ -9,6 +9,19 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('livefruit_valid', 'end\nwaitfor livefruit=0x40000390 livefruit=1073742740 timeout=1\n', 0, 'done at tick'),
+    ('livefruit_unready', 'waitfor livefruit=0x40000394 timeout=1\n', 3, 'TIMEOUT waitfor'),
+    ('livefruit_low', 'waitfor livefruit=0x4000038f timeout=1\n', 2, 'unexpected token'),
+    ('livefruit_high', 'waitfor livefruit=0x40000395 timeout=1\n', 2, 'unexpected token'),
+    ('fruit_target_valid', 'end\nwalkto fruit=0x40000394 timeout=1\nfaceto fruit=1073742740 timeout=1\n', 0, 'done at tick'),
+    ('fruit_target_unready', 'walkto fruit=0x40000394 timeout=1\n', 3, 'fruit target unavailable'),
+    ('fruit_target_negative', 'walkto fruit=-1 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_fraction', 'walkto fruit=1.0 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_overflow', 'walkto fruit=99999999999999999999 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_duplicate', 'walkto fruit=0x40000394 fruit=0x40000394 timeout=1\n', 2, 'fruit needs one actor ID'),
+    ('fruit_target_mix', 'walkto x=0 z=0 fruit=0x40000394 timeout=1\n', 2, 'fruit cannot mix'),
+    ('fruit_target_tama', 'faceto fruit=0x40000394 tama=0 timeout=1\n', 2, 'fruit cannot mix'),
+
     ('eggfruit_valid', 'end\nwaitfor eggfruit=0x40000390 eggfruit=1073742740 timeout=1\n', 0, 'done at tick'),
     ('eggfruit_negative', 'waitfor eggfruit=-1 timeout=1\n', 2, 'unexpected token'),
     ('eggfruit_low', 'waitfor eggfruit=0x4000038f timeout=1\n', 2, 'unexpected token'),

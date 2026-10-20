@@ -62,6 +62,7 @@
 #include "Player/Mario.hpp"
 #include <Player/Yoshi.hpp>
 #include <Player/Tongue.hpp>
+#include <MoveBG/MapObjBall.hpp>
 #include "System/Application.hpp"
 #include "System/FlagManager.hpp"
 #include "System/MarDirector.hpp"
@@ -114,7 +115,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, MarioStatus, YoshiState, EggFruit, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, TamaAwake, TamaChase, TamaAir, TamaSunk, TamaDead, FerrisFrameGe, FerrisFrameLe, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
+	enum class Cond { None, Stage, Scen, Mario, MarioStatus, YoshiState, EggFruit, LiveFruit, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, TamaAwake, TamaChase, TamaAir, TamaSunk, TamaDead, FerrisFrameGe, FerrisFrameLe, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -131,6 +132,7 @@ struct Command {
 	bool hover = false;     // walkto hover=1: hover steering, and R let go once a trigger nozzle is spent
 	bool navel = false;     // walkto/faceto navel=1: target Petey's navel, re-read every tick (what the in-game target arrow marks)
 	bool petey = false;     // walkto/faceto petey=1: target Petey's position
+	int fruit = -1;        // walkto/faceto: nearest live reset fruit; ordinary PAD steering only
 	int tama = -1;         // walkto/faceto: current Pinna4 turtle, followed with ordinary PAD inputs
 	float behind = 0.f;     // walkto behind=R: the point R behind Petey, reached around his swing radius
 	bool soft = false;      // walkto/faceto/waitfor soft=1: a timeout moves on (to a `goto` retry) instead of failing
@@ -197,6 +199,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("scen=", 0) == 0) k = Command::Cond::Scen;
 	else if (tok.rfind("dirstate=", 0) == 0 || tok.rfind("dir.state=", 0) == 0) k = Command::Cond::DirState;
 	else if (tok.rfind("flag=", 0) == 0) k = Command::Cond::Flag;
+	else if (tok.rfind("livefruit=", 0) == 0) k = Command::Cond::LiveFruit;
 	else if (tok.rfind("eggfruit=", 0) == 0) k = Command::Cond::EggFruit;
 	else if (tok.rfind("yoshistate=", 0) == 0) k = Command::Cond::YoshiState;
 	else if (tok.rfind("mstatus=", 0) == 0) k = Command::Cond::MarioStatus;
@@ -264,7 +267,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else return false;
 	const size_t eq = tok.find('=');
 	int value = 0;
-	if (k == Command::Cond::MarioStatus || k == Command::Cond::EggFruit) {
+	if (k == Command::Cond::MarioStatus || k == Command::Cond::EggFruit || k == Command::Cond::LiveFruit) {
 		const char* begin = tok.c_str() + eq + 1;
 		const char* end = tok.c_str() + tok.size();
 		int base = 10;
@@ -275,7 +278,7 @@ bool parseCond(const std::string& tok, Command& c)
 		if (begin == end || *begin == '-') return false;
 		const auto parsed = std::from_chars(begin, end, value, base);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < 0) return false;
-		if (k == Command::Cond::EggFruit && (value < 0x40000390 || value > 0x40000394)) return false;
+		if ((k == Command::Cond::EggFruit || k == Command::Cond::LiveFruit) && (value < 0x40000390 || value > 0x40000394)) return false;
 	} else if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
 	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::YoshiState || k == Command::Cond::Held || k == Command::Cond::BombReady
 	    || k == Command::Cond::TamaAwake || k == Command::Cond::TamaChase || k == Command::Cond::TamaAir || k == Command::Cond::TamaSunk || k == Command::Cond::TamaDead
@@ -436,6 +439,12 @@ Command parseLine(const std::string& text, int line)
 				const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, c.hop);
 				if (parsed.ec != std::errc{} || parsed.ptr != end || c.hop < 3) fail(line, "hop needs an integer >= 3", tok);
 			} else if (key == "hover" && c.op == Op::WalkTo) c.hover = v != 0.f; // opt-in: older routes were tuned without it
+			else if (key == "fruit") {
+				Command request;
+				if (c.fruit >= 0 || !parseCond("livefruit=" + tok.substr(eq + 1), request))
+					fail(line, "fruit needs one actor ID 0x40000390..0x40000394", tok);
+				c.fruit = request.conds.front().second;
+			}
 			else if (key == "tama") {
 				const char* end = tok.c_str() + tok.size();
 				int index = -1;
@@ -452,10 +461,12 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "timeout" || key == "max") c.maxTicks = static_cast<int>(v);
 			else fail(line, "unexpected token in walkto", tok);
 		}
+		if (c.fruit >= 0 && (otherTarget || c.tama >= 0))
+			fail(line, "fruit cannot mix with another target", text);
 		if (c.tama >= 0 && otherTarget)
 			fail(line, "tama cannot mix with another target", text);
 		if (until && c.conds.empty()) fail(line, "until needs a condition", text);
-		if (c.tama < 0 && (!gotX || !gotZ)) fail(line, "walkto needs x= and z=", text);
+		if (c.tama < 0 && c.fruit < 0 && (!gotX || !gotZ)) fail(line, "walkto needs x= and z=", text);
 		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
 		return c;
 	}
@@ -1154,6 +1165,24 @@ void logStatus(const char* tag)
 				    actor->mActorType, actor->mPosition.x, actor->mPosition.y, actor->mPosition.z, gTick);
 		}
 
+	if (std::strcmp(tag, "devscript") == 0 && gpMapObjManager)
+		for (int i = 0; i < gpMapObjManager->getObjNum(); ++i) {
+			auto* hide = dynamic_cast<THideObjBase*>(gpMapObjManager->getObj(i));
+			if (!hide || !hide->mHiddenObj || !TMapObjBase::isFruit(hide->mHiddenObj)) continue;
+			const auto* fruit = hide->mHiddenObj;
+			std::printf("[%s-yoshi-reveal] event=%u allowed=%d pos=(%.1f,%.1f,%.1f) fruit=0x%08X dead=%d fruitPos=(%.1f,%.1f,%.1f) tick=%d\n", tag,
+			    hide->getEventId(), int(hide->mAllowReveal), hide->mPosition.x, hide->mPosition.y, hide->mPosition.z,
+			    fruit->mActorType, int(fruit->checkLiveFlag(LIVE_FLAG_DEAD)),
+			    fruit->mPosition.x, fruit->mPosition.y, fruit->mPosition.z, gTick);
+		}
+	if (std::strcmp(tag, "devscript") == 0 && gpMarioOriginal && gpMarioOriginal->mWaterGun) {
+		TWaterGun* gun = gpMarioOriginal->mWaterGun;
+		if (MtxPtr emit = gun->getEmitMtx(0))
+			std::printf("[%s-yoshi-nozzle] nozzle=%d pitch=%d emit=(%.1f,%.1f,%.1f) forward=(%.3f,%.3f,%.3f) tick=%d\n", tag,
+			    int(gun->mCurrentNozzle), int(gun->getCurrentNozzle()->unk36E),
+			    emit[0][3], emit[1][3], emit[2][3], emit[0][0], emit[1][0], emit[2][0], gTick);
+	}
+
 	logBoss(tag);
 	logRiccoGate(tag);
 	logGesso(tag);
@@ -1323,6 +1352,25 @@ void doHurt(int damage) {
 	std::printf("[devscript] hurt %d: health %d -> %d tick=%d\n", damage, before, (int)gpMarioOriginal->mHealth, gTick);
 }
 
+const TResetFruit* findLiveFruit(int actorType)
+{
+	if (!sceneReady() || !gpMarioOriginal || !gpItemManager) return nullptr;
+	const TResetFruit* best = nullptr;
+	float bestDistance = 0.f;
+	for (int i = 0; i < gpItemManager->getObjNum(); ++i) {
+		const auto* actor = gpItemManager->getObj(i);
+		if (actor->checkLiveFlag(LIVE_FLAG_DEAD) || actor->mActorType != static_cast<u32>(actorType)) continue;
+		const auto* fruit = dynamic_cast<const TResetFruit*>(actor);
+		if (!fruit) continue;
+		const float dx = fruit->mPosition.x - gpMarioOriginal->mPosition.x;
+		const float dy = fruit->mPosition.y - gpMarioOriginal->mPosition.y;
+		const float dz = fruit->mPosition.z - gpMarioOriginal->mPosition.z;
+		const float distance = dx * dx + dy * dy + dz * dz;
+		if (!best || distance < bestDistance) { best = fruit; bestDistance = distance; }
+	}
+	return best;
+}
+
 bool condHolds(const Command& c)
 {
 	for (const auto& [kind, val] : c.conds) {
@@ -1332,6 +1380,7 @@ bool condHolds(const Command& c)
 		case Command::Cond::Scen: ok = static_cast<int>(gpApplication.mCurrArea.getScenario()) == val; break;
 		case Command::Cond::Mario: ok = sceneReady() && gpMarioOriginal != nullptr; break;
 		case Command::Cond::YoshiState: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mYoshi && gpMarioOriginal->mYoshi->mState == val; break;
+		case Command::Cond::LiveFruit: ok = findLiveFruit(val) != nullptr; break;
 		case Command::Cond::EggFruit:
 			ok = false;
 			if (sceneReady() && gpItemManager)
@@ -1702,6 +1751,18 @@ void step()
 {
 	while (gCursor < gScript.size()) {
 		const Command& c = gScript[gCursor];
+		if (c.fruit >= 0) {
+			const auto* fruit = findLiveFruit(c.fruit);
+			if (!fruit) {
+				std::printf("[devscript] FAIL line=%d: fruit target unavailable, tick=%d\n", c.line, gTick);
+				std::fflush(stdout);
+				std::exit(3);
+			}
+			Command& target = gScript[gCursor];
+			target.pos[0] = fruit->mPosition.x;
+			target.pos[1] = fruit->mPosition.y;
+			target.pos[2] = fruit->mPosition.z;
+		}
 		if (c.tama >= 0) {
 			const auto* tama = findPinnaTama(c.tama);
 			if (!tama) {
