@@ -1364,6 +1364,8 @@ const TResetFruit* findLiveFruit(int actorType)
 		if (!fruit) continue;
 		const float dx = fruit->mPosition.x - gpMarioOriginal->mPosition.x;
 		const float dy = fruit->mPosition.y - gpMarioOriginal->mPosition.y;
+		// shortcut: ground-fruit routes only; extend this height band for elevated pickups.
+		if (std::fabs(dy) > 500.f) continue;
 		const float dz = fruit->mPosition.z - gpMarioOriginal->mPosition.z;
 		const float distance = dx * dx + dy * dy + dz * dz;
 		if (!best || distance < bestDistance) { best = fruit; bestDistance = distance; }
