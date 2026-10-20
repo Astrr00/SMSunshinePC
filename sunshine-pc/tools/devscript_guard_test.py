@@ -9,6 +9,14 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('yoshi_valid', 'end\nwaitfor yoshistate=0 yoshistate=8 timeout=1\n', 0, 'done at tick'),
+    ('yoshi_negative', 'waitfor yoshistate=-1 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_large', 'waitfor yoshistate=9 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_fraction', 'waitfor yoshistate=1.0 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_empty', 'waitfor yoshistate= timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_overflow', 'waitfor yoshistate=99999999999999999999 timeout=1\n', 2, 'unexpected token'),
+    ('yoshi_unready', 'waitfor yoshistate=0 timeout=1\n', 3, 'TIMEOUT waitfor'),
+
     ('walk_until_valid', 'end\nwalkto x=0 z=0 until mstatus=0x38000368 timeout=1\n', 0, 'done at tick'),
     ('walk_until_unready', 'walkto x=0 z=0 until mstatus=0x38000368 timeout=1\n', 3, 'TIMEOUT walkto'),
     ('walk_until_empty', 'walkto x=0 z=0 until timeout=1\n', 2, 'until needs a condition'),

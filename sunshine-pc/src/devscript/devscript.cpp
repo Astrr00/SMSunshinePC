@@ -60,6 +60,8 @@
 #include "Strategic/Spine.hpp"
 #include "System/MarioGamePad.hpp"
 #include "Player/Mario.hpp"
+#include <Player/Yoshi.hpp>
+#include <Player/Tongue.hpp>
 #include "System/Application.hpp"
 #include "System/FlagManager.hpp"
 #include "System/MarDirector.hpp"
@@ -112,7 +114,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, MarioStatus, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, TamaAwake, TamaChase, TamaAir, TamaSunk, TamaDead, FerrisFrameGe, FerrisFrameLe, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
+	enum class Cond { None, Stage, Scen, Mario, MarioStatus, YoshiState, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, TamaAwake, TamaChase, TamaAir, TamaSunk, TamaDead, FerrisFrameGe, FerrisFrameLe, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -195,6 +197,7 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("scen=", 0) == 0) k = Command::Cond::Scen;
 	else if (tok.rfind("dirstate=", 0) == 0 || tok.rfind("dir.state=", 0) == 0) k = Command::Cond::DirState;
 	else if (tok.rfind("flag=", 0) == 0) k = Command::Cond::Flag;
+	else if (tok.rfind("yoshistate=", 0) == 0) k = Command::Cond::YoshiState;
 	else if (tok.rfind("mstatus=", 0) == 0) k = Command::Cond::MarioStatus;
 	else if (tok.rfind("cardmode=", 0) == 0) k = Command::Cond::CardMode; // TCardLoad::unk14
 	else if (tok.rfind("cardprog=", 0) == 0) k = Command::Cond::CardProg; // TCardLoad::unk1C (TEProgress)
@@ -272,7 +275,7 @@ bool parseCond(const std::string& tok, Command& c)
 		const auto parsed = std::from_chars(begin, end, value, base);
 		if (parsed.ec != std::errc{} || parsed.ptr != end || value < 0) return false;
 	} else if (k == Command::Cond::PitchGe || k == Command::Cond::PitchLe || k == Command::Cond::CraneState
-	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::Held || k == Command::Cond::BombReady
+	    || k == Command::Cond::CargoYLe || k == Command::Cond::BellLeft || k == Command::Cond::GessoHp || k == Command::Cond::GessoMode || k == Command::Cond::GessoPull || k == Command::Cond::YoshiState || k == Command::Cond::Held || k == Command::Cond::BombReady
 	    || k == Command::Cond::TamaAwake || k == Command::Cond::TamaChase || k == Command::Cond::TamaAir || k == Command::Cond::TamaSunk || k == Command::Cond::TamaDead
 	    || k == Command::Cond::Wood8WaitGe || k == Command::Cond::Wood8WaitLe || k == Command::Cond::Wood12WaitGe || k == Command::Cond::Wood12WaitLe
 	    || k == Command::Cond::Ship0AngleGe || k == Command::Cond::Ship0AngleLe || k == Command::Cond::Ship1AngleGe || k == Command::Cond::Ship1AngleLe
@@ -295,6 +298,7 @@ bool parseCond(const std::string& tok, Command& c)
 		if (k == Command::Cond::BoatDistLe && value < 0) return false;
 		if ((k == Command::Cond::Ship0AngleGe || k == Command::Cond::Ship0AngleLe || k == Command::Cond::Ship1AngleGe || k == Command::Cond::Ship1AngleLe) && (value < -180 || value > 180)) return false;
 		if ((k == Command::Cond::Ship0RateGe || k == Command::Cond::Ship0RateLe || k == Command::Cond::Ship1RateGe || k == Command::Cond::Ship1RateLe) && (value < -10000 || value > 10000)) return false;
+		if (k == Command::Cond::YoshiState && (value < 0 || value > 8)) return false;
 		if (k == Command::Cond::RedCoinsGe && (value < 0 || value > 8)) return false;
 		if ((k == Command::Cond::Wood8WaitGe || k == Command::Cond::Wood8WaitLe || k == Command::Cond::Wood12WaitGe || k == Command::Cond::Wood12WaitLe) && value < 0) return false;
 		if (k == Command::Cond::GessoHp && (value < 0 || value > 255)) return false;
@@ -1124,6 +1128,30 @@ void logStatus(const char* tag)
 	}
 	logWash(tag);
 	logEMario(tag);
+	if (gpMarioOriginal && gpMarioOriginal->mYoshi) {
+		const TYoshi* yoshi = gpMarioOriginal->mYoshi;
+		const bool hatched = yoshi->mState != TYoshi::STATE_EGG;
+		std::printf("[%s-yoshi] state=%u type=%d juice=%d/%d pos=(%.1f,%.1f,%.1f) flutter=%d tongue=%d mouth=0x%08X unlocked=%d tick=%d\n", tag,
+		    unsigned(yoshi->mState), hatched ? int(yoshi->mType) : -1,
+		    yoshi->unkC, yoshi->unk8, yoshi->mTranslation.x, yoshi->mTranslation.y, yoshi->mTranslation.z,
+		    hatched ? int(yoshi->mFlutterState) : -1,
+		    hatched && yoshi->mTongue ? int(yoshi->mTongue->mState) : -1,
+		    hatched && yoshi->mTongue ? yoshi->mTongue->mActorTypeInMouth : 0u,
+		    int(TFlagManager::getInstance()->getBool(0x1038F)), gTick);
+	}
+	// Explicit logs inventory current-scene eggs/fruits without retaining scene pointers.
+	if (gpApplication.mCurrArea.getStage() == 1 && std::strcmp(tag, "devscript") == 0 && gpItemManager)
+		for (int i = 0; i < gpItemManager->getObjNum(); ++i) {
+			const auto* actor = gpItemManager->getObj(i);
+			if (actor->checkLiveFlag(LIVE_FLAG_DEAD)) continue;
+			if (const auto* egg = dynamic_cast<const TEggYoshi*>(actor))
+				std::printf("[%s-yoshi-egg] i=%d state=%d wanted=0x%08X pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, i,
+				    int(egg->mState), egg->unk14C, egg->mPosition.x, egg->mPosition.y, egg->mPosition.z, gTick);
+			else if (actor->mActorType >= 0x40000390 && actor->mActorType <= 0x40000394)
+				std::printf("[%s-yoshi-fruit] i=%d type=0x%08X pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, i,
+				    actor->mActorType, actor->mPosition.x, actor->mPosition.y, actor->mPosition.z, gTick);
+		}
+
 	logBoss(tag);
 	logRiccoGate(tag);
 	logGesso(tag);
@@ -1301,6 +1329,7 @@ bool condHolds(const Command& c)
 		case Command::Cond::Stage: ok = static_cast<int>(gpApplication.mCurrArea.getStage()) == val; break;
 		case Command::Cond::Scen: ok = static_cast<int>(gpApplication.mCurrArea.getScenario()) == val; break;
 		case Command::Cond::Mario: ok = sceneReady() && gpMarioOriginal != nullptr; break;
+		case Command::Cond::YoshiState: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mYoshi && gpMarioOriginal->mYoshi->mState == val; break;
 		case Command::Cond::MarioStatus: ok = sceneReady() && gpMarioOriginal && gpMarioOriginal->mStatus == static_cast<u32>(val); break;
 		case Command::Cond::Director: ok = sceneReady(); break;
 		case Command::Cond::DirState: ok = sceneReady() && static_cast<int>(gpMarDirector->mState) == val; break;
