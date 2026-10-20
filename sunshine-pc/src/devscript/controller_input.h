@@ -16,6 +16,12 @@ inline float cameraRelativeStick(float dx, float dz, std::int16_t cameraYaw, std
     sy = static_cast<std::int8_t>(y + (y > 0 ? 15 : y < 0 ? -15 : 0));
     return dist;
 }
+// Mario's Hover turns only between its forward and backward thrust cones.
+inline float hoverSteeringDelta(float delta) {
+    const float magnitude = std::fabs(delta);
+    return magnitude > 0.05f && (magnitude < 0.5236f || magnitude > 2.6179f)
+        ? std::copysign(0.7854f, delta) : delta;
+}
 // Small turns invert Mario's second deadzone after JUTGamePad scales the stick by 128/54.
 inline std::int8_t smallTurnAxis(std::int8_t raw) {
     const int magnitude = raw < 0 ? -static_cast<int>(raw) : raw;

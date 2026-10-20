@@ -406,9 +406,15 @@ Command parseLine(const std::string& text, int line)
 		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] [hop=N] [hover=1] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
 		// navel=1 / petey=1 / behind=R instead of x/z: Petey's navel, Petey, or R behind him (stage 55), followed every tick.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
-		bool gotX = false, gotZ = false, otherTarget = false;
+		bool gotX = false, gotZ = false, otherTarget = false, until = false;
 		std::string tok;
 		while (in >> tok) {
+			if (tok == "until" && c.op == Op::WalkTo) {
+				if (until) fail(line, "duplicate until in walkto", tok);
+				until = true;
+				continue;
+			}
+			if (until && parseCond(tok, c)) continue;
 			const size_t eq = tok.find('=');
 			if (eq == std::string::npos) fail(line, "unexpected token in walkto", tok);
 			const std::string key = tok.substr(0, eq);
@@ -442,6 +448,7 @@ Command parseLine(const std::string& text, int line)
 		}
 		if (c.tama >= 0 && otherTarget)
 			fail(line, "tama cannot mix with another target", text);
+		if (until && c.conds.empty()) fail(line, "until needs a condition", text);
 		if (c.tama < 0 && (!gotX || !gotZ)) fail(line, "walkto needs x= and z=", text);
 		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
 		return c;
@@ -2205,9 +2212,10 @@ void step()
 					// push 45 deg off the facing until it points at the target, so the flight follows the line instead of drifting up to 30 deg.
 					const float face = gpMarioOriginal->mFaceAngle.y * (6.2831853f / 65536.f);
 					const float d = std::remainder(std::atan2(c.pos[0] - gpMarioOriginal->mPosition.x, c.pos[2] - gpMarioOriginal->mPosition.z) - face, 6.2831853f);
-					if (std::fabs(d) > 0.05f && std::fabs(d) < 0.5236f) {
+					const float steering = devscript::hoverSteeringDelta(d);
+					if (steering != d) {
 						Command t = c;
-						const float a = face + (d > 0.f ? 0.7854f : -0.7854f);
+						const float a = face + steering;
 						t.pos[0] = gpMarioOriginal->mPosition.x + 100.f * std::sin(a);
 						t.pos[2] = gpMarioOriginal->mPosition.z + 100.f * std::cos(a);
 						float unused;
@@ -2242,7 +2250,8 @@ void step()
 						--walkRecover;
 					}
 				}
-				if (dist <= c.radius) {
+				// Optional observations finish the input sequence only after the actual contact/state.
+				if (c.conds.empty() ? dist <= c.radius : condHolds(c)) {
 					std::printf("[devscript] walkto met line=%d after=%d dist=%.0f tick=%d\n", c.line, gRemaining, dist, gTick);
 					const PADStatus neutral{};
 					setVirtualPad(0, &neutral);

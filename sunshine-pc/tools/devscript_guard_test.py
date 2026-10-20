@@ -9,6 +9,13 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('walk_until_valid', 'end\nwalkto x=0 z=0 until mstatus=0x38000368 timeout=1\n', 0, 'done at tick'),
+    ('walk_until_unready', 'walkto x=0 z=0 until mstatus=0x38000368 timeout=1\n', 3, 'TIMEOUT walkto'),
+    ('walk_until_empty', 'walkto x=0 z=0 until timeout=1\n', 2, 'until needs a condition'),
+    ('walk_until_duplicate', 'walkto x=0 z=0 until until mario timeout=1\n', 2, 'duplicate until'),
+    ('walk_until_target', 'walkto until mario timeout=1\n', 2, 'walkto needs x= and z='),
+    ('walk_until_invalid', 'walkto x=0 z=0 until mstatus=nan timeout=1\n', 2, 'unexpected token'),
+    ('face_until_rejected', 'faceto x=0 z=0 until mario timeout=1\n', 2, 'unexpected token'),
     ('redcoins_unready', 'waitfor redcoins>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
     ('ferris_valid', 'end\nwaitfor ferrisframe>=0 ferrisframe<=32767 timeout=1\n', 0, 'done at tick'),
     ('ferris_unready', 'waitfor ferrisframe>=0 timeout=1\nend\n', 3, 'TIMEOUT waitfor'),
