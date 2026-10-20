@@ -1,6 +1,6 @@
 #pragma once
 
-// Dev-only read-only observations for the original Pinna Episode3 ships.
+// Dev-only read-only observations for the original Pinna Episode3/5 ships.
 #include <cstdio>
 #include <JSystem/JDrama/JDRNameRefGen.hpp>
 #include <MoveBG/MapObjPinna.hpp>
@@ -14,7 +14,7 @@ static inline bool pinnaShipSceneReady()
 	    && gpMarDirector && gpApplication.mDirector == gpMarDirector
 	    && gpMarDirector->unk260 == 1
 	    && gpApplication.mCurrArea.getStage() == 13
-	    && gpApplication.mCurrArea.getScenario() == 1;
+	    && (gpApplication.mCurrArea.getScenario() == 1 || gpApplication.mCurrArea.getScenario() == 2);
 }
 
 static inline const TViking* findPinnaShip(int index)

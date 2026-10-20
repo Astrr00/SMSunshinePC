@@ -159,6 +159,17 @@ void testManifest() {
 }
 
 void testControllerSteering() {
+    const auto hoverTurns = [](float error) {
+        const int angle = static_cast<int>(devscript::hoverSteeringDelta(error) * (32768.f / 3.14159265f));
+        // MarioJump.cpp::rocketing turns only outside its two thrust cones.
+        return std::abs(angle) >= 0x1555 && std::abs(angle) <= 0x6aaa && (angle > 0) == (error > 0);
+    };
+    check(hoverTurns(2.96706f), "controller: Hover turns toward a target 170 degrees right instead of braking backward");
+    check(hoverTurns(-2.96706f), "controller: Hover turns toward a target 170 degrees left instead of braking backward");
+    check(hoverTurns(0.1f), "controller: small Hover heading error leaves the forward thrust cone");
+    check(devscript::hoverSteeringDelta(0.f) == 0.f, "controller: aligned Hover keeps forward thrust");
+    check(devscript::hoverSteeringDelta(1.5708f) == 1.5708f, "controller: valid right Hover turn is preserved");
+    check(devscript::hoverSteeringDelta(-1.5708f) == -1.5708f, "controller: valid left Hover turn is preserved");
     bool correct = true;
     const int yaws[] = {0, 8192, 16384, 24576, -32768, -12345};
     const float targets[][2] = {{100, 0}, {0, 100}, {-100, 0}, {0, -100}, {200, -100}, {-100, 300}};

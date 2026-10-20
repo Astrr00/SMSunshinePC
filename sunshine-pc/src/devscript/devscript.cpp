@@ -26,6 +26,7 @@
 #include "pinna_observe.h"
 #include "pinna_secret_observe.h"
 #include "pinna_ship_observe.h"
+#include <MoveBG/MapObjFence.hpp>
 #include <NPC/NpcEvent.hpp>
 #include "Camera/Camera.hpp"
 #include "Camera/CameraOption.hpp"
@@ -111,7 +112,7 @@ namespace {
 enum class Op { Wait, Hold, Shine, Log, Trace, Shot, End, Hurt, TpShine, WaitFor, Mash, WalkTo, FaceTo, AimBoss, Tp, Cheat, KillBoss, TpEm, Chase, FightBoss, Menu, DiscErr, Clear, Label, Goto, Guard };
 
 struct Command {
-	enum class Cond { None, Stage, Scen, Mario, MarioStatus, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, TamaAwake, TamaChase, TamaAir, TamaSunk, TamaDead, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
+	enum class Cond { None, Stage, Scen, Mario, MarioStatus, Director, DirState, Flag, Thp, CardMode, CardProg, CamDemo, Washed, Talk, TalkBusy, Bck, BckFrameGe, BckFrameLe, GkAwake, Squat, PitchGe, PitchLe, CraneState, CargoYLe, BellLeft, CoasterRailGe, CoasterRailLe, CoasterLoaded, TinKoopaState, GessoHp, GessoMode, GessoPull, Held, BombReady, TamaAwake, TamaChase, TamaAir, TamaSunk, TamaDead, FerrisFrameGe, FerrisFrameLe, Wood8WaitGe, Wood8WaitLe, Wood12WaitGe, Wood12WaitLe, Ship0AngleGe, Ship0AngleLe, Ship1AngleGe, Ship1AngleLe, Ship0RateGe, Ship0RateLe, Ship1RateGe, Ship1RateLe, RedCoinsGe, MirrorSLeft, MirrorMLeft, MirrorLLeft, PlungeloEdge, PlungeloEdgeGe, PlungeloWet, MarioYGe, MarioYLe, FloorYGe, Weak, Facing, PeteyHp, BoatDistLe, BoatZGe, BoatZLe };
 	Op op;
 	int frames = 0;
 	int line = 0;
@@ -248,6 +249,8 @@ bool parseCond(const std::string& tok, Command& c)
 	else if (tok.rfind("ship1rate>=", 0) == 0) k = Command::Cond::Ship1RateGe;
 	else if (tok.rfind("ship1rate<=", 0) == 0) k = Command::Cond::Ship1RateLe;
 	else if (tok.rfind("redcoins>=", 0) == 0) k = Command::Cond::RedCoinsGe;
+	else if (tok.rfind("ferrisframe>=", 0) == 0) k = Command::Cond::FerrisFrameGe;
+	else if (tok.rfind("ferrisframe<=", 0) == 0) k = Command::Cond::FerrisFrameLe;
 	else if (tok.rfind("marioy>=", 0) == 0) k = Command::Cond::MarioYGe; // Mario's height, what a player sees (a platform carries him up)
 	else if (tok.rfind("marioy<=", 0) == 0) k = Command::Cond::MarioYLe;
 	else if (tok.rfind("floory>=", 0) == 0) k = Command::Cond::FloorYGe; // the ground under Mario, e.g. a windmill block passing below a jump
@@ -277,6 +280,7 @@ bool parseCond(const std::string& tok, Command& c)
 	    || k == Command::Cond::MirrorSLeft || k == Command::Cond::MirrorMLeft || k == Command::Cond::MirrorLLeft
 	    || k == Command::Cond::PlungeloEdge || k == Command::Cond::PlungeloEdgeGe || k == Command::Cond::PlungeloWet
 	    || k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe || k == Command::Cond::CoasterLoaded || k == Command::Cond::TinKoopaState
+	    || k == Command::Cond::FerrisFrameGe || k == Command::Cond::FerrisFrameLe
 	    || k == Command::Cond::BoatDistLe || k == Command::Cond::BoatZGe || k == Command::Cond::BoatZLe) {
 		const char* end = tok.c_str() + tok.size();
 		const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, value);
@@ -287,6 +291,7 @@ bool parseCond(const std::string& tok, Command& c)
 		if ((k == Command::Cond::CoasterRailGe || k == Command::Cond::CoasterRailLe) && value < 0) return false;
 		if (k == Command::Cond::CoasterLoaded && (value < 0 || value > 1)) return false;
 		if (k == Command::Cond::TinKoopaState && (value < 0 || value > 4)) return false;
+		if ((k == Command::Cond::FerrisFrameGe || k == Command::Cond::FerrisFrameLe) && value < 0) return false;
 		if (k == Command::Cond::BoatDistLe && value < 0) return false;
 		if ((k == Command::Cond::Ship0AngleGe || k == Command::Cond::Ship0AngleLe || k == Command::Cond::Ship1AngleGe || k == Command::Cond::Ship1AngleLe) && (value < -180 || value > 180)) return false;
 		if ((k == Command::Cond::Ship0RateGe || k == Command::Cond::Ship0RateLe || k == Command::Cond::Ship1RateGe || k == Command::Cond::Ship1RateLe) && (value < -10000 || value > 10000)) return false;
@@ -401,9 +406,15 @@ Command parseLine(const std::string& text, int line)
 		// walkto x=<x> z=<z> [radius=R] [spray=N] [jump=N] [hop=N] [hover=1] timeout=N: main stick toward (x,z), camera-relative, until within R of it.
 		// navel=1 / petey=1 / behind=R instead of x/z: Petey's navel, Petey, or R behind him (stage 55), followed every tick.
 		c.op = verb == "walkto" ? Op::WalkTo : Op::FaceTo; // faceto x= z= [tol=deg] timeout=N: turn Mario on the spot toward (x,z)
-		bool gotX = false, gotZ = false, otherTarget = false;
+		bool gotX = false, gotZ = false, otherTarget = false, until = false;
 		std::string tok;
 		while (in >> tok) {
+			if (tok == "until" && c.op == Op::WalkTo) {
+				if (until) fail(line, "duplicate until in walkto", tok);
+				until = true;
+				continue;
+			}
+			if (until && parseCond(tok, c)) continue;
 			const size_t eq = tok.find('=');
 			if (eq == std::string::npos) fail(line, "unexpected token in walkto", tok);
 			const std::string key = tok.substr(0, eq);
@@ -437,6 +448,7 @@ Command parseLine(const std::string& text, int line)
 		}
 		if (c.tama >= 0 && otherTarget)
 			fail(line, "tama cannot mix with another target", text);
+		if (until && c.conds.empty()) fail(line, "until needs a condition", text);
 		if (c.tama < 0 && (!gotX || !gotZ)) fail(line, "walkto needs x= and z=", text);
 		if (c.maxTicks <= 0) fail(line, "walkto needs timeout=N (logic ticks)", text);
 		return c;
@@ -644,6 +656,14 @@ bool sceneReady()
 	// PAD reads precede direct(): scene globals survive freeAll(), and unk260 is set only after the setup-thread join and setupObjects().
 	return gpApplication.mAppState == TApplication::APP_STATE_GAMEPLAY && gpMarDirector
 	    && gpApplication.mDirector == gpMarDirector && gpMarDirector->unk260 == 1;
+}
+
+const TFerrisWheel* findPinnaWheel()
+{
+	if (!sceneReady() || gpApplication.mCurrArea.getStage() != 13 || gpApplication.mCurrArea.getScenario() != 2) return nullptr;
+	auto* registry = JDrama::TNameRefGen::instance;
+	auto* root = registry ? registry->getRootNameRef() : nullptr;
+	return root ? dynamic_cast<const TFerrisWheel*>(root->search("FerrisWheel")) : nullptr;
 }
 
 int shineCount()
@@ -1120,6 +1140,32 @@ void logStatus(const char* tag)
 	}
 	logSecretWoodBlocks(tag, gTick);
 	logPinnaShips(tag, gTick);
+	if (sceneReady() && gpApplication.mCurrArea.getStage() == 13 && gpApplication.mCurrArea.getScenario() == 2) {
+		auto* registry = JDrama::TNameRefGen::instance;
+		auto* root = registry ? registry->getRootNameRef() : nullptr;
+		if (root) {
+			const auto* boss = dynamic_cast<const TAmiKing*>(root->search("\x83\x41\x83\x7e\x83\x4c\x83\x93\x83\x4f"));
+			const auto* panel = dynamic_cast<const TRevolvingFenceOuter*>(root->search("fenceRevolve 3"));
+			const auto* wheel = dynamic_cast<const TFerrisWheel*>(root->search("FerrisWheel"));
+			const auto* shine = dynamic_cast<const TShine*>(root->search("\x83\x56\x83\x83\x83\x43\x83\x93\x81\x69\x8a\xcf\x97\x97\x8e\xd4\x83\x56\x83\x83\x83\x43\x83\x93\x97\x70\x81\x6a"));
+			if (boss) std::printf("[%s-pinna5-boss] pos=(%.1f,%.1f,%.1f) dead=%d launched=%d panelState=%d tick=%d\n", tag,
+			    boss->mPosition.x, boss->mPosition.y, boss->mPosition.z,
+			    (int)boss->checkLiveFlag(LIVE_FLAG_DEAD), (int)boss->unk138,
+			    panel && panel->unk13C ? (int)panel->unk13C->mState : -1, gTick);
+			if (shine) std::printf("[%s-pinna5-shine] pos=(%.1f,%.1f,%.1f) dead=%d hidden=%d tick=%d\n", tag,
+			    shine->mPosition.x, shine->mPosition.y, shine->mPosition.z,
+			    (int)shine->checkLiveFlag(LIVE_FLAG_DEAD), (int)shine->checkLiveFlag(LIVE_FLAG_HIDDEN), gTick);
+			if (wheel) {
+				std::printf("[%s-pinna5-wheel] state=%d speed=%.3f frame=%.1f tick=%d\n", tag,
+				    (int)wheel->mState, wheel->unk140, wheel->getMActor()->getFrameCtrl(0)->getFrame(), gTick);
+				for (int i = 0; i < wheel->unk138; ++i) {
+					const auto* gondola = wheel->unk13C[i];
+					std::printf("[%s-pinna5-gondola] i=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, i,
+					    gondola->mPosition.x, gondola->mPosition.y, gondola->mPosition.z, gTick);
+				}
+			}
+		}
+	}
 	logCrates(tag);
 	if (const auto* bell = findDelfinoTVBell())
 		std::printf("[%s-bell] bellleft=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, bell->unk154,
@@ -1382,6 +1428,14 @@ bool condHolds(const Command& c)
 			}
 			break;
 		}
+		case Command::Cond::FerrisFrameGe:
+		case Command::Cond::FerrisFrameLe: {
+			if (const auto* wheel = findPinnaWheel()) {
+				const float frame = wheel->getMActor()->getFrameCtrl(0)->getFrame();
+				ok = kind == Command::Cond::FerrisFrameGe ? frame >= val : frame <= val;
+			}
+			break;
+		}
 		case Command::Cond::Ship0AngleGe:
 		case Command::Cond::Ship0AngleLe:
 		case Command::Cond::Ship1AngleGe:
@@ -1399,7 +1453,7 @@ bool condHolds(const Command& c)
 			}
 			break;
 		}
-		case Command::Cond::RedCoinsGe: ok = pinnaShipSceneReady() && TFlagManager::smInstance && TFlagManager::smInstance->getFlag(0x60000) >= val; break;
+		case Command::Cond::RedCoinsGe: ok = pinnaShipSceneReady() && gpApplication.mCurrArea.getScenario() == 1 && TFlagManager::smInstance && TFlagManager::smInstance->getFlag(0x60000) >= val; break;
 		case Command::Cond::Wood8WaitGe:
 		case Command::Cond::Wood8WaitLe:
 		case Command::Cond::Wood12WaitGe:
@@ -2158,9 +2212,10 @@ void step()
 					// push 45 deg off the facing until it points at the target, so the flight follows the line instead of drifting up to 30 deg.
 					const float face = gpMarioOriginal->mFaceAngle.y * (6.2831853f / 65536.f);
 					const float d = std::remainder(std::atan2(c.pos[0] - gpMarioOriginal->mPosition.x, c.pos[2] - gpMarioOriginal->mPosition.z) - face, 6.2831853f);
-					if (std::fabs(d) > 0.05f && std::fabs(d) < 0.5236f) {
+					const float steering = devscript::hoverSteeringDelta(d);
+					if (steering != d) {
 						Command t = c;
-						const float a = face + (d > 0.f ? 0.7854f : -0.7854f);
+						const float a = face + steering;
 						t.pos[0] = gpMarioOriginal->mPosition.x + 100.f * std::sin(a);
 						t.pos[2] = gpMarioOriginal->mPosition.z + 100.f * std::cos(a);
 						float unused;
@@ -2195,7 +2250,8 @@ void step()
 						--walkRecover;
 					}
 				}
-				if (dist <= c.radius) {
+				// Optional observations finish the input sequence only after the actual contact/state.
+				if (c.conds.empty() ? dist <= c.radius : condHolds(c)) {
 					std::printf("[devscript] walkto met line=%d after=%d dist=%.0f tick=%d\n", c.line, gRemaining, dist, gTick);
 					const PADStatus neutral{};
 					setVirtualPad(0, &neutral);

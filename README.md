@@ -10,7 +10,7 @@ Support for US and European ROMs is planned for a future milestone.
 
 ## Playability
 
-Normal controller-input routes have verified the airport, Delfino Gatekeeper and Shadow Mario, Petey Piranha, Gooper Blooper, Gelato's sandcastle mission, and Pinna's Mecha Bowser, Cannon/block secret, pirate-ship red coins and five sunflower turtles. Fourteen earned Shines have been saved and independently reloaded in fresh processes, including four [Delfino prerequisites for Pinna](sunshine-pc/docs/pinna-normal-route.md). These are bounded route results, not proof that every mission works. See the [normal world route evidence](sunshine-pc/docs/normal-world-routes.md) and [acceptance matrix](sunshine-pc/docs/playability-matrix.tsv).
+Normal controller-input routes have verified the airport, Delfino Gatekeeper and Shadow Mario, Petey Piranha, Gooper Blooper, Gelato's sandcastle mission, and Pinna's Mecha Bowser, Cannon/block secret, pirate-ship red coins, five sunflower turtles and the Ferris-wheel boss. Fifteen earned Shines have been saved and independently reloaded in fresh processes, including four [Delfino prerequisites for Pinna](sunshine-pc/docs/pinna-normal-route.md). These are bounded route results, not proof that every mission works. See the [normal world route evidence](sunshine-pc/docs/normal-world-routes.md) and [acceptance matrix](sunshine-pc/docs/playability-matrix.tsv).
 
 ![Playability: 17 checks passed with bounded evidence, 8 open, and 0 requiring an external check. These counts do not measure overall completion.](sunshine-pc/docs/img/status.svg)
 
