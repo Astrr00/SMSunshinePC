@@ -49,6 +49,7 @@
 #include "Player/MarioAccess.hpp"
 #include "Enemy/GateKeeper.hpp"
 #include "Enemy/BossPakkun.hpp"
+#include "Enemy/Popo.hpp"
 #include "Enemy/BossGesso.hpp"
 #include "Enemy/BossGessoTentacle.hpp"
 #include "Enemy/TinKoopa.hpp"
@@ -1207,6 +1208,21 @@ void logStatus(const char* tag)
 	}
 	logSecretWoodBlocks(tag, gTick);
 	logPinnaShips(tag, gTick);
+	if (sceneReady() && gpApplication.mCurrArea.getStage() == 2 && gpApplication.mCurrArea.getScenario() == 3 && TFlagManager::smInstance)
+		std::printf("[%s-bianco4] redcoins=%d tick=%d\n", tag, TFlagManager::smInstance->getFlag(0x60000), gTick);
+	if (sceneReady() && gpApplication.mCurrArea.getStage() == 2 && gpApplication.mCurrArea.getScenario() == 4) {
+		if (const auto* boss = findPetey())
+			std::printf("[%s-bianco5-petey] hp=%d weak=%d bck=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag,
+			    boss->getHitPoints(), int(boss->mWeakPoint), boss->mMActor->getCurAnmIdx(ANM_TYPE_BCK),
+			    boss->mPosition.x, boss->mPosition.y, boss->mPosition.z, gTick);
+		auto* manager = dynamic_cast<TLiveManager*>(JDrama::TNameRefGen::search("\x83\x7c\x83\x7c\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"));
+		for (int i = 0; manager && i < manager->getObjNum(); ++i) {
+			const auto* popo = dynamic_cast<const TPopo*>(manager->getObj(i));
+			if (!popo || popo->checkLiveFlag(LIVE_FLAG_DEAD)) continue;
+			std::printf("[%s-bianco5-poink] i=%d attached=%d scale=%.2f pos=(%.1f,%.1f,%.1f) tick=%d\n", tag,
+			    i, int(popo->mIsPossessed), popo->mWaterScale, popo->mPosition.x, popo->mPosition.y, popo->mPosition.z, gTick);
+		}
+	}
 	if (sceneReady() && gpApplication.mCurrArea.getStage() == 13 && gpApplication.mCurrArea.getScenario() == 2) {
 		auto* registry = JDrama::TNameRefGen::instance;
 		auto* root = registry ? registry->getRootNameRef() : nullptr;
@@ -1553,7 +1569,11 @@ bool condHolds(const Command& c)
 			}
 			break;
 		}
-		case Command::Cond::RedCoinsGe: ok = pinnaShipSceneReady() && gpApplication.mCurrArea.getScenario() == 1 && TFlagManager::smInstance && TFlagManager::smInstance->getFlag(0x60000) >= val; break;
+		case Command::Cond::RedCoinsGe:
+			ok = sceneReady() && ((gpApplication.mCurrArea.getStage() == 2 && gpApplication.mCurrArea.getScenario() == 3)
+			    || (gpApplication.mCurrArea.getStage() == 13 && gpApplication.mCurrArea.getScenario() == 1))
+			    && TFlagManager::smInstance && TFlagManager::smInstance->getFlag(0x60000) >= val;
+			break;
 		case Command::Cond::Wood8WaitGe:
 		case Command::Cond::Wood8WaitLe:
 		case Command::Cond::Wood12WaitGe:
