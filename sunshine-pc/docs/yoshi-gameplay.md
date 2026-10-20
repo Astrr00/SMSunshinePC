@@ -33,6 +33,16 @@ GCI               d2881420875902009086f4ca53a6a9659cf58a6841bb00a62ad169ca51a6db
 Private artifacts remain under `build/Route/ys16_inland/`: `run.log`, `crash.log`, screenshots and the copied profile. The frozen route and compact result are `build/ys16_inland.dev` and `build/ys16_inland-result.json`; they contain no acceptance claim for other episodes.
 Preflight: `STRICT: 0 unresolved symbols`, 74 port checks with 0 failures and 27 focused parser/unready/missing-target cases passed. Independent code review found no blocker; the native run supplies the positive gameplay evidence.
 
+## Permanent Delfino unlock, save and cold reload
+
+`sr51_yoshi_saved_seed1` starts from the same earned fifteen-Shine File B and completes the permanent Delfino Yoshi event with normal controller inputs: defeat Shadow Mario, dismiss the dialogue, carry the requested banana to the egg, hatch and mount Yoshi, then use **Pause > Save > Yes > Continue**. It passes with rc0 in 126 seconds, finishes at tick 3514, keeps health at 7 or 8, records no active cheat and has an empty crash log. Mounting sets `0x1038F`; the final post-save assertion observes it again in controllable Delfino 1/8.
+
+The route uses `SUNSHINE_DEV_SEED=1` only to make the ordinary Shadow Mario chase reproducible. It does not start a stage, aim at the target, teleport, change progress or emit non-controller gameplay actions.
+
+The saved card changes from SHA-256 `d2881420875902009086f4ca53a6a9659cf58a6841bb00a62ad169ca51a6db9a` to `097ed898069ce949067c0867230a31971723917d2f2dc38aa19c3c63db6fb9c8`; the active File B advances from sector write counts 18/19 to 20/21. `gci_check.py` passes all seven checksums.
+
+`sr52_yoshi_cold` starts a separate process from that output and loads File B through the normal title and file-select flow. It passes with rc0 in 50 seconds, finishes at tick 1393, reaches controllable Delfino 1/8 with fifteen Shines and asserts `0x1038F`. Its GCI is byte-identical to the saved source, its crash log is empty and no cheat is active. This closes the permanent Delfino Yoshi unlock/save/cold prerequisite; it does not certify every Yoshi mission or interaction.
+
 ## Reproduce
 
 From `sunshine-pc`, with the private normally earned seed available:
@@ -43,6 +53,9 @@ python tools\locked.py cmd /c tools\_strict.cmd
 .\tools\port_tests.cmd
 python tools/route.py Strict tools/routes/pc_yoshi_pinna_abilities.dev --name <unique> --appdata-from p525_full --seconds 300 SUNSHINE_DEV_HPLOG=1
 python tools/gci_check.py "build/Route/<unique>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_delfino_yoshi_unlock_unassisted.dev --name <unlock> --appdata-from p525_full --seconds 300 SUNSHINE_DEV_HPLOG=1 SUNSHINE_DEV_SEED=1
+python tools/gci_check.py "build/Route/<unlock>/appdata/Sunshine/saves/JAP/Card A/01-GMSJ-super_mario_sunshine.gci"
+python tools/route.py Strict tools/routes/pc_delfino_yoshi_unlock_reload.dev --name <cold> --appdata-from <unlock> --seconds 150
 ```
 
 The script contains no developer start, teleport, direct aiming, cheats, guard, bypass or save edit. Success requires the recorded feeding/mount/refill/flutter/spray/dismount outcomes; rc0 alone is insufficient.
@@ -59,13 +72,12 @@ The FLUDD water count refills separately while riding; lifetime drain by itself 
 
 ## Calibration and limits
 
-Delfino probes `ys01_egg`–`ys03_early` were stopped when Shadow Mario waited on a roof outside the ground route's 3D trigger range. They do not prove a missing unlock implementation.
+Delfino probes `ys01_egg`--`ys03_early` were stopped when Shadow Mario waited on a roof outside the ground route's 3D trigger range. They do not prove a missing unlock implementation.
 `ys04_pinna` exposed the seed's default Episode6 selection. Later fruit probes established ordinary water reveals and exposed high-fruit targeting, damaging approach positions, collision-limited pickup and water pushing rolling fruit toward the sea.
 The height filter corrects the new helper's high-banana false target (`ys08_follow`). No optimization defect or UB cause is established.
 `ys13_episode4` reveals both fruits but its radius 85 pickup orbits at about 92 separation and times out.
 `ys14_pickup` completes hatch, mount, eating/refill, flutter and dismount once with health 8; its digital-only R command does not prove juice emission.
 `ys15_juice` times out after residual spray rolls pineapple into the sea. `ys16_inland` is the accepted complete functional run, not a repeatability certificate.
 
-The native accepted branch feeds banana and eats pineapple. Other egg requests are parser/source checked, not certified by this run.
-Permanent Delfino unlock/save/cold proof remains open: `TMarDirector::fireRideYoshi` sets `0x1038F` only in Delfino, and the flag remains 0 throughout this Pinna run.
+The native accepted Pinna branch feeds banana and eats pineapple. Other egg requests are parser/source checked, not certified by that run. The separate Delfino route feeds the requested banana and proves the permanent unlock/save/cold path.
 This does not certify all Yoshi missions, fruit variants, juice enemy/platform/goop interactions, underwater dissolution, physical-controller behaviour or audible output. Muted WARP testing and script exit do not replace those checks or normal-quit/lifecycle acceptance.

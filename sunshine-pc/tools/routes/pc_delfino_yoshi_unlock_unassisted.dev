@@ -1,0 +1,93 @@
+# Permanently unlock Yoshi in Delfino from the earned fifteen-Shine File B.
+# The route defeats Shadow Mario, feeds and mounts Yoshi, then uses Pause > Save.
+# Acceptance requires flag 0x1038F in memory and a changed, valid GCI; the paired
+# cold route proves persistence. Controller inputs only; no stage start, cheats,
+# direct aiming, teleportation or save edits. See docs/yoshi-gameplay.md.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot pn_cold_pinna_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10000 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x1000a timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10056 timeout=1
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+waitfor flag=0x1001e timeout=1
+waitfor flag=0x1001f timeout=1
+waitfor flag=0x10020 timeout=1
+waitfor flag=0x10021 timeout=1
+waitfor flag=0x10022 timeout=1
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10389 timeout=1
+log
+shot pn_cold_pinna_saved_flags.png
+trace frames=60
+wait frames=60
+log
+shot pn_cold_pinna_neutral.png
+wait frames=30
+# Cross the plaza goop on the proven line, then begin dynamic controller aiming before the final approach.
+walkto x=300 z=3700 radius=120 timeout=1000
+chase timeout=5500 radius=900
+log
+shot ys_shadow_down.png
+mash A period=30 until talk=0 timeout=2400
+wait frames=150
+log
+shot ys_egg_ready.png
+walkto x=3000 z=4000 radius=80 timeout=600
+walkto x=5000 z=4000 radius=80 timeout=600
+walkto fruit=0x40000394 radius=140 timeout=600
+wait frames=20
+faceto fruit=0x40000394 tol=2 timeout=180
+mash B period=30 until held=1 timeout=180
+walkto x=5000 z=4000 radius=80 timeout=600
+walkto x=3000 z=4000 radius=80 timeout=600
+walkto x=1312 z=2887 radius=200 timeout=900
+waitfor yoshistate=6 timeout=300
+walkto x=2350 z=3540 radius=35 hop=24 until yoshistate=8 timeout=300
+waitfor flag=0x1038F timeout=1
+log
+shot ys_delfino_mounted.png
+mash A period=30 until dirstate=4 camDemo=0 timeout=1200
+hold X frames=1
+wait frames=30
+waitfor yoshistate=6 timeout=1
+wait frames=120
+hold START frames=1
+waitfor dirstate=5 timeout=90
+wait frames=60
+hold DOWN frames=2
+wait frames=30
+hold A frames=2
+wait frames=120
+hold LEFT frames=2
+wait frames=30
+mash A period=30 until stage=1 scen=8 dirstate=4 camDemo=0 timeout=1500
+wait frames=60
+waitfor flag=0x1038F timeout=1
+log
+shot ys_delfino_saved.png
+end
