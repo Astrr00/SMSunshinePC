@@ -4,7 +4,7 @@
 
 The [ROADMAP](../../ROADMAP.md#open-work-in-order) owns the current queue and completion criteria. The [matrix](playability-matrix.tsv) now records **17 passed-bounded, 8 open and 0 external checks**. The private `0.1.0.20261019` candidate passes the owner-confirmed [external Clean-PC test](clean-pc-test-2026-10-19.md).
 
-1. Verify the largest unobserved gameplay block: Yoshi feeding/riding/abilities, followed by the remaining FLUDD nozzles. Keep tests functional and compact; do not automate every Shine separately.
+1. Verify normal Rocket/Turbo nozzle acquisition/use and representative interactions. The [bounded Yoshi ability milestone](yoshi-gameplay.md) passes (`ys16_inland`, rc0/205.36s, unchanged valid fifteen-Shine card); permanent Delfino unlock/save/cold remains open. Keep tests functional and compact; do not automate every Shine separately.
 2. Correct demonstrated shared gameplay defects. No next defect is established yet.
 3. Complete remaining normal world milestones and saved/cold-reloaded rewards; mirrors remain deferred.
 4. Finish the connected owner playthrough and explicit remaining Shine/blue-coin acquisition evidence.
