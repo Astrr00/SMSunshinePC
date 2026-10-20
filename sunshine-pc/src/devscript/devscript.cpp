@@ -2576,6 +2576,22 @@ void sunshineDevScriptTick()
 		loadScript(scriptPath);
 		navLoad(); // eager: routes without `chase` never reached the lazy call
 	}
+	// Optional controller-only calibration chunks; ordinary START inputs pause/resume the game.
+	static const char* const chunks = std::getenv("SUNSHINE_DEV_SCRIPT_CHUNKS");
+	static unsigned chunk = 1;
+	if (gDone && chunks && gTick % 30 == 0) {
+		const std::string path = std::string(chunks) + "/" + std::to_string(chunk) + ".dev";
+		if (std::ifstream(path).good()) {
+			gScript.clear();
+			gCursor = 0;
+			gRemaining = 0;
+			gStarted = gDone = false;
+			gGuard = 0.f;
+			gGuardResume = -1;
+			loadScript(path.c_str());
+			std::printf("[devscript] chunk=%u tick=%d\n", chunk++, gTick);
+		}
+	}
 	if (gLoaded && !gDone) step();
 	if (gTrace > 0 && sceneReady() && gpMarioOriginal) {
 		--gTrace;
