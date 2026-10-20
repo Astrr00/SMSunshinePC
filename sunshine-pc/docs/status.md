@@ -1,10 +1,10 @@
 # Port status audit
 
-## Current remaining work (reviewed 2026-10-19)
+## Current remaining work (reviewed 2026-10-20)
 
 The [ROADMAP](../../ROADMAP.md#open-work-in-order) owns the current queue and completion criteria. The [matrix](playability-matrix.tsv) now records **17 passed-bounded, 8 open and 0 external checks**. The private `0.1.0.20261019` candidate passes the owner-confirmed [external Clean-PC test](clean-pc-test-2026-10-19.md).
 
-1. Verify normal Rocket/Turbo nozzle acquisition/use and representative interactions. The [bounded Yoshi ability milestone](yoshi-gameplay.md) passes (`ys16_inland`, rc0/205.36s, unchanged valid fifteen-Shine card); permanent Delfino unlock/save/cold remains open. Keep tests functional and compact; do not automate every Shine separately.
+1. Verify Turbo after normal Bianco Episode4/5 rewards open Episode6; its Episode4 box remains blocked by original stakes. The [Rocket milestone](rocket-turbo-gameplay.md) passes normal acquisition/save/launch/landing/cold. The [Yoshi milestone](yoshi-gameplay.md) includes the permanent Delfino unlock/save/cold. Keep tests functional and compact; do not automate every Shine separately.
 2. Correct demonstrated shared gameplay defects. No next defect is established yet.
 3. Complete remaining normal world milestones and saved/cold-reloaded rewards; mirrors remain deferred.
 4. Finish the connected owner playthrough and explicit remaining Shine/blue-coin acquisition evidence.
@@ -15,6 +15,8 @@ The [ROADMAP](../../ROADMAP.md#open-work-in-order) owns the current queue and co
 Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards and cold reloads; six earned Shines are recorded in [normal-world-routes.md](normal-world-routes.md). The old `/O2` sweep and diagnostic later-world load batch are complete. Do not repeat them without a relevant regression need.
 
 ## Dated evidence log
+
+**Normal Rocket PASS; Turbo prerequisites corrected (2026-10-20).** `rt40_secret_plainjumps` saves normally earned Hillside Shine2, extending the connected card to sixteen Shines. `rt44_rocket_collect` passes normal Bianco Rocket acquisition, save, full-trigger launch from y3388 to a recorded maximum y6047.7 and landing. Dedicated `rt52_cold_rocket` passes all sixteen Shines and the saved Rocket right on a fresh process, retaining a byte-identical GCI with seven valid checksums. Strict0 and all74 port checks pass. Turbo remains unverified: six original stakes block its Episode4 box and are removed in Episode6; next are the two necessary normal episode rewards. Read-only nozzle/box traces, no original game-code changes, no bypass or UB claim. [Hashes, calibration and limits](rocket-turbo-gameplay.md). Broad matrix states remain17/8/0; mirrors remain deferred and the release stays draft.
 
 **Normal Pinna Episode5 PASS (2026-10-19).** `p525_full` completes normal entry, Ferris-wheel boss defeat, rising-gondola roof ride and Shine34 collection/save (rc0/382.62s). Independent `p526_cold` passes normal File B reload (rc0/51.27s), retaining exactly fifteen earned Shines and the byte-identical GCI; all seven checksums pass. Controller inputs only, empty crash logs, no active cheats; minimum health6/full and8/cold. Strict0 and74 port checks pass, including two old-source steering failures. A second agent independently reviewed route/log/save evidence without findings. Controller steering and read-only observations change; no original-game fix or descending-roof carry parity is claimed. [Hashes, calibration and limits](pinna-normal-route.md#complete-normal-ferris-wheel-milestone). One accepted full pass plus cold proof; Episode6 onward and broad PC-CORE/PC-CONTENT remain open. Matrix17/8/0, mirrors deferred, release draft.
 

@@ -1,0 +1,124 @@
+# Normal Bianco Episode4 entry, Rocket acquisition/save and launch.
+# Seed: a normally earned and saved Hillside Cave Shine.
+# Ordinary controller inputs only; no dev start, teleport, direct aim, cheats or save edits.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=60
+
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x10022 timeout=1
+waitfor flag=0x10002 timeout=1
+waitfor flag=0x10385 timeout=60
+log
+
+walkto x=340 z=5650 radius=60 spray=1 timeout=900
+faceto x=0 z=4941 tol=3 timeout=300
+hold trig=0,255 frames=120
+walkto x=0 z=4800 radius=200 timeout=600
+hold A stick=0,127 frames=120
+waitfor stage=2 scen=255 timeout=1200
+wait frames=400
+log
+shot rt_bianco3_selector.png
+hold A frames=4
+waitfor stage=2 scen=3 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=120
+log
+shot rt_bianco3_start.png
+
+walkto x=-5900 z=16260 radius=30 timeout=1361
+walkto x=-2740 z=11660 radius=30 timeout=1735
+walkto x=-1140 z=10060 radius=30 timeout=739
+walkto x=-880 z=9420 radius=30 timeout=268
+walkto x=-560 z=8920 radius=30 timeout=239
+walkto x=-380 z=8780 radius=50 timeout=220
+hold X frames=1
+wait frames=20
+faceto x=500 z=7800 tol=3 timeout=180
+hold A stick=45,119 frames=14
+walkto x=500 z=7800 radius=250 spray=1 timeout=400
+walkto x=500 z=7800 radius=60 timeout=200
+walkto x=1000 z=6800 radius=50 timeout=600
+walkto x=1160 z=4960 radius=30 timeout=615
+walkto x=920 z=3480 radius=30 timeout=510
+walkto x=880 z=3280 radius=30 timeout=220
+walkto x=5840 z=1080 radius=50 timeout=1688
+walkto x=6040 z=800 radius=50 timeout=264
+hold X frames=1
+wait frames=20
+faceto x=7050 z=2050 tol=3 timeout=180
+hold A frames=14
+walkto x=7050 z=2050 radius=180 spray=1 timeout=400
+walkto x=7050 z=2050 radius=40 timeout=240
+wait frames=30
+log
+shot rt_bianco3_central.png
+hold X frames=1
+wait frames=20
+
+# Reach the normal Rocket box on the east hillside.
+walkto x=10000 z=3000 radius=80 jump=18 spray=18 hover=1 timeout=1200
+walkto x=10000 z=8000 radius=80 jump=18 spray=18 hover=1 timeout=1800
+walkto x=12000 z=6500 radius=80 jump=18 spray=18 hover=1 timeout=1200
+walkto x=12700 z=6300 radius=40 jump=18 spray=18 hover=1 timeout=600
+walkto x=13000 z=6000 radius=60 jump=18 spray=18 hover=1 timeout=600
+walkto x=14000 z=5600 radius=50 jump=18 spray=18 hover=1 timeout=900
+
+# Spin jump, wall kick and delayed Hover clear the tall marked-path step.
+hold L frames=8
+wait frames=20
+faceto x=15000 z=5400 tol=2 timeout=180
+hold stick=0,24 frames=1
+hold stick=24,0 frames=1
+hold stick=0,-24 frames=1
+hold stick=-24,0 frames=1
+hold A stick=0,24 frames=1
+walkto x=15000 z=5400 radius=60 until mstatus=0x000008a7 timeout=90
+wait frames=1
+hold A frames=1
+hold A until marioy>=3500 timeout=90
+walkto x=14750 z=5400 radius=60 spray=1 hover=1 until floory>=3600 timeout=180
+waitfor floory>=3600 timeout=120
+walkto x=15000 z=5400 radius=150 jump=12 spray=12 hover=1 timeout=300
+walkto x=14750 z=6500 radius=60 jump=18 spray=18 hover=1 timeout=600
+
+# Glide back to the box, land, then open it with an ordinary jump.
+faceto x=12077 z=6533 tol=2 timeout=180
+walkto x=12077 z=6533 radius=35 jump=12 spray=12 hover=1 timeout=360
+hold L frames=2
+wait frames=90
+walkto x=12077 z=6200 radius=150 timeout=300
+walkto x=12077 z=6800 radius=150 timeout=300
+walkto x=12077 z=6533 radius=30 hop=24 until mstatus=0x02000890 timeout=600
+wait frames=60
+walkto x=12077 z=6921 radius=30 until flag=0x10368 timeout=300
+wait frames=90
+log
+mash A period=30 until stage=2 scen=3 dirstate=4 camDemo=0 timeout=1800
+wait frames=90
+log
+shot rt_rocket_acquired.png
+# Charge the acquired Rocket with the ordinary analog R trigger.
+trace frames=210
+hold trig=0,255 until marioy>=4600 timeout=180
+log
+shot rt_rocket_launch.png
+wait frames=180
+waitfor flag=0x10368 timeout=1
+log
+shot rt_rocket_landed.png
+end

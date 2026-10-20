@@ -1156,6 +1156,14 @@ void logStatus(const char* tag)
 	if (std::strcmp(tag, "devscript") == 0 && gpItemManager)
 		for (int i = 0; i < gpItemManager->getObjNum(); ++i) {
 			const auto* actor = gpItemManager->getObj(i);
+			if (const auto* box = dynamic_cast<const TNozzleBox*>(actor)) {
+				const auto* item = box->mContainedNozzleItem;
+				std::printf("[%s-nozzle-box] i=%d type=%d valid=%d dead=%d pos=(%.1f,%.1f,%.1f) itemDead=%d itemPos=(%.1f,%.1f,%.1f) tick=%d\n", tag, i,
+				    box->mContainedNozzleType, int(box->unk15C), int(box->checkLiveFlag(LIVE_FLAG_DEAD)),
+				    box->mPosition.x, box->mPosition.y, box->mPosition.z,
+				    item ? int(item->checkLiveFlag(LIVE_FLAG_DEAD)) : -1,
+				    item ? item->mPosition.x : 0.f, item ? item->mPosition.y : 0.f, item ? item->mPosition.z : 0.f, gTick);
+			}
 			if (actor->checkLiveFlag(LIVE_FLAG_DEAD)) continue;
 			if (const auto* egg = dynamic_cast<const TEggYoshi*>(actor))
 				std::printf("[%s-yoshi-egg] i=%d state=%d wanted=0x%08X pos=(%.1f,%.1f,%.1f) tick=%d\n", tag, i,
@@ -2560,10 +2568,11 @@ void sunshineDevScriptTick()
 				trigT = static_cast<TNozzleTrigger*>(nz)->unk386;
 			}
 		}
-		std::printf("[trace] tick=%d pos=(%.0f,%.1f,%.0f) vel=(%.1f,%.1f,%.1f) fwd=%.1f face=%.1f status=0x%08X upper=%d trig=%d/%d water=%d floor=%.0f\n", gTick,
+		std::printf("[trace] tick=%d pos=(%.0f,%.1f,%.0f) vel=(%.1f,%.1f,%.1f) fwd=%.1f face=%.1f status=0x%08X upper=%d trig=%d/%d water=%d floor=%.0f nozzle=%d\n", gTick,
 		    m->mPosition.x, m->mPosition.y, m->mPosition.z, m->mVel.x, m->mVel.y, m->mVel.z, m->mForwardVel,
 		    static_cast<s16>(m->mFaceAngle.y) * (360.0f / 65536.0f), (unsigned)m->mStatus, (int)m->mUpperState, trig, trigT,
-		    m->mWaterGun ? (int)m->mWaterGun->mCurrentWater : -1, m->mFloorPosition.y);
+		    m->mWaterGun ? (int)m->mWaterGun->mCurrentWater : -1, m->mFloorPosition.y,
+		    m->mWaterGun ? (int)m->mWaterGun->mCurrentNozzle : -1);
 		logCrates("trace");
 	}
 	if (std::getenv("SUNSHINE_DEV_STATUS") && gTick % 30 == 0) {
