@@ -49,6 +49,7 @@
 #include "Player/MarioAccess.hpp"
 #include "Enemy/GateKeeper.hpp"
 #include "Enemy/BossPakkun.hpp"
+#include "Enemy/Popo.hpp"
 #include "Enemy/BossGesso.hpp"
 #include "Enemy/BossGessoTentacle.hpp"
 #include "Enemy/TinKoopa.hpp"
@@ -851,6 +852,8 @@ const TSmallEnemy* nearestSmallEnemy(float r)
 		for (int i = 0; i < (*it)->getObjNum(); ++i) {
 			const TSmallEnemy* e = dynamic_cast<const TSmallEnemy*>((*it)->getObj(i));
 			if (!e || e->checkLiveFlag(LIVE_FLAG_DEAD) || e->checkLiveFlag(LIVE_FLAG_HIDDEN) || std::fabs(e->mPosition.y - m.y) > 300.f) continue;
+			// Poinks attach to FLUDD and absorb spray; defensive spraying cannot clear them.
+			if (dynamic_cast<const TPopo*>(e)) continue;
 			// Already hit: one water hit pushes the die nerve (TNameKuri::behaveToWater); more spray only drains the tank.
 			if (e->mSpine && e->mSpine->getCurrentNerve() == &TNerveSmallEnemyDie::theNerve()) continue;
 			const float d = std::hypot(e->mPosition.x - m.x, e->mPosition.z - m.z);
@@ -1207,6 +1210,23 @@ void logStatus(const char* tag)
 	}
 	logSecretWoodBlocks(tag, gTick);
 	logPinnaShips(tag, gTick);
+	if (sceneReady() && gpApplication.mCurrArea.getStage() == 2 && gpApplication.mCurrArea.getScenario() == 3 && TFlagManager::smInstance)
+		std::printf("[%s-bianco4] redcoins=%d tick=%d\n", tag, TFlagManager::smInstance->getFlag(0x60000), gTick);
+	if (sceneReady() && gpApplication.mCurrArea.getStage() == 2 && gpApplication.mCurrArea.getScenario() == 4) {
+		if (const auto* boss = findPetey())
+			std::printf("[%s-bianco5-petey] hp=%d weak=%d bck=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag,
+			    boss->getHitPoints(), int(boss->mWeakPoint), boss->mMActor->getCurAnmIdx(ANM_TYPE_BCK),
+			    boss->mPosition.x, boss->mPosition.y, boss->mPosition.z, gTick);
+		const auto* defense = nearestSmallEnemy(650.f);
+		std::printf("[%s-bianco5-defense] actor=0x%08X tick=%d\n", tag, defense ? defense->getActorType() : 0, gTick);
+		auto* manager = dynamic_cast<TLiveManager*>(JDrama::TNameRefGen::search("\x83\x7c\x83\x7c\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"));
+		for (int i = 0; manager && i < manager->getObjNum(); ++i) {
+			const auto* popo = dynamic_cast<const TPopo*>(manager->getObj(i));
+			if (!popo || popo->checkLiveFlag(LIVE_FLAG_DEAD)) continue;
+			std::printf("[%s-bianco5-poink] i=%d attached=%d scale=%.2f pos=(%.1f,%.1f,%.1f) tick=%d\n", tag,
+			    i, int(popo->mIsPossessed), popo->mWaterScale, popo->mPosition.x, popo->mPosition.y, popo->mPosition.z, gTick);
+		}
+	}
 	if (sceneReady() && gpApplication.mCurrArea.getStage() == 13 && gpApplication.mCurrArea.getScenario() == 2) {
 		auto* registry = JDrama::TNameRefGen::instance;
 		auto* root = registry ? registry->getRootNameRef() : nullptr;
@@ -1553,7 +1573,11 @@ bool condHolds(const Command& c)
 			}
 			break;
 		}
-		case Command::Cond::RedCoinsGe: ok = pinnaShipSceneReady() && gpApplication.mCurrArea.getScenario() == 1 && TFlagManager::smInstance && TFlagManager::smInstance->getFlag(0x60000) >= val; break;
+		case Command::Cond::RedCoinsGe:
+			ok = sceneReady() && ((gpApplication.mCurrArea.getStage() == 2 && gpApplication.mCurrArea.getScenario() == 3)
+			    || (gpApplication.mCurrArea.getStage() == 13 && gpApplication.mCurrArea.getScenario() == 1))
+			    && TFlagManager::smInstance && TFlagManager::smInstance->getFlag(0x60000) >= val;
+			break;
 		case Command::Cond::Wood8WaitGe:
 		case Command::Cond::Wood8WaitLe:
 		case Command::Cond::Wood12WaitGe:
@@ -2555,6 +2579,22 @@ void sunshineDevScriptTick()
 		gLoaded = true;
 		loadScript(scriptPath);
 		navLoad(); // eager: routes without `chase` never reached the lazy call
+	}
+	// Optional controller-only calibration chunks; ordinary START inputs pause/resume the game.
+	static const char* const chunks = std::getenv("SUNSHINE_DEV_SCRIPT_CHUNKS");
+	static unsigned chunk = 1;
+	if (chunks && gTick % 30 == 0) {
+		const std::string path = std::string(chunks) + "/" + std::to_string(chunk) + ".dev";
+		if (std::ifstream(path).good()) {
+			gScript.clear();
+			gCursor = 0;
+			gRemaining = 0;
+			gStarted = gDone = false;
+			gGuard = 0.f;
+			gGuardResume = -1;
+			loadScript(path.c_str());
+			std::printf("[devscript] chunk=%u tick=%d\n", chunk++, gTick);
+		}
 	}
 	if (gLoaded && !gDone) step();
 	if (gTrace > 0 && sceneReady() && gpMarioOriginal) {

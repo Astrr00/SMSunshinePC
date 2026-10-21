@@ -1,0 +1,224 @@
+# Normal Bianco Episode4 red coins and saved Shine3.
+# Seed: rt44_rocket_collect, sixteen earned Shines and saved Bianco Rocket right.
+# Ordinary controller inputs only; no dev start, teleport, direct aim, cheats or save edits.
+
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=60
+
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x10022 timeout=1
+waitfor flag=0x10002 timeout=1
+waitfor flag=0x10385 timeout=60
+waitfor flag=0x10368 timeout=1
+log
+
+walkto x=340 z=5650 radius=60 spray=1 timeout=900
+faceto x=0 z=4941 tol=3 timeout=300
+hold trig=0,255 frames=120
+walkto x=0 z=4800 radius=200 timeout=600
+hold A stick=0,127 frames=120
+waitfor stage=2 scen=255 timeout=1200
+wait frames=400
+log
+shot rt_bianco3_selector.png
+hold A frames=4
+waitfor stage=2 scen=3 director mario dirstate=4 camDemo=0 timeout=3000
+wait frames=120
+log
+shot bt_bianco4_start.png
+waitfor redcoins>=0 timeout=1
+
+walkto x=-5900 z=16260 radius=30 timeout=1361
+walkto x=-2740 z=11660 radius=30 timeout=1735
+walkto x=-1140 z=10060 radius=30 timeout=739
+walkto x=-880 z=9420 radius=30 timeout=268
+walkto x=-560 z=8920 radius=30 timeout=239
+walkto x=-380 z=8780 radius=50 timeout=220
+hold X frames=1
+wait frames=20
+faceto x=500 z=7800 tol=3 timeout=180
+hold A stick=45,119 frames=14
+walkto x=500 z=7800 radius=250 spray=1 timeout=400
+walkto x=500 z=7800 radius=60 timeout=200
+walkto x=1000 z=6800 radius=50 timeout=600
+
+# Enter the village and climb the now-valid roof Rocket box from its east wall.
+walkto x=-3000 z=6800 radius=50 timeout=600
+walkto x=-3000 z=5400 radius=50 timeout=600
+walkto x=-3000 z=4800 radius=40 timeout=400
+log
+shot bt_rocket_east_wall.png
+hold L frames=8
+wait frames=20
+faceto x=-4002 z=4756 tol=2 timeout=180
+trace frames=180
+walkto x=-3600 z=4800 radius=20 timeout=180
+walkto x=-3300 z=4800 radius=20 timeout=180
+waitfor mstatus=0x00000444 timeout=1
+walkto x=-4002 z=4756 radius=40 jump=18 until mstatus=0x000008a7 timeout=90
+wait frames=1
+hold A frames=1
+hold A until marioy>=3200 timeout=90
+walkto x=-4002 z=4756 radius=40 spray=1 hover=1 until floory>=3330 timeout=180
+walkto x=-4002 z=4756 radius=25 spray=1 hover=1 timeout=180
+wait frames=120
+log
+shot bt_roof_rocket.png
+walkto x=-4002 z=5143 radius=25 timeout=300
+wait frames=60
+log
+shot bt_roof_rocket_acquired.png
+
+# Charge beside the overhead rope, then transfer to red coin2.
+walkto x=-4000 z=5300 radius=25 timeout=300
+wait frames=30
+faceto x=-5661 z=4850 tol=2 timeout=180
+trace frames=300
+hold trig=0,255 until marioy>=3900 timeout=180
+walkto x=-5661 z=4850 radius=20 hop=24 until redcoins>=1 timeout=300
+hold L frames=2
+wait frames=60
+waitfor redcoins>=1 timeout=60
+log
+shot bt_red2.png
+# The high wire coin5 is directly above the open street between two houses.
+walkto x=-7400 z=3500 radius=40 timeout=600
+walkto x=-7434 z=2396 radius=25 timeout=400
+hold trig=0,255 until redcoins>=2 timeout=240
+hold L frames=2
+wait frames=90
+log
+shot bt_red5.png
+# Reach the outer roof, then the high western red coin0.
+walkto x=-7400 z=3500 radius=25  timeout=600
+walkto x=-10100 z=3500 radius=25  timeout=600
+walkto x=-10100 z=1500 radius=25  timeout=600
+walkto x=-10100 z=800 radius=25 hop=24 timeout=300
+walkto x=-10100 z=650 radius=25  timeout=600
+faceto x=-10100 z=200 tol=2 timeout=180
+hold trig=0,255 until marioy>=4300 timeout=180
+walkto x=-10100 z=200 radius=20  timeout=180
+hold L frames=2
+wait frames=90
+faceto x=-9876 z=-203 tol=2 timeout=180
+hold trig=0,255 until marioy>=5150 timeout=180
+walkto x=-9876 z=-203 radius=20  timeout=180
+hold L frames=2
+wait frames=90
+waitfor redcoins>=3 timeout=60
+log
+shot bt_red0.png
+# Return along the open streets for the low rope coin7.
+walkto x=-10450 z=1000 radius=25  timeout=900
+walkto x=-10450 z=3500 radius=25  timeout=900
+walkto x=-7400 z=3500 radius=25  timeout=900
+walkto x=-3000 z=3500 radius=25 timeout=900
+walkto x=-3000 z=5447 radius=25 timeout=600
+walkto x=-2795 z=5447 radius=25  timeout=900
+hold trig=0,255 until redcoins>=4 timeout=240
+hold L frames=2
+wait frames=90
+waitfor redcoins>=4 timeout=60
+log
+shot bt_red7.png
+# Rise beside the small roof before crossing over red coin1.
+walkto x=-2450 z=6100 radius=30 jump=8 timeout=300
+hold L frames=2
+wait frames=60
+faceto x=-1649 z=5478 tol=2 timeout=180
+hold trig=0,255 until marioy>=4000 timeout=180
+walkto x=-1649 z=5478 radius=20  timeout=180
+hold L frames=2
+wait frames=90
+waitfor redcoins>=5 timeout=60
+log
+shot bt_red1.png
+# Approach the eastern wall from its lower, clear side.
+walkto x=-600 z=6500 radius=25  timeout=600
+walkto x=700 z=6500 radius=25  timeout=600
+walkto x=700 z=5815 radius=25  timeout=600
+faceto x=1203 z=5815 tol=2 timeout=180
+hold trig=0,255 until marioy>=3850 timeout=180
+walkto x=1203 z=5815 radius=20  timeout=180
+hold L frames=2
+wait frames=90
+waitfor redcoins>=6 timeout=60
+log
+shot bt_red6.png
+# Land on the lower arch ledge and walk beneath the upper wall for coin4.
+walkto x=700 z=6500 radius=30 jump=8 timeout=600
+walkto x=-3000 z=6500 radius=30 timeout=600
+walkto x=-3000 z=3500 radius=25 timeout=600
+walkto x=-3000 z=2700 radius=25  timeout=600
+faceto x=-2350 z=2060 tol=2 timeout=180
+hold trig=0,255 until marioy>=3600 timeout=180
+walkto x=-2350 z=2060 radius=20  timeout=180
+hold L frames=2
+wait frames=90
+waitfor marioy>=3300 timeout=1
+walkto x=-1879 z=2141 radius=25 until redcoins>=7 timeout=300
+waitfor redcoins>=7 timeout=60
+log
+shot bt_red4.png
+# Launch outside the upper wall, then descend onto its coin3.
+walkto x=-2500 z=2050 radius=25  timeout=600
+faceto x=-1899 z=3464 tol=2 timeout=180
+hold trig=0,255 until marioy>=4500 timeout=180
+walkto x=-1899 z=3464 radius=20 until redcoins>=8 timeout=180
+hold L frames=2
+wait frames=90
+waitfor redcoins>=8 timeout=60
+log
+shot bt_red3_all8.png
+waitfor stage=2 scen=3 dirstate=4 camDemo=0 redcoins>=8 timeout=1800
+# Recollect the original roof Rocket for a normal full-water refill.
+walkto x=-3000 z=4500 radius=25  timeout=600
+faceto x=-4002 z=4756 tol=2 timeout=180
+hold trig=0,255 until marioy>=3600 timeout=180
+walkto x=-4002 z=4756 radius=20  timeout=180
+hold L frames=2
+wait frames=90
+hold A frames=8
+wait frames=60
+walkto x=-4002 z=5143 radius=25  timeout=300
+wait frames=60
+log
+# Land beside the original windmill column, then Rocket above its solid cap.
+walkto x=-4000 z=5300 radius=25 timeout=300
+wait frames=30
+faceto x=-5596 z=5000 tol=2 timeout=180
+hold trig=0,255 until marioy>=3900 timeout=180
+walkto x=-5596 z=5000 radius=20 timeout=180
+hold L frames=2
+wait frames=90
+waitfor marioy>=4500 timeout=1
+faceto x=-5596 z=5594 tol=2 timeout=180
+trace frames=360
+hold trig=0,255 until marioy>=5500 timeout=180
+walkto x=-5596 z=5594 radius=70 hop=24 timeout=300
+waitfor marioy>=6400 timeout=1
+hold L frames=2
+mash A period=30 until flag=0x10003 timeout=900
+log
+shot bt_bianco4_shine3_collected.png
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=9000
+wait frames=120
+waitfor flag=0x10003 timeout=1
+log
+shot bt_bianco4_shine3_saved.png
+wait frames=30
+end

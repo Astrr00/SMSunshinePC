@@ -4,7 +4,7 @@
 
 The [ROADMAP](../../ROADMAP.md#open-work-in-order) owns the current queue and completion criteria. The [matrix](playability-matrix.tsv) now records **17 passed-bounded, 8 open and 0 external checks**. The private `0.1.0.20261019` candidate passes the owner-confirmed [external Clean-PC test](clean-pc-test-2026-10-19.md).
 
-1. Verify Turbo after normal Bianco Episode4/5 rewards open Episode6; its Episode4 box remains blocked by original stakes. The [Rocket milestone](rocket-turbo-gameplay.md) passes normal acquisition/save/launch/landing/cold. The [Yoshi milestone](yoshi-gameplay.md) includes the permanent Delfino unlock/save/cold. Keep tests functional and compact; do not automate every Shine separately.
+1. Verify Turbo after the remaining normal Bianco Episode5 reward opens Episode6; Episode4 Shine3 is already saved/cold-loaded on the seventeen-Shine card; its Episode4 box remains blocked by original stakes. The [Rocket milestone](rocket-turbo-gameplay.md) passes normal acquisition/save/launch/landing/cold. The [Yoshi milestone](yoshi-gameplay.md) includes the permanent Delfino unlock/save/cold. Keep tests functional and compact; do not automate every Shine separately.
 2. Correct demonstrated shared gameplay defects. No next defect is established yet.
 3. Complete remaining normal world milestones and saved/cold-reloaded rewards; mirrors remain deferred.
 4. Finish the connected owner playthrough and explicit remaining Shine/blue-coin acquisition evidence.
@@ -15,6 +15,8 @@ The [ROADMAP](../../ROADMAP.md#open-work-in-order) owns the current queue and co
 Petey, Gooper Blooper and Gelato's sandcastle already have normal saved rewards and cold reloads; six earned Shines are recorded in [normal-world-routes.md](normal-world-routes.md). The old `/O2` sweep and diagnostic later-world load batch are complete. Do not repeat them without a relevant regression need.
 
 ## Dated evidence log
+
+**Normal Bianco Episode4 saved/cold PASS (2026-10-20).** `bt17_bianco4_full` earns all eight red coins and the windmill-top Shine3, saves and returns normally. Fresh-process Episode5 entries retain the byte-identical seventeen-Shine GCI with seven valid checksums. Episode5 and Turbo completion remain open. A demonstrated controller-guard defect that pumped an attached Poink is corrected in the dev driver; no original game code changes. Strict0, all74 port checks and focused controller-loader checks pass. [Exact evidence and limits](bianco-turbo-progression.md).
 
 **Normal Rocket PASS; Turbo prerequisites corrected (2026-10-20).** `rt40_secret_plainjumps` saves normally earned Hillside Shine2, extending the connected card to sixteen Shines. `rt44_rocket_collect` passes normal Bianco Rocket acquisition, save, full-trigger launch from y3388 to a recorded maximum y6047.7 and landing. Dedicated `rt52_cold_rocket` passes all sixteen Shines and the saved Rocket right on a fresh process, retaining a byte-identical GCI with seven valid checksums. Strict0 and all74 port checks pass. Turbo remains unverified: six original stakes block its Episode4 box and are removed in Episode6; next are the two necessary normal episode rewards. Read-only nozzle/box traces, no original game-code changes, no bypass or UB claim. [Hashes, calibration and limits](rocket-turbo-gameplay.md). Broad matrix states remain17/8/0; mirrors remain deferred and the release stays draft.
 
