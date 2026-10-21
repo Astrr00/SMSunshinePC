@@ -1,4 +1,4 @@
-# Normal Rocket milestone and Turbo prerequisites
+# Normal Rocket and Turbo milestones
 
 ## Scope
 
@@ -20,13 +20,13 @@ Result: rc0 / 185 seconds, done at tick5221; health8, no active cheats and an em
 
 The accepted script is `tools/routes/pc_bianco_rocket_turbo_unassisted.dev`, frozen privately as `build/rt44-rocket-frozen.dev`. Earlier `rt41`/`rt42` miss the pickup; `rt43_rocket_bounce` observes the opened box and live item without collecting it. These are route calibration results, not demonstrated game-code failures. The added devscript output only reads the current nozzle and box/item state.
 
-## Turbo remains open: normal Episode6 prerequisite
+## Turbo gate: normal Episode6 prerequisite
 
 Bianco Episode4 contains a valid Turbo box at `(9198.1,2800,-23109.9)`, but six original `Pile` actors block the cave entrance. Their centers run from x8700 to9700 at z-22900, y2700. The original `pile.col` spans y0..500 and their Y scale is2, giving tops at y3700. Episode4 (`bianco3`) and Episode5 (`bianco4`) each contain16 Pile placements; Episode6 (`bianco5`) contains10, with those six entrance stakes removed. A valid box does not establish normal reachability in Episode4. The [external location description](https://www.mariowiki.com/Bianco_Hills#Nozzles) also describes the box as visible in Episodes4–8 and accessible in Episodes6–8; scene data and native collisions provide the local evidence.
 
-The earned card opens Episode4. Next: normally earn/save its red-coin Shine3 and Episode5's Petey-rematch Shine4, then select Episode6 for Turbo acquisition, charge/use, save and cold reload. Do not repeat the blocked Episode4 approach, bypass the stakes or edit progress. These are necessary shared-mechanic prerequisites, not a requirement to automate every Shine. Global Delfino nozzle unlocks remain outside this milestone.
+The necessary Episode4 red-coin Shine3 and Episode5 Petey-rematch Shine4 are now normally earned, saved and cold loaded. `bt47_turbo6_entry` completes normal Episode6 leaf-boat travel, spin-jump/Hover shore access, Turbo pickup and save; a full R use reaches speed85.6 with nozzle5 and consumes water. `bt48_cold_turbo` independently reloads the eighteen-Shine card and both nozzle rights (rc0/51 seconds, seven valid checksums, byte-identical GCI). [Controller sequence, hashes and explicit limits](bianco-turbo-progression.md#completed-episode6-turbo-milestone). Do not repeat the blocked Episode4 approach, bypass the stakes or edit progress. These are necessary shared-mechanic prerequisites, not a requirement to automate every Shine. Global Delfino nozzle unlocks remain outside this milestone.
 
-Calibration remains explicit: `rt45_turbo_acquire` hits the island wall; `rt46_turbo_east` takes the open eastern water line and lands at the shore, but bounces on the Pianta. `rt47_turbo_hover_box` and `rt48_turbo_spin_box` time out at excessive route altitude assertions; the latter records a spin jump and Hover at y3403. `rt49_turbo_box_land` hits the stakes (minimum health7), `rt50_turbo_stakes_east` has insufficient idle-Hover momentum, and `rt51_turbo_running_hover` meets the cave's east wall. All retain the accepted Rocket card and have empty crash logs. The final diagnostic is frozen privately as `build/rt51-turbo-episode4-blocked.dev`. None is an accepted Turbo acquisition/use result, a demonstrated game-code defect or evidence of undefined behavior.
+Calibration remains explicit: `rt45_turbo_acquire` hits the island wall; `rt46_turbo_east` takes the open eastern water line and lands at the shore, but bounces on the Pianta. `rt47_turbo_hover_box` and `rt48_turbo_spin_box` time out at excessive route altitude assertions; the latter records a spin jump and Hover at y3403. `rt49_turbo_box_land` hits the stakes (minimum health7), `rt50_turbo_stakes_east` has insufficient idle-Hover momentum, and `rt51_turbo_running_hover` meets the cave's east wall. All retain the accepted Rocket card and have empty crash logs. The final diagnostic is frozen privately as `build/rt51-turbo-episode4-blocked.dev`. None of those Episode4 calibrations is an accepted Turbo acquisition/use result, a demonstrated game-code defect or evidence of undefined behavior.
 
 ## Build and route identity
 
@@ -52,3 +52,5 @@ python tools/route.py Strict tools/routes/pc_bianco_rocket_reload.dev --name <co
 ```
 
 Private profiles, screenshots, disc data and GCI files are not distributed. Each accepted milestone is one successful bounded run; this is not consecutive-repeatability proof, every nozzle interaction, global Delfino nozzle unlocking or a complete playthrough. Native runs are muted and use the CPU adapter at render scale0.25; they do not certify audio or full rendering quality.
+
+The later Turbo cold check uses `tools/routes/pc_bianco_turbo_reload.dev` with `--appdata-from bt47_turbo6_entry`. It passes on Strict SHA-256 `2beda12192b1ff36b5915bcea8b785ad03223bf2c22040664e31ec47035312f2`, whose existing build reports zero unresolved symbols and passes all74 port checks. The earlier Rocket reproduction commands remain the evidence for their original sixteen-Shine profile.
