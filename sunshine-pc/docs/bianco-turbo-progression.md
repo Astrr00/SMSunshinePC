@@ -44,6 +44,12 @@ The corrected Strict has zero unresolved symbols and all74 port checks pass. Str
 
 Strict links with zero unresolved symbols, all74 port checks pass, and six focused parser cases cover accepted limits, negative/out-of-range values, fractional/empty values and overflow. In `bt37_bianco5_partial_r`, the connected normal approach reaches the Poink plateau at tick5478 with health7 and water6286; the subsequent charged shot wakes Petey. This validates partial-trigger steering, not Episode5 completion. Strict SHA-256 `2beda12192b1ff36b5915bcea8b785ad03223bf2c22040664e31ec47035312f2`.
 
+## Rematch controller components
+
+The ordinary-input continuations in `bt41_bianco5_battle` establish two complete mouth-fill/navel-pound components: chunks22/23 reduce Petey from3 to2 HP while Mario remains at3 HP, and chunks28/29 reduce Petey from2 to1 HP while Mario remains at2 HP. Both fills reach250/250. Waiting for `weak=3 facing=60` before the flying shot avoids a subsequent approach from the wrong side. A later continuous movement/shot section also knocks Petey down normally.
+
+These are component observations, not Episode5 completion. The low-health session subsequently ends in normal enemy damage/death before the final pound. Its card still has seventeen Shines and its crash log is empty. Petey's original swing-distance parameter is600; the death observation places Mario about760 units from Petey and a jumping slug42 units from Mario, so a Petey swing is not an established explanation. The next controller calibration preserves more health on the cliff return and checks the initial mouth hit separately. No game-code defect or undefined behavior is inferred.
+
 ## Open acceptance
 
 Episode5 completion and saved Shine4, normal Episode6 Turbo acquisition/use, saved Turbo right and the final fresh-process reload remain pending. A route draft, one knockdown or resource placement is not their PASS. The broader playability matrix remains17 passed-bounded / 8 open / 0 external-check-required. Mirrors remain deferred; no release is published.
