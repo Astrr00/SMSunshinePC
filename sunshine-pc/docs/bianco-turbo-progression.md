@@ -50,8 +50,18 @@ The ordinary-input continuations in `bt41_bianco5_battle` establish two complete
 
 These are component observations, not Episode5 completion. The low-health session subsequently ends in normal enemy damage/death before the final pound. Its card still has seventeen Shines and its crash log is empty. Petey's original swing-distance parameter is600; the death observation places Mario about760 units from Petey and a jumping slug42 units from Mario, so a Petey swing is not an established explanation. The next controller calibration preserves more health on the cliff return and checks the initial mouth hit separately. No game-code defect or undefined behavior is inferred.
 
+## Completed Episode5 milestone
+
+`bt46_bianco5_battle` normally loads the seventeen-Shine `bt17_bianco4_full` card, enters Episode5, collects the roof Rocket and a normal healing blue coin, wakes sleeping Petey with a charged Poink and returns to the village. The completed fight uses the northern spray position near `(-3037,3545)` and a separate eastern mouth approach near `(-2050,4780)`. Three full250/250 mouth fills in controller chunks10/16/22 and navel pounds in11/17/23 reduce Petey3→2→1→0; Mario stays at3 HP throughout those three attack chains. The narrower eastern flying-shot approach was unreliable and is not the accepted sequence.
+
+The reward moves to its original authored position `(-5300,2800,-1000)`. Ordinary movement, Hover and a normal jump collect Shine4; normal save confirmation returns to controllable Delfino1/8. Chunk30 ends at tick54875. File B sector3/write26 contains eighteen Shine identities: `0,1,2,3,4,10,20,30,31,32,33,34,86,94,95,98,107,117`; GCI SHA-256 `99a8af03a336d61e443c1b63a443fd1ba1207595e8336b596358c1bf0c616fb1`. All seven sector checksums pass, the crash log is empty and no cheats are active. Reward travel drops Mario to1 HP before the Shine; this is not a damage-free approach claim.
+
+The fresh `bt47_turbo6_entry` process normally loads File B, asserts Shine4 and the previous saved rights, and enters Episode6 (`stage2/scen5`) with18 Shines and8 HP. Its GCI is byte-identical to the saved Episode5 card, establishing cold persistence. Both use Strict SHA-256 `2beda12192b1ff36b5915bcea8b785ad03223bf2c22040664e31ec47035312f2`, whose build reports zero unresolved symbols and passes all74 port checks.
+
+Episode5 is a completed segmented controller-input session, with ordinary START pauses and read-only checkpoints. The process was deliberately stopped after the verified saved Delfino return. It is not an unattended full-route rc0 or repeatability claim. The frozen private controller files and hashes are recorded in `build/bt46-proof/summary.json`; no game actor or progress state was written by the driver.
+
 ## Open acceptance
 
-Episode5 completion and saved Shine4, normal Episode6 Turbo acquisition/use, saved Turbo right and the final fresh-process reload remain pending. A route draft, one knockdown or resource placement is not their PASS. The broader playability matrix remains17 passed-bounded / 8 open / 0 external-check-required. Mirrors remain deferred; no release is published.
+Normal Episode6 Turbo acquisition/use, saved Turbo right and the final fresh-process reload remain pending. Episode5 Shine4 save/cold persistence is complete. A route draft, one knockdown or resource placement is not their PASS. The broader playability matrix remains17 passed-bounded / 8 open / 0 external-check-required. Mirrors remain deferred; no release is published.
 
 Private logs, screenshots, disc data and GCI files are not distributed. Native routes are muted and use the CPU adapter at render scale0.25; they do not certify audio or full rendering quality.
