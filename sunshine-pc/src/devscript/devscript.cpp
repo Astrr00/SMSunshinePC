@@ -1912,11 +1912,12 @@ void step()
 					const float err = std::remainder(std::atan2(e->mPosition.x - gpMarioOriginal->mPosition.x, e->mPosition.z - gpMarioOriginal->mPosition.z)
 					                                     - static_cast<s16>(gpMarioOriginal->mFaceAngle.y) * (6.2831853f / 65536.f), 6.2831853f);
 					pad.button = PAD_TRIGGER_R;
-					pad.triggerRight = 255;
+					// Running spray blocks canSquat(); release analog R until the ordinary R-click stance is entered.
+					pad.triggerRight = gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT ? 255 : 0;
 					pad.stickX = gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT && std::fabs(err) > 0.08f ? (err > 0.f ? -127 : 127) : 0;
 					const TNozzleBase* nozzle = gpMarioOriginal->mWaterGun ? gpMarioOriginal->mWaterGun->getCurrentNozzle() : nullptr;
-					// shortcut: slight downward spray for flat-floor enemies; keep walking guards on slopes.
-					pad.stickY = gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT && nozzle ? (nozzle->unk36E < 1500 ? 127 : nozzle->unk36E > 2500 ? -127 : 0) : 0;
+					// Lift the flat-floor spray slightly: a downward jet hits the ground before a slug at guard distance.
+					pad.stickY = gpMarioOriginal->mStatus == MARIO_STATUS_SQUAT && nozzle ? (nozzle->unk36E < -1500 ? 127 : nozzle->unk36E > -500 ? -127 : 0) : 0;
 				} else if (gGuardResume >= 0) {
 					// A clears oil-slide momentum; small deflections defend the stance instead of chasing through goop.
 					const float err = std::remainder(std::atan2(e->mPosition.x - gpMarioOriginal->mPosition.x, e->mPosition.z - gpMarioOriginal->mPosition.z)

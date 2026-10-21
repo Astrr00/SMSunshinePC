@@ -30,6 +30,14 @@ The optional `SUNSHINE_DEV_SCRIPT_CHUNKS` directory accepts numbered controller 
 
 The current Strict reports zero unresolved symbols; all74 port checks pass. Strict SHA-256 `e07fb4ee12416b026e0cd43c52a625637fb8ec7d502154bbced78f137f75f4a2`.
 
+## Stationary defense stance and trajectory
+
+The opt-in stationary guard needs an ordinary R-click aiming stance before analog spray. `TMario::canSquat` refuses that transition while FLUDD is already emitting; the controller now releases analog R until Mario enters the stance. Its previous downward pitch also aimed a flat-floor jet into the ground before a nearby slug. The input feedback now holds a slight upward nozzle pitch instead. Only virtual controller inputs change; no gameplay state is written.
+
+In `bt36_bianco5_stance`, live controller chunk2 resolves two nearby `TNameKuri` without damage: health6 remains unchanged and water falls from9162 to9120. Read-only inspection identifies both enemies as `TNerveNKFollowMario` before the section and `TNerveSmallEnemyDie` afterwards. This is a bounded controller-defense check, not a Petey completion or a full-route PASS. The earlier `bt34_bianco5_roof` stationary defense exhausted its remaining tank and ended in normal enemy damage/death; no crash or original-game UB is inferred.
+
+The corrected Strict has zero unresolved symbols and all74 port checks pass. Strict SHA-256 `ea8c486f8a6b25ee640e79e874c6b569864be746b0a38db966074f0cd3bcc049`.
+
 ## Open acceptance
 
 Episode5 completion and saved Shine4, normal Episode6 Turbo acquisition/use, saved Turbo right and the final fresh-process reload remain pending. A route draft, one knockdown or resource placement is not their PASS. The broader playability matrix remains17 passed-bounded / 8 open / 0 external-check-required. Mirrors remain deferred; no release is published.
