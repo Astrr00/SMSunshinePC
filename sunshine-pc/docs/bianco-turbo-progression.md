@@ -38,6 +38,12 @@ In `bt36_bianco5_stance`, live controller chunk2 resolves two nearby `TNameKuri`
 
 The corrected Strict has zero unresolved symbols and all74 port checks pass. Strict SHA-256 `ea8c486f8a6b25ee640e79e874c6b569864be746b0a38db966074f0cd3bcc049`.
 
+## Partial-trigger walking inputs
+
+`walkto ... spray=1 pressure=64` now expresses an ordinary light R-trigger press while steering. `pressure` accepts decimal raw PAD values0..255 and defaults to255, preserving existing routes. It changes only the virtual trigger; Hover/Rocket sequences can retain their full trigger input.
+
+Strict links with zero unresolved symbols, all74 port checks pass, and six focused parser cases cover accepted limits, negative/out-of-range values, fractional/empty values and overflow. In `bt37_bianco5_partial_r`, the connected normal approach reaches the Poink plateau at tick5478 with health7 and water6286; the subsequent charged shot wakes Petey. This validates partial-trigger steering, not Episode5 completion. Strict SHA-256 `2beda12192b1ff36b5915bcea8b785ad03223bf2c22040664e31ec47035312f2`.
+
 ## Open acceptance
 
 Episode5 completion and saved Shine4, normal Episode6 Turbo acquisition/use, saved Turbo right and the final fresh-process reload remain pending. A route draft, one knockdown or resource placement is not their PASS. The broader playability matrix remains17 passed-bounded / 8 open / 0 external-check-required. Mirrors remain deferred; no release is published.

@@ -129,6 +129,7 @@ struct Command {
 	bool spray = false;     // walkto: hold the analog R trigger while walking (the spray cleans goop ahead, so Mario keeps grip)
 	bool bombs = false;     // clear bombs=1: select only fresh, usable original Pinna Episode2 Bob-ombs
 	int hop = 0;            // walkto hop=N: repeat a two-tick A press every N ticks while steering
+	int sprayTrigger = 255; // optional walkto pressure: raw analog R input
 	int sprayFrom = 0;      // walkto spray=N: R held from tick N-1 on
 	bool hover = false;     // walkto hover=1: hover steering, and R let go once a trigger nozzle is spent
 	bool navel = false;     // walkto/faceto navel=1: target Petey's navel, re-read every tick (what the in-game target arrow marks)
@@ -434,6 +435,12 @@ Command parseLine(const std::string& text, int line)
 			else if (key == "z") { c.pos[2] = v; gotZ = true; }
 			else if (key == "radius") c.radius = v;
 			else if (key == "spray") { c.spray = v != 0.f; c.sprayFrom = static_cast<int>(v) - 1; } // R from tick N-1: jump first, then hover
+			else if (key == "pressure" && c.op == Op::WalkTo) {
+				const char* end = tok.c_str() + tok.size();
+				const auto parsed = std::from_chars(tok.c_str() + eq + 1, end, c.sprayTrigger);
+				if (parsed.ec != std::errc{} || parsed.ptr != end || c.sprayTrigger < 0 || c.sprayTrigger > 255)
+					fail(line, "pressure needs an integer 0..255", tok);
+			}
 			else if (key == "jump" && c.op == Op::WalkTo) c.frames = static_cast<int>(v); // A held for the first N ticks while steering
 			else if (key == "hop" && c.op == Op::WalkTo) {
 				const char* end = tok.c_str() + tok.size();
@@ -2359,7 +2366,7 @@ void step()
 						walkStick(t, pad.stickX, pad.stickY, unused);
 					}
 				}
-				if (c.spray && gRemaining >= c.sprayFrom) pad.triggerRight = 255;
+				if (c.spray && gRemaining >= c.sprayFrom) pad.triggerRight = static_cast<u8>(c.sprayTrigger);
 				if (TWaterGun* wg = c.hover ? gpMarioOriginal->mWaterGun : nullptr) { // a hover burst ends after its trigger time (DEAD) and re-arms only once R is let go
 					TNozzleBase* nz = wg->getCurrentNozzle();
 					if (nz && nz->getNozzleKind() == 1 && static_cast<TNozzleTrigger*>(nz)->unk385 == TNozzleTrigger::DEAD) pad.triggerRight = 0;

@@ -9,6 +9,12 @@ directory = root / "build" / "DevscriptGuardTests"
 directory.mkdir(exist_ok=True)
 tag = time.time_ns()
 cases = [
+    ('pressure_limits', 'end\nwalkto x=0 z=0 spray=1 pressure=0 timeout=1\nwalkto x=0 z=0 spray=1 pressure=64 timeout=1\nwalkto x=0 z=0 spray=1 pressure=255 timeout=1\n', 0, 'done at tick'),
+    ('pressure_negative', 'walkto x=0 z=0 spray=1 pressure=-1 timeout=1\n', 2, 'pressure needs an integer 0..255'),
+    ('pressure_high', 'walkto x=0 z=0 spray=1 pressure=256 timeout=1\n', 2, 'pressure needs an integer 0..255'),
+    ('pressure_fraction', 'walkto x=0 z=0 spray=1 pressure=64.5 timeout=1\n', 2, 'pressure needs an integer 0..255'),
+    ('pressure_empty', 'walkto x=0 z=0 spray=1 pressure= timeout=1\n', 2, 'pressure needs an integer 0..255'),
+    ('pressure_overflow', 'walkto x=0 z=0 spray=1 pressure=999999999999999999 timeout=1\n', 2, 'pressure needs an integer 0..255'),
     ('livefruit_valid', 'end\nwaitfor livefruit=0x40000390 livefruit=1073742740 timeout=1\n', 0, 'done at tick'),
     ('livefruit_unready', 'waitfor livefruit=0x40000394 timeout=1\n', 3, 'TIMEOUT waitfor'),
     ('livefruit_low', 'waitfor livefruit=0x4000038f timeout=1\n', 2, 'unexpected token'),
