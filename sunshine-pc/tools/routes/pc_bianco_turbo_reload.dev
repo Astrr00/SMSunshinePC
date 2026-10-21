@@ -1,0 +1,54 @@
+# Normal File B cold load of the earned Bianco4/5 Shines and both Bianco nozzle rights.
+# Controller menus and read-only assertions only; see docs/bianco-turbo-progression.md.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot bt_cold_turbo_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10000 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x1000a timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10056 timeout=1
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+waitfor flag=0x1001e timeout=1
+waitfor flag=0x1001f timeout=1
+waitfor flag=0x10020 timeout=1
+waitfor flag=0x10021 timeout=1
+waitfor flag=0x10022 timeout=1
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10389 timeout=1
+waitfor flag=0x1038F timeout=1
+waitfor flag=0x10002 timeout=1
+waitfor flag=0x10385 timeout=1
+waitfor flag=0x10368 timeout=1
+waitfor flag=0x10003 timeout=1
+waitfor flag=0x10004 timeout=1
+waitfor flag=0x10369 timeout=1
+log
+shot bt_cold_turbo_saved_flags.png
+trace frames=60
+wait frames=60
+log
+shot bt_cold_turbo_neutral.png
+wait frames=30
+end
