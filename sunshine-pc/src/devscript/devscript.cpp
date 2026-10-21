@@ -852,6 +852,8 @@ const TSmallEnemy* nearestSmallEnemy(float r)
 		for (int i = 0; i < (*it)->getObjNum(); ++i) {
 			const TSmallEnemy* e = dynamic_cast<const TSmallEnemy*>((*it)->getObj(i));
 			if (!e || e->checkLiveFlag(LIVE_FLAG_DEAD) || e->checkLiveFlag(LIVE_FLAG_HIDDEN) || std::fabs(e->mPosition.y - m.y) > 300.f) continue;
+			// Poinks attach to FLUDD and absorb spray; defensive spraying cannot clear them.
+			if (dynamic_cast<const TPopo*>(e)) continue;
 			// Already hit: one water hit pushes the die nerve (TNameKuri::behaveToWater); more spray only drains the tank.
 			if (e->mSpine && e->mSpine->getCurrentNerve() == &TNerveSmallEnemyDie::theNerve()) continue;
 			const float d = std::hypot(e->mPosition.x - m.x, e->mPosition.z - m.z);
@@ -1215,6 +1217,8 @@ void logStatus(const char* tag)
 			std::printf("[%s-bianco5-petey] hp=%d weak=%d bck=%d pos=(%.1f,%.1f,%.1f) tick=%d\n", tag,
 			    boss->getHitPoints(), int(boss->mWeakPoint), boss->mMActor->getCurAnmIdx(ANM_TYPE_BCK),
 			    boss->mPosition.x, boss->mPosition.y, boss->mPosition.z, gTick);
+		const auto* defense = nearestSmallEnemy(650.f);
+		std::printf("[%s-bianco5-defense] actor=0x%08X tick=%d\n", tag, defense ? defense->getActorType() : 0, gTick);
 		auto* manager = dynamic_cast<TLiveManager*>(JDrama::TNameRefGen::search("\x83\x7c\x83\x7c\x83\x7d\x83\x6c\x81\x5b\x83\x57\x83\x83\x81\x5b"));
 		for (int i = 0; manager && i < manager->getObjNum(); ++i) {
 			const auto* popo = dynamic_cast<const TPopo*>(manager->getObj(i));
