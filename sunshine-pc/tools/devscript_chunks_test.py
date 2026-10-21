@@ -1,4 +1,4 @@
-"""Check optional controller chunks after script completion (local Strict/disc required)."""
+"""Check opt-in live controller replacement (local Strict/disc required)."""
 from pathlib import Path
 import re
 import subprocess
@@ -11,7 +11,7 @@ tag = f"chunks_{time.time_ns()}"
 directory = root / "build" / tag
 directory.mkdir()
 initial = directory / "initial.dev"
-initial.write_text("wait frames=30\nend\n", encoding="utf-8")
+initial.write_text("wait frames=300\nend\n", encoding="utf-8")
 for number, text in [(1, "wait frames=1\nend\n"), (2, "end\n"), (4, "end\n")]:
     (directory / f"{number}.dev").write_text(text, encoding="utf-8")
 
@@ -29,7 +29,7 @@ for enabled in (False, True):
     expected = ["1", "2"] if enabled else []
     assert result.returncode == 124, (name, result.returncode, result.stdout, result.stderr)
     assert [number for number, _ in chunks] == expected, (name, chunks)
-    assert not chunks or int(chunks[0][1]) >= 60, chunks
-    assert log.count("[devscript] done at tick=") == (3 if enabled else 1), name
+    assert not chunks or 30 <= int(chunks[0][1]) < 300, chunks
+    assert log.count("[devscript] done at tick=") == (2 if enabled else 0), name
     assert (run / "crash.log").stat().st_size == 0, name
-    print(f"PASS: chunks {'ordered and idle-only' if enabled else 'disabled by default'}", flush=True)
+    print(f"PASS: chunks {'ordered active replacement' if enabled else 'disabled by default'}", flush=True)

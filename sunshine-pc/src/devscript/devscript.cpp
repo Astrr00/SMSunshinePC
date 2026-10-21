@@ -2583,7 +2583,7 @@ void sunshineDevScriptTick()
 	// Optional controller-only calibration chunks; ordinary START inputs pause/resume the game.
 	static const char* const chunks = std::getenv("SUNSHINE_DEV_SCRIPT_CHUNKS");
 	static unsigned chunk = 1;
-	if (gDone && chunks && gTick % 30 == 0) {
+	if (chunks && gTick % 30 == 0) {
 		const std::string path = std::string(chunks) + "/" + std::to_string(chunk) + ".dev";
 		if (std::ifstream(path).good()) {
 			gScript.clear();

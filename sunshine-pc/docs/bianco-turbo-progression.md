@@ -26,9 +26,9 @@ Calibration failures include goop/enemy damage, missed landing/shot timing, STAR
 
 Both defensive callers (`guard` and `clear`) now exclude `TPopo`. Normal hostiles retain the existing live/visible/height/range filters. In the first160 timestamped defense observations of the corrected `bt31_bianco5_defense` run, seventeen show an attached Poink with no defensive target; ordinary actor types `0x10000003` (21 observations) and `0x10000004` (one) remain eligible. The route also keeps Rocket selected until descending away from the Poink area, because an attached Poink would absorb spray aimed at a real threat too. No original game code changes.
 
-The optional `SUNSHINE_DEV_SCRIPT_CHUNKS` directory allows numbered controller scripts after END when `SUNSHINE_DEV_EXIT_ON_END=0`; normal START inputs pause/resume calibration. Its two focused checks pass: disabled by default, and ordered/idle-only loading without skipping missing numbers. These are ordinary controller continuations, not save states.
+The optional `SUNSHINE_DEV_SCRIPT_CHUNKS` directory accepts numbered controller scripts during calibration, replacing the unfinished input program when a new number is available; `SUNSHINE_DEV_EXIT_ON_END=0` keeps the session alive after END. Normal START inputs pause/resume the game. Both focused checks pass: disabled by default, and ordered active replacement without skipping missing numbers. Replacement changes only controller-program bookkeeping, not actor or save state. These are ordinary controller continuations, not save states.
 
-The current Strict reports zero unresolved symbols; all74 port checks pass. Strict SHA-256 `1d28396e729ddefadab40f2a1487a22f18ca5f1172dca19a5fe3724f7e1894ef`.
+The current Strict reports zero unresolved symbols; all74 port checks pass. Strict SHA-256 `e07fb4ee12416b026e0cd43c52a625637fb8ec7d502154bbced78f137f75f4a2`.
 
 ## Open acceptance
 
