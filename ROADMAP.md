@@ -22,6 +22,7 @@ The [playability matrix](sunshine-pc/docs/playability-matrix.tsv) has **17 passe
 - v0.1.0 is a draft. The tested private snapshot is not final release approval. [Release checklist](sunshine-pc/docs/release-checklist.md).
 
 - A [focused shared-code audit](sunshine-pc/docs/playability-audit-2026-10-19.md) finds no new supported defect. [Normal Pinna Episode4 entry and first-turtle combat](sunshine-pc/docs/pinna-four-first-turtle.md) pass once (`p408_hipdrop`, health8, unchanged thirteen-Shine card). The complete [Episode4 milestone](sunshine-pc/docs/pinna-normal-route.md#complete-normal-sunflower-milestone) now also passes; the earlier first-turtle evidence remains a historical component.
+- The [2026-10-21 audit continuation](sunshine-pc/docs/playability-audit-2026-10-21.md) checks 146 further compiler units and collision metadata in 107 original scene archives without establishing a new game-code defect. Production allocation already clears the suspected wire-trap timer; the oversized static collision resource avoids the fixed scratch buffer. PC-CORE remains open; no speculative game-code change or repeated route batch.
 
 ## Open work, in order
 
