@@ -1,0 +1,131 @@
+# Normal File B load of the earned eighteen-Shine card with the Sirena pipe open.
+# Controller-only roof/pipe/NPC entry component; no Manta victory or Shine40 claim.
+mash START period=30 until stage=15 dirstate=4 timeout=6000
+wait frames=240
+mash A period=30 until cardmode=0 timeout=900
+wait frames=30
+log
+shot sirena_entry_file_select.png
+wait frames=30
+walkto x=1080 z=-1000 radius=25 timeout=600
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+hold A frames=4
+wait frames=26
+waitfor thp=2 timeout=1500
+wait frames=600
+mash A period=30 until stage=1 director mario dirstate=4 camDemo=0 timeout=15000
+wait frames=120
+waitfor scen=8 timeout=1
+waitfor flag=0x10000 timeout=1
+waitfor flag=0x10001 timeout=1
+waitfor flag=0x1000a timeout=1
+waitfor flag=0x10014 timeout=1
+waitfor flag=0x10056 timeout=1
+waitfor flag=0x10075 timeout=1
+waitfor flag=0x1005e timeout=1
+waitfor flag=0x1005f timeout=1
+waitfor flag=0x10062 timeout=1
+waitfor flag=0x1006b timeout=1
+waitfor flag=0x1001e timeout=1
+waitfor flag=0x1001f timeout=1
+waitfor flag=0x10020 timeout=1
+waitfor flag=0x10021 timeout=1
+waitfor flag=0x10022 timeout=1
+waitfor flag=0x10386 timeout=1
+waitfor flag=0x10387 timeout=1
+waitfor flag=0x10389 timeout=1
+waitfor flag=0x1038F timeout=1
+waitfor flag=0x10002 timeout=1
+waitfor flag=0x10385 timeout=1
+waitfor flag=0x10368 timeout=1
+waitfor flag=0x10003 timeout=1
+waitfor flag=0x10004 timeout=1
+waitfor flag=0x10369 timeout=1
+waitfor flag=0x1038B timeout=1
+log
+shot sirena_entry_saved_flags.png
+trace frames=60
+wait frames=60
+log
+shot sirena_entry_neutral.png
+wait frames=30
+waitfor flag=0x1038B timeout=1
+walkto x=-6200 z=3100 radius=35 timeout=1000
+wait frames=45
+faceto x=-6350 z=3400 tol=2 timeout=180
+hold stick=0,24 frames=1
+hold stick=24,0 frames=1
+hold stick=0,-24 frames=1
+hold stick=-24,0 frames=1
+hold A stick=0,24 frames=1
+walkto x=-6350 z=3400 radius=80 jump=45 timeout=100 soft=1
+waitfor marioy>=1500 timeout=180 soft=1
+walkto x=-6500 z=3950 radius=35 timeout=150 soft=1
+wait frames=80
+hold X frames=1
+wait frames=4
+walkto x=-6200 z=3800 radius=35 timeout=180 soft=1
+wait frames=45
+faceto x=-4800 z=1750 tol=2 timeout=180
+wait frames=20
+hold stick=0,24 frames=1
+hold stick=24,0 frames=1
+hold stick=0,-24 frames=1
+hold stick=-24,0 frames=1
+hold A stick=0,24 frames=1
+walkto x=-4800 z=1750 radius=45 jump=12 spray=8 hover=1 timeout=300 soft=1
+hold L frames=1
+wait frames=90
+log
+shot sm04_bell_corner.png
+faceto x=-3100 z=1450 tol=2 timeout=180
+wait frames=20
+hold stick=0,24 frames=1
+hold stick=24,0 frames=1
+hold stick=0,-24 frames=1
+hold stick=-24,0 frames=1
+hold A stick=0,24 frames=1
+walkto x=-3100 z=1450 radius=35 jump=12 spray=8 hover=1 timeout=240 soft=1
+hold L frames=1
+wait frames=90
+log
+walkto x=-1400 z=1400 radius=35 timeout=400 soft=1
+wait frames=50
+faceto x=-350 z=1350 tol=2 timeout=180
+wait frames=20
+hold stick=0,24 frames=1
+hold stick=24,0 frames=1
+hold stick=0,-24 frames=1
+hold stick=-24,0 frames=1
+hold A stick=0,24 frames=1
+walkto x=-350 z=1350 radius=35 jump=12 spray=8 hover=1 timeout=240 soft=1
+hold L frames=1
+wait frames=90
+log
+shot sm05_dome.png
+faceto x=0 z=1100 tol=2 timeout=180
+wait frames=20
+hold A frames=1
+walkto x=0 z=1100 radius=20 jump=24 timeout=120 soft=1
+wait frames=90
+mash A period=30 until stage=6 scen=0 director mario dirstate=4 camDemo=0 timeout=12000
+wait frames=120
+walkto x=-3500 z=4000 radius=100 timeout=900 soft=1
+walkto x=-1000 z=2500 radius=100 timeout=900 soft=1
+walkto x=0 z=500 radius=100 timeout=900 soft=1
+walkto x=0 z=-1800 radius=100 timeout=900 soft=1
+walkto x=-47 z=-2450 radius=100 timeout=600 soft=1
+wait frames=45
+faceto x=-47 z=-2613 tol=2 timeout=180
+wait frames=20
+hold B frames=1
+mash A period=24 until flag=0x50007 timeout=1800
+mash A period=30 until stage=6 scen=0 dirstate=4 camDemo=0 timeout=6000
+wait frames=120
+log
+shot sm03_manta_started.png
+mash START period=30 until dirstate=5 timeout=300
+end
