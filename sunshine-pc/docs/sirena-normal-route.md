@@ -47,3 +47,12 @@ Private failed approaches include ordinary combat deaths, a malformed condition 
 ## Remaining acceptance
 
 Defeat the original Manta encounter, collect Shine40 normally, save through the normal menu, and independently cold-load the nineteen-Shine card. Retain the previous eighteen IDs, flag0x1038B and the earned nozzle/Yoshi rights; check all card sectors and compare the saved card before and after the cold reload.
+
+## High starting ledge probe (not passed)
+
+Two controller-only probes on 2026-10-22 test downward spray from the initial NPC platform rather than walking onto the arena floor. Original `sirena0` collision data shows a ramp in front of this position, with surfaces descending from 1000 to 900; the starting platform is not isolated from the Manta's approach.
+
+- `sm21_manta_ledge` reaches four G0 hits. Mario initially remains at y=1000 with health 8, then contact throws him north from approximately z=-2373 to -3526 and leaves health 7. The subsequent aiming recovery fails during another damage state: health 6, camera mode 0 and a pitch-condition timeout (rc3). G0 does not split.
+- `sm22_manta_ledge` immediately follows the same normal entry with a fixed southern aim and an uninterrupted 600-tick spray block. It reaches only one G0 hit, leaves health 1 and throws Mario far from the starting position, to approximately `(-70.8,1124.7,-7956.6)`. The read-only checkpoint still has one live G0 and no G1. The paused process is then stopped externally; script completion does not mean combat success.
+
+Both crash logs are empty, no cheats are active, and both GCI files remain byte-identical to the earned eighteen-Shine pipe-open card above. Both attempts use the recorded `e670f752...674d1a2` Strict executable without game-code changes. The shared fifteen-minute budget includes entry and observation; calibration stops after the second attempt, after 11m43s overall. Do not repeat this stationary fixed-angle approach as a safe ledge strategy. These failures do not prove every possible ledge tactic impossible or establish a game-code/undefined-behavior defect. The complete Sirena milestone remains open.
