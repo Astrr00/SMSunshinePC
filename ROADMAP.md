@@ -44,6 +44,11 @@ Prioritize unverified shared gameplay features over individual Shine routes. Nor
 
 ## Execution limits
 
+- Before each gameplay experiment, record one hypothesis, one changed variable, the observable success/failure signal and a wall-clock deadline in the private run notes. Default budget: at most two attempts or 15 minutes for the same approach, whichever comes first; a known longer acceptance route needs its expected duration stated before launch.
+- Stop calibration when the same failure repeats twice or the budget expires. Stop safely, preserve the earned save and summarize the result. Do not restart the budget by renaming a run, making small timing/angle changes or splitting a session into more chunks. Further attempts require new evidence that supports a materially different approach.
+- After 30 minutes without a new verified gameplay checkpoint, stop native route calibration and report the blocker and spent budget. Investigate the smallest unresolved mechanic from the existing logs/source before launching another route. Do not substitute another large batch or a speculative code fix.
+- Reuse the closest normally earned save and already verified entry components. Test the uncertain segment first; run one complete acceptance and one independent cold reload after it works, unless an explicit repeatability requirement or new failure requires more.
+- Progress updates must name the new observed result, the remaining acceptance and the budget used. Partial entry, damage dealt and documentation are partial results; they do not complete a requested boss/save/cold milestone. Documentation-only changes need a diff/link review, not a game rebuild or route rerun.
 - Run focused regressions for the changed behavior. Repeat or broaden only after a relevant change, failure or unresolved concern; do not rerun the completed `/O2` sweep or 91-scenario load batch by default.
 - The accepted Pinna Episode1/coaster, Episode2/Cannon-secret and Episode3/pirate-red-coin paths are each bounded to one complete pass and their cold reloads. The tiny-speed slide branch and audible refill behavior retain the specific limits in their evidence documents. A missing native observation is not itself a newly proven defect.
 - No `/Od` comparison exists. Attribute a failure to undefined behavior only after evidence; an empty `crash.log` is normal.
