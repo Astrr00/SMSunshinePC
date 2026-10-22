@@ -74,6 +74,11 @@ public:
 
 	T* getAnmPtr(int idx) const
 	{
+#ifdef TARGET_PC
+		// Motion-blend setters also look up the negative animation-disable sentinel.
+		if (idx < 0)
+			return nullptr;
+#endif
 		if (idx < mAnmNum)
 			return static_cast<T*>(mAnimations[idx]);
 		return nullptr;
